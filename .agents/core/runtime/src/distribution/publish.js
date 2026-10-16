@@ -4,7 +4,8 @@ import { join, resolve } from 'node:path';
 import { configuration, fail, parseJSON, readRegular, sha256, stableJSON, validateManifest, releaseReceipt, validateProducts, writeAtomic, installedManifest, compareVersions, isRevision } from './common.js';
 import { inspectCoreArchive, userDirectories } from './release.js';
 import { readArchive } from './archive.js';
-import { GitHubAPI, treeFromChanges } from './github.js';
+import { GitHubAPI, githubToken, treeFromChanges } from './github.js';
+import { gitTemplateThreshold, publishGitTemplate } from './template-git.js';
 import { download, releaseIndex } from './network.js';
 import { validateIndex } from './system.js';
 import { products, artifactName, releaseIndexName } from './products.js';
@@ -60,7 +61,7 @@ export function inspectReleaseDirectory(root, directory) {
   artifacts.push({ name: releaseIndexName, bytes, sha256: sha256(bytes), size: bytes.length });
   return { config, index, artifacts, workspaces };
 }
-async function templateFromBundle(bundle, api) {
+async function templateFromBundle(bundle, api, gitTransport) {
   const { config, index, workspaces } = bundle;
   // The template is runnable on the primary shipped platform; other platforms use their full archive.
   const workspace = workspaces.find(w => w.platform === 'darwin-arm64') ?? workspaces[0];
@@ -84,22 +85,31 @@ async function templateFromBundle(bundle, api) {
     if (comparison < 0) fail('TEMPLATE_VERSION_OLDER', 'An older release cannot overwrite a newer remote template.');
     if (comparison === 0 && index.core_revision !== provenance.revision) fail('TEMPLATE_VERSION_CONFLICT', 'The remote template has the same version from a different Core revision.');
   }
-  const changes = [...workspace.entries.values()].map(entry => ({ path: entry.path, content: entry.bytes.toString('base64'), mode: entry.mode }));
-  const tree = await treeFromChanges(api, config.template_repository, changes);
   const parent = await api.request('GET', `/repos/${config.template_repository}/git/commits/${head.object.sha}`);
-  let commit = head.object.sha;
-  if (parent.tree.sha !== tree.sha) {
-    commit = (await api.request('POST', `/repos/${config.template_repository}/git/commits`, {
-      message: `Release ${products.workspace} ${index.version} (${workspace.platform})`, tree: tree.sha, parents: [head.object.sha],
-    })).sha;
-    const latest = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
-    if (latest.object.sha !== head.object.sha) fail('TEMPLATE_CHANGED', 'The template branch changed during preparation; inspect it and retry.');
-    await api.request('PATCH', `/repos/${config.template_repository}/git/refs/heads/${encodeURIComponent(branch)}`, { sha: commit, force: false });
+  let tree, commit = head.object.sha, pushFailed = false;
+  if ([...workspace.entries.values()].some(entry => entry.bytes.length > gitTemplateThreshold)) {
+    const transferred = await gitTransport({ repository: config.template_repository, branch,
+      expectedHead: head.object.sha, expectedTree: parent.tree.sha, entries: workspace.entries,
+      message: `Release ${products.workspace} ${index.version} (${workspace.platform})`, token: api.token ?? githubToken() });
+    if (!isRevision(transferred.tree) || !isRevision(transferred.commit)) fail('TEMPLATE_VERIFY_FAILED', 'The Git transfer returned invalid object identities.');
+    tree = { sha: transferred.tree }; commit = transferred.commit; pushFailed = transferred.pushFailed === true;
+  } else {
+    const changes = [...workspace.entries.values()].map(entry => ({ path: entry.path, content: entry.bytes.toString('base64'), mode: entry.mode }));
+    tree = await treeFromChanges(api, config.template_repository, changes);
+    if (parent.tree.sha !== tree.sha) {
+      commit = (await api.request('POST', `/repos/${config.template_repository}/git/commits`, {
+        message: `Release ${products.workspace} ${index.version} (${workspace.platform})`, tree: tree.sha, parents: [head.object.sha],
+      })).sha;
+      const latest = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
+      if (latest.object.sha !== head.object.sha) fail('TEMPLATE_CHANGED', 'The template branch changed during preparation; inspect it and retry.');
+      await api.request('PATCH', `/repos/${config.template_repository}/git/refs/heads/${encodeURIComponent(branch)}`, { sha: commit, force: false });
+    }
   }
   if (!repository.is_template) await api.request('PATCH', `/repos/${config.template_repository}`, { is_template: true });
   // Reconcile the actual branch and immutable commit, including after a no-op.
   // A lost PATCH response is recoverable by repeating the same verified bundle.
   const actual = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
+  if (pushFailed && actual.object.sha === head.object.sha && actual.object.sha !== commit) fail('TEMPLATE_GIT_FAILED', 'The Git upload did not update the template; preserve this release and retry its template stage.');
   if (actual.object.sha !== commit) fail('TEMPLATE_CHANGED', 'The template branch changed before verification; inspect its actual state.');
   const actualCommit = await api.request('GET', `/repos/${config.template_repository}/git/commits/${commit}`);
   if (actualCommit.tree.sha !== tree.sha) fail('TEMPLATE_VERIFY_FAILED', 'The remote template tree differs from the verified bundle.');
@@ -112,13 +122,13 @@ async function templateFromBundle(bundle, api) {
   return { product: products.workspace, instanceDefaultName: products.instance, repository: config.template_repository, branch, commit, version: index.version,
     coreRevision: index.core_revision, verified: true, url: `https://github.com/${config.template_repository}`, created };
 }
-export async function publishTemplate({ root, directory, dryRun = false, api }) {
+export async function publishTemplate({ root, directory, dryRun = false, api, gitTransport = publishGitTemplate }) {
   const bundle = inspectReleaseDirectory(root, directory);
   if (dryRun) return { dryRun, product: products.workspace, instanceDefaultName: products.instance, repository: bundle.config.template_repository, version: bundle.index.version,
     files: bundle.workspaces[0].entries.size, wouldPublish: true };
-  return await templateFromBundle(bundle, api ?? new GitHubAPI());
+  return await templateFromBundle(bundle, api ?? new GitHubAPI(), gitTransport);
 }
-export async function publishRelease({ root, directory, dryRun = false, releaseOnly = false, api }) {
+export async function publishRelease({ root, directory, dryRun = false, releaseOnly = false, api, gitTransport = publishGitTemplate }) {
   const bundle = inspectReleaseDirectory(root, directory), { config, index, artifacts } = bundle;
   if (dryRun) return { dryRun, products, repository: config.core_repository, templateRepository: config.template_repository,
     version: index.version, revision: index.core_revision, assets: artifacts.map(({ bytes, ...asset }) => asset), wouldPublish: true };
@@ -151,12 +161,12 @@ export async function publishRelease({ root, directory, dryRun = false, releaseO
       await github.request('POST', `/repos/${repository}/releases/${release.id}/assets?name=${encodeURIComponent(artifact.name)}`, artifact.bytes, { binary: true, upload: true });
     }
   }
-  const template = releaseOnly ? { status: 'not-requested', published: false, scheduled: false, repository: config.template_repository } : await templateFromBundle(bundle, github);
+  const template = releaseOnly ? { status: 'not-requested', published: false, scheduled: false, repository: config.template_repository } : await templateFromBundle(bundle, github, gitTransport);
   if (release.draft) release = await github.request('PATCH', `/repos/${repository}/releases/${release.id}`, { draft: false });
   return { products, version: index.version, repository, url: release.html_url, template, assets: artifacts.map(a => a.name), published: true };
 }
 
-export async function mirrorTemplate({ root, source, dryRun = false, api, fetcher }) {
+export async function mirrorTemplate({ root, source, dryRun = false, api, fetcher, gitTransport = publishGitTemplate }) {
   const config = configuration(root), current = installedManifest(root), selectedSource = source ?? config.release_source;
   const downloaded = await releaseIndex(selectedSource, { fetcher, timeout: config.request_timeout_seconds * 1000 });
   validateIndex(downloaded.index, current);
@@ -174,6 +184,6 @@ export async function mirrorTemplate({ root, source, dryRun = false, api, fetche
       if (response.bytes.length !== item.size || sha256(response.bytes) !== item.sha256) fail('CHECKSUM_MISMATCH', 'Template mirror download failed verification.');
       writeAtomic(join(staging, item.name), response.bytes);
     }
-    return await publishTemplate({ root, directory: staging, dryRun, api });
+    return await publishTemplate({ root, directory: staging, dryRun, api, gitTransport });
   } finally { rmSync(staging, { recursive: true, force: true }); }
 }

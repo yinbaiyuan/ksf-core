@@ -21,10 +21,10 @@ runtime:
       distribution_url: "https://nodejs.org/dist/v24.21.0/node-v24.21.0-darwin-arm64.tar.gz"
 build:
   generator: "ksf build"
-  built_at: "2026-10-16T15:13:47.410Z"
-  source_revision: "f059c2b82478605caeb4bf90e5e483d65882106d"
+  built_at: "2026-10-16T15:45:33.251Z"
+  source_revision: "b7feb9232aa0747d2712f9ebefdb64b428f50a64"
   source_dirty: true
-  source_sha256: "593d2fbcbe67f51f1d077a65e186165ce6292ba09c522e052d8e9cc64d7ee81e"
+  source_sha256: "bf17828ba9fe9db479630b485d056a778ca86e3871609038c8d55ecae1c423a1"
   input_sha256: "b2ddb5be324ead35b21f6befc33be04e6c3f473a17b7c5adbec6ff7b5849484c"
   toolchain: "Official prebuilt Node.js 24.21.0 and JavaScript source"
   generator_node: "v24.21.0"

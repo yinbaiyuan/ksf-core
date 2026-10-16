@@ -140,11 +140,13 @@ test('Core Actions contract uses one artifact ID, pinned publisher, gated templa
   assert.deepEqual(workflow.jobs.template.needs, ['prepare', 'release']);
   assert.match(workflow.jobs.template.if, /!cancelled\(\).*needs.prepare.result == 'success'/s);
   assert.match(workflow.jobs.template.if, /inputs.operation == 'template-only'/);
+  assert.equal(workflow.jobs.prepare.outputs.publisher, '${{ github.sha }}');
+  assert.equal(workflow.jobs.template.env.KSF_EXPECTED_REVISION, '${{ needs.prepare.outputs.revision }}');
   const upload = workflow.jobs.prepare.steps.find(step => step.id === 'upload');
   assert.match(upload.with.path, /ksf-core-release.json/); assert.match(upload.with.path, /\*\.tar\.gz/);
   for (const name of ['release', 'template']) {
     const steps = workflow.jobs[name].steps;
-    assert.equal(steps.find(step => step.uses?.startsWith('actions/checkout')).with.ref, '${{ needs.prepare.outputs.revision }}');
+    assert.equal(steps.find(step => step.uses?.startsWith('actions/checkout')).with.ref, name === 'template' ? '${{ needs.prepare.outputs.publisher }}' : '${{ needs.prepare.outputs.revision }}');
     assert.equal(steps.find(step => step.uses?.startsWith('actions/download-artifact')).with['artifact-ids'], '${{ needs.prepare.outputs.artifact }}');
     assert.equal(workflow.jobs[name].env.KSF_EXPECTED_INDEX, '${{ needs.prepare.outputs.index }}');
   }

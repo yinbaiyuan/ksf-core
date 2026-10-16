@@ -52,7 +52,7 @@ test('isolated lifecycle: older assistant entry -> runtime -> rollback -> upgrad
 test('maintenance remains discoverable and derivable; runtime resists user takeover', async t => {
   const f = await distributionFixture(t);
   objectMutation({ root: f.workspace, type: 'partner', operation: 'write', id: 'partner.ksf.maintainer', input: { body: 'Fictional custom maintenance method.' } });
-  const selected = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.maintainer@0.1.3' });
+  const selected = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.maintainer@0.1.4' });
   assert.equal(selected.data.object.source, 'user');
   assert.equal(contextCapabilities(f.workspace).data.partners.objects.find(p => p.id === 'partner.ksf.maintainer').protected, false);
   assert.throws(() => objectMutation({ root: f.workspace, type: 'partner', operation: 'write', id: 'partner.ksf.runtime', input: { body: 'replace' } }), { code: 'OBJECT_PROTECTED' });

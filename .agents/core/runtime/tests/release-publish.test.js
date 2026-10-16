@@ -133,3 +133,31 @@ test('template publication verifies actual remote receipt before reporting succe
   api.badReceipt = false;
   assert.equal((await publishTemplate({ root: f.root, directory: f.first.output, api })).verified, true);
 });
+
+
+test('large template uses Git and reconciles a lost successful push without REST blob uploads', async t => {
+  const f = await distributionFixture(t), api = new PublicationAPI(); api.token = 'fixture-token';
+  const next = await f.next('0.1.1', { '.agents/core/large.bin': Buffer.alloc(9 * 1024 * 1024) });
+  let transfers = 0;
+  const gitTransport = async options => {
+    transfers++; assert.equal(options.expectedHead, api.head); assert.equal(options.token, 'fixture-token');
+    assert.equal(options.entries.get('.agents/core/large.bin').bytes.length, 9 * 1024 * 1024);
+    const commit = 'c'.repeat(40), tree = 'b'.repeat(40);
+    api.commits.set(commit, { sha: commit, tree: { sha: tree } }); api.head = commit;
+    api.provenance = JSON.parse(options.entries.get('.ksf-template.json').bytes);
+    api.receipt = options.entries.get('.agents/core/release.json').bytes.toString();
+    return { commit, tree, pushFailed: true };
+  };
+  const result = await publishTemplate({ root: f.root, directory: next.output, api, gitTransport });
+  assert.equal(result.verified, true); assert.equal(result.coreRevision, next.coreRevision); assert.equal(transfers, 1);
+  assert.ok(api.calls.every(call => call.method === 'GET'));
+});
+
+test('failed large-file Git publication preserves the release and reports the unchanged template', async t => {
+  const f = await distributionFixture(t), api = new PublicationAPI(); api.token = 'fixture-token';
+  const next = await f.next('0.1.1', { '.agents/core/large.bin': Buffer.alloc(9 * 1024 * 1024) });
+  const before = api.head;
+  await assert.rejects(publishTemplate({ root: f.root, directory: next.output, api,
+    gitTransport: async () => ({ commit: 'c'.repeat(40), tree: 'b'.repeat(40), pushFailed: true }) }), { code: 'TEMPLATE_GIT_FAILED' });
+  assert.equal(api.head, before); assert.ok(api.calls.every(call => call.method === 'GET'));
+});
