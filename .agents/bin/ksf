@@ -1,0 +1,65 @@
+#!/bin/sh
+set -eu
+PATH=${PATH:-/usr/bin:/bin}
+export PATH
+case "$0" in */*) ksf_launcher_dir=${0%/*} ;; *) ksf_launcher_dir=. ;; esac
+KSF_ROOT=$(CDPATH= cd "$ksf_launcher_dir/../.." && pwd -P)
+export KSF_ROOT
+
+# Recovery is independent of the upgradeable Core, Node, Git and the network.
+for ksf_guard in .agents/runtime-data .agents/runtime-data/system .agents/runtime-data/system/transaction .agents .agents/bin .agents/core; do
+  if [ -L "$KSF_ROOT/$ksf_guard" ]; then
+    echo "KSF: unsafe symlink at $ksf_guard" >&2; exit 1
+  fi
+done
+ksf_transaction="$KSF_ROOT/.agents/runtime-data/system/transaction"
+if [ -d "$ksf_transaction" ]; then
+  ksf_owner=$(cat "$ksf_transaction/owner" 2>/dev/null || true)
+  ksf_owner_start=$(cat "$ksf_transaction/owner.start" 2>/dev/null || true)
+  case "$ksf_owner" in ''|*[!0-9]*) ksf_owner=0 ;; esac
+  if [ "$ksf_owner" -gt 0 ] && kill -0 "$ksf_owner" 2>/dev/null; then
+    ksf_actual_start=$(/bin/ps -p "$ksf_owner" -o lstart= 2>/dev/null | /usr/bin/awk '{$1=$1; print}')
+    if [ "$ksf_actual_start" = "$ksf_owner_start" ]; then
+      echo "KSF: a system update is running; retry after it finishes." >&2; exit 1
+    fi
+  fi
+  ksf_backup_name=$(cat "$ksf_transaction/name" 2>/dev/null || true)
+  case "$ksf_backup_name" in ''|*[!A-Za-z0-9._-]*) echo 'KSF: invalid update recovery journal.' >&2; exit 1 ;; esac
+  if [ -f "$ksf_transaction/committed" ]; then
+    mkdir -p "$KSF_ROOT/.agents/runtime-data/system/backups"
+    mv "$ksf_transaction" "$KSF_ROOT/.agents/runtime-data/system/backups/$ksf_backup_name"
+  else
+    if [ -d "$ksf_transaction/old-core" ]; then
+      if [ -d "$KSF_ROOT/.agents/core" ]; then mv "$KSF_ROOT/.agents/core" "$ksf_transaction/failed-core"; fi
+      mv "$ksf_transaction/old-core" "$KSF_ROOT/.agents/core"
+    fi
+    for ksf_root_file in AGENTS.md .agents/bin/ksf; do
+      if [ -f "$ksf_transaction/old-root/$ksf_root_file" ]; then
+        cp -p "$ksf_transaction/old-root/$ksf_root_file" "$KSF_ROOT/$ksf_root_file.recover"
+        mv "$KSF_ROOT/$ksf_root_file.recover" "$KSF_ROOT/$ksf_root_file"
+      fi
+    done
+    mkdir -p "$KSF_ROOT/.agents/runtime-data/system/failed"
+    mv "$ksf_transaction" "$KSF_ROOT/.agents/runtime-data/system/failed/$ksf_backup_name"
+    echo 'KSF: recovered the previous system after an interrupted update.' >&2
+  fi
+fi
+
+export KSF_INSTALLED_LAUNCHER=1
+mkdir -p "$KSF_ROOT/.agents/runtime-data"
+if [ ! -e "$KSF_ROOT/.agents/runtime-data/.gitignore" ]; then
+  (set -C; printf '*\n' > "$KSF_ROOT/.agents/runtime-data/.gitignore") 2>/dev/null || true
+fi
+. "$KSF_ROOT/.agents/core/runtime/bootstrap.sh"
+ksf_prepare_runtime "$@"
+
+ksf_auto=1
+case "${1:-}" in system|release|contribute|build|test|--help|-h|'') ksf_auto=0 ;; esac
+if [ "${KSF_SKIP_AUTO_UPDATE:-0}" = 1 ]; then ksf_auto=0; fi
+if [ "$ksf_auto" = 1 ] && [ -f "$KSF_ROOT/.agents/core/release.json" ]; then
+  "$KSF_NODE" "$KSF_CLI" system sync --quiet || true
+  # An upgrade can change both JavaScript and the bundled Node version.
+  . "$KSF_ROOT/.agents/core/runtime/bootstrap.sh"
+  ksf_prepare_runtime "$@"
+fi
+exec "$KSF_NODE" "$KSF_CLI" "$@"

@@ -1,0 +1,40 @@
+name: Publish ksf-core Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ksf-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check release tag against build version
+        if: github.ref_type == 'tag'
+        env:
+          KSF_RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          ksf_version=$(/usr/bin/plutil -extract version raw -o - .agents/core/build.json)
+          test "$KSF_RELEASE_TAG" = "v$ksf_version"
+      - name: Verify runtime and regression tests
+        run: |
+          .agents/bin/ksf runtime verify --json
+          .agents/bin/ksf test
+      - name: Build ksf-core system, ksf-workspace template and index
+        run: .agents/bin/ksf release build --output .agents/runtime-data/release --json
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ksf-core-release
+          path: .agents/runtime-data/release/*.tar.gz
+          retention-days: 14
+      - name: Publish verified Release assets
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: .agents/bin/ksf release publish .agents/runtime-data/release --release-only --json

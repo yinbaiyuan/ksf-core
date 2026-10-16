@@ -1,0 +1,5 @@
+{
+  "name": "ksf-runtime",
+  "private": true,
+  "type": "module"
+}

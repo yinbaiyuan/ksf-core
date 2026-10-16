@@ -1,0 +1,22 @@
+name: Verify Core
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Verify shipped runtime
+        run: .agents/bin/ksf runtime verify --json
+      - name: Run JavaScript tests with bundled Node
+        run: .agents/bin/ksf test
+      - name: Verify clean release build
+        run: .agents/bin/ksf release build --dry-run --json
