@@ -129,3 +129,6 @@ function ksf_bootstrap_main {
 } finally {
     foreach ($ksfRoot in $ksfTestRoots) { Remove-Item -LiteralPath $ksfRoot -Recurse -Force }
 }
+
+# Expected failure cases set LASTEXITCODE; report success only after all assertions and cleanup.
+exit 0
