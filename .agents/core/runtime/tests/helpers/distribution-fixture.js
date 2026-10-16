@@ -32,6 +32,7 @@ export async function distributionFixture(t, { legacyEntry = false, sourceRoot =
   const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
+  // Reconstruct Core sources without inheriting the source workspace's installed identity.
   const installedMarker = join(sourceRoot, '.agents/core/release.json');
   cpSync(join(sourceRoot, '.agents/core'), join(root, '.agents/core'), { recursive: true,
     filter: path => path !== installedMarker && !path.includes('/runtime/packages') && !path.includes('/runtime/tests') });
