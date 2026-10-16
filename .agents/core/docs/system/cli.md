@@ -46,4 +46,4 @@ CLI 把宿主传入的命令变成确定性的查询或修改，并返回调用�
 
 ## 实现与验证来源
 
-架构约束见[命令设计规范](../CLI命令设计规范.md)。适配层验证见 [cli.test.js](../../runtime/tests/cli.test.js)、[context-cli.test.js](../../runtime/tests/context-cli.test.js)、[objects-cli.test.js](../../runtime/tests/objects-cli.test.js)、[projects-cli.test.js](../../runtime/tests/projects-cli.test.js)、[metadata-cli.test.js](../../runtime/tests/metadata-cli.test.js)。user-data 的命令与服务验证集中于 [user-data.test.js](../../runtime/tests/user-data.test.js)，系统生命周期另见[生命周期专题](lifecycle.md)。
+架构约束见[命令设计规范](../CLI命令设计规范.md)。适配层验证见 [cli.test.js](../../runtime/tests/cli.test.js)、[context-cli.test.js](../../runtime/tests/context-cli.test.js)、[objects-cli.test.js](../../runtime/tests/objects-cli.test.js)、[projects-cli.test.js](../../runtime/tests/projects-cli.test.js)、[metadata-cli.test.js](../../runtime/tests/metadata-cli.test.js)。user-data 的命令与服务验证见 [user-data.test.js](../../runtime/tests/user-data.test.js)与 [identity.test.js](../../runtime/tests/identity.test.js)，系统生命周期另见[生命周期专题](lifecycle.md)。

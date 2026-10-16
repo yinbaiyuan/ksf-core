@@ -13,12 +13,12 @@ Core 源码仓库不保留项目、知识、用户能力、收件箱、源档或
 开发验证：
 
 ```sh
-.agents/bin/ksf runtime verify --json
-.agents/bin/ksf test
-.agents/bin/ksf release build --dry-run --json
+.agents/ksf runtime verify --json
+.agents/ksf test
+.agents/ksf release build --dry-run --json
 ```
 
-官方发行要求干净的源码提交。设置 `.agents/core/build.json` 的版本，提交并推送 `v<版本>` 标签后，GitHub Actions 验证、打包并发布 `ksf-core` 系统包、`ksf-workspace` 模板包和 `ksf-core-release.json` 索引。`ksf-workspace` 模板仓库每 15 分钟检查已发布 Release，也可手动运行同步工作流。
+官方发行要求干净的源码提交。设置 `.agents/core/build.json` 的版本，提交并推送 `v<版本>` 标签后，GitHub Actions 验证、打包并发布 `ksf-core` 系统包、`ksf-workspace` 模板包和 `ksf-core-release.json` 索引。Core Actions 随后用同一批产物直接同步官方 `ksf-workspace`，模板不再运行定时自同步。用户实例也可显式发起远程 Actions，无需本地 Core 克隆；跨仓库 App 配置、template-only 恢复与两阶段结果见[发行说明](.agents/core/docs/distribution.md#从用户实例发起远程发行)。
 
 主分支为 `main`，功能和修复分支按用途命名，无需 `ksf-` 前缀。正式使用和系统开发分别保存到各自仓库，详见 [Git 协作规则](.agents/core/docs/git.md)。
 

@@ -25,7 +25,11 @@ export function inspectReleaseDirectory(root, directory) {
         core = inspectCoreArchive(bytes, { expectedVersion: index.version, expectedPlatform: platform, expectedRepository: config.core_repository });
         if (core.manifest.core.revision !== index.core_revision || core.manifest.development) fail('RELEASE_INVALID', 'Artifact revision or development status differs from the index.');
       } else {
-        const entries = readArchive(bytes), extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', '.github/workflows/sync-template.yml', ...userDirectories.map(d => `${d}/.gitkeep`)]);
+        const entries = readArchive(bytes), extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', ...userDirectories.map(d => `${d}/.gitkeep`)]);
+        // Older bundles carry a strictly source-derived workflow. New bundles
+        // omit both the source and generated workflow; arbitrary extras stay forbidden.
+        const workflowSource = core.entries.get('.agents/core/distribution/template-workflow.yml');
+        if (workflowSource) extra.add('.github/workflows/sync-template.yml');
         if (entries.size !== core.entries.size + extra.size) fail('RELEASE_INVALID', 'Workspace contains unexpected files.');
         for (const [path, file] of entries) {
           const original = core.entries.get(path);
@@ -39,8 +43,11 @@ export function inspectReleaseDirectory(root, directory) {
         for (const path of ['README.md', '.gitignore', '.gitattributes']) {
           if (!entries.get(path)?.bytes.equals(core.entries.get(`.agents/core/distribution/template/${path}`)?.bytes)) fail('RELEASE_INVALID', `Workspace template differs from its source: ${path}.`);
         }
-        const workflow = core.entries.get('.agents/core/distribution/template-workflow.yml')?.bytes.toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository);
-        if (!workflow || entries.get('.github/workflows/sync-template.yml')?.bytes.toString('utf8') !== workflow) fail('RELEASE_INVALID', 'Template workflow differs from its configured source.');
+        if (workflowSource) {
+          const workflow = workflowSource.bytes.toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository);
+          const generated = entries.get('.github/workflows/sync-template.yml');
+          if (!generated || generated.mode !== 0o644 || generated.bytes.toString('utf8') !== workflow) fail('RELEASE_INVALID', 'Template workflow differs from its configured source.');
+        }
         const provenance = parseJSON(entries.get('.ksf-template.json').bytes, 'template provenance');
         if (provenance.generated_from !== config.core_repository || provenance.revision !== index.core_revision || provenance.version !== index.version) fail('RELEASE_INVALID', 'Invalid template provenance.');
         if (provenance.product !== products.workspace || provenance.instance_default_name !== products.instance || core.manifest.product !== products.core) fail('RELEASE_INVALID', 'Release product identities differ from their manifests.');
@@ -90,7 +97,20 @@ async function templateFromBundle(bundle, api) {
     await api.request('PATCH', `/repos/${config.template_repository}/git/refs/heads/${encodeURIComponent(branch)}`, { sha: commit, force: false });
   }
   if (!repository.is_template) await api.request('PATCH', `/repos/${config.template_repository}`, { is_template: true });
-  return { product: products.workspace, instanceDefaultName: products.instance, repository: config.template_repository, branch, commit, version: index.version, url: `https://github.com/${config.template_repository}`, created };
+  // Reconcile the actual branch and immutable commit, including after a no-op.
+  // A lost PATCH response is recoverable by repeating the same verified bundle.
+  const actual = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
+  if (actual.object.sha !== commit) fail('TEMPLATE_CHANGED', 'The template branch changed before verification; inspect its actual state.');
+  const actualCommit = await api.request('GET', `/repos/${config.template_repository}/git/commits/${commit}`);
+  if (actualCommit.tree.sha !== tree.sha) fail('TEMPLATE_VERIFY_FAILED', 'The remote template tree differs from the verified bundle.');
+  for (const path of ['.ksf-template.json', '.agents/core/release.json']) {
+    const remote = await api.request('GET', `/repos/${config.template_repository}/contents/${path}?ref=${commit}`);
+    if (remote.encoding !== 'base64' || !Buffer.from(remote.content ?? '', 'base64').equals(workspace.entries.get(path).bytes)) {
+      fail('TEMPLATE_VERIFY_FAILED', `Remote template identity differs from the verified bundle: ${path}.`);
+    }
+  }
+  return { product: products.workspace, instanceDefaultName: products.instance, repository: config.template_repository, branch, commit, version: index.version,
+    coreRevision: index.core_revision, verified: true, url: `https://github.com/${config.template_repository}`, created };
 }
 export async function publishTemplate({ root, directory, dryRun = false, api }) {
   const bundle = inspectReleaseDirectory(root, directory);
@@ -131,7 +151,7 @@ export async function publishRelease({ root, directory, dryRun = false, releaseO
       await github.request('POST', `/repos/${repository}/releases/${release.id}/assets?name=${encodeURIComponent(artifact.name)}`, artifact.bytes, { binary: true, upload: true });
     }
   }
-  const template = releaseOnly ? { scheduled: true, repository: config.template_repository } : await templateFromBundle(bundle, github);
+  const template = releaseOnly ? { status: 'not-requested', published: false, scheduled: false, repository: config.template_repository } : await templateFromBundle(bundle, github);
   if (release.draft) release = await github.request('PATCH', `/repos/${repository}/releases/${release.id}`, { draft: false });
   return { products, version: index.version, repository, url: release.html_url, template, assets: artifacts.map(a => a.name), published: true };
 }
