@@ -9,7 +9,16 @@ concurrency:
   group: ksf-release
   cancel-in-progress: false
 jobs:
+  windows-launcher:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Verify launcher with Windows PowerShell 5.1 (no Node)
+        shell: powershell
+        run: ./.agents/core/runtime/tests/launcher-windows.ps1
   release:
+    needs: windows-launcher
     runs-on: macos-15
     timeout-minutes: 30
     steps:
@@ -25,10 +34,10 @@ jobs:
           test "$KSF_RELEASE_TAG" = "v$ksf_version"
       - name: Verify runtime and regression tests
         run: |
-          .agents/bin/ksf runtime verify --json
-          .agents/bin/ksf test
+          .agents/ksf runtime verify --json
+          .agents/ksf test
       - name: Build ksf-core system, ksf-workspace template and index
-        run: .agents/bin/ksf release build --output .agents/runtime-data/release --json
+        run: .agents/ksf release build --output .agents/runtime-data/release --json
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: ksf-core-release
@@ -37,4 +46,4 @@ jobs:
       - name: Publish verified Release assets
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .agents/bin/ksf release publish .agents/runtime-data/release --release-only --json
+        run: .agents/ksf release publish .agents/runtime-data/release --release-only --json
