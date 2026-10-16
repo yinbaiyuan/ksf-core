@@ -11,13 +11,13 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf data-package --help
-.agents/bin/ksf data-package list --source all --json
-.agents/bin/ksf data-package read data-package.yinchao.sample --part metadata --json
-.agents/bin/ksf data-package read data-package.yinchao.sample@0.1.0 --part body --source user --json
-.agents/bin/ksf data-package check data-package.yinchao.sample --json
-.agents/bin/ksf data-package write data-package.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
-.agents/bin/ksf data-package remove data-package.yinchao.sample --dry-run --json
+.agents/ksf data-package --help
+.agents/ksf data-package list --source all --json
+.agents/ksf data-package read data-package.yinchao.sample --part metadata --json
+.agents/ksf data-package read data-package.yinchao.sample@0.1.0 --part body --source user --json
+.agents/ksf data-package check data-package.yinchao.sample --json
+.agents/ksf data-package write data-package.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
+.agents/ksf data-package remove data-package.yinchao.sample --dry-run --json
 ```
 
 示例 ID 为占位用法；不存在的 read/check/remove 报错。去掉 --dry-run 后才实际创建、修改或物理删除整个用户目录。read 默认 --part all，--source 默认 effective；list 返回摘要，不能把列举成功当作正文已读取。

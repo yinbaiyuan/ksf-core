@@ -5,3 +5,6 @@
 
 # 构建中间文件。
 /.agents/core/.manifest.yaml.*.tmp
+
+# KSF 系统级用户数据随用户实例保存；只排除原子写入的临时文件。
+/.agents/user-data/*.tmp

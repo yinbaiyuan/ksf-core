@@ -62,7 +62,7 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 
 这是一组分类判断，不是要求为每项需求建立整套对象。同一输入可以有多个归属，也可以仅更新一个既有对象；重要缺口会改变归属时，先澄清。
 
-设计时的承载判断由 [ksf 对象设计师](../../abilities/partners/ksf-object-designer/partner.md)负责。运行时由 [task-route](../../abilities/competencies/task-route/competency.md)选择已有对象，两者不能互相替代。
+设计时的承载判断由 [ksf 对象设计师](../../abilities/partners/ksf-object-designer/partner.md)负责。运行时由 [ability-route](../../abilities/competencies/ability-route/competency.md)选择已有对象，两者不能互相替代。
 
 ## 运行时怎样读取
 
@@ -72,7 +72,7 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 
 [根 AGENTS.md](../../../../AGENTS.md)是特殊入口工作流，连接系统搭档与任务路由。这个入口约定不扩大普通业务工作流的边界，也不要求把每个请求包装成业务工作流。
 
-四类对象的列举、按部分读取、用户写入、完整目录派生、删除和本地引用检查已实现；context capabilities 已组合工作流与搭档的完整有效发现信息。项目基础管理已有 [project CLI](../cli/project.md)，项目筛选、知识读取及资产维护的语义判断由 ksf-assistant 的三项运行基本功承接；尚无专用知识管理命令，见[最小运行闭环](../runtime/minimal-runtime.md)。实际程序接口以 [CLI 说明](../cli/overview.md)为准，能力路由行为以 task-route 为准。
+四类对象的列举、按部分读取、用户写入、完整目录派生、删除和本地引用检查已实现；context capabilities 已组合工作流与搭档的完整有效发现信息。项目基础管理已有 [project CLI](../cli/project.md)，项目筛选、知识读取及资产维护的语义判断由 ksf-runtime 的三项运行基本功承接；尚无专用知识管理命令，见[最小运行闭环](../runtime/minimal-runtime.md)。实际程序接口以 [CLI 说明](../cli/overview.md)为准，能力路由行为以 ability-route 为准。
 
 ## 文档与实现的分工
 
@@ -94,3 +94,7 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 | 固定执行某种文件转换并检查结果 | 基本功，按需直接调用程序 |
 | 记录本次功能开发的约束、取舍和验收结果 | 项目 |
 | 现有对象已经能够满足需要 | 复用或完善，无需新建 |
+
+## 能力术语
+
+KSF 的能力总称统一使用 ability，集合目录为 abilities；Workflow、Partner、Competency、DataPackage 是具体能力对象类型。工作流与搭档的选择方法称为能力路由 ability-route，属于 Competency。既有 `context capabilities` CLI 保留为兼容命令名，不因此引入另一类能力对象。任务关系与工作过程由 ksf-runtime 管理。

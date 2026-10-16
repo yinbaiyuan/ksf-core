@@ -9,8 +9,8 @@
 ## 调用与输入
 
 ```sh
-.agents/bin/ksf build
-.agents/bin/ksf build --json
+.agents/ksf build
+.agents/ksf build --json
 ```
 
 输入为 [build.json](../../build.json)、配置声明的运行时包及系统源码；输出固定为 [manifest.yaml](../../manifest.yaml)。当前不支持自定义输出路径或自动递增版本。

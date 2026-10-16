@@ -1,0 +1,7 @@
+# Preserve managed-system text and binary bytes when checked out on Windows.
+AGENTS.md text eol=lf
+.agents/ksf text eol=lf
+.agents/ksf.ps1 text eol=lf
+.agents/core/** text=auto eol=lf
+.agents/core/runtime/packages/** -text
+.agents/user-data/*.json text eol=lf

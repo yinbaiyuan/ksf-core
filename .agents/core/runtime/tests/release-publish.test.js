@@ -5,17 +5,20 @@ import { join } from 'node:path';
 import { publishRelease, publishTemplate, mirrorTemplate } from '../src/distribution/publish.js';
 import { sha256, stableJSON } from '../src/distribution/common.js';
 import { distributionFixture } from './helpers/distribution-fixture.js';
+import { systemUpdate } from '../src/distribution/system.js';
 
 class PublicationAPI {
-  constructor({ wrongTemplate = false, failUpload = false } = {}) {
+  constructor({ wrongTemplate = false, failUpload = false, provenance, concurrent = false } = {}) {
     this.calls = []; this.tag = null; this.release = null; this.head = 'd'.repeat(40);
     this.commits = new Map([[this.head, { sha: this.head, tree: { sha: 'e'.repeat(40) } }]]);
     this.wrongTemplate = wrongTemplate; this.failUpload = failUpload;
+    this.provenance = provenance ?? { generated_from: 'yinbaiyuan/ksf-core', version: '0.0.0', revision: '0'.repeat(40) };
+    this.concurrent = concurrent; this.headReads = 0;
   }
   async request(method, path, body, options) {
     this.calls.push({ method, path, body, options });
     if (path === '/repos/yinbaiyuan/ksf-workspace' && method === 'GET') return { default_branch: 'main', is_template: true };
-    if (path.includes('/contents/.ksf-template.json')) return { content: Buffer.from(stableJSON({ generated_from: this.wrongTemplate ? 'someone/else' : 'yinbaiyuan/ksf-core' })).toString('base64') };
+    if (path.includes('/contents/.ksf-template.json')) return { content: Buffer.from(stableJSON({ ...this.provenance, generated_from: this.wrongTemplate ? 'someone/else' : this.provenance.generated_from })).toString('base64') };
     if (path.includes('/git/commits/') && method === 'GET') return this.commits.get(path.split('/').at(-1)) ?? { sha: path.split('/').at(-1), tree: { sha: 'a'.repeat(40) } };
     if (path.includes('/git/ref/tags/') && method === 'GET') return this.tag;
     if (path.endsWith('/git/refs') && method === 'POST') return this.tag = { object: { type: 'commit', sha: body.sha } };
@@ -29,13 +32,19 @@ class PublicationAPI {
       return asset;
     }
     if (path.endsWith('/releases/7') && method === 'PATCH') { this.release.draft = body.draft; return this.release; }
-    if (path.includes('/git/ref/heads/') && method === 'GET') return { object: { sha: this.head } };
+    if (path.includes('/git/ref/heads/') && method === 'GET') {
+      if (++this.headReads === 2 && this.concurrent) this.head = '9'.repeat(40);
+      return { object: { sha: this.head } };
+    }
     if (path.endsWith('/git/blobs')) return { sha: 'f'.repeat(40) };
-    if (path.endsWith('/git/trees')) return { sha: 'b'.repeat(40) };
+    if (path.endsWith('/git/trees')) {
+      this.pendingProvenance = JSON.parse(body.tree.find(e => e.path === '.ksf-template.json').content);
+      return { sha: 'b'.repeat(40) };
+    }
     if (path.endsWith('/git/commits') && method === 'POST') {
       const result = { sha: 'c'.repeat(40), tree: { sha: body.tree } }; this.commits.set(result.sha, result); return result;
     }
-    if (path.includes('/git/refs/heads/') && method === 'PATCH') { this.head = body.sha; return { object: { sha: body.sha } }; }
+    if (path.includes('/git/refs/heads/') && method === 'PATCH') { this.head = body.sha; this.provenance = this.pendingProvenance; return { object: { sha: body.sha } }; }
     throw new Error(`Unexpected publication fixture call: ${method} ${path}`);
   }
 }
@@ -103,4 +112,32 @@ test('template mirror refuses a platform-derived filename that escapes its stagi
   };
   await assert.rejects(mirrorTemplate({ root: f.workspace, source: 'https://release.invalid/index.json', dryRun: true, fetcher }), { code: 'RELEASE_INVALID' });
   assert.equal(unsafeDownload, false);
+});
+
+for (const [version, revision, code] of [
+  ['0.2.0', 'f'.repeat(40), 'TEMPLATE_VERSION_OLDER'],
+  ['0.1.0', 'f'.repeat(40), 'TEMPLATE_VERSION_CONFLICT'],
+]) test(`template publication rejects remote provenance ${version} (${code}) before writes`, async t => {
+  const f = await distributionFixture(t), api = new PublicationAPI({ provenance: { generated_from: 'yinbaiyuan/ksf-core', version, revision } });
+  await assert.rejects(publishTemplate({ root: f.root, directory: f.first.output, api }), { code });
+  assert.ok(api.calls.every(c => c.method === 'GET'));
+});
+test('template publication refuses a concurrent branch change without a forced update', async t => {
+  const f = await distributionFixture(t), api = new PublicationAPI({ concurrent: true });
+  await assert.rejects(publishTemplate({ root: f.root, directory: f.first.output, api }), { code: 'TEMPLATE_CHANGED' });
+  assert.ok(!api.calls.some(c => c.method === 'PATCH'));
+});
+test('mirror refuses an older feed than the installed template (F02) without remote writes or artifact downloads', async t => {
+  const f = await distributionFixture(t), next = await f.next(), api = new PublicationAPI();
+  await systemUpdate({ root: f.workspace, from: next.coreArchive });
+  let downloads = 0;
+  const fetcher = async () => { downloads++; return new Response(stableJSON(f.first.index)); };
+  const result = await mirrorTemplate({ root: f.workspace, source: 'https://release.invalid/index.json', fetcher, api });
+  assert.equal(result.skipped, 'older-release'); assert.equal(downloads, 1); assert.equal(api.calls.length, 0);
+});
+test('mirror rejects a same-version release from another revision before downloads', async t => {
+  const f = await distributionFixture(t), api = new PublicationAPI();
+  const index = { ...f.first.index, core_revision: 'f'.repeat(40) };
+  await assert.rejects(mirrorTemplate({ root: f.workspace, source: 'https://release.invalid/index.json', fetcher: async () => new Response(stableJSON(index)), api }), { code: 'RELEASE_REPLACED' });
+  assert.equal(api.calls.length, 0);
 });

@@ -1,6 +1,6 @@
 # competency 命令
 
-已实现。统一管理专业方法、具体执行操作与质量标准，正文按当前责任需要读取。基本功可以直接使用脚本、CLI、模板、数据包和资料，支持资源不需要包装成另一类能力对象。competency.ksf.task-route 是固定入口基本功，不能派生接管或删除。
+已实现。统一管理专业方法、具体执行操作与质量标准，正文按当前责任需要读取。基本功可以直接使用脚本、CLI、模板、数据包和资料，支持资源不需要包装成另一类能力对象。competency.ksf.ability-route 是固定入口基本功，不能派生接管或删除。
 
 ## 位置与公共规则
 
@@ -11,13 +11,13 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf competency --help
-.agents/bin/ksf competency list --source all --json
-.agents/bin/ksf competency read competency.yinchao.sample --part metadata --json
-.agents/bin/ksf competency read competency.yinchao.sample@0.1.0 --part body --source user --json
-.agents/bin/ksf competency check competency.yinchao.sample --json
-.agents/bin/ksf competency write competency.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
-.agents/bin/ksf competency remove competency.yinchao.sample --dry-run --json
+.agents/ksf competency --help
+.agents/ksf competency list --source all --json
+.agents/ksf competency read competency.yinchao.sample --part metadata --json
+.agents/ksf competency read competency.yinchao.sample@0.1.0 --part body --source user --json
+.agents/ksf competency check competency.yinchao.sample --json
+.agents/ksf competency write competency.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
+.agents/ksf competency remove competency.yinchao.sample --dry-run --json
 ```
 
 示例 ID 为占位用法；不存在的 read/check/remove 报错。去掉 --dry-run 后才实际创建、修改或物理删除整个用户目录。read 默认 --part all，--source 默认 effective；list 返回摘要，不能把列举成功当作正文已读取。
