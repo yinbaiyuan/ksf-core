@@ -45,7 +45,7 @@ macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其
 | `.agents/runtime-data/` | 本机运行时、升级备份、失败事务、检查记录和贡献草稿，不提交 |
 | `.ksf-template.json` | 记录初始 ksf-workspace 模板产品、默认实例名与出处；不限定实际实例名称，当前系统版本以 release.json 为准 |
 
-ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许在官方模板仓库运行，用户复制或从模板创建的实例仓库不会执行该发布任务。
+新 ksf-workspace 不携带模板自同步工作流。官方模板由 Core 发行 Actions 使用同一批已验证产物直接更新；首次同步移除官方仓库的旧定时任务，不执行旧模板程序。已有用户实例的根 `.github/` 是用户内容，普通系统升级不删除它；旧工作流的官方仓库条件仍限制其运行。
 
 模板写入前核对观察到的远程提交及其出处：拒绝版本倒退和同版本不同 Core 提交；同版本同来源可重核模板树。写分支前重新读取 head，发生竞争则停止，最终 ref 更新始终非强制。mirror 也拒绝比本地模板更旧的发行源。
 
@@ -96,7 +96,7 @@ ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许�
 
 ## 维护和发布
 
-系统、文档和模板源码统一在 Core 修改。模板源为 `.agents/core/distribution/template/`，官方工作流源为 `.agents/core/distribution/template-workflow.yml`。
+系统、文档和模板源码统一在 Core 修改。模板源为 `.agents/core/distribution/template/`；发行工作流只保存在 Core 的 `.github/workflows/release.yml`，不复制进模板。
 
 ```sh
 .agents/ksf runtime verify --json
@@ -121,7 +121,36 @@ ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许�
 
 publish 验证包、上游提交和标签，上传全部草稿资产，更新生成模板，最后公开 Release。相同构建可重试，同版本的不同资产不能覆盖。现有同名模板仓库必须有正确生成标记，否则拒绝覆盖。
 
-自动发布不需要跨仓库令牌：ksf-core 标签工作流用自身 GITHUB_TOKEN 执行 `release publish --release-only`，ksf-workspace 工作流每 15 分钟用自己的令牌执行 `release mirror`，也可手动运行。GitHub 调度可能延迟。首次创建官方 ksf-workspace 并设置 Template repository 是维护者的一次性操作。无新版本时镜像只检查索引，不重复下载大包。
+### 从用户实例发起远程发行
+
+用户实例可由 maintainer 按 system-release 方法发起 Core Actions，无需本地 Core 克隆。实例修改须先贡献并合入 Core，正式版本号也须先进入 Core 的版本配置。发起账户须有 Core Actions 运行权限；安装 KSF 或配置模板 App 不授予此权限。不要将个人仓库 origin 当作 Core。
+
+```sh
+# 明确要求正式发布后，在任意目录执行；发的是远程 main 的版本与提交。
+gh workflow run release.yml --repo yinbaiyuan/ksf-core --ref main -f operation=release
+# 只恢复某个已经公开的发行版本的模板，不重建、不创建 Core Release。
+gh workflow run release.yml --repo yinbaiyuan/ksf-core --ref main -f operation=template-only -f release_tag=v0.1.1
+```
+
+示例版本仅说明参数，不代表该版本已发布。也可在 Core 的 Actions 页面选择 Publish ksf-core Release → Run workflow。正常 release 不接受 release_tag；版本来自所选 Core 源码。标签推送要求 v<版本> 与源码版本一致；普通 main 合并不触发发行。请求结果未知时先查实际运行，不重复发起；并发运行不能靠“最新一条”归属。记录工作流、发起时间、操作者、事件、提交和运行 URL，按原运行恢复。
+
+### 三阶段协议与失败恢复
+
+1. 准备：保留 Windows 启动器检查；验证 macOS ARM64 运行时及完整回归，干净 Core 只构建一次。两个压缩包和索引同时上传，冻结 Core 提交、索引 SHA256 和 artifact ID。恢复模式从指定公开 Release 下载并核对标签提交、索引、大小和摘要，不查询 latest；仅支持包含本恢复桥接程序的 Core 发行。
+2. Core：使用自身 GITHUB_TOKEN，仅此作业 contents: write。按 artifact ID 下载，在准备时固定的 Core 提交上核对索引摘要，再执行 release publish --release-only。模板返回 status=not-requested、published=false、scheduled=false，不能据此声称已同步。
+3. 模板：Core 发布成功后才运行；template-only 则在准备成功后运行，即使 Core 作业被跳过。使用同一 artifact ID 与对应 Core 提交中的程序执行 release template。此阶段只用 App 的 workspace 安装令牌。实际远程分支、提交树、来源标识和发行凭据全部匹配才返回 verified=true 与 coreRevision。
+
+整个工作流串行排队，不取消前一运行。Core 已成功而模板失败时，两者状态分开报告；选择 Re-run failed jobs，复用成功准备阶段的产物与输出，不重跑 Core。artifact 保留 14 天，过期后按原 release_tag 发起 template-only，从原 Release 恢复。无论何种恢复都不覆盖同版本不同内容、不降低模板版本、不强制写分支。响应丢失时先核对远程；同版本同来源的相同模板树可重复验证，不新建无意义提交。
+
+### GitHub App 配置
+
+在维护者账户创建私有 App，仅安装到官方 ksf-workspace；关闭 webhook，不请求用户 OAuth。Repository permissions 为 Contents: read/write、Workflows: read/write，以及 GitHub 必需的 Metadata: read。Workflows 权限用于首次迁移删除旧同步任务。无需 Administration、Secrets 或 Core 仓库访问权限；官方模板必须预先存在且已标记为 Template repository，不自动建仓或修改仓库设置。
+
+Core 配置变量 KSF_TEMPLATE_APP_CLIENT_ID 与 Secret KSF_TEMPLATE_APP_PRIVATE_KEY。私钥只存 Secret，不进入源码、发行包、贡献或运行日志；初次写入后的临时私钥删除。使用官方 actions/create-github-app-token（固定 v3.3.0 提交），owner 和 repositories 显式限定官方模板，显式请求 contents/workflows 写权限；每个作业独立签发，结束后默认撤销。
+
+在 Core 发布前先获取受限令牌，读取 installation/repositories，确保令牌只可见目标模板，并验证远程生成标识。缺少配置、权限或模板出处时在任何 Core 发布写入前停止。模板作业重新获取并复核令牌，不能沿用可能过期的预检令牌。权限或分支规则后来变化仍可能导致部分成功，按上述恢复处理，不降低保护。
+
+新包拒绝携带任意附加工作流。兼容旧 schema-3 包的原工作流时，必须与包内 Core 的旧模板源和官方仓库替换结果精确一致；此兼容不使新构建重新生成旧任务。release mirror 保留为显式工具，已不承担官方定时同步。
 
 ## 协议与验证边界
 

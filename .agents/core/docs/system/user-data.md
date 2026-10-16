@@ -1,6 +1,6 @@
 # 系统级用户数据
 
-`.agents/user-data/` 保存 KSF 程序自身需要、并应随用户实例保留的用户设置和必要状态。它与本机 [runtime-data](runtime-data.md)分开，也与正常工作中的项目、任务记录、草稿、成果和知识分开。当前仅注册 settings；其他命名空间必须先有明确格式和消费方。返回[架构总览](README.md)。
+`.agents/user-data/` 保存 KSF 程序自身需要、并应随用户实例保留的用户设置和必要状态。它与本机 [runtime-data](runtime-data.md)分开，也与正常工作中的项目、任务记录、草稿、成果和知识分开。当前注册 settings 和 identity；其他命名空间必须先有明确格式和消费方。返回[架构总览](README.md)。
 
 命令参数、字段范围和完整结果契约由 [user-data 命令](../cli/user-data.md)持有。本篇解释实现分层、使用路径和后续扩展。
 
@@ -28,6 +28,12 @@ Core 构建与发布调用默认配置路径，不读取维护者的个人设置
 
 write 按顶层字段合并，提供的字段值整体替换。因此提交新的 updates 映射会替换旧 updates；未再提供的子项回到 Core 默认值。写入空对象保持现有覆盖，remove 删除该命名空间文件后恢复全部默认值。
 
+## identity 如何设置
+
+identity 通过现有 user-data write 保存 name、email、namespace，read/check 读取或检查，remove 清除该命名空间。三个字段按顶层合并，未提供的保留。它只保存本地资料，名称非空、邮箱做基本格式检查，namespace 使用对象 ID 单段校验；不依赖账户、GitHub 或网络，不核验全局唯一性。
+
+设置文件和 settings 一样由用户实例保存、备份和迁移，Core 包不携带维护者的身份资料。CLI 输入及示例见 [identity 说明](../cli/user-data.md#identity-本地身份设置)。目前没有自动替换对象 ID、自动注入作者元数据或改写 Git 配置的行为；创建者需要使用对象命名空间时可读取该值。
+
 ## 版本与并发
 
 持久化文件包含 schema_version、namespace、revision 和 values。schema_version 按命名空间解释；revision 仅在真实内容变化时增加；etag 是完整文件字节的 SHA256，缺失使用 missing。同值写入保留原字节、revision 和 etag。
@@ -52,6 +58,6 @@ write 按顶层字段合并，提供的字段值整体替换。因此提交新�
 
 ## 实现与验证来源
 
-[user-data.test.js](../../runtime/tests/user-data.test.js)覆盖格式、CLI、并发、路径和跨设备复制；[user-data-distribution.test.js](../../runtime/tests/user-data-distribution.test.js)覆盖实际升级回滚保留、Core 打包隔离及 Git 边界。[system.js](../../runtime/src/distribution/system.js)是当前配置消费方，[release.js](../../runtime/src/distribution/release.js)生成模板空目录。
+[user-data.test.js](../../runtime/tests/user-data.test.js)覆盖格式、CLI、并发、路径和跨设备复制；[identity.test.js](../../runtime/tests/identity.test.js)覆盖本地身份字段、部分设置、独立删除和离线操作；[user-data-distribution.test.js](../../runtime/tests/user-data-distribution.test.js)覆盖实际升级回滚保留、Core 打包隔离及 Git 边界。[system.js](../../runtime/src/distribution/system.js)消费 settings，[release.js](../../runtime/src/distribution/release.js)生成模板空目录。
 
 存储模块采用 Node 标准库，尚不能据此宣称 Windows 完整 CLI 已可运行。当前没有自动跨设备同步服务，也没有通用凭据存储或第五类能力对象。

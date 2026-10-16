@@ -13,7 +13,7 @@
 | runtime | 运行时完整校验 | [runtime](runtime.md) |
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
-| user-data | KSF 系统级用户设置与可迁移状态 | [user-data](user-data.md) |
+| user-data | KSF 系统级用户设置、本地身份资料与可迁移状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
 | context | 组织 Agent 所需的能力发现上下文 | [context](context.md) |
 | project | 项目根卡与目录的基础管理 | [project](project.md) |

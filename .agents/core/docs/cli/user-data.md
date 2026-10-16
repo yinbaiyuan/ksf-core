@@ -11,7 +11,7 @@
 | `.agents/runtime-data/` | 本机运行时、缓存、进程身份、锁、升级事务和备份，默认不提交 |
 | `项目/`、`知识/`、`能力/` 等正常用户空间 | 正常工作中的项目进展、任务记录、草稿、成果、知识和个人能力 |
 
-user-data 不是通用 JSON 仓库，也不增加第五类能力对象。只允许 Core 注册并逐字段校验的命名空间。第一版仅注册 `settings`，后续系统功能需要先定义自己的格式和消费方式；不能通过任意名称写入项目、任务或草稿。
+user-data 不是通用 JSON 仓库，也不增加第五类能力对象。只允许 Core 注册并逐字段校验的命名空间。当前注册 `settings` 和 `identity`，后续系统功能需要先定义自己的格式和消费方式；不能通过任意名称写入项目、任务或草稿。
 
 入口文件保持原有职责；除模板生成的空目录占位外，首次真实写入时才创建命名空间文件。读取、检查和缺失目标均不自动创建配置文件。
 
@@ -58,9 +58,31 @@ namespace 为已注册名称，不接受文件路径。支持命令级及操作�
 
 检查间隔只约束用户显式调用 `system sync` 的间隔；普通启动和读取仍不访问版本源或自动升级。Core 构建与发布读取系统默认配置，不读取或合并维护者的 user-data。
 
+## identity 本地身份设置
+
+identity 保存用户自行填写的名称、联系邮箱和对象命名空间，位置为 `.agents/user-data/identity.json`。它使用现有 write/read/check/remove 接口；“设置数据”使用 write，不新增同义 set 操作。
+
+| 字段 | 内容与校验 |
+| --- | --- |
+| name | 显示名称，非空、最长 200、不含控制字符 |
+| email | 单个联系邮箱，最长 254，检查基本地址格式；不验证邮箱所有权 |
+| namespace | 对象 ID 中间一段，沿用对象 ID 的单段规则，支持中文，禁止点号、空白和路径非法字符 |
+
+三个字段均可单独写入，省略字段保留原值。未知字段报错，不接受 GitHub 绑定信息或自报“已验证”标志。不同用户可设置相同值；不查询 GitHub、不检查账号存在性或全局唯一性，也不读写 Git 配置。
+
+以下示例会保存本地数据；名称、邮箱和命名空间均为示例，使用前替换为实际值。首次文件缺失用 missing，以后修改使用 read 返回的 etag：
+
+```sh
+.agents/ksf user-data write identity --data '{"name":"示例用户","email":"author@example.invalid","namespace":"example-author"}' --if-match missing --json
+.agents/ksf user-data read identity --json
+.agents/ksf user-data check identity --json
+```
+
+保存 namespace 不会自动重写对象 ID、目录或 references。当前对象 CLI 仍接受完整 ID，例如 `competency.example-author.architecture-analysis`；创建者可读取 identity 后使用该命名空间。name/email 不自动写入对象元数据或公开贡献。
+
 ## 持久化与版本
 
-第一版位置为 `.agents/user-data/settings.json`：
+每个注册命名空间使用同样的版本信封。以 `.agents/user-data/settings.json` 为例：
 
 ```json
 {
@@ -86,7 +108,7 @@ schema_version 按命名空间解释，revision 在实际内容变化时增加�
 ## Git、发行与跨设备
 
 - Core 源码仓库继续忽略真实 user-data；发行只生成 `.agents/user-data/.gitkeep` 空目录占位，不读取或复制维护者的设置。
-- 用户模板允许 settings.json 进入用户自己的仓库，忽略 `.agents/user-data/*.tmp` 原子写临时文件；JSON 使用 LF，避免 Windows 检出改变字节摘要。
+- 用户模板允许 settings.json、identity.json 进入用户自己的仓库，忽略 `.agents/user-data/*.tmp` 原子写临时文件；JSON 使用 LF，避免 Windows 检出改变字节摘要。
 - Core 升级和回滚的管理范围不包含 user-data，用户设置保留原样。升级 Core 不等于迁移用户数据格式。
 - 同步或复制 user-data 后，新设备读取相同版本格式和覆盖值，本机锁与运行环境重新建立。当前不是自动同步服务，也不把用户的历史设置解释为发起远程操作的授权。
 - Gitignore 只约束 Git；整目录网盘同步仍需排除 runtime-data。损坏或冲突数据保留后处理，不自动最后写入覆盖。
@@ -99,4 +121,4 @@ schema_version 按命名空间解释，revision 在实际内容变化时增加�
 
 主要错误：USER_DATA_NAMESPACE_UNKNOWN、USER_DATA_INVALID、USER_DATA_VERSION_UNSUPPORTED、USER_DATA_PATH_INVALID、USER_DATA_CONFLICT、USER_DATA_LOCKED、USER_DATA_UNKNOWN_ENTRY、USER_DATA_INPUT_UNREADABLE、USER_DATA_IO_FAILED。
 
-实现为 `src/user-data/`、`src/services/user-data.js`、`src/commands/user-data.js`。验证见 `tests/user-data.test.js` 和 `tests/user-data-distribution.test.js`，分别覆盖格式、迁移、并发和参数，以及发行隔离、升级回滚保留和 Git 边界。实际平台与运行结果以测试记录为准。
+实现为 `src/user-data/`、`src/services/user-data.js`、`src/commands/user-data.js`。验证见 [user-data.test.js](../../runtime/tests/user-data.test.js)、[identity.test.js](../../runtime/tests/identity.test.js)和 [user-data-distribution.test.js](../../runtime/tests/user-data-distribution.test.js)，覆盖格式、迁移、并发和参数，以及发行隔离、升级回滚保留和 Git 边界。实际平台与运行结果以测试记录为准。

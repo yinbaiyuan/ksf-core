@@ -85,8 +85,6 @@ export async function buildRelease({ root, output, platform = `${process.platfor
     inspectCoreArchive(coreArchive, { expectedVersion: build.version, expectedPlatform: platform, expectedRepository: config.core_repository });
     const extras = [];
     for (const file of ['README.md', '.gitignore', '.gitattributes']) extras.push({ path: file, bytes: readRegular(root, `.agents/core/distribution/template/${file}`), mode: 0o644 });
-    extras.push({ path: '.github/workflows/sync-template.yml', mode: 0o644,
-      bytes: Buffer.from(readRegular(root, '.agents/core/distribution/template-workflow.yml').toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository)) });
     for (const directory of userDirectories) extras.push({ path: `${directory}/.gitkeep`, bytes: Buffer.alloc(0), mode: 0o644 });
     extras.push({ path: '.ksf-template.json', mode: 0o644, bytes: Buffer.from(stableJSON({ schema_version: 1,
       product: products.workspace, instance_default_name: products.instance,

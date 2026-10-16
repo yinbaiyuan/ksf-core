@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { readUserData, writeUserData, removeUserData, checkUserData, listUserData, UserDataError } from '../services/user-data.js';
+import { namespaces } from '../user-data/schema.js';
 
 const operations = new Set(['list', 'read', 'write', 'remove', 'check']);
 const specs = {
@@ -17,7 +18,8 @@ export function userDataHelp(operation) {
   };
   const lines = operation ? [usages[operation]] : Object.values(usages);
   return `KSF user-data${operation ? ` ${operation}` : ''}\n\nUsage:\n${lines.map(line => `  ksf user-data ${line}`).join('\n')}\n\n` +
-    'Only registered system-user-data namespaces are accepted; currently: settings.\n' +
+    `Only registered system-user-data namespaces are accepted; currently: ${Object.keys(namespaces).join(', ')}.\n` +
+    'identity accepts name, email and namespace as local values; no account or global uniqueness verification.\n' +
     'Ordinary work, projects, knowledge, drafts and task checkpoints keep their existing locations.\n' +
     'write merges supplied top-level fields; each field value replaces its previous value.\n' +
     '--data/--from contains the values object, not the persisted envelope. --from is based on the KSF root.\n' +

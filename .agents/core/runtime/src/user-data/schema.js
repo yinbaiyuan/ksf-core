@@ -1,3 +1,5 @@
+import { validId } from '../objects/schema.js';
+
 export const userDataRoot = '.agents/user-data';
 export class UserDataError extends Error {
   constructor(code, message, details = {}, exitCode = 1) {
@@ -22,10 +24,26 @@ function settings(values) {
     }
   }
 }
+function identity(values) {
+  keys(values, ['name', 'email', 'namespace'], 'identity');
+  if (Object.hasOwn(values, 'name') && (typeof values.name !== 'string' || !values.name.trim() ||
+      values.name.length > 200 || /\p{Cc}/u.test(values.name))) {
+    fail('USER_DATA_INVALID', 'identity.name must be a nonempty display name of at most 200 characters.', { field: 'name' });
+  }
+  if (Object.hasOwn(values, 'email') && (typeof values.email !== 'string' || values.email.length > 254 ||
+      /\p{Cc}/u.test(values.email) || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(values.email))) {
+    fail('USER_DATA_INVALID', 'identity.email must be a single contact email address.', { field: 'email' });
+  }
+  if (Object.hasOwn(values, 'namespace') && (typeof values.namespace !== 'string' ||
+      !validId(`competency.${values.namespace}.identity`, 'competency'))) {
+    fail('USER_DATA_INVALID', 'identity.namespace must be one valid object ID segment.', { field: 'namespace' });
+  }
+}
 // Only Core-owned, explicitly validated namespaces belong here. Ordinary work,
 // project checkpoints and user capability bodies have their existing locations.
 export const namespaces = Object.freeze({
   settings: Object.freeze({ schemaVersion: 1, kind: 'settings', description: 'KSF program settings; overrides Core defaults.', validate: settings }),
+  identity: Object.freeze({ schemaVersion: 1, kind: 'identity', description: 'Local user name, contact email and object namespace; no remote verification.', validate: identity }),
 });
 export function definition(namespace) {
   if (!Object.hasOwn(namespaces, namespace)) fail('USER_DATA_NAMESPACE_UNKNOWN', 'Expected a registered KSF system-user-data namespace.', { namespace });
