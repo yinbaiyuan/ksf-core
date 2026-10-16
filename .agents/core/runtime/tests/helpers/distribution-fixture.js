@@ -16,14 +16,16 @@ export function git(root, args) {
   } });
   assert.equal(result.status, 0, result.stderr); return result.stdout.trim();
 }
-export async function distributionFixture(t) {
+export async function distributionFixture(t, { sourceRoot = repository } = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
-  cpSync(join(repository, '.agents/core'), join(root, '.agents/core'), { recursive: true,
-    filter: path => !path.includes('/runtime/packages') && !path.includes('/runtime/tests') });
-  cpSync(join(repository, '.agents/bin'), join(root, '.agents/bin'), { recursive: true });
-  cpSync(join(repository, 'AGENTS.md'), join(root, 'AGENTS.md'));
+  // Reconstruct Core sources without inheriting the source workspace's installed identity.
+  const installedMarker = join(sourceRoot, '.agents/core/release.json');
+  cpSync(join(sourceRoot, '.agents/core'), join(root, '.agents/core'), { recursive: true,
+    filter: path => path !== installedMarker && !path.includes('/runtime/packages') && !path.includes('/runtime/tests') });
+  cpSync(join(sourceRoot, '.agents/bin'), join(root, '.agents/bin'), { recursive: true });
+  cpSync(join(sourceRoot, 'AGENTS.md'), join(root, 'AGENTS.md'));
   writeFileSync(join(root, '.gitignore'), '/.agents/runtime-data/\n/知识/\n/.agents/core/release.json\n');
   writeAtomic(join(root, '.agents/core/example.txt'), 'first\none\ntwo\nthree\nfour\nfive\nlast\n');
   const version = process.version.slice(1), archiveRoot = `node-v${version}-darwin-arm64`;

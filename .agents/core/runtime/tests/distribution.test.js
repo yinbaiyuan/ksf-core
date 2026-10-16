@@ -121,6 +121,16 @@ test('Core sources need no user directories while installed workspaces still val
   assert.equal(incomplete.data.workflows.complete, false);
   assert.ok(incomplete.errors.some(error => error.target === '能力/工作流'));
 });
+test('distribution fixture reconstructs Core sources from an installed workspace', async t => {
+  const source = await distributionFixture(t);
+  assert.equal(existsSync(join(source.workspace, '.agents/core/release.json')), true);
+  const f = await distributionFixture(t, { sourceRoot: source.workspace });
+  assert.equal(existsSync(join(f.root, '.agents/core/release.json')), false);
+  const discovery = contextCapabilities(f.root);
+  assert.equal(discovery.data.complete, true, JSON.stringify(discovery.errors));
+  assert.equal(existsSync(join(source.workspace, '.agents/core/release.json')), true);
+  assert.equal(f.launch(['context', 'capabilities', '--json']).status, 0);
+});
 test('release preview creates no output and dirty sources require an explicit development build', async t => {
   const f = await distributionFixture(t), output = join(f.directory, 'preview');
   const preview = await buildRelease({ root: f.root, output, dryRun: true });
