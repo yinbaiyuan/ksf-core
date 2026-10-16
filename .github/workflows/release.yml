@@ -40,6 +40,7 @@ jobs:
       revision: ${{ steps.bundle.outputs.revision }}
       index: ${{ steps.bundle.outputs.index_sha256 }}
       artifact: ${{ steps.upload.outputs.artifact-id }}
+      publisher: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -156,10 +157,11 @@ jobs:
     env:
       KSF_EXPECTED_REVISION: ${{ needs.prepare.outputs.revision }}
       KSF_EXPECTED_INDEX: ${{ needs.prepare.outputs.index }}
+      KSF_PUBLISHER_REVISION: ${{ needs.prepare.outputs.publisher }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ needs.prepare.outputs.revision }}
+          ref: ${{ needs.prepare.outputs.publisher }}
           persist-credentials: false
       - uses: actions/download-artifact@v8.0.2
         with:
@@ -183,6 +185,7 @@ jobs:
           KSF_RELEASE_PHASE: template
           KSF_RELEASE_RESULT: ${{ runner.temp }}/template-result.json
         run: |
+          printf 'Template publisher: `%s`\nRelease Core: `%s`\n\n' "$KSF_PUBLISHER_REVISION" "$KSF_EXPECTED_REVISION" >> "$GITHUB_STEP_SUMMARY"
           .agents/ksf runtime verify --json
           ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
           "$ksf_node" .agents/core/runtime/src/distribution/release-actions.js inspect

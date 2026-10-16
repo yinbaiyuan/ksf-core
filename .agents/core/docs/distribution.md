@@ -138,7 +138,7 @@ gh workflow run release.yml --repo yinbaiyuan/ksf-core --ref main -f operation=t
 
 1. 准备：保留 Windows 启动器检查；验证 macOS ARM64 运行时及完整回归，干净 Core 只构建一次。两个压缩包和索引同时上传，冻结 Core 提交、索引 SHA256 和 artifact ID。恢复模式从指定公开 Release 下载并核对标签提交、索引、大小和摘要，不查询 latest；仅支持包含本恢复桥接程序的 Core 发行。
 2. Core：使用自身 GITHUB_TOKEN，仅此作业 contents: write。按 artifact ID 下载，在准备时固定的 Core 提交上核对索引摘要，再执行 release publish --release-only。模板返回 status=not-requested、published=false、scheduled=false，不能据此声称已同步。
-3. 模板：Core 发布成功后才运行；template-only 则在准备成功后运行，即使 Core 作业被跳过。使用同一 artifact ID 与对应 Core 提交中的程序执行 release template。此阶段只用 App 的 workspace 安装令牌。实际远程分支、提交树、来源标识和发行凭据全部匹配才返回 verified=true 与 coreRevision。
+3. 模板：Core 发布成功后才运行；template-only 则在准备成功后运行，即使 Core 作业被跳过。使用同一 artifact ID 执行 release template。模板程序来自 prepare 冻结的工作流提交，正常发行与 Core 来源一致，template-only 可用后续修复程序恢复原发行；发布摘要同时记录 publisher 与发行 Core 提交。此阶段只用 App 的 workspace 安装令牌。实际远程分支、提交树、来源标识和发行凭据全部匹配才返回 verified=true 与 coreRevision。
 
 整个工作流串行排队，不取消前一运行。Core 已成功而模板失败时，两者状态分开报告；选择 Re-run failed jobs，复用成功准备阶段的产物与输出，不重跑 Core。artifact 保留 14 天，过期后按原 release_tag 发起 template-only，从原 Release 恢复。无论何种恢复都不覆盖同版本不同内容、不降低模板版本、不强制写分支。响应丢失时先核对远程；同版本同来源的相同模板树可重复验证，不新建无意义提交。
 
@@ -161,3 +161,9 @@ Core 配置变量 KSF_TEMPLATE_APP_CLIENT_ID 与 Secret KSF_TEMPLATE_APP_PRIVATE
 测试分别使用小型运行时、真实本机 HTTP、模拟 GitHub API及真实随包 Node/发行包。真实外部发布状态以实施记录中的证据为准，不能把模拟 API 当作已发布。
 
 系统级用户设置的格式、读写和跨设备边界见 [user-data](cli/user-data.md)。模板只生成空目录占位；正常工作内容仍在正常用户空间。
+
+### 大文件上传与已发行版本恢复
+
+模板文件超过 8 MiB 时，使用本机临时、隔离配置的 Git 对象库及非强制 push，不把大型二进制转为 REST blob JSON。Git pack 复用远程已有对象；完整生成树仍会移除旧模板任务。上传前固定目标仓库、分支、父提交和版本。临时发布仓库的 pre-push 检查服务端通告的旧提交必须等于预期父提交，再由 Git 服务端原子比较该旧提交；并发新增、回退或删除均停止，不重新创建已删除分支。此检查不是用户实例或全局 Git hook。上传后对账实际提交树、来源标识与发行凭据。凭证只通过受限子进程环境提供，不写 URL、文件、仓库或日志。Git 不可用时在 Core 发布前的预检失败。普通 KSF 运行不新增 Git 依赖。
+
+若旧发行的模板发布程序有缺陷，单纯重跑旧作业仍会使用旧程序。合入修复后，从含修复的 main 发起 `template-only` 并指定原标签（例如 `v0.1.1`）。prepare 冻结维护程序提交，下载并校验原版三个资产；template 使用固定维护程序处理原产物。原标签、Core 提交、压缩包、索引及摘要保持原样，不以重新发布同版本修复程序。正常发行的程序来源仍与当次 Core 源码一致。

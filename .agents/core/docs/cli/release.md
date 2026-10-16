@@ -26,3 +26,5 @@ JSON：`{ok, command:"release", operation, data, errors}`，业务结果和错�
 模板发布新增版本及并发保护：TEMPLATE_VERSION_OLDER 拒绝旧版覆盖远程新版，TEMPLATE_VERSION_CONFLICT 拒绝同版本不同 Core 来源，TEMPLATE_CHANGED 表示准备期间远程分支已变。mirror 对比本地模板后可返回 skipped=older-release；同版本换源返回 RELEASE_REPLACED。预览只验证本地产物，不认证或保证远程版本条件；实际写入必须重新核对远程出处与 head。
 
 从用户实例发起远程发布与 template-only 恢复属于 Core Actions 接口，不新增 CLI 操作。具体输入、App 配置和失败重试见[发行说明](../distribution.md#从用户实例发起远程发行)。TEMPLATE_VERIFY_FAILED 表示实际远程模板与已验证包不一致，不能报告成功；保留原包和远程状态再核对。
+
+大文件模板传输要求 Git，使用临时对象库、服务端旧提交校验和非强制推送，完成后仍通过远程树和发行凭据对账。恢复旧发行可使用本次 Actions 固定的维护程序提交；原产物仍按指定发布标签、Core 提交及摘要校验，不修改已公开资产。`TEMPLATE_GIT_REQUIRED` 表示缺少 Git，`TEMPLATE_GIT_FAILED` 表示 Git 传输未被证实成功；先核对远程后恢复同一版本模板。

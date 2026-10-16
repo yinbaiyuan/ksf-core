@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configuration, compareVersions, fail, isRevision, parseJSON, readRegular, sha256, stableJSON, versionParts, writeAtomic } from './common.js';
 import { GitHubAPI } from './github.js';
+import { verifyTemplateGit } from './template-git.js';
 import { inspectReleaseDirectory } from './publish.js';
 import { artifactName, releaseIndexName } from './products.js';
 import { download } from './network.js';
@@ -33,6 +34,7 @@ export async function templatePreflight({ root, directory, revision, indexHash, 
   if (provenance.generated_from !== config.core_repository || !isRevision(provenance.revision)) fail('TEMPLATE_NOT_GENERATED', 'The target lacks valid Core provenance.');
   versionParts(provenance.version);
   if (directory) {
+    verifyTemplateGit();
     const candidate = inspectHandoff({ root, directory, revision, indexHash });
     const comparison = compareVersions(candidate.version, provenance.version);
     if (comparison < 0) fail('TEMPLATE_VERSION_OLDER', 'An older release cannot replace the official template.');
