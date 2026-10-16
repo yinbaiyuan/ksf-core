@@ -5,8 +5,8 @@ For the current command list and calling conventions, see [CLI 能力说明](../
 Run from any working directory through the KSF program entry:
 
 ```sh
-.agents/bin/ksf build
-.agents/bin/ksf build --json
+.agents/ksf build
+.agents/ksf build --json
 ```
 
 When running outside the repository, use the entry's absolute path. This command
@@ -83,8 +83,8 @@ All package checks happen locally; no network access is involved in this build.
 1. Put the selected official Node.js archive into `runtime/packages/`.
 2. Update `.agents/core/build.json` with the deliberate version/path and trusted
    official archive SHA256. There is no handwritten executable SHA256 field.
-3. Run `.agents/bin/ksf build`, then `.agents/bin/ksf test` and
-   `.agents/bin/ksf runtime verify` before distributing the changed release.
+3. Run `.agents/ksf build`, then `.agents/ksf test` and
+   `.agents/ksf runtime verify` before distributing the changed release.
 
 Build preparation may install the newly selected runtime before manifest
 publication. On build failure, the old manifest remains authoritative for normal

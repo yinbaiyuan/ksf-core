@@ -13,6 +13,7 @@ import { distributionFixture, git } from './helpers/distribution-fixture.js';
 import { contextCapabilities } from '../src/services/context.js';
 import { objectQuery } from '../src/services/objects.js';
 import { systemUpdate } from '../src/distribution/system.js';
+import { ForkAPI } from './helpers/contribution-api.js';
 
 test('release archive round-trips UTF-8 paths, content and executable modes', () => {
   const path = '.agents/core/' + 'long-directory/'.repeat(10) + '中文.js';
@@ -68,21 +69,21 @@ test('complete release includes the system and empty user skeleton, excluding pr
   assert.equal(installedManifest(result.template).core.revision, git(f.root, ['rev-parse', 'HEAD']));
   assert.equal(installedManifest(result.template).product, 'ksf-core');
   assert.equal(installedManifest(result.template).name, 'ksf-core');
-  assert.equal(lstatSync(join(result.template, '.agents/bin/ksf')).mode & 0o777, 0o755);
+  assert.equal(lstatSync(join(result.template, '.agents/ksf')).mode & 0o777, 0o755);
   const coreEntries = inspectCoreArchive(readFileSync(join(result.output, result.index.platforms['darwin-arm64'].core.name))).entries;
-  assert.ok([...coreEntries.keys()].every(path => path === 'AGENTS.md' || path === '.agents/bin/ksf' || path.startsWith('.agents/core/')));
+  assert.ok([...coreEntries.keys()].every(path => path === 'AGENTS.md' || path === '.agents/ksf' || path === '.agents/ksf.ps1' || path.startsWith('.agents/core/')));
 });
 test('a custom-named user instance starts and upgrades independently of its template name', async t => {
   const f = await distributionFixture(t), next = await f.next();
   const instance = join(f.directory, '我的个人资料 实例');
   cpSync(f.first.template, instance, { recursive: true });
   writeAtomic(join(instance, '知识/private.md'), 'FICTIONAL_PRIVATE');
-  const launched = spawnSync('/bin/sh', [join(instance, '.agents/bin/ksf'), 'hello', '--json'], {
+  const launched = spawnSync('/bin/sh', [join(instance, '.agents/ksf'), 'hello', '--json'], {
     cwd: f.directory, encoding: 'utf8', timeout: 20000, env: { ...process.env, PATH: '', KSF_SKIP_AUTO_UPDATE: '1' },
   });
   assert.equal(launched.status, 0, launched.stderr);
   assert.equal(JSON.parse(launched.stdout).runtime.ksfRoot.replace(/\/$/, ''), realpathSync(instance));
-  await systemUpdate({ root: instance, from: next.coreArchive });
+  await systemUpdate({ root: instance, from: next.coreArchive, api: new ForkAPI({ coreRoot: f.root }) });
   assert.equal(installedManifest(instance).version, '0.1.1');
   assert.equal(readFileSync(join(instance, '知识/private.md'), 'utf8'), 'FICTIONAL_PRIVATE');
 });

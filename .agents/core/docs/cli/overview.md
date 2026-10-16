@@ -1,7 +1,7 @@
 ---
 type: cli-reference
 status: active
-reviewed_for: "0.1.1"
+reviewed_for: "0.1.0"
 updated: 2026-10-16
 ---
 
@@ -9,32 +9,35 @@ updated: 2026-10-16
 
 文档导航见 [CLI 命令索引](index.md)；后续接口设计遵循 [CLI 命令设计规范](../CLI命令设计规范.md)。本文记录当前已实现行为。
 
+启动器、CLI 服务分层、runtime-data、user-data 及构建发行的关系见[系统基础架构](../system/README.md)。
+
 KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript 测试、项目基础管理、Markdown 元数据、四类能力对象管理与能力上下文组织能力。本文件作为 CLI 能力总入口，记录可执行命令、输入输出、文件影响和实现范围。新增命令或改变行为时，在这里同步更新，再链接到对应的实现说明。
 
-项目筛选、知识读取及已授权资产维护由 ksf-assistant 的三项运行基本功组织，使用 project 等现有 CLI 与宿主文件工具，见[最小运行闭环](../runtime/minimal-runtime.md)。项目 CLI 不代替 Agent 的归属判断，也不提供自动项目绑定、知识语义索引或跨文件事务服务；运行基本功纳入固定系统对象保护。
+项目筛选、知识读取及已授权资产维护由 ksf-runtime 的三项运行基本功组织，使用 project 等现有 CLI 与宿主文件工具，见[最小运行闭环](../runtime/minimal-runtime.md)。项目 CLI 不代替 Agent 的归属判断，也不提供自动项目绑定、知识语义索引或跨文件事务服务；运行基本功纳入固定系统对象保护。
 
-当前 KSF 系统版本为 `0.1.1`，随包 Node.js 为 `24.21.0`。版本事实以 [manifest.yaml](../../manifest.yaml) 为准。当前已随包提供并验证的平台是 **macOS ARM64**；macOS x64 仅有平台识别和构建描述支持，尚未提供对应包；Windows 和 Linux 启动入口尚未实现。
+KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js 当前为 `24.21.0`。当前已随包提供并验证的平台是 **macOS ARM64**；macOS x64 仅有平台识别和构建描述支持，尚未提供对应包；Windows 已提供 PowerShell 5.1 入口的独立恢复和 Core 转交契约，Windows bootstrap、Node 包及业务命令尚未接入；Linux 尚未支持。
 
 ## 调用入口
 
 以下命令在 `ksf-core` 仓库根目录执行：
 
 ```sh
-.agents/bin/ksf --help
-.agents/bin/ksf hello --json
+.agents/ksf --help
+.agents/ksf hello --json
 ```
 
-从其他目录调用时，使用该入口的绝对路径。当前没有安装全局 `ksf` 命令或别名，也不要求预装 Node.js、npm 或 Python。首次启动使用 macOS 自带工具校验和解压仓库中的 Node.js 包，不额外联网下载。
+从其他目录调用时，使用该入口的绝对路径。本文命令示例采用 macOS Shell 入口；Windows 入口、可用范围及转交契约见[启动入口](../../runtime/launcher.md)。当前没有安装全局 `ksf` 命令或别名，也不要求预装 Node.js、npm 或 Python。首次启动使用 macOS 自带工具校验和解压仓库中的 Node.js 包，不额外联网下载。
 
-发行工作区统一调用 `.agents/bin/ksf`。固定入口先恢复中断升级，普通业务启动按间隔检查 Release 并尝试更新；离线仍可使用已有版本。开发仓库不自动升级。只读/预览业务可能经过运行时准备，但 release/system/contribute 命令不会嵌套触发自动升级。协议和文件归属见[发行说明](../distribution.md)。
+发行工作区统一调用 `.agents/ksf`。固定入口先恢复已发起的中断事务；启动和普通命令不检查远程版本或安装更新，升级只能显式发起。只读/预览命令仍可能准备本地随包运行时。KSF 生命周期由 ksf-maintainer 及四项维护基本功承接，协议和文件归属见[发行说明](../distribution.md)。
 
-进入业务命令前，所有调用都会经过启动准备，包括帮助命令和测试命令。因此，首次调用或运行时需要修复时，可能先写入 `.agents/runtime-data/runtime/`。命令表中的文件影响指命令自身的行为，不包含这项共同的启动准备。
+除无需 Core/Node 的 `launcher recover` 外，其他调用都会经过启动准备，包括帮助命令和测试命令。因此，首次调用或运行时需要修复时，可能先写入 `.agents/runtime-data/runtime/`。命令表中的文件影响指命令自身的行为，不包含这项共同的启动准备。
 
 ## 已实现命令总表
 
 | 命令 | 能力 | 支持 JSON | 命令自身的文件影响 |
 | --- | --- | --- | --- |
 | 无参数、`--help`、`-h` | 显示帮助和当前命令列表 | 否 | 无 |
+| `launcher recover` | 固定入口独立恢复中断事务，无需 Core 或 Node | 否 | 按事务恢复系统并归档；无事务时不写入 |
 | `hello` | 输出 `Hello, KSF!`，检查调用链是否可用 | 是，`hello --json` | 无 |
 | `runtime verify` | 完整验证随包压缩包及已安装 Node；损坏时可重新准备 | 是，`runtime verify --json` | 可能更新安装记录或修复运行时 |
 | `build` | 校验构建输入和各平台包，生成 manifest | 是，`build --json` | 原子替换 `.agents/core/manifest.yaml` |
@@ -43,7 +46,8 @@ KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript �
 | `project list/read/write/remove/check` | 项目根卡与目录的基础管理 | 是 | write 创建或更新根卡；remove 删除整个项目目录；修改支持预览 |
 | `release build/publish/template/mirror` | 构建完整包、Core 更新包，发布 Release 和模板 | 是 | build 写指定输出；发布写远程；修改支持预览 |
 | `system read/check/update/sync/rollback` | 安装版版本、Release 升级、恢复及回滚 | 是 | update/rollback 修改系统并保留备份；sync 记录检查；支持预览 |
-| `contribute prepare/read/submit` | 选定系统差异的审查和干净 Core PR | 是 | prepare 写本机计划；submit 明确发布审查内容；支持预览 |
+| `contribute prepare/read/submit` | HEAD 已提交系统差异的审查和干净 Core PR | 是 | prepare 读取 HEAD 及固定远程原版并提示既往 PR；submit 核对基线与重复内容后发布；未提交内容忽略 |
+| `user-data list/read/write/remove/check` | KSF 系统级用户数据；支持 settings 和 identity | 是 | 写入用户专属目录；支持预览和 etag 冲突检查 |
 | `metadata read/write/remove/check` | 任意 Markdown 的 YAML frontmatter 管理 | 是，各操作支持 --json | write/remove 可能更新明确指定文件，支持 --dry-run |
 | `workflow / partner / competency / data-package` | 各自提供 list/read/write/remove/check | 是 | 只写用户对象；首次修改系统对象派生完整目录；删除包含附件及基线；支持预览 |
 
@@ -54,9 +58,9 @@ KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript �
 ### 帮助
 
 ```sh
-.agents/bin/ksf
-.agents/bin/ksf --help
-.agents/bin/ksf -h
+.agents/ksf
+.agents/ksf --help
+.agents/ksf -h
 ```
 
 三种调用都输出帮助文本。普通启动依赖合法的 manifest；manifest 缺失或损坏时，帮助命令也可能在启动阶段失败，此时使用 `build` 重建。
@@ -64,8 +68,8 @@ KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript �
 ### Hello World
 
 ```sh
-.agents/bin/ksf hello
-.agents/bin/ksf hello --json
+.agents/ksf hello
+.agents/ksf hello --json
 ```
 
 普通输出为 `Hello, KSF!`。JSON 输出的字段如下；示例中的路径是占位值：
@@ -115,8 +119,8 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ### 完整校验
 
 ```sh
-.agents/bin/ksf runtime verify
-.agents/bin/ksf runtime verify --json
+.agents/ksf runtime verify
+.agents/ksf runtime verify --json
 ```
 
 即使已有可用安装，这个命令仍计算压缩包和 Node 的 SHA256，并要求 Node 返回声明的精确版本。Node 损坏时可以重新准备；压缩包缺失或与声明不符时会报错。
@@ -126,8 +130,8 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ## 构建 manifest
 
 ```sh
-.agents/bin/ksf build
-.agents/bin/ksf build --json
+.agents/ksf build
+.agents/ksf build --json
 ```
 
 构建输入在 [build.json](../../build.json)，生成结果在 [manifest.yaml](../../manifest.yaml)。配置中维护 KSF 版本、精确 Node 版本、平台包路径和可信的官方压缩包 SHA256；可执行文件的 SHA256、构建时间和源码信息由脚本计算。manifest 不由 Agent 填写，也不手工修改。
@@ -157,7 +161,7 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ## JavaScript 测试
 
 ```sh
-.agents/bin/ksf test
+.agents/ksf test
 ```
 
 入口先准备随包 Node，再使用同一个可执行文件运行内置 `node:test`。测试结果直接输出，失败退出码会传回调用方；当前不支持 `test --json` 或附加测试参数。
@@ -184,10 +188,10 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ## 项目基础管理
 
 ```sh
-.agents/bin/ksf project list --json
-.agents/bin/ksf project read "KSF运行机制测试" --part all --json
-.agents/bin/ksf project write "新项目" --data '{"body":"# 新项目\n\n项目目标。\n"}' --dry-run --json
-.agents/bin/ksf project check --json
+.agents/ksf project list --json
+.agents/ksf project read "KSF运行机制测试" --part all --json
+.agents/ksf project write "新项目" --data '{"body":"# 新项目\n\n项目目标。\n"}' --dry-run --json
+.agents/ksf project check --json
 ```
 
 项目目标是 `项目/` 下的单层目录名，根卡为普通 Markdown。list 返回浅层摘要，read 按 metadata/body/all 读取；write 以 metadata/body 信封创建或更新根卡，新建必须提供 body。元数据按顶层合并，提供 body 时整体替换正文，其他资料不动。remove 会删除整个指定项目目录，支持预览。check 检查路径、编码和 frontmatter，不验证业务内容或链接。完整参数、异常、锁和文件影响见 [project 命令说明](project.md)。
@@ -195,10 +199,10 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ## Markdown 元数据管理
 
 ```sh
-.agents/bin/ksf metadata read notes.md --fields title tags --json
-.agents/bin/ksf metadata write notes.md --data '{"title":"设计笔记"}' --dry-run --json
-.agents/bin/ksf metadata remove notes.md --fields obsolete draft --json
-.agents/bin/ksf metadata check notes.md --json
+.agents/ksf metadata read notes.md --fields title tags --json
+.agents/ksf metadata write notes.md --data '{"title":"设计笔记"}' --dry-run --json
+.agents/ksf metadata remove notes.md --fields obsolete draft --json
+.agents/ksf metadata check notes.md --json
 ```
 
 文件参数及 --from 的相对路径基于 KSF 根目录，绝对路径直接使用。支持普通 YAML 字段映射，保留 Markdown 正文；不是对象契约校验或知识整理命令。完整规则、文件影响、限制、JSON 字段和错误码见 [metadata 命令说明](metadata.md)。
@@ -208,9 +212,9 @@ project、context、metadata 与四类对象的业务成功与失败 JSON 都进
 ## 四类能力对象
 
 ```sh
-.agents/bin/ksf workflow list --json
-.agents/bin/ksf partner read partner.ksf.object-designer --part all --json
-.agents/bin/ksf competency check competency.ksf.partner-design --json
+.agents/ksf workflow list --json
+.agents/ksf partner read partner.ksf.object-designer --part all --json
+.agents/ksf competency check competency.ksf.partner-design --json
 ```
 
 四类对象共用 list/read/write/remove/check。默认 source=effective，用户 draft/active 接管同 ID 系统定义，archived 退出接管；精确 id@version 优先匹配用户版本，再匹配系统版本。固定入口链始终使用指定系统定义。
@@ -222,13 +226,13 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 ## 能力上下文
 
 ```sh
-.agents/bin/ksf context capabilities
-.agents/bin/ksf context capabilities --json
+.agents/ksf context capabilities
+.agents/ksf context capabilities --json
 ```
 
-一次组织全部有效 Workflow、Partner 的名称、原始 description、ID、定义路径和固定入口标记，按两类分组。覆盖、归档及身份解析由对象服务处理；不提供来源筛选，不改写摘要或展开正文。固定入口保留，task-route 在下游匹配时排除。
+一次组织全部有效 Workflow、Partner 的名称、原始 description、ID、定义路径和固定入口标记，按两类分组。覆盖、归档及身份解析由对象服务处理；不提供来源筛选，不改写摘要或展开正文。固定入口保留，ability-route 在下游匹配时排除。
 
-各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，工作流优先、搭档兜底及默认 Agent 承接仍由 task-route 判断。完整协议见 [context](context.md)。
+各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，工作流优先、搭档兜底及默认 Agent 承接仍由 ability-route 判断。完整协议见 [context](context.md)。
 
 ## 输出和错误处理
 
@@ -277,7 +281,7 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 
 | 位置 | 用途 | 维护方式 |
 | --- | --- | --- |
-| [程序入口](../../../bin/ksf) | 定位根目录，调用 bootstrap 和随包 Node | 程序源码 |
+| [程序入口](../../../ksf) | 定位根目录，调用 bootstrap 和随包 Node | 程序源码 |
 | [CLI 源码](../../runtime/src/cli.js) | 命令分发、结果输出和退出码 | 程序源码 |
 | [构建配置](../../build.json) | 维护版本和可信包声明 | 构建输入 |
 | [manifest](../../manifest.yaml) | 当前发行的运行声明和构建元数据 | `ksf build` 生成 |
@@ -306,3 +310,7 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 新增命令或改变行为时，同步更新命令总表、参数和输出、文件影响、错误说明以及测试链接。将能力从“待实现”移入“已实现”之前，检查真实命令行为和相关测试；更新本文的审阅版本与日期。
 
 实现细节保留在源码、[bootstrap.md](../../runtime/bootstrap.md) 和 [build.md](../../runtime/build.md)，本文件维护调用者需要的完整能力入口。修改系统资产后通过 `ksf build` 刷新构建摘要，再按变更范围执行校验和测试。
+
+## 系统级用户数据
+
+`.agents/user-data/` 保存 KSF 程序自身的用户设置与必要状态，和本机 `.agents/runtime-data/` 分离。它随用户实例保留，Core 发行不复制个人值，升级与回滚不覆盖。正常工作产生的项目、任务记录、草稿、成果和知识仍在正常用户空间。settings 的更新检查间隔和请求超时供显式 system 操作使用；identity 保存用户自行填写的名称、邮箱和对象命名空间，仅做本地格式校验。普通启动不检查更新。接口与完整边界见 [user-data](user-data.md)。

@@ -62,17 +62,17 @@ read、write、remove、check 已实现，使用随包 Node.js 运行。本文�
 以下从仓库根目录通过程序入口调用；在其他目录使用入口的绝对路径，文件参数仍基于 KSF 根目录：
 
 ```sh
-.agents/bin/ksf metadata read notes.md --json
-.agents/bin/ksf metadata read notes.md --fields title
-.agents/bin/ksf metadata read notes.md --fields title tags --json
-.agents/bin/ksf metadata read notes.md --fields "display name" tags
-.agents/bin/ksf metadata write notes.md --data '{"title":"设计笔记"}'
-.agents/bin/ksf metadata write notes.md --data '{"title":"设计笔记","tags":["KSF"],"published":false}'
-.agents/bin/ksf metadata write notes.md --from metadata.json --dry-run
-.agents/bin/ksf metadata remove notes.md --fields obsolete
-.agents/bin/ksf metadata remove notes.md --fields obsolete draft --json
-.agents/bin/ksf metadata remove notes.md --all
-.agents/bin/ksf metadata check notes.md --json
+.agents/ksf metadata read notes.md --json
+.agents/ksf metadata read notes.md --fields title
+.agents/ksf metadata read notes.md --fields title tags --json
+.agents/ksf metadata read notes.md --fields "display name" tags
+.agents/ksf metadata write notes.md --data '{"title":"设计笔记"}'
+.agents/ksf metadata write notes.md --data '{"title":"设计笔记","tags":["KSF"],"published":false}'
+.agents/ksf metadata write notes.md --from metadata.json --dry-run
+.agents/ksf metadata remove notes.md --fields obsolete
+.agents/ksf metadata remove notes.md --fields obsolete draft --json
+.agents/ksf metadata remove notes.md --all
+.agents/ksf metadata check notes.md --json
 ```
 
 ### 更新与删除语义
@@ -301,9 +301,9 @@ FILE_LOCK_CLEANUP 是 stderr 清理诊断，不伪造业务错误码或撤销已
 
 2026-10-15，在 macOS ARM64、随包 Node.js v24.21.0 上完成：
 
-- `.agents/bin/ksf test`：78/78 通过，包含原有回归及 metadata 单元、文件发布、跨进程锁和 CLI 测试。
-- 真实 `.agents/bin/ksf metadata` 入口共 12 次调用：临时文件上验证预览、写入、读取、检查、多字段删除和整块移除；从其他工作目录调用，确认目标及 --from 相对路径基于 KSF 根。
+- `.agents/ksf test`：78/78 通过，包含原有回归及 metadata 单元、文件发布、跨进程锁和 CLI 测试。
+- 真实 `.agents/ksf metadata` 入口共 12 次调用：临时文件上验证预览、写入、读取、检查、多字段删除和整块移除；从其他工作目录调用，确认目标及 --from 相对路径基于 KSF 根。
 - 临时文件的 BOM 与正文原始字节保留；两份现有普通笔记仅执行检查和读取，操作前后内容哈希一致。
-- `.agents/bin/ksf runtime verify --json`：通过。
+- `.agents/ksf runtime verify --json`：通过。
 
 这些结果覆盖本机首版行为，不代表其他平台或长期使用已验证。测试数据在独立临时目录中创建并清理。

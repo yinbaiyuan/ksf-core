@@ -1,18 +1,18 @@
 # system 命令
 
-已实现无 Git 工作区的版本检查、更新、自动同步和回滚。完整协议与恢复见[发行说明](../distribution.md)。
+已实现无 Git 工作区的版本检查、显式更新、手动同步和回滚。完整协议与恢复见[发行说明](../distribution.md)。
 
 | 调用 | 作用 |
 | --- | --- |
 | `system read` | 模式、版本、来源、系统改动和备份 |
 | `system check [--source <地址或索引文件>]` | 检查适用的新 Release |
-| `system update [--source <地址或索引文件> \| --from <Core包>] [--dry-run]` | 校验、合并、升级；from 支持离线包 |
-| `system sync [--quiet]` | 按间隔检查和升级，记录尝试结果 |
+| `system update [--source <地址或索引文件> \| --from <Core包>] [--dry-run]` | 校验、合并、升级；from 指定更新包 |
+| `system sync [--quiet]` | 仅显式调用时按间隔检查和升级，记录尝试结果 |
 | `system rollback [--dry-run]` | 恢复上次事务保存的系统 |
 
 各操作支持 json、单独 help。quiet 仅限 sync，与 json 互斥。source 与 from 互斥，不持久改变来源；文件按 KSF 根定位。接受 HTTPS、本地文件和 loopback HTTP；拒绝公开明文 HTTP、带凭据地址和降级重定向。
 
-read/check 不写业务目标。update 预览也下载、合并、验证候选，但不切换系统或建立正式备份。update 要求新版本；旧版本使用 rollback。开发仓库 read 返回 development，其余安装操作要求有效 release.json。
+read/check 不写业务目标。schema 4 实例的 read 会联网读取固定 Core 提交的文件树以比较差异，不查询新版；升级双方修改同一文本时按需读取并校验原文。联网是维护前提，读取失败保留当前系统。未发布的 development 小型凭据只返回身份，changes:null、baselineVerified:false、baselineStatus:development-package，不尝试把个人或未发布提交冒充远程原版；开发包仍不能贡献或正式升级。update 预览也下载、合并、验证候选，但不切换系统或建立正式备份。update 要求新版本；旧版本使用 rollback。开发仓库 read 返回 development，其余安装操作要求有效 release.json。
 
 ## 在用户实例里手动升级
 
@@ -23,14 +23,14 @@ read/check 不写业务目标。update 预览也下载、合并、验证候选�
 也可以在实例根目录依次执行：
 
 ```sh
-./.agents/bin/ksf system read --json
-./.agents/bin/ksf system check --json
-./.agents/bin/ksf system update --dry-run --json
-./.agents/bin/ksf system update --json
-./.agents/bin/ksf system read --json
+./.agents/ksf system read --json
+./.agents/ksf system check --json
+./.agents/ksf system update --dry-run --json
+./.agents/ksf system update --json
+./.agents/ksf system read --json
 ```
 
-`check` 的 `current` 是实例当前版本，`latest` 是公开发行版本，`available: true` 表示有适用的新版本；`available: false` 时无需执行升级。显式 `check` 和 `update` 不受每日自动检查间隔限制，可以立即检查刚发布的版本。
+`check` 的 `current` 是实例当前版本，`latest` 是公开发行版本，`available: true` 表示有适用的新版本；`available: false` 时无需执行升级。显式 `check` 和 `update` 不受 sync 的检查间隔限制，可以立即检查刚发布的版本。
 
 预览成功且 `conflicts` 为空时再执行实际升级；出现冲突时先检查返回的路径和内容，解决后重试。完成后以 `system read` 的 `version` 确认安装版本，并核对需要保留的个人文件。`.ksf-template.json` 记录初始模板出处，升级后仍可能保留初始版本。
 
@@ -38,10 +38,12 @@ read/check 不写业务目标。update 预览也下载、合并、验证候选�
 
 ## 输出与错误
 
-JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失败 1、参数错误 2。update 提供 current/latest、changed、changes、conflicts 和 backup。UPDATE_CONFLICT 时 data 保留冲突内容。自动 quiet 提示写 stderr，不混入业务 stdout。
+JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失败 1、参数错误 2。update 提供 current/latest、changed、changes、conflicts 和 backup。UPDATE_CONFLICT 时 data 保留冲突内容。sync 的 quiet 提示写 stderr，不混入业务 stdout；失败不宣称现有系统必然可用。
 
-错误包括 DOWNLOAD_FAILED、RELEASE_NOT_FOUND、CHECKSUM_MISMATCH、RELEASE_INVALID、RELEASE_REPLACED、VERSION_NOT_NEWER、UPDATE_CONFLICT、CANDIDATE_INVALID、SYSTEM_CHANGED、UPDATE_BUSY、BACKUP_MISSING、ROLLBACK_LOCAL_CHANGES。
+错误包括 BASELINE_UNVERIFIED、BASELINE_MISMATCH、DOWNLOAD_FAILED、RELEASE_NOT_FOUND、CHECKSUM_MISMATCH、RELEASE_INVALID、RELEASE_REPLACED、VERSION_NOT_NEWER、UPDATE_CONFLICT、CANDIDATE_INVALID、SYSTEM_CHANGED、UPDATE_BUSY、BACKUP_MISSING、ROLLBACK_LOCAL_CHANGES。
 
-升级只管理系统文件和本机事务，不写个人目录、Git 配置或忽略规则。固定启动器先恢复中断，再启动 Node；不撤销活跃事务。默认每天自动检查一次，失败也缓存；离线时业务继续。显式操作按实际结果退出。开发包不自动升级。
+升级只管理系统文件和本机事务，不写个人目录、Git 配置或忽略规则。固定启动器先按协议 1 恢复中断，再交给 Core 准备运行时；不撤销活跃事务。启动和普通命令不检查更新或安装。sync 仅显式调用时使用间隔缓存，失败也记录；read 的 automaticUpdates 固定为 false。KSF_SKIP_AUTO_UPDATE 是无作用兼容项。显式操作按实际结果退出。
+
+入口独立恢复可调用 `ksf launcher recover`，不需要 Core 或 Node。协议、并发改动保护与 Windows 范围见[启动入口](../../runtime/launcher.md)。
 
 实现 system.js、network.js 和模板固定启动器；system-update.test.js 覆盖合并、回滚、故障注入和真实 SIGKILL，release-network.test.js 使用真实本机 HTTP。

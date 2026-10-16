@@ -1,0 +1,100 @@
+#!/bin/sh
+# Launcher protocol 1. Recovery must work without Core or its runtime.
+set -eu
+PATH=${PATH:-/usr/bin:/bin}
+export PATH
+case "$0" in */*) ksf_launcher_dir=${0%/*} ;; *) ksf_launcher_dir=. ;; esac
+KSF_ROOT=$(CDPATH= cd "$ksf_launcher_dir/.." && pwd -P)
+export KSF_ROOT
+
+ksf_launcher_fail() { printf 'KSF launcher error [%s]: %s\n' "$1" "$2" >&2; exit 1; }
+ksf_guard_path() { [ ! -L "$1" ] || ksf_launcher_fail UNSAFE_PATH "Symbolic link: $1"; }
+for ksf_path in .agents .agents/ksf .agents/ksf.ps1 .agents/core .agents/runtime-data .agents/runtime-data/system; do
+  ksf_guard_path "$KSF_ROOT/$ksf_path"
+done
+
+# Release the recovery lock before loading Core, including on error.
+ksf_recover() (
+  ksf_system="$KSF_ROOT/.agents/runtime-data/system"
+  ksf_transaction="$ksf_system/transaction"
+  ksf_guard_path "$ksf_transaction"
+  [ -d "$ksf_transaction" ] || exit 0
+  ksf_lock="$ksf_system/recovery.lock"
+  ksf_temporary=''
+  ksf_guard_path "$ksf_lock"
+  [ -x /usr/bin/shlock ] || ksf_launcher_fail LOCK_UNAVAILABLE 'Recovery requires the native shlock utility.'
+  /usr/bin/shlock -f "$ksf_lock" -p "$$" || ksf_launcher_fail RECOVERY_BUSY 'Another recovery is running; retry after it finishes.'
+  trap 'rm -f "$ksf_lock"; [ -z "$ksf_temporary" ] || rm -f "$ksf_temporary"' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM HUP
+  [ -d "$ksf_transaction" ] || exit 0
+  [ -z "$(find "$ksf_transaction" -type l -print -quit)" ] || ksf_launcher_fail UNSAFE_PATH 'The recovery journal contains a symbolic link.'
+  [ "$(cat "$ksf_transaction/protocol" 2>/dev/null || true)" = 1 ] || ksf_launcher_fail RECOVERY_PROTOCOL 'Unknown or missing recovery protocol; preserve the transaction for repair.'
+  ksf_owner=$(cat "$ksf_transaction/owner" 2>/dev/null || true)
+  ksf_owner_start=$(cat "$ksf_transaction/owner.start" 2>/dev/null || true)
+  case "$ksf_owner" in ''|*[!0-9]*) ksf_launcher_fail JOURNAL_INVALID 'Invalid transaction owner.' ;; esac
+  [ "$ksf_owner" -gt 0 ] && [ -n "$ksf_owner_start" ] || ksf_launcher_fail JOURNAL_INVALID 'Missing transaction owner identity.'
+  if kill -0 "$ksf_owner" 2>/dev/null; then
+    ksf_actual_start=$(/bin/ps -p "$ksf_owner" -o lstart= 2>/dev/null | /usr/bin/awk '{$1=$1; print}')
+    [ "$ksf_actual_start" != "$ksf_owner_start" ] || ksf_launcher_fail UPDATE_BUSY 'A system update is running; retry after it finishes.'
+  fi
+  ksf_name=$(cat "$ksf_transaction/name" 2>/dev/null || true)
+  case "$ksf_name" in ''|[!A-Za-z0-9]*|*[!A-Za-z0-9._-]*) ksf_launcher_fail JOURNAL_INVALID 'Invalid transaction name.' ;; esac
+  if [ -f "$ksf_transaction/committed" ]; then
+    ksf_archive="$ksf_system/backups"
+  else
+    ksf_archive="$ksf_system/failed"
+  fi
+  ksf_guard_path "$ksf_archive"
+  mkdir -p "$ksf_archive"
+  ksf_guard_path "$ksf_archive/$ksf_name"
+  [ ! -e "$ksf_archive/$ksf_name" ] || ksf_launcher_fail RECOVERY_CONFLICT 'Transaction archive already exists.'
+  if [ ! -f "$ksf_transaction/committed" ]; then
+    # Validate every affected root before restoring anything. A root must still
+    # equal its old or intended-new snapshot; unrelated edits must survive.
+    for ksf_file in AGENTS.md .agents/ksf .agents/ksf.ps1; do
+      [ -f "$ksf_transaction/root-intent/$ksf_file" ] || continue
+      ksf_guard_path "$KSF_ROOT/$ksf_file"
+      [ -f "$ksf_transaction/old-root/$ksf_file" ] && [ -f "$ksf_transaction/new-root/$ksf_file" ] || ksf_launcher_fail JOURNAL_INVALID 'Missing root snapshots.'
+      if ! cmp -s "$KSF_ROOT/$ksf_file" "$ksf_transaction/old-root/$ksf_file" && ! cmp -s "$KSF_ROOT/$ksf_file" "$ksf_transaction/new-root/$ksf_file"; then
+        ksf_launcher_fail RECOVERY_CONFLICT "Concurrent edit at $ksf_file; files and transaction were preserved."
+      fi
+    done
+    if [ -d "$ksf_transaction/old-core" ]; then
+      if [ -e "$KSF_ROOT/.agents/core" ]; then
+        [ ! -e "$ksf_transaction/failed-core" ] || ksf_launcher_fail RECOVERY_CONFLICT 'Both live and failed Core exist.'
+        mv "$KSF_ROOT/.agents/core" "$ksf_transaction/failed-core"
+      fi
+      mv "$ksf_transaction/old-core" "$KSF_ROOT/.agents/core"
+    fi
+    for ksf_file in AGENTS.md .agents/ksf .agents/ksf.ps1; do
+      [ -f "$ksf_transaction/root-intent/$ksf_file" ] || continue
+      cmp -s "$KSF_ROOT/$ksf_file" "$ksf_transaction/old-root/$ksf_file" && continue
+      ksf_temporary=$(mktemp "$KSF_ROOT/$ksf_file.recover.XXXXXXXX")
+      cp -p "$ksf_transaction/old-root/$ksf_file" "$ksf_temporary"
+      mv "$ksf_temporary" "$KSF_ROOT/$ksf_file"
+      ksf_temporary=''
+    done
+  fi
+  mv "$ksf_transaction" "$ksf_archive/$ksf_name"
+  [ "$ksf_archive" != "$ksf_system/failed" ] || printf 'KSF: recovered the previous system after an interrupted update.\n' >&2
+)
+ksf_recover
+
+# This maintenance operation deliberately needs neither Core nor Node.
+if [ "${1:-}" = launcher ]; then
+  if [ "$#" = 2 ] && [ "$2" = recover ]; then exit 0; fi
+  printf 'Usage: ksf launcher recover\n' >&2; exit 2
+fi
+export KSF_INSTALLED_LAUNCHER=1 KSF_LAUNCHER_PROTOCOL=1
+mkdir -p "$KSF_ROOT/.agents/runtime-data"
+ksf_guard_path "$KSF_ROOT/.agents/runtime-data/.gitignore"
+if [ ! -e "$KSF_ROOT/.agents/runtime-data/.gitignore" ]; then
+  (set -C; printf '*\n' > "$KSF_ROOT/.agents/runtime-data/.gitignore") 2>/dev/null || true
+fi
+ksf_bootstrap="$KSF_ROOT/.agents/core/runtime/bootstrap.sh"
+for ksf_path in .agents/core/runtime .agents/core/runtime/bootstrap.sh; do ksf_guard_path "$KSF_ROOT/$ksf_path"; done
+[ -f "$ksf_bootstrap" ] || ksf_launcher_fail BOOTSTRAP_MISSING 'Core bootstrap.sh is missing; restore a complete system package.'
+. "$ksf_bootstrap"
+command -v ksf_bootstrap_main >/dev/null 2>&1 || ksf_launcher_fail BOOTSTRAP_INVALID 'Core must define ksf_bootstrap_main.'
+ksf_bootstrap_main "$@"

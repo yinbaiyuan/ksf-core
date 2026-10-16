@@ -59,7 +59,7 @@
 
 **反例情境**：某项目本周采用了新的交付日期，这属于项目事实；仅凭可能被 AI 读取，不构成知识或能力对象的创建理由。
 
-知识内容主要位于 `知识/`，保持普通 Markdown，不注册成能力对象，也不直接套用运行对象的版本与引用契约。名称、摘要和主题等元数据可帮助发现，但不强制每篇补齐一套模板。`知识/用户画像.md` 是可选配置的短卡入口，由用户维护身份和默认协作约定；ksf-assistant 在首次进入当前 KSF 时读取已配置短卡，未配置时正常运行，系统包不预填私人内容。加载、覆盖与迁移边界见[用户协作约定](../runtime/user-collaboration.md)。
+知识内容主要位于 `知识/`，保持普通 Markdown，不注册成能力对象，也不直接套用运行对象的版本与引用契约。名称、摘要和主题等元数据可帮助发现，但不强制每篇补齐一套模板。`知识/用户画像.md` 是可选配置的短卡入口，由用户维护身份和默认协作约定；ksf-runtime 在首次进入当前 KSF 时读取已配置短卡，未配置时正常运行，系统包不预填私人内容。加载、覆盖与迁移边界见[用户协作约定](../runtime/user-collaboration.md)。
 
 最小发现、来源检查与渐进读取由 [knowledge-route](../../abilities/competencies/knowledge-route/competency.md)持有；已授权维护由 [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md)处理。当前由 Agent 使用文件检索、现有 metadata CLI 与宿主编辑工具执行，没有专用知识管理命令或全库语义索引。更完整的主题组织与机器契约按实际需求另行设计。
 

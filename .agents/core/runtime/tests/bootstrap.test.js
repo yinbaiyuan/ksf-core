@@ -20,9 +20,9 @@ class Fixture {
   constructor() {
     this.root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf runtime 测试 ')));
     this.children = new Set();
-    this.launcher = join(this.root, '.agents/bin/ksf');
+    this.launcher = join(this.root, '.agents/ksf');
     mkdirSync(dirname(this.launcher), { recursive: true });
-    copyFileSync(join(repo, '.agents/bin/ksf'), this.launcher);
+    copyFileSync(join(repo, '.agents/ksf'), this.launcher);
     chmodSync(this.launcher, 0o755);
     mkdirSync(this.path('.agents/core/runtime/src'), { recursive: true });
     writeFileSync(this.path('.agents/core/runtime/src/cli.js'), '// fixture business entry\n');

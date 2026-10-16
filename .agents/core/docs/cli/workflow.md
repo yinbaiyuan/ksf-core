@@ -11,13 +11,13 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf workflow --help
-.agents/bin/ksf workflow list --source all --json
-.agents/bin/ksf workflow read workflow.yinchao.sample --part metadata --json
-.agents/bin/ksf workflow read workflow.yinchao.sample@0.1.0 --part body --source user --json
-.agents/bin/ksf workflow check workflow.yinchao.sample --json
-.agents/bin/ksf workflow write workflow.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
-.agents/bin/ksf workflow remove workflow.yinchao.sample --dry-run --json
+.agents/ksf workflow --help
+.agents/ksf workflow list --source all --json
+.agents/ksf workflow read workflow.yinchao.sample --part metadata --json
+.agents/ksf workflow read workflow.yinchao.sample@0.1.0 --part body --source user --json
+.agents/ksf workflow check workflow.yinchao.sample --json
+.agents/ksf workflow write workflow.yinchao.sample --data '{"metadata":{"name":"示例","description":"说明用途、结果与边界","status":"draft","version":"0.1.0"},"body":"# 示例定义\n"}' --dry-run --json
+.agents/ksf workflow remove workflow.yinchao.sample --dry-run --json
 ```
 
 示例 ID 为占位用法；不存在的 read/check/remove 报错。去掉 --dry-run 后才实际创建、修改或物理删除整个用户目录。read 默认 --part all，--source 默认 effective；list 返回摘要，不能把列举成功当作正文已读取。

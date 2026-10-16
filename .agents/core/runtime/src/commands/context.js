@@ -6,7 +6,7 @@ export function contextHelp(operation) {
     '  ksf context capabilities [--json]\n\n' +
     'Return all effective workflow and partner discovery descriptions, workflows first.\n' +
     'Descriptions are preserved; bodies and related resources are not included.\n' +
-    'Fixed entries remain marked. task-route owns matching and fallback decisions.\n' +
+    'Fixed entries remain marked. ability-route owns matching and fallback decisions.\n' +
     'Partial results remain available with exit 1; invalid arguments return exit 2.\n' +
     'Use --help or -h alone at either level to show help.\n';
 }

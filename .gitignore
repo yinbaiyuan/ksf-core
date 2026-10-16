@@ -4,12 +4,14 @@
 !/.gitignore
 !/AGENTS.md
 !/README.md
+!/.gitattributes
 !/.github/
 !/.agents/
 
-# .agents 只收录固定入口和可升级系统；runtime-data 等本机数据不入库。
+# .agents 只收录固定入口和可升级系统；user-data 属于用户实例，runtime-data 属于本机，均不进入 Core。
 /.agents/*
-!/.agents/bin/
+!/.agents/ksf
+!/.agents/ksf.ps1
 !/.agents/core/
 
 # 仅在发行包中生成的来源与升级基线，不作为 Core 源码提交。

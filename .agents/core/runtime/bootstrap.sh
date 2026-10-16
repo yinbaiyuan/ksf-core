@@ -1,4 +1,4 @@
-# Loaded by .agents/bin/ksf; no Node.js or package manager is needed here.
+# Loaded by .agents/ksf; no Node.js or package manager is needed here.
 
 ksf_fail() {
   printf 'KSF runtime error [%s]: %s\n' "$1" "$2" >&2
@@ -255,4 +255,12 @@ ksf_prepare_runtime() {
     export KSF_BOOTSTRAP_VERIFIED
   fi
   trap - EXIT INT TERM HUP
+}
+
+# Stable launcher protocol 1 delegates all normal-command policy to Core.
+ksf_bootstrap_main() {
+  ksf_prepare_runtime "$@"
+  # Version checks and installation require an explicit system command.
+  # KSF_SKIP_AUTO_UPDATE remains accepted for compatibility but has no effect.
+  exec "$KSF_NODE" "$KSF_CLI" "$@"
 }

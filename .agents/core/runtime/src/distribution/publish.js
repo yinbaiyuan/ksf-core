@@ -1,7 +1,7 @@
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { configuration, fail, parseJSON, readRegular, sha256, stableJSON, validateManifest, validateProducts, writeAtomic, installedManifest } from './common.js';
+import { configuration, fail, parseJSON, readRegular, sha256, stableJSON, validateManifest, releaseReceipt, validateProducts, writeAtomic, installedManifest, compareVersions, isRevision } from './common.js';
 import { inspectCoreArchive, userDirectories } from './release.js';
 import { readArchive } from './archive.js';
 import { GitHubAPI, treeFromChanges } from './github.js';
@@ -25,14 +25,18 @@ export function inspectReleaseDirectory(root, directory) {
         core = inspectCoreArchive(bytes, { expectedVersion: index.version, expectedPlatform: platform, expectedRepository: config.core_repository });
         if (core.manifest.core.revision !== index.core_revision || core.manifest.development) fail('RELEASE_INVALID', 'Artifact revision or development status differs from the index.');
       } else {
-        const entries = readArchive(bytes), extra = new Set(['README.md', '.gitignore', '.ksf-template.json', '.github/workflows/sync-template.yml', ...userDirectories.map(d => `${d}/.gitkeep`)]);
+        const entries = readArchive(bytes), extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', '.github/workflows/sync-template.yml', ...userDirectories.map(d => `${d}/.gitkeep`)]);
         if (entries.size !== core.entries.size + extra.size) fail('RELEASE_INVALID', 'Workspace contains unexpected files.');
         for (const [path, file] of entries) {
           const original = core.entries.get(path);
+          if (path === '.agents/core/release.json' && parseJSON(file.bytes, 'workspace receipt').schema_version === 4) {
+            if (file.mode !== original.mode || !file.bytes.equals(Buffer.from(stableJSON(releaseReceipt(core.manifest))))) fail('RELEASE_INVALID', 'Workspace receipt differs from the verified Core archive.');
+            continue;
+          }
           if (original ? !file.bytes.equals(original.bytes) || file.mode !== original.mode : !extra.has(path)) fail('RELEASE_INVALID', `Unexpected workspace file: ${path}.`);
           if (path.endsWith('/.gitkeep') && file.bytes.length !== 0) fail('RELEASE_INVALID', 'User-directory placeholders must be empty.');
         }
-        for (const path of ['README.md', '.gitignore']) {
+        for (const path of ['README.md', '.gitignore', '.gitattributes']) {
           if (!entries.get(path)?.bytes.equals(core.entries.get(`.agents/core/distribution/template/${path}`)?.bytes)) fail('RELEASE_INVALID', `Workspace template differs from its source: ${path}.`);
         }
         const workflow = core.entries.get('.agents/core/distribution/template-workflow.yml')?.bytes.toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository);
@@ -65,8 +69,13 @@ async function templateFromBundle(bundle, api) {
   const branch = repository.default_branch || 'main';
   const head = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
   if (!created) {
-    const marker = await api.request('GET', `/repos/${config.template_repository}/contents/.ksf-template.json?ref=${encodeURIComponent(branch)}`, undefined, { optional: true });
-    if (!marker || parseJSON(Buffer.from(marker.content ?? '', 'base64'), 'remote template provenance').generated_from !== config.core_repository) fail('TEMPLATE_NOT_GENERATED', 'The target repository is not a generated KSF template; it will not be overwritten.');
+    // Read provenance at the observed commit, not a branch that can move mid-check.
+    const marker = await api.request('GET', `/repos/${config.template_repository}/contents/.ksf-template.json?ref=${head.object.sha}`, undefined, { optional: true });
+    const provenance = marker && parseJSON(Buffer.from(marker.content ?? '', 'base64'), 'remote template provenance');
+    if (!provenance || provenance.generated_from !== config.core_repository || !isRevision(provenance.revision) || typeof provenance.version !== 'string') fail('TEMPLATE_NOT_GENERATED', 'The target repository lacks valid generated-template provenance; it will not be overwritten.');
+    const comparison = compareVersions(index.version, provenance.version);
+    if (comparison < 0) fail('TEMPLATE_VERSION_OLDER', 'An older release cannot overwrite a newer remote template.');
+    if (comparison === 0 && index.core_revision !== provenance.revision) fail('TEMPLATE_VERSION_CONFLICT', 'The remote template has the same version from a different Core revision.');
   }
   const changes = [...workspace.entries.values()].map(entry => ({ path: entry.path, content: entry.bytes.toString('base64'), mode: entry.mode }));
   const tree = await treeFromChanges(api, config.template_repository, changes);
@@ -76,6 +85,8 @@ async function templateFromBundle(bundle, api) {
     commit = (await api.request('POST', `/repos/${config.template_repository}/git/commits`, {
       message: `Release ${products.workspace} ${index.version} (${workspace.platform})`, tree: tree.sha, parents: [head.object.sha],
     })).sha;
+    const latest = await api.request('GET', `/repos/${config.template_repository}/git/ref/heads/${encodeURIComponent(branch)}`);
+    if (latest.object.sha !== head.object.sha) fail('TEMPLATE_CHANGED', 'The template branch changed during preparation; inspect it and retry.');
     await api.request('PATCH', `/repos/${config.template_repository}/git/refs/heads/${encodeURIComponent(branch)}`, { sha: commit, force: false });
   }
   if (!repository.is_template) await api.request('PATCH', `/repos/${config.template_repository}`, { is_template: true });
@@ -129,8 +140,10 @@ export async function mirrorTemplate({ root, source, dryRun = false, api, fetche
   const config = configuration(root), current = installedManifest(root), selectedSource = source ?? config.release_source;
   const downloaded = await releaseIndex(selectedSource, { fetcher, timeout: config.request_timeout_seconds * 1000 });
   validateIndex(downloaded.index, current);
-  if (downloaded.index.version === current.version && downloaded.index.core_revision === current.core.revision) {
-    return { changed: false, skipped: 'up-to-date', product: products.workspace, instanceDefaultName: products.instance, version: current.version, repository: config.template_repository };
+  const comparison = compareVersions(downloaded.index.version, current.version);
+  if (comparison === 0 && downloaded.index.core_revision !== current.core.revision) fail('RELEASE_REPLACED', 'The installed template version was republished from a different Core revision.');
+  if (comparison <= 0) {
+    return { changed: false, skipped: comparison < 0 ? 'older-release' : 'up-to-date', product: products.workspace, instanceDefaultName: products.instance, version: current.version, repository: config.template_repository };
   }
   const staging = mkdtempSync(join(tmpdir(), 'ksf-template-mirror-'));
   try {

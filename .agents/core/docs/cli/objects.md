@@ -12,7 +12,7 @@ ksf <类型> write <id> (--data JSON | --from 文件) [--dry-run] [--json]
 ksf <类型> remove <id> [--dry-run] [--json]
 ```
 
-示例中的 ksf 指 `.agents/bin/ksf`，不表示已安装全局命令。支持类型级、操作级 `--help`/`-h`。操作后的选项可以调整顺序，`--` 结束选项；未知、重复、缺值、互斥及当前操作不支持的选项均报错。不保留旧操作或别名。
+示例中的 ksf 指 `.agents/ksf`，不表示已安装全局命令。支持类型级、操作级 `--help`/`-h`。操作后的选项可以调整顺序，`--` 结束选项；未知、重复、缺值、互斥及当前操作不支持的选项均报错。不保留旧操作或别名。
 
 | 参数 | 类型、默认与限制 |
 | --- | --- |
@@ -38,8 +38,8 @@ ksf <类型> remove <id> [--dry-run] [--json]
 | ID | 指定路径 |
 | --- | --- |
 | `workflow.ksf.entry` | `AGENTS.md` |
-| `partner.ksf.assistant` | `.agents/core/abilities/partners/ksf-assistant/partner.md` |
-| `competency.ksf.task-route` | `.agents/core/abilities/competencies/task-route/competency.md` |
+| `partner.ksf.runtime` | `.agents/core/abilities/partners/ksf-runtime/partner.md` |
+| `competency.ksf.ability-route` | `.agents/core/abilities/competencies/ability-route/competency.md` |
 | `competency.ksf.project-route` | `.agents/core/abilities/competencies/project-route/competency.md` |
 | `competency.ksf.knowledge-route` | `.agents/core/abilities/competencies/knowledge-route/competency.md` |
 | `competency.ksf.asset-maintenance` | `.agents/core/abilities/competencies/asset-maintenance/competency.md` |
@@ -69,9 +69,9 @@ metadata 或 body 可以省略，省略部分保持原样；metadata 顶层合�
 系统与用户同 ID 以状态自动接管，无需另存运行时选择表：
 
 ```sh
-.agents/bin/ksf partner write partner.ksf.object-designer --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
-.agents/bin/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"archived"}}' --json
-.agents/bin/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"active"}}' --json
+.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
+.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"archived"}}' --json
+.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"active"}}' --json
 ```
 
 上例预览不会实际派生；之后的实际 write 才创建或修改用户定义。派生时完整保存入口、程序、模板、二进制资源和空目录；原始快照与来源摘要位于用户目录 .upstream/，入口内受管 upstream 映射记录 id/version；丢失基线时不能被当成用户原创继续更新。不支持的目录项导致整个操作失败，不能静默漏文件。

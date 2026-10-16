@@ -57,7 +57,7 @@ test('context projects full descriptions, preserves order and fixed entries, and
     assert.equal(object.protected, Object.hasOwn(protectedPaths, object.id));
   }
   assert.ok(objects.some(o => o.id === 'workflow.ksf.entry'));
-  assert.ok(objects.some(o => o.id === 'partner.ksf.assistant'));
+  assert.ok(objects.some(o => o.id === 'partner.ksf.runtime'));
   assert.ok(!JSON.stringify(result).includes('PRIVATE_BODY_SENTINEL'));
   assert.ok(!JSON.stringify(result).includes('COMPETENCY_SENTINEL'));
   for (const [type, group] of [['workflow', 'workflows'], ['partner', 'partners']]) {

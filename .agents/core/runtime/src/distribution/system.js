@@ -4,40 +4,49 @@ import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, re
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { checkedPath, compareVersions, configuration, digestObject, fail, fileMode, installedManifest,
   isRepository, isRevision, isSHA, parseJSON, readJSON, readRegular, sha256, stableJSON, textBytes,
-  validateManifest, validateProducts, versionParts, walkFiles, writeAtomic, writeJSON } from './common.js';
+  validateManifest, releaseReceipt, validateProducts, versionParts, walkFiles, writeAtomic, writeJSON } from './common.js';
+import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { download, releaseIndex } from './network.js';
 import { inspectCoreArchive } from './release.js';
+import { rootFiles, launcherProtocol } from './products.js';
 
 const generated = new Set(['.agents/core/manifest.yaml']);
 const modeOf = (root, path) => existsSync(checkedPath(root, path)) ? fileMode(checkedPath(root, path)) : null;
-const equals = (file, record) => file === null ? record === null : record !== null && sha256(file.bytes) === record.sha256 && file.mode === record.mode;
+const equals = matchesBaseline;
 function localFile(root, path) {
   const bytes = readRegular(root, path, true);
   return bytes === null ? null : { bytes, mode: fileMode(checkedPath(root, path)) };
 }
 export function systemFingerprint(root) {
-  const paths = walkFiles(root, '.agents/core').concat(['AGENTS.md', '.agents/bin/ksf']).sort();
+  const paths = walkFiles(root, '.agents/core').concat(rootFiles).sort();
   return digestObject(paths.map(path => [path, sha256(readRegular(root, path)), fileMode(checkedPath(root, path))]));
 }
-export function systemRead({ root }) {
-  const manifest = installedManifest(root, true), config = configuration(root);
+export async function systemRead({ root, api, fetcher }) {
+  const receipt = installedManifest(root, true), config = configuration(root, { user: true });
   const backups = backupRecords(root);
-  if (!manifest) return { mode: 'development', installed: false, coreRepository: config.core_repository,
+  if (!receipt) return { mode: 'development', installed: false, coreRepository: config.core_repository,
     releaseSource: config.release_source, automaticUpdates: false, backups: [] };
+  if (receipt.schema_version === 4 && receipt.development) return { mode: 'workspace', installed: true,
+    version: receipt.version, platform: receipt.platform, core: receipt.core, developmentPackage: true,
+    releaseSource: config.release_source, automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds,
+    requestTimeoutSeconds: config.request_timeout_seconds, changes: null, baselineVerified: false,
+    baselineStatus: 'development-package', backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
+  const manifest = await resolveBaseline(receipt, { api, fetcher });
   const changes = [];
   for (const [path, base] of Object.entries(manifest.files)) {
     if (generated.has(path)) continue;
     const file = localFile(root, path);
     if (!equals(file, base)) changes.push({ path, state: file === null ? 'deleted' : 'modified' });
   }
-  for (const path of walkFiles(root, '.agents/core')) {
-    if (path !== '.agents/core/release.json' && !Object.hasOwn(manifest.files, path) && !/\.tmp$/.test(path)) changes.push({ path, state: 'added' });
+  for (const path of walkFiles(root, '.agents/core').concat(rootFiles)) {
+    if (path !== '.agents/core/release.json' && !generated.has(path) && !Object.hasOwn(manifest.files, path) && !/\.tmp$/.test(path) && localFile(root, path) !== null) changes.push({ path, state: 'added' });
   }
   return { mode: 'workspace', installed: true, version: manifest.version, platform: manifest.platform,
     core: manifest.core, developmentPackage: manifest.development === true, releaseSource: config.release_source,
-    automaticUpdates: manifest.development !== true, checkIntervalSeconds: config.check_interval_seconds, changes, backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
+    automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds, requestTimeoutSeconds: config.request_timeout_seconds, changes, backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
 }
 export function validateIndex(index, manifest) {
   if (!index || index.schema_version !== 1 || !isRepository(index.core_repository) || !isRevision(index.core_revision) ||
@@ -56,7 +65,7 @@ function sourceAtRoot(root, source) {
   return source && !/^[A-Za-z][A-Za-z0-9+.-]*:/.test(source) ? resolve(root, source) : source;
 }
 export async function systemCheck({ root, source, fetcher }) {
-  const current = installedManifest(root), config = configuration(root);
+  const current = installedManifest(root), config = configuration(root, { user: true });
   const resolvedSource = sourceAtRoot(root, source) ?? config.release_source;
   const { index, url } = await releaseIndex(resolvedSource, { timeout: config.request_timeout_seconds * 1000, fetcher });
   const artifacts = validateIndex(index, current), comparison = compareVersions(index.version, current.version);
@@ -76,7 +85,7 @@ export function mergeText(base, local, incoming) {
     return { bytes: response.stdout, conflict: response.status === 1 };
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
-export function planUpdate(root, current, incoming, entries) {
+export async function planUpdate(root, current, incoming, entries) {
   const result = { files: new Map(), changes: [], conflicts: [] };
   const paths = [...new Set([...Object.keys(current.files), ...Object.keys(incoming.files)])].sort();
   for (const path of paths) {
@@ -86,9 +95,11 @@ export function planUpdate(root, current, incoming, entries) {
     if (generated.has(path)) chosen = remote;
     else if (equals(local, next)) chosen = local;
     else if (equals(local, base)) chosen = remote;
-    else if ((base === null && next === null) || (base && next && base.sha256 === next.sha256 && base.mode === next.mode)) chosen = local;
-    else if (base && next && local && base.baseline !== undefined && textBytes(local.bytes) && textBytes(remote.bytes)) {
-      const merged = mergeText(Buffer.from(base.baseline, 'base64'), local.bytes, remote.bytes);
+    else if ((base === null && next === null) || (base && next && equals(remote, base))) chosen = local;
+    else if (base && next && local && textBytes(local.bytes) && textBytes(remote.bytes)) {
+      const original = await current.read(path);
+      if (!textBytes(original)) { result.conflicts.push({ path, kind: 'binary' }); continue; }
+      const merged = mergeText(original, local.bytes, remote.bytes);
       if (merged.conflict) result.conflicts.push({ path, kind: 'text', merged: merged.bytes.toString('utf8') });
       else chosen = { bytes: merged.bytes, mode: local.mode === base.mode ? next.mode : local.mode };
     } else result.conflicts.push({ path, kind: !base ? 'add-add' : !next ? 'delete-modify' : !local ? 'modify-delete' : 'binary' });
@@ -111,13 +122,17 @@ function backupRecords(root) {
   });
 }
 function verifyCandidate(candidate, changedPaths = []) {
-  const verify = spawnSync('/bin/sh', [join(candidate, '.agents/bin/ksf'), 'runtime', 'verify', '--json'], {
+  const verify = spawnSync('/bin/sh', [join(candidate, '.agents/ksf'), 'runtime', 'verify', '--json'], {
     cwd: candidate, encoding: 'utf8', timeout: 90000, maxBuffer: 1024 * 1024,
     env: { ...process.env, KSF_SKIP_AUTO_UPDATE: '1', KSF_INSTALLED_LAUNCHER: '1' },
   });
   if (verify.status !== 0) fail('CANDIDATE_INVALID', 'Updated system did not pass its bundled runtime verification.', { stderr: verify.stderr?.slice(0, 4000), stdout: verify.stdout?.slice(0, 4000) });
   const binaries = walkFiles(candidate, '.agents/runtime-data/runtime/node').filter(p => p.endsWith('/bin/node'));
   if (binaries.length !== 1) fail('CANDIDATE_INVALID', 'Candidate runtime installation is ambiguous.');
+  const definitions = spawnSync(join(candidate, binaries[0]), [fileURLToPath(new URL('../services/validate-system.js', import.meta.url)), candidate], {
+    encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024,
+  });
+  if (definitions.status !== 0) fail('CANDIDATE_INVALID', 'Updated system definitions or exact references are invalid.', { stderr: definitions.stderr?.slice(0, 4000) });
   for (const path of changedPaths.filter(p => /\.(?:js|mjs|cjs)$/.test(p) && existsSync(checkedPath(candidate, p)))) {
     const checked = spawnSync(join(candidate, binaries[0]), ['--check', checkedPath(candidate, path)], { encoding: 'utf8', timeout: 10000 });
     if (checked.status !== 0) fail('CANDIDATE_INVALID', `Updated JavaScript does not parse: ${path}.`, { stderr: checked.stderr?.slice(0, 4000) });
@@ -131,19 +146,37 @@ function ownerStart() {
 export function recoverTransaction(root) {
   const path = checkedPath(root, '.agents/runtime-data/system/transaction');
   if (!existsSync(path)) return { recovered: false };
-  const launcher = checkedPath(root, '.agents/bin/ksf');
-  const result = spawnSync('/bin/sh', [launcher, 'system', 'read', '--json'], {
+  const launcher = checkedPath(root, '.agents/ksf');
+  const result = spawnSync('/bin/sh', [launcher, 'launcher', 'recover'], {
     cwd: root, encoding: 'utf8', timeout: 30000, env: { ...process.env, KSF_SKIP_AUTO_UPDATE: '1' },
   });
   if (result.status !== 0) fail('UPDATE_BUSY', 'An update is active or its recovery needs attention.', { stderr: result.stderr?.slice(0, 2000) });
   return { recovered: true };
 }
+function restoreCandidate(root, transaction) {
+  const pending = rootFiles.filter(path => existsSync(join(transaction, 'root-intent', path)));
+  const same = (first, second) => existsSync(first) && existsSync(second) && readFileSync(first).equals(readFileSync(second));
+  // Preflight all roots before changing Core or restoring any one root.
+  for (const path of pending) {
+    const live = checkedPath(root, path), old = checkedPath(transaction, `old-root/${path}`), next = checkedPath(transaction, `new-root/${path}`);
+    if (!same(live, old) && !same(live, next)) fail('RECOVERY_CONFLICT', `Concurrent edit at ${path}; files and transaction were preserved.`);
+  }
+  if (existsSync(join(transaction, 'old-core'))) {
+    if (existsSync(join(root, '.agents/core'))) renameSync(join(root, '.agents/core'), join(transaction, 'failed-core'));
+    renameSync(join(transaction, 'old-core'), join(root, '.agents/core'));
+  }
+  for (const path of pending) {
+    const old = join(transaction, 'old-root', path), live = checkedPath(root, path);
+    if (!same(live, old)) writeAtomic(live, readFileSync(old), fileMode(old));
+  }
+}
 function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault } = {}) {
   const system = checkedPath(root, '.agents/runtime-data/system'); mkdirSync(system, { recursive: true });
   const transaction = checkedPath(root, '.agents/runtime-data/system/transaction');
-  if (existsSync(transaction)) fail('UPDATE_BUSY', 'Another update transaction exists; use .agents/bin/ksf to recover it.');
+  if (existsSync(transaction)) fail('UPDATE_BUSY', 'Another update transaction exists; use .agents/ksf to recover it.');
   const id = `${Date.now()}-${randomUUID()}`, preparation = checkedPath(root, `.agents/runtime-data/system/prepare-${id}`);
   mkdirSync(preparation);
+  writeAtomic(join(preparation, 'protocol'), `${launcherProtocol}\n`);
   writeAtomic(join(preparation, 'owner'), String(process.pid) + '\n');
   writeAtomic(join(preparation, 'owner.start'), ownerStart() + '\n');
   writeAtomic(join(preparation, 'name'), id + '\n');
@@ -155,7 +188,8 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
     cpSync(join(candidate, '.agents/core'), join(transaction, 'new-core'), { recursive: true, errorOnExist: true, force: false });
     mkdirSync(join(transaction, 'old-root'));
     mkdirSync(join(transaction, 'new-root'));
-    for (const path of ['AGENTS.md', '.agents/bin/ksf']) {
+    const changedRoots = rootFiles.filter(path => !readRegular(root, path).equals(readRegular(candidate, path)) || modeOf(root, path) !== modeOf(candidate, path));
+    for (const path of changedRoots) {
       writeAtomic(join(transaction, 'old-root', path), readRegular(root, path), modeOf(root, path));
       writeAtomic(join(transaction, 'new-root', path), readRegular(candidate, path), modeOf(candidate, path));
     }
@@ -167,7 +201,12 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
     fault?.('old-renamed', transaction);
     renameSync(join(transaction, 'new-core'), join(root, '.agents/core'));
     fault?.('new-renamed', transaction);
-    for (const path of ['AGENTS.md', '.agents/bin/ksf']) renameSync(join(transaction, 'new-root', path), join(root, path));
+    for (const path of changedRoots) {
+      if (!readRegular(root, path).equals(readRegular(transaction, `old-root/${path}`))) fail('SYSTEM_CHANGED', `Root changed before replacement: ${path}.`);
+      writeAtomic(join(transaction, 'root-intent', path), '1\n');
+      writeAtomic(join(root, path), readRegular(transaction, `new-root/${path}`), modeOf(candidate, path));
+      fault?.(`root-installed:${path}`, transaction);
+    }
     fault?.('roots-installed', transaction);
     writeAtomic(join(transaction, 'committed'), id + '\n'); committed = true;
     fault?.('committed', transaction);
@@ -177,21 +216,16 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
   } catch (error) {
     if (error?.simulateCrash) throw error;
     if (!committed && existsSync(transaction)) {
-      if (existsSync(join(transaction, 'old-core'))) {
-        if (existsSync(join(root, '.agents/core'))) renameSync(join(root, '.agents/core'), join(transaction, 'failed-core'));
-        renameSync(join(transaction, 'old-core'), join(root, '.agents/core'));
-      }
-      for (const path of ['AGENTS.md', '.agents/bin/ksf']) {
-        if (existsSync(join(transaction, 'old-root', path))) writeAtomic(join(root, path), readFileSync(join(transaction, 'old-root', path)), fileMode(join(transaction, 'old-root', path)));
-      }
+      restoreCandidate(root, transaction);
       const failed = checkedPath(root, '.agents/runtime-data/system/failed'); mkdirSync(failed, { recursive: true });
       renameSync(transaction, join(failed, id));
     }
     throw error;
   }
 }
-export async function systemUpdate({ root, source, from, dryRun = false, fetcher, fault }) {
-  const current = installedManifest(root), config = configuration(root), before = systemFingerprint(root);
+export async function systemUpdate({ root, source, from, dryRun = false, fetcher, fault, api }) {
+  const receipt = installedManifest(root), config = configuration(root, { user: true }), before = systemFingerprint(root);
+  let current = receipt;
   let archive, check;
   if (from) {
     archive = (await download(sourceAtRoot(root, from), { timeout: config.request_timeout_seconds * 1000, fetcher })).bytes;
@@ -205,7 +239,8 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
   if (incoming.development) fail('RELEASE_INVALID', 'Cannot install a development package as an official update.');
   if (check && incoming.core.revision !== check.index.core_revision) fail('RELEASE_INVALID', 'Release source revision differs from the index.');
   if (compareVersions(incoming.version, current.version) <= 0) fail('VERSION_NOT_NEWER', 'Updates require a newer version; use rollback to return to a previous installed version.');
-  const plan = planUpdate(root, current, incoming, entries);
+  current = await resolveBaseline(receipt, { api, fetcher });
+  const plan = await planUpdate(root, current, incoming, entries);
   const result = { current: current.version, latest: incoming.version, dryRun, changed: false, changes: plan.changes, conflicts: plan.conflicts };
   if (plan.conflicts.length) fail('UPDATE_CONFLICT', 'Core changes conflict with local edits; the current system was preserved.', result);
   const staging = mkdtempSync(join(tmpdir(), 'ksf-update-'));
@@ -216,7 +251,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
       if (file === null) rmSync(target, { force: true });
       else writeAtomic(target, file.bytes, file.mode);
     }
-    writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(incoming));
+    writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(releaseReceipt(incoming)));
     verifyCandidate(staging, plan.changes.map(c => c.path));
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed during update validation.');
     if (dryRun) return { ...result, wouldChange: true };
@@ -233,7 +268,11 @@ export async function systemRollback({ root, dryRun = false, fault }) {
   const staging = mkdtempSync(join(tmpdir(), 'ksf-rollback-'));
   try {
     cpSync(join(backup, 'old-core'), join(staging, '.agents/core'), { recursive: true });
-    for (const path of ['AGENTS.md', '.agents/bin/ksf']) writeAtomic(join(staging, path), readFileSync(join(backup, 'old-root', path)), fileMode(join(backup, 'old-root', path)));
+    for (const path of rootFiles) {
+      const old = join(backup, 'old-root', path);
+      const source = existsSync(old) ? old : checkedPath(root, path);
+      writeAtomic(join(staging, path), readFileSync(source), fileMode(source));
+    }
     verifyCandidate(staging);
     if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun };
     return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault }), dryRun };
@@ -243,7 +282,7 @@ export async function systemSync({ root, now = Date.now(), fetcher }) {
   const manifest = installedManifest(root, true);
   if (!manifest) return { skipped: true, reason: 'development', changed: false };
   if (manifest.development) return { skipped: true, reason: 'development-package', changed: false };
-  const config = configuration(root), cachePath = '.agents/runtime-data/system/check.json';
+  const config = configuration(root, { user: true }), cachePath = '.agents/runtime-data/system/check.json';
   let cache;
   try { cache = readJSON(root, cachePath, true); }
   catch (error) {

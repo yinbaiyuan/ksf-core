@@ -27,8 +27,8 @@ export function distributionHelp(command, operation) {
   const selected = operation ? [specs[command][operation]] : Object.values(specs[command]);
   const notes = {
     release: 'Build the ksf-core system and ksf-workspace user template from Core sources.\nOutput contains ksf-workspace/, both product archives and the ksf-core release index.\nCopy the template to an instance named ksf or any user-chosen name.\nOfficial publishing rejects dirty/development packages.\nPublishing requires GitHub authorization; building and --dry-run do not.\n',
-    system: 'Read, check, update and roll back copied or template-created workspaces.\nUpdates use explicit release baselines and never merge personal Git history.\n--source accepts HTTPS, absolute/local index files and loopback HTTP.\n--from installs a newer verified Core archive offline.\nUser directories and .gitignore are never update targets.\nConflicts preserve the current system. Use .agents/bin/ksf for recovery.\n',
-    contribute: 'Select system changes, review the diff, then submit its exact digest.\nNo Git repository is required. Personal files and Git history are excluded.\n--paths takes root-relative literal system paths, not globs.\nSubmission creates a draft Core PR; it requires GitHub authorization.\n',
+    system: 'Read, check, update and roll back copied or template-created workspaces.\nVersion checks and installation require an explicit command; startup never invokes sync.\nUpdates use explicit release baselines and never merge personal Git history.\n--source accepts HTTPS, absolute/local index files and loopback HTTP.\n--from selects a verified Core archive; original baselines are resolved online.\nUser directories and .gitignore are never update targets.\nConflicts preserve the current system. Use .agents/ksf for recovery.\n',
+    contribute: 'Select committed HEAD system changes against its original Core baseline.\nGit, a local HEAD and network access to the recorded Core are required; index and working changes are ignored.\nPersonal files, history and local commit IDs are never published.\n--paths takes root-relative literal system paths, not globs.\nPrepare warns about prior PRs for the same local commit or system content.\nIdentical content reuses its verified PR; unknown prior attempts must be reconciled.\nSubmission creates a draft Core PR; it requires GitHub authorization.\n',
   };
   return `KSF ${command}${operation ? ` ${operation}` : ''}\n\nUsage:\n` + selected.map(s => `  ksf ${command} ${s.usage} [--json]`).join('\n') + '\n\n' + notes[command] +
     'Paths are relative to the KSF root; -- ends option parsing.\n--dry-run previews without publishing or changing live system files.\nUse --help or -h alone at command or operation level.\n';
@@ -110,7 +110,7 @@ export async function runDistributionCommand(command, args, root) {
     exitCode = error instanceof DistributionError ? error.exitCode : 1;
   }
   if (quiet) return { stdout: '', stderr: response.ok ? response.data?.changed ? `KSF: updated Core to ${response.data.to ?? response.data.latest}.\n` : '' :
-    `KSF: automatic update skipped (${response.errors[0].code}); the installed version remains usable.\n`, exitCode };
+    `KSF: explicit sync failed (${response.errors[0].code}); inspect the installed system state.\n`, exitCode };
   const end = args.indexOf('--'), json = (end < 0 ? args : args.slice(0, end)).includes('--json');
   return { stdout: json ? JSON.stringify(response) + '\n' :
     [response.data ? JSON.stringify(response.data, null, 2) : '', ...response.errors.map(e => `${e.code}: ${e.message}`)].filter(Boolean).join('\n') + '\n', stderr: '', exitCode };

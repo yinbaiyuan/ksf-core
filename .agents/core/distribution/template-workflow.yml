@@ -22,4 +22,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           KSF_SKIP_AUTO_UPDATE: '1'
-        run: ./.agents/bin/ksf release mirror --json
+        run: ./.agents/ksf release mirror --json

@@ -4,17 +4,17 @@
 
 已实现 `capabilities`。为 Agent 组织当前 KSF 的完整有效 Workflow、Partner 发现信息，先工作流、后搭档。复用对象服务的有效列表查询，用户接管、归档回退、冲突及固定入口保护均由对象层处理，不维护第二套扫描或 YAML 解析逻辑，不启动对象 CLI 子进程。
 
-描述由对象作者维护，程序忠实取得 `description`，不补写、改写、截断或评价其业务充分性。程序只组织数据；匹配、澄清和后续行动由 [task-route](../../abilities/competencies/task-route/competency.md) 与 Agent 判断。
+描述由对象作者维护，程序忠实取得 `description`，不补写、改写、截断或评价其业务充分性。程序只组织数据；匹配、澄清和后续行动由 [ability-route](../../abilities/competencies/ability-route/competency.md) 与 Agent 判断。
 
 ## 调用与参数
 
 从 KSF 根目录调用；其他工作目录使用入口绝对路径：
 
 ```sh
-.agents/bin/ksf context capabilities
-.agents/bin/ksf context capabilities --json
-.agents/bin/ksf context --help
-.agents/bin/ksf context capabilities --help
+.agents/ksf context capabilities
+.agents/ksf context capabilities --json
+.agents/ksf context --help
+.agents/ksf context capabilities --help
 ```
 
 | 参数或操作 | 行为 |
@@ -30,7 +30,7 @@
 
 直接使用现有 Workflow、Partner 的默认有效列表，每次查询当前文件，没有持久化索引。对象层按公共规则处理系统与用户定义、精确身份、状态与冲突；context 不按系统/用户分组，也不提供另选来源的规则。
 
-结果保留固定根入口工作流和入口搭档，并通过 `protected=true` 标明。task-route 从下游候选中排除这些固定入口。先匹配适用工作流，未匹配时再选择搭档，两类均不适用时判断通用 Agent 能否承接；context 不替 Agent 执行该顺序或宣布匹配成功。
+结果保留固定根入口工作流和入口搭档，并通过 `protected=true` 标明。ability-route 从下游候选中排除这些固定入口。先匹配适用工作流，未匹配时再选择搭档，两类均不适用时判断通用 Agent 能否承接；context 不替 Agent 执行该顺序或宣布匹配成功。
 
 只输出选定的发现字段，不返回原始元数据映射、版本、修订、正文、声明依赖、基本功、数据包或附属资源。对象底层会读取并校验对象定义，读取不代表这些内容已进入 Agent 上下文，也不代表专业适用性已验证。候选正文继续通过对应对象 `read` 命令按需取得。
 
@@ -70,7 +70,7 @@ Core 源码仓库不要求创建用户能力目录，未创建的用户范围视
 | 1 | 不完整或执行失败，仍需读取 stdout 中的有效项与错误 |
 | 2 | 操作、参数或调用格式错误 |
 
-发现不完整时，Agent 可以继续核对不依赖缺失范围的候选，不能宣称已排除全库工作流或直接据此决定不存在匹配。详细处理沿用 task-route。启动层尚未进入业务处理器时可能只有 stderr，不保证业务 JSON 已产生。
+发现不完整时，Agent 可以继续核对不依赖缺失范围的候选，不能宣称已排除全库工作流或直接据此决定不存在匹配。详细处理沿用 ability-route。启动层尚未进入业务处理器时可能只有 stderr，不保证业务 JSON 已产生。
 
 ## 文件影响、实现与验证
 
@@ -81,10 +81,12 @@ CLI 适配在 `runtime/src/commands/context.js`，组合服务在 `runtime/src/s
 ### 首次 context 命令验证（2026-10-15，macOS ARM64）
 
 - 当时通过随包入口执行 `ksf test`，123 项全部通过，其中 context 新增 13 项；没有跳过或失败。四类能力模型调整后的回归见[对象验证记录](objects-validation.md)。
-- 真实执行文本命令，并从其他工作目录执行 JSON 命令，均退出 0、complete=true。当前返回 1 个固定入口工作流、2 个搭档，其中入口搭档为 protected；普通下游候选为 ksf对象设计师。
+- 真实执行文本命令，并从其他工作目录执行 JSON 命令，均退出 0、complete=true。该次验证返回 1 个固定入口工作流、2 个搭档，其中入口搭档为 protected；普通下游候选为 ksf对象设计师。
 - 路由走查采用模拟输入“完善一个搭档的职责与基本功配置”。实际取得上述摘要，排除固定入口后没有普通工作流，依据摘要选择对象设计师；实际通过 `partner read partner.ksf.object-designer --part all --json` 读取正文，再按其精确声明读取 `competency.ksf.partner-design@0.1.0`，两次均退出 0、errors 为空。确认该任务属于搭档设计责任，下一步应取得目标搭档与实际问题，再按方法处理。
 - 这是当前 Agent 的路由走查，使用了真实程序和正文读取；没有执行新的搭档设计任务，也没有独立会话、多 Agent 或长期效果验证。
 
 后续 context 操作按真实需求另行设计；当前不提供项目、知识或任务状态的组装接口。[最小运行闭环](../runtime/minimal-runtime.md)中的项目发现与根卡读取使用 [project CLI](project.md)，资料和知识仍按基本功按需读取，不是新增的 context 程序接口。
 
 返回[命令索引](index.md)。
+
+2026-10-16 重构后，当前完整发现为 1 个固定入口工作流和 3 个搭档：runtime 固定保护，maintainer 与对象设计师为普通候选。真实 CLI 已核对 complete=true、errors=[]；维护角色可发现和派生，固定入口仍从下游候选排除。

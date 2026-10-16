@@ -2,7 +2,7 @@
 
 For the current command list and calling conventions, see [CLI 能力说明](../docs/cli/overview.md).
 
-`.agents/bin/ksf` is the program entry. Before executing JavaScript, it loads
+`.agents/ksf` is the program entry. Before executing JavaScript, it loads
 `bootstrap.sh` to prepare the exact Node.js runtime declared in
 [`../manifest.yaml`](../manifest.yaml). Agents call the entry; they do not
 inspect, unpack, repair or select Node.js themselves.
@@ -18,8 +18,8 @@ inspect, unpack, repair or select Node.js themselves.
   and per-identity installation locks. They are not user knowledge or business data.
 
 The currently bundled and tested platform is **macOS ARM64**, using Node.js
-24.21.0. macOS x64 has platform detection but no bundled package. Linux and
-Windows launchers/packages are not supplied in this prototype. An unsupported
+24.21.0. macOS x64 has platform detection but no bundled package. Linux is not supported.
+Windows has a separate `.agents/ksf.ps1` recovery launcher, but no Windows runtime bootstrap or package yet. An unsupported
 platform fails explicitly; there is no global Node.js or network fallback.
 
 The bootstrap uses macOS platform tools (`sh`, `awk`, `stat`, `shasum`, `tar`,
@@ -62,8 +62,8 @@ cryptographic integrity audit against content changes that also preserve all
 recorded attributes. Use the explicit full verification command when needed:
 
 ```sh
-.agents/bin/ksf runtime verify
-.agents/bin/ksf runtime verify --json
+.agents/ksf runtime verify
+.agents/ksf runtime verify --json
 ```
 
 This checks both archive and executable even on a ready installation. A damaged
@@ -73,7 +73,7 @@ verification command even if normal startup can still reuse an installed runtime
 ## Upgrade and rollback
 
 Bundle a new official archive, update the version, archive path and trusted
-official archive SHA256 in `.agents/core/build.json`, then run `.agents/bin/ksf build`.
+official archive SHA256 in `.agents/core/build.json`, then run `.agents/ksf build`.
 The program derives both hashes and generates `manifest.yaml`; do not edit that
 generated file by hand. See [build.md](build.md). The next normal `ksf` call uses
 the new identity automatically. Repacking the same version also creates a new
@@ -110,7 +110,7 @@ declaration fails closed.
 ## Development verification
 
 ```sh
-.agents/bin/ksf test
+.agents/ksf test
 ```
 
 The entry first prepares the bundled Node.js, then runs its built-in `node:test`
@@ -124,3 +124,5 @@ then calls the real launcher to exercise state transitions, concurrency and
 interruption. The Node.js running the test suite does not prepare those fixture
 installations. The real bundled Node.js and Hello World must also be run through
 the entry before delivering a runtime change.
+
+The stable launcher calls `ksf_bootstrap_main` (launcher protocol 1). Core owns local runtime preparation and final exec. Version checks and installation require an explicit system command; ordinary commands never invoke sync. KSF_SKIP_AUTO_UPDATE is an inert compatibility variable. See [launcher.md](launcher.md) for the shared recovery protocol and Windows scope.
