@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fail, isRevision, isRepository, isBranch } from './common.js';
@@ -23,6 +23,7 @@ export async function publishGitTemplate({ repository, branch, expectedHead, exp
   Object.assign(env, { GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null', GIT_TERMINAL_PROMPT: '0',
     GIT_AUTHOR_NAME: 'KSF Template Publisher', GIT_AUTHOR_EMAIL: 'noreply@ksf.invalid',
     GIT_COMMITTER_NAME: 'KSF Template Publisher', GIT_COMMITTER_EMAIL: 'noreply@ksf.invalid',
+    KSF_TEMPLATE_EXPECTED_REF: `refs/heads/${branch}`, KSF_TEMPLATE_EXPECTED_HEAD: expectedHead,
     GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'credential.helper', GIT_CONFIG_VALUE_0: '' });
   if (token) Object.assign(env, { GIT_CONFIG_COUNT: '2', GIT_CONFIG_KEY_1: 'http.https://github.com/.extraheader',
     GIT_CONFIG_VALUE_1: `AUTHORIZATION: basic ${Buffer.from(`x-access-token:${token}`).toString('base64')}` });
@@ -51,6 +52,13 @@ export async function publishGitTemplate({ repository, branch, expectedHead, exp
     if (!isRevision(tree) || !isRevision(commit)) fail('TEMPLATE_GIT_FAILED', 'Git returned invalid template objects.');
     // A normal push must fast-forward the observed parent; never force or merge.
     // Reconcile even a failed/unknown push response using the computed commit.
+    // Inspect the server-advertised old OID as well. A plain fast-forward check
+    // alone would accept a concurrent rewind or recreate a deleted branch.
+    // After this hook, Git's receive-pack atomically compares that same OID.
+    mkdirSync(join(directory, '.git/hooks'), { recursive: true });
+    writeFileSync(join(directory, '.git/hooks/pre-push'), '#!/bin/sh\n' +
+      'read -r local_ref local_oid remote_ref remote_oid || exit 1\n' +
+      '[ "$remote_ref" = "$KSF_TEMPLATE_EXPECTED_REF" ] && [ "$remote_oid" = "$KSF_TEMPLATE_EXPECTED_HEAD" ]\n', { mode: 0o755 });
     const pushed = run(executable, ['-C', directory, 'push', '--porcelain', remote, `${commit}:refs/heads/${branch}`],
       { env, timeout: 180000, maxBuffer: 8 * 1024 * 1024 });
     return { tree, commit, changed: true, pushFailed: pushed.status !== 0 };

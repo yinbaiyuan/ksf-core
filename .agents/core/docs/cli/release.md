@@ -27,4 +27,4 @@ JSON：`{ok, command:"release", operation, data, errors}`，业务结果和错�
 
 从用户实例发起远程发布与 template-only 恢复属于 Core Actions 接口，不新增 CLI 操作。具体输入、App 配置和失败重试见[发行说明](../distribution.md#从用户实例发起远程发行)。TEMPLATE_VERIFY_FAILED 表示实际远程模板与已验证包不一致，不能报告成功；保留原包和远程状态再核对。
 
-大文件模板传输要求 Git，使用临时对象库和非强制推送，完成后仍通过远程树和发行凭据对账。恢复旧发行可使用本次 Actions 固定的维护程序提交；原产物仍按指定发布标签、Core 提交及摘要校验，不修改已公开资产。`TEMPLATE_GIT_REQUIRED` 表示缺少 Git，`TEMPLATE_GIT_FAILED` 表示 Git 传输未被证实成功；先核对远程后恢复同一版本模板。
+大文件模板传输要求 Git，使用临时对象库、服务端旧提交校验和非强制推送，完成后仍通过远程树和发行凭据对账。恢复旧发行可使用本次 Actions 固定的维护程序提交；原产物仍按指定发布标签、Core 提交及摘要校验，不修改已公开资产。`TEMPLATE_GIT_REQUIRED` 表示缺少 Git，`TEMPLATE_GIT_FAILED` 表示 Git 传输未被证实成功；先核对远程后恢复同一版本模板。

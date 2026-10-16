@@ -91,3 +91,20 @@ test('Git errors do not echo credentials or subprocess output', async t => {
     assert.ok(!error.message.includes(secret)); return true;
   });
 });
+
+
+for (const operation of ['rewind', 'delete']) test(`a concurrent ${operation} before push advertisement is preserved`, async t => {
+  const f = fixture(t), ancestor = f.head();
+  f.git(f.source, ['commit', '--allow-empty', '-m', 'Observed template head']);
+  f.git(f.source, ['push', f.remote, 'HEAD:refs/heads/main']); const options = f.options();
+  const result = await publishGitTemplate({ ...options, run: (program, args, config) => {
+    if (args.includes('push')) {
+      if (operation === 'rewind') f.git(f.remote, ['update-ref', 'refs/heads/main', ancestor, options.expectedHead]);
+      else f.git(f.remote, ['update-ref', '-d', 'refs/heads/main', options.expectedHead]);
+    }
+    return spawnSync(program, args, config);
+  } });
+  assert.equal(result.pushFailed, true);
+  if (operation === 'rewind') assert.equal(f.head(), ancestor);
+  else assert.equal(f.git(f.remote, ['for-each-ref', 'refs/heads/main']), '');
+});
