@@ -4,12 +4,15 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { buildManifest } from '../services/build-manifest.js';
 import { configuration, fail, sha256, stableJSON, checkedPath, readRegular, walkFiles,
-  fileMode, textBytes, validateManifest, versionParts, writeAtomic, parseJSON } from './common.js';
+  fileMode, validateManifest, releaseReceipt, versionParts, writeAtomic, parseJSON } from './common.js';
 import { createArchive, readArchive } from './archive.js';
 import { types } from '../objects/schema.js';
-import { products, artifactName, releaseIndexName } from './products.js';
+import { products, artifactName, releaseIndexName, launcherFiles, launcherProtocol } from './products.js';
+import { userDataRoot } from '../user-data/schema.js';
+import { committedSource } from './committed-source.js';
+import { gitBlobID, baselinePath } from './baseline.js';
 
-export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '源档', '归档'];
+export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '源档', '归档', userDataRoot];
 function revisionInfo(root, allowDirty) {
   const git = args => spawnSync('/usr/bin/git', ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
   const rev = git(['rev-parse', '--verify', 'HEAD']);
@@ -30,6 +33,7 @@ export function inspectCoreArchive(bytes, { expectedVersion, expectedPlatform, e
   const entries = readArchive(bytes), metadata = entries.get('.agents/core/release.json');
   if (!metadata) fail('RELEASE_INVALID', 'Core archive has no release manifest.');
   const manifest = validateManifest(parseJSON(metadata.bytes, 'Core manifest'));
+  if (!manifest.files) fail('RELEASE_INVALID', 'An update archive requires its verified file inventory.');
   if ((expectedVersion && manifest.version !== expectedVersion) || (expectedPlatform && manifest.platform !== expectedPlatform) ||
       (expectedRepository && manifest.core.repository !== expectedRepository)) fail('RELEASE_INVALID', 'Core archive identity does not match its release index.');
   if (entries.size !== Object.keys(manifest.files).length + 1) fail('RELEASE_INVALID', 'Archive and managed inventory differ.');
@@ -43,7 +47,8 @@ export async function buildRelease({ root, output, platform = `${process.platfor
   const config = configuration(root), build = parseJSON(readRegular(root, '.agents/core/build.json'), 'build.json');
   versionParts(build.version);
   if (!build.runtime?.packages?.[platform]) fail('PLATFORM_UNSUPPORTED', `No bundled runtime for ${platform}.`);
-  const source = revisionInfo(root, allowDirty), paths = [...walkFiles(root, '.agents/core', { exclude: excluded }), '.agents/bin/ksf'].sort();
+  const source = revisionInfo(root, allowDirty), paths = [...walkFiles(root, '.agents/core', { exclude: excluded }), ...launcherFiles].sort();
+  const committed = source.dirty ? null : committedSource(root);
   const destination = resolve(root, output ?? `.agents/runtime-data/releases/${build.version}-${platform}`);
   const targetRoot = join(destination, products.workspace);
   if (existsSync(destination)) fail('OUTPUT_EXISTS', 'Release output already exists; choose a new output directory.');
@@ -53,32 +58,40 @@ export async function buildRelease({ root, output, platform = `${process.platfor
     const sourceHashes = new Map();
     for (const path of [...paths, 'AGENTS.md']) {
       const bytes = readRegular(root, path), mode = fileMode(checkedPath(root, path));
+      const original = committed?.entries.get(path);
+      if (committed && path !== '.agents/core/manifest.yaml' && (!original || original.type !== 'blob' ||
+          original.mode !== (mode === 0o755 ? '100755' : '100644') || gitBlobID(bytes) !== original.object)) source.dirty = true;
       sourceHashes.set(path, sha256(bytes));
       writeAtomic(checkedPath(staging, path), bytes, mode);
+    }
+    if (committed) {
+      const expected = [...committed.entries.keys()].filter(path => baselinePath(path) && !excluded(path) && path !== '.agents/core/manifest.yaml').sort();
+      const actual = [...paths, 'AGENTS.md'].filter(path => path !== '.agents/core/manifest.yaml').sort();
+      if (expected.join('\n') !== actual.join('\n')) source.dirty = true;
+      if (source.dirty && !allowDirty) fail('RELEASE_SOURCE_DIRTY', 'System files must exactly match the recorded Core commit; ignored or uncommitted files cannot enter an official release.');
     }
     await buildManifest(staging, { sourceRoot: root, builtAt: source.builtAt });
     const inventory = {}, coreEntries = [];
     for (const path of [...paths.filter(p => p !== '.agents/core/manifest.yaml'), '.agents/core/manifest.yaml', 'AGENTS.md'].sort()) {
       const bytes = readRegular(staging, path), mode = fileMode(checkedPath(staging, path));
-      inventory[path] = { sha256: sha256(bytes), mode, source_path: path,
-        ...(textBytes(bytes) && path !== '.agents/core/manifest.yaml' ? { baseline: bytes.toString('base64') } : {}) };
+      inventory[path] = { sha256: sha256(bytes), mode, source_path: path };
       coreEntries.push({ path, bytes, mode });
     }
-    const manifest = validateManifest({ schema_version: 2, name: products.core, product: products.core, version: build.version, platform,
+    const manifest = validateManifest({ schema_version: 3, launcher_protocol: launcherProtocol, name: products.core, product: products.core, version: build.version, platform,
       core: { repository: config.core_repository, branch: config.core_branch, revision: source.revision },
       development: source.dirty, files: inventory });
     coreEntries.push({ path: '.agents/core/release.json', bytes: Buffer.from(stableJSON(manifest)), mode: 0o644 });
     const coreArchive = createArchive(coreEntries);
     inspectCoreArchive(coreArchive, { expectedVersion: build.version, expectedPlatform: platform, expectedRepository: config.core_repository });
     const extras = [];
-    for (const file of ['README.md', '.gitignore']) extras.push({ path: file, bytes: readRegular(root, `.agents/core/distribution/template/${file}`), mode: 0o644 });
-    extras.push({ path: '.github/workflows/sync-template.yml', mode: 0o644,
-      bytes: Buffer.from(readRegular(root, '.agents/core/distribution/template-workflow.yml').toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository)) });
+    for (const file of ['README.md', '.gitignore', '.gitattributes']) extras.push({ path: file, bytes: readRegular(root, `.agents/core/distribution/template/${file}`), mode: 0o644 });
     for (const directory of userDirectories) extras.push({ path: `${directory}/.gitkeep`, bytes: Buffer.alloc(0), mode: 0o644 });
     extras.push({ path: '.ksf-template.json', mode: 0o644, bytes: Buffer.from(stableJSON({ schema_version: 1,
       product: products.workspace, instance_default_name: products.instance,
       generated_from: config.core_repository, revision: source.revision, version: build.version })) });
-    const fullEntries = [...coreEntries, ...extras], workspaceArchive = createArchive(fullEntries);
+    const receipt = Buffer.from(stableJSON(releaseReceipt(manifest)));
+    const fullEntries = [...coreEntries.map(entry => entry.path === '.agents/core/release.json' ? { ...entry, bytes: receipt } : entry), ...extras];
+    const workspaceArchive = createArchive(fullEntries);
     const coreName = artifactName('core', build.version, platform), workspaceName = artifactName('workspace', build.version, platform);
     const base = `https://github.com/${config.core_repository}/releases/download/v${build.version}/`;
     const artifact = (name, bytes) => ({ name, url: base + name, sha256: sha256(bytes), size: bytes.length });
@@ -88,7 +101,7 @@ export async function buildRelease({ root, output, platform = `${process.platfor
       } } };
     const current = revisionInfo(root, true);
     if (current.revision !== source.revision || [...sourceHashes].some(([p, hash]) => sha256(readRegular(root, p)) !== hash) ||
-        paths.join('\n') !== [...walkFiles(root, '.agents/core', { exclude: excluded }), '.agents/bin/ksf'].sort().join('\n')) fail('RELEASE_INPUT_CHANGED', 'Core changed while building the release.');
+        paths.join('\n') !== [...walkFiles(root, '.agents/core', { exclude: excluded }), ...launcherFiles].sort().join('\n')) fail('RELEASE_INPUT_CHANGED', 'Core changed while building the release.');
     const result = { version: build.version, platform, development: source.dirty, coreRevision: source.revision,
       products, output: destination, template: targetRoot, index, managedFiles: Object.keys(inventory).length, dryRun };
     if (!dryRun) {

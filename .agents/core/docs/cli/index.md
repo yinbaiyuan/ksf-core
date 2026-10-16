@@ -2,20 +2,24 @@
 
 命令设计遵循[统一规范](../CLI命令设计规范.md)，可执行能力总入口见 [CLI 能力说明](overview.md)。各文档明确区分已实现与设计中。
 
+程序分层、启动调用链、数据目录和维护入口见[系统基础架构](../system/README.md)。本目录继续持有各命令的具体接口契约。
+
 ## 已实现命令
 
 | 命令 | 职责 | 文档 |
 | --- | --- | --- |
+| launcher recover | 无需 Core/Node 恢复中断升级 | [启动入口](../../runtime/launcher.md) |
 | hello | 检查启动与输出链路 | [hello](hello.md) |
 | runtime | 运行时完整校验 | [runtime](runtime.md) |
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
+| user-data | KSF 系统级用户设置、本地身份资料与可迁移状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
 | context | 组织 Agent 所需的能力发现上下文 | [context](context.md) |
 | project | 项目根卡与目录的基础管理 | [project](project.md) |
 | release | 发行构建、发布和官方模板镜像 | [release](release.md) |
 | system | 工作区版本检查、升级、恢复和回滚 | [system](system.md) |
-| contribute | 选定系统修改的审查与 Core PR | [contribute](contribute.md) |
+| contribute | HEAD 已提交系统修改的审查与 Core PR | [contribute](contribute.md) |
 | workflow | 工作流对象管理 | [workflow](workflow.md) |
 | partner | 搭档对象管理 | [partner](partner.md) |
 | competency | 基本功对象管理 | [competency](competency.md) |
@@ -32,6 +36,6 @@ CLI 适配、对象服务、目录/契约/解析/发布模块分开。对象层�
 
 ## 调用与维护
 
-Core 开发仓库与发行工作区统一调用 `.agents/bin/ksf`；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复中断事务，普通业务启动按间隔自动检查升级，详见 system。
+Core 开发仓库与发行工作区在 macOS 调用 `.agents/ksf`，Windows 对应 `.agents/ksf.ps1`（目前仅入口恢复与转交契约）；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复已发起的中断事务；启动和普通命令不检查或安装新版本，维护命令只显式调用，详见 system。
 
 共同启动可能准备 `.agents/runtime-data/runtime/`，因此命令自身只读或预览不代表整个启动过程零写入。新增或变更接口时同步对应文档、公共规范、索引和能力说明，并运行相应回归、构建及真实入口验证。通过检查不代表获准提交或发布 Git。

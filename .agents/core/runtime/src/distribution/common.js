@@ -2,7 +2,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, openSync, closeSync, fsyncSync, readFileSync,
   readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
-import { products, releaseIndexName } from './products.js';
+import { products, releaseIndexName, launcherFiles, launcherProtocol } from './products.js';
+import { readUserData } from '../services/user-data.js';
 
 export class DistributionError extends Error {
   constructor(code, message, data, exitCode = 1) {
@@ -16,7 +17,8 @@ export const stableJSON = value => JSON.stringify(value, null, 2) + '\n';
 export const digestObject = value => sha256(stableJSON(value));
 export const isSHA = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const isRevision = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
-export const isRepository = value => typeof value === 'string' && /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value);
+export const isRepository = value => typeof value === 'string' && /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value) &&
+  !value.split('/').some(part => part === '.' || part === '..');
 export const isBranch = value => typeof value === 'string' && value.length > 0 && value !== '@' &&
   !value.startsWith('-') && !value.includes('..') && !value.includes('@{') &&
   !/[\x00-\x20\x7f~^:?*\[\\]/.test(value) &&
@@ -27,7 +29,7 @@ export function validRelative(path) {
     !/[\\\x00-\x1f\x7f:]/.test(path) && path.split('/').every(p => p && p !== '.' && p !== '..' && p !== '.git');
 }
 export function managedPath(path) {
-  return validRelative(path) && (path === 'AGENTS.md' || path === '.agents/bin/ksf' ||
+  return validRelative(path) && (path === 'AGENTS.md' || launcherFiles.includes(path) ||
     (path.startsWith('.agents/core/') && !path.split('/').some(p => ['.agents/runtime-data', '.DS_Store'].includes(p)) &&
       !/^\.agents\/core\/(?:release\.json|\.manifest\.yaml\..*\.tmp)$/.test(path)));
 }
@@ -115,7 +117,7 @@ export function compareVersions(a, b) {
   }
   return 0;
 }
-export function configuration(root) {
+export function configuration(root, { user = false } = {}) {
   const config = readJSON(root, '.agents/core/distribution.json');
   if (config.schema_version !== 1 || !isRepository(config.core_repository) || !isRepository(config.template_repository) ||
       !isBranch(config.core_branch) || typeof config.release_source !== 'string' || config.index_asset !== releaseIndexName ||
@@ -123,7 +125,10 @@ export function configuration(root) {
       !Number.isInteger(config.request_timeout_seconds) || config.request_timeout_seconds < 1 || config.request_timeout_seconds > 60) {
     fail('DISTRIBUTION_CONFIG_INVALID', 'Invalid .agents/core/distribution.json.');
   }
-  return config;
+  // Build/publish use only Core defaults; system operations explicitly opt in.
+  if (!user) return config;
+  const settings = readUserData({ root, namespace: 'settings' });
+  return { ...config, ...(settings.values.updates ?? {}) };
 }
 export function validateProducts(value) {
   if (!value || Array.isArray(value) ||
@@ -132,8 +137,10 @@ export function validateProducts(value) {
     fail('RELEASE_INVALID', 'Release products must identify ksf-core, ksf-workspace and the default ksf instance.');
   }
 }
-export function validateManifest(manifest) {
-  if (!manifest || manifest.schema_version !== 2 || manifest.name !== products.core || manifest.product !== products.core ||
+function validateReleaseManifest(manifest, legacy) {
+  const acceptsPath = path => managedPath(path) || (legacy && path === '.agents/bin/ksf');
+  const launchers = legacy ? ['.agents/bin/ksf'] : launcherFiles;
+  if (!manifest || manifest.schema_version !== (legacy ? 2 : 3) || (!legacy && manifest.launcher_protocol !== launcherProtocol) || manifest.name !== products.core || manifest.product !== products.core ||
       !isRepository(manifest.core?.repository) || !isRevision(manifest.core?.revision) ||
       !isBranch(manifest.core.branch) || typeof manifest.development !== 'boolean' ||
       !['darwin-arm64', 'darwin-x64'].includes(manifest.platform) || !manifest.files || Array.isArray(manifest.files)) {
@@ -143,7 +150,7 @@ export function validateManifest(manifest) {
   const entries = Object.entries(manifest.files);
   if (entries.length === 0 || entries.length > 20000) fail('RELEASE_INVALID', 'Invalid managed file count.');
   for (const [path, entry] of entries) {
-    if (!managedPath(path) || !entry || !isSHA(entry.sha256) || ![0o644, 0o755].includes(entry.mode) || !managedPath(entry.source_path)) {
+    if (!acceptsPath(path) || !entry || !isSHA(entry.sha256) || ![0o644, 0o755].includes(entry.mode) || !acceptsPath(entry.source_path)) {
       fail('RELEASE_INVALID', `Invalid managed file: ${path}.`);
     }
     if (entry.baseline !== undefined) {
@@ -156,12 +163,38 @@ export function validateManifest(manifest) {
   for (let i = 0; i + 1 < sorted.length; i++) {
     if (sorted[i + 1].startsWith(`${sorted[i]}/`)) fail('RELEASE_INVALID', `File/directory collision: ${sorted[i]}.`);
   }
-  for (const required of ['AGENTS.md', '.agents/bin/ksf', '.agents/core/build.json', '.agents/core/manifest.yaml', '.agents/core/distribution.json']) {
+  for (const required of ['AGENTS.md', ...launchers, '.agents/core/build.json', '.agents/core/manifest.yaml', '.agents/core/distribution.json']) {
     if (!Object.hasOwn(manifest.files, required)) fail('RELEASE_INVALID', `Required file absent: ${required}.`);
   }
-  if (manifest.files['.agents/bin/ksf'].mode !== 0o755) fail('RELEASE_INVALID', 'Release launcher must be executable.');
+  if (manifest.files[launchers[0]].mode !== 0o755) fail('RELEASE_INVALID', 'Release launcher must be executable.');
   return manifest;
 }
+export function validateReceipt(manifest) {
+  if (!manifest || manifest.schema_version !== 4 || manifest.launcher_protocol !== launcherProtocol ||
+      manifest.name !== products.core || manifest.product !== products.core ||
+      !isRepository(manifest.core?.repository) || !isRevision(manifest.core?.revision) || !isBranch(manifest.core?.branch) ||
+      Object.keys(manifest.core).some(key => !['repository', 'branch', 'revision'].includes(key)) ||
+      typeof manifest.development !== 'boolean' || !['darwin-arm64', 'darwin-x64'].includes(manifest.platform) ||
+      Object.keys(manifest).some(key => !['schema_version', 'launcher_protocol', 'name', 'product', 'version', 'platform', 'core', 'development'].includes(key))) {
+    fail('RELEASE_INVALID', 'Invalid compact Core release receipt.');
+  }
+  versionParts(manifest.version);
+  return manifest;
+}
+export function releaseReceipt(manifest) {
+  validateContributionManifest(manifest);
+  if (manifest.files && Object.entries(manifest.files).some(([path, file]) => path !== file.source_path)) {
+    fail('RELEASE_INVALID', 'Compact receipts require identical workspace and Core source paths.');
+  }
+  return validateReceipt({ schema_version: 4, launcher_protocol: launcherProtocol, name: products.core, product: products.core,
+    version: manifest.version, platform: manifest.platform,
+    core: { repository: manifest.core.repository, branch: manifest.core.branch, revision: manifest.core.revision },
+    development: manifest.development });
+}
+export function validateManifest(manifest) { return manifest?.schema_version === 4 ? validateReceipt(manifest) : validateReleaseManifest(manifest, false); }
+// Compatibility is deliberately limited to reading a committed contribution baseline.
+// Installation, upgrade and recovery still require the current launcher protocol.
+export function validateContributionManifest(manifest) { return manifest?.schema_version === 4 ? validateReceipt(manifest) : validateReleaseManifest(manifest, manifest?.schema_version === 2); }
 export function installedManifest(root, optional = false) {
   const data = readJSON(root, '.agents/core/release.json', optional);
   return data === null ? null : validateManifest(data);

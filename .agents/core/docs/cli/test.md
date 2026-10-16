@@ -9,7 +9,7 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf test
+.agents/ksf test
 ```
 
 当前不支持 `--json`、测试过滤、附加文件参数或其他选项。

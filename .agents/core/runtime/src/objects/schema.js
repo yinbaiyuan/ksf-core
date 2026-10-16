@@ -8,8 +8,8 @@ export const types = {
 };
 export const protectedPaths = {
   'workflow.ksf.entry': 'AGENTS.md',
-  'partner.ksf.assistant': '.agents/core/abilities/partners/ksf-assistant/partner.md',
-  'competency.ksf.task-route': '.agents/core/abilities/competencies/task-route/competency.md',
+  'partner.ksf.runtime': '.agents/core/abilities/partners/ksf-runtime/partner.md',
+  'competency.ksf.ability-route': '.agents/core/abilities/competencies/ability-route/competency.md',
   'competency.ksf.project-route': '.agents/core/abilities/competencies/project-route/competency.md',
   'competency.ksf.knowledge-route': '.agents/core/abilities/competencies/knowledge-route/competency.md',
   'competency.ksf.asset-maintenance': '.agents/core/abilities/competencies/asset-maintenance/competency.md',

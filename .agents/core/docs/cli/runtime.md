@@ -9,8 +9,8 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf runtime verify
-.agents/bin/ksf runtime verify --json
+.agents/ksf runtime verify
+.agents/ksf runtime verify --json
 ```
 
 当前不支持单独的 `runtime`、安装、升级、卸载、清理或版本切换子命令。

@@ -9,8 +9,8 @@
 ## 调用
 
 ```sh
-.agents/bin/ksf hello
-.agents/bin/ksf hello --json
+.agents/ksf hello
+.agents/ksf hello --json
 ```
 
 仅接受上述两种形式，不接受重复选项、额外参数或自定义问候内容。

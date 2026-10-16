@@ -8,7 +8,9 @@ KSF 分为系统、用户模板和用户实例三层：
 | `ksf-workspace` | KSF 用户模板：随包系统、空的用户目录、初始说明和忽略规则 | 从 ksf-core 构建，发布模板目录、模板压缩包及官方模板仓库 |
 | `ksf` 或用户自定义名称 | 真正的 KSF 用户实例，保存该用户的项目、知识、能力及配置 | 复制/解压模板或从模板创建私有仓库后使用；实例名称不进入系统版本身份 |
 
-三种身份的程序定义统一位于 [products.js](../runtime/src/distribution/products.js)。命令入口仍为 `.agents/bin/ksf`，不随用户实例目录或仓库名称变化。
+三种身份的程序定义统一位于 [products.js](../runtime/src/distribution/products.js)。命令入口仍为 `.agents/ksf`，不随用户实例目录或仓库名称变化。
+
+Agent 入口为 AGENTS.md → [ksf-runtime](../abilities/partners/ksf-runtime/partner.md) → ability-route；系统维护选择 [ksf-maintainer](../abilities/partners/ksf-maintainer/partner.md)，按发布、创建工作区、升级或贡献基本功执行。职责和情境判断由对象定义持有，本文持有发行协议与程序行为。检查、安装和公开提交分别核对用户要求，不因发现新版本而安装。
 
 Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱、源档和归档目录由发行程序生成。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。
 
@@ -18,51 +20,56 @@ Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项�
 
 仓库模板：打开官方 ksf-workspace 页面，点击 **Use this template → Create a new repository**，名称默认建议 `ksf`，也可自定义，选择 **Private** 后创建，再克隆自己的用户实例仓库。公开仓库的 fork 也公开，个人资料应进入自己的私有仓库。用户实例具有独立历史，升级和贡献均不依赖这个历史。
 
-所有工作区统一调用 `./.agents/bin/ksf`，其他 cwd 使用绝对路径。Core 开发仓库不会自动升级。
+macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其他 cwd 使用入口绝对路径。Windows 当前只实现入口恢复和 Core 转交契约，运行时尚未接入。Core 开发仓库不会自动升级。入口职责与协议见[启动入口](../runtime/launcher.md)。
 
 ## 文件归属
 
 ```text
 .agents/
-├── bin/ksf        固定启动与恢复入口
+├── ksf            macOS 固定启动与恢复入口
+├── ksf.ps1        Windows 固定恢复入口
 ├── core/          可升级的系统定义、程序和文档
+├── user-data/     KSF 系统级用户设置与状态，随用户实例保留
 └── runtime-data/  本机运行时、缓存、备份和贡献草稿
 ```
 
 
 | 位置 | 行为 |
 | --- | --- |
-| 清单中的 `.agents/core/` 文件、根 AGENTS.md 和 `.agents/bin/ksf` | 系统管理，升级合并本地修改 |
-| `.agents/core/release.json` | 生成的精确来源、版本、平台、文件清单和原版基线，禁止手工编辑 |
+| 清单中的 `.agents/core/` 文件、根 AGENTS.md、`.agents/ksf` 和 `.agents/ksf.ps1` | 系统管理，升级合并本地修改 |
+| `.agents/core/release.json` | schema 4 小型发行凭据，仅保存精确 Core 来源、版本、平台及启动协议；禁止手工编辑 |
 | `.agents/core/manifest.yaml` | 生成的运行时声明，升级使用发行版本，不作为源码贡献 |
 | 根 README.md、.gitignore | 首次生成的用户文件，Core 升级不覆盖 |
 | 项目、知识、能力、源档、归档、收件箱 | 个人内容，发行不读取，升级不写入 |
+| `.agents/user-data/` | 用户实例所有的系统级用户数据，Core 包不收录实际值，升级与回滚不覆盖 |
 | `.agents/runtime-data/` | 本机运行时、升级备份、失败事务、检查记录和贡献草稿，不提交 |
 | `.ksf-template.json` | 记录初始 ksf-workspace 模板产品、默认实例名与出处；不限定实际实例名称，当前系统版本以 release.json 为准 |
 
-ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许在官方模板仓库运行，用户复制或从模板创建的实例仓库不会执行该发布任务。
+新 ksf-workspace 不携带模板自同步工作流。官方模板由 Core 发行 Actions 使用同一批已验证产物直接更新；首次同步移除官方仓库的旧定时任务，不执行旧模板程序。已有用户实例的根 `.github/` 是用户内容，普通系统升级不删除它；旧工作流的官方仓库条件仍限制其运行。
+
+模板写入前核对观察到的远程提交及其出处：拒绝版本倒退和同版本不同 Core 提交；同版本同来源可重核模板树。写分支前重新读取 head，发生竞争则停止，最终 ref 更新始终非强制。mirror 也拒绝比本地模板更旧的发行源。
 
 ## 检查和升级
 
 ```sh
-./.agents/bin/ksf system read --json
-./.agents/bin/ksf system check --json
-./.agents/bin/ksf system update --dry-run --json
-./.agents/bin/ksf system update --json
-./.agents/bin/ksf system rollback --json
+./.agents/ksf system read --json
+./.agents/ksf system check --json
+./.agents/ksf system update --dry-run --json
+./.agents/ksf system update --json
+./.agents/ksf system rollback --json
 ```
 
-发行源及间隔在 `.agents/core/distribution.json`。正常业务 CLI 启动前按间隔执行 `system sync`，默认每天检查一次。失败也记录尝试，离线不阻断已有版本的业务。帮助、测试、构建、发行、贡献和 system 不嵌套触发检查。新会话没有 CLI 业务时，入口搭档执行一次 sync。`KSF_SKIP_AUTO_UPDATE=1` 临时禁用自动检查，显式操作仍可用。开发包不自动更新。
+启动和普通 CLI 不访问远程版本源、不自动安装更新。用户通过 Agent 明确要求后，由 ksf-runtime 经 ability-route 选择 ksf-maintainer，按对应基本功执行；也可直接调用维护 CLI。查询和预览不产生安装授权。`system sync` 仅显式调用时按 `.agents/core/distribution.json` 的间隔缓存检查并更新，默认间隔一天；显式 check/update 不受此间隔限制。`KSF_SKIP_AUTO_UPDATE` 保留为无作用兼容项。开发仓库不能当发行实例安装。
 
-默认源是 GitHub 最新正式 Release 中公开的 `ksf-core-release.json` 下载地址，直接读取索引，用户无需账户或令牌，也不消耗匿名 REST API 配额。`--source` 可临时选择 HTTPS 索引地址、Release API 或本地索引，`--from` 安装离线 Core 更新包，均不持久改变发行源。
+默认源是 GitHub 最新正式 Release 中公开的 `ksf-core-release.json` 下载地址，直接读取索引，用户无需账户或令牌，也不消耗匿名 REST API 配额。`--source` 可临时选择 HTTPS 索引地址、Release API 或本地索引，`--from` 选择指定 Core 更新包，原版基线仍按需联网取得，均不持久改变发行源。
 
 索引声明版本、精确 Core 提交、适用平台、包大小和 SHA256。程序验证下载、受限 USTAR+gzip 归档、路径及条目类型，并逐一核对文件清单。拒绝路径穿越、重复条目、链接、特殊文件和清单外文件。
 
-安装清单采用协议 2，系统文件统一位于 `.agents/core/`，固定入口为 `.agents/bin/ksf`，运行数据位于 `.agents/runtime-data/`。系统贡献目标为 main。
+实例发行凭据采用协议 4，更新包内部校验清单沿用协议 3；两者声明 launcher_protocol: 1，系统文件统一位于 `.agents/core/`，固定入口为 `.agents/ksf`，运行数据位于 `.agents/runtime-data/`。系统贡献目标为 main。
 
-升级比较旧官方版本、本地文件、新官方版本。未修改文件更新，本地单独修改保留，双方文本修改使用系统 diff3。文本、二进制或删除冲突时保留当前系统，结果列出路径，文本冲突附审查内容；修订本地修改后重试。个人目录和用户忽略规则不参与合并。
+升级比较凭据固定的旧 Core 提交、本地文件和新官方版本。旧版文件树通过远程 Git 对象读取，原文仅在实际合并需要时取得并校验 Git blob；公开原文可按准确提交从 raw 地址读取，避免每个文件消耗一次匿名 REST 请求；不使用最新 main，不额外保存全量原版快照。未修改文件更新，本地单独修改保留，双方文本修改使用系统 diff3。文本、二进制或删除冲突时保留当前系统，结果列出路径，文本冲突附审查内容；修订本地修改后重试。个人目录和用户忽略规则不参与合并。
 
-候选系统先验证随包运行时及变化的 JavaScript 语法，再通过事务切换。事务只整体交换 `.agents/core/`；`.agents/bin/` 保持可用，入口文件及 AGENTS.md 分别原子更新，`.agents/runtime-data/` 不参与系统替换。旧版本保存在 `.agents/runtime-data/system/backups/`，不自动上传或删除。普通 I/O 失败恢复原系统；进程中断后的下一次固定入口启动先恢复事务，再准备 Node。恢复不依赖 Git、网络或完整 Node，活跃事务通过 PID 和启动身份识别，不被其他启动器撤销。
+候选系统先验证随包运行时、变化的 JavaScript 语法、固定入口及全部系统对象的精确引用，再通过事务切换。定义检查采用候选自身的身份规范，使有效旧版入口可以回滚。事务只整体交换 `.agents/core/`；`.agents/ksf` 和 `.agents/ksf.ps1` 位于 Core 外，入口文件及 AGENTS.md 仅在内容或权限变化时原子更新，`.agents/runtime-data/` 不参与系统替换。旧版本保存在 `.agents/runtime-data/system/backups/`，不自动上传或删除。普通 I/O 失败恢复本事务实际替换的内容；若根文件有其他改动则保留文件和事务并报恢复冲突；进程中断后的下一次固定入口启动先恢复事务，再准备 Node。恢复不依赖 Git、网络或完整 Node，活跃事务通过 PID 和启动身份识别，不被其他启动器撤销。
 
 回滚恢复上次事务。升级后又修改 Core 时返回 `ROLLBACK_LOCAL_CHANGES`，避免丢失新编辑。个人内容不受回滚影响。
 
@@ -71,33 +78,35 @@ ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许�
 ## 贡献修改
 
 ```sh
-./.agents/bin/ksf contribute prepare --paths .agents/core/runtime/src/services/hello.js --title '修复问候输出' --json
-./.agents/bin/ksf contribute read <返回的贡献ID> --json
-./.agents/bin/ksf contribute submit <贡献ID> --reviewed <预览摘要> --dry-run --json
-./.agents/bin/ksf contribute submit <贡献ID> --reviewed <预览摘要> --json
+./.agents/ksf contribute prepare --paths .agents/core/runtime/src/services/hello.js --title '修复问候输出' --json
+./.agents/ksf contribute read <返回的贡献ID> --json
+./.agents/ksf contribute submit <贡献ID> --reviewed <预览摘要> --dry-run --json
+./.agents/ksf contribute submit <贡献ID> --reviewed <预览摘要> --json
 ```
 
-用户在实际工作区修改、验证 Core，工具只提取选定系统差异。prepare 冻结内容并生成公开 diff、标题、说明和摘要。Agent 展示这些内容后再提交；路径属于系统不代表具体文字必然适合公开。`--all` 选择全部系统改动，需先核对范围。
+用户在实例修改、验证系统并先形成本地 Git 提交。prepare 读取最新 HEAD 中的系统文件及同一提交保存的正式发行清单，比较完整系统快照，包含多次已提交修改的累积差异。暂存区、未暂存修改和未跟踪文件不参与，也不阻止贡献；命令不自动暂存或提交。prepare 冻结 sourceCommit、基线身份、选定内容、公开 diff、标题、说明和 digest。Agent 展示后按授权提交；系统路径中的文字同样要审阅。`--all` 选择全部已提交系统差异，需先核对范围。
 
-准备与预览不要求 Git 或账户。实际提交从 `KSF_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN` 或已有 `gh auth login` 取得授权。令牌不写入草稿、不回显，也不发往发行下载地址。
+准备要求 KSF 根本身是 Git 根、有 HEAD 和正式基线，联网取得该提交中小型凭据固定的原版 Core；公开源可匿名读取，也可复用已有授权。read 及 submit dry-run 仅本地读取。贡献读取兼容 schema 2、3、4 及旧启动器路径，不读取未提交的发行凭据。真实 submit 在任何远程写入前核对原版 Core 提交、文件内容和权限；无法核实时保留计划。实际提交从 `KSF_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN` 或已有 `gh auth login` 取得授权。令牌不写入草稿、不回显，也不发往发行下载地址。
 
 工具创建或复用正确的 ksf-core fork，在 `contrib-<ID>` 形成新提交，并向发行记录指定的 main 分支发起草稿 PR。父提交是发行原版的 Core 提交，不是个人 Git HEAD；个人历史、提交说明、目录和作者配置不进入新提交。Core 所有者可以直接建立自身分支。
 
-审查后文件或安装版本改变时要求重新准备。相同 ID 重试恢复已有分支和 PR，远程分支被其他修改时拒绝覆盖。工具不自动合并 PR。
+草稿 PR 的交付提醒按 [Git 协作规则中的用户贡献要求](git.md#用户贡献)执行。
+
+首次发布前本地 HEAD 改变须重新准备；仅工作目录或暂存区变化不使冻结计划失效。本地 sourceCommit 仅留在本机记录，不发送给 Core；PR 的父提交仍为原版 Core，不自动变基到最新 main。已记录远程提交的相同 ID 重试可核对旧计划，不混入新 HEAD。旧 schema 1 计划仍可读取，只能只读核对已有 PR，不能新发布。重试重新查询远程分支、提交和 PR，缓存链接不能证明仍有效。远程变更、PR 缺失或状态未知时保留现场；合并后删除分支可核对原提交后报告 merged，已关闭未合并则报告 closed，不重复创建。工具不自动合并 PR。不同计划若来自同一本地节点或相同系统内容，prepare 返回既往 PR 提示及只读核对结果；相同内容的 submit 返回已核实的原 PR，不重复创建。部分成功或状态未知时先恢复原 ID，不因新 prepare 而绕过保护。
 
 ## 维护和发布
 
-系统、文档和模板源码统一在 Core 修改。模板源为 `.agents/core/distribution/template/`，官方工作流源为 `.agents/core/distribution/template-workflow.yml`。
+系统、文档和模板源码统一在 Core 修改。模板源为 `.agents/core/distribution/template/`；发行工作流只保存在 Core 的 `.github/workflows/release.yml`，不复制进模板。
 
 ```sh
-.agents/bin/ksf runtime verify --json
-.agents/bin/ksf test
-.agents/bin/ksf release build --output .agents/runtime-data/release --json
-.agents/bin/ksf release publish .agents/runtime-data/release --dry-run --json
-.agents/bin/ksf release publish .agents/runtime-data/release --json
+.agents/ksf runtime verify --json
+.agents/ksf test
+.agents/ksf release build --output .agents/runtime-data/release --json
+.agents/ksf release publish .agents/runtime-data/release --dry-run --json
+.agents/ksf release publish .agents/runtime-data/release --json
 ```
 
-官方构建要求纯系统提交、干净源码，版本取 build.json。产出定义如下；已有输出目录不覆盖，allow-dirty 仅生成不可发布的开发包，构建不扫描个人目录。
+官方构建要求纯系统提交、干净源码，版本取 build.json。系统文件须与该提交的 Git blob、权限及路径集合完全一致；忽略文件混入也不能以干净 Git 状态冒充正式来源。产出定义如下；已有输出目录不覆盖，allow-dirty 仅生成不可发布的开发包，构建不扫描个人目录。
 
 | 产物 | 定义 |
 | --- | --- |
@@ -112,12 +121,43 @@ ksf-workspace 模板带 `.github/workflows/sync-template.yml`，任务只允许�
 
 publish 验证包、上游提交和标签，上传全部草稿资产，更新生成模板，最后公开 Release。相同构建可重试，同版本的不同资产不能覆盖。现有同名模板仓库必须有正确生成标记，否则拒绝覆盖。
 
-自动发布不需要跨仓库令牌：ksf-core 标签工作流用自身 GITHUB_TOKEN 执行 `release publish --release-only`，ksf-workspace 工作流每 15 分钟用自己的令牌执行 `release mirror`，也可手动运行。GitHub 调度可能延迟。首次创建官方 ksf-workspace 并设置 Template repository 是维护者的一次性操作。无新版本时镜像只检查索引，不重复下载大包。
+### 从用户实例发起远程发行
+
+用户实例可由 maintainer 按 system-release 方法发起 Core Actions，无需本地 Core 克隆。实例修改须先贡献并合入 Core，正式版本号也须先进入 Core 的版本配置。发起账户须有 Core Actions 运行权限；安装 KSF 或配置模板 App 不授予此权限。不要将个人仓库 origin 当作 Core。
+
+```sh
+# 明确要求正式发布后，在任意目录执行；发的是远程 main 的版本与提交。
+gh workflow run release.yml --repo yinbaiyuan/ksf-core --ref main -f operation=release
+# 只恢复某个已经公开的发行版本的模板，不重建、不创建 Core Release。
+gh workflow run release.yml --repo yinbaiyuan/ksf-core --ref main -f operation=template-only -f release_tag=v0.1.1
+```
+
+示例版本仅说明参数，不代表该版本已发布。也可在 Core 的 Actions 页面选择 Publish ksf-core Release → Run workflow。正常 release 不接受 release_tag；版本来自所选 Core 源码。标签推送要求 v<版本> 与源码版本一致；普通 main 合并不触发发行。请求结果未知时先查实际运行，不重复发起；并发运行不能靠“最新一条”归属。记录工作流、发起时间、操作者、事件、提交和运行 URL，按原运行恢复。
+
+### 三阶段协议与失败恢复
+
+1. 准备：保留 Windows 启动器检查；验证 macOS ARM64 运行时及完整回归，干净 Core 只构建一次。两个压缩包和索引同时上传，冻结 Core 提交、索引 SHA256 和 artifact ID。恢复模式从指定公开 Release 下载并核对标签提交、索引、大小和摘要，不查询 latest；仅支持包含本恢复桥接程序的 Core 发行。
+2. Core：使用自身 GITHUB_TOKEN，仅此作业 contents: write。按 artifact ID 下载，在准备时固定的 Core 提交上核对索引摘要，再执行 release publish --release-only。模板返回 status=not-requested、published=false、scheduled=false，不能据此声称已同步。
+3. 模板：Core 发布成功后才运行；template-only 则在准备成功后运行，即使 Core 作业被跳过。使用同一 artifact ID 与对应 Core 提交中的程序执行 release template。此阶段只用 App 的 workspace 安装令牌。实际远程分支、提交树、来源标识和发行凭据全部匹配才返回 verified=true 与 coreRevision。
+
+整个工作流串行排队，不取消前一运行。Core 已成功而模板失败时，两者状态分开报告；选择 Re-run failed jobs，复用成功准备阶段的产物与输出，不重跑 Core。artifact 保留 14 天，过期后按原 release_tag 发起 template-only，从原 Release 恢复。无论何种恢复都不覆盖同版本不同内容、不降低模板版本、不强制写分支。响应丢失时先核对远程；同版本同来源的相同模板树可重复验证，不新建无意义提交。
+
+### GitHub App 配置
+
+在维护者账户创建私有 App，仅安装到官方 ksf-workspace；关闭 webhook，不请求用户 OAuth。Repository permissions 为 Contents: read/write、Workflows: read/write，以及 GitHub 必需的 Metadata: read。Workflows 权限用于首次迁移删除旧同步任务。无需 Administration、Secrets 或 Core 仓库访问权限；官方模板必须预先存在且已标记为 Template repository，不自动建仓或修改仓库设置。
+
+Core 配置变量 KSF_TEMPLATE_APP_CLIENT_ID 与 Secret KSF_TEMPLATE_APP_PRIVATE_KEY。私钥只存 Secret，不进入源码、发行包、贡献或运行日志；初次写入后的临时私钥删除。使用官方 actions/create-github-app-token（固定 v3.3.0 提交），owner 和 repositories 显式限定官方模板，显式请求 contents/workflows 写权限；每个作业独立签发，结束后默认撤销。
+
+在 Core 发布前先获取受限令牌，读取 installation/repositories，确保令牌只可见目标模板，并验证远程生成标识。缺少配置、权限或模板出处时在任何 Core 发布写入前停止。模板作业重新获取并复核令牌，不能沿用可能过期的预检令牌。权限或分支规则后来变化仍可能导致部分成功，按上述恢复处理，不降低保护。
+
+新包拒绝携带任意附加工作流。兼容旧 schema-3 包的原工作流时，必须与包内 Core 的旧模板源和官方仓库替换结果精确一致；此兼容不使新构建重新生成旧任务。release mirror 保留为显式工具，已不承担官方定时同步。
 
 ## 协议与验证边界
 
-安装清单协议版本 2，更新索引仍为协议 1。每个文件记录路径、权限、SHA256 和 Core 源码位置；不超过 2 MiB 的 UTF-8 文本附原版内容，二进制只保存摘要。下载单包上限 256 MiB，归档展开上限 512 MiB，不执行安装钩子。
+实例小型发行凭据协议为 4，约数百字节，不包含文件清单、原版正文或快照。原版由准确 Core 提交定位，远程读取其完整系统树，按需取得必要 blob 并验证内容身份。Core 更新包内的协议 3 清单只保存路径、权限、SHA256 和源码位置，供受限解包校验；旧协议 2／3 基线继续按兼容边界读取。更新索引仍为协议 1。下载单包上限 256 MiB，归档展开上限 512 MiB，不执行安装钩子。
 
 本版使用 HTTPS 与摘要校验，没有独立离线签名根；发行地址及发布账户属于信任来源。持久事务覆盖普通 I/O 失败与进程中断，不声称穷尽全部硬件断电故障。
 
 测试分别使用小型运行时、真实本机 HTTP、模拟 GitHub API及真实随包 Node/发行包。真实外部发布状态以实施记录中的证据为准，不能把模拟 API 当作已发布。
+
+系统级用户设置的格式、读写和跨设备边界见 [user-data](cli/user-data.md)。模板只生成空目录占位；正常工作内容仍在正常用户空间。

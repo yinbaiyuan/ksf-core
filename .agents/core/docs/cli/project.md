@@ -9,13 +9,13 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 ## 调用与操作
 
 ```sh
-.agents/bin/ksf project list --json
-.agents/bin/ksf project read "KSF运行机制测试" --part all --json
-.agents/bin/ksf project write "新项目" --data '{"metadata":{"name":"新项目","description":"本项目的目标"},"body":"# 新项目\n\n项目目标。\n"}' --dry-run --json
-.agents/bin/ksf project write "新项目" --from project-input.json --json
-.agents/bin/ksf project check "KSF运行机制测试" --json
-.agents/bin/ksf project check --json
-.agents/bin/ksf project remove "新项目" --dry-run --json
+.agents/ksf project list --json
+.agents/ksf project read "KSF运行机制测试" --part all --json
+.agents/ksf project write "新项目" --data '{"metadata":{"name":"新项目","description":"本项目的目标"},"body":"# 新项目\n\n项目目标。\n"}' --dry-run --json
+.agents/ksf project write "新项目" --from project-input.json --json
+.agents/ksf project check "KSF运行机制测试" --json
+.agents/ksf project check --json
+.agents/ksf project remove "新项目" --dry-run --json
 ```
 
 | 操作 | 目标 | 行为 |

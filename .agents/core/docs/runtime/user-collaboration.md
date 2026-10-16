@@ -7,7 +7,7 @@
 | 内容 | 维护位置 |
 | --- | --- |
 | 用户身份、称呼、协作目标、默认气质与表达偏好 | 用户区 `知识/用户画像.md` |
-| 短卡加载、持续采用、覆盖关系、交接和通用交付规则 | [ksf-assistant](../../abilities/partners/ksf-assistant/partner.md) |
+| 短卡加载、持续采用、覆盖关系、交接和通用交付规则 | [ksf-runtime](../../abilities/partners/ksf-runtime/partner.md) |
 | 原文核对、范围、时效、当前事实与历史材料的冲突 | [knowledge-route](../../abilities/competencies/knowledge-route/competency.md) |
 | 后续已授权修订、基线复核、验证及回退 | [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md) |
 

@@ -146,8 +146,8 @@ test('a symlink output is refused and its target remains unchanged', async t => 
 test('real ksf build recreates a missing or malformed manifest without global Node', { timeout: 60_000 }, t => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf clean build 测试 ')));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  mkdirSync(join(root, '.agents/bin'), { recursive: true });
-  cpSync(join(repo, '.agents/bin/ksf'), join(root, '.agents/bin/ksf'));
+  mkdirSync(join(root, '.agents'), { recursive: true });
+  cpSync(join(repo, '.agents/ksf'), join(root, '.agents/ksf'));
   cpSync(join(repo, '.agents/core/runtime'), join(root, '.agents/core/runtime'), {
     recursive: true, filter: path => !path.includes('/packages') && !path.includes('/tests'),
   });
@@ -157,7 +157,7 @@ test('real ksf build recreates a missing or malformed manifest without global No
     mkdirSync(join(root, '.agents/core/runtime/packages'), { recursive: true });
     linkSync(join(repo, item.archive_path), join(root, item.archive_path));
   }
-  const run = args => spawnSync(join(root, '.agents/bin/ksf'), args, {
+  const run = args => spawnSync(join(root, '.agents/ksf'), args, {
     encoding: 'utf8', cwd: '/tmp', env: { ...process.env, PATH: '' }, timeout: 30_000,
   });
   const output = join(root, '.agents/core/manifest.yaml');

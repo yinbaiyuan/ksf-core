@@ -104,7 +104,7 @@ function sourceDigest(root, packages) {
     else if (stat.isFile()) files.push(rel);
   }
   walk(join(root, '.agents/core'));
-  if (existsSync(join(root, '.agents/bin/ksf'))) files.push('.agents/bin/ksf');
+  for (const launcher of ['.agents/ksf', '.agents/ksf.ps1']) if (existsSync(join(root, launcher))) files.push(launcher);
   if (existsSync(join(root, 'AGENTS.md'))) files.push('AGENTS.md');
   const hash = createHash('sha256');
   for (const path of files.sort()) hash.update(JSON.stringify([path, digest(readFileSync(join(root, path)))]));
@@ -152,7 +152,7 @@ export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
     name: products.core, version: config.version,
     runtime: { bootstrap_protocol: 1, status: 'prototype', engine: 'nodejs',
       release_channel: config.runtime.release_channel, version: config.runtime.version,
-      distribution: 'bundled', source_language: 'javascript', interface: 'cli', cli_path: '.agents/bin/ksf',
+      distribution: 'bundled', source_language: 'javascript', interface: 'cli', cli_path: '.agents/ksf',
       source_entry: '.agents/core/runtime/src/cli.js', packages },
     build: { generator: 'ksf build', built_at: builtAt ?? new Date().toISOString(), ...gitInfo(sourceRoot ?? root),
       source_sha256: sourceSha256, input_sha256: digest(bytes),

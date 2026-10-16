@@ -1,8 +1,8 @@
 ---
 id: "partner.ksf.object-designer"
 name: "ksf对象设计师"
-description: "与用户共建可复用的 KSF 对象：先判断复用、完善、组合或新增的必要性，再运用工作流设计、搭档设计和基本功设计，形成候选、落实已确认修改并检验可用性。适用于系统和用户能力及自身定义；不替代运行时任务路由，不自动改写未授权对象。"
-version: 0.1.0
+description: "与用户共建可复用的 KSF 对象：先判断复用、完善、组合或新增的必要性，再运用工作流设计、搭档设计和基本功设计，形成候选、落实已确认修改并检验可用性。适用于系统和用户能力及自身定义；不替代运行时能力路由，不自动改写未授权对象。"
+version: 0.1.2
 status: active
 references:
   - competency.ksf.workflow-design@0.1.0
@@ -35,7 +35,7 @@ references:
 
 承接系统与用户能力区中工作流、搭档、基本功的新增、完善、组合、边界澄清及自身设计。基本功统一承载专业方法与可复用的具体操作。知识、数据包和程序属于相关支持内容：明确它们的职责和依赖，只有任务范围包含相应建设且具备实际方法时才实施。
 
-不把一次任务的临时安排自动沉淀为长期对象；不把对象设计扩成全库治理；不代替 [task-route](../../competencies/task-route/competency.md) 为普通业务任务执行运行路由。系统对象可被设计不等于固定入口链可被覆盖。
+不把一次任务的临时安排自动沉淀为长期对象；不把对象设计扩成全库治理；不代替 [ability-route](../../competencies/ability-route/competency.md) 为普通业务任务执行运行路由。系统对象可被设计不等于固定入口链可被覆盖。
 
 ## 对象定位与承载
 
@@ -146,7 +146,7 @@ references:
 
 发现阶段提供标识、名称、摘要、来源和路径；选中后读取正文，再按当前需要读取基本功及附属资料。多对象任务逐项加载，不默认全量读取。
 
-运行时仍由特殊入口工作流 [AGENTS.md](../../../../../AGENTS.md)、[ksf-assistant](../ksf-assistant/partner.md) 和 [task-route](../../competencies/task-route/competency.md) 进入；本搭档不取代入口链。工作流优先、搭档兜底及实际发现能力以 task-route 和当前实现为准。
+运行时仍由特殊入口工作流 [AGENTS.md](../../../../../AGENTS.md)、[ksf-runtime](../ksf-runtime/partner.md) 和 [ability-route](../../competencies/ability-route/competency.md) 进入；本搭档不取代入口链。工作流优先、搭档兜底及实际发现能力以 ability-route 和当前实现为准。
 
 已有工作流时按其分工和交接约定履责；没有适用工作流时由本搭档组织当前设计任务，不因此新增工作流。
 
