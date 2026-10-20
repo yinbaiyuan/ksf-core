@@ -43,7 +43,7 @@ test('shipped definitions resolve the minimal runtime in a fresh root with empty
     assert.equal(listed.data.complete, true, JSON.stringify(listed.errors));
     for (const row of listed.data.objects) assert.equal(f.query(type, 'check', row.id).data.valid, true, row.id);
   }
-  const entry = f.query('partner', 'read', 'partner.ksf.runtime@0.1.1');
+  const entry = f.query('partner', 'read', 'partner.ksf.runtime@0.1.4');
   assert.deepEqual(entry.errors, []);
   assert.deepEqual(entry.data.references.map(row => row.id), ['competency.ksf.ability-route', ...runtimeNames.map(name => 'competency.ksf.' + name)]);
   for (const ref of entry.data.references) {
@@ -108,7 +108,7 @@ test('real CLI resolves the copied runtime from unrelated cwd without creating u
     return JSON.parse(result.stdout);
   };
   assert.equal(launch(['context', 'capabilities']).data.complete, true);
-  const entry = launch(['partner', 'read', 'partner.ksf.runtime@0.1.1']);
+  const entry = launch(['partner', 'read', 'partner.ksf.runtime@0.1.4']);
   for (const dependency of entry.data.references) assert.equal(launch(['competency', 'check', dependency.reference]).data.valid, true);
   for (const folder of userFolders) assert.deepEqual(files(join(f.root, folder)), []);
 });

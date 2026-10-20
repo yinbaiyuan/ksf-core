@@ -1,7 +1,9 @@
+import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
 import { resolve } from 'node:path';
 import { MetadataError, decodeUtf8, invalid } from '../metadata/errors.js';
 import { readSnapshot } from '../metadata/files.js';
 import { types, parseReference } from '../objects/schema.js';
+import { validSourceId } from '../sources/schema.js';
 import { parseObjectInput, objectQuery, objectMutation } from '../services/objects.js';
 
 const operations = new Set(['list', 'read', 'write', 'remove', 'check']);
@@ -15,9 +17,9 @@ const allowed = {
 
 export function objectHelp(type, operation) {
   const lines = {
-    list: 'list [--source effective|system|user|all] [--json]',
-    read: 'read <id[@version]> [--part metadata|body|all] [--source effective|system|user] [--json]',
-    check: 'check <id[@version]> [--source effective|system|user] [--json]',
+    list: 'list [--source effective|system|user|all|source-id] [--json]',
+    read: 'read <id[@version]> [--part metadata|body|all] [--source effective|system|user|source-id] [--json]',
+    check: 'check <id[@version]> [--source effective|system|user|source-id] [--json]',
     write: 'write <id> (--data <JSON> | --from <file>) [--dry-run] [--json]',
     remove: 'remove <id> [--dry-run] [--json]',
   };
@@ -28,7 +30,7 @@ export function objectHelp(type, operation) {
     'Writes only affect user objects. A system object is derived as a whole directory.\n' +
     'user_revision and upstream are service-managed fields.\n' +
     'draft/active user objects take over; archived user objects do not.\n' +
-    'Exact versions: matching user first, then matching system.\n' +
+    'Exact versions: matching user, unique linked source, then system.\n' +
     'remove physically deletes the complete user directory, including baseline and assets.\n' +
     '--from paths are based on the KSF root. --dry-run does not publish changes.\n';
 }
@@ -39,33 +41,14 @@ export function parseObjectArgs(type, args) {
   const [operation, ...rest] = args;
   if (!operations.has(operation)) invalid('Expected list, read, write, remove or check.');
   const parsed = { operation, source: 'effective', part: 'all', dryRun: false };
-  const seen = new Set();
-  let end = false;
   const setTarget = token => {
     if (parsed.reference !== undefined || operation === 'list') invalid('Unexpected object argument.');
     parsed.reference = token;
   };
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    if (end) { setTarget(token); continue; }
-    if (token === '--') { end = true; continue; }
-    if (!token.startsWith('-')) { setTarget(token); continue; }
-    const match = /^(?:--([a-z][a-z-]*)(?:=(.*))?|-([h]))$/s.exec(token);
-    if (!match) invalid('Unknown object option.');
-    const name = match[1] ?? 'help', inline = match[2];
-    if (!allowed[operation].includes(name)) invalid(`Option --${name} is not supported by ${operation}.`);
-    if (seen.has(name)) invalid(`Option --${name} cannot be repeated.`);
-    seen.add(name);
-    if (['json', 'dry-run', 'help'].includes(name)) {
-      if (inline !== undefined) invalid(`Option --${name} does not accept a value.`);
-      parsed[name === 'dry-run' ? 'dryRun' : name] = true;
-    } else {
-      const value = inline ?? rest[i + 1];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) invalid(`Option --${name} requires a value.`);
-      parsed[name] = value;
-      if (inline === undefined) i++;
-    }
-  }
+  const seen = parseOptions(rest, { result: parsed, invalid, target: setTarget,
+    options: optionSpecs(allowed[operation]),
+    messages: { unknown: 'Unknown object option.', unsupported: name => `Option --${name} is not supported by ${operation}.` },
+  });
   if (parsed.help) {
     if (seen.size !== 1 || parsed.reference !== undefined) invalid('Use --help without target or other options.');
     return parsed;
@@ -74,7 +57,7 @@ export function parseObjectArgs(type, args) {
     const reference = parseReference(parsed.reference, type);
     if (['write', 'remove'].includes(operation) && reference.version) invalid('write/remove require a plain ID.');
   }
-  if (!['effective', 'system', 'user', ...(operation === 'list' ? ['all'] : [])].includes(parsed.source)) invalid('Invalid source selection.');
+  if (!['effective', 'system', 'user', ...(operation === 'list' ? ['all'] : [])].includes(parsed.source) && !validSourceId(parsed.source)) invalid('Invalid source selection.');
   if (!['metadata', 'body', 'all'].includes(parsed.part)) invalid('Invalid read part.');
   if (operation === 'write' && seen.has('data') === seen.has('from')) invalid('Specify exactly one of --data or --from.');
   return parsed;
@@ -88,8 +71,7 @@ function render(result) {
 }
 
 export function runObjectCommand(type, args, root) {
-  const end = args.indexOf('--');
-  const json = (end === -1 ? args : args.slice(0, end)).includes('--json');
+  const json = hasJsonFlag(args);
   let parsed;
   const result = { ok: false, command: type, operation: operations.has(args[0]) ? args[0] : null, data: null, errors: [] };
   let exitCode = 0;

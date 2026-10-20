@@ -5,9 +5,14 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { checkedPath, compareVersions, configuration, digestObject, fail, fileMode, installedManifest,
-  isRepository, isRevision, isSHA, parseJSON, readJSON, readRegular, sha256, stableJSON, textBytes,
-  validateManifest, releaseReceipt, validateProducts, versionParts, walkFiles, writeAtomic, writeJSON } from './common.js';
+import { checkedPath, fileMode, parseJSON, readJSON, readRegular, textBytes, walkFiles, writeAtomic, writeJSON } from './files.js';
+import { compareVersions, versionParts } from './versions.js';
+import { configuration } from './configuration.js';
+import { digestObject, isSHA, sha256, stableJSON } from '../shared/hash.js';
+import { fail } from './errors.js';
+import { installedManifest, validateManifest, releaseReceipt, validateProducts } from './manifests.js';
+import { checkSourceCompatibility } from '../sources/compatibility.js';
+import { isRepository, isRevision } from './git-values.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { download, releaseIndex } from './network.js';
 import { inspectCoreArchive } from './release.js';
@@ -171,6 +176,7 @@ function restoreCandidate(root, transaction) {
   }
 }
 function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault } = {}) {
+  checkSourceCompatibility(root, candidate);
   const system = checkedPath(root, '.agents/runtime-data/system'); mkdirSync(system, { recursive: true });
   const transaction = checkedPath(root, '.agents/runtime-data/system/transaction');
   if (existsSync(transaction)) fail('UPDATE_BUSY', 'Another update transaction exists; use .agents/ksf to recover it.');
@@ -253,6 +259,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
     }
     writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(releaseReceipt(incoming)));
     verifyCandidate(staging, plan.changes.map(c => c.path));
+    checkSourceCompatibility(root, staging);
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed during update validation.');
     if (dryRun) return { ...result, wouldChange: true };
     return { ...result, ...commitCandidate(root, staging, { before, from: current.version, to: incoming.version, fault }) };
@@ -274,6 +281,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
       writeAtomic(join(staging, path), readFileSync(source), fileMode(source));
     }
     verifyCandidate(staging);
+    checkSourceCompatibility(root, staging);
     if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun };
     return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault }), dryRun };
   } finally { rmSync(staging, { recursive: true, force: true }); }

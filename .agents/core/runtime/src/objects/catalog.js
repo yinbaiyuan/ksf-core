@@ -1,26 +1,31 @@
 import { lstatSync, readdirSync, existsSync } from 'node:fs';
-import { join, relative, basename, sep } from 'node:path';
-import { createHash } from 'node:crypto';
+import { join, relative, basename } from 'node:path';
+import { sha256 as sha } from '../shared/hash.js';
+import { portable } from '../shared/paths.js';
 import { parseFrontmatter } from '../metadata/frontmatter.js';
 import { readSnapshot } from '../metadata/files.js';
 import { types, protectedPaths, validId, validateObject, fail, compare } from './schema.js';
+import { configuredSources, readDeclaration } from '../sources/storage.js';
 
-export const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-export const portable = path => path.split(sep).join('/');
+export { sha256 as sha } from '../shared/hash.js';
+export { portable } from '../shared/paths.js';
 export const skipped = name => name === '.upstream' || name.startsWith('.ksf-object-') || name.startsWith('.ksf-metadata-');
 
-export function catalog(root) {
+export function catalog(root, { linked = true, sourceFilter, extraSources = [] } = {}) {
   const rows = [], errors = [], scopes = [];
+  const sources = [];
+  let scanRoot = root;
   // Core sources have no user skeleton; installed workspaces still require it.
   const optionalUserScopes = existsSync(join(root, '.agents/core/build.json')) &&
     existsSync(join(root, '.agents/core/distribution.json')) && !existsSync(join(root, '.agents/core/release.json')) && !existsSync(join(root, 'ksf'));
   function load(file, type, source) {
-    const path = portable(relative(root, file));
-    const fixedId = Object.keys(protectedPaths).find(id => protectedPaths[id] === path);
+    const external = !['system', 'user'].includes(source);
+    const path = external ? file : portable(relative(root, file));
+    const fixedId = external ? undefined : Object.keys(protectedPaths).find(id => protectedPaths[id] === path);
     const folderId = validId(basename(join(file, '..')), type) ? basename(join(file, '..')) : undefined;
-    const designatedId = fixedId ?? (source === 'user' ? folderId : undefined);
+    const designatedId = fixedId ?? (source !== 'system' ? folderId : undefined);
     const id = designatedId;
-    const row = { type, source, path, directory: portable(relative(root, join(file, '..'))), id, errors: [] };
+    const row = { type, source, path, directory: external ? join(file, '..') : portable(relative(root, join(file, '..'))), ...(external ? { sourceRoot: scanRoot } : {}), id, errors: [] };
     try {
       row.snapshot = readSnapshot(file);
       row.digest = sha(row.snapshot.bytes);
@@ -28,6 +33,8 @@ export function catalog(root) {
       row.metadata = row.parsed.values;
       if (!row.id && validId(row.metadata.id)) row.id = row.metadata.id;
       row.errors = validateObject(row.metadata, { type, source, path });
+      if (external && !row.parsed.body.toString('utf8').trim()) row.errors.push({ code: 'OBJECT_BODY_REQUIRED', message: 'Published objects require a nonempty body.', target: path });
+      if (external && !folderId) row.errors.push({ code: 'OBJECT_ID_LOCATION_MISMATCH', message: 'Published object directories must use the complete object ID.', target: path, id: row.id });
       if (designatedId && row.metadata.id !== designatedId) row.errors.push({ code: 'OBJECT_ID_LOCATION_MISMATCH', message: 'Object identity does not match its designated directory or entry.', target: path, id: designatedId });
     } catch (error) {
       row.errors.push({ code: error.code ?? 'OBJECT_READ_FAILED', message: 'Cannot parse object entry.', target: path, ...(error.details?.line ? { line: error.details.line, column: error.details.column } : {}) });
@@ -37,7 +44,7 @@ export function catalog(root) {
   }
   function inspect(path) {
     // Check every scope component so a linked capability root is not traversed.
-    let current = root;
+    let current = scanRoot;
     for (const segment of path.split('/')) {
       current = join(current, segment);
       if (lstatSync(current).isSymbolicLink()) fail('OBJECT_UNSUPPORTED', 'Capability directories cannot be symbolic links.');
@@ -50,7 +57,7 @@ export function catalog(root) {
     const coreNames = Object.values(types).map(t => t.entry);
     const cores = entries.filter(e => coreNames.includes(e.name));
     if (cores.length) {
-      const invalid = cores.length !== 1 || cores[0].name !== types[type].entry || portable(relative(root, directory)) === types[type][source];
+      const invalid = cores.length !== 1 || cores[0].name !== types[type].entry || portable(relative(scanRoot, directory)) === (types[type][source] ?? types[type].user);
       for (const e of cores) {
         const row = load(join(directory, e.name), type, source);
         if (invalid) row.errors.push({ code: 'OBJECT_ENTRY_INVALID', message: 'Object must own a subdirectory with exactly one matching core entry.', target: row.path });
@@ -79,6 +86,36 @@ export function catalog(root) {
     }
   }
   if (existsSync(join(root, 'AGENTS.md'))) load(join(root, 'AGENTS.md'), 'workflow', 'system');
+  let entries = [];
+  if (linked) {
+    try { entries = configuredSources(root); }
+    catch (error) { errors.push({ code: error.code ?? 'SOURCE_REGISTRY_INVALID', message: error.message, source: '@registry' }); }
+  }
+  entries = [...entries.filter(entry => !sourceFilter || entry.id === sourceFilter), ...extraSources];
+  for (const entry of entries) {
+    sources.push(entry);
+    scanRoot = entry.root;
+    try {
+      const declaration = readDeclaration(entry.root, entry.id);
+      scanRoot = declaration.root;
+      Object.assign(entry, { root: scanRoot, name: declaration.name });
+      for (const [type, definition] of Object.entries(types)) {
+        const path = definition.user;
+        try {
+          if (existsSync(join(scanRoot, path))) scan(inspect(path), type, entry.id);
+          scopes.push({ type, source: entry.id, path: join(scanRoot, path), complete: true });
+        } catch (error) {
+          errors.push({ code: error.code ?? 'OBJECT_SCOPE_UNREADABLE', message: error.message, target: join(scanRoot, path), type, source: entry.id });
+          scopes.push({ type, source: entry.id, path: join(scanRoot, path), complete: false });
+        }
+      }
+    } catch (error) {
+      for (const type of Object.keys(types)) {
+        errors.push({ code: error.code ?? 'SOURCE_UNREADABLE', message: error.message, target: entry.root, type, source: entry.id });
+        scopes.push({ type, source: entry.id, path: entry.root, complete: false });
+      }
+    }
+  }
   const groups = new Map();
   for (const row of rows) {
     if (!row.id) continue;
@@ -87,47 +124,10 @@ export function catalog(root) {
     groups.get(key).push(row);
   }
   for (const group of groups.values()) if (group.length > 1) for (const row of group) row.errors.push({ code: 'OBJECT_ID_CONFLICT', message: 'Duplicate ID within one source.', target: row.path, id: row.id });
-  return { root, rows, errors, scopes };
+  return { root, rows, errors, scopes, sources };
 }
 
-export function problems(c, { type, source } = {}) {
-  const match = r => (!type || r.type === type) && (!source || source === 'effective' || source === 'all' || r.source === source);
-  return [...c.errors.filter(match), ...c.rows.filter(match).flatMap(r => r.errors.map(e => ({ ...e, source: r.source, type: r.type, ...(r.id ? { id: r.id } : {}) })))];
-}
-
-export function resolveObject(c, { id, version }, source = 'effective') {
-  const type = id.split('.')[0];
-  if (Object.hasOwn(protectedPaths, id) && source === 'user') fail('OBJECT_PROTECTED', 'Fixed entries cannot use user definitions.', { id });
-  const sources = source === 'effective' ? Object.hasOwn(protectedPaths, id) ? ['system'] : ['user', 'system'] : [source];
-  // An unidentifiable damaged object may shadow this ID; do not assume absence.
-  for (const s of sources) {
-    const scopeErrors = c.errors.filter(e => e.source === s && e.type === type);
-    const unknown = c.rows.filter(r => r.type === type && r.source === s && !r.id && r.errors.length);
-    if (scopeErrors.length || unknown.length) fail('OBJECT_SCOPE_INCOMPLETE', 'Object scope cannot be resolved completely.', { id, source: s });
-    const matches = c.rows.filter(r => r.id === id && r.source === s);
-    if (matches.length > 1) fail('OBJECT_ID_CONFLICT', 'Duplicate ID within one source.', { id, source: s });
-    if (!matches.length) continue;
-    const row = matches[0];
-    if (source === 'effective' && row.metadata?.status === 'archived') continue;
-    if (row.errors.length) fail('OBJECT_INVALID', 'Selected object has invalid metadata or identity.', { id, source: s, target: row.path });
-    if (Object.hasOwn(protectedPaths, id) && s !== 'system') fail('OBJECT_PROTECTED', 'Fixed entries cannot use user definitions.', { id });
-    if (!version || row.metadata.version === version) return row;
-  }
-  const present = c.rows.some(r => r.id === id && sources.includes(r.source));
-  fail(version && present ? 'OBJECT_VERSION_MISMATCH' : 'OBJECT_NOT_FOUND', version ? 'No eligible object matches the requested version.' : 'Object is not available in the requested source.', { id, ...(version ? { version } : {}) });
-}
-
-export function referenceResults(c, row) {
-  return (row.metadata.references ?? []).map(reference => {
-    const [id, version] = reference.split('@');
-    try {
-      const target = resolveObject(c, { id, version });
-      return { reference, id, version, source: target.source, path: target.path, user_revision: target.metadata.user_revision ?? null };
-    } catch (error) {
-      return { reference, error: { code: error.code, message: error.message, target: row.path, id } };
-    }
-  });
-}
+export { problems, resolveObject, referenceResults } from './references.js';
 
 export function fingerprint(c) {
   return sha(JSON.stringify({ rows: c.rows.map(r => [r.path, r.digest, r.snapshot?.stat.ino, r.snapshot?.stat.mtimeMs, r.errors]), errors: c.errors, scopes: c.scopes }));
@@ -137,5 +137,6 @@ export function summary(row) {
   const m = row.metadata;
   return { id: m.id, name: m.name, description: m.description, status: m.status, version: m.version,
     user_revision: m.user_revision ?? null, source: row.source, path: row.path, directory: row.directory,
+    ...(row.sourceRoot ? { source_root: row.sourceRoot } : {}),
     protected: Object.hasOwn(protectedPaths, m.id) };
 }

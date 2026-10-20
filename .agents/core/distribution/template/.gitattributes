@@ -5,3 +5,4 @@ AGENTS.md text eol=lf
 .agents/core/** text=auto eol=lf
 .agents/core/runtime/packages/** -text
 .agents/user-data/*.json text eol=lf
+.agents/user-data/**/*.json text eol=lf

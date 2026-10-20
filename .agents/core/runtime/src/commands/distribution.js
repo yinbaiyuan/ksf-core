@@ -1,5 +1,6 @@
+import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
 import { resolve } from 'node:path';
-import { DistributionError, invalid } from '../distribution/common.js';
+import { DistributionError, invalid } from '../distribution/errors.js';
 
 const specs = {
   release: {
@@ -22,7 +23,6 @@ const specs = {
   },
 };
 const booleans = new Set(['json', 'help', 'allow-dirty', 'dry-run', 'release-only', 'all', 'quiet']);
-const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 export function distributionHelp(command, operation) {
   const selected = operation ? [specs[command][operation]] : Object.values(specs[command]);
   const notes = {
@@ -37,35 +37,17 @@ export function parseDistributionArgs(command, args) {
   if (!args.length || (args.length === 1 && ['--help', '-h'].includes(args[0]))) return { help: true };
   const [operation, ...rest] = args, spec = specs[command]?.[operation];
   if (!spec) invalid(`Unsupported ${command} operation.`);
-  const parsed = { operation }, seen = new Set(); let ended = false;
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    if (!ended && token === '--') { ended = true; continue; }
-    if (ended || !token.startsWith('-')) {
+  const parsed = { operation };
+  const overrides = Object.fromEntries([...booleans].map(name => [name, { kind: 'flag' }]));
+  overrides.paths = { kind: 'many', missing: '--paths requires one or more literal system paths.',
+    validate(values) { if (values.some(p => !p)) invalid('--paths requires one or more literal system paths.'); } };
+  const seen = parseOptions(rest, { result: parsed, invalid,
+    options: optionSpecs(['json', 'help', ...spec.options], overrides),
+    target(token) {
       if (parsed.target !== undefined) invalid('Only one target is allowed.');
-      parsed.target = token; continue;
-    }
-    const match = /^(?:--([a-z][a-z-]*)(?:=(.*))?|-([h]))$/s.exec(token);
-    if (!match) invalid('Unknown option.');
-    const name = match[1] ?? 'help', inline = match[2];
-    if (!['json', 'help', ...spec.options].includes(name)) invalid(`Option --${name} is not supported here.`);
-    if (seen.has(name)) invalid(`Option --${name} cannot be repeated.`);
-    seen.add(name);
-    if (booleans.has(name)) {
-      if (inline !== undefined) invalid(`Option --${name} does not accept a value.`);
-      parsed[camel(name)] = true;
-    } else if (name === 'paths') {
-      const values = [];
-      if (inline !== undefined) values.push(inline);
-      else while (i + 1 < rest.length && !rest[i + 1].startsWith('-')) values.push(rest[++i]);
-      if (!values.length || values.some(p => !p)) invalid('--paths requires one or more literal system paths.');
-      parsed.paths = values;
-    } else {
-      const value = inline ?? rest[++i];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) invalid(`Option --${name} requires a value.`);
-      parsed[camel(name)] = value;
-    }
-  }
+      parsed.target = token;
+    },
+  });
   if (parsed.help) {
     if (seen.size !== 1 || parsed.target !== undefined) invalid('Use --help without other arguments.');
     return parsed;
@@ -111,7 +93,7 @@ export async function runDistributionCommand(command, args, root) {
   }
   if (quiet) return { stdout: '', stderr: response.ok ? response.data?.changed ? `KSF: updated Core to ${response.data.to ?? response.data.latest}.\n` : '' :
     `KSF: explicit sync failed (${response.errors[0].code}); inspect the installed system state.\n`, exitCode };
-  const end = args.indexOf('--'), json = (end < 0 ? args : args.slice(0, end)).includes('--json');
+  const json = hasJsonFlag(args);
   return { stdout: json ? JSON.stringify(response) + '\n' :
     [response.data ? JSON.stringify(response.data, null, 2) : '', ...response.errors.map(e => `${e.code}: ${e.message}`)].filter(Boolean).join('\n') + '\n', stderr: '', exitCode };
 }

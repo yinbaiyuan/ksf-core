@@ -1,7 +1,13 @@
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { configuration, fail, parseJSON, readRegular, sha256, stableJSON, validateManifest, releaseReceipt, validateProducts, writeAtomic, installedManifest, compareVersions, isRevision } from './common.js';
+import { configuration } from './configuration.js';
+import { fail } from './errors.js';
+import { parseJSON, readRegular, writeAtomic } from './files.js';
+import { sha256, stableJSON } from '../shared/hash.js';
+import { validateManifest, releaseReceipt, validateProducts, installedManifest } from './manifests.js';
+import { compareVersions } from './versions.js';
+import { isRevision } from './git-values.js';
 import { inspectCoreArchive, userDirectories } from './release.js';
 import { readArchive } from './archive.js';
 import { GitHubAPI, githubToken, treeFromChanges } from './github.js';

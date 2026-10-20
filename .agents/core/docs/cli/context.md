@@ -24,11 +24,11 @@
 | `capabilities --json` | 同一业务结果的 JSON 表达，无值且只能出现一次 |
 | `capabilities --help`、`capabilities -h` | 显示操作帮助；不能与其他选项或目标组合 |
 
-没有位置目标、来源选择或对象过滤参数。未知操作、多余参数、重复选项、带值的无值选项及混用帮助均报调用错误。`--` 不引入额外目标或选项能力。未提供独立的 discover/catalog 命令或兼容别名。
+没有位置目标；支持 --source <源ID> 限定能力源范围，不提供其他对象过滤参数。未知操作、多余参数、重复选项、带值的无值选项及混用帮助均报调用错误。`--` 不引入额外目标或选项能力。未提供独立的 discover/catalog 命令或兼容别名。
 
 ## 有效范围与读取边界
 
-直接使用现有 Workflow、Partner 的默认有效列表，每次查询当前文件，没有持久化索引。对象层按公共规则处理系统与用户定义、精确身份、状态与冲突；context 不按系统/用户分组，也不提供另选来源的规则。
+直接使用现有 Workflow、Partner 的默认有效列表，每次查询当前文件，没有持久化索引。对象层按公共规则处理系统、个人与已关联源定义、精确身份、状态与冲突；context 不按系统/用户分组，也不提供另选来源的规则。
 
 结果保留固定根入口工作流和入口搭档，并通过 `protected=true` 标明。ability-route 从下游候选中排除这些固定入口。先匹配适用工作流，未匹配时再选择搭档，两类均不适用时判断通用 Agent 能否承接；context 不替 Agent 执行该顺序或宣布匹配成功。
 
@@ -54,7 +54,7 @@ JSON 沿用统一信封：
 }
 ```
 
-两组 `objects` 中每项恰好包含 `id`、`name`、`description`、`path`、`protected`。path 相对启动入口定位的 KSF 根目录。顺序沿用对象服务的稳定顺序，不按语义相似度排序，不静默裁减数量。
+两组 `objects` 中每项包含 `id`、`name`、`description`、`path`、`protected`、`source`；能力源对象还含 `source_root`。系统/个人 path 相对 KSF 根，源对象 path 为实际绝对路径。顺序沿用对象服务的稳定顺序，不按语义相似度排序，不静默裁减数量。
 
 ## 不完整结果与错误
 
@@ -90,3 +90,7 @@ CLI 适配在 `runtime/src/commands/context.js`，组合服务在 `runtime/src/s
 返回[命令索引](index.md)。
 
 2026-10-16 重构后，当前完整发现为 1 个固定入口工作流和 3 个搭档：runtime 固定保护，maintainer 与对象设计师为普通候选。真实 CLI 已核对 complete=true、errors=[]；维护角色可发现和派生，固定入口仍从下游候选排除。
+
+## 能力源过滤
+
+默认聚合个人、全部已关联源和系统的有效工作流/搭档。--source <源ID> 则聚合个人、指定源和系统，保留个人优先与固定入口。每项新增 source，源对象还含 source_root 和实际绝对 path；description 仍原样提供。多源同 ID 歧义返回 SOURCE_AMBIGUOUS 和候选，按明确源重新发现，不按配置顺序猜测。详情见[能力源协议](../sources.md)。

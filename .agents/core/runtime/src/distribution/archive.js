@@ -1,5 +1,6 @@
 import { gzipSync, gunzipSync } from 'node:zlib';
-import { fail, validRelative } from './common.js';
+import { fail } from './errors.js';
+import { validRelative } from './paths.js';
 
 const block = 512, limit = 512 * 1024 * 1024;
 function octal(value, length) { return value.toString(8).padStart(length - 1, '0') + '\0'; }

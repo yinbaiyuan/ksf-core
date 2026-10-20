@@ -11,7 +11,7 @@ updated: 2026-10-16
 
 启动器、CLI 服务分层、runtime-data、user-data 及构建发行的关系见[系统基础架构](../system/README.md)。
 
-KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript 测试、项目基础管理、Markdown 元数据、四类能力对象管理与能力上下文组织能力。本文件作为 CLI 能力总入口，记录可执行命令、输入输出、文件影响和实现范围。新增命令或改变行为时，在这里同步更新，再链接到对应的实现说明。
+KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript 测试、项目基础管理、独立工程仓库管理、能力源直接关联与分享、Markdown 元数据、四类能力对象管理与能力上下文组织能力。本文件作为 CLI 能力总入口，记录可执行命令、输入输出、文件影响和实现范围。新增命令或改变行为时，在这里同步更新，再链接到对应的实现说明。
 
 项目筛选、知识读取及已授权资产维护由 ksf-runtime 的三项运行基本功组织，使用 project 等现有 CLI 与宿主文件工具，见[最小运行闭环](../runtime/minimal-runtime.md)。项目 CLI 不代替 Agent 的归属判断，也不提供自动项目绑定、知识语义索引或跨文件事务服务；运行基本功纳入固定系统对象保护。
 
@@ -44,10 +44,11 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `test` | 使用随包 Node 的内置测试运行器执行 JavaScript 测试 | 否 | 测试创建独立临时目录并在结束后清理 |
 | `context capabilities` | 一次组织完整有效的工作流、搭档发现描述 | 是 | 命令自身只读，不生成索引 |
 | `project list/read/write/remove/check` | 项目根卡与目录的基础管理 | 是 | write 创建或更新根卡；remove 删除整个项目目录；修改支持预览 |
+| `repository create/link/unlink/list/check` | 独立本地 Git 工程与项目关联 | 是 | create 初始化工程；link/unlink 只改根卡；修改支持预览 |
 | `release build/publish/template/mirror` | 构建完整包、Core 更新包，发布 Release 和模板 | 是 | build 写指定输出；发布写远程；修改支持预览 |
 | `system read/check/update/sync/rollback` | 安装版版本、Release 升级、恢复及回滚 | 是 | update/rollback 修改系统并保留备份；sync 记录检查；支持预览 |
 | `contribute prepare/read/submit` | HEAD 已提交系统差异的审查和干净 Core PR | 是 | prepare 读取 HEAD 及固定远程原版并提示既往 PR；submit 核对基线与重复内容后发布；未提交内容忽略 |
-| `user-data list/read/write/remove/check` | KSF 系统级用户数据；支持 settings 和 identity | 是 | 写入用户专属目录；支持预览和 etag 冲突检查 |
+| `user-data list/read/write/remove/check` | 系统命名空间及四类对象持久数据；支持 --object / --objects | 是 | 写入用户专属目录；支持预览和 etag 冲突检查 |
 | `metadata read/write/remove/check` | 任意 Markdown 的 YAML frontmatter 管理 | 是，各操作支持 --json | write/remove 可能更新明确指定文件，支持 --dry-run |
 | `workflow / partner / competency / data-package` | 各自提供 list/read/write/remove/check | 是 | 只写用户对象；首次修改系统对象派生完整目录；删除包含附件及基线；支持预览 |
 
@@ -209,6 +210,10 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 
 project、context、metadata 与四类对象的业务成功与失败 JSON 都进入 stdout，采用 ok、command、operation、data、errors 结构。下节的原有单 error／stderr 协议继续适用于旧命令；这些新增命令的日志和启动层错误仍在 stderr。启动准备尚未完成时不保证业务 JSON 已产生。
 
+## 独立工程仓库
+
+`repository create <工程名>` 在用户根 repositories 下建立同名独立 Git 工程，默认 main，无初始提交及远程；`link/unlink <工程路径> --project <项目目录名>` 维护根卡可选 repositories 路径列表；`list/check` 默认检查容器，--project 检查已保存关联及外部工程。修改支持 --dry-run，所有操作支持 --json。项目与工程允许多对多，已有工程原位关联。仓库操作需要本机 Git，普通启动无需 Git。归档、解除关联及删除项目记录均保留工程。完整契约见 [repository](repository.md)。
+
 ## 四类能力对象
 
 ```sh
@@ -289,9 +294,11 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 | `.agents/runtime-data/runtime/` | 已安装 Node、安装记录、锁和临时文件 | CLI 自动维护，不入 Git |
 | `.agents/runtime-data/objects/write.lock` | 跨类型对象写锁 | 服务维护，不入 Git；遗留锁需检查后处理 |
 | `.agents/runtime-data/projects/write.lock` | 项目写入与删除锁 | 服务维护，不入 Git；遗留锁需检查后处理 |
+| `.agents/runtime-data/repositories/write.lock` | 工程创建锁 | 服务维护，不入 Git；遗留锁需检查后处理 |
+| `repositories/` | 独立工程容器，父 KSF Git 忽略，子工程各自 Git 管理 | 用户工程；不进入发行、升级或回滚范围 |
 | `能力/<类型目录>/<完整ID>/.upstream/` | 用户派生对象的完整来源快照及摘要 | 用户资产，可备份迁移；普通更新不覆盖 |
 
-用户或 Agent 统一调用 `ksf` 程序入口。运行时准备、校验、构建和测试由程序执行；Agent 不负责手动解压 Node、选择安装目录或填写生成字段。普通项目、对象和元数据命令不执行 Git 提交或推送。发行版根据 Release 更新，不运行 `git pull`；显式 release 发布及 contribute 提交会按各自契约写远程，不能由普通业务写入隐式触发。
+用户或 Agent 统一调用 `ksf` 程序入口。运行时准备、校验、构建和测试由程序执行；Agent 不负责手动解压 Node、选择安装目录或填写生成字段。普通项目、仓库、对象和元数据命令不执行 Git 提交或推送；repository create 仅初始化选定工程的本地 Git。发行版根据 Release 更新，不运行 `git pull`；显式 release 发布及 contribute 提交会按各自契约写远程，不能由普通业务写入隐式触发。
 
 ## 后续业务能力状态
 
@@ -313,4 +320,8 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 
 ## 系统级用户数据
 
-`.agents/user-data/` 保存 KSF 程序自身的用户设置与必要状态，和本机 `.agents/runtime-data/` 分离。它随用户实例保留，Core 发行不复制个人值，升级与回滚不覆盖。正常工作产生的项目、任务记录、草稿、成果和知识仍在正常用户空间。settings 的更新检查间隔和请求超时供显式 system 操作使用；identity 保存用户自行填写的名称、邮箱和对象命名空间，仅做本地格式校验。普通启动不检查更新。接口与完整边界见 [user-data](user-data.md)。
+`.agents/user-data/` 保存 KSF 程序和能力对象的用户设置与必要状态，和本机 `.agents/runtime-data/` 分离。它随用户实例保留，Core 发行不复制个人值，升级与回滚不覆盖。正常工作产生的项目、任务记录、草稿、成果和知识仍在正常用户空间。settings 的更新检查间隔和请求超时供显式 system 操作使用；identity 保存用户自行填写的名称、邮箱和对象命名空间，仅做本地格式校验。对象可通过 --object 按稳定 ID 保存通用 JSON 配置，--objects 列举已有对象记录；来源、版本、目录变化不切换数据，采用时按公共运行约定读取。普通启动不检查更新。接口与完整边界见 [user-data](user-data.md)。
+
+## 能力源管理
+
+`ksf source init/link/unlink/list/read/check/export` 已实现。关联仓库当前工作树，不创建安装副本、版本锁或能力快照；多源身份、依赖和 Git 协作见[source](source.md)及[协议](../sources.md)。`context capabilities --source <源ID>` 可限定共享范围；对象 read/check/list 的 --source 支持源 ID。

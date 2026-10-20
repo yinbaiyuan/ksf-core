@@ -3,8 +3,12 @@ import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { buildManifest } from '../services/build-manifest.js';
-import { configuration, fail, sha256, stableJSON, checkedPath, readRegular, walkFiles,
-  fileMode, validateManifest, releaseReceipt, versionParts, writeAtomic, parseJSON } from './common.js';
+import { configuration } from './configuration.js';
+import { fail } from './errors.js';
+import { sha256, stableJSON } from '../shared/hash.js';
+import { checkedPath, readRegular, walkFiles, fileMode, writeAtomic, parseJSON } from './files.js';
+import { validateManifest, releaseReceipt } from './manifests.js';
+import { versionParts } from './versions.js';
 import { createArchive, readArchive } from './archive.js';
 import { types } from '../objects/schema.js';
 import { products, artifactName, releaseIndexName, launcherFiles, launcherProtocol } from './products.js';

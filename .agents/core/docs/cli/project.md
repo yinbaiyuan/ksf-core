@@ -6,6 +6,8 @@
 
 CLI 负责文件操作；主项目判断、来源核对、写入授权和成果验收仍由 Agent 完成。项目不进入能力发现集合，也不支持自动绑定工程、跨会话自动记忆或项目间事务。公共调用规范见 [CLI 命令设计规范](../CLI命令设计规范.md)。
 
+实际工程默认位于 `repositories/` 或已有工作区，由 [repository CLI](repository.md) 显式创建和关联；根卡的可选 repositories 元数据保存路径列表。project write 不自动 git init，project remove 不跟随关联路径删除工程。项目归档只改变使用状态，工程保留原位。
+
 ## 调用与操作
 
 ```sh

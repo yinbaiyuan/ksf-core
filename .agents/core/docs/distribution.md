@@ -12,7 +12,7 @@ KSF 分为系统、用户模板和用户实例三层：
 
 Agent 入口为 AGENTS.md → [ksf-runtime](../abilities/partners/ksf-runtime/partner.md) → ability-route；系统维护选择 [ksf-maintainer](../abilities/partners/ksf-maintainer/partner.md)，按发布、创建工作区、升级或贡献基本功执行。职责和情境判断由对象定义持有，本文持有发行协议与程序行为。检查、安装和公开提交分别核对用户要求，不因发现新版本而安装。
 
-Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱、源档和归档目录由发行程序生成。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。
+Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱、源档和归档目录由发行程序生成。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。`repositories/` 是可选的用户工程容器，首次使用 repository create 时建立，不生成受跟踪占位文件；模板忽略规则排除整个容器。已有实例启用时需在其自己的 .gitignore 中补 `/repositories/`，升级继续保留用户忽略规则。
 
 ## 开始使用
 
@@ -41,6 +41,7 @@ macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其
 | `.agents/core/manifest.yaml` | 生成的运行时声明，升级使用发行版本，不作为源码贡献 |
 | 根 README.md、.gitignore | 首次生成的用户文件，Core 升级不覆盖 |
 | 项目、知识、能力、源档、归档、收件箱 | 个人内容，发行不读取，升级不写入 |
+| `repositories/` | 用户工程容器，父 Git 忽略、工程各自 Git 管理；按需创建，发行不读取，升级和回滚不写入 |
 | `.agents/user-data/` | 用户实例所有的系统级用户数据，Core 包不收录实际值，升级与回滚不覆盖 |
 | `.agents/runtime-data/` | 本机运行时、升级备份、失败事务、检查记录和贡献草稿，不提交 |
 | `.ksf-template.json` | 记录初始 ksf-workspace 模板产品、默认实例名与出处；不限定实际实例名称，当前系统版本以 release.json 为准 |

@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
-import { fail, isRevision, managedPath, sha256, validRelative, validateContributionManifest } from './common.js';
+import { fail } from './errors.js';
+import { isRevision } from './git-values.js';
+import { managedPath, validRelative } from './paths.js';
+import { sha256 } from '../shared/hash.js';
+import { validateContributionManifest } from './manifests.js';
 import { GitHubAPI } from './github.js';
 import { download } from './network.js';
 

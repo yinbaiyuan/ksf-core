@@ -1,6 +1,8 @@
+import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
+import { parseInput } from '../metadata/input.js';
 import { resolve } from 'node:path';
 import { MetadataError, invalid } from '../metadata/errors.js';
-import { metadata, parseInput, readInputFile } from '../services/metadata.js';
+import { metadata, readInputFile } from '../services/metadata.js';
 
 const operations = new Set(['read', 'write', 'remove', 'check']);
 const supported = {
@@ -32,40 +34,18 @@ export function parseMetadataArgs(args) {
   const [operation, ...rest] = args;
   if (!operations.has(operation)) invalid('Expected metadata read, write, remove or check.');
   const result = { operation, fields: [] };
-  const seen = new Set();
-  let ended = false;
   function target(value) {
     if (result.target !== undefined) invalid('Exactly one target file is required.');
     result.target = value;
   }
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    if (ended) { target(token); continue; }
-    if (token === '--') { ended = true; continue; }
-    if (!token.startsWith('-')) { target(token); continue; }
-    const match = /^(?:--([a-z][a-z-]*)(?:=(.*))?|-([h]))$/s.exec(token);
-    if (!match) invalid('Unknown metadata option.');
-    const name = match[1] ?? 'help';
-    const inline = match[2];
-    if (!supported[operation].includes(name)) invalid(`Option --${name} is not supported by metadata ${operation}.`);
-    if (seen.has(name)) invalid(`Option --${name} cannot be repeated.`);
-    seen.add(name);
-    if (['all', 'json', 'dry-run', 'help'].includes(name)) {
-      if (inline !== undefined) invalid(`Option --${name} does not accept a value.`);
-      result[name === 'dry-run' ? 'dryRun' : name] = true;
-    } else if (name === 'fields') {
-      if (result.target === undefined) invalid('Place the target before --fields.');
-      const values = inline === undefined ? [] : [inline];
-      while (i + 1 < rest.length && !rest[i + 1].startsWith('-')) values.push(rest[++i]);
-      if (!values.length) invalid('--fields requires at least one name.');
-      result.fields = [...new Set(values)];
-    } else {
-      const value = inline ?? rest[i + 1];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) invalid(`Option --${name} requires a value.`);
-      result[name] = value;
-      if (inline === undefined) i++;
-    }
-  }
+  const seen = parseOptions(rest, { result, invalid, target,
+    options: optionSpecs(supported[operation], {
+      all: { kind: 'flag' }, fields: { kind: 'many', inlineContinues: true, unique: true,
+        before() { if (result.target === undefined) invalid('Place the target before --fields.'); },
+        missing: '--fields requires at least one name.' },
+    }),
+    messages: { unknown: 'Unknown metadata option.', unsupported: name => `Option --${name} is not supported by metadata ${operation}.` },
+  });
   if (result.help) {
     if (seen.size !== 1 || result.target !== undefined) invalid('Use --help without target or other options.');
     return result;
@@ -89,8 +69,7 @@ function render(result) {
 
 export function runMetadataCommand(args, root) {
   let parsed;
-  const end = args.indexOf('--');
-  const wantsJson = (end === -1 ? args : args.slice(0, end)).includes('--json');
+  const wantsJson = hasJsonFlag(args);
   const operation = operations.has(args[0]) ? args[0] : null;
   const result = { ok: false, command: 'metadata', operation, data: null, errors: [] };
   let exitCode = 0;

@@ -7,12 +7,24 @@
 收到模板文件夹后，按自己的名称保存为用户实例，用 Agent 打开该目录，让它读取根目录的 AGENTS.md 即可。终端入口是 `./.agents/ksf`，可运行 `./.agents/ksf --help` 检查。
 
 - 项目、知识、能力、源档、归档和收件箱保存你的正式个人内容。
+- `repositories/` 按需承载实际工程代码、文档和成果；父 KSF Git 忽略整个容器，各工程独立管理 Git。项目根卡保存事实与工作区入口，已有外部工程可原位关联。
 - `.agents/core/` 是随包 Core；启动不会检查或安装新版。需要时明确要求 Agent 检查、预览或升级，也可手动运行 system 命令。
 - `.agents/ksf` 是 macOS 固定入口；`.agents/ksf.ps1` 是 Windows PowerShell 入口。Windows 当前可独立恢复事务，实际业务运行仍待 Windows bootstrap 和运行时包接入。
 - `.agents/user-data/` 保存 KSF 程序自身的用户设置与必要状态，可随你的实例备份迁移；正常工作内容仍在正常用户空间。
 - `.agents/runtime-data/` 保存本机缓存、升级备份、日志及贡献草稿。
 
 你可以直接使用文件夹；希望远程备份时，也可以从官方模板创建自己的私有仓库。公开仓库的 fork 也会公开，存放个人资料时请选择自己的私有仓库。
+
+已有项目根卡、需要开始产出工程文件时，可以创建并关联独立工程（需要本机 Git）：
+
+```sh
+./.agents/ksf repository create "工程名" --dry-run --json
+./.agents/ksf repository create "工程名" --json
+./.agents/ksf repository link "repositories/工程名" --project "项目名" --json
+./.agents/ksf repository check --project "项目名" --json
+```
+
+仅建项目目标和讨论时无需创建工程。项目与工程可以多对多；归档项目或解除关联保留工程原位。工程内容与 Git 历史需由各工程自行备份。命令与边界见 [repository 说明](.agents/core/docs/cli/repository.md)。
 
 系统操作：
 
