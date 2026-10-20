@@ -213,7 +213,7 @@ for (const defect of ['missing-entry', 'missing-reference', 'inactive-entry']) t
   const f = await distributionFixture(t), path = '.agents/core/abilities/partners/ksf-runtime/partner.md';
   const original = readFileSync(join(f.root, path), 'utf8');
   const changes = defect === 'missing-entry' ? { [path]: null }
-    : { [path]: defect === 'missing-reference' ? original.replace('competency.ksf.ability-route@0.1.0', 'competency.ksf.absent@0.1.0') : original.replace('status: active', 'status: archived') };
+    : { [path]: defect === 'missing-reference' ? original.replace('competency.ksf.ability-route@0.1.1', 'competency.ksf.absent@0.1.0') : original.replace('status: active', 'status: archived') };
   const next = await f.next('0.1.1', changes), before = systemFingerprint(f.workspace);
   await assert.rejects(systemUpdate({ root: f.workspace, from: next.coreArchive }), { code: 'CANDIDATE_INVALID' });
   assert.equal(systemFingerprint(f.workspace), before); assert.equal(installedManifest(f.workspace).version, '0.1.0');

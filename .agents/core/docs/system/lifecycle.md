@@ -9,7 +9,8 @@
 | `core/build.json` | 维护者编写，build 读取 | 声明系统版本、Node 固定版本、随包压缩包路径及可信摘要 |
 | `core/manifest.yaml` | build 生成，bootstrap 与程序读取 | 记录校验后的运行时声明、构建来源和系统摘要；不手工编辑 |
 | `core/distribution.json` | 系统默认配置，发行与显式维护操作读取 | 声明产品仓库、发行源及默认间隔超时；个人覆盖留在 user-data |
-| `core/release.json` | release build 放入包，安装与贡献读取 | 精确 Core 来源、平台、文件清单、权限及原版文本基线；当前安装协议为 3 |
+| Core 更新包中的 `core/release.json` | release build 生成，安装前校验 | schema 3 文件校验清单，保存文件路径、权限与摘要，不内嵌原版正文 |
+| 已安装实例及用户模板中的 `core/release.json` | release build / 安装生成，维护与贡献读取 | schema 4 精简凭据，保存精确 Core 来源、版本、平台和入口协议；不保存文件清单或原版正文 |
 | `ksf-core-release.json` | release build 生成，检查与安装读取 | 声明各平台产物 URL、大小和摘要及 Core 身份 |
 | `.ksf-template.json` | 用户模板生成时写入 | 记录模板初始出处；当前安装版本仍以 release.json 为准 |
 
@@ -19,7 +20,7 @@ build 校验固定输入与真实压缩包，推导可执行文件摘要，并�
 
 ## 从源码到发行包
 
-release build 从明确系统路径收集文件，在独立临时目录重新生成 manifest，生成带基线的 release.json，构建并回读验证 Core 包，再生成用户模板、完整模板包与发行索引。默认输出位于 runtime-data/releases，也可显式指定。
+release build 从明确系统路径收集文件，在独立临时目录重新生成 manifest，生成 schema 3 文件清单，构建并回读验证 Core 包。生成用户模板与完整模板包时，将同路径的清单转换为 schema 4 精简凭据，再生成发行索引。包校验清单与已安装凭据用途不同，入口恢复协议仍为 1。默认输出位于 runtime-data/releases，也可显式指定。
 
 正式包要求干净的 Core 源提交。`--allow-dirty` 只产生本地开发包，开发标记会阻止其作为正式更新和公开发行使用。生成包、向远程发布及同步官方模板是不同操作；构建成功不表示已发布。
 
@@ -33,9 +34,9 @@ release build 从明确系统路径收集文件，在独立临时目录重新生
 
 ## 从检查到升级
 
-system read 读取安装身份、本地差异及备份，不访问远程版本源。system check 获取并校验索引；system update 获取候选、校验并安装；显式 system sync 根据本机检查记录和有效配置间隔决定是否执行更新。普通启动不调用 sync。
+system read 读取安装身份、本地差异及备份。正式 schema 4 实例按凭据固定的准确 Core 提交联网取得原版文件，才能比较本地差异；它不查询新版或安装更新。无安装凭据的开发源只返回本地开发身份，development 凭据返回 changes:null、baselineVerified:false，不伪称已核实正式基线。system check 获取并校验索引；system update 获取候选、校验并安装；显式 system sync 根据本机检查记录和有效配置间隔决定是否执行更新。普通启动不调用 sync。
 
-更新采用旧正式基线、本地系统和新正式版本三方比较。未改文件更新，本地单独修改保留，双方文本修改使用 diff3；冲突返回路径与可审查信息，保留当前系统。生成的运行时 manifest 采用发行候选。用户目录、user-data、用户 README 和忽略文件不作为 Core 更新目标。
+更新采用旧正式基线、本地系统和新正式版本三方比较。原版按准确提交取回，不以 main 最新内容替代，也不常驻复制一套原版正文。未改文件更新，本地单独修改保留，双方文本修改使用 diff3；冲突返回路径与可审查信息，保留当前系统。生成的运行时 manifest 采用发行候选。用户目录、user-data、用户 README 和忽略文件不作为 Core 更新目标；repositories 工程及其 Git 历史保留原位。
 
 候选在独立临时目录验证随包运行时、变化 JavaScript 的语法和系统对象的精确引用。定义校验使用候选自身身份规范，支持合法旧版本回滚。安装前重核当前系统指纹，避免验证期间的并发修改被覆盖；预览完成验证后返回计划，不切换当前系统。
 

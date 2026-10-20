@@ -14,6 +14,7 @@
 | `runtime/staging/` | bootstrap 的构建输入准备、解压和安装替换 | 正常退出清理；同身份安装遗留物在取得相应锁后处理，不能整目录并发清空 |
 | `objects/write.lock` | 对象写服务创建与释放 | 对象写入全局锁；遗留锁需核实持有者，不自动按 PID 抢占 |
 | `projects/write.lock` | 项目服务创建与释放 | 协调项目修改；遗留锁需核对进程和未完成操作 |
+| `repositories/write.lock` | repository create 创建与释放 | 协调本机工程目录创建；link/unlink 使用项目写锁；遗留锁先核对持有者和实际工程状态 |
 | `user-data/<命名空间>.lock` | user-data 写服务创建与释放 | 仅本机写锁；不迁入可移植数据目录，遗留锁需核对后处理 |
 | `system/check.json` | 显式 system sync 记录并读取 | 保存检查尝试及结果；清除会丢失间隔依据，下一次显式 sync 可能立即检查和更新 |
 | `system/check-corrupt-<ID>.json` | sync 发现无效检查 JSON 后保留 | 排查缓存损坏时使用；确认不再需要该证据后可人工归档或清理 |

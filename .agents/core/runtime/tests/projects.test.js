@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, rmdirSync, readFileSync, writeFileSync,
   realpathSync, symlinkSync, existsSync, renameSync, chmodSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { project } from '../src/services/projects.js';
+import { project, updateProjectMetadata } from '../src/services/projects.js';
 import { withWriteLock } from '../src/metadata/files.js';
 import { metadata } from '../src/services/metadata.js';
 
@@ -17,6 +17,21 @@ function fixture(t) {
   const file = (name = '测试 甲') => join(root, '项目', name, 'project.md');
   return { root, run, create, file };
 }
+
+test('metadata transforms see the latest card inside the existing project lock and retain unrelated values', t => {
+  const f = fixture(t); f.create('甲', { metadata: { repositories: ['existing'] }, body: '# Original\n' });
+  metadata({ root: f.root, target: f.file('甲'), operation: 'write', data: { description: 'latest' } });
+  const result = updateProjectMetadata({ root: f.root, name: '甲' }, values => {
+    assert.equal(existsSync(join(f.root, '.agents/runtime-data/projects/write.lock')), true);
+    assert.equal(values.description, 'latest');
+    return { ...values, repositories: [...values.repositories, 'new'] };
+  });
+  assert.equal(result.changed, true);
+  const read = f.run('read', '甲').data.project;
+  assert.equal(read.metadata.description, 'latest');
+  assert.deepEqual(read.metadata.repositories, ['existing', 'new']);
+  assert.equal(read.body, '# Original\n');
+});
 
 test('project discovery is shallow, deterministic and accepts root cards without frontmatter', t => {
   const f = fixture(t);

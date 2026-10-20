@@ -1,6 +1,10 @@
 import { realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { fail, managedPath, parseJSON, sha256, validRelative, validateContributionManifest } from './common.js';
+import { fail } from './errors.js';
+import { managedPath, validRelative } from './paths.js';
+import { parseJSON } from './files.js';
+import { sha256 } from '../shared/hash.js';
+import { validateContributionManifest } from './manifests.js';
 
 const gitBinary = process.platform === 'win32' ? 'git' : '/usr/bin/git';
 const gitEnvironment = () => {

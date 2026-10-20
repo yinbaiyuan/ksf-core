@@ -3,8 +3,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { checkedPath, digestObject, fail, isSHA, isRepository, isBranch,
-  readJSON, sha256, textBytes, writeAtomic, writeJSON, isRevision } from './common.js';
+import { checkedPath, readJSON, textBytes, writeAtomic, writeJSON } from './files.js';
+import { digestObject, isSHA, sha256 } from '../shared/hash.js';
+import { fail } from './errors.js';
+import { isRepository, isBranch, isRevision } from './git-values.js';
 import { committedSource, contributionBaseline, contributionPath as eligible, isLocalCommit } from './committed-source.js';
 import { GitHubAPI, treeFromChanges } from './github.js';
 import { products } from './products.js';

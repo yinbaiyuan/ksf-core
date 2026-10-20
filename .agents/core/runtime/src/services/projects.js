@@ -1,16 +1,16 @@
+import { sha256 as sha } from '../shared/hash.js';
+import { locations, publicProject, validateWrite, encodeProject, planProjectWrite, planProjectRemoval } from '../projects/plan.js';
+import { withExclusiveLock, withTemporaryFile } from '../shared/files.js';
 import {
-  lstatSync, readdirSync, mkdirSync, rmdirSync, openSync, closeSync, writeFileSync,
-  fstatSync, fsyncSync, unlinkSync, linkSync, renameSync, rmSync, realpathSync,
+  lstatSync, readdirSync, mkdirSync, rmdirSync, unlinkSync, linkSync, renameSync, rmSync, realpathSync,
 } from 'node:fs';
 import { join, relative } from 'node:path';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { MetadataError, invalid } from '../metadata/errors.js';
 import { readSnapshot, withWriteLock, publishFile } from '../metadata/files.js';
-import { parseFrontmatter, createFrontmatter, encodeFrontmatter, setField } from '../metadata/frontmatter.js';
-import { validateInput, equalValues } from './metadata.js';
+import { parseFrontmatter } from '../metadata/frontmatter.js';
 
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
-const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 
 function stat(path) {
@@ -43,11 +43,6 @@ function validateName(name) {
   }
 }
 
-function locations(root, name) {
-  const scope = join(root, '项目');
-  return { scope, folder: join(scope, name), target: join(scope, name, 'project.md') };
-}
-
 function guardPaths(scope, folder) {
   const paths = [scope, folder].map(path => ({ path, entry: directory(path) }));
   return () => {
@@ -73,15 +68,6 @@ function load(root, name, { optional = false } = {}) {
   const parsed = parseFrontmatter(snapshot.bytes, paths.target);
   guard();
   return { ...paths, snapshot, parsed, guard };
-}
-
-function publicProject(root, name, parsed, part = 'all') {
-  const { folder, target } = locations(root, name);
-  return {
-    name, path: relative(root, target), directory: relative(root, folder), state: parsed.state,
-    ...(part !== 'body' ? { metadata: parsed.values } : {}),
-    ...(part !== 'metadata' ? { body: parsed.body.toString('utf8') } : {}),
-  };
 }
 
 function titleOf(parsed, fallback) {
@@ -132,42 +118,6 @@ export function errorItem(error, target) {
   return { code: 'PROJECT_IO_FAILED', message: 'Cannot access project files.', ...(target ? { target } : {}) };
 }
 
-function validateWrite(data) {
-  validateInput(data);
-  if (!Object.keys(data).length || Object.keys(data).some(key => !['metadata', 'body'].includes(key))) {
-    invalid('Project write accepts metadata and/or body only.');
-  }
-  if (Object.hasOwn(data, 'metadata')) validateInput(data.metadata);
-  if (Object.hasOwn(data, 'body') && typeof data.body !== 'string') invalid('Project body must be a string.');
-}
-
-function encode(current, input) {
-  let parsed = current.parsed ?? parseFrontmatter(Buffer.alloc(0), current.target);
-  const expected = Object.fromEntries(Object.entries(parsed.values));
-  const fields = Object.keys(input.metadata ?? {}).filter(key =>
-    !Object.hasOwn(expected, key) || !equalValues(expected[key], input.metadata[key]));
-  const bodyChanged = Object.hasOwn(input, 'body') && input.body !== parsed.body.toString('utf8');
-  const body = bodyChanged ? Buffer.from(input.body) : parsed.body;
-  let bytes;
-  if (fields.length) {
-    if (parsed.state === 'absent') parsed = createFrontmatter(parsed);
-    for (const field of fields) {
-      setField(parsed.doc, field, input.metadata[field]);
-      Object.defineProperty(expected, field, { value: input.metadata[field], enumerable: true, configurable: true, writable: true });
-    }
-    bytes = encodeFrontmatter({ ...parsed, body });
-  } else {
-    const prefix = parsed.bytes.subarray(0, parsed.bytes.length - parsed.body.length);
-    bytes = Buffer.concat([prefix, body]);
-  }
-  const verified = parseFrontmatter(bytes, current.target);
-  if (!equalValues(verified.values, expected) || !verified.body.equals(body) ||
-      (Object.hasOwn(input, 'body') && verified.body.toString('utf8') !== input.body)) {
-    fail('PROJECT_SERIALIZATION_FAILED', 'Root card did not preserve the requested metadata and body.', { target: current.target });
-  }
-  return { bytes, parsed: verified, changes: { metadata: fields, body: bodyChanged } };
-}
-
 function withProjectLock(root, action) {
   directory(join(root, '.agents'), { create: true });
   const runtime = join(root, '.agents/runtime-data');
@@ -175,44 +125,26 @@ function withProjectLock(root, action) {
   const locks = join(runtime, 'projects');
   directory(locks, { create: true });
   const lock = join(locks, 'write.lock');
-  let fd;
-  try {
-    try { fd = openSync(lock, 'wx', 0o600); }
-    catch (error) {
-      if (error.code === 'EEXIST') fail('PROJECT_LOCKED', 'Project write lock exists; inspect its owner before retrying.', { target: lock });
-      throw error;
-    }
-    writeFileSync(fd, JSON.stringify({ pid: process.pid }) + '\n');
-    return action();
-  } finally {
-    if (fd !== undefined) {
-      const owner = fstatSync(fd); closeSync(fd);
-      try {
-        const current = lstatSync(lock);
-        if (current.dev === owner.dev && current.ino === owner.ino) unlinkSync(lock);
-        else process.stderr.write('PROJECT_LOCK_CLEANUP: Replaced lock left untouched.\n');
-      } catch (error) { if (error.code !== 'ENOENT') process.stderr.write('PROJECT_LOCK_CLEANUP: Inspect remaining write lock.\n'); }
-    }
-  }
+  return withExclusiveLock(lock, { pid: process.pid }, () => action(), {
+    onLocked() { fail('PROJECT_LOCKED', 'Project write lock exists; inspect its owner before retrying.', { target: lock }); },
+    onReplaced() { process.stderr.write('PROJECT_LOCK_CLEANUP: Replaced lock left untouched.\n'); },
+    onCleanup() { process.stderr.write('PROJECT_LOCK_CLEANUP: Inspect remaining write lock.\n'); },
+  });
 }
 
 function publishNew(current, bytes, beforeCheck) {
   const temporary = join(current.folder, `.ksf-project-writing-${randomUUID()}`);
-  let fd;
-  try {
-    fd = openSync(temporary, 'wx', 0o644);
-    writeFileSync(fd, bytes); fsyncSync(fd); closeSync(fd); fd = undefined;
+  return withTemporaryFile(temporary, bytes, { mode: 0o644, cleanup(path) {
+    try { unlinkSync(path); }
+    catch (error) { if (error.code !== 'ENOENT') process.stderr.write('PROJECT_FILE_CLEANUP: Inspect remaining temporary root card.\n'); }
+  } }, () => {
     beforeCheck?.(); current.guard();
     try { linkSync(temporary, current.target); }
     catch (error) {
       if (error.code === 'EEXIST') fail('PROJECT_CONFLICT', 'Project root card was created concurrently.', { target: current.target });
       throw error;
     }
-  } finally {
-    if (fd !== undefined) closeSync(fd);
-    try { unlinkSync(temporary); }
-    catch (error) { if (error.code !== 'ENOENT') process.stderr.write('PROJECT_FILE_CLEANUP: Inspect remaining temporary root card.\n'); }
-  }
+  });
 }
 
 function tree(folder, exclude) {
@@ -235,6 +167,28 @@ function tree(folder, exclude) {
   return { fingerprint: sha(JSON.stringify(entries)), entries: entries.map(entry => entry.path).filter(Boolean) };
 }
 
+// Read/transform/publish under the same project lock. Callers can update a
+// metadata collection without losing another project's or metadata writer's work.
+export function updateProjectMetadata({ root, name, dryRun = false }, transform, hooks = {}) {
+  validateName(name);
+  if (typeof root !== 'string' || typeof dryRun !== 'boolean' || typeof transform !== 'function') invalid('Invalid project metadata update.');
+  root = realpathSync(root);
+  const execute = () => {
+    const current = load(root, name);
+    const data = { metadata: transform(structuredClone(current.parsed.values)) };
+    validateWrite(data);
+    const { result, bytes, wouldChange } = planProjectWrite(current, { root, name, data, dryRun }, { metadataOnly: true });
+    if (!dryRun && wouldChange) {
+      withWriteLock(current.target, () => (hooks.publish ?? publishFile)(current.snapshot, bytes, {
+        beforeCheck: () => { hooks.beforeCheck?.(); current.guard(); },
+      }));
+      result.changed = true;
+    }
+    return result;
+  };
+  return dryRun ? execute() : withProjectLock(root, execute);
+}
+
 export function project({ root, operation, name, part = 'all', data, dryRun = false }, hooks = {}) {
   if (typeof root !== 'string' || !['list', 'read', 'write', 'remove', 'check'].includes(operation) ||
       !['metadata', 'body', 'all'].includes(part) || typeof dryRun !== 'boolean') invalid('Invalid project service request.');
@@ -253,67 +207,68 @@ export function project({ root, operation, name, part = 'all', data, dryRun = fa
     const before = load(root, name, { optional: true });
     if (!before.snapshot && !Object.hasOwn(data, 'body')) invalid('Creating a project requires body in the write input.');
     // Validate serialization before creating directories or acquiring a lock.
-    encode(before, data);
+    encodeProject(before, data);
   }
   const execute = () => {
     const current = load(root, name, { optional: true });
     if (operation === 'remove') {
-      const result = { name, path: relative(root, current.folder), dryRun, changed: false,
-        wouldChange: !!current.snapshot, removed: false, entries: [] };
+      const result = planProjectRemoval(current, { root, name, dryRun });
       if (!current.snapshot) return { data: result, errors: [] };
       const remove = exclude => {
         const baseline = tree(current.folder, exclude);
         result.entries = baseline.entries;
-        if (!dryRun) {
-          hooks.beforeCheck?.(); current.guard();
-          if (tree(current.folder, exclude).fingerprint !== baseline.fingerprint) {
-            fail('PROJECT_CONFLICT', 'Project resources changed before removal.', { target: current.folder });
-          }
-          const recoveryPath = join(current.scope, `.ksf-project-deleting-${randomUUID()}`);
-          renameSync(current.folder, recoveryPath);
-          Object.assign(result, { changed: true, removed: true });
-          try { (hooks.cleanup ?? rmSync)(recoveryPath, { recursive: true, force: false }); }
-          catch {
-            fail('PROJECT_CLEANUP_FAILED', 'Project was detached but cleanup failed; inspect the recovery path.', {
-              data: { ...result, recoveryPath }, target: current.folder,
-            });
-          }
-        }
+        if (!dryRun) commitProjectRemoval(current, baseline, exclude, result, hooks);
         return { data: result, errors: [] };
       };
       return dryRun ? remove() : withWriteLock(current.target, ({ lock }) => remove(lock));
     }
     if (!current.snapshot && !Object.hasOwn(data, 'body')) invalid('Creating a project requires body in the write input.');
-    const encoded = encode(current, data);
-    const wouldChange = !current.snapshot || !encoded.bytes.equals(current.snapshot.bytes);
-    const result = { name, path: relative(root, current.target), dryRun, changed: false, wouldChange,
-      created: false, wouldCreate: !current.snapshot, changes: encoded.changes,
-      project: publicProject(root, name, encoded.parsed) };
+    const { result, bytes, wouldChange } = planProjectWrite(current, { root, name, data, dryRun });
     if (dryRun || !wouldChange) return { data: result, errors: [] };
-    directory(current.scope, { create: true });
-    const createdDirectory = !directory(current.folder, { missing: true });
-    if (createdDirectory) mkdirSync(current.folder);
-    const ownDirectory = createdDirectory ? lstatSync(current.folder) : null;
-    current.guard = guardPaths(current.scope, current.folder);
-    try {
-      withWriteLock(current.target, () => {
-        if (current.snapshot) {
-          (hooks.publish ?? publishFile)(current.snapshot, encoded.bytes, { beforeCheck: () => {
-            hooks.beforeCheck?.(); current.guard();
-          } });
-        } else publishNew(current, encoded.bytes, hooks.beforeCheck);
-      });
-    } catch (error) {
-      if (ownDirectory) {
-        try {
-          const latest = lstatSync(current.folder);
-          if (latest.dev === ownDirectory.dev && latest.ino === ownDirectory.ino) rmdirSync(current.folder);
-        } catch { /* Preserve concurrent contents and replacement directories. */ }
-      }
-      throw error;
-    }
+    commitProjectWrite(current, bytes, hooks);
     Object.assign(result, { changed: true, created: !current.snapshot });
     return { data: result, errors: [] };
   };
   return dryRun ? execute() : withProjectLock(root, execute);
+}
+
+function commitProjectWrite(current, bytes, hooks) {
+  directory(current.scope, { create: true });
+  const createdDirectory = !directory(current.folder, { missing: true });
+  if (createdDirectory) mkdirSync(current.folder);
+  const ownDirectory = createdDirectory ? lstatSync(current.folder) : null;
+  current.guard = guardPaths(current.scope, current.folder);
+  try {
+    withWriteLock(current.target, () => {
+      if (current.snapshot) {
+        (hooks.publish ?? publishFile)(current.snapshot, bytes, { beforeCheck: () => {
+          hooks.beforeCheck?.(); current.guard();
+        } });
+      } else publishNew(current, bytes, hooks.beforeCheck);
+    });
+  } catch (error) {
+    if (ownDirectory) {
+      try {
+        const latest = lstatSync(current.folder);
+        if (latest.dev === ownDirectory.dev && latest.ino === ownDirectory.ino) rmdirSync(current.folder);
+      } catch { /* Preserve concurrent contents and replacement directories. */ }
+    }
+    throw error;
+  }
+}
+
+function commitProjectRemoval(current, baseline, exclude, result, hooks) {
+  hooks.beforeCheck?.(); current.guard();
+  if (tree(current.folder, exclude).fingerprint !== baseline.fingerprint) {
+    fail('PROJECT_CONFLICT', 'Project resources changed before removal.', { target: current.folder });
+  }
+  const recoveryPath = join(current.scope, `.ksf-project-deleting-${randomUUID()}`);
+  renameSync(current.folder, recoveryPath);
+  Object.assign(result, { changed: true, removed: true });
+  try { (hooks.cleanup ?? rmSync)(recoveryPath, { recursive: true, force: false }); }
+  catch {
+    fail('PROJECT_CLEANUP_FAILED', 'Project was detached but cleanup failed; inspect the recovery path.', {
+      data: { ...result, recoveryPath }, target: current.folder,
+    });
+  }
 }

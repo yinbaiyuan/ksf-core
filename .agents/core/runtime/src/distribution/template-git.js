@@ -2,7 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fail, isRevision, isRepository, isBranch } from './common.js';
+import { fail } from './errors.js';
+import { isRevision, isRepository, isBranch } from './git-values.js';
 
 // Large base64 JSON bodies can be rejected by the Git Database REST API.
 // Git's pack protocol also reuses unchanged blobs already held by the target.

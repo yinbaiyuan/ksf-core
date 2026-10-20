@@ -2,7 +2,12 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { configuration, compareVersions, fail, isRevision, parseJSON, readRegular, sha256, stableJSON, versionParts, writeAtomic } from './common.js';
+import { configuration } from './configuration.js';
+import { compareVersions, versionParts } from './versions.js';
+import { fail } from './errors.js';
+import { isRevision } from './git-values.js';
+import { parseJSON, readRegular, writeAtomic } from './files.js';
+import { sha256, stableJSON } from '../shared/hash.js';
 import { GitHubAPI } from './github.js';
 import { verifyTemplateGit } from './template-git.js';
 import { inspectReleaseDirectory } from './publish.js';

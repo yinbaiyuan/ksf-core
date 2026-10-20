@@ -1,4 +1,5 @@
 import { validId } from '../objects/schema.js';
+import { validSourceId } from '../sources/schema.js';
 
 export const userDataRoot = '.agents/user-data';
 export class UserDataError extends Error {
@@ -42,6 +43,17 @@ function identity(values) {
 // Only Core-owned, explicitly validated namespaces belong here. Ordinary work,
 // project checkpoints and user capability bodies have their existing locations.
 export const namespaces = Object.freeze({
+  sources: Object.freeze({ schemaVersion: 1, kind: 'sources', description: 'Direct local ability-source repository associations; no capability copies.', validate(values) {
+    keys(values, ['entries'], 'sources');
+    if (values.entries === undefined) return;
+    if (!Array.isArray(values.entries)) fail('USER_DATA_INVALID', 'sources.entries must be an array.');
+    const ids = new Set(), paths = new Set();
+    for (const entry of values.entries) {
+      keys(entry, ['id', 'path'], 'sources.entries');
+      if (!validSourceId(entry.id) || typeof entry.path !== 'string' || !entry.path.trim() || /[\x00-\x1f\x7f]/.test(entry.path) || ids.has(entry.id) || paths.has(entry.path)) fail('USER_DATA_INVALID', 'Source IDs and paths must be valid and unique.');
+      ids.add(entry.id); paths.add(entry.path);
+    }
+  } }),
   settings: Object.freeze({ schemaVersion: 1, kind: 'settings', description: 'KSF program settings; overrides Core defaults.', validate: settings }),
   identity: Object.freeze({ schemaVersion: 1, kind: 'identity', description: 'Local user name, contact email and object namespace; no remote verification.', validate: identity }),
 });

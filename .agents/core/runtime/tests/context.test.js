@@ -53,7 +53,7 @@ test('context projects full descriptions, preserves order and fixed entries, and
   assert.equal(z.name, '中文搭档');
   assert.equal(z.path, '能力/搭档/partner.test.z/partner.md');
   for (const object of objects) {
-    assert.deepEqual(Object.keys(object), ['id', 'name', 'description', 'path', 'protected']);
+    assert.deepEqual(Object.keys(object), ['id', 'name', 'description', 'path', 'protected', 'source']);
     assert.equal(object.protected, Object.hasOwn(protectedPaths, object.id));
   }
   assert.ok(objects.some(o => o.id === 'workflow.ksf.entry'));
@@ -67,19 +67,23 @@ test('context projects full descriptions, preserves order and fixed entries, and
   assert.deepEqual(snapshot(f.root), before);
 });
 
-test('effective user overrides and archived fallback come from the object service', t => {
-  const f = fixture(t), id = 'partner.test.same';
-  f.add('partner', 'system', id, { description: '系统定义' });
-  const path = f.add('partner', 'user', id, { description: '用户定义', status: 'draft' });
+for (const [type, group] of [['workflow', 'workflows'], ['partner', 'partners']]) test(`${type}: draft descriptions are discovered immediately and status changes follow object resolution`, t => {
+  const f = fixture(t), id = `${type}.test.same`;
+  f.add(type, 'system', id, { description: '系统定义' });
+  const path = f.add(type, 'user', id, { description: '用户定义', status: 'draft' });
   let result = contextCapabilities(f.root);
-  assert.equal(result.data.partners.objects.length, 1);
-  assert.equal(result.data.partners.objects[0].description, '用户定义');
-  writeFileSync(path, readFileSync(path, 'utf8').replace('status: draft', 'status: archived'));
-  result = contextCapabilities(f.root);
-  assert.equal(result.data.partners.objects.length, 1);
-  assert.equal(result.data.partners.objects[0].description, '系统定义');
-  f.add('partner', 'user', 'partner.test.only', { status: 'archived' });
-  assert.equal(contextCapabilities(f.root).data.partners.objects.length, 1);
+  assert.equal(result.data[group].objects.length, 1);
+  assert.equal(result.data[group].objects[0].description, '用户定义');
+  let previous = 'draft';
+  for (const status of ['active', 'archived', 'draft']) {
+    writeFileSync(path, readFileSync(path, 'utf8').replace('status: ' + previous, 'status: ' + status));
+    result = contextCapabilities(f.root);
+    assert.equal(result.data[group].objects.length, 1);
+    assert.equal(result.data[group].objects[0].description, status === 'archived' ? '系统定义' : '用户定义');
+    previous = status;
+  }
+  f.add(type, 'user', `${type}.test.only`, { status: 'archived' });
+  assert.equal(contextCapabilities(f.root).data[group].objects.length, 1);
 });
 
 test('bad override does not expose its system copy; unrelated valid objects remain', t => {

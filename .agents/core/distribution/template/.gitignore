@@ -1,5 +1,8 @@
 .DS_Store
 
+# 工程各自管理 Git，不进入 KSF 用户实例的仓库。
+/repositories/
+
 # 本机运行时、更新事务和贡献草稿由程序维护，不作为个人资料提交。
 /.agents/runtime-data/
 
@@ -8,3 +11,6 @@
 
 # KSF 系统级用户数据随用户实例保存；只排除原子写入的临时文件。
 /.agents/user-data/*.tmp
+
+# 对象持久数据的嵌套原子写入临时文件。
+/.agents/user-data/**/*.tmp
