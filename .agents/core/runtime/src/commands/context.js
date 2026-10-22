@@ -1,9 +1,11 @@
+import { hasJsonFlag, parseOptions, optionSpecs } from '../shared/options.js';
+import { validSourceId } from '../sources/schema.js';
 import { invalid, MetadataError } from '../metadata/errors.js';
 import { contextCapabilities } from '../services/context.js';
 
 export function contextHelp(operation) {
   return `KSF context${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
-    '  ksf context capabilities [--json]\n\n' +
+    '  ksf context capabilities [--json] [--source <source-id>]\n\n' +
     'Return all effective workflow and partner discovery descriptions, workflows first.\n' +
     'Descriptions are preserved; bodies and related resources are not included.\n' +
     'Fixed entries remain marked. ability-route owns matching and fallback decisions.\n' +
@@ -16,11 +18,10 @@ function parseArgs(args) {
   const [operation, ...options] = args;
   if (operation !== 'capabilities') invalid('Expected context capabilities.');
   if (options.length === 1 && ['--help', '-h'].includes(options[0])) return { operation, help: true };
-  // No targets or scope selectors: this operation always returns the full set.
-  if (options.length > 1 || (options.length === 1 && options[0] !== '--json')) {
-    invalid('Use context capabilities with only --json, or --help alone.');
-  }
-  return { operation };
+  const parsed = { operation };
+  parseOptions(options, { result: parsed, options: optionSpecs(['json', 'source']), invalid, target() { invalid('Context does not accept targets.'); } });
+  if (parsed.source !== undefined && !validSourceId(parsed.source)) invalid('Expected a linked source ID.');
+  return parsed;
 }
 
 function render(result) {
@@ -33,7 +34,7 @@ function render(result) {
       if (!group.objects.length) lines.push('(empty)');
       for (const object of group.objects) {
         lines.push(`\n- ${object.name}${object.protected ? ' [fixed entry]' : ''}`,
-          `  ID: ${object.id}`, `  Definition: ${object.path}`,
+          `  ID: ${object.id}`, `  Source: ${object.source}`, `  Definition: ${object.path}`,
           `  Fixed entry: ${object.protected ? 'yes' : 'no'}`, `Description:\n${object.description}`);
       }
     }
@@ -55,7 +56,7 @@ export function runContextCommand(args, root) {
   try {
     const parsed = parseArgs(args);
     if (parsed.help) return { stdout: contextHelp(parsed.operation), exitCode: 0 };
-    const response = contextCapabilities(root);
+    const response = contextCapabilities(root, { source: parsed.source });
     result.data = response.data;
     result.errors = response.errors;
     result.ok = result.data.complete && result.errors.length === 0;
@@ -66,7 +67,6 @@ export function runContextCommand(args, root) {
     result.errors = [{ code: error.code, message: error.message, ...error.details }];
     exitCode = error.exitCode;
   }
-  const end = args.indexOf('--');
-  const json = (end === -1 ? args : args.slice(0, end)).includes('--json');
+  const json = hasJsonFlag(args);
   return { stdout: json ? JSON.stringify(result) + '\n' : render(result), exitCode };
 }

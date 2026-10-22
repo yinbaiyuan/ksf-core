@@ -9,14 +9,29 @@ CLI 把宿主传入的命令变成确定性的查询或修改，并返回调用�
 | 层次 | 实现 | 职责 |
 | --- | --- | --- |
 | 顶级分发 | [cli.js](../../runtime/src/cli.js) | 识别命令、定位 KSF 根、加载命令适配器、写出结果与退出码；直接处理部分简单命令 |
-| 参数与输出适配 | [commands](../../runtime/src/commands) | 解析操作、目标及选项，拒绝无效组合，调用服务，转换文本或 JSON 输出 |
+| 参数与输出适配 | [commands](../../runtime/src/commands) | 声明允许的选项，校验操作、目标及组合，调用服务，转换文本或 JSON 输出 |
 | 可复用服务 | [services](../../runtime/src/services) | 组织对象、项目、元数据、能力上下文和用户数据操作；业务调用复用函数接口 |
-| 领域规则与存储 | [objects](../../runtime/src/objects)、[metadata](../../runtime/src/metadata)、[user-data](../../runtime/src/user-data) | 身份解析、格式校验、路径约束、快照、锁和发布 |
+| 领域规则与存储 | [objects](../../runtime/src/objects)、[projects](../../runtime/src/projects)、[metadata](../../runtime/src/metadata)、[user-data](../../runtime/src/user-data) | 身份与格式规则、内存变更计算，以及各业务的路径约束、锁策略和发布方式 |
 | 系统生命周期 | [distribution](../../runtime/src/distribution) | 构建、归档、网络、发行、升级、回滚、已提交系统差异及公开贡献 |
+| 通用基础机制 | [shared](../../runtime/src/shared) | 文件描述符与临时文件生命周期、独占锁、值校验与比较、哈希、路径字符串转换、参数扫描；不依赖业务服务 |
 
-目前并非每个命令都经过完全相同的文件布局。例如项目服务将目录与锁逻辑放在服务文件中，distribution 适配器直接调用对应领域模块。维护时按实际所有权复用代码，不为形式一致复制一层服务。
+目前并非每个命令都经过完全相同的文件布局。例如项目服务保留目录与锁策略，distribution 适配器直接调用对应领域模块。维护时按实际所有权复用代码，不为形式一致复制一层服务。
 
 业务复用通过函数接口进行，不启动另一条 CLI 来获取同一套规则。隔离候选运行时验证、Git、系统 diff3 或测试运行器使用子进程，是相应操作本身的一部分。
+
+## 变更计算与文件提交
+
+对象写入通过 [services/objects.js](../../runtime/src/services/objects.js) 读取目录、资源和基线，由 [objects/plan.js](../../runtime/src/objects/plan.js) 计算候选元数据、精确依赖、修订号和序列化内容，最后由服务执行提交。纯引用解析在 [objects/references.js](../../runtime/src/objects/references.js)，Markdown 链接转换在 [objects/markdown.js](../../runtime/src/objects/markdown.js)，不需要文件系统。
+
+项目写入同样由服务读取状态，再由 [projects/plan.js](../../runtime/src/projects/plan.js) 计算元数据合并、正文替换、字节内容及变更结果，服务负责目录准备、发布和删除恢复。规划函数只处理传入状态，不修改原始 YAML 文档，不获取锁或执行文件操作。预览和真实写入复用规划函数；预览结果的 changed 仍为 false。为保持错误顺序，项目写入继续在获取锁前预检序列化，获取原有项目锁后重读并重新计算。
+
+`updateProjectMetadata` 保留“项目锁内读取最新根卡 → 执行转换 → 计算变更 → 文件锁内发布”的顺序，供 repository 关联操作复用。对象、项目、metadata、user-data 和 repository 只共享独占锁的创建与所有权清理机制，锁路径、范围、顺序、错误和清理通知仍由各业务持有。
+
+[shared/files.js](../../runtime/src/shared/files.js) 管理文件快照、持久化暂存和资源清理；调用方决定路径策略、身份比较字段、权限及替换或创建方式。对象目录派生、项目目录删除和发行事务保留各自实现。user-data 继续要求精确 etag；本次分层不为对象与项目增加新的读后写版本条件。
+
+参数扫描由 [shared/options.js](../../runtime/src/shared/options.js) 处理，命令声明布尔、单值、多值和选项别名。metadata 的 `--fields=<name>` 继续吸收后续普通字段，distribution 的 `--paths=<path>` 仍只取内联值；两者不能互换。context 保留自身简单、严格的语法校验，共用 JSON 模式识别。帮助、参数组合、错误信息、结果格式和退出码由命令适配器持有。
+
+distribution 的错误、路径、文件操作、版本、配置和发行清单分别归入对应模块；配置读取才依赖用户设置服务。`common.js` 仅保留旧导出兼容入口，运行时代码直接引用实际所有者，避免归档等纯工具加载配置服务。通用值校验在 shared，metadata 输入适配层负责转换为原有错误。
 
 ## 两条实际调用链
 
@@ -47,3 +62,5 @@ CLI 把宿主传入的命令变成确定性的查询或修改，并返回调用�
 ## 实现与验证来源
 
 架构约束见[命令设计规范](../CLI命令设计规范.md)。适配层验证见 [cli.test.js](../../runtime/tests/cli.test.js)、[context-cli.test.js](../../runtime/tests/context-cli.test.js)、[objects-cli.test.js](../../runtime/tests/objects-cli.test.js)、[projects-cli.test.js](../../runtime/tests/projects-cli.test.js)、[metadata-cli.test.js](../../runtime/tests/metadata-cli.test.js)。user-data 的命令与服务验证见 [user-data.test.js](../../runtime/tests/user-data.test.js)与 [identity.test.js](../../runtime/tests/identity.test.js)，系统生命周期另见[生命周期专题](lifecycle.md)。
+
+[shared-files.test.js](../../runtime/tests/shared-files.test.js) 验证锁所有权、暂存清理、发布冲突与权限；[mutation-plans.test.js](../../runtime/tests/mutation-plans.test.js) 在无真实文件的状态中比较预览和执行计划，并检查输入未被修改；[cli-options.test.js](../../runtime/tests/cli-options.test.js) 保存重构前的参数契约；[runtime-layers.test.js](../../runtime/tests/runtime-layers.test.js) 检查基础层依赖、规划模块的静态导入闭包和循环依赖。静态检查包含字面量动态导入，不覆盖运行时计算的模块路径，也不能代替实际行为测试。

@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { fail, parseJSON } from './common.js';
+import { fail } from './errors.js';
+import { parseJSON } from './files.js';
 import { releaseIndexName } from './products.js';
 
 export function resourceURL(source, base) {

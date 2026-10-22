@@ -69,6 +69,33 @@ for (const type of Object.keys(types)) {
   });
 }
 
+for (const type of Object.keys(types)) test(`${type}: draft derivation immediately takes over, active does not add a gate, and archive restores the system`, t => {
+  const f = fixture(t), id = `${type}.test.draft-contract`;
+  const system = f.add(type, 'system', id, {}, 'SYSTEM_BODY\n');
+  const original = readFileSync(system.path);
+  const derived = f.mutate(type, 'write', id, { input: { body: 'DRAFT_BODY\n' } }).data;
+  const read = () => f.query(type, 'read', id).data.object;
+  assert.equal(derived.user_revision, 1);
+  assert.equal(read().metadata.status, 'draft');
+  assert.equal(read().source, 'user');
+  assert.equal(read().body, 'DRAFT_BODY\n');
+  assert.equal(f.query(type, 'read', id + '@0.1.0').data.object.body, 'DRAFT_BODY\n');
+  assert.equal(f.query(type, 'list').data.objects[0].status, 'draft');
+  const owner = f.add('partner', 'user', 'partner.test.consumer', { references: [id + '@0.1.0'] });
+  assert.equal(f.query('partner', 'read', owner.id).data.references[0].source, 'user');
+  for (const status of ['active', 'archived', 'draft']) {
+    f.mutate(type, 'write', id, { input: { metadata: { status } } });
+    assert.equal(read().source, status === 'archived' ? 'system' : 'user');
+    assert.equal(read().body, status === 'archived' ? 'SYSTEM_BODY\n' : 'DRAFT_BODY\n');
+    assert.equal(f.query('partner', 'read', owner.id).data.references[0].source, status === 'archived' ? 'system' : 'user');
+  }
+  const path = join(f.root, derived.path);
+  writeFileSync(path, readFileSync(path, 'utf8').replace('description: For testing', 'description: ""'));
+  assert.throws(() => f.query(type, 'read', id), { code: 'OBJECT_INVALID' });
+  assert.equal(f.query('partner', 'read', owner.id).errors[0].code, 'OBJECT_INVALID');
+  assert.deepEqual(readFileSync(system.path), original);
+});
+
 test('derivation copies the entire directory, preserves raw baseline and rebases external links', t => {
   const f = fixture(t), system = f.add('partner', 'system', 'partner.test.sample', {},
     '# Source\n[inside](resources/note.md)\n[outside](../../../../.agents/core/docs/manual.md)\n`[example](../../keep)`\n');

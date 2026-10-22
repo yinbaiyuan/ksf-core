@@ -5,9 +5,9 @@
 ## 命令与参数
 
 ```sh
-ksf <类型> list [--source effective|system|user|all] [--json]
-ksf <类型> read <id[@version]> [--part metadata|body|all] [--source effective|system|user] [--json]
-ksf <类型> check <id[@version]> [--source effective|system|user] [--json]
+ksf <类型> list [--source effective|system|user|all|源ID] [--json]
+ksf <类型> read <id[@version]> [--part metadata|body|all] [--source effective|system|user|源ID] [--json]
+ksf <类型> check <id[@version]> [--source effective|system|user|源ID] [--json]
 ksf <类型> write <id> (--data JSON | --from 文件) [--dry-run] [--json]
 ksf <类型> remove <id> [--dry-run] [--json]
 ```
@@ -31,7 +31,9 @@ ksf <类型> remove <id> [--dry-run] [--json]
 
 未发行的 Core 源码包含 `.agents/core/build.json`、`.agents/core/distribution.json`，没有 `.agents/core/release.json` 和根 `ksf` 启动器。此时尚未创建的用户能力目录视为空范围，查询不创建目录。系统目录仍须完整；发行工作区的用户目录缺失、任何范围不可读或包含符号链接仍报告错误。
 
-默认有效来源：用户 draft/active 接管；用户 archived 退出；精确版本先找匹配用户版，再找匹配系统版。不支持自动选最新版。显式 system/user 只读指定区，可读归档定义。坏的未归档用户副本不静默回退。同区重复身份冲突；跨区同 ID 允许接管。
+默认有效来源：个人、匹配能力源、系统；用户 draft/active 接管；用户 archived 退出；精确版本先找匹配个人版，再找唯一匹配的能力源版，最后找匹配系统版。多个源匹配时明确选择来源，不自动选最新版。不支持自动选最新版。显式 system/user 只读指定区，可读归档定义。坏的未归档用户副本不静默回退。同区重复身份冲突；跨区同 ID 允许接管。
+
+draft 保存后立即影响默认读取和依赖解析；首次派生默认就是 draft。active 不另设启用门禁，也不表示质量通过。需要先讨论而不生效的候选留在任务材料中；需要保留现有副本但退出默认选择时显式归档。完整语义见[用户接管与修订](../对象元数据规范.md#用户接管与修订)。
 
 固定对象只认指定系统定义：
 
@@ -44,7 +46,7 @@ ksf <类型> remove <id> [--dry-run] [--json]
 | `competency.ksf.knowledge-route` | `.agents/core/abilities/competencies/knowledge-route/competency.md` |
 | `competency.ksf.asset-maintenance` | `.agents/core/abilities/competencies/asset-maintenance/competency.md` |
 
-list 是对象管理清单，包含固定定义并标注 protected；路由从中排除固定入口链。list --source all 展示两区实际有效定义和 effective 标记；无效项通过 errors 报告，不能冒充可调用对象。部分失败仍返回可核实项，complete=false、ok=false、退出 1；不完整集合不能证明“全库无匹配”。
+list 是对象管理清单，包含固定定义并标注 protected；路由从中排除固定入口链。list --source all 展示全部来源实际有效定义和 effective 标记；无效项通过 errors 报告，不能冒充可调用对象。部分失败仍返回可核实项，complete=false、ok=false、退出 1；不完整集合不能证明“全库无匹配”。
 
 ## 读取与检查
 
@@ -113,3 +115,7 @@ remove 物理删除整个用户目录，包括所有附件和基线。没有用�
 测试见 [objects.test.js](../../runtime/tests/objects.test.js) 和 [objects-cli.test.js](../../runtime/tests/objects-cli.test.js)：覆盖四类生命周期、读取模式、接管/版本、完整派生、基线、相对链接、引用保护、固定入口、锁、并发及失败清理；真实启动入口结果需与测试报告分别记录。资源监控、自动合并、远程获取、多版本和前端升级不在首版范围。
 
 首版实际测试、真实入口调用与路由走查证据见[验证记录](objects-validation.md)。
+
+## 已关联能力源
+
+能力源对象是直接读取的独立仓库内容，路径为实际绝对路径，返回 source 为源 ID、source_root 为仓库根。显式 --source <源ID> 只查询该源；all 列举所有来源。源内依赖在本源/Core 精确绑定，后续按 references 返回的 source 显式读取。SOURCE_AMBIGUOUS 携带候选源，失联和损坏返回不完整结果。write/remove 仍只操作个人区，不会修改或自动派生能力源对象。协议与发布见[能力源](../sources.md)。

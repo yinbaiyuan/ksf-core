@@ -1,41 +1,10 @@
 import { resolve } from 'node:path';
-import { isDeepStrictEqual } from 'node:util';
+import { equalValues, parseInput, validateInput } from '../metadata/input.js';
 import { MetadataError, decodeUtf8 } from '../metadata/errors.js';
 import { readSnapshot, withWriteLock, publishFile } from '../metadata/files.js';
 import { parseFrontmatter, encodeFrontmatter, createFrontmatter, setField } from '../metadata/frontmatter.js';
 
-export function equalValues(a, b) {
-  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return isDeepStrictEqual(a, b);
-  if (Array.isArray(a) || Array.isArray(b)) return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((v, i) => equalValues(v, b[i]));
-  const keys = Object.keys(a);
-  return keys.length === Object.keys(b).length && keys.every(k => Object.hasOwn(b, k) && equalValues(a[k], b[k]));
-}
-
-export function parseInput(text, source) {
-  let data;
-  try { data = JSON.parse(text); }
-  catch { throw new MetadataError('INPUT_INVALID', 'Input must be valid JSON.', { exitCode: 2, ...(source ? { target: source } : {}) }); }
-  return validateInput(data, source);
-}
-
-export function validateInput(data, source) {
-  const invalid = () => { throw new MetadataError('INPUT_INVALID', 'Input must be a JSON field mapping with finite, safe numbers.', { exitCode: 2, ...(source ? { target: source } : {}) }); };
-  if (data === null || typeof data !== 'object' || Array.isArray(data)) invalid();
-  const ancestors = new Set();
-  function check(value) {
-    if (!['string', 'number', 'boolean', 'object'].includes(typeof value)) invalid();
-    if (typeof value === 'number' && (!Number.isFinite(value) || (Number.isInteger(value) && !Number.isSafeInteger(value)))) invalid();
-    if (value && typeof value === 'object') {
-      if (ancestors.has(value)) invalid();
-      if (!Array.isArray(value) && ![Object.prototype, null].includes(Object.getPrototypeOf(value))) invalid();
-      ancestors.add(value);
-      for (const child of Object.values(value)) check(child);
-      ancestors.delete(value);
-    }
-  }
-  check(data);
-  return data;
-}
+export { equalValues, parseInput, validateInput } from '../metadata/input.js';
 
 export function readInputFile(root, path) {
   const target = resolve(root, path);

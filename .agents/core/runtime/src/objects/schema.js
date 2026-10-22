@@ -46,6 +46,7 @@ export function validateObject(metadata, { type, source, path }) {
   if (!versionPattern.test(metadata.version ?? '')) issue('version', 'Expected an exact x.y.z version.');
   if (source === 'user' && (!Number.isSafeInteger(metadata.user_revision) || metadata.user_revision < 1)) issue('user_revision', 'User objects require a positive integer revision.');
   if (source === 'system' && Object.hasOwn(metadata, 'user_revision')) issue('user_revision', 'System definitions do not carry user revisions.');
+  if (!['system', 'user'].includes(source) && (Object.hasOwn(metadata, 'user_revision') || Object.hasOwn(metadata, 'upstream'))) issue('user_revision', 'Published source objects do not carry personal revision or derivation fields.');
   if (Object.hasOwn(metadata, 'upstream')) {
     const u = metadata.upstream;
     if (source !== 'user' || !u || typeof u !== 'object' || Array.isArray(u) ||
