@@ -9,13 +9,13 @@ import { gitBlobID, resolveBaseline } from '../src/distribution/baseline.js';
 import { GitHubAPI } from '../src/distribution/github.js';
 import { systemRead, systemUpdate, systemRollback, systemFingerprint } from '../src/distribution/system.js';
 import { prepareContribution, readContribution, submitContribution } from '../src/distribution/contribute.js';
-import { distributionFixture, commitWorkspace, git } from './helpers/distribution-fixture.js';
+import { distributionFixture, commitWorkspace, git, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 
 const example = '.agents/core/example.txt';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 const apiFor = f => new ForkAPI({ coreRoot: f.root });
-const prepare = (f, api, options = {}) => prepareContribution({ root: f.workspace, paths: [example], api, ...options });
+const prepare = (f, api, options = {}) => prepareContribution({ ...contributionDescription, root: f.workspace, paths: [example], api, ...options });
 const submit = (f, plan, api, options = {}) => submitContribution({ root: f.workspace, id: plan.id, reviewed: plan.digest, api, ...options });
 
 test('anonymous original reads use pinned raw content and verify blobs without one REST request per file', async () => {

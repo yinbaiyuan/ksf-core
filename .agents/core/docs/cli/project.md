@@ -6,6 +6,8 @@
 
 CLI 负责文件操作；主项目判断、来源核对、写入授权和成果验收仍由 Agent 完成。项目不进入能力发现集合，也不支持自动绑定工程、跨会话自动记忆或项目间事务。公共调用规范见 [CLI 命令设计规范](../CLI命令设计规范.md)。
 
+实际工程默认位于 `repositories/` 或已有工作区，由 [repository CLI](repository.md) 显式创建和关联；根卡的可选 repositories 元数据保存路径列表。project write 不自动 git init，project remove 不跟随关联路径删除工程。项目归档只改变使用状态，工程保留原位。
+
 ## 调用与操作
 
 ```sh
@@ -60,6 +62,30 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 
 命令不自动改项目材料、成果、其他项目、外部工程或导航链接。需要同步时由 Agent 根据已授权差异处理。
 
+## 可选 routing：项目偏好与知识入口
+
+根卡 metadata.routing 为可省略的映射，只接受下列可选列表；省略或空列表表示没有该类预设，空映射表示没有预设。routing 不是第五类能力对象，也不要求项目 ID 或版本。
+
+| 字段 | 每项格式 | 作用 |
+| --- | --- | --- |
+| workflows | `{ref: "workflow.example.delivery@0.1.0", source: "team-methods"}` | 优先核对的工作流 |
+| partners | `{ref: "partner.example.editor@0.1.0"}` | 优先核对的搭档 |
+| competencies | `{ref: "competency.example.review@0.1.0"}` | 按需采用的补充方法 |
+| data_packages | `{ref: "data-package.example.materials@0.1.0"}` | 按需使用的资料包 |
+| knowledge | `"../../知识/主题/README.md"` | 优先发现的知识入口 |
+
+能力项只接受 ref 与可选 source，ref 类型匹配列表并含精确 x.y.z；固定运行入口不能作为预设。source 省略时为 effective，也可显式指定 user、system 或源 ID，不能用 all。只影响该项定位，不过滤全局候选或改变源对象同源/Core 依赖规则。重复条目保留输入顺序，Agent 不因重复而重复执行。
+
+知识项是相对根卡的普通路径，不是 Markdown 链接或 URL；用 `/`，最终位于当前实例 `知识/` 下，以 `.md` 结尾，不接受绝对路径、反斜杠或控制字符。check 核实文件及父目录均非符号链接、文件为普通 UTF-8 文本，不将正文加入输出。
+
+write 校验显式提供的 routing 结构；未知字段、非映射、错误类型、非精确引用及不支持的路径返回 PROJECT_ROUTING_INVALID、退出 2，不联网或检查对象当前可用性，允许先记录尚未可用的精确引用。routing 嵌套值仍整体替换；清空用 `{}`，不能用 null。只改正文或其他元数据时保留原配置。repository 等内部元数据变换保留未改变的旧配置，不借无关操作修复坏 routing。通用 metadata/宿主编辑不自动应用此领域校验，check 和采用时仍需核实。
+
+read 原样返回 routing，不展开资料或校验可用性，坏配置不阻止读取其他项目事实。check 对每项独立检查：能力项复用对象 check，返回实际来源/路径及精确依赖，归档对象即使显式指定来源也不能作为有效预设；知识项检查实际文件。某项失败保留原配置和其他有效项，不自动换版本、安装、重置、建知识导航或读取/写入对象 user-data。
+
+没有 routing 的旧项目响应不增加 routing 字段。配置存在时，指定及批量 check 的项目结果增加 `routing: {valid, entries}`。每项含 field（如 routing.partners[0]）、reference 和 valid；能力项另含 requestedSource、可解析时的 object 摘要及 references，知识有效项含 path；失败项含 errors，对应问题汇总到顶层 errors。未知配置字段进入汇总错误，不生成虚构条目。部分失败退出 1，仍需读取 stdout 的可用项；list 不因 routing 失效而丢失项目摘要。批量 check 有任何错误时 complete/valid 均为 false，各条目仍返回已检查结果。
+
+程序只证明配置结构和本机可用性，不选择能力或核实项目事实。明确指令、有效原安排及适用预设的选择顺序由[能力路由](../../abilities/competencies/ability-route/competency.md)持有，整体调度见[三路由协作](../runtime/routing.md)。裁剪示例见[配置模板](../templates/project-routing.md)。
+
 ## 输出
 
 JSON 使用 `ok`、`command: "project"`、`operation`、`data`、`errors`。业务成功、失败及部分结果都写入 stdout，日志与启动诊断在 stderr；退出码 0 为成功，1 为操作失败或检查不通过，2 为调用错误。
@@ -68,7 +94,7 @@ JSON 使用 `ok`、`command: "project"`、`operation`、`data`、`errors`。业�
 | --- | --- |
 | list | complete、projects；每项含 name、title、description、status、path |
 | read | project，含 name、path、directory、state 及所选 metadata/body |
-| check 指定项目 | name、path、valid、state |
+| check 指定项目 | name、path、valid、state；配置存在时另含 routing 逐项结果 |
 | check 全部 | complete、valid、projects，每项包含根卡检查结果 |
 | write | name、path、dryRun、changed、wouldChange、created、wouldCreate、changes、写入后的 project |
 | remove | name、path、dryRun、changed、wouldChange、removed、将移除的 entries |
@@ -81,11 +107,15 @@ write 的 changes 包含变动的元数据字段名和正文是否变化。预�
 
 ## 检查与异常
 
-check 检查根卡的安全路径、普通文件、UTF-8 和 frontmatter 可解析性。不检查 Markdown 链接、事实来源、章节完整度、预算、项目语义或业务完成情况。只有 `项目/<项目名>/project.md` 是入口；更深的同名文件与没有根卡的目录不成为项目条目。
+check 检查根卡的安全路径、普通文件、UTF-8 和 frontmatter 可解析性，并对已配置 routing 执行上述逐项检查。不扫描正文中的所有 Markdown 链接，不核实事实来源、章节完整度、预算、项目语义或业务完成情况。只有 `项目/<项目名>/project.md` 是入口；更深的同名文件与没有根卡的目录不成为项目条目。
 
 | 错误码 | 含义 |
 | --- | --- |
 | INVALID_ARGUMENTS / INPUT_INVALID | 参数或写入信封无效，退出 2 |
+| PROJECT_ROUTING_INVALID | 显式写入结构错误退出 2；检查存量配置时作为逐项错误、退出 1 |
+| PROJECT_ROUTING_ARCHIVED | 显式来源对象已归档，不能作为可采用的预设 |
+| PROJECT_KNOWLEDGE_NOT_FOUND / PROJECT_KNOWLEDGE_PATH_INVALID | 配置知识文件缺失或路径含链接/不安全父目录 |
+| PROJECT_ROUTING_CHECK_FAILED | 不能完成某项可用性核对；对象/文件错误也保留其原错误码及 field |
 | PROJECT_DIRECTORY_MISSING | 读取或发现所需目录不存在，不能当作空库 |
 | PROJECT_NOT_FOUND | 指定项目根卡不存在 |
 | PROJECT_PATH_INVALID | 项目目录或管理路径含符号链接或不是普通目录 |
@@ -114,6 +144,7 @@ list/read/check 自身只读。修改类真实调用使用 `.agents/runtime-data
 
 - [命令适配](../../runtime/src/commands/projects.js)：参数、帮助、文本与 JSON、退出码。
 - [项目服务](../../runtime/src/services/projects.js)：发现、格式复用、写入、锁和目录删除。
+- [纯结构校验](../../runtime/src/projects/routing-schema.js)、[routing 可用性检查](../../runtime/src/projects/routing.js)与[专项测试](../../runtime/tests/project-routing.test.js)：结构、精确引用、来源绑定、局部错误、知识路径及旧项目兼容。
 - [服务测试](../../runtime/tests/projects.test.js)与 [CLI 测试](../../runtime/tests/projects-cli.test.js)：创建更新、无元数据、中文名称、预览、部分失败、字节保留、路径隔离、冲突、清理失败和跨 cwd 调用。
 
 实际测试通过范围见本次 `ksf test` 输出；自动化使用隔离临时项目，不修改正式用户项目。返回[索引](index.md)。

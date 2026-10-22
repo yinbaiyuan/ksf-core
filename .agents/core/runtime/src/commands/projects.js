@@ -1,5 +1,7 @@
+import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
+import { parseInput } from '../metadata/input.js';
 import { MetadataError, invalid } from '../metadata/errors.js';
-import { parseInput, readInputFile } from '../services/metadata.js';
+import { readInputFile } from '../services/metadata.js';
 import { project, errorItem } from '../services/projects.js';
 
 const supported = {
@@ -23,7 +25,8 @@ export function projectHelp(operation) {
     'write accepts {"metadata": {...}, "body": "..."}; creation requires body.\n' +
     'Metadata merges top-level fields; a supplied body replaces the full body.\n' +
     'remove deletes the ENTIRE project directory, including all resources.\n' +
-    'check without a name checks all root cards; no business or link validation.\n' +
+    'Optional metadata.routing sets preferred abilities and knowledge entries.\n' +
+    'check validates root cards and configured routing references; it does not select abilities or verify business facts.\n' +
     '--from paths are relative to the KSF root; absolute input paths are accepted.\n' +
     '--dry-run previews without writes. Use -- before a name starting with a hyphen.\n' +
     'Use --help or -h alone at command or operation level.\n';
@@ -33,31 +36,15 @@ export function parseProjectArgs(args) {
   if (!args.length || (args.length === 1 && ['--help', '-h'].includes(args[0]))) return { help: true };
   const [operation, ...rest] = args;
   if (!Object.hasOwn(supported, operation)) invalid('Expected project list, read, write, remove or check.');
-  const parsed = { operation }, seen = new Set();
-  let ended = false;
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    if (token === '--' && !ended) { ended = true; continue; }
-    if (ended || !token.startsWith('-')) {
+  const parsed = { operation };
+  const seen = parseOptions(rest, { result: parsed, invalid,
+    options: optionSpecs(supported[operation]),
+    target(token) {
       if (parsed.name !== undefined) invalid('Only one project name is allowed.');
-      parsed.name = token; continue;
-    }
-    const match = /^(?:--([a-z][a-z-]*)(?:=(.*))?|-([h]))$/s.exec(token);
-    if (!match) invalid('Unknown project option.');
-    const option = match[1] ?? 'help', inline = match[2];
-    if (!supported[operation].includes(option)) invalid(`Option --${option} is not supported by project ${operation}.`);
-    if (seen.has(option)) invalid(`Option --${option} cannot be repeated.`);
-    seen.add(option);
-    if (['json', 'dry-run', 'help'].includes(option)) {
-      if (inline !== undefined) invalid(`Option --${option} does not accept a value.`);
-      parsed[option === 'dry-run' ? 'dryRun' : option] = true;
-    } else {
-      const value = inline ?? rest[i + 1];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) invalid(`Option --${option} requires a value.`);
-      parsed[option] = value;
-      if (inline === undefined) i++;
-    }
-  }
+      parsed.name = token;
+    },
+    messages: { unknown: 'Unknown project option.', unsupported: name => `Option --${name} is not supported by project ${operation}.` },
+  });
   if (parsed.help) {
     if (seen.size !== 1 || parsed.name !== undefined) invalid('Use --help without a target or other options.');
     return parsed;
@@ -84,8 +71,10 @@ function render(result) {
       lines.push(`Project: ${data.project.name} (${data.project.path}); metadata: ${data.project.state}`);
       if (Object.hasOwn(data.project, 'metadata')) lines.push(JSON.stringify(data.project.metadata, null, 2));
       if (Object.hasOwn(data.project, 'body')) lines.push(data.project.body);
-    } else if (operation === 'check') lines.push(`Project: ${data.name}; ${data.valid ? 'valid' : 'invalid'}.`);
-    else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path}`,
+    } else if (operation === 'check') {
+      lines.push(`Project: ${data.name}; ${data.valid ? 'valid' : 'invalid'}.`);
+      for (const entry of data.routing?.entries ?? []) lines.push(`- ${entry.field}: ${entry.valid ? 'available' : 'unavailable'}; ${entry.object?.source ?? entry.path ?? entry.reference ?? '(invalid)'}`);
+    } else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path}`,
       JSON.stringify(data, null, 2));
   }
   for (const error of result.errors) lines.push(`${error.code}: ${error.message}${error.target ? ` (${error.target})` : ''}`);
@@ -110,7 +99,6 @@ export function runProjectCommand(args, root) {
     result.errors = [item];
     exitCode = error instanceof MetadataError ? error.exitCode : 1;
   }
-  const end = args.indexOf('--');
-  const json = (end === -1 ? args : args.slice(0, end)).includes('--json');
+  const json = hasJsonFlag(args);
   return { stdout: json ? JSON.stringify(result) + '\n' : render(result), exitCode };
 }

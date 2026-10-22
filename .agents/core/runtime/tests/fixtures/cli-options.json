@@ -1,0 +1,1177 @@
+[
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [],
+    "expected": {
+      "value": {
+        "help": true
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "--help"
+    ],
+    "expected": {
+      "value": {
+        "help": true
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "read",
+      "x",
+      "--fields=-a",
+      "b",
+      "b"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read",
+        "fields": [
+          "-a",
+          "b"
+        ],
+        "target": "x"
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "read",
+      "--fields",
+      "a"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Place the target before --fields.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "remove",
+      "x",
+      "--all",
+      "--fields",
+      "a"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Specify exactly one of --fields or --all.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "write",
+      "x",
+      "--data={}"
+    ],
+    "expected": {
+      "value": {
+        "operation": "write",
+        "fields": [],
+        "target": "x",
+        "data": "{}"
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "read",
+      "x",
+      "--json",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --json cannot be repeated.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "check",
+      "--",
+      "--json"
+    ],
+    "expected": {
+      "value": {
+        "operation": "check",
+        "fields": [],
+        "target": "--json"
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "read",
+      "x",
+      "--json="
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --json does not accept a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "metadata",
+    "method": "parseMetadataArgs",
+    "args": [
+      "write",
+      "x",
+      "--from",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --from requires a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "list"
+    ],
+    "expected": {
+      "value": {
+        "operation": "list"
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "check"
+    ],
+    "expected": {
+      "value": {
+        "operation": "check"
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "read",
+      "--",
+      "-甲"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read",
+        "name": "-甲"
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "read",
+      "甲",
+      "--part=body"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read",
+        "name": "甲",
+        "part": "body"
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "write",
+      "甲",
+      "--data={}"
+    ],
+    "expected": {
+      "value": {
+        "operation": "write",
+        "name": "甲",
+        "data": "{}"
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "write",
+      "甲",
+      "--data={}",
+      "--from=x"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Specify exactly one of --data or --from.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "read",
+      "--part",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --part requires a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "read",
+      "甲",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Use --help without a target or other options.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "projects",
+    "method": "parseProjectArgs",
+    "args": [
+      "list",
+      "甲"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Project list does not accept a target.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "create",
+      "甲",
+      "--dry-run"
+    ],
+    "expected": {
+      "value": {
+        "operation": "create",
+        "target": "甲",
+        "dryRun": true
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "link",
+      "a",
+      "--project=甲"
+    ],
+    "expected": {
+      "value": {
+        "operation": "link",
+        "target": "a",
+        "projectName": "甲"
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "link",
+      "a",
+      "--project="
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--project requires one project directory name.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "link",
+      "a",
+      "--project",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--project requires one project directory name.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "check",
+      "a",
+      "--project=甲"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Choose a path or --project.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "list",
+      "--project=甲"
+    ],
+    "expected": {
+      "value": {
+        "operation": "list",
+        "projectName": "甲"
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "list",
+      "--json",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Unsupported or repeated repository option.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "create",
+      "--help"
+    ],
+    "expected": {
+      "value": {
+        "operation": "create",
+        "help": true
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "link",
+      "--",
+      "--project"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--project is required.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "repositories",
+    "method": "parseRepositoryArgs",
+    "args": [
+      "check",
+      "--json=true"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--json does not accept a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "list"
+    ],
+    "expected": {
+      "value": {
+        "operation": "list"
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "write",
+      "identity",
+      "--data={}",
+      "--if-match=missing"
+    ],
+    "expected": {
+      "value": {
+        "operation": "write",
+        "namespace": "identity",
+        "data": "{}",
+        "ifMatch": "missing"
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "remove",
+      "settings",
+      "--if-match=missing",
+      "--dry-run"
+    ],
+    "expected": {
+      "value": {
+        "operation": "remove",
+        "namespace": "settings",
+        "ifMatch": "missing",
+        "dryRun": true
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "remove",
+      "settings"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Supply --if-match missing or the etag returned by read.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "read",
+      "settings",
+      "--json="
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--json does not accept a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "read",
+      "--",
+      "--json"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read",
+        "namespace": "--json"
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "write",
+      "identity",
+      "--from",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--from requires a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "read",
+      "settings",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Use --help without target or other options.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "user-data",
+    "method": "parseUserDataArgs",
+    "args": [
+      "check",
+      "settings",
+      "--json",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Unsupported or repeated option --json.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "list",
+      "--source=all"
+    ],
+    "expected": {
+      "value": {
+        "operation": "list",
+        "source": "all",
+        "part": "all",
+        "dryRun": false
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "read",
+      "partner.test.x@0.1.0",
+      "--part=body"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read",
+        "source": "effective",
+        "part": "body",
+        "dryRun": false,
+        "reference": "partner.test.x@0.1.0"
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "write",
+      "partner.test.x",
+      "--data={}"
+    ],
+    "expected": {
+      "value": {
+        "operation": "write",
+        "source": "effective",
+        "part": "all",
+        "dryRun": false,
+        "reference": "partner.test.x",
+        "data": "{}"
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "write",
+      "partner.test.x@0.1.0",
+      "--data={}"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "write/remove require a plain ID.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "remove",
+      "--",
+      "-x"
+    ],
+    "expected": {
+      "error": {
+        "code": "OBJECT_REFERENCE_INVALID",
+        "message": "Expected a three-part object ID and an optional exact x.y.z version.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "read",
+      "partner.test.x",
+      "--source=all"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Invalid source selection.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "check",
+      "partner.test.x",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Use --help without target or other options.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "list",
+      "--json="
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --json does not accept a value.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "objects",
+    "method": "parseObjectArgs",
+    "prefix": "partner",
+    "args": [
+      "write",
+      "partner.test.x",
+      "--data={}",
+      "--data={}"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --data cannot be repeated.",
+        "details": {},
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "prepare",
+      "--paths=a",
+      "b"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "This operation does not accept a target.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "prepare",
+      "--paths",
+      "a",
+      "b",
+      "--json",
+      "--title",
+      "fix(core): 修正示例行为",
+      "--body",
+      "原因：示例",
+      "--pr-body",
+      "## 背景与目的\n示例"
+    ],
+    "expected": {
+      "value": {
+        "operation": "prepare",
+        "paths": [
+          "a",
+          "b"
+        ],
+        "json": true,
+        "title": "fix(core): 修正示例行为",
+        "body": "原因：示例",
+        "prBody": "## 背景与目的\n示例"
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "prepare",
+      "--paths="
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--paths requires one or more literal system paths.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "prepare",
+      "--paths",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--paths requires one or more literal system paths.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "prepare",
+      "--all",
+      "--title",
+      "fix(core): 修正示例行为",
+      "--body",
+      "原因：示例",
+      "--pr-body",
+      "## 背景与目的\n示例"
+    ],
+    "expected": {
+      "value": {
+        "operation": "prepare",
+        "all": true,
+        "title": "fix(core): 修正示例行为",
+        "body": "原因：示例",
+        "prBody": "## 背景与目的\n示例"
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "submit",
+      "id",
+      "--reviewed=x"
+    ],
+    "expected": {
+      "value": {
+        "operation": "submit",
+        "target": "id",
+        "reviewed": "x"
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "submit",
+      "id"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--reviewed requires the digest of a prepared contribution.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "contribute",
+    "args": [
+      "read",
+      "id",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Use --help without other arguments.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "read"
+    ],
+    "expected": {
+      "value": {
+        "operation": "read"
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "sync",
+      "--quiet",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--quiet and --json are mutually exclusive.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "update",
+      "--source=a",
+      "--from=b"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "--source and --from are mutually exclusive.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "update",
+      "--from="
+    ],
+    "expected": {
+      "value": {
+        "operation": "update",
+        "from": ""
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "check",
+      "--source",
+      "--help"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --source requires a value.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "rollback",
+      "--dry-run"
+    ],
+    "expected": {
+      "value": {
+        "operation": "rollback",
+        "dryRun": true
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "read",
+      "--json",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --json cannot be repeated.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "system",
+    "args": [
+      "read",
+      "--",
+      "--json"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "This operation does not accept a target.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "build",
+      "--platform=darwin-arm64",
+      "--allow-dirty",
+      "--dry-run"
+    ],
+    "expected": {
+      "value": {
+        "operation": "build",
+        "platform": "darwin-arm64",
+        "allowDirty": true,
+        "dryRun": true
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "publish",
+      "out",
+      "--release-only"
+    ],
+    "expected": {
+      "value": {
+        "operation": "publish",
+        "target": "out",
+        "releaseOnly": true
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "mirror",
+      "--source=x"
+    ],
+    "expected": {
+      "value": {
+        "operation": "mirror",
+        "source": "x"
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "template",
+      "--help"
+    ],
+    "expected": {
+      "value": {
+        "operation": "template",
+        "help": true
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "publish"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "A target is required.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "build",
+      "out"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "This operation does not accept a target.",
+        "exitCode": 2
+      }
+    }
+  },
+  {
+    "module": "distribution",
+    "method": "parseDistributionArgs",
+    "prefix": "release",
+    "args": [
+      "build",
+      "--allow-dirty=true"
+    ],
+    "expected": {
+      "error": {
+        "code": "INVALID_ARGUMENTS",
+        "message": "Option --allow-dirty does not accept a value.",
+        "exitCode": 2
+      }
+    }
+  }
+]

@@ -3,12 +3,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { checkedPath, digestObject, fail, isSHA, isRepository, isBranch,
-  readJSON, sha256, textBytes, writeAtomic, writeJSON, isRevision } from './common.js';
+import { checkedPath, readJSON, textBytes, writeAtomic, writeJSON } from './files.js';
+import { digestObject, isSHA, sha256 } from '../shared/hash.js';
+import { fail } from './errors.js';
+import { isRepository, isBranch, isRevision } from './git-values.js';
 import { committedSource, contributionBaseline, contributionPath as eligible, isLocalCommit } from './committed-source.js';
 import { GitHubAPI, treeFromChanges } from './github.js';
-import { products } from './products.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
+import { contributionCommitMessage, checkCommitMessage } from '../services/commit-message.js';
+import { requirePRDescription, checkPRDescription, contributionPRBody } from '../services/pr-description.js';
 
 function publicDiff(path, base, bytes, baseMode, mode) {
   if ((base !== null && !textBytes(base)) || (bytes !== null && !textBytes(bytes))) return `Binary change: ${path}\n`;
@@ -22,9 +25,11 @@ function publicDiff(path, base, bytes, baseMode, mode) {
     return (baseMode !== mode ? `Mode ${baseMode?.toString(8) ?? 'absent'} -> ${mode?.toString(8) ?? 'absent'}: ${path}\n` : '') + diff.stdout;
   } finally { rmSync(temporary, { recursive: true, force: true }); }
 }
-export async function prepareContribution({ root, paths, all = false, title = `Improve ${products.core}`, body = '', dryRun = false, api, fetcher }) {
+export async function prepareContribution({ root, paths, all = false, title, body, prBody, dryRun = false, api, fetcher }) {
   if ((!all && (!Array.isArray(paths) || !paths.length)) || (all && paths?.length)) fail('CONTRIBUTION_SELECTION_REQUIRED', 'Choose --paths or --all after reviewing the system changes.');
   if (typeof title !== 'string' || !title.trim() || title.length > 200 || /[\r\n]/.test(title) || typeof body !== 'string' || body.length > 60000) fail('CONTRIBUTION_INVALID', 'Invalid contribution title or description.');
+  const commitMessage = contributionCommitMessage(title, body);
+  const prDescription = requirePRDescription(title, prBody);
   const source = committedSource(root), { manifest: receipt, baseline } = contributionBaseline(source);
   if (paths?.some(path => !eligible(path))) fail('CONTRIBUTION_PATH_INVALID', 'Contributions may select only system source files.');
   const manifest = await resolveBaseline(receipt, { api, fetcher });
@@ -55,8 +60,10 @@ export async function prepareContribution({ root, paths, all = false, title = `I
   if (!changes.length) fail('CONTRIBUTION_EMPTY', 'HEAD has no selected system changes relative to its original Core baseline.', {
     sourceCommit: source.sourceCommit, core: manifest.core, version: manifest.version, baseline, comparedFiles: selected.length, changes: [],
   });
-  const plan = { schema_version: 2, id: randomUUID(), created_at: new Date().toISOString(), sourceCommit: source.sourceCommit,
-    baseline, core: manifest.core, version: manifest.version, title: title.trim(), body, changes };
+  const publicPRBody = contributionPRBody(prDescription, manifest.version, manifest.core.revision);
+  requirePRDescription(title, publicPRBody);
+  const plan = { schema_version: 4, id: randomUUID(), created_at: new Date().toISOString(), sourceCommit: source.sourceCommit,
+    baseline, core: manifest.core, version: manifest.version, title, body, commitMessage, prDescription, prBody: publicPRBody, changes };
   const digest = digestObject(plan), directory = `.agents/runtime-data/contributions/${plan.id}`;
   const warnings = await previousContributionWarnings(root, plan, api, fetcher);
   if (!dryRun) {
@@ -68,17 +75,22 @@ export async function prepareContribution({ root, paths, all = false, title = `I
 export function readContribution({ root, id }) {
   if (typeof id !== 'string' || !/^[a-f0-9-]{36}$/.test(id)) fail('CONTRIBUTION_INVALID', 'Invalid contribution ID.');
   const stored = readJSON(root, `.agents/runtime-data/contributions/${id}/plan.json`), { digest, ...plan } = stored;
-  if (!isSHA(digest) || digestObject(plan) !== digest || ![1, 2].includes(plan.schema_version) || plan.id !== id ||
+  if (!isSHA(digest) || digestObject(plan) !== digest || ![1, 2, 3, 4].includes(plan.schema_version) || plan.id !== id ||
       !isRepository(plan.core?.repository) || !isBranch(plan.core?.branch) || !isRevision(plan.core?.revision) ||
       !Array.isArray(plan.changes) || !plan.changes.length) fail('CONTRIBUTION_TAMPERED', 'The prepared contribution changed; prepare and review it again.');
-  if (plan.schema_version === 2 && (!isLocalCommit(plan.sourceCommit) || !isSHA(plan.baseline?.manifest_sha256) ||
+  if (plan.schema_version >= 2 && (!isLocalCommit(plan.sourceCommit) || !isSHA(plan.baseline?.manifest_sha256) ||
       ![2, 3, 4].includes(plan.baseline?.schema_version))) fail('CONTRIBUTION_INVALID', 'Invalid committed contribution source or baseline.');
+  if (plan.schema_version >= 3 && (typeof plan.commitMessage !== 'string' || !checkCommitMessage(plan.commitMessage).valid ||
+      plan.commitMessage !== contributionCommitMessage(plan.title, plan.body))) fail('CONTRIBUTION_INVALID', 'Invalid frozen commit message.');
+  if (plan.schema_version === 4 && (!checkPRDescription(plan.title, plan.prDescription).valid ||
+      !checkPRDescription(plan.title, plan.prBody).valid ||
+      plan.prBody !== contributionPRBody(plan.prDescription, plan.version, plan.core.revision))) fail('CONTRIBUTION_INVALID', 'Invalid frozen PR description or provenance.');
   const destinations = new Set();
   for (const change of plan.changes) {
     if (!change || !eligible(change.workspace_path) || !eligible(change.source_path) || ![0o644, 0o755].includes(change.mode) ||
         destinations.has(change.source_path) || !['add', 'update', 'delete'].includes(change.operation) ||
         !(change.before_sha256 === null || isSHA(change.before_sha256)) ||
-        (plan.schema_version === 2 && ![null, 0o644, 0o755].includes(change.before_mode)) ||
+        (plan.schema_version >= 2 && ![null, 0o644, 0o755].includes(change.before_mode)) ||
         (change.content === null ? change.after_sha256 !== null || change.operation !== 'delete' :
           !isSHA(change.after_sha256) || change.operation === 'delete') ||
         (change.content !== null && (typeof change.content !== 'string' || sha256(Buffer.from(change.content, 'base64')) !== change.after_sha256))) fail('CONTRIBUTION_INVALID', 'Invalid prepared system change.');
@@ -160,7 +172,7 @@ async function verifyLegacyTree(github, repository, treeSHA, entries, changes) {
   }
 }
 export async function submitContribution({ root, id, reviewed, dryRun = false, api, reconcileOnly = false }) {
-  const plan = readContribution({ root, id }), legacy = plan.schema_version === 1;
+  const plan = readContribution({ root, id }), legacy = plan.schema_version < 4;
   const targetBranch = plan.core.branch;
   if (reviewed !== plan.digest) fail('CONTRIBUTION_REVIEW_REQUIRED', 'Supply the digest of the contribution preview using --reviewed.');
   const statePath = `.agents/runtime-data/contributions/${id}/submitted.json`;
@@ -174,7 +186,9 @@ export async function submitContribution({ root, id, reviewed, dryRun = false, a
   if (legacy && !previous) fail('CONTRIBUTION_LEGACY_PLAN', 'Legacy previews cannot publish; prepare again from the latest local commit.');
   if (!legacy) verifyLocalSource(root, plan, !!previous);
   if (dryRun) return { id, digest: plan.digest, sourceCommit: plan.sourceCommit ?? null, dryRun, repository: plan.core.repository, base: targetBranch,
-    files: plan.changes.map(c => ({ path: c.source_path, operation: c.operation })), wouldPublish: !legacy, reconcileOnly: legacy, remoteVerified: false };
+    files: plan.changes.map(c => ({ path: c.source_path, operation: c.operation })), title: plan.title,
+    commitMessage: plan.commitMessage ?? null, prBody: plan.prBody ?? null,
+    wouldPublish: !legacy, reconcileOnly: legacy, remoteVerified: false };
   const github = api ?? new GitHubAPI();
   const { base, entries: baseEntries } = await verifyRemoteBaseline(github, plan);
   // A legacy plan can only reconcile an existing PR. Its saved source is
@@ -246,17 +260,19 @@ export async function submitContribution({ root, id, reviewed, dryRun = false, a
   let legacyTree;
   if (ref) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${ref.object.sha}`);
+    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The contribution branch was changed remotely; it will not be overwritten.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (previous) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${commit}`);
+    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The merged contribution commit differs from the reviewed contribution.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (pr) {
     fail('CONTRIBUTION_BRANCH_MISSING', 'A PR exists without a recoverable contribution branch; inspect it before retrying.');
   } else {
     verifyLocalSource(root, plan, false);
-    const created = await github.request('POST', `/repos/${repository}/git/commits`, { message: plan.title,
+    const created = await github.request('POST', `/repos/${repository}/git/commits`, { message: plan.commitMessage,
       tree: tree.sha, parents: [plan.core.revision] });
     if (!isRevision(created?.sha)) fail('GITHUB_RESPONSE_INVALID', 'Invalid contribution commit response.');
     verifyLocalSource(root, plan, false);
@@ -269,7 +285,7 @@ export async function submitContribution({ root, id, reviewed, dryRun = false, a
   if (!pr) writeJSON(checkedPath(root, statePath), state);
   if (!pr && !previous) verifyLocalSource(root, plan, false);
   if (!pr) pr = await github.request('POST', `/repos/${plan.core.repository}/pulls`, { title: plan.title, head, base: targetBranch,
-    body: plan.body + `\n\nPrepared from ${products.core} ${plan.version} (${plan.core.revision}).\nOnly the reviewed system-file changes are included.`, draft: true });
+    body: plan.prBody, draft: true });
   validatePR(pr);
   if (pr.head.sha !== commit) fail('CONTRIBUTION_PR_CHANGED', 'Created PR does not match the verified contribution commit.');
   const final = { ...state, number: pr.number, url: pr.html_url, draft: pr.draft === true,

@@ -12,7 +12,7 @@ KSF 分为系统、用户模板和用户实例三层：
 
 Agent 入口为 AGENTS.md → [ksf-runtime](../abilities/partners/ksf-runtime/partner.md) → ability-route；系统维护选择 [ksf-maintainer](../abilities/partners/ksf-maintainer/partner.md)，按发布、创建工作区、升级或贡献基本功执行。职责和情境判断由对象定义持有，本文持有发行协议与程序行为。检查、安装和公开提交分别核对用户要求，不因发现新版本而安装。
 
-Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱、源档和归档目录由发行程序生成。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。
+Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱、源档和归档目录由发行程序生成。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。`repositories/` 是可选的用户工程容器，首次使用 repository create 时建立，不生成受跟踪占位文件；模板忽略规则排除整个容器。已有实例启用时需在其自己的 .gitignore 中补 `/repositories/`，升级继续保留用户忽略规则。
 
 ## 开始使用
 
@@ -41,6 +41,7 @@ macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其
 | `.agents/core/manifest.yaml` | 生成的运行时声明，升级使用发行版本，不作为源码贡献 |
 | 根 README.md、.gitignore | 首次生成的用户文件，Core 升级不覆盖 |
 | 项目、知识、能力、源档、归档、收件箱 | 个人内容，发行不读取，升级不写入 |
+| `repositories/` | 用户工程容器，父 Git 忽略、工程各自 Git 管理；按需创建，发行不读取，升级和回滚不写入 |
 | `.agents/user-data/` | 用户实例所有的系统级用户数据，Core 包不收录实际值，升级与回滚不覆盖 |
 | `.agents/runtime-data/` | 本机运行时、升级备份、失败事务、检查记录和贡献草稿，不提交 |
 | `.ksf-template.json` | 记录初始 ksf-workspace 模板产品、默认实例名与出处；不限定实际实例名称，当前系统版本以 release.json 为准 |
@@ -78,21 +79,21 @@ macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其
 ## 贡献修改
 
 ```sh
-./.agents/ksf contribute prepare --paths .agents/core/runtime/src/services/hello.js --title '修复问候输出' --json
+./.agents/ksf contribute prepare --paths .agents/core/runtime/src/services/hello.js --title 'fix(cli): 修复问候输出' --body-file /tmp/contribution-body.txt --pr-body-file /tmp/pr-description.md --json
 ./.agents/ksf contribute read <返回的贡献ID> --json
 ./.agents/ksf contribute submit <贡献ID> --reviewed <预览摘要> --dry-run --json
 ./.agents/ksf contribute submit <贡献ID> --reviewed <预览摘要> --json
 ```
 
-用户在实例修改、验证系统并先形成本地 Git 提交。prepare 读取最新 HEAD 中的系统文件及同一提交保存的正式发行清单，比较完整系统快照，包含多次已提交修改的累积差异。暂存区、未暂存修改和未跟踪文件不参与，也不阻止贡献；命令不自动暂存或提交。prepare 冻结 sourceCommit、基线身份、选定内容、公开 diff、标题、说明和 digest。Agent 展示后按授权提交；系统路径中的文字同样要审阅。`--all` 选择全部已提交系统差异，需先核对范围。
+用户在实例修改、验证系统并先形成本地 Git 提交。prepare 读取最新 HEAD 中的系统文件及同一提交保存的正式发行清单，比较完整系统快照，包含多次已提交修改的累积差异。暂存区、未暂存修改和未跟踪文件不参与，也不阻止贡献；命令不自动暂存或提交。Git 正文按[提交信息规则](git-commit-message.md)填写原因、变更和验证，独立 PR 正文按[PR 说明规则](pr-description.md)填写四项 Markdown 内容。schema 4 贡献计划冻结 sourceCommit、基线身份、选定内容、公开 diff、共同标题、两份正文、完整 commitMessage 及包含自动来源说明的完整 prBody 和 digest；真实 Core 提交与草稿 PR 分别使用审阅过的完整文本。Agent 展示后按授权提交；系统路径中的文字同样要审阅。`--all` 选择全部已提交系统差异，需先核对范围。
 
 准备要求 KSF 根本身是 Git 根、有 HEAD 和正式基线，联网取得该提交中小型凭据固定的原版 Core；公开源可匿名读取，也可复用已有授权。read 及 submit dry-run 仅本地读取。贡献读取兼容 schema 2、3、4 及旧启动器路径，不读取未提交的发行凭据。真实 submit 在任何远程写入前核对原版 Core 提交、文件内容和权限；无法核实时保留计划。实际提交从 `KSF_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN` 或已有 `gh auth login` 取得授权。令牌不写入草稿、不回显，也不发往发行下载地址。
 
-工具创建或复用正确的 ksf-core fork，在 `contrib-<ID>` 形成新提交，并向发行记录指定的 main 分支发起草稿 PR。父提交是发行原版的 Core 提交，不是个人 Git HEAD；个人历史、提交说明、目录和作者配置不进入新提交。Core 所有者可以直接建立自身分支。
+工具创建或复用正确的 ksf-core fork，在 `contrib-<ID>` 形成新提交，并向发行记录指定的 main 分支发起草稿 PR。父提交是发行原版的 Core 提交，不是个人 Git HEAD；个人历史、个人提交说明、目录和作者配置不进入新提交。Core 所有者可以直接建立自身分支。
 
 草稿 PR 的交付提醒按 [Git 协作规则中的用户贡献要求](git.md#用户贡献)执行。
 
-首次发布前本地 HEAD 改变须重新准备；仅工作目录或暂存区变化不使冻结计划失效。本地 sourceCommit 仅留在本机记录，不发送给 Core；PR 的父提交仍为原版 Core，不自动变基到最新 main。已记录远程提交的相同 ID 重试可核对旧计划，不混入新 HEAD。旧 schema 1 计划仍可读取，只能只读核对已有 PR，不能新发布。重试重新查询远程分支、提交和 PR，缓存链接不能证明仍有效。远程变更、PR 缺失或状态未知时保留现场；合并后删除分支可核对原提交后报告 merged，已关闭未合并则报告 closed，不重复创建。工具不自动合并 PR。不同计划若来自同一本地节点或相同系统内容，prepare 返回既往 PR 提示及只读核对结果；相同内容的 submit 返回已核实的原 PR，不重复创建。部分成功或状态未知时先恢复原 ID，不因新 prepare 而绕过保护。
+首次发布前本地 HEAD 改变须重新准备；仅工作目录或暂存区变化不使冻结计划失效。本地 sourceCommit 仅留在本机记录，不发送给 Core；PR 的父提交仍为原版 Core，不自动变基到最新 main。已记录远程提交的相同 ID 重试可核对旧计划，不混入新 HEAD。旧 schema 1／2／3 贡献计划仍可读取，只能只读核对已有 PR，不能新发布。重试重新查询远程分支、提交和 PR，缓存链接不能证明仍有效。远程变更、PR 缺失或状态未知时保留现场；合并后删除分支可核对原提交后报告 merged，已关闭未合并则报告 closed，不重复创建。普通重试不覆盖评审中已编辑的 PR 标题或正文；schema 3 的冻结提交消息仍核对。工具不自动合并 PR。不同计划若来自同一本地节点或相同系统内容，prepare 返回既往 PR 提示及只读核对结果；相同内容的 submit 返回已核实的原 PR，不重复创建。部分成功或状态未知时先恢复原 ID，不因新 prepare 而绕过保护。
 
 ## 维护和发布
 

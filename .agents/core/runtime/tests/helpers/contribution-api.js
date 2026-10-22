@@ -55,7 +55,7 @@ export class ForkAPI {
       this.trees.set('b'.repeat(40), [...entries.values()]); return { sha: 'b'.repeat(40) };
     }
     if (method === 'GET' && path.includes('/git/ref/heads/')) return this.ref;
-    if (method === 'POST' && path.endsWith('/git/commits')) { this.commit.parents = body.parents.map(sha => ({ sha })); return this.commit; }
+    if (method === 'POST' && path.endsWith('/git/commits')) { this.commit.parents = body.parents.map(sha => ({ sha })); this.commit.message = body.message; return this.commit; }
     if (method === 'POST' && path.endsWith('/git/refs')) {
       this.ref = { object: { sha: body.sha } };
       if (this.failAfterRef) { this.failAfterRef = false; throw Object.assign(new Error('unknown ref response'), { code: 'GITHUB_REQUEST_FAILED' }); }
