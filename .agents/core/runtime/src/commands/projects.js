@@ -25,7 +25,8 @@ export function projectHelp(operation) {
     'write accepts {"metadata": {...}, "body": "..."}; creation requires body.\n' +
     'Metadata merges top-level fields; a supplied body replaces the full body.\n' +
     'remove deletes the ENTIRE project directory, including all resources.\n' +
-    'check without a name checks all root cards; no business or link validation.\n' +
+    'Optional metadata.routing sets preferred abilities and knowledge entries.\n' +
+    'check validates root cards and configured routing references; it does not select abilities or verify business facts.\n' +
     '--from paths are relative to the KSF root; absolute input paths are accepted.\n' +
     '--dry-run previews without writes. Use -- before a name starting with a hyphen.\n' +
     'Use --help or -h alone at command or operation level.\n';
@@ -70,8 +71,10 @@ function render(result) {
       lines.push(`Project: ${data.project.name} (${data.project.path}); metadata: ${data.project.state}`);
       if (Object.hasOwn(data.project, 'metadata')) lines.push(JSON.stringify(data.project.metadata, null, 2));
       if (Object.hasOwn(data.project, 'body')) lines.push(data.project.body);
-    } else if (operation === 'check') lines.push(`Project: ${data.name}; ${data.valid ? 'valid' : 'invalid'}.`);
-    else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path}`,
+    } else if (operation === 'check') {
+      lines.push(`Project: ${data.name}; ${data.valid ? 'valid' : 'invalid'}.`);
+      for (const entry of data.routing?.entries ?? []) lines.push(`- ${entry.field}: ${entry.valid ? 'available' : 'unavailable'}; ${entry.object?.source ?? entry.path ?? entry.reference ?? '(invalid)'}`);
+    } else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path}`,
       JSON.stringify(data, null, 2));
   }
   for (const error of result.errors) lines.push(`${error.code}: ${error.message}${error.target ? ` (${error.target})` : ''}`);

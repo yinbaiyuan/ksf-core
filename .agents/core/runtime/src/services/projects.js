@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import { MetadataError, invalid } from '../metadata/errors.js';
 import { readSnapshot, withWriteLock, publishFile } from '../metadata/files.js';
 import { parseFrontmatter } from '../metadata/frontmatter.js';
+import { checkRouting } from '../projects/routing.js';
 
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
@@ -100,7 +101,9 @@ function list(root, check = false) {
         if (!entry.isDirectory() || !stat(target)) continue;
         if (!validName(name)) fail('PROJECT_PATH_INVALID', 'Stored project name is not supported by project commands.', { target: folder });
         const { parsed } = load(root, name);
-        projects.push(check ? { name, path: relative(root, target), valid: true, state: parsed.state } : {
+        const checked = check ? checkProject(root, name, parsed) : null;
+        if (checked) errors.push(...checked.errors);
+        projects.push(check ? checked.data : {
           name, title: titleOf(parsed, name), description: parsed.values.description ?? null,
           status: parsed.values.status ?? null, path: relative(root, target),
         });
@@ -111,6 +114,12 @@ function list(root, check = false) {
     }
   } catch (error) { errors.push(errorItem(error, scope)); }
   return { data: { complete: errors.length === 0, ...(check ? { valid: errors.length === 0 } : {}), projects }, errors };
+}
+
+function checkProject(root, name, parsed) {
+  const result = checkRouting({ root, name, values: parsed.values });
+  return { data: { name, path: relative(root, locations(root, name).target), valid: result.errors.length === 0,
+    state: parsed.state, ...(result.routing ? { routing: result.routing } : {}) }, errors: result.errors };
 }
 
 export function errorItem(error, target) {
@@ -176,7 +185,7 @@ export function updateProjectMetadata({ root, name, dryRun = false }, transform,
   const execute = () => {
     const current = load(root, name);
     const data = { metadata: transform(structuredClone(current.parsed.values)) };
-    validateWrite(data);
+    validateWrite(data, { previousMetadata: current.parsed.values });
     const { result, bytes, wouldChange } = planProjectWrite(current, { root, name, data, dryRun }, { metadataOnly: true });
     if (!dryRun && wouldChange) {
       withWriteLock(current.target, () => (hooks.publish ?? publishFile)(current.snapshot, bytes, {
@@ -199,8 +208,8 @@ export function project({ root, operation, name, part = 'all', data, dryRun = fa
   if (operation === 'list' || (operation === 'check' && name === undefined)) return list(root, operation === 'check');
   if (['read', 'check'].includes(operation)) {
     const current = load(root, name);
-    return { data: operation === 'read' ? { project: publicProject(root, name, current.parsed, part) }
-      : { name, path: relative(root, current.target), valid: true, state: current.parsed.state }, errors: [] };
+    return operation === 'read' ? { data: { project: publicProject(root, name, current.parsed, part) }, errors: [] }
+      : checkProject(root, name, current.parsed);
   }
   if (operation === 'write') {
     validateWrite(data);

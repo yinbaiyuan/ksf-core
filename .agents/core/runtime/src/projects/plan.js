@@ -2,6 +2,7 @@ import { join, relative } from 'node:path';
 import { MetadataError, invalid } from '../metadata/errors.js';
 import { validateInput, equalValues } from '../metadata/input.js';
 import { parseFrontmatter, createFrontmatter, encodeFrontmatter, setField } from '../metadata/frontmatter.js';
+import { validateRouting } from './routing-schema.js';
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
 
 export function locations(root, name) {
@@ -18,12 +19,14 @@ export function publicProject(root, name, parsed, part = 'all') {
   };
 }
 
-export function validateWrite(data) {
+export function validateWrite(data, { previousMetadata } = {}) {
   validateInput(data);
   if (!Object.keys(data).length || Object.keys(data).some(key => !['metadata', 'body'].includes(key))) {
     invalid('Project write accepts metadata and/or body only.');
   }
   if (Object.hasOwn(data, 'metadata')) validateInput(data.metadata);
+  if (Object.hasOwn(data.metadata ?? {}, 'routing') &&
+      (!previousMetadata || !equalValues(data.metadata.routing, previousMetadata.routing))) validateRouting(data.metadata.routing);
   if (Object.hasOwn(data, 'body') && typeof data.body !== 'string') invalid('Project body must be a string.');
 }
 

@@ -804,7 +804,13 @@
       "--paths",
       "a",
       "b",
-      "--json"
+      "--json",
+      "--title",
+      "fix(core): 修正示例行为",
+      "--body",
+      "原因：示例",
+      "--pr-body",
+      "## 背景与目的\n示例"
     ],
     "expected": {
       "value": {
@@ -813,7 +819,10 @@
           "a",
           "b"
         ],
-        "json": true
+        "json": true,
+        "title": "fix(core): 修正示例行为",
+        "body": "原因：示例",
+        "prBody": "## 背景与目的\n示例"
       }
     }
   },
@@ -856,12 +865,21 @@
     "prefix": "contribute",
     "args": [
       "prepare",
-      "--all"
+      "--all",
+      "--title",
+      "fix(core): 修正示例行为",
+      "--body",
+      "原因：示例",
+      "--pr-body",
+      "## 背景与目的\n示例"
     ],
     "expected": {
       "value": {
         "operation": "prepare",
-        "all": true
+        "all": true,
+        "title": "fix(core): 修正示例行为",
+        "body": "原因：示例",
+        "prBody": "## 背景与目的\n示例"
       }
     }
   },

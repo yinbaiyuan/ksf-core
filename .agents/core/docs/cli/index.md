@@ -13,6 +13,7 @@
 | runtime | 运行时完整校验 | [runtime](runtime.md) |
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
+| eval | 独立Agent自然语言三路由批测、证据与评审 | [eval](eval.md) |
 | user-data | 系统设置、本地身份、能力源关联及对象配置／必要状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
 | context | 组织 Agent 所需的能力发现上下文 | [context](context.md) |
@@ -21,6 +22,8 @@
 | release | 发行构建、发布和官方模板镜像 | [release](release.md) |
 | system | 工作区版本检查、升级、恢复和回滚 | [system](system.md) |
 | contribute | HEAD 已提交系统修改的审查与 Core PR | [contribute](contribute.md) |
+| commit-message | 提交信息格式检查与填写模板 | [commit-message](commit-message.md) |
+| pr-description | PR 标题、正文格式检查与模板 | [pr-description](pr-description.md) |
 | workflow | 工作流对象管理 | [workflow](workflow.md) |
 | partner | 搭档对象管理 | [partner](partner.md) |
 | competency | 基本功对象管理 | [competency](competency.md) |

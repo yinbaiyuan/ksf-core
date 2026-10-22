@@ -31,6 +31,8 @@
 
 普通配置和必要状态不包含项目正文、知识、任务日志或登录凭据。数据跟随实例，不是跨实例自动同步服务，也没有通用凭据管理器。保存文件、再次读取、Agent 正确采用和独立新会话效果应分别验证。
 
+为新建或完善的能力设计字段时，使用对象设计师持有的[对象 user-data 设计与使用](../../abilities/partners/ksf-object-designer/references/user-data-design.md)及其模板。每次评估需求，有需要才生成字段及消费、维护约定；它补充对象语义，不新增公共元数据或程序 schema，也不自动初始化个人记录。
+
 ## settings 如何生效
 
 settings 当前保存更新检查间隔和请求超时。数据文件只持有用户覆盖；系统默认值仍由 [distribution.json](../../distribution.json)持有。

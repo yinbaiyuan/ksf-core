@@ -10,6 +10,11 @@ import { createArchive } from '../../src/distribution/archive.js';
 import { sha256, stableJSON, writeAtomic, fileMode } from '../../src/distribution/common.js';
 
 export const repository = fileURLToPath(new URL('../../../../../', import.meta.url));
+export const contributionDescription = {
+  title: 'fix(core): 修正选定系统文件的示例行为',
+  body: '原因：\n选定系统文件与预期行为不符。\n\n变更：\n- 修正选定系统文件的示例行为。\n\n验证：\n- 未执行：这里只构造隔离的贡献测试数据，不代表真实系统验证。\n',
+  prBody: '## 背景与目的\n选定系统文件与预期行为不符，需恢复约定行为。\n\n## 主要变更\n- 修正示例行为，并保留当前贡献边界。\n\n## 验证结果\n- 未执行：这里只构造隔离贡献数据，不代表真实系统验证。\n\n## 影响与兼容\n本例不更换 CLI 或数据格式；实际兼容性由测试场景核对。\n',
+};
 export function git(root, args) {
   const result = spawnSync('/usr/bin/git', ['-C', root, ...args], { encoding: 'utf8', env: {
     ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null', GIT_TERMINAL_PROMPT: '0',

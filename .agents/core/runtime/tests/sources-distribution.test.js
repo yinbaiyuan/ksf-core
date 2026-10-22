@@ -15,7 +15,8 @@ function source(f) {
   abilitySource({ root: f.workspace, operation: 'init', target: directory, id: 'private-methods', name: 'Private methods' });
   const method = join(directory, '能力/基本功/competency.author.private'); mkdirSync(method);
   const canary = 'PRIVATE_ABILITY_CONTENT_DO_NOT_PACKAGE';
-  writeFileSync(join(method, 'competency.md'), `---\nid: competency.author.private\nname: private\ndescription: private method\nstatus: active\nversion: 0.1.0\nreferences:\n  - competency.ksf.ability-route@0.1.1\n---\n${canary}\n`);
+  const routeVersion = readFileSync(join(f.root, '.agents/core/abilities/competencies/ability-route/competency.md'), 'utf8').match(/^version:\s*(\S+)/m)[1];
+  writeFileSync(join(method, 'competency.md'), `---\nid: competency.author.private\nname: private\ndescription: private method\nstatus: active\nversion: 0.1.0\nreferences:\n  - competency.ksf.ability-route@${routeVersion}\n---\n${canary}\n`);
   abilitySource({ root: f.workspace, operation: 'link', target: directory });
   return { directory, canary };
 }
@@ -48,8 +49,8 @@ test('Core update and rollback retain source associations and reject incompatibl
   assert.deepEqual(readFileSync(association), before);
   assert.ok(existsSync(s.directory));
   const route = '.agents/core/abilities/competencies/ability-route/competency.md';
-  const incompatible = await f.next('0.1.2', { [route]: readFileSync(join(f.root, route), 'utf8').replace('version: 0.1.1', 'version: 0.9.0'),
-    '.agents/core/abilities/partners/ksf-runtime/partner.md': readFileSync(join(f.root, '.agents/core/abilities/partners/ksf-runtime/partner.md'), 'utf8').replace('competency.ksf.ability-route@0.1.1', 'competency.ksf.ability-route@0.9.0') });
+  const incompatible = await f.next('0.1.2', { [route]: readFileSync(join(f.root, route), 'utf8').replace(/^version: \d+\.\d+\.\d+/m, 'version: 0.9.0'),
+    '.agents/core/abilities/partners/ksf-runtime/partner.md': readFileSync(join(f.root, '.agents/core/abilities/partners/ksf-runtime/partner.md'), 'utf8').replace(/competency\.ksf\.ability-route@\d+\.\d+\.\d+/, 'competency.ksf.ability-route@0.9.0') });
   await assert.rejects(systemUpdate({ root: f.workspace, from: incompatible.coreArchive, dryRun: true }), { code: 'SOURCE_CORE_INCOMPATIBLE' });
   await assert.rejects(systemUpdate({ root: f.workspace, from: incompatible.coreArchive }), { code: 'SOURCE_CORE_INCOMPATIBLE' });
   assert.deepEqual(readFileSync(association), before);

@@ -1,8 +1,8 @@
 ---
 type: cli-reference
 status: active
-reviewed_for: "0.1.0"
-updated: 2026-10-16
+reviewed_for: "0.1.3"
+updated: 2026-10-21
 ---
 
 # KSF CLI 能力说明
@@ -42,12 +42,15 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `runtime verify` | 完整验证随包压缩包及已安装 Node；损坏时可重新准备 | 是，`runtime verify --json` | 可能更新安装记录或修复运行时 |
 | `build` | 校验构建输入和各平台包，生成 manifest | 是，`build --json` | 原子替换 `.agents/core/manifest.yaml` |
 | `test` | 使用随包 Node 的内置测试运行器执行 JavaScript 测试 | 否 | 测试创建独立临时目录并在结束后清理 |
+| `eval check/run/read` | 显式的独立Agent自然语言三路由评测，运行与判分分开 | 是 | check仅临时探针；run调用Codex并保存隔离材料与报告；read只读历史 |
 | `context capabilities` | 一次组织完整有效的工作流、搭档发现描述 | 是 | 命令自身只读，不生成索引 |
 | `project list/read/write/remove/check` | 项目根卡与目录的基础管理 | 是 | write 创建或更新根卡；remove 删除整个项目目录；修改支持预览 |
 | `repository create/link/unlink/list/check` | 独立本地 Git 工程与项目关联 | 是 | create 初始化工程；link/unlink 只改根卡；修改支持预览 |
 | `release build/publish/template/mirror` | 构建完整包、Core 更新包，发布 Release 和模板 | 是 | build 写指定输出；发布写远程；修改支持预览 |
 | `system read/check/update/sync/rollback` | 安装版版本、Release 升级、恢复及回滚 | 是 | update/rollback 修改系统并保留备份；sync 记录检查；支持预览 |
 | `contribute prepare/read/submit` | HEAD 已提交系统差异的审查和干净 Core PR | 是 | prepare 读取 HEAD 及固定远程原版并提示既往 PR；submit 核对基线与重复内容后发布；未提交内容忽略 |
+| `commit-message check/template` | 检查完整提交信息格式或读取填写模板 | 是 | 命令自身只读，不修改 Git hook 或配置；语义和证据另行审阅 |
+| `pr-description check/template` | 检查 PR 标题及四项正文，或读取模板 | 是 | 命令只读；贡献 prepare 强制校验独立 PR 正文，来源说明一并冻结；不验证语义和证据 |
 | `user-data list/read/write/remove/check` | 系统命名空间及四类对象持久数据；支持 --object / --objects | 是 | 写入用户专属目录；支持预览和 etag 冲突检查 |
 | `metadata read/write/remove/check` | 任意 Markdown 的 YAML frontmatter 管理 | 是，各操作支持 --json | write/remove 可能更新明确指定文件，支持 --dry-run |
 | `workflow / partner / competency / data-package` | 各自提供 list/read/write/remove/check | 是 | 只写用户对象；首次修改系统对象派生完整目录；删除包含附件及基线；支持预览 |
@@ -195,7 +198,7 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 .agents/ksf project check --json
 ```
 
-项目目标是 `项目/` 下的单层目录名，根卡为普通 Markdown。list 返回浅层摘要，read 按 metadata/body/all 读取；write 以 metadata/body 信封创建或更新根卡，新建必须提供 body。元数据按顶层合并，提供 body 时整体替换正文，其他资料不动。remove 会删除整个指定项目目录，支持预览。check 检查路径、编码和 frontmatter，不验证业务内容或链接。完整参数、异常、锁和文件影响见 [project 命令说明](project.md)。
+项目目标是 `项目/` 下的单层目录名，根卡为普通 Markdown。list 返回浅层摘要，read 按 metadata/body/all 读取；write 以 metadata/body 信封创建或更新根卡，新建必须提供 body。元数据按顶层合并，提供 body 时整体替换正文，其他资料不动。remove 会删除整个指定项目目录，支持预览。可选 routing 保存能力偏好及知识入口；write 校验结构，read 保留原始值，check 检查路径、编码、frontmatter 和逐项预设可用性，保留部分结果，不验证业务语义或扫描正文所有链接。完整参数、异常、锁和文件影响见 [project 命令说明](project.md)。
 
 ## Markdown 元数据管理
 
@@ -237,7 +240,7 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 
 一次组织全部有效 Workflow、Partner 的名称、原始 description、ID、定义路径和固定入口标记，按两类分组。覆盖、归档及身份解析由对象服务处理；不提供来源筛选，不改写摘要或展开正文。固定入口保留，ability-route 在下游匹配时排除。
 
-各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，工作流优先、搭档兜底及默认 Agent 承接仍由 ability-route 判断。完整协议见 [context](context.md)。
+各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，明确指定、有效安排、适用项目预设优先，全局工作流/搭档及通用 Agent 承接仍由 ability-route 判断；项目预设不改变全局发现集合。完整协议见 [context](context.md)。
 
 ## 输出和错误处理
 

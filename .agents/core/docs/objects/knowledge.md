@@ -61,6 +61,8 @@
 
 知识内容主要位于 `知识/`，保持普通 Markdown，不注册成能力对象，也不直接套用运行对象的版本与引用契约。名称、摘要和主题等元数据可帮助发现，但不强制每篇补齐一套模板。`知识/用户画像.md` 是可选配置的短卡入口，由用户维护身份和默认协作约定；ksf-runtime 在首次进入当前 KSF 时读取已配置短卡，未配置时正常运行，系统包不预填私人内容。加载、覆盖与迁移边界见[用户协作约定](../runtime/user-collaboration.md)。
 
+可选根入口为 `知识/knowledge.md`，对整个知识目录做分层结构化概览：简述各分区承载什么内容，链接到下一级目录或主题综述，便于 Agent 按任务逐层深入。每层只概述当前目录及直接下级主题，不递归枚举全库文件，不展开具体知识正文或方法步骤。子目录可使用 `knowledge.md` 或复用现有主题综述，不强制每个目录新建入口。[模板](../templates/knowledge-index.md)仅供授权后裁剪，不自动创建真实内容。知识模型和目录自由组织，不强制 Y 模型或批量迁移，根导航不替代用户画像短卡。项目知识入口和能力引用优先，需扩展发现时再沿相关概览下钻或限定目录检索；无导航也正常工作。调度及异常见[三路由协作](../runtime/routing.md)。
+
 最小发现、来源检查与渐进读取由 [knowledge-route](../../abilities/competencies/knowledge-route/competency.md)持有；已授权维护由 [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md)处理。当前由 Agent 使用文件检索、现有 metadata CLI 与宿主编辑工具执行，没有专用知识管理命令或全库语义索引。更完整的主题组织与机器契约按实际需求另行设计。
 
 返回[对象综述](overview.md)。相关对象：[基本功](competency.md)、[数据包](data-package.md)、[项目](project.md)。
