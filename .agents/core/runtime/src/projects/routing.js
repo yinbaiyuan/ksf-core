@@ -3,6 +3,7 @@ import { join, relative, resolve, isAbsolute } from 'node:path';
 import { MetadataError, decodeUtf8 } from '../metadata/errors.js';
 import { readSnapshot } from '../metadata/files.js';
 import { objectQuery } from '../services/objects.js';
+import { locations } from './plan.js';
 import { abilityFields, fields, mapping, entryProblems, routingProblems } from './routing-schema.js';
 
 function knowledgeEntry(root, folder, reference) {
@@ -32,10 +33,10 @@ function knowledgeEntry(root, folder, reference) {
 
 // Deterministic availability only. No suitability decisions, body projection,
 // personal-setting reads, dependency installation or persistent index.
-export function checkRouting({ root, name, values }) {
+export function checkRouting({ root, name, values, scope = 'current' }) {
   if (!Object.hasOwn(values, 'routing')) return { errors: [] };
-  const folder = join(root, '项目', name), target = join(folder, 'project.md');
-  const errors = routingProblems(values.routing).map(error => ({ ...error, target }));
+  const { folder, target } = locations(root, name, scope);
+  const errors = routingProblems(values.routing, scope).map(error => ({ ...error, target }));
   const entries = [];
   if (mapping(values.routing)) for (const field of fields) {
     if (!Array.isArray(values.routing[field])) continue;
@@ -47,7 +48,7 @@ export function checkRouting({ root, name, values }) {
         ...(field !== 'knowledge' && mapping(entry) && (entry.source === undefined || typeof entry.source === 'string')
           ? { requestedSource: entry.source ?? 'effective' } : {}) };
       entries.push(result);
-      const malformed = entryProblems(field, entry, index);
+      const malformed = entryProblems(field, entry, index, scope);
       if (malformed.length) { result.errors = malformed.map(error => ({ ...error, target })); return; }
       try {
         if (field === 'knowledge') result.path = knowledgeEntry(root, folder, entry);

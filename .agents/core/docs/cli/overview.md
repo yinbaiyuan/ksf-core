@@ -328,3 +328,5 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 ## 能力源管理
 
 `ksf source init/link/unlink/list/read/check/export` 已实现。关联仓库当前工作树，不创建安装副本、版本锁或能力快照；多源身份、依赖和 Git 协作见[source](source.md)及[协议](../sources.md)。`context capabilities --source <源ID>` 可限定共享范围；对象 read/check/list 的 --source 支持源 ID。
+
+项目支持 current/archived/all 的范围发现与检查、指定范围的读取维护，以及 archive、restore、recover；工程关联支持项目 scope。默认知识与档案的实例机制见 [设计指南](../content-design.md)，根说明随新模板生成并由用户自行维护。完整操作及恢复边界以 [project](project.md) 与 [repository](repository.md)为准。

@@ -80,12 +80,12 @@ function identity(root, path, run) {
   const branch = git(real, ['symbolic-ref', '--quiet', '--short', 'HEAD'], run);
   return { name: basename(real), path: display(root, real), gitRoot: display(root, real), managed, branch: branch.status === 0 ? branch.stdout.trim() : null, valid: true };
 }
-function pathsFrom(metadata, root, projectName) {
+function pathsFrom(metadata, folder, projectName) {
   const values = Object.hasOwn(metadata, 'repositories') ? metadata.repositories : [];
   if (!Array.isArray(values) || values.some(value => typeof value !== 'string' || !value.trim() || /[\x00-\x1f\x7f]/.test(value))) {
     fail('REPOSITORY_LINKS_INVALID', 'Project repositories metadata must be an array of nonempty local paths.', projectName);
   }
-  return values.map(value => ({ value, absolute: resolve(root, '项目', projectName, value) }));
+  return values.map(value => ({ value, absolute: resolve(folder, value) }));
 }
 function withRepositoryLock(root, action) {
   const folder = join(root, '.agents/runtime-data/repositories');
@@ -135,8 +135,9 @@ function create(root, name, dryRun, hooks) {
   };
   return dryRun ? execute() : withRepositoryLock(root, execute);
 }
-export function repository({ root, operation, target, projectName, dryRun = false }, hooks = {}) {
+export function repository({ root, operation, target, projectName, scope = 'current', dryRun = false }, hooks = {}) {
   if (typeof root !== 'string' || !['create', 'link', 'unlink', 'list', 'check'].includes(operation) || typeof dryRun !== 'boolean') invalid('Invalid repository service request.');
+  if (!['current', 'archived'].includes(scope) || (scope !== 'current' && projectName === undefined)) invalid('Project scope requires --project.');
   root = realpathSync(root);
   if (['create', 'link', 'unlink'].includes(operation) && !target) invalid('A repository target is required.');
   if (target !== undefined && (typeof target !== 'string' || !target.trim() || /[\x00-\x1f\x7f]/.test(target))) invalid('Expected a nonempty local repository target.');
@@ -150,25 +151,26 @@ export function repository({ root, operation, target, projectName, dryRun = fals
     if (typeof target !== 'string' || !target.trim() || /[\x00-\x1f\x7f]/.test(target)) invalid('Expected a local repository path.');
     let path = resolve(root, target);
     // Validate the project before querying Git or taking a mutation lock.
-    project({ root, operation: 'read', name: projectName });
+    const card = project({ root, operation: 'read', name: projectName, scope }).data.project;
+    const folder = resolve(root, card.directory);
     let linked;
     if (operation === 'link') { linked = identity(root, path, hooks.run); path = realpathSync(path); }
-    const updated = updateProjectMetadata({ root, name: projectName, dryRun }, metadata => {
-      const before = pathsFrom(metadata, root, projectName);
+    const updated = updateProjectMetadata({ root, name: projectName, scope, dryRun }, metadata => {
+      const before = pathsFrom(metadata, folder, projectName);
       const remaining = before.filter(entry => entry.absolute !== path).map(entry => entry.value);
       const exists = before.some(entry => entry.absolute === path);
       if (operation === 'link') {
-        return { repositories: exists ? before.map(entry => entry.value) : [...remaining, inside(root, path) ? relative(join(root, '项目', projectName), path) : path] };
+        return { repositories: exists ? before.map(entry => entry.value) : [...remaining, inside(root, path) ? relative(folder, path) : path] };
       }
       return exists ? { repositories: remaining } : {};
     }, hooks);
-    return { data: { project: projectName, path: display(root, path), dryRun, changed: updated.changed, wouldChange: updated.wouldChange,
+    return { data: { project: projectName, scope, path: display(root, path), dryRun, changed: updated.changed, wouldChange: updated.wouldChange,
       repositories: updated.project.metadata.repositories ?? [], ...(linked ? { repository: linked } : {}) }, errors: [] };
   }
   let candidates;
   if (projectName !== undefined) {
-    const card = project({ root, operation: 'read', name: projectName }).data.project;
-    candidates = pathsFrom(card.metadata, root, projectName).map(entry => entry.absolute);
+    const card = project({ root, operation: 'read', name: projectName, scope }).data.project;
+    candidates = pathsFrom(card.metadata, resolve(root, card.directory), projectName).map(entry => entry.absolute);
   } else if (target !== undefined) candidates = [resolve(root, target)];
   else {
     const scope = scopeOf(root);

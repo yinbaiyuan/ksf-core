@@ -19,7 +19,7 @@ test('release publication uploads verified assets, updates only the generated te
   const tree = api.calls.find(c => c.path === '/repos/yinbaiyuan/ksf-workspace/git/trees').body;
   assert.ok(!tree.tree.some(e => e.path.startsWith('.github/')));
   assert.equal(result.template.verified, true); assert.equal(result.template.coreRevision, f.first.coreRevision);
-  assert.ok(tree.tree.every(e => !e.path.startsWith('知识/') || e.path === '知识/.gitkeep'));
+  assert.ok(tree.tree.every(e => !e.path.startsWith('知识/') || ['知识/.gitkeep', '知识/knowledge.md'].includes(e.path)));
   const finalIndex = api.calls.findIndex(c => c.path.endsWith('/releases/7') && c.method === 'PATCH');
   const templateIndex = api.calls.findIndex(c => c.path.includes('/git/refs/heads/') && c.method === 'PATCH');
   assert.ok(finalIndex > templateIndex);

@@ -5,22 +5,26 @@ import { readInputFile } from '../services/metadata.js';
 import { project, errorItem } from '../services/projects.js';
 
 const supported = {
-  list: ['json', 'help'], read: ['part', 'json', 'help'],
-  write: ['data', 'from', 'dry-run', 'json', 'help'],
-  remove: ['dry-run', 'json', 'help'], check: ['json', 'help'],
+  list: ['scope', 'json', 'help'], read: ['scope', 'part', 'json', 'help'],
+  write: ['scope', 'data', 'from', 'dry-run', 'json', 'help'],
+  remove: ['scope', 'dry-run', 'json', 'help'], check: ['scope', 'json', 'help'],
+  archive: ['reason', 'dry-run', 'json', 'help'], restore: ['status', 'dry-run', 'json', 'help'], recover: ['dry-run', 'json', 'help'],
 };
 const usages = {
-  list: 'list [--json]',
-  read: 'read <name> [--part metadata|body|all] [--json]',
-  write: 'write <name> (--data <JSON> | --from <file>) [--dry-run] [--json]',
-  remove: 'remove <name> [--dry-run] [--json]',
-  check: 'check [name] [--json]',
+  list: 'list [--scope current|archived|all] [--json]',
+  read: 'read <name> [--scope current|archived] [--part metadata|body|all] [--json]',
+  write: 'write <name> [--scope current|archived] (--data <JSON> | --from <file>) [--dry-run] [--json]',
+  remove: 'remove <name> [--scope current|archived] [--dry-run] [--json]',
+  check: 'check [name] [--scope current|archived|all] [--json]',
+  archive: 'archive <name> --reason <text> [--dry-run] [--json]',
+  restore: 'restore <name> [--status <text>] [--dry-run] [--json]',
+  recover: 'recover <operation-id> [--dry-run] [--json]',
 };
 
 export function projectHelp(operation) {
   return `KSF project${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
     (operation ? [usages[operation]] : Object.values(usages)).map(usage => `  ksf project ${usage}`).join('\n') + '\n\n' +
-    'Targets are directory names under 项目/, not paths or capability IDs.\n' +
+    'Targets are directory names under 项目/ (current) or 档案/项目/ (archived). Default scope: current.\n' +
     'read defaults to all; list returns root-card summaries without bodies.\n' +
     'write accepts {"metadata": {...}, "body": "..."}; creation requires body.\n' +
     'Metadata merges top-level fields; a supplied body replaces the full body.\n' +
@@ -35,7 +39,7 @@ export function projectHelp(operation) {
 export function parseProjectArgs(args) {
   if (!args.length || (args.length === 1 && ['--help', '-h'].includes(args[0]))) return { help: true };
   const [operation, ...rest] = args;
-  if (!Object.hasOwn(supported, operation)) invalid('Expected project list, read, write, remove or check.');
+  if (!Object.hasOwn(supported, operation)) invalid('Expected project list, read, write, remove, check, archive, restore or recover.');
   const parsed = { operation };
   const seen = parseOptions(rest, { result: parsed, invalid,
     options: optionSpecs(supported[operation]),
@@ -51,6 +55,9 @@ export function parseProjectArgs(args) {
   }
   if (operation === 'list' && parsed.name !== undefined) invalid('Project list does not accept a target.');
   if (!['list', 'check'].includes(operation) && parsed.name === undefined) invalid('A project name is required.');
+  if (parsed.scope !== undefined && (!['current', 'archived', 'all'].includes(parsed.scope) || (parsed.scope === 'all' && (!['list', 'check'].includes(operation) || parsed.name !== undefined)))) invalid('Invalid project scope.');
+  if (operation === 'archive' && !parsed.reason?.trim()) invalid('Archive requires a nonempty --reason.');
+  if (parsed.status !== undefined && !parsed.status.trim()) invalid('--status must be nonempty.');
   if (parsed.part !== undefined && !['metadata', 'body', 'all'].includes(parsed.part)) invalid('--part must be metadata, body or all.');
   if (operation === 'write' && seen.has('data') === seen.has('from')) invalid('Specify exactly one of --data or --from.');
   return parsed;
@@ -74,7 +81,7 @@ function render(result) {
     } else if (operation === 'check') {
       lines.push(`Project: ${data.name}; ${data.valid ? 'valid' : 'invalid'}.`);
       for (const entry of data.routing?.entries ?? []) lines.push(`- ${entry.field}: ${entry.valid ? 'available' : 'unavailable'}; ${entry.object?.source ?? entry.path ?? entry.reference ?? '(invalid)'}`);
-    } else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path}`,
+    } else lines.push(`${data.dryRun ? 'Preview' : data.changed ? operation === 'remove' ? 'Removed' : 'Updated' : 'Unchanged'}: ${data.path ?? data.operationId}`,
       JSON.stringify(data, null, 2));
   }
   for (const error of result.errors) lines.push(`${error.code}: ${error.message}${error.target ? ` (${error.target})` : ''}`);

@@ -4,20 +4,20 @@ import { repository, repositoryErrorItem } from '../services/repositories.js';
 
 const supported = {
   create: ['dry-run', 'json', 'help'],
-  link: ['project', 'dry-run', 'json', 'help'], unlink: ['project', 'dry-run', 'json', 'help'],
-  list: ['project', 'json', 'help'], check: ['project', 'json', 'help'],
+  link: ['project', 'scope', 'dry-run', 'json', 'help'], unlink: ['project', 'scope', 'dry-run', 'json', 'help'],
+  list: ['project', 'scope', 'json', 'help'], check: ['project', 'scope', 'json', 'help'],
 };
 const usages = {
   create: 'create <name> [--dry-run] [--json]',
-  link: 'link <path> --project <project-name> [--dry-run] [--json]',
-  unlink: 'unlink <path> --project <project-name> [--dry-run] [--json]',
-  list: 'list [--project <project-name>] [--json]',
-  check: 'check [path | --project <project-name>] [--json]',
+  link: 'link <path> --project <project-name> [--scope current|archived] [--dry-run] [--json]',
+  unlink: 'unlink <path> --project <project-name> [--scope current|archived] [--dry-run] [--json]',
+  list: 'list [--project <project-name> [--scope current|archived]] [--json]',
+  check: 'check [path | --project <project-name> [--scope current|archived]] [--json]',
 };
 export function repositoryHelp(operation) {
   return 'KSF repository\n\nUsage:\n' + (operation ? [usages[operation]] : Object.values(usages)).map(usage => `  ksf repository ${usage}`).join('\n') +
     '\n\nNew local Git roots live in repositories/<name>, ignored by the outer KSF Git repository.\n' +
-    'Paths resolve from the KSF root; project names are directory names under 项目/.\n' +
+    'Paths resolve from the KSF root; project names select 项目/ or 档案/项目/ with --scope current|archived (default current).\n' +
     'create initializes main with no commits or remote. Existing valid Git roots are unchanged.\n' +
     'link/unlink change only project repositories metadata; unlink never deletes files.\n' +
     'list/check default to direct children; --project includes external linked repositories.\n' +
@@ -42,6 +42,7 @@ export function parseRepositoryArgs(args) {
   });
   if (parsed.help && (seen.size !== 1 || parsed.target !== undefined)) invalid('Use --help without a target or other options.');
   if (!parsed.help) {
+    if (parsed.scope !== undefined && (!['current', 'archived'].includes(parsed.scope) || parsed.projectName === undefined)) invalid('--scope current|archived requires --project.');
     if (['create', 'link', 'unlink'].includes(operation) && parsed.target === undefined) invalid('A repository target is required.');
     if (['link', 'unlink'].includes(operation) && parsed.projectName === undefined) invalid('--project is required.');
     if (operation === 'list' && parsed.target !== undefined) invalid('list does not accept a target.');

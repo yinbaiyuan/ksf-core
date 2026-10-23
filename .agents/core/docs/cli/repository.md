@@ -34,7 +34,7 @@
 
 - create 的 name 是单层目录名，允许中文、空格和连字符；拒绝路径、空白名称、`.`、`..`、控制字符与保留的 `.ksf-` 前缀。`.git` 及大小写、尾随点/空格、HFS+ 忽略字符造成的等价名称同样保留，在调用 Git、创建目录或写锁之前拒绝。不自动增加名称前缀。
 - path 是本地路径；相对路径基于启动入口定位的 KSF 根，不受调用者 cwd 影响。绝对路径直接使用。check 的 path 与 --project 互斥。list 不接受位置目标。
-- --project 必须是 `项目/` 下的单层目录名。link/unlink 必填；list/check 可选；create 不接受，不隐式创建项目根卡。
+- --project 必须是指定项目 scope 下的单层目录名。link/unlink 必填；list/check 可选；create 不接受，不隐式创建项目根卡。
 - --dry-run 是无值布尔选项，仅 create/link/unlink 支持；不修改业务目标、不建目录或锁。--json 只改变输出格式，全部操作支持。
 - --help/-h 单独使用，命令级及操作级支持。操作后的选项可调整顺序，支持 -- 结束选项解析；例如 `repository create --json -- -工程`。重复、未知、缺值或多目标参数返回退出 2。
 
@@ -90,3 +90,15 @@ link/unlink 使用项目服务的同一写锁，在锁内读取最新字段并�
 - 运行 `.agents/ksf test`、`.agents/ksf build --json`、`.agents/ksf runtime verify --json`；测试在临时目录创建虚构工程，真实通过范围以输出为准。
 
 返回[命令索引](index.md)。
+
+
+## 档案项目的工程关联
+
+link/unlink/list/check 带 --project 时可加 `--scope current|archived`，默认 current；不选择项目时传 scope 为参数错误。create 不接受 scope，仍不自动关联项目。
+
+```sh
+.agents/ksf repository check --project "项目名" --scope archived --json
+.agents/ksf repository link "repositories/工程名" --project "项目名" --scope archived --dry-run --json
+```
+
+路径始终基于实际根卡所在目录解析和保存，关联修改回执给出项目 scope。归档与恢复会重算 repositories 的相对路径，不复制、移动或删除工程。pending 项目操作期间禁止关联修改，读取检查仍可进行；需按项目回执恢复后再继续写入。

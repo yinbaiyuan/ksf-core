@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ import { contextCapabilities } from '../src/services/context.js';
 const repository = fileURLToPath(new URL('../../../../', import.meta.url));
 const runtimeReference = readFileSync(join(repository, 'AGENTS.md'), 'utf8').match(/partner\.ksf\.runtime@\d+\.\d+\.\d+/)[0];
 const runtimeNames = ['project-route', 'knowledge-route', 'asset-maintenance'];
-const userFolders = ['项目', '知识', '@收件箱', '源档', '归档', ...Object.values(types).map(type => type.user)];
+const userFolders = ['项目', '知识', '@收件箱', '档案', ...Object.values(types).map(type => type.user)];
 
 function fixture(t) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf minimal runtime ')));
@@ -56,6 +56,8 @@ test('shipped definitions resolve the minimal runtime in a fresh root with empty
   assert.equal(contextCapabilities(f.root).data.complete, true);
   assert.deepEqual(files(f.root), before);
   for (const folder of userFolders) assert.deepEqual(files(join(f.root, folder)), []);
+  assert.equal(existsSync(join(f.root, '源档')), false);
+  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) assert.equal(existsSync(join(f.root, path)), false);
 });
 
 test('runtime competencies resist real and preview mutations and cannot be taken over by user copies', t => {
@@ -93,8 +95,8 @@ test('project intake is a normal system competency with effective user derivatio
   const system = f.query('competency', 'read', id);
   assert.equal(system.data.object.protected, false); assert.equal(system.data.object.source, 'system');
   const target = join(f.root, types.competency.user, id); mkdirSync(target);
-  writeFileSync(join(target, 'competency.md'), `---\nid: ${id}\nname: intake derivative\ndescription: scoped custom method\nstatus: active\nversion: 0.1.0\nuser_revision: 1\nreferences: []\n---\nCustom intake method.\n`);
-  const read = f.query('competency', 'read', id + '@0.1.0');
+  writeFileSync(join(target, 'competency.md'), `---\nid: ${id}\nname: intake derivative\ndescription: scoped custom method\nstatus: active\nversion: ${system.data.object.version}\nuser_revision: 1\nreferences: []\n---\nCustom intake method.\n`);
+  const read = f.query('competency', 'read', id + '@' + system.data.object.version);
   assert.deepEqual(read.errors, []); assert.equal(read.data.object.source, 'user');
   const runtime = f.query('partner', 'read', runtimeReference);
   assert.deepEqual(runtime.errors, []); assert.ok(runtime.data.references.some(row => row.id === id));
@@ -106,9 +108,10 @@ test('the actual user-derived intake script uses the selected instance shared pr
   const deployed = join(f.root, '.agents/core/runtime');
   cpSync(join(repository, '.agents/core/runtime/src'), join(deployed, 'src'), { recursive: true });
   cpSync(join(repository, '.agents/core/runtime/package.json'), join(deployed, 'package.json'));
-  const original = f.query('competency', 'read', id).data.object.body;
+  const definition = f.query('competency', 'read', id).data.object;
+  const original = definition.body;
   objectMutation({ root: f.root, type: 'competency', operation: 'write', id, input: { body: original + '\nUser-specific intake note.\n' } });
-  const derived = f.query('competency', 'read', id + '@0.1.0').data.object;
+  const derived = f.query('competency', 'read', id + '@' + definition.version).data.object;
   assert.equal(derived.source, 'user');
   const folder = join(f.root, '项目', '示例'); mkdirSync(folder); writeFileSync(join(folder, 'project.md'), '# 示例\n');
   const source = join(f.root, '外部普通材料.md'); writeFileSync(source, '保留来源与字节\n');
@@ -145,4 +148,6 @@ test('real CLI resolves the copied runtime from unrelated cwd without creating u
   const entry = launch(['partner', 'read', runtimeReference]);
   for (const dependency of entry.data.references) assert.equal(launch(['competency', 'check', dependency.reference]).data.valid, true);
   for (const folder of userFolders) assert.deepEqual(files(join(f.root, folder)), []);
+  assert.equal(existsSync(join(f.root, '源档')), false);
+  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) assert.equal(existsSync(join(f.root, path)), false);
 });

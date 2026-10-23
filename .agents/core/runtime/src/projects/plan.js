@@ -5,28 +5,29 @@ import { parseFrontmatter, createFrontmatter, encodeFrontmatter, setField } from
 import { validateRouting } from './routing-schema.js';
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
 
-export function locations(root, name) {
-  const scope = join(root, '项目');
-  return { scope, folder: join(scope, name), target: join(scope, name, 'project.md') };
+export function locations(root, name, projectScope = 'current') {
+  if (!['current', 'archived'].includes(projectScope)) invalid('Expected current or archived project scope.');
+  const scope = projectScope === 'current' ? join(root, '项目') : join(root, '档案', '项目');
+  return { scope, projectScope, folder: join(scope, name), target: join(scope, name, 'project.md') };
 }
 
-export function publicProject(root, name, parsed, part = 'all') {
-  const { folder, target } = locations(root, name);
+export function publicProject(root, name, parsed, part = 'all', projectScope = 'current') {
+  const { folder, target } = locations(root, name, projectScope);
   return {
-    name, path: relative(root, target), directory: relative(root, folder), state: parsed.state,
+    name, scope: projectScope, path: relative(root, target), directory: relative(root, folder), state: parsed.state,
     ...(part !== 'body' ? { metadata: parsed.values } : {}),
     ...(part !== 'metadata' ? { body: parsed.body.toString('utf8') } : {}),
   };
 }
 
-export function validateWrite(data, { previousMetadata } = {}) {
+export function validateWrite(data, { previousMetadata, scope = 'current' } = {}) {
   validateInput(data);
   if (!Object.keys(data).length || Object.keys(data).some(key => !['metadata', 'body'].includes(key))) {
     invalid('Project write accepts metadata and/or body only.');
   }
   if (Object.hasOwn(data, 'metadata')) validateInput(data.metadata);
   if (Object.hasOwn(data.metadata ?? {}, 'routing') &&
-      (!previousMetadata || !equalValues(data.metadata.routing, previousMetadata.routing))) validateRouting(data.metadata.routing);
+      (!previousMetadata || !equalValues(data.metadata.routing, previousMetadata.routing))) validateRouting(data.metadata.routing, scope);
   if (Object.hasOwn(data, 'body') && typeof data.body !== 'string') invalid('Project body must be a string.');
 }
 
@@ -60,13 +61,13 @@ export function encodeProject(current, input) {
 export function planProjectWrite(current, { root, name, data, dryRun = false }, { metadataOnly = false } = {}) {
   const encoded = encodeProject(current, data);
   const wouldChange = !current.snapshot || !encoded.bytes.equals(current.snapshot.bytes);
-  const result = { name, path: relative(root, current.target), dryRun, changed: false, wouldChange,
+  const result = { name, scope: current.projectScope ?? 'current', path: relative(root, current.target), dryRun, changed: false, wouldChange,
     ...(!metadataOnly ? { created: false, wouldCreate: !current.snapshot, changes: encoded.changes } : {}),
-    project: publicProject(root, name, encoded.parsed) };
+    project: publicProject(root, name, encoded.parsed, 'all', current.projectScope) };
   return { result, bytes: encoded.bytes, wouldChange };
 }
 
 export function planProjectRemoval(current, { root, name, dryRun = false }, entries = []) {
-  return { name, path: relative(root, current.folder), dryRun, changed: false,
+  return { name, scope: current.projectScope ?? 'current', path: relative(root, current.folder), dryRun, changed: false,
     wouldChange: !!current.snapshot, removed: false, entries };
 }

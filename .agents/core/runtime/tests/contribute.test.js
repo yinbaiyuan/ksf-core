@@ -65,7 +65,8 @@ test('working-tree-only changes produce an empty committed contribution and no p
 for (const path of ['知识/private.md', '.git/config', '../outside', '.agents/core/release.json', '.agents/core/manifest.yaml']) {
   test(`contribution rejects non-source target ${path}`, async t => {
     const f = await fixture(t);
-    await assert.rejects(() => prepare(f, { paths: [path] }), { code: 'CONTRIBUTION_PATH_INVALID' });
+    const selected = path === '知识/private.md' ? [path, 'USER.md', 'BOT.md', 'MEMORY.md'] : [path];
+    for (const userPath of selected) await assert.rejects(() => prepare(f, { paths: [userPath] }), { code: 'CONTRIBUTION_PATH_INVALID' });
   });
 }
 
