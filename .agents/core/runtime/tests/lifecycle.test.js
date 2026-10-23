@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { commitWorkspace, distributionFixture } from './helpers/distribution-fixture.js';
+import { commitWorkspace, distributionFixture, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 import { systemCheck, systemUpdate, systemRollback, systemRead } from '../src/distribution/system.js';
 import { prepareContribution, submitContribution } from '../src/distribution/contribute.js';
@@ -24,7 +24,8 @@ test('isolated lifecycle: older assistant entry -> runtime -> rollback -> upgrad
   assert.equal(existsSync(join(f.workspace, '.agents/core/abilities/partners/ksf-assistant/partner.md')), false);
   assert.throws(() => objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.assistant' }), { code: 'OBJECT_NOT_FOUND' });
   assert.throws(() => objectQuery({ root: f.workspace, type: 'competency', operation: 'read', reference: 'competency.ksf.task-route' }), { code: 'OBJECT_NOT_FOUND' });
-  assert.equal(objectQuery({ root: f.workspace, type: 'competency', operation: 'check', reference: 'competency.ksf.ability-route@0.1.0' }).data.valid, true);
+  const routeReference = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.runtime' }).data.references.find(r => r.id === 'competency.ksf.ability-route').reference;
+  assert.equal(objectQuery({ root: f.workspace, type: 'competency', operation: 'check', reference: routeReference }).data.valid, true);
   const capabilities = contextCapabilities(f.workspace);
   assert.equal(capabilities.data.complete, true, JSON.stringify(capabilities.errors));
   const partners = capabilities.data.partners.objects;
@@ -40,7 +41,7 @@ test('isolated lifecycle: older assistant entry -> runtime -> rollback -> upgrad
   writeAtomic(join(f.workspace, '.agents/core/example.txt'), 'fictional reviewed improvement\n');
   commitWorkspace(f);
   const api = new ForkAPI({ coreRoot: f.root });
-  const plan = await prepareContribution({ root: f.workspace, paths: ['.agents/core/example.txt'], api });
+  const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, paths: ['.agents/core/example.txt'], api });
   const submitted = await submitContribution({ root: f.workspace, id: plan.id, reviewed: plan.digest, api });
   const retried = await submitContribution({ root: f.workspace, id: plan.id, reviewed: plan.digest, api });
   assert.equal(submitted.draft, true); assert.equal(retried.reused, true); assert.equal(api.prCount, 1);
@@ -51,9 +52,11 @@ test('isolated lifecycle: older assistant entry -> runtime -> rollback -> upgrad
 
 test('maintenance remains discoverable and derivable; runtime resists user takeover', async t => {
   const f = await distributionFixture(t);
+  const system = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.maintainer', source: 'system' }).data.object;
   objectMutation({ root: f.workspace, type: 'partner', operation: 'write', id: 'partner.ksf.maintainer', input: { body: 'Fictional custom maintenance method.' } });
-  const selected = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.maintainer@0.1.4' });
+  const selected = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.maintainer@' + system.version });
   assert.equal(selected.data.object.source, 'user');
+  assert.equal(selected.data.object.version, system.version);
   assert.equal(contextCapabilities(f.workspace).data.partners.objects.find(p => p.id === 'partner.ksf.maintainer').protected, false);
   assert.throws(() => objectMutation({ root: f.workspace, type: 'partner', operation: 'write', id: 'partner.ksf.runtime', input: { body: 'replace' } }), { code: 'OBJECT_PROTECTED' });
 });

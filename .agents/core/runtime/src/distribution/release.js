@@ -3,8 +3,12 @@ import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { buildManifest } from '../services/build-manifest.js';
-import { configuration, fail, sha256, stableJSON, checkedPath, readRegular, walkFiles,
-  fileMode, validateManifest, releaseReceipt, versionParts, writeAtomic, parseJSON } from './common.js';
+import { configuration } from './configuration.js';
+import { fail } from './errors.js';
+import { sha256, stableJSON } from '../shared/hash.js';
+import { checkedPath, readRegular, walkFiles, fileMode, writeAtomic, parseJSON } from './files.js';
+import { validateManifest, releaseReceipt } from './manifests.js';
+import { versionParts } from './versions.js';
 import { createArchive, readArchive } from './archive.js';
 import { types } from '../objects/schema.js';
 import { products, artifactName, releaseIndexName, launcherFiles, launcherProtocol } from './products.js';
@@ -12,7 +16,8 @@ import { userDataRoot } from '../user-data/schema.js';
 import { committedSource } from './committed-source.js';
 import { gitBlobID, baselinePath } from './baseline.js';
 
-export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '源档', '归档', userDataRoot];
+export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '档案', '档案/个人', '档案/企业', '档案/项目', userDataRoot];
+export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', 'MEMORY.md'];
 function revisionInfo(root, allowDirty) {
   const git = args => spawnSync('/usr/bin/git', ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
   const rev = git(['rev-parse', '--verify', 'HEAD']);
@@ -84,7 +89,7 @@ export async function buildRelease({ root, output, platform = `${process.platfor
     const coreArchive = createArchive(coreEntries);
     inspectCoreArchive(coreArchive, { expectedVersion: build.version, expectedPlatform: platform, expectedRepository: config.core_repository });
     const extras = [];
-    for (const file of ['README.md', '.gitignore', '.gitattributes']) extras.push({ path: file, bytes: readRegular(root, `.agents/core/distribution/template/${file}`), mode: 0o644 });
+    for (const file of ['README.md', '.gitignore', '.gitattributes', ...workspaceDocuments]) extras.push({ path: file, bytes: readRegular(root, `.agents/core/distribution/template/${file}`), mode: 0o644 });
     for (const directory of userDirectories) extras.push({ path: `${directory}/.gitkeep`, bytes: Buffer.alloc(0), mode: 0o644 });
     extras.push({ path: '.ksf-template.json', mode: 0o644, bytes: Buffer.from(stableJSON({ schema_version: 1,
       product: products.workspace, instance_default_name: products.instance,

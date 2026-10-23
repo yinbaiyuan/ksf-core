@@ -5,8 +5,8 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { createArchive, readArchive } from '../src/distribution/archive.js';
-import { compareVersions, configuration, installedManifest, isBranch, sha256, stableJSON, writeAtomic } from '../src/distribution/common.js';
-import { buildRelease, inspectCoreArchive } from '../src/distribution/release.js';
+import { compareVersions, configuration, installedManifest, releaseReceipt, isBranch, sha256, stableJSON, writeAtomic } from '../src/distribution/common.js';
+import { buildRelease, inspectCoreArchive, workspaceDocuments } from '../src/distribution/release.js';
 import { inspectReleaseDirectory } from '../src/distribution/publish.js';
 import { parseDistributionArgs } from '../src/commands/distribution.js';
 import { distributionFixture, git } from './helpers/distribution-fixture.js';
@@ -52,6 +52,7 @@ test('Core accepts ordinary branch names while rejecting invalid refs', () => {
 test('complete release includes the system and empty user skeleton, excluding private data and history', async t => {
   const f = await distributionFixture(t);
   writeAtomic(join(f.root, '知识/fictional-private.md'), 'FICTIONAL_PRIVATE_SENTINEL');
+  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) writeAtomic(join(f.root, path), 'FICTIONAL_PRIVATE_SENTINEL ' + path);
   const result = await buildRelease({ root: f.root, output: join(f.directory, 'another-build') });
   const loaded = inspectReleaseDirectory(f.root, result.output);
   const entries = loaded.workspaces[0].entries;
@@ -62,8 +63,17 @@ test('complete release includes the system and empty user skeleton, excluding pr
   const provenance = JSON.parse(entries.get('.ksf-template.json').bytes);
   assert.equal(provenance.product, 'ksf-workspace'); assert.equal(provenance.instance_default_name, 'ksf');
   assert.ok(entries.has('知识/.gitkeep'));
+  for (const path of [...workspaceDocuments, '档案/个人/.gitkeep', '档案/企业/.gitkeep', '档案/项目/.gitkeep']) assert.ok(entries.has(path), path);
+  assert.equal(existsSync(join(result.template, '归档')), false);
   assert.ok(entries.has('能力/数据包/.gitkeep'));
+  assert.ok(![...entries.keys()].some(path => path.startsWith('源档/')));
+  assert.equal(existsSync(join(result.template, '源档')), false);
   assert.ok(!entries.has('知识/fictional-private.md'));
+  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) {
+    assert.deepEqual(entries.get(path).bytes, readFileSync(join(f.root, '.agents/core/distribution/template', path)));
+    assert.equal(entries.get(path).mode, 0o644);
+    assert.equal(entries.has(path.toLowerCase()), false);
+  }
   assert.ok([...entries.keys()].every(path => !path.startsWith('.git/') && (!path.startsWith('.agents/runtime-data/') || path.endsWith('/.gitkeep'))));
   assert.ok(!Buffer.concat([...entries.values()].map(e => e.bytes)).includes(Buffer.from('FICTIONAL_PRIVATE_SENTINEL')));
   assert.equal(installedManifest(result.template).core.revision, git(f.root, ['rev-parse', 'HEAD']));
@@ -108,10 +118,37 @@ test('a copied no-Git workspace starts through its fixed launcher from another c
   const discovery = f.launch(['context', 'capabilities', '--json']);
   assert.equal(discovery.status, 0, discovery.stdout + discovery.stderr);
   assert.equal(JSON.parse(discovery.stdout).data.complete, true);
+  assert.equal(existsSync(join(f.workspace, '源档')), false);
+  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) assert.equal(existsSync(join(f.root, path)), false);
+});
+
+test('release validation accepts only the empty legacy originals placeholder and rejects unrelated extras', async t => {
+  const f = await distributionFixture(t);
+  const descriptor = f.first.index.platforms['darwin-arm64'].workspace;
+  const archivePath = join(f.first.output, descriptor.name);
+  const original = [...readArchive(readFileSync(archivePath)).values()];
+  const cases = [
+    { path: '源档/.gitkeep', bytes: Buffer.alloc(0), mode: 0o644, accepted: true },
+    { path: '归档/.gitkeep', bytes: Buffer.alloc(0), mode: 0o644, accepted: true },
+    { path: '归档/.gitkeep', bytes: Buffer.from('private archive'), mode: 0o644 },
+    { path: '归档/.gitkeep', bytes: Buffer.alloc(0), mode: 0o755 },
+    { path: '源档/.gitkeep', bytes: Buffer.from('private original'), mode: 0o644 },
+    { path: '源档/.gitkeep', bytes: Buffer.alloc(0), mode: 0o755 },
+    { path: '源档/会议.md', bytes: Buffer.from('private original'), mode: 0o644 },
+    { path: '未知目录/.gitkeep', bytes: Buffer.alloc(0), mode: 0o644 },
+  ];
+  for (const { accepted = false, ...extra } of cases) {
+    const bytes = createArchive([...original, extra]);
+    writeFileSync(archivePath, bytes);
+    descriptor.size = bytes.length; descriptor.sha256 = sha256(bytes);
+    writeFileSync(join(f.first.output, 'ksf-core-release.json'), stableJSON(f.first.index));
+    if (accepted) assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.get(extra.path).bytes.length, 0);
+    else assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' }, extra.path);
+  }
 });
 test('Core sources need no user directories while installed workspaces still validate their user scopes', async t => {
   const f = await distributionFixture(t);
-  for (const name of ['项目', '知识', '能力', '@收件箱', '源档', '归档']) assert.equal(existsSync(join(f.root, name)), false);
+  for (const name of ['项目', '知识', '能力', '@收件箱', '源档', '归档', '档案']) assert.equal(existsSync(join(f.root, name)), false);
   const discovery = contextCapabilities(f.root);
   assert.equal(discovery.data.complete, true, JSON.stringify(discovery.errors));
   assert.deepEqual(objectQuery({ root: f.root, type: 'partner', operation: 'check', reference: 'partner.ksf.object-designer' }).errors, []);
@@ -170,3 +207,50 @@ for (const [command, args] of [
     assert.throws(() => parseDistributionArgs(command, args), { code: 'INVALID_ARGUMENTS', exitCode: 2 });
   });
 }
+
+
+test('verified legacy workspace layouts remain valid and generated documents must match their Core sources', async t => {
+  const f = await distributionFixture(t), index = structuredClone(f.first.index);
+  const platform = index.platforms['darwin-arm64'];
+  const core = readArchive(readFileSync(join(f.first.output, platform.core.name)));
+  const workspace = readArchive(readFileSync(join(f.first.output, platform.workspace.name)));
+  const save = (descriptor, entries) => {
+    const bytes = createArchive([...entries.values()]);
+    writeFileSync(join(f.first.output, descriptor.name), bytes);
+    descriptor.size = bytes.length; descriptor.sha256 = sha256(bytes);
+    writeFileSync(join(f.first.output, 'ksf-core-release.json'), stableJSON(index));
+  };
+  // Rehashing an altered workspace cannot bypass its verified Core template sources.
+  for (const path of workspaceDocuments) {
+    const original = workspace.get(path);
+    for (const replacement of [null, { ...original, bytes: Buffer.from('unverified replacement') }, { ...original, mode: 0o755 }]) {
+      if (replacement) workspace.set(path, replacement); else workspace.delete(path);
+      save(platform.workspace, workspace);
+      assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' }, path);
+    }
+    workspace.set(path, original);
+  }
+  const manifest = JSON.parse(core.get('.agents/core/release.json').bytes);
+  const removeDocuments = paths => {
+    for (const path of paths) {
+      const source = `.agents/core/distribution/template/${path}`;
+      core.delete(source); workspace.delete(source); delete manifest.files[source]; workspace.delete(path);
+    }
+    core.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(manifest));
+    workspace.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(releaseReceipt(manifest)));
+    save(platform.core, core); save(platform.workspace, workspace);
+  };
+  // Previous knowledge/archive layout, before the three collaboration templates.
+  removeDocuments(['USER.md', 'BOT.md', 'MEMORY.md']);
+  assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('档案/archive.md'), true);
+  workspace.set('USER.md', { path: 'USER.md', bytes: Buffer.from('unexpected personal file'), mode: 0o644 });
+  save(platform.workspace, workspace);
+  assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' });
+  workspace.delete('USER.md');
+  // Older layout without either knowledge/archive root document.
+  removeDocuments(['知识/knowledge.md', '档案/archive.md']);
+  for (const path of [...workspace.keys()]) if (path.startsWith('档案/')) workspace.delete(path);
+  for (const path of ['归档/.gitkeep', '源档/.gitkeep']) workspace.set(path, { path, bytes: Buffer.alloc(0), mode: 0o644 });
+  save(platform.workspace, workspace);
+  assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('归档/.gitkeep'), true);
+});

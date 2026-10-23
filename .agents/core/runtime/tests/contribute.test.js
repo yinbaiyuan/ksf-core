@@ -6,7 +6,7 @@ import { prepareContribution, readContribution, submitContribution } from '../sr
 import { committedSource } from '../src/distribution/committed-source.js';
 import { digestObject, installedManifest, sha256, stableJSON, validateManifest, writeAtomic } from '../src/distribution/common.js';
 import { GitHubAPI } from '../src/distribution/github.js';
-import { commitWorkspace, distributionFixture, git } from './helpers/distribution-fixture.js';
+import { commitWorkspace, distributionFixture, git, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 
 const example = '.agents/core/example.txt';
@@ -19,7 +19,7 @@ function edit(f) {
 }
 const apiFor = (f, options = {}) => new ForkAPI({ coreRoot: f.root, ...options });
 const publish = (f, plan, api, options = {}) => submitContribution({ root: f.workspace, id: plan.id, reviewed: plan.digest, api, ...options });
-const prepare = (f, options = {}) => prepareContribution({ root: f.workspace, paths: [example], ...options });
+const prepare = (f, options = {}) => prepareContribution({ ...contributionDescription, root: f.workspace, paths: [example], ...options });
 
 test('HEAD includes cumulative committed fixes even when the latest commit contains only private material', async t => {
   const f = await fixture(t); edit(f);
@@ -27,8 +27,8 @@ test('HEAD includes cumulative committed fixes even when the latest commit conta
   writeAtomic(join(f.workspace, path), 'another committed system fix\n'); commitWorkspace(f, { paths: [path] });
   writeAtomic(join(f.workspace, '知识/private.md'), 'FICTIONAL_PRIVATE_FILE');
   const head = commitWorkspace(f, { paths: ['知识/private.md'], message: 'FICTIONAL_PRIVATE_MESSAGE' });
-  const plan = await prepareContribution({ root: f.workspace, all: true });
-  assert.equal(plan.schema_version, 2); assert.equal(plan.sourceCommit, head);
+  const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true });
+  assert.equal(plan.schema_version, 4); assert.equal(plan.sourceCommit, head);
   assert.deepEqual(plan.changes.map(c => c.workspace_path), [example, path].sort());
   assert.ok(!JSON.stringify(plan).includes('FICTIONAL_PRIVATE_'));
   assert.equal(readContribution({ root: f.workspace, id: plan.id }).digest, plan.digest);
@@ -42,7 +42,7 @@ test('index, working edits, untracked files and an uncommitted manifest do not e
   writeAtomic(join(f.workspace, '.agents/core/untracked.txt'), 'FICTIONAL_UNTRACKED_CONTENT');
   writeAtomic(join(f.workspace, '.agents/core/release.json'), 'uncommitted broken development metadata');
   const beforeIndex = readFileSync(join(f.workspace, '.git/index'));
-  const plan = await prepareContribution({ root: f.workspace, all: true });
+  const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true });
   assert.equal(plan.sourceCommit, head); assert.equal(plan.changes.length, 1);
   assert.equal(Buffer.from(plan.changes[0].content, 'base64').toString(), 'a useful fictional Core fix\n');
   const result = await publish(f, plan, api);
@@ -55,7 +55,7 @@ test('working-tree-only changes produce an empty committed contribution and no p
   const f = await fixture(t);
   writeAtomic(join(f.workspace, example), 'only uncommitted content');
   writeAtomic(join(f.workspace, '.agents/core/new.txt'), 'only untracked content');
-  await assert.rejects(() => prepareContribution({ root: f.workspace, all: true }), error => {
+  await assert.rejects(() => prepareContribution({ ...contributionDescription, root: f.workspace, all: true }), error => {
     assert.equal(error.code, 'CONTRIBUTION_EMPTY'); assert.equal(error.data.changes.length, 0);
     assert.equal(error.data.sourceCommit, git(f.workspace, ['rev-parse', 'HEAD'])); return true;
   });
@@ -65,7 +65,8 @@ test('working-tree-only changes produce an empty committed contribution and no p
 for (const path of ['知识/private.md', '.git/config', '../outside', '.agents/core/release.json', '.agents/core/manifest.yaml']) {
   test(`contribution rejects non-source target ${path}`, async t => {
     const f = await fixture(t);
-    await assert.rejects(() => prepare(f, { paths: [path] }), { code: 'CONTRIBUTION_PATH_INVALID' });
+    const selected = path === '知识/private.md' ? [path, 'USER.md', 'BOT.md', 'MEMORY.md'] : [path];
+    for (const userPath of selected) await assert.rejects(() => prepare(f, { paths: [userPath] }), { code: 'CONTRIBUTION_PATH_INVALID' });
   });
 }
 
@@ -75,13 +76,13 @@ test('committed additions, deletion, permissions, binary data and Chinese paths 
   rmSync(join(f.workspace, example)); chmodSync(join(f.workspace, 'AGENTS.md'), 0o755);
   writeAtomic(join(f.workspace, binary), Buffer.from([0, 255, 10])); writeAtomic(join(f.workspace, added), 'committed new text\n');
   commitWorkspace(f, { paths: [example, 'AGENTS.md', binary, added] });
-  const plan = await prepareContribution({ root: f.workspace, all: true, dryRun: true });
+  const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true, dryRun: true });
   assert.equal(plan.changes.find(c => c.workspace_path === example).operation, 'delete');
   assert.equal(plan.changes.find(c => c.workspace_path === 'AGENTS.md').mode, 0o755);
   assert.equal(plan.changes.find(c => c.workspace_path === binary).diff, `Binary change: ${binary}\n`);
   assert.equal(plan.changes.find(c => c.workspace_path === added).operation, 'add');
   assert.equal(existsSync(join(f.workspace, '.agents/runtime-data/contributions')), false);
-  const saved = await prepareContribution({ root: f.workspace, all: true }), api = apiFor(f);
+  const saved = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true }), api = apiFor(f);
   assert.equal((await publish(f, saved, api)).draft, true);
   assert.ok(api.calls.some(c => c.method === 'POST' && c.path.endsWith('/git/blobs')));
 });
@@ -94,7 +95,7 @@ test('Git and an existing HEAD are required; a parent repository cannot silently
   await assert.rejects(() => prepare(f), { code: 'CONTRIBUTION_HEAD_REQUIRED' });
   commitWorkspace(f);
   const nested = join(f.workspace, 'nested-ksf'); mkdirSync(nested);
-  await assert.rejects(() => prepareContribution({ root: nested, all: true }), { code: 'CONTRIBUTION_GIT_ROOT_MISMATCH' });
+  await assert.rejects(() => prepareContribution({ ...contributionDescription, root: nested, all: true }), { code: 'CONTRIBUTION_GIT_ROOT_MISMATCH' });
 });
 
 for (const kind of ['missing', 'json', 'checksum', 'repository', 'revision', 'development']) {
@@ -130,13 +131,13 @@ test('schema 2 contribution baselines support removal of the old launcher withou
   writeAtomic(join(f.workspace, '.agents/bin/ksf'), launcher, 0o755);
   rmSync(join(f.workspace, '.agents/ksf')); rmSync(join(f.workspace, '.agents/ksf.ps1'));
   commitWorkspace(f, { paths: ['.agents/core', 'AGENTS.md', '.agents/bin/ksf'] });
-  await assert.rejects(() => prepareContribution({ root: f.workspace, all: true }), { code: 'CONTRIBUTION_EMPTY' });
+  await assert.rejects(() => prepareContribution({ ...contributionDescription, root: f.workspace, all: true }), { code: 'CONTRIBUTION_EMPTY' });
   assert.throws(() => validateManifest(manifest), { code: 'RELEASE_INVALID' });
   rmSync(join(f.workspace, '.agents/bin/ksf'));
   writeAtomic(join(f.workspace, '.agents/ksf'), launcher, 0o755);
   writeAtomic(join(f.workspace, '.agents/ksf.ps1'), '# fictional new Windows entry\n');
   commitWorkspace(f, { paths: ['.agents/bin/ksf', '.agents/ksf', '.agents/ksf.ps1'] });
-  const plan = await prepareContribution({ root: f.workspace, all: true });
+  const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true });
   assert.equal(plan.baseline.schema_version, 2);
   assert.equal(plan.changes.find(c => c.workspace_path === '.agents/bin/ksf').operation, 'delete');
   assert.equal((await publish(f, plan, apiFor(f))).draft, true);
@@ -168,13 +169,15 @@ test('public submission exports only committed system content, never private his
   writeAtomic(join(f.workspace, '知识/private.md'), 'FICTIONAL_PRIVATE_FILE');
   git(f.workspace, ['config', 'user.name', 'FICTIONAL_PRIVATE_AUTHOR']);
   const privateRevision = commitWorkspace(f, { paths: ['知识/private.md'], message: 'FICTIONAL_PRIVATE_MESSAGE' });
-  const plan = await prepare(f, { title: 'Fix public behavior', body: 'A fictional reproducible Core fix.' }), api = apiFor(f);
+  const plan = await prepare(f), api = apiFor(f);
   const response = await publish(f, plan, api);
   assert.equal(response.number, 17); assert.equal(response.draft, true);
   const serialized = JSON.stringify(api.calls);
   assert.ok(!serialized.includes('FICTIONAL_PRIVATE_')); assert.ok(!serialized.includes(privateRevision));
   const commit = api.calls.find(c => c.method === 'POST' && c.path.endsWith('/git/commits')).body;
   assert.deepEqual(commit.parents, [plan.core.revision]);
+  assert.equal(commit.message, plan.commitMessage);
+  assert.equal(commit.message, `${plan.title}\n\n${plan.body.trimEnd()}\n`);
   assert.deepEqual(api.calls.find(c => c.method === 'POST' && c.path.endsWith('/git/trees')).body.tree.map(c => c.path), [example]);
 });
 
@@ -278,9 +281,14 @@ for (const failure of ['missing-branch', 'missing-pr', 'changed-pr', 'offline'])
   await assert.rejects(s.retry(), { code }); assert.ok(readFileSync(path).equals(before)); assert.ok(s.api.calls.every(c => c.method === 'GET'));
 });
 
-function makeLegacy(f, plan) {
-  const { digest, sourceCommit, baseline, ...old } = readContribution({ root: f.workspace, id: plan.id });
-  old.schema_version = 1; old.changes = old.changes.map(({ before_mode, ...change }) => change);
+function makeLegacy(f, plan, schema = 1) {
+  const { digest, prDescription, prBody, ...old } = readContribution({ root: f.workspace, id: plan.id });
+  old.schema_version = schema;
+  if (schema < 3) delete old.commitMessage;
+  if (schema === 1) {
+    delete old.sourceCommit; delete old.baseline;
+    old.changes = old.changes.map(({ before_mode, ...change }) => change);
+  }
   const legacy = { ...old, digest: digestObject(old) };
   writeAtomic(join(f.workspace, `.agents/runtime-data/contributions/${plan.id}/plan.json`), stableJSON(legacy));
   return legacy;
@@ -298,4 +306,117 @@ test('legacy existing PRs are checked with reads only, including old states with
   assert.equal(result.legacy, true); assert.equal(result.reconcileOnly, true); assert.equal(result.reused, true);
   assert.ok(s.api.calls.every(c => c.method === 'GET')); assert.ok(readFileSync(path).equals(before));
   assert.ok(!s.api.calls.some(c => c.path === '/user'));
+});
+
+test('invalid public messages fail before Git, networking or contribution directory creation', async t => {
+  const f = await distributionFixture(t), api = apiFor(f);
+  await assert.rejects(prepare(f, { title: 'fix(core): 更新代码', api }), { code: 'COMMIT_MESSAGE_INVALID' });
+  await assert.rejects(prepare(f, { body: 'An unstructured description', api }), { code: 'COMMIT_MESSAGE_INVALID' });
+  assert.equal(api.calls.length, 0);
+  assert.equal(existsSync(join(f.workspace, '.agents/runtime-data/contributions')), false);
+});
+
+test('the complete message is frozen in the preview and digest, not reconstructed at publication', async t => {
+  const f = await fixture(t); edit(f); const plan = await prepare(f), api = apiFor(f);
+  const preview = await publish(f, plan, api, { dryRun: true });
+  assert.equal(preview.commitMessage, plan.commitMessage);
+  const path = join(f.workspace, `.agents/runtime-data/contributions/${plan.id}/plan.json`), changed = JSON.parse(readFileSync(path));
+  changed.commitMessage = changed.commitMessage.replace('示例行为', '另一种行为');
+  writeAtomic(path, stableJSON(changed));
+  assert.throws(() => readContribution({ root: f.workspace, id: plan.id }), { code: 'CONTRIBUTION_TAMPERED' });
+  assert.equal(api.calls.length, 0);
+});
+
+test('a message inconsistent with title and body is rejected even with a recomputed digest', async t => {
+  const f = await fixture(t); edit(f); const plan = await prepare(f);
+  const { digest, ...changed } = plan; delete changed.dryRun; delete changed.warnings; delete changed.reviewPath;
+  changed.commitMessage = changed.commitMessage.replace('示例行为', '另一种行为');
+  writeAtomic(join(f.workspace, `.agents/runtime-data/contributions/${plan.id}/plan.json`), stableJSON({ ...changed, digest: digestObject(changed) }));
+  assert.throws(() => readContribution({ root: f.workspace, id: plan.id }), { code: 'CONTRIBUTION_INVALID' });
+});
+
+test('retry refuses a remotely changed message without writing another commit or PR', async t => {
+  const s = await submitted(t); s.api.commit.message = 'a different remote message';
+  await assert.rejects(s.retry(), { code: 'CONTRIBUTION_BRANCH_CHANGED' });
+  assert.ok(s.api.calls.every(c => c.method === 'GET')); assert.equal(s.api.prCount, 1);
+});
+
+test('schema 2 previews remain readable and unpublished ones require preparation under the message rules', async t => {
+  const f = await fixture(t); edit(f); const old = makeLegacy(f, await prepare(f), 2), api = apiFor(f);
+  assert.equal(readContribution({ root: f.workspace, id: old.id }).schema_version, 2);
+  await assert.rejects(publish(f, old, api), { code: 'CONTRIBUTION_LEGACY_PLAN' });
+  assert.equal(api.calls.length, 0);
+});
+
+test('schema 2 existing PRs retain their old message and reconcile with reads only', async t => {
+  const s = await submitted(t), old = makeLegacy(s.f, s.plan, 2);
+  const path = join(s.f.workspace, `.agents/runtime-data/contributions/${s.plan.id}/submitted.json`), state = JSON.parse(readFileSync(path));
+  state.digest = old.digest; writeAtomic(path, stableJSON(state));
+  s.api.commit.message = 'Original title-only public message';
+  const before = readFileSync(path), result = await publish(s.f, old, s.api);
+  assert.equal(result.reconcileOnly, true); assert.ok(s.api.calls.every(c => c.method === 'GET'));
+  assert.ok(readFileSync(path).equals(before));
+});
+
+test('the real launcher accepts a UTF-8 body file and publishes exactly the reviewed full message', async t => {
+  const f = await fixture(t); edit(f);
+  const path = join(f.directory, '公开正文.txt'); writeFileSync(path, contributionDescription.body);
+  const prPath = join(f.directory, 'PR说明.md'); writeFileSync(prPath, contributionDescription.prBody);
+  const prepared = f.launch(['contribute', 'prepare', '--paths', example, '--title', contributionDescription.title, '--body-file', path, '--pr-body-file', prPath, '--json']);
+  assert.equal(prepared.status, 0, prepared.stderr + prepared.stdout);
+  const plan = JSON.parse(prepared.stdout).data, api = apiFor(f);
+  assert.equal(plan.commitMessage, `${plan.title}\n\n${contributionDescription.body.trimEnd()}\n`);
+  assert.equal(readContribution({ root: f.workspace, id: plan.id }).commitMessage, plan.commitMessage);
+  await publish(f, plan, api);
+  assert.equal(api.calls.find(call => call.method === 'POST' && call.path.endsWith('/git/commits')).body.message, plan.commitMessage);
+  assert.equal(api.calls.find(call => call.method === 'POST' && call.path.endsWith('/pulls')).body.body, plan.prBody);
+});
+
+test('commit and PR text are frozen separately, including generated provenance', async t => {
+  const f = await fixture(t); edit(f); const plan = await prepare(f), api = apiFor(f);
+  assert.notEqual(plan.prDescription, plan.body);
+  assert.equal(plan.prDescription, contributionDescription.prBody);
+  assert.ok(plan.prBody.endsWith(`贡献来源：ksf-core ${plan.version}（${plan.core.revision}）。\n仅包含已审阅的系统文件差异。\n`));
+  const preview = await publish(f, plan, api, { dryRun: true });
+  assert.equal(preview.prBody, plan.prBody); assert.equal(preview.title, plan.title); assert.equal(api.calls.length, 0);
+  await publish(f, plan, api);
+  assert.equal(api.calls.find(c => c.method === 'POST' && c.path.endsWith('/git/commits')).body.message, plan.commitMessage);
+  const posted = api.calls.find(c => c.method === 'POST' && c.path.endsWith('/pulls')).body;
+  assert.equal(posted.body, plan.prBody); assert.equal(posted.title, plan.title); assert.equal(posted.draft, true);
+});
+
+test('PR tampering and inconsistent provenance fail before any publication', async t => {
+  const f = await fixture(t); edit(f); const plan = await prepare(f), path = join(f.workspace, `.agents/runtime-data/contributions/${plan.id}/plan.json`);
+  const stored = JSON.parse(readFileSync(path));
+  stored.prBody += '未审阅内容\n'; writeAtomic(path, stableJSON(stored));
+  assert.throws(() => readContribution({ root: f.workspace, id: plan.id }), { code: 'CONTRIBUTION_TAMPERED' });
+  const { digest, ...changed } = stored;
+  writeAtomic(path, stableJSON({ ...changed, digest: digestObject(changed) }));
+  assert.throws(() => readContribution({ root: f.workspace, id: plan.id }), { code: 'CONTRIBUTION_INVALID' });
+});
+
+test('PR edits during review survive ordinary retries without remote writes', async t => {
+  const s = await submitted(t); s.api.pr.body = 'Reviewed PR text with newly recorded evidence.'; s.api.pr.title = 'Edited review title';
+  const result = await s.retry();
+  assert.equal(result.reused, true); assert.equal(s.api.pr.body, 'Reviewed PR text with newly recorded evidence.');
+  assert.equal(s.api.pr.title, 'Edited review title');
+  assert.ok(s.api.calls.every(c => c.method === 'GET')); assert.equal(s.api.prCount, 1);
+});
+
+test('schema 3 remains readable but cannot initiate publication without the independent PR description', async t => {
+  const f = await fixture(t); edit(f); const old = makeLegacy(f, await prepare(f), 3), api = apiFor(f);
+  assert.equal(readContribution({ root: f.workspace, id: old.id }).commitMessage, old.commitMessage);
+  await assert.rejects(publish(f, old, api), { code: 'CONTRIBUTION_LEGACY_PLAN' }); assert.equal(api.calls.length, 0);
+});
+
+test('schema 3 published records reconcile read-only and still verify the frozen commit message', async t => {
+  const s = await submitted(t), old = makeLegacy(s.f, s.plan, 3);
+  const path = join(s.f.workspace, `.agents/runtime-data/contributions/${old.id}/submitted.json`), state = JSON.parse(readFileSync(path));
+  state.digest = old.digest; writeAtomic(path, stableJSON(state));
+  const before = readFileSync(path), preview = await publish(s.f, old, s.api, { dryRun: true });
+  assert.equal(preview.reconcileOnly, true); assert.equal(preview.wouldPublish, false); assert.equal(preview.prBody, null);
+  const result = await publish(s.f, old, s.api); assert.equal(result.reconcileOnly, true);
+  assert.ok(s.api.calls.every(c => c.method === 'GET')); assert.ok(readFileSync(path).equals(before));
+  s.api.commit.message = 'Changed schema-3 message';
+  await assert.rejects(publish(s.f, old, s.api), { code: 'CONTRIBUTION_BRANCH_CHANGED' });
 });

@@ -1,8 +1,14 @@
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { configuration, fail, parseJSON, readRegular, sha256, stableJSON, validateManifest, releaseReceipt, validateProducts, writeAtomic, installedManifest, compareVersions, isRevision } from './common.js';
-import { inspectCoreArchive, userDirectories } from './release.js';
+import { configuration } from './configuration.js';
+import { fail } from './errors.js';
+import { parseJSON, readRegular, writeAtomic } from './files.js';
+import { sha256, stableJSON } from '../shared/hash.js';
+import { validateManifest, releaseReceipt, validateProducts, installedManifest } from './manifests.js';
+import { compareVersions } from './versions.js';
+import { isRevision } from './git-values.js';
+import { inspectCoreArchive, userDirectories, workspaceDocuments } from './release.js';
 import { readArchive } from './archive.js';
 import { GitHubAPI, githubToken, treeFromChanges } from './github.js';
 import { gitTemplateThreshold, publishGitTemplate } from './template-git.js';
@@ -26,7 +32,20 @@ export function inspectReleaseDirectory(root, directory) {
         core = inspectCoreArchive(bytes, { expectedVersion: index.version, expectedPlatform: platform, expectedRepository: config.core_repository });
         if (core.manifest.core.revision !== index.core_revision || core.manifest.development) fail('RELEASE_INVALID', 'Artifact revision or development status differs from the index.');
       } else {
-        const entries = readArchive(bytes), extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', ...userDirectories.map(d => `${d}/.gitkeep`)]);
+        const entries = readArchive(bytes);
+        const documents = workspaceDocuments.filter(path => core.entries.has(`.agents/core/distribution/template/${path}`));
+        const modern = documents.includes('档案/archive.md');
+        const directories = modern ? userDirectories : [...userDirectories.filter(path => path !== '档案' && !path.startsWith('档案/')), '归档'];
+        const extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', ...documents, ...directories.map(d => `${d}/.gitkeep`)]);
+        // Accept only the known empty placeholder from older workspace bundles.
+        // It is no longer generated; this does not allow user data or other extras.
+        for (const path of ['源档/.gitkeep', '归档/.gitkeep']) {
+          const legacy = entries.get(path);
+          if (legacy) {
+            if (legacy.bytes.length !== 0 || legacy.mode !== 0o644) fail('RELEASE_INVALID', 'Legacy placeholders must be empty with mode 0644.');
+            extra.add(path);
+          }
+        }
         // Older bundles carry a strictly source-derived workflow. New bundles
         // omit both the source and generated workflow; arbitrary extras stay forbidden.
         const workflowSource = core.entries.get('.agents/core/distribution/template-workflow.yml');
@@ -41,8 +60,8 @@ export function inspectReleaseDirectory(root, directory) {
           if (original ? !file.bytes.equals(original.bytes) || file.mode !== original.mode : !extra.has(path)) fail('RELEASE_INVALID', `Unexpected workspace file: ${path}.`);
           if (path.endsWith('/.gitkeep') && file.bytes.length !== 0) fail('RELEASE_INVALID', 'User-directory placeholders must be empty.');
         }
-        for (const path of ['README.md', '.gitignore', '.gitattributes']) {
-          if (!entries.get(path)?.bytes.equals(core.entries.get(`.agents/core/distribution/template/${path}`)?.bytes)) fail('RELEASE_INVALID', `Workspace template differs from its source: ${path}.`);
+        for (const path of ['README.md', '.gitignore', '.gitattributes', ...documents]) {
+          if (entries.get(path)?.mode !== 0o644 || !entries.get(path)?.bytes.equals(core.entries.get(`.agents/core/distribution/template/${path}`)?.bytes)) fail('RELEASE_INVALID', `Workspace template differs from its source: ${path}.`);
         }
         if (workflowSource) {
           const workflow = workflowSource.bytes.toString('utf8').replaceAll('__KSF_TEMPLATE_REPOSITORY__', config.template_repository);
