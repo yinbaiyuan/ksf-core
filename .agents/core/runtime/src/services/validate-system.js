@@ -8,7 +8,7 @@ export async function validateSystemDefinitions(root) {
   const [{ catalog, problems, resolveObject }, { protectedPaths }] = await Promise.all([
     import(source('objects/catalog.js')), import(source('objects/schema.js')),
   ]);
-  const c = catalog(root), errors = problems(c, { source: 'system' });
+  const c = catalog(root, { linked: false }), errors = problems(c, { source: 'system' });
   for (const id of Object.keys(protectedPaths)) {
     try {
       const row = resolveObject(c, { id }, 'system');

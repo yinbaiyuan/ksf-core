@@ -14,7 +14,12 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   const objectCommands = Object.keys(types).map(type =>
     `  ${`ksf ${type} --help`.padEnd(27)}Manage ${type} objects\n`).join('');
   process.stdout.write('KSF CLI\n\nUsage:\n  ksf hello                   Print a greeting\n  ksf hello --json            Return a greeting and runtime details as JSON\n  ksf runtime verify          Fully verify the bundled and installed runtime\n  ksf runtime verify --json   Return verification details as JSON\n  ksf build                   Generate manifest from build inputs and artifacts\n  ksf build --json            Return generated manifest details as JSON\n  ksf test                    Run JavaScript tests with the bundled Node.js\n  ksf context --help          Get capability context for the Agent\n  ksf project --help          Manage project root cards and directories\n  ksf metadata --help         Manage Markdown YAML frontmatter\n' + objectCommands + '  ksf --help                  Show this help\n');
+  process.stdout.write('  ksf repository --help       Manage independent local project repositories\n');
+  process.stdout.write('  ksf commit-message --help   Check commit messages or print the template\n');
+  process.stdout.write('  ksf pr-description --help   Check PR descriptions or print the template\n');
+  process.stdout.write('  ksf source --help           Associate and share Git ability sources\n');
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
+  process.stdout.write('  ksf eval --help             Explicit natural-language Agent evaluations\n');
   process.stdout.write('  ksf launcher recover       Recover an interrupted update without Core or Node\n  ksf release --help          Build ksf-core and ksf-workspace releases\n  ksf system --help           Check, upgrade and roll back installed Core\n  ksf contribute --help       Review system changes and submit a Core PR\n');
 } else if (['release', 'system', 'contribute'].includes(command)) {
   const { runDistributionCommand } = await import('./commands/distribution.js');
@@ -22,9 +27,34 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
   process.exitCode = result.exitCode;
+} else if (command === 'eval') {
+  const { runEvalCommand } = await import('./commands/eval.js');
+  const result = await runEvalCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
+} else if (command === 'commit-message') {
+  const { runCommitMessageCommand } = await import('./commands/commit-message.js');
+  const result = runCommitMessageCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
+} else if (command === 'pr-description') {
+  const { runPRDescriptionCommand } = await import('./commands/pr-description.js');
+  const result = runPRDescriptionCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
+} else if (command === 'source') {
+  const { runSourceCommand } = await import('./commands/sources.js');
+  const result = runSourceCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
 } else if (command === 'user-data') {
   const { runUserDataCommand } = await import('./commands/user-data.js');
   const result = runUserDataCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
+} else if (command === 'repository') {
+  const { runRepositoryCommand } = await import('./commands/repositories.js');
+  const result = runRepositoryCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
 } else if (command === 'project') {

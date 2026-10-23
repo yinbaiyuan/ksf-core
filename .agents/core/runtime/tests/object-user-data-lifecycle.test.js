@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { mkdtempSync, realpathSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import YAML from '../src/vendor/yaml/dist/index.js';
+import { types } from '../src/objects/schema.js';
+import { objectQuery, objectMutation } from '../src/services/objects.js';
+import { abilitySource } from '../src/services/sources.js';
+import { contextCapabilities } from '../src/services/context.js';
+import { readUserData, writeUserData } from '../src/services/user-data.js';
+
+for (const type of Object.keys(types)) test(`${type}: data survives derivation, archive and removal without entering discovery or definitions`, t => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf object data lifecycle ')));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  for (const def of Object.values(types)) for (const source of ['system', 'user']) mkdirSync(join(root, def[source]), { recursive: true });
+  writeFileSync(join(root, '.agents/core/manifest.yaml'), 'name: KSF\nversion: 0.1.2\n');
+  const id = `${type}.test.lifecycle`, directory = join(root, types[type].system, '可读目录'); mkdirSync(directory);
+  const metadata = { id, name: '生命周期测试', description: '测试', status: 'active', version: '0.1.0' };
+  writeFileSync(join(directory, types[type].entry), `---\n${YAML.stringify(metadata)}---\n# Definition\n`);
+  const saved = writeUserData({ root, objectId: id, ifMatch: 'missing', values: { marker: 'PRIVATE_OBJECT_DATA' } });
+  const read = () => readUserData({ root, objectId: id });
+  const query = () => objectQuery({ root, type, operation: 'read', reference: id }).data.object;
+  assert.equal(query().source, 'system');
+  objectMutation({ root, type, operation: 'write', id, input: {} }); assert.equal(query().source, 'user'); assert.equal(read().etag, saved.etag);
+  assert.ok(!JSON.stringify(query()).includes('PRIVATE_OBJECT_DATA'));
+  assert.ok(!JSON.stringify(contextCapabilities(root)).includes('PRIVATE_OBJECT_DATA'));
+  objectMutation({ root, type, operation: 'write', id, input: { metadata: { status: 'archived' } } });
+  assert.equal(query().source, 'system'); assert.equal(read().etag, saved.etag);
+  objectMutation({ root, type, operation: 'remove', id }); assert.equal(read().etag, saved.etag);
+  renameSync(directory, join(root, types[type].system, '新目录')); assert.equal(query().id, id); assert.equal(read().etag, saved.etag);
+});
+
+test('linked source version changes, source unlink and reinstallation keep the instance-owned object record', t => {
+  const parent = realpathSync(mkdtempSync(join(tmpdir(), 'ksf source object data '))), root = join(parent, 'ksf'), source = join(parent, 'methods');
+  t.after(() => rmSync(parent, { recursive: true, force: true }));
+  for (const def of Object.values(types)) for (const origin of ['system', 'user']) mkdirSync(join(root, def[origin]), { recursive: true });
+  mkdirSync(source); assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', source]).status, 0);
+  abilitySource({ root, operation: 'init', target: source, id: 'methods', name: 'Methods' });
+  const id = 'partner.test.external', folder = join(source, '能力/搭档', id); mkdirSync(folder);
+  const entry = join(folder, 'partner.md');
+  writeFileSync(entry, `---\n${YAML.stringify({ id, name: '源对象', description: '测试', status: 'active', version: '0.1.0' })}---\n# External\n`);
+  const saved = writeUserData({ root, objectId: id, ifMatch: 'missing', values: { folder: 'local-output' } });
+  const path = join(root, saved.path), bytes = readFileSync(path);
+  abilitySource({ root, operation: 'link', target: source });
+  assert.equal(objectQuery({ root, type: 'partner', operation: 'read', reference: id }).data.object.source, 'methods');
+  writeFileSync(entry, readFileSync(entry, 'utf8').replace('0.1.0', '0.2.0'));
+  assert.equal(objectQuery({ root, type: 'partner', operation: 'read', reference: id }).data.object.version, '0.2.0');
+  abilitySource({ root, operation: 'unlink', target: 'methods' }); assert.deepEqual(readFileSync(path), bytes);
+  abilitySource({ root, operation: 'link', target: source }); assert.equal(readUserData({ root, objectId: id }).etag, saved.etag);
+  assert.equal(readFileSync(entry, 'utf8').includes('local-output'), false);
+});

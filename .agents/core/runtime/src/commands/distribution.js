@@ -1,5 +1,8 @@
+import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
 import { resolve } from 'node:path';
-import { DistributionError, invalid } from '../distribution/common.js';
+import { DistributionError, invalid } from '../distribution/errors.js';
+import { readCommitText } from '../services/commit-message.js';
+import { readPRText } from '../services/pr-description.js';
 
 const specs = {
   release: {
@@ -16,19 +19,18 @@ const specs = {
     rollback: { options: ['dry-run'], usage: 'rollback [--dry-run]' },
   },
   contribute: {
-    prepare: { options: ['paths', 'all', 'title', 'body', 'dry-run'], usage: 'prepare (--paths <system-file...> | --all) [--title <title>] [--body <description>] [--dry-run]' },
+    prepare: { options: ['paths', 'all', 'title', 'body', 'body-file', 'pr-body', 'pr-body-file', 'dry-run'], usage: 'prepare (--paths <system-file...> | --all) --title <type(scope): summary> (--body <commit-body> | --body-file <file>) (--pr-body <PR-body> | --pr-body-file <file>) [--dry-run]' },
     read: { target: true, options: [], usage: 'read <contribution-id>' },
     submit: { target: true, options: ['reviewed', 'dry-run'], usage: 'submit <contribution-id> --reviewed <preview-digest> [--dry-run]' },
   },
 };
 const booleans = new Set(['json', 'help', 'allow-dirty', 'dry-run', 'release-only', 'all', 'quiet']);
-const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 export function distributionHelp(command, operation) {
   const selected = operation ? [specs[command][operation]] : Object.values(specs[command]);
   const notes = {
     release: 'Build the ksf-core system and ksf-workspace user template from Core sources.\nOutput contains ksf-workspace/, both product archives and the ksf-core release index.\nCopy the template to an instance named ksf or any user-chosen name.\nOfficial publishing rejects dirty/development packages.\nPublishing requires GitHub authorization; building and --dry-run do not.\n',
     system: 'Read, check, update and roll back copied or template-created workspaces.\nVersion checks and installation require an explicit command; startup never invokes sync.\nUpdates use explicit release baselines and never merge personal Git history.\n--source accepts HTTPS, absolute/local index files and loopback HTTP.\n--from selects a verified Core archive; original baselines are resolved online.\nUser directories and .gitignore are never update targets.\nConflicts preserve the current system. Use .agents/ksf for recovery.\n',
-    contribute: 'Select committed HEAD system changes against its original Core baseline.\nGit, a local HEAD and network access to the recorded Core are required; index and working changes are ignored.\nPersonal files, history and local commit IDs are never published.\n--paths takes root-relative literal system paths, not globs.\nPrepare warns about prior PRs for the same local commit or system content.\nIdentical content reuses its verified PR; unknown prior attempts must be reconciled.\nSubmission creates a draft Core PR; it requires GitHub authorization.\n',
+    contribute: 'Select committed HEAD system changes against its original Core baseline.\nGit, a local HEAD and network access to the recorded Core are required; index and working changes are ignored.\nPersonal files, history and local commit IDs are never published.\n--paths takes root-relative literal system paths, not globs.\nPrepare requires a reviewed conventional title and 原因／变更／验证 body (--body or --body-file).\nA separate PR description is required (--pr-body or --pr-body-file), with four Markdown sections.\nSchema-4 plans freeze the full commit message and PR body including provenance.\nSchema-1/2/3 plans remain readable and can only reconcile existing publication records.\nRetries never overwrite remote PR descriptions.\nPrepare warns about prior PRs for the same local commit or system content.\nIdentical content reuses its verified PR; unknown prior attempts must be reconciled.\nSubmission creates a draft Core PR; it requires GitHub authorization.\n',
   };
   return `KSF ${command}${operation ? ` ${operation}` : ''}\n\nUsage:\n` + selected.map(s => `  ksf ${command} ${s.usage} [--json]`).join('\n') + '\n\n' + notes[command] +
     'Paths are relative to the KSF root; -- ends option parsing.\n--dry-run previews without publishing or changing live system files.\nUse --help or -h alone at command or operation level.\n';
@@ -37,35 +39,17 @@ export function parseDistributionArgs(command, args) {
   if (!args.length || (args.length === 1 && ['--help', '-h'].includes(args[0]))) return { help: true };
   const [operation, ...rest] = args, spec = specs[command]?.[operation];
   if (!spec) invalid(`Unsupported ${command} operation.`);
-  const parsed = { operation }, seen = new Set(); let ended = false;
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    if (!ended && token === '--') { ended = true; continue; }
-    if (ended || !token.startsWith('-')) {
+  const parsed = { operation };
+  const overrides = Object.fromEntries([...booleans].map(name => [name, { kind: 'flag' }]));
+  overrides.paths = { kind: 'many', missing: '--paths requires one or more literal system paths.',
+    validate(values) { if (values.some(p => !p)) invalid('--paths requires one or more literal system paths.'); } };
+  const seen = parseOptions(rest, { result: parsed, invalid,
+    options: optionSpecs(['json', 'help', ...spec.options], overrides),
+    target(token) {
       if (parsed.target !== undefined) invalid('Only one target is allowed.');
-      parsed.target = token; continue;
-    }
-    const match = /^(?:--([a-z][a-z-]*)(?:=(.*))?|-([h]))$/s.exec(token);
-    if (!match) invalid('Unknown option.');
-    const name = match[1] ?? 'help', inline = match[2];
-    if (!['json', 'help', ...spec.options].includes(name)) invalid(`Option --${name} is not supported here.`);
-    if (seen.has(name)) invalid(`Option --${name} cannot be repeated.`);
-    seen.add(name);
-    if (booleans.has(name)) {
-      if (inline !== undefined) invalid(`Option --${name} does not accept a value.`);
-      parsed[camel(name)] = true;
-    } else if (name === 'paths') {
-      const values = [];
-      if (inline !== undefined) values.push(inline);
-      else while (i + 1 < rest.length && !rest[i + 1].startsWith('-')) values.push(rest[++i]);
-      if (!values.length || values.some(p => !p)) invalid('--paths requires one or more literal system paths.');
-      parsed.paths = values;
-    } else {
-      const value = inline ?? rest[++i];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) invalid(`Option --${name} requires a value.`);
-      parsed[camel(name)] = value;
-    }
-  }
+      parsed.target = token;
+    },
+  });
   if (parsed.help) {
     if (seen.size !== 1 || parsed.target !== undefined) invalid('Use --help without other arguments.');
     return parsed;
@@ -74,6 +58,11 @@ export function parseDistributionArgs(command, args) {
   if (parsed.source !== undefined && parsed.from !== undefined) invalid('--source and --from are mutually exclusive.');
   if (parsed.quiet && parsed.json) invalid('--quiet and --json are mutually exclusive.');
   if (command === 'contribute' && operation === 'prepare' && (!!parsed.paths === !!parsed.all)) invalid('Choose exactly one of --paths or --all.');
+  if (command === 'contribute' && operation === 'prepare') {
+    if (!parsed.title) invalid('--title requires a conventional commit title.');
+    if ((parsed.body !== undefined) === (parsed.bodyFile !== undefined)) invalid('Choose exactly one of --body or --body-file.');
+    if ((parsed.prBody !== undefined) === (parsed.prBodyFile !== undefined)) invalid('Choose exactly one of --pr-body or --pr-body-file.');
+  }
   if (command === 'contribute' && operation === 'submit' && !parsed.reviewed) invalid('--reviewed requires the digest of a prepared contribution.');
   return parsed;
 }
@@ -94,6 +83,8 @@ export async function runDistributionCommand(command, args, root) {
     } else if (command === 'contribute') {
       const contribution = await import('../distribution/contribute.js');
       const methods = { prepare: contribution.prepareContribution, read: contribution.readContribution, submit: contribution.submitContribution };
+      if (parsed.bodyFile !== undefined) parsed.body = readCommitText(root, parsed.bodyFile);
+      if (parsed.prBodyFile !== undefined) parsed.prBody = readPRText(root, parsed.prBodyFile);
       data = await methods[parsed.operation]({ root, ...parsed, id: parsed.target });
     } else if (parsed.operation === 'build') {
       const { buildRelease } = await import('../distribution/release.js');
@@ -111,7 +102,7 @@ export async function runDistributionCommand(command, args, root) {
   }
   if (quiet) return { stdout: '', stderr: response.ok ? response.data?.changed ? `KSF: updated Core to ${response.data.to ?? response.data.latest}.\n` : '' :
     `KSF: explicit sync failed (${response.errors[0].code}); inspect the installed system state.\n`, exitCode };
-  const end = args.indexOf('--'), json = (end < 0 ? args : args.slice(0, end)).includes('--json');
+  const json = hasJsonFlag(args);
   return { stdout: json ? JSON.stringify(response) + '\n' :
     [response.data ? JSON.stringify(response.data, null, 2) : '', ...response.errors.map(e => `${e.code}: ${e.message}`)].filter(Boolean).join('\n') + '\n', stderr: '', exitCode };
 }

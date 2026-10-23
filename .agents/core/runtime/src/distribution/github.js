@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { fail } from './common.js';
+import { fail } from './errors.js';
 
 export function githubToken() {
   const environment = process.env.KSF_GITHUB_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
