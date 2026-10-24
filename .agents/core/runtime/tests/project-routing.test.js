@@ -9,6 +9,7 @@ import { types } from '../src/objects/schema.js';
 import { project, updateProjectMetadata } from '../src/services/projects.js';
 import { contextCapabilities } from '../src/services/context.js';
 import { abilitySource } from '../src/services/sources.js';
+import { checkRouting } from '../src/projects/routing.js';
 import { runProjectCommand } from '../src/commands/projects.js';
 
 function fixture(t) {
@@ -26,6 +27,7 @@ function fixture(t) {
   };
   const run = (operation, name = '甲', options = {}) => project({ root, operation, name, ...options });
   const create = routing => run('write', '甲', { data: { metadata: { name: '甲', ...(routing === undefined ? {} : { routing }) }, body: '# 原项目\n' } });
+  const legacy = routing => { create(); writeFileSync(join(root, '项目/甲/project.md'), `---\n${YAML.stringify({ name: '甲', routing })}---\n# 原项目\n`); };
   const source = id => {
     const path = join(directory, id);
     const git = spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', path], { encoding: 'utf8' });
@@ -37,7 +39,7 @@ function fixture(t) {
   const knowledge = (name = '领域/README.md', body = '# PRIVATE_KNOWLEDGE_BODY\n') => {
     const path = join(root, '知识', name); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, body); return path;
   };
-  return { root, directory, add, run, create, source, link, knowledge, card: join(root, '项目/甲/project.md') };
+  return { root, directory, add, run, create, legacy, source, link, knowledge, card: join(root, '项目/甲/project.md') };
 }
 
 test('old cards and empty preferences keep their behavior without knowledge or user records', t => {
@@ -64,17 +66,16 @@ test('write validates new routing syntax before creating a project or locks', t 
   assert.equal(existsSync(join(f.root, '.agents/runtime-data')), false);
 });
 
-test('all four preference types and explicit knowledge entries resolve without body or settings loading', t => {
+test('all four preference types resolve without any knowledge tree or settings loading', t => {
   const f = fixture(t), routing = {};
   for (const [field, type] of [['workflows', 'workflow'], ['partners', 'partner'], ['competencies', 'competency'], ['data_packages', 'data-package']]) {
     const id = `${type}.test.example`; f.add('user', id); routing[field] = [{ ref: `${id}@0.1.0`, source: 'user' }];
   }
-  f.knowledge(); routing.knowledge = ['../../知识/领域/README.md']; f.create(routing);
+  f.create(routing);
   const before = readFileSync(f.card), checked = f.run('check');
   assert.deepEqual(checked.errors, []); assert.equal(checked.data.valid, true);
-  assert.equal(checked.data.routing.entries.length, 5);
+  assert.equal(checked.data.routing.entries.length, 4);
   assert.ok(checked.data.routing.entries.every(entry => entry.valid));
-  assert.equal(checked.data.routing.entries[4].path, '知识/领域/README.md');
   assert.ok(!JSON.stringify(checked).includes('PRIVATE_'));
   assert.deepEqual(readFileSync(f.card), before);
   assert.equal(existsSync(join(f.root, '.agents/user-data')), false);
@@ -83,12 +84,12 @@ test('all four preference types and explicit knowledge entries resolve without b
 
 test('availability failures retain usable entries and raw project facts in single and bulk check', t => {
   const f = fixture(t); f.add('system', 'partner.test.valid');
-  f.create({ partners: [{ ref: 'partner.test.missing@0.1.0' }, { ref: 'partner.test.valid@0.1.0' }], knowledge: ['../../知识/missing.md'] });
+  f.legacy({ partners: [{ ref: 'partner.test.missing@0.1.0' }, { ref: 'partner.test.valid@0.1.0' }], knowledge: ['../../知识/missing.md'] });
   const before = readFileSync(f.card), checked = f.run('check');
   assert.equal(checked.data.valid, false);
-  assert.deepEqual(checked.data.routing.entries.map(entry => entry.valid), [false, true, false]);
+  assert.deepEqual(checked.data.routing.entries.map(entry => entry.valid), [false, true]);
   assert.ok(checked.errors.some(error => error.code === 'OBJECT_NOT_FOUND'));
-  assert.ok(checked.errors.some(error => error.code === 'PROJECT_KNOWLEDGE_NOT_FOUND'));
+  assert.ok(checked.errors.some(error => error.code === 'PROJECT_ROUTING_KNOWLEDGE_REMOVED'));
   assert.equal(f.run('read').data.project.body, '# 原项目\n');
   assert.equal(project({ root: f.root, operation: 'list' }).data.complete, true);
   const all = project({ root: f.root, operation: 'check' });
@@ -166,25 +167,26 @@ test('ambiguous and unknown ability sources remain explicit per-entry failures',
   assert.equal(f.run('read').errors.length, 0);
 });
 
-for (const placement of ['file', 'parent', 'scope']) test(`knowledge ${placement} symlinks cannot escape the instance`, t => {
+for (const placement of ['file', 'parent', 'scope']) test(`removed knowledge ${placement} links are not resolved`, t => {
   const f = fixture(t), outside = join(f.directory, 'outside'); mkdirSync(outside); writeFileSync(join(outside, 'entry.md'), '# PRIVATE\n');
   mkdirSync(join(f.root, '知识'), { recursive: true });
   if (placement === 'scope') { rmSync(join(f.root, '知识'), { recursive: true }); symlinkSync(outside, join(f.root, '知识')); }
   else if (placement === 'parent') symlinkSync(outside, join(f.root, '知识/sub'));
   else symlinkSync(join(outside, 'entry.md'), join(f.root, '知识/entry.md'));
-  f.create({ knowledge: [placement === 'parent' ? '../../知识/sub/entry.md' : '../../知识/entry.md'] });
+  f.legacy({ knowledge: [placement === 'parent' ? '../../知识/sub/entry.md' : '../../知识/entry.md'] });
   const checked = f.run('check'); assert.equal(checked.data.valid, false);
+  assert.ok(checked.errors.some(e => e.code === 'PROJECT_ROUTING_KNOWLEDGE_REMOVED'));
   assert.ok(!JSON.stringify(checked).includes('PRIVATE'));
   assert.equal(readFileSync(join(outside, 'entry.md'), 'utf8'), '# PRIVATE\n');
 });
 
-test('non-UTF8 knowledge and vanished sources are failures rather than missing optional configuration', t => {
+test('retired knowledge is not decoded while vanished ability sources remain failures', t => {
   const f = fixture(t), source = f.source('alpha'); f.add(source, 'partner.team.p'); f.link(source);
   f.knowledge('broken.md', Buffer.from([0xff]));
-  f.create({ partners: [{ ref: 'partner.team.p@0.1.0', source: 'alpha' }], knowledge: ['../../知识/broken.md'] });
+  f.legacy({ partners: [{ ref: 'partner.team.p@0.1.0', source: 'alpha' }], knowledge: ['../../知识/broken.md'] });
   rmSync(source, { recursive: true });
   const checked = f.run('check'); assert.equal(checked.data.valid, false);
-  assert.ok(checked.errors.some(error => error.code === 'ENCODING_INVALID'));
+  assert.ok(checked.errors.some(error => error.code === 'PROJECT_ROUTING_KNOWLEDGE_REMOVED'));
   assert.ok(checked.data.routing.entries[0].errors.length);
 });
 
@@ -196,4 +198,32 @@ test('CLI exposes partial routing checks in JSON and text with compatible exit c
   assert.match(runProjectCommand(['check', '甲'], f.root).stdout, /routing\.partners\[1\]: available; system/);
   const invalid = runProjectCommand(['write', '乙', '--data', '{"metadata":{"routing":{"partners":["wrong"]}},"body":"# 内容"}', '--json'], f.root);
   assert.equal(invalid.exitCode, 2); assert.equal(JSON.parse(invalid.stdout).errors[0].code, 'PROJECT_ROUTING_INVALID');
+});
+
+
+test('removed knowledge values are never dereferenced by availability checking', t => {
+  const f = fixture(t); f.create();
+  const routing = {};
+  Object.defineProperty(routing, 'knowledge', { enumerable: true, get() { throw new Error('RETIRED_VALUE_WAS_READ'); } });
+  const checked = checkRouting({ root: f.root, name: '甲', values: { routing } });
+  assert.equal(checked.routing.valid, false);
+  assert.deepEqual(checked.routing.entries, []);
+  assert.equal(checked.errors[0].code, 'PROJECT_ROUTING_KNOWLEDGE_REMOVED');
+  assert.equal(existsSync(join(f.root, '知识')), false);
+});
+
+test('legacy fields remain readable and survive unrelated writes but must be removed for routing changes', t => {
+  const f = fixture(t); const routing = { knowledge: ['../../知识/missing.md'] }; f.legacy(routing);
+  assert.deepEqual(f.run('read').data.project.metadata.routing, routing);
+  assert.equal(project({ root: f.root, operation: 'list' }).data.complete, true);
+  f.run('write', '甲', { data: { body: '# 新正文\n', metadata: { description: '仅修改项目事实' } } });
+  updateProjectMetadata({ root: f.root, name: '甲' }, values => ({ ...values, repositories: [] }));
+  assert.deepEqual(f.run('read').data.project.metadata.routing, routing);
+  const before = readFileSync(f.card);
+  assert.throws(() => f.run('write', '甲', { data: { metadata: { routing: { ...routing, partners: [] } } } }), error =>
+    error.code === 'PROJECT_ROUTING_INVALID' && error.details.issues[0].code === 'PROJECT_ROUTING_KNOWLEDGE_REMOVED');
+  assert.deepEqual(readFileSync(f.card), before);
+  f.run('write', '甲', { data: { metadata: { routing: {} } } });
+  assert.equal(f.run('check').data.valid, true);
+  assert.equal(existsSync(join(f.root, '知识')), false);
 });

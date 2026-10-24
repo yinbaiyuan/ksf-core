@@ -36,7 +36,7 @@ export function parseOptions(args, { result, options, target, invalid, messages 
       result[key] = spec.unique ? [...new Set(values)] : values;
     } else {
       const value = inline ?? args[++i];
-      if (value === undefined || (inline === undefined && value.startsWith('-'))) {
+      if (value === undefined || (inline === undefined && value.startsWith('-') && !(value === '-' && spec.allowDash))) {
         if (spec.missing) invalid(spec.missing);
         reject('missing', name, `Option --${name} requires a value.`);
       }

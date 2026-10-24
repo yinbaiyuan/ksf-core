@@ -66,7 +66,6 @@ function rebase(root, from, to, metadata, sourceScope) {
   if (metadata.routing !== undefined) {
     validateWrite({ metadata: { routing: metadata.routing } }, { scope: sourceScope });
     fields.routing = structuredClone(metadata.routing);
-    if (fields.routing.knowledge) fields.routing.knowledge = fields.routing.knowledge.map(value => relative(to, resolve(from, value)));
   }
   return fields;
 }

@@ -1,4 +1,4 @@
-# eval：自然语言三路由评测
+# eval：自然语言项目、能力与资料采用评测
 
 ## 状态与职责
 
@@ -61,3 +61,7 @@ JSON遵循公共 `{ok,command,operation,data,errors}` 信封。run 全部通过�
 ## 实现与验证
 
 CLI适配位于runtime/src/commands/eval.js；案例、快照、执行器、证据、评分聚合及运行编排位于runtime/src/eval/。eval.test.js用假执行器离线验证协议、六例/四十例编排、会话延续、门槛、异常、证据缺口和越界；真实Codex与独立AI的结果只由各次运行报告证明。
+
+当前套件为 2.0.0，维度为 project、ability、materials、adoption、boundary。24 场景、6 例校准和核心 40 例次及 eval routing 接口保持；项目事实由项目入口提供，配套资料由能力或数据包明确指定，显式知识任务按本次范围读取。旧报告按保存版本原样读取，不重新判分；旧校准不作为新套件门槛。
+
+expected.forbiddenReads 为可选禁止读取的实例内路径列表。已观察到正文读取为硬失败；缺原件指纹、轨迹不完整或存在无法解释的读取工具时保留无法判定。程序没有匹配到路径不等于证明所有读取均合规，语义评审仍检查实际资料范围。普通 ksf test 与 eval check 不调用模型。

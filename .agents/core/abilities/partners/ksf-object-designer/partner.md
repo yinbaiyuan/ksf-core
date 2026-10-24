@@ -2,12 +2,12 @@
 id: "partner.ksf.object-designer"
 name: "ksf对象设计师"
 description: "与用户共建可复用的 KSF 对象：判断复用、完善、组合或新增的必要性，运用三项设计基本功，按需设计持久设置与必要状态，形成候选、落实已确认修改并检验可用性。适用于系统和用户能力及自身定义；不替代运行时能力路由，不自动改写未授权对象。"
-version: 0.1.4
+version: 0.1.5
 status: active
 references:
-  - competency.ksf.workflow-design@0.1.1
-  - competency.ksf.partner-design@0.1.1
-  - competency.ksf.competency-design@0.1.1
+  - competency.ksf.workflow-design@0.1.2
+  - competency.ksf.partner-design@0.1.2
+  - competency.ksf.competency-design@0.1.2
 ---
 
 # ksf对象设计师
@@ -139,9 +139,9 @@ references:
 
 | 责任 | 基本功 |
 | --- | --- |
-| 设计跨搭档分工、依赖、交接、协调、返工、整体完成条件及流程设置归属 | `competency.ksf.workflow-design@0.1.1` |
-| 设计搭档使命、职责、协作过程、责任—基本功配置及持久协作设置 | `competency.ksf.partner-design@0.1.1` |
-| 设计基本功独立结果、专业方法、判断标准、支持关系及字段消费方式 | `competency.ksf.competency-design@0.1.1` |
+| 设计跨搭档分工、依赖、交接、协调、返工、整体完成条件及流程设置归属 | `competency.ksf.workflow-design@0.1.2` |
+| 设计搭档使命、职责、协作过程、责任—基本功配置及持久协作设置 | `competency.ksf.partner-design@0.1.2` |
+| 设计基本功独立结果、专业方法、判断标准、支持关系及字段消费方式 | `competency.ksf.competency-design@0.1.2` |
 
 按上表声明引用调用 `ksf competency read <id@version> --part all --json`，采用返回的有效来源；不通过旧系统路径绕过用户副本。自身参考资料相对于实际选定的搭档目录读取，不展开 .upstream/ 快照。
 

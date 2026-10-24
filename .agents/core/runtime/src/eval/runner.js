@@ -99,7 +99,7 @@ export async function runRouting(root, profile, { invoke = invokeCodex, inspect 
       const subjectDeadline = Date.now() + suite.timeoutMs;
       for (const [turnIndex, turn] of contract.turns.entries()) {
         if (turn.inject) for (const [path, content] of Object.entries(turn.inject)) put(workspace, path, content);
-        for (const path of new Set(['.agents/core/abilities/partners/ksf-runtime/partner.md', '.agents/core/abilities/competencies/ability-route/competency.md', ...contract.expected.requiredReads, ...(contract.expected.requiredReadGroups ?? []).flat(), ...Object.values(contract.expected.presetPriority ?? {})])) {
+        for (const path of new Set(['.agents/core/abilities/partners/ksf-runtime/partner.md', '.agents/core/abilities/competencies/ability-route/competency.md', ...contract.expected.requiredReads, ...(contract.expected.requiredReadGroups ?? []).flat(), ...(contract.expected.forbiddenReads ?? []), ...Object.values(contract.expected.presetPriority ?? {})])) {
           if (regularFile(workspace, path)) {
             observation.readProofs[path] = readProof(readFileSync(join(workspace, path), 'utf8'));
           }

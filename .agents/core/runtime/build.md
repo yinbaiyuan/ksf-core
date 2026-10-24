@@ -46,7 +46,7 @@ manifest together with its matching archives and source.
 | `build.toolchain`, `generator_node`, `target` | This generator and its executing Node.js/package targets |
 
 System source hashing covers `.agents/core/` and the optional root `AGENTS.md`.
-Generated manifest/release metadata, publication temporaries and package bytes are excluded from
+Generated manifest/release metadata, publication temporaries, frontend development installations/caches/review outputs, and package bytes are excluded from
 the source walk; verified package hashes are included separately. User projects,
 knowledge and `.agents/runtime-data` are outside that system source boundary.
 
@@ -90,3 +90,17 @@ Build preparation may install the newly selected runtime before manifest
 publication. On build failure, the old manifest remains authoritative for normal
 commands and older installations remain available. Successfully publishing the
 manifest makes subsequent normal calls select the newly declared identity.
+
+## Frontend artifacts
+
+The workbench in `runtime/web` uses a separate locked npm toolchain. Developers run
+`npm ci` and `npm run build` there with the bundled Node. Its production `dist` and
+third-party notices are managed Core files. Normal Web startup needs neither npm
+nor node_modules and never builds or installs on demand.
+
+Core build verifies `dist/build.json`: a digest of frontend source/build inputs
+and package-lock.json, plus each allowlisted output SHA256. Missing, stale,
+symlinked or altered outputs fail with WEB_BUILD_INVALID before manifest publication.
+Frontend node_modules, .vite cache, coverage, test-results and .impeccable/review
+are excluded consistently from source hashing, managed paths and release walks.
+The Vite production manifest under dist/.vite remains a managed build artifact.

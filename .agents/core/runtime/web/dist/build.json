@@ -1,0 +1,10 @@
+{
+  "protocol": "ksf-web-build-v1",
+  "sourceDigest": "f555f779bb21cfab4fa87756bc9e1da90f13ce190987224bd185b4ab62262777",
+  "files": {
+    "THIRD_PARTY_NOTICES.txt": "8966c0a6650fe92b6b61abf53623bde7ac3c4db5f394ffa1e1d56f24717ca0e6",
+    "assets/index-Cqq9sb9Y.css": "6b5bf01d0be66a6b9c0bba52cd317009da42c4fd1dba1aa4bf8b4017d265ae76",
+    "assets/index-CwWeLzIs.js": "f308c238d25bc88d7225bca35f95b4c0a23a5261fede8775d03cd01b627934ee",
+    "index.html": "667eb5c4910ee0d04ceee0193a0d9f345adb55fa3ac7d8dbaf5615a7ccb2c030"
+  }
+}

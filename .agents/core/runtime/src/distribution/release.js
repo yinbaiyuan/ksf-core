@@ -15,9 +15,18 @@ import { products, artifactName, releaseIndexName, launcherFiles, launcherProtoc
 import { userDataRoot } from '../user-data/schema.js';
 import { committedSource } from './committed-source.js';
 import { gitBlobID, baselinePath } from './baseline.js';
+import { developmentPath } from './paths.js';
 
 export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '档案', '档案/个人', '档案/企业', '档案/项目', userDataRoot];
-export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', 'MEMORY.md'];
+// Explicit template allowlist: never discover instance content to build a workspace.
+export const knowledgeFrameworkFiles = [
+  '知识/rules/README.md', '知识/rules/认知.md',
+  '知识/rules/templates/cognition/cognition.md',
+  '知识/rules/templates/cognition/3认知/认知说明.md',
+  ...['1理论与模型/科学类比', '1理论与模型/提炼模型', '2事实与案例/定性定量', '2事实与案例/假设驱动']
+    .map(path => `知识/rules/templates/cognition/${path}/.gitkeep`),
+];
+export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', 'MEMORY.md', ...knowledgeFrameworkFiles];
 function revisionInfo(root, allowDirty) {
   const git = args => spawnSync('/usr/bin/git', ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
   const rev = git(['rev-parse', '--verify', 'HEAD']);
@@ -31,7 +40,7 @@ function revisionInfo(root, allowDirty) {
   return { revision: rev.stdout.trim(), dirty, builtAt: new Date(time.stdout.trim()).toISOString() };
 }
 function excluded(path) {
-  return path === '.agents/core/release.json' || /(?:^|\/)\.DS_Store$/.test(path) ||
+  return developmentPath(path) || path === '.agents/core/release.json' || /(?:^|\/)\.DS_Store$/.test(path) ||
     /^\.agents\/core\/\.manifest\.yaml\..*\.tmp$/.test(path);
 }
 export function inspectCoreArchive(bytes, { expectedVersion, expectedPlatform, expectedRepository } = {}) {
