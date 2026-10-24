@@ -62,7 +62,7 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 
 命令不自动改项目材料、成果、其他项目、外部工程或导航链接。需要同步时由 Agent 根据已授权差异处理。
 
-## 可选 routing：项目偏好与知识入口
+## 可选 routing：四类能力偏好
 
 根卡 metadata.routing 为可省略的映射，只接受下列可选列表；省略或空列表表示没有该类预设，空映射表示没有预设。routing 不是第五类能力对象，也不要求项目 ID 或版本。
 
@@ -72,19 +72,18 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 | partners | `{ref: "partner.example.editor@0.1.0"}` | 优先核对的搭档 |
 | competencies | `{ref: "competency.example.review@0.1.0"}` | 按需采用的补充方法 |
 | data_packages | `{ref: "data-package.example.materials@0.1.0"}` | 按需使用的资料包 |
-| knowledge | `"../../知识/主题/README.md"` | 优先发现的知识入口 |
 
 能力项只接受 ref 与可选 source，ref 类型匹配列表并含精确 x.y.z；固定运行入口不能作为预设。source 省略时为 effective，也可显式指定 user、system 或源 ID，不能用 all。只影响该项定位，不过滤全局候选或改变源对象同源/Core 依赖规则。重复条目保留输入顺序，Agent 不因重复而重复执行。
 
-知识项是相对根卡的普通路径，不是 Markdown 链接或 URL；用 `/`，最终位于当前实例 `知识/` 下，以 `.md` 结尾，不接受绝对路径、反斜杠或控制字符。check 核实文件及父目录均非符号链接、文件为普通 UTF-8 文本，不将正文加入输出。
+routing.knowledge 已移除，check 返回 PROJECT_ROUTING_KNOWLEDGE_REMOVED，指出 routing.knowledge 并提示显式移除。程序不访问其值或目标文件；项目事实入口放正文，配套资料由承接能力声明，不新增替代路由字段。
 
-write 校验显式提供的 routing 结构；未知字段、非映射、错误类型、非精确引用及不支持的路径返回 PROJECT_ROUTING_INVALID、退出 2，不联网或检查对象当前可用性，允许先记录尚未可用的精确引用。routing 嵌套值仍整体替换；清空用 `{}`，不能用 null。只改正文或其他元数据时保留原配置。repository 等内部元数据变换保留未改变的旧配置，不借无关操作修复坏 routing。通用 metadata/宿主编辑不自动应用此领域校验，check 和采用时仍需核实。
+write 校验显式提供的 routing 结构；未知字段、非映射、错误类型、非精确引用返回 PROJECT_ROUTING_INVALID、退出 2，不联网或检查对象当前可用性，允许先记录尚未可用的精确引用。routing 嵌套值仍整体替换；清空用 `{}`，不能用 null。只改正文或其他元数据时保留原配置。repository 等内部元数据变换保留未改变的旧配置，不借无关操作修复坏 routing。通用 metadata/宿主编辑不自动应用此领域校验，check 和采用时仍需核实。
 
-read 原样返回 routing，不展开资料或校验可用性，坏配置不阻止读取其他项目事实。check 对每项独立检查：能力项复用对象 check，返回实际来源/路径及精确依赖，归档对象即使显式指定来源也不能作为有效预设；知识项检查实际文件。某项失败保留原配置和其他有效项，不自动换版本、安装、重置、建知识导航或读取/写入对象 user-data。
+read 原样返回 routing，不展开资料或校验可用性，坏配置不阻止读取其他项目事实。check 对每项独立检查：能力项复用对象 check，返回实际来源/路径及精确依赖，归档对象即使显式指定来源也不能作为有效预设。某项失败保留原配置和其他有效项，不自动换版本、安装、重置、建知识导航或读取/写入对象 user-data。
 
-没有 routing 的旧项目响应不增加 routing 字段。配置存在时，指定及批量 check 的项目结果增加 `routing: {valid, entries}`。每项含 field（如 routing.partners[0]）、reference 和 valid；能力项另含 requestedSource、可解析时的 object 摘要及 references，知识有效项含 path；失败项含 errors，对应问题汇总到顶层 errors。未知配置字段进入汇总错误，不生成虚构条目。部分失败退出 1，仍需读取 stdout 的可用项；list 不因 routing 失效而丢失项目摘要。批量 check 有任何错误时 complete/valid 均为 false，各条目仍返回已检查结果。
+没有 routing 的旧项目响应不增加 routing 字段。配置存在时，指定及批量 check 的项目结果增加 `routing: {valid, entries}`。每项含 field（如 routing.partners[0]）、reference 和 valid；能力项另含 requestedSource、可解析时的 object 摘要及 references；失败项含 errors，对应问题汇总到顶层 errors。未知配置字段进入汇总错误，不生成虚构条目。部分失败退出 1，仍需读取 stdout 的可用项；list 不因 routing 失效而丢失项目摘要。批量 check 有任何错误时 complete/valid 均为 false，各条目仍返回已检查结果。
 
-程序只证明配置结构和本机可用性，不选择能力或核实项目事实。明确指令、有效原安排及适用预设的选择顺序由[能力路由](../../abilities/competencies/ability-route/competency.md)持有，整体调度见[三路由协作](../runtime/routing.md)。裁剪示例见[配置模板](../templates/project-routing.md)。
+程序只证明配置结构和本机可用性，不选择能力或核实项目事实。明确指令、有效原安排及适用预设的选择顺序由[能力路由](../../abilities/competencies/ability-route/competency.md)持有，整体调度见[项目与能力路由协作](../runtime/routing.md)。裁剪示例见[配置模板](../templates/project-routing.md)。
 
 ## 输出
 
@@ -172,7 +171,7 @@ archive 从 current 整体移到 archived，reason 必填且非空；restore 反
 
 预览返回 wouldChange、entries、changes、from/to 及 referenceReview，既不创建档案目录，也不写入历史、锁或日志。实际操作重核库存；目标已存在一律停止，不覆盖合并。在目标 scope 已存在且源已不存在时返回无变化，不重复追加历史。创建当前项目时发现同名档案项目也停止；archived scope 的 write 只维护已有根卡，不直接创建项目档案。
 
-repositories 与 routing.knowledge 保持指向原目标，相对路径按新根卡目录重算。相对指向项目内部的工程关联、嵌套 .git、特殊文件、未知临时资源、不支持的链接或跨文件系统移动拒绝；项目内部相对符号链接和外部绝对链接保留，不遍历链接目标。项目材料的普通文件字节保留，根卡元数据按上述规则修改。
+repositories 保持指向原目标，相对路径按新根卡目录重算。相对指向项目内部的工程关联、嵌套 .git、特殊文件、未知临时资源、不支持的链接或跨文件系统移动拒绝；项目内部相对符号链接和外部绝对链接保留，不遍历链接目标。项目材料的普通文件字节保留，根卡元数据按上述规则修改。
 
 referenceReview 给出旧新前缀及移动的 Markdown 清单，资产维护据此审阅出入链接，核对其他当前根卡、知识/档案导航、档案说明及必要引用。程序不批量改写历史 JSON、原始来源表述或全部 Markdown，不证明所有链接或业务内容正确；这部分需 Agent 在已授权范围修复并验收后才能交付。
 
@@ -185,3 +184,5 @@ recover 在项目锁内核对实际所在目录、文件库存、原始或预期
 恢复不回滚 Agent 另行完成的跨文件入口补丁，资产维护需对自己的基线逐项核实；不承诺跨文件原子事务。系统 launcher recover 只处理系统升级事务，不自动处理项目日志。旧实例不自动移动，原位 status: archived 项目仍可按 current 读取。restore 只处理从档案位置移回；旧原位项目的明确复工请求使用普通 project write 更新 status，不把 restore 的无变化回执当作已激活。
 
 常见新增错误：PROJECT_DESTINATION_EXISTS、PROJECT_ARCHIVED_EXISTS、PROJECT_TRANSITION_PENDING、PROJECT_CONFLICT、PROJECT_EMBEDDED_REPOSITORY、PROJECT_LINK_RELOCATION_UNSUPPORTED、PROJECT_CROSS_DEVICE、PROJECT_RESOURCE_BUSY、PROJECT_TRANSITION_FAILED。失败回执包含可用的 recoveryId/recoveryPath；不得从退出码推断一定没有变更。
+
+旧 routing.knowledge 在 read/list 中原样保留，正文及无关元数据维护可以保留未变旧值；新增或修改 routing 时按 PROJECT_ROUTING_INVALID 拒绝，issues 内含 PROJECT_ROUTING_KNOWLEDGE_REMOVED。归档/恢复同样先验证 routing，须先清理旧字段，失败不产生部分移动。程序不自动改写现有项目，旧字段的路径不再重算。

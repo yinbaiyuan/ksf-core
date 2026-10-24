@@ -16,7 +16,11 @@ function keys(value, allowed, field) {
   }
 }
 function settings(values) {
-  keys(values, ['updates'], 'settings');
+  keys(values, ['updates', 'routing'], 'settings');
+  if (Object.hasOwn(values, 'routing')) {
+    keys(values.routing, ['enabled'], 'settings.routing');
+    if (typeof values.routing.enabled !== 'boolean') fail('USER_DATA_INVALID', 'settings.routing.enabled must be boolean.', { field: 'routing.enabled' });
+  }
   if (Object.hasOwn(values, 'updates')) {
     keys(values.updates, ['check_interval_seconds', 'request_timeout_seconds'], 'settings.updates');
     for (const [key, value] of Object.entries(values.updates)) {

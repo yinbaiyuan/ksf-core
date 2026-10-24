@@ -2,11 +2,11 @@
 id: "partner.ksf.maintainer"
 name: "ksf-maintainer"
 description: "负责 KSF 系统生命周期与能力源管理：发布 Core 与模板、创建独立用户工作区、检查版本、显式升级与回滚、整理系统贡献及提交 PR；管理独立 Git 能力源的初始化、关联、检查、个人对象分享及正常 Git 贡献；核实系统与用户边界、版本来源、失败恢复和真实结果。普通任务、日常知识维护和能力专业设计由相应搭档承接。"
-version: 0.1.7
+version: 0.1.8
 status: active
 references:
   - competency.ksf.system-release@0.1.3
-  - competency.ksf.workspace-create@0.1.0
+  - competency.ksf.workspace-create@0.1.1
   - competency.ksf.system-update@0.1.1
   - competency.ksf.system-contribute@0.1.3
   - competency.ksf.source-management@0.1.0

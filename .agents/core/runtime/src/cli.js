@@ -20,12 +20,28 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write('  ksf source --help           Associate and share Git ability sources\n');
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
   process.stdout.write('  ksf eval --help             Explicit natural-language Agent evaluations\n');
+  process.stdout.write('  ksf web --help              Start the local Web server\n');
+  process.stdout.write('  ksf route --help            Record and query local session routing\n');
+  process.stdout.write('  ksf task --help             Archive Codex task turns and routing\n');
   process.stdout.write('  ksf launcher recover       Recover an interrupted update without Core or Node\n  ksf release --help          Build ksf-core and ksf-workspace releases\n  ksf system --help           Check, upgrade and roll back installed Core\n  ksf contribute --help       Review system changes and submit a Core PR\n');
 } else if (['release', 'system', 'contribute'].includes(command)) {
   const { runDistributionCommand } = await import('./commands/distribution.js');
   const result = await runDistributionCommand(command, options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
+  process.exitCode = result.exitCode;
+} else if (command === 'web') {
+  const { runWebCommand } = await import('./commands/web.js');
+  process.exitCode = await runWebCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+} else if (command === 'task') {
+  const { runTaskCommand } = await import('./commands/tasks.js');
+  const result = await runTaskCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
+  process.exitCode = result.exitCode;
+} else if (command === 'route') {
+  const { runRouteCommand } = await import('./commands/routes.js');
+  const result = await runRouteCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
 } else if (command === 'eval') {
   const { runEvalCommand } = await import('./commands/eval.js');

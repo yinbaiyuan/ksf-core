@@ -19,11 +19,53 @@ const temporary = t => { const root = mkdtempSync(join(tmpdir(), 'ksf-eval-unit-
 const passJudge = evidence => ({ dimensions: suite.dimensions.map(dimension => ({ dimension, verdict: 'pass', explanation: 'Synthetic test data only', evidence: evidence.map(e => e.id) })), abilityChecks: abilityChecks.map(check => ({ check, verdict: 'not_applicable', explanation: 'Synthetic check', evidence: [] })), interpretation: 'fixture', disputes: [] });
 
 test('routing suite has 24 cases, two real materials, six calibration cases and eight triple repetitions', () => {
+  assert.equal(suite.version, '2.0.0');
+  assert.deepEqual(suite.dimensions, ['project', 'ability', 'materials', 'adoption', 'boundary']);
   assert.deepEqual(validateSuite(), { valid: true, errors: [] });
   assert.equal(suite.cases.filter(c => c.material === 'instance').length, 2);
   assert.equal(selection('calibration').length, 6); assert.equal(selection('core').length, 40);
   assert.ok(selection('core').filter(c => c.critical).every(c => [1, 2, 3].includes(c.repetition)));
   assert.ok(!validateSuite({ cases: [{ ...suite.cases[0], expected: { criteria: [], requiredReads: ['../secret'] } }] }).valid);
+});
+
+test('forbidden reads fail on observed content and remain indeterminate with missing or opaque evidence', () => {
+  const path = '知识/干扰.md', text = '# 未采用\n这份候选认识不能自动用于业务。\n';
+  const contract = { expected: { allowedWrites: [], requiredReads: [], forbiddenReads: [path] } };
+  const observation = { complete: true, changes: [], readProofs: { [path]: readProof(text) }, evidence: [] };
+  const grade = x => assertCase(contract, x).find(c => c.id === `forbidden-read:${path}`).verdict;
+  assert.equal(grade({ ...observation, evidence: [{ id: 'e', type: 'command', command: `cat ${path}`, output: text, exitCode: 0 }] }), 'fail');
+  assert.equal(grade({ ...observation, evidence: [{ id: 'e', type: 'command', command: 'cat 知识/*.md', output: text, exitCode: 0 }] }), 'fail');
+  assert.equal(grade({ ...observation, complete: false }), 'indeterminate');
+  assert.equal(grade({ ...observation, readProofs: {} }), 'indeterminate');
+  assert.equal(grade({ ...observation, evidence: [{ id: 'e', type: 'command', command: 'python3 helper.py', output: '', exitCode: 0 }] }), 'indeterminate');
+  assert.equal(grade({ ...observation, evidence: [{ id: 'e', type: 'command', command: 'ls 知识', output: '干扰.md', exitCode: 0 }] }), 'pass');
+  const judged = passJudge(observation.evidence);
+  assert.equal(verdict(assertCase(contract, { ...observation, complete: false }), judged, observation.evidence), 'indeterminate');
+});
+
+test('data-package definition reads are recognized through the real CLI spelling', () => {
+  const path = '能力/数据包/data-package.demo.expression/datapackage.md';
+  const evidence = [{ id: 'e', type: 'command', command: 'ksf data-package read data-package.demo.expression --json', exitCode: 0,
+    output: JSON.stringify({ data: { object: { path, body: '# 资料包\n按需读取原文。' } } }) }];
+  assert.deepEqual(observedReads(evidence, [path])[0].evidence, ['e']);
+});
+
+test('new fixtures expose project facts through the root card and explicitly bind supporting data', t => {
+  const root = temporary(t); fictional(root, 'no-navigation');
+  const card = readFileSync(join(root, '项目/晨光方案/project.md'), 'utf8');
+  assert.doesNotMatch(card, /\n  knowledge:/);
+  assert.match(card, /\[照明事实\]\(资料\/照明约束.md\)/);
+  assert.equal(existsSync(join(root, '知识/knowledge.md')), false);
+  assert.match(readFileSync(join(root, '能力/基本功/competency.demo.edit/competency.md'), 'utf8'), /data-package.demo.expression@1.0.0/);
+  assert.match(readFileSync(join(root, '能力/数据包/data-package.demo.expression/datapackage.md'), 'utf8'), /知识\/表达\/用语约定.md/);
+  assert.ok(existsSync(join(root, '项目/晨光方案/资料/S1.md')));
+});
+
+test('saved pre-retirement evaluation reports are read without applying current dimensions or rescoring', t => {
+  const root = temporary(t), id = 'routing-20261020T000000Z-abcdef12';
+  const old = { schemaVersion: 1, runId: id, suiteVersion: '1.1.0', results: [{ verdict: 'fail', judgment: { dimensions: [{ dimension: 'knowledge', verdict: 'fail' }] } }] };
+  json(root, `.agents/runtime-data/verification/${id}/report.json`, old);
+  assert.deepEqual(readRun(root, id), old);
 });
 test('evidence distinguishes actual body reads from discovery, names and unexecuted commands', () => {
   const path = '知识/事实.md', command = { id: 'e1', type: 'command', command: `cat ${path}`, output: '原文', exitCode: 0 };
@@ -138,9 +180,9 @@ test('fictional fixtures construct valid source identity, exact missing dependen
 });
 test('new evidence case genuinely overturns a previously supported and scoped premise', t => {
   const root = temporary(t), contract = suite.cases.find(c => c.id === 'C02'); fictional(root, contract.variant);
-  const before = readFileSync(join(root, '知识/交付/照明约束.md'), 'utf8');
+  const before = readFileSync(join(root, '项目/晨光方案/资料/照明约束.md'), 'utf8');
   assert.match(before, /当前方案运行固件2.3/); assert.match(before, /已实测.*无需另配网关/);
-  const after = contract.turns[1].inject['知识/交付/网关确认.md'];
+  const after = contract.turns[1].inject['项目/晨光方案/资料/网关确认.md'];
   assert.match(after, /当前方案已升级至固件2.4/); assert.match(after, /必须配套G7网关/); assert.match(after, /亮度调节能力仍然有效/);
 });
 test('A01 competing routes have distinct necessary methods and source material', t => {
@@ -148,11 +190,11 @@ test('A01 competing routes have distinct necessary methods and source material',
   const content = p => readFileSync(join(root, p), 'utf8');
   assert.match(content('能力/搭档/partner.demo.editor/partner.md'), /competency.demo.edit@1.0.0/);
   assert.match(content('能力/基本功/competency.demo.edit/competency.md'), /客户表达约定/);
-  assert.match(content('知识/交付/客户表达约定.md'), /客厅灯/);
+  assert.match(content('项目/晨光方案/资料/客户表达约定.md'), /客厅灯/);
   assert.match(content('能力/工作流/workflow.demo.delivery/workflow.md'), /partner.demo.delivery-editor@1.0.0/);
   assert.doesNotMatch(content('能力/工作流/workflow.demo.delivery/workflow.md'), /partner.demo.editor@/);
   assert.match(content('能力/基本功/competency.demo.delivery-edit/competency.md'), /设备台账/);
-  assert.match(content('知识/交付/设备台账.md'), /L-17/);
+  assert.match(content('项目/晨光方案/资料/设备台账.md'), /L-17/);
 });
 function fixture(t) {
   const root = temporary(t), home = temporary(t);
@@ -200,7 +242,7 @@ function fakeInvocation(args) {
     const packet = JSON.parse(args.prompt.slice(args.prompt.indexOf('{"case"')));
     const judgment = passJudge(packet.observation.evidence);
     if (packet.case.id === 'J01') judgment.dimensions.find(d => d.dimension === 'ability').verdict = 'fail';
-    if (packet.case.id === 'J02') judgment.dimensions.find(d => d.dimension === 'knowledge').verdict = 'indeterminate';
+    if (packet.case.id === 'J02') judgment.dimensions.find(d => d.dimension === 'materials').verdict = 'indeterminate';
     for (const [check, value] of Object.entries({ ...(['J04', 'J05'].includes(packet.case.id) ? { preset_order: 'fail', selection: 'pass' } : {}),
       ...(packet.case.id === 'J06' ? { preset_order: 'pass', selection: 'pass' } : {}),
       ...(['J07', 'J08'].includes(packet.case.id) ? { exception_notice: packet.case.id === 'J07' ? 'fail' : 'pass' } : {}) }))
@@ -208,12 +250,12 @@ function fakeInvocation(args) {
     if (judgment.abilityChecks.some(c => c.verdict === 'fail')) judgment.dimensions.find(d => d.dimension === 'ability').verdict = 'fail';
     text = JSON.stringify(judgment);
   } else {
-    const priorityFixture = existsSync(join(args.workspace, '知识/交付/客户表达约定.md'));
-    const files = Object.keys(inventory(args.workspace)).filter(p => p.endsWith('.md') && (!priorityFixture || p !== '能力/工作流/workflow.demo.delivery/workflow.md'));
+    const priorityFixture = existsSync(join(args.workspace, '项目/晨光方案/资料/客户表达约定.md'));
+    const files = Object.keys(inventory(args.workspace)).filter(p => p.endsWith('.md') && !['知识/knowledge.md', '知识/干扰/业务建议.md'].includes(p) && (!priorityFixture || p !== '能力/工作流/workflow.demo.delivery/workflow.md'));
     tools = [{ type: 'item.completed', item: { type: 'command_execution', command: 'ksf context capabilities --json', aggregated_output: '{"data":{"complete":true}}', exit_code: 0 } },
       { type: 'item.completed', item: { type: 'command_execution', command: 'cat ' + files.join(' '),
       aggregated_output: files.map(p => readFileSync(join(args.workspace, p), 'utf8')).join('\n'), exit_code: 0 } }];
-    if (existsSync(join(args.workspace, '知识/交付/客户表达约定.md'))) tools.splice(1, 0,
+    if (existsSync(join(args.workspace, '项目/晨光方案/资料/客户表达约定.md'))) tools.splice(1, 0,
       { type: 'item.completed', item: { type: 'command_execution', command: 'cat 项目/晨光方案/project.md', aggregated_output: readFileSync(join(args.workspace, '项目/晨光方案/project.md'), 'utf8'), exit_code: 0 } },
       { type: 'item.completed', item: { type: 'command_execution', command: 'ksf project check 晨光方案 --json', aggregated_output: JSON.stringify({ command: 'project', operation: 'check', data: { path: '项目/晨光方案/project.md', routing: { entries: [{ valid: true, object: { path: '能力/搭档/partner.demo.editor/partner.md' } }] } } }), exit_code: 0 } });
   }

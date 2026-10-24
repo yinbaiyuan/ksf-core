@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { buildManifest } from '../../src/services/build-manifest.js';
 import { buildRelease, inspectCoreArchive } from '../../src/distribution/release.js';
 import { createArchive } from '../../src/distribution/archive.js';
 import { sha256, stableJSON, writeAtomic, fileMode } from '../../src/distribution/common.js';
+import { developmentPath } from '../../src/distribution/paths.js';
 
 export const repository = fileURLToPath(new URL('../../../../../', import.meta.url));
 export const contributionDescription = {
@@ -40,7 +41,7 @@ export async function distributionFixture(t, { legacyEntry = false, sourceRoot =
   // Reconstruct Core sources without inheriting the source workspace's installed identity.
   const installedMarker = join(sourceRoot, '.agents/core/release.json');
   cpSync(join(sourceRoot, '.agents/core'), join(root, '.agents/core'), { recursive: true,
-    filter: path => path !== installedMarker && !path.includes('/runtime/packages') && !path.includes('/runtime/tests') });
+    filter: path => path !== installedMarker && !developmentPath(relative(sourceRoot, path).replaceAll('\\', '/')) && !path.includes('/runtime/packages') && !path.includes('/runtime/tests') });
   for (const entry of ['ksf', 'ksf.ps1']) cpSync(join(sourceRoot, '.agents', entry), join(root, '.agents', entry));
   cpSync(join(sourceRoot, 'AGENTS.md'), join(root, 'AGENTS.md'));
   const definitionFiles = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {

@@ -1,7 +1,15 @@
-# 知识根说明模板
+# 知识导航与框架模板
 
-唯一模板源为 [knowledge.md](../../distribution/template/知识/knowledge.md)，默认生成到新实例的 `知识/knowledge.md`。根说明同时承载用户的组织维护约定和分层导航；已有实例按授权合并，保留原分区与正文，不整体覆盖。
+唯一模板源在 Core 的 distribution/template/知识/，新工作区由发行程序按显式白名单生成。生成后归用户实例维护；Core 升级和回滚不覆盖定制，也不补写缺失文件。
 
-按 [Core 设计机制](../content-design.md)从实际材料确定用途、保存单元、分类与关联、来源和修订方式。无需统一模型、对象 ID 或初始化问卷；只有目录与处理约定写在这里，具体业务知识留在唯一正文。
+| 模板 | 职责 |
+| --- | --- |
+| [knowledge.md](../../distribution/template/知识/knowledge.md) | 只概述直接下级的内容、组织方式和入口，不承载详细规则或业务正文 |
+| [rules/README.md](../../distribution/template/知识/rules/README.md) | 可编辑的默认命名、单元边界、入口、来源、引用和规则扩展约定 |
+| [rules/认知.md](../../distribution/template/知识/rules/认知.md) | 可选认知类型的三层结构、四条路径与五步职责 |
+| [cognition.md](../../distribution/template/知识/rules/templates/cognition/cognition.md) | 认知主题简短定义、三个分区导航及五步概述 |
+| [认知说明.md](../../distribution/template/知识/rules/templates/cognition/3认知/认知说明.md) | 五步详细认识骨架，未知内容保持待形成 |
 
-导航每层只概述当前和直接下级分区，链接已有入口；可用子级 knowledge.md，也可复用现有综述，不强制全库补齐，不递归枚举文件。明确文件可直接读，维护与重组前读根说明。模板不会产生额外写入、移动或 Git 授权。
+知识单元默认同级使用“单元类型-具体名称”。认知采用“认知-名称/cognition.md”；其他类型按自己的框架与实际入口，不强制认知模型、对象 ID 或类型注册表。模板的空分区通过 .gitkeep 保留，没有真实主题和默认用户记录。
+
+已有实例的采用、新建主题与链接重定位按[知识组织基本功的采用方法](../../abilities/competencies/knowledge-organize/references/core-framework.md)处理。只在用户明确采用或创建时形成必要差异，不整体覆盖实例规则。读取与组织分别处理，导航保持逐层概览，程序检查不代替内容判断。

@@ -52,7 +52,7 @@ function ksfVersion(root) {
 function view(row, part) {
   const result = { id: row.id, source: row.source, path: row.path, directory: row.directory,
     ...(row.sourceRoot ? { source_root: row.sourceRoot } : {}),
-    version: row.metadata.version, user_revision: row.metadata.user_revision ?? null, protected: Object.hasOwn(protectedPaths, row.id) };
+    version: row.metadata.version, user_revision: row.metadata.user_revision ?? null, definition_digest: row.digest, protected: Object.hasOwn(protectedPaths, row.id) };
   if (part !== 'body') result.metadata = row.metadata;
   if (part !== 'metadata') result.body = row.parsed.body.toString('utf8');
   return result;

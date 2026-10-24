@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { createArchive, readArchive } from '../src/distribution/archive.js';
 import { compareVersions, configuration, installedManifest, releaseReceipt, isBranch, sha256, stableJSON, writeAtomic } from '../src/distribution/common.js';
-import { buildRelease, inspectCoreArchive, workspaceDocuments } from '../src/distribution/release.js';
+import { buildRelease, inspectCoreArchive, workspaceDocuments, knowledgeFrameworkFiles } from '../src/distribution/release.js';
 import { inspectReleaseDirectory } from '../src/distribution/publish.js';
 import { parseDistributionArgs } from '../src/commands/distribution.js';
 import { distributionFixture, git } from './helpers/distribution-fixture.js';
@@ -52,6 +52,7 @@ test('Core accepts ordinary branch names while rejecting invalid refs', () => {
 test('complete release includes the system and empty user skeleton, excluding private data and history', async t => {
   const f = await distributionFixture(t);
   writeAtomic(join(f.root, '知识/fictional-private.md'), 'FICTIONAL_PRIVATE_SENTINEL');
+  writeAtomic(join(f.root, '知识/rules/README.md'), 'FICTIONAL_PRIVATE_SENTINEL instance rules');
   for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) writeAtomic(join(f.root, path), 'FICTIONAL_PRIVATE_SENTINEL ' + path);
   const result = await buildRelease({ root: f.root, output: join(f.directory, 'another-build') });
   const loaded = inspectReleaseDirectory(f.root, result.output);
@@ -240,6 +241,9 @@ test('verified legacy workspace layouts remain valid and generated documents mus
     workspace.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(releaseReceipt(manifest)));
     save(platform.core, core); save(platform.workspace, workspace);
   };
+  // Old releases did not contain knowledge rules or cognition template sources.
+  removeDocuments(knowledgeFrameworkFiles);
+  assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('知识/rules/README.md'), false);
   // Previous knowledge/archive layout, before the three collaboration templates.
   removeDocuments(['USER.md', 'BOT.md', 'MEMORY.md']);
   assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('档案/archive.md'), true);
