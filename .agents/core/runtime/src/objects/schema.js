@@ -11,7 +11,6 @@ export const protectedPaths = {
   'partner.ksf.runtime': '.agents/core/abilities/partners/ksf-runtime/partner.md',
   'competency.ksf.ability-route': '.agents/core/abilities/competencies/ability-route/competency.md',
   'competency.ksf.project-route': '.agents/core/abilities/competencies/project-route/competency.md',
-  'competency.ksf.knowledge-route': '.agents/core/abilities/competencies/knowledge-route/competency.md',
   'competency.ksf.asset-maintenance': '.agents/core/abilities/competencies/asset-maintenance/competency.md',
 };
 export const versionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;

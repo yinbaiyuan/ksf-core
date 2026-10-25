@@ -7,6 +7,8 @@ import {
 } from 'node:fs';
 import { join, relative } from 'node:path';
 import { products } from '../distribution/products.js';
+import { developmentPath } from '../distribution/paths.js';
+import { verifyWebBuild } from '../web/assets.js';
 
 const digest = data => createHash('sha256').update(data).digest('hex');
 const exactVersion = /^\d+\.\d+\.\d+$/;
@@ -97,7 +99,7 @@ function sourceDigest(root, packages) {
   const files = [];
   function walk(path) {
     const rel = relative(root, path);
-    if (rel === '.agents/core/manifest.yaml' || rel === '.agents/core/release.json' || rel === '.agents/core/runtime/packages' || /^\.agents\/core\/\.manifest\.yaml\./.test(rel)) return;
+    if (developmentPath(rel) || rel === '.agents/core/manifest.yaml' || rel === '.agents/core/release.json' || rel === '.agents/core/runtime/packages' || /^\.agents\/core\/\.manifest\.yaml\./.test(rel)) return;
     const stat = lstatSync(path);
     if (stat.isSymbolicLink()) fail('BUILD_SOURCE_INVALID', `System source must not be a symlink: ${rel}`);
     if (stat.isDirectory()) for (const name of readdirSync(path).sort()) walk(join(path, name));
@@ -122,6 +124,7 @@ function yaml(value, depth = 0) {
 
 export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
   const root = realpathSync(directory);
+  verifyWebBuild(join(root, '.agents/core/runtime/web'), { optional: true });
   const { config, bytes } = readConfig(root);
   const packages = {};
   const fingerprints = new Map();

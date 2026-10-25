@@ -16,6 +16,9 @@
 | `projects/write.lock` | 项目服务创建与释放 | 协调项目修改；遗留锁需核对进程和未完成操作 |
 | `repositories/write.lock` | repository create 创建与释放 | 协调本机工程目录创建；link/unlink 使用项目写锁；遗留锁先核对持有者和实际工程状态 |
 | `user-data/<命名空间>.lock` | user-data 写服务创建与释放 | 仅本机写锁；不迁入可移植数据目录，遗留锁需核对后处理 |
+| `routing/v1/identity.key` | route 首次有效写入生成，宿主身份查询使用 | 本地 HMAC 密钥；不保存宿主原始会话 ID，不能与现有记录分离删除或更换 |
+| `routing/v1/<sessionKey>.json` | Agent 通过 route start/write 上报，CLI 与 Web 查询 | 当前快照、最近 50 次变化及截断计数；去重凭据保留，达到容量后拒绝新增，不自动迁移旧版数据 |
+| `routing/v1/<sessionKey>.lock`、`*.tmp` | route 写服务创建 | 同会话互斥、同目录原子发布；正常结束清理，异常遗留先核对持有者和完整记录 |
 | `system/check.json` | 显式 system sync 记录并读取 | 保存检查尝试及结果；清除会丢失间隔依据，下一次显式 sync 可能立即检查和更新 |
 | `system/check-corrupt-<ID>.json` | sync 发现无效检查 JSON 后保留 | 排查缓存损坏时使用；确认不再需要该证据后可人工归档或清理 |
 | `system/prepare-<ID>/` | 系统安装事务生产端 | 事务公布前的元数据准备；异常遗留应核对 owner 和相邻事务，不能当成已提交事务执行 |
@@ -49,3 +52,9 @@ metadata 为保证同一文件系统发布，在目标文件旁使用 `.ksf-meta
 运行时：[bootstrap.sh](../../runtime/bootstrap.sh)、[bootstrap.test.js](../../runtime/tests/bootstrap.test.js)。文件与写锁：[metadata/files.js](../../runtime/src/metadata/files.js)、[objects/storage.js](../../runtime/src/objects/storage.js)、[projects.js](../../runtime/src/services/projects.js)、[user-data/storage.js](../../runtime/src/user-data/storage.js)，相应验证见 [metadata.test.js](../../runtime/tests/metadata.test.js)、[objects.test.js](../../runtime/tests/objects.test.js)和 [projects.test.js](../../runtime/tests/projects.test.js)。
 
 事务与记录：[system.js](../../runtime/src/distribution/system.js)、[contribute.js](../../runtime/src/distribution/contribute.js)、[release.js](../../runtime/src/distribution/release.js)。相关验证：[launcher.test.js](../../runtime/tests/launcher.test.js)、[system-update.test.js](../../runtime/tests/system-update.test.js)、[contribute.test.js](../../runtime/tests/contribute.test.js)、[user-data.test.js](../../runtime/tests/user-data.test.js)。恢复布局的精确约定由[启动入口契约](../../runtime/launcher.md)持有。
+
+## 聊天任务采集
+
+`task-capture/config.json` 保存未来轮次基线与本机开关；sources/、locks/、last-sync.json 保存可重建游标、任务锁和诊断。重建时保留 config 与 routing/v1/identity.key。长期原件位于 `档案/对话/Codex/`，不受路由快照截断影响。见 [task](../cli/task.md)。
+
+`task-targets/registry.lock` 仅在采集或旧路由写入接受待创建目标、显式绑定时协调跨聊天并发，不是长期目标数据库。稳定身份及绑定事实保存在允许采集的轮次原件或旧路由记录的 `targetFacts` 中；查询从这些事实和后续明确允许的路由证据重建目标投影。读取不创建运行索引，身份冲突或损坏显示读取缺口；未知锁持有者不自动清除。

@@ -43,14 +43,13 @@ draft 保存后立即影响默认读取和依赖解析；首次派生默认就�
 | `partner.ksf.runtime` | `.agents/core/abilities/partners/ksf-runtime/partner.md` |
 | `competency.ksf.ability-route` | `.agents/core/abilities/competencies/ability-route/competency.md` |
 | `competency.ksf.project-route` | `.agents/core/abilities/competencies/project-route/competency.md` |
-| `competency.ksf.knowledge-route` | `.agents/core/abilities/competencies/knowledge-route/competency.md` |
 | `competency.ksf.asset-maintenance` | `.agents/core/abilities/competencies/asset-maintenance/competency.md` |
 
 list 是对象管理清单，包含固定定义并标注 protected；路由从中排除固定入口链。list --source all 展示全部来源实际有效定义和 effective 标记；无效项通过 errors 报告，不能冒充可调用对象。部分失败仍返回可核实项，complete=false、ok=false、退出 1；不完整集合不能证明“全库无匹配”。
 
 ## 读取与检查
 
-read 返回入口选定部分：metadata 只包含 metadata 映射；body 只包含正文；all 两者都有。三种模式都保留 id/source/path/directory/version/user_revision/protected 定位信息，未选择字段不输出。不展开任何参考资料、模板、基线或程序；read 返回 references 的解析定位，不加载引用正文。
+read 返回入口选定部分：metadata 只包含 metadata 映射；body 只包含正文；all 两者都有。三种模式都保留 id/source/path/directory/version/user_revision/protected 定位信息及 definition_digest（入口文件原始字节的 SHA-256），未选择字段不输出。摘要供[路由上报](route.md)核对，不代表已读全部资源或已采用方法。不展开任何参考资料、模板、基线或程序；read 返回 references 的解析定位，不加载引用正文。
 
 check 检查公共字段、类型与存储位置、同区重复身份、声明精确依赖的本地解析，以及所选用户派生基线的完整性。返回 valid、checkedPaths 与 references。检查不评价专业质量、不自动修复，也不证明基本功中的操作或支持程序已被执行。
 

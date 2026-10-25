@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { buildManifest } from '../src/services/build-manifest.js';
+import { developmentPath } from '../src/distribution/paths.js';
 
 const repo = fileURLToPath(new URL('../../../../', import.meta.url));
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -149,7 +150,7 @@ test('real ksf build recreates a missing or malformed manifest without global No
   mkdirSync(join(root, '.agents'), { recursive: true });
   cpSync(join(repo, '.agents/ksf'), join(root, '.agents/ksf'));
   cpSync(join(repo, '.agents/core/runtime'), join(root, '.agents/core/runtime'), {
-    recursive: true, filter: path => !path.includes('/packages') && !path.includes('/tests'),
+    recursive: true, filter: path => !path.includes('/packages') && !path.includes('/tests') && !developmentPath(path.slice(repo.length).replaceAll('\\', '/')),
   });
   cpSync(join(repo, '.agents/core/build.json'), join(root, '.agents/core/build.json'));
   const config = JSON.parse(readFileSync(join(root, '.agents/core/build.json'), 'utf8'));
@@ -184,4 +185,13 @@ test('real ksf build recreates a missing or malformed manifest without global No
   assert.equal(failed.stdout, '');
   assert.deepEqual(readFileSync(output), before);
   assert.ok(generated.length > 0);
+});
+
+test('frontend dependency installations and caches do not affect the managed Core source hash', async t => {
+  const f = fixture(t), first = (await buildManifest(f.root)).manifest.build.source_sha256;
+  for (const name of ['node_modules', '.vite', 'coverage', 'test-results', '.impeccable/review']) {
+    const path = join(f.root, '.agents/core/runtime/web', name); mkdirSync(path, { recursive: true }); writeFileSync(join(path, 'cache.js'), 'local development data');
+  }
+  symlinkSync('/etc/passwd', join(f.root, '.agents/core/runtime/web/node_modules/ignored-link'));
+  assert.equal((await buildManifest(f.root)).manifest.build.source_sha256, first);
 });

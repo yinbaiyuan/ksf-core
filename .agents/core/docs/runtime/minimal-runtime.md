@@ -1,6 +1,6 @@
 # 最小运行闭环
 
-本版让当前 Agent 从 KSF 根入口完成必要的项目筛选、知识读取、任务推进和已授权资产维护。方法定义已有，实际处理仍由宿主 Agent 执行，不能把 CLI 返回成功当作任务已完成。
+本版让当前 Agent 从 KSF 根入口完成必要的项目事实准备、能力约定的资料读取、任务推进和已授权资产维护。方法定义已有，实际处理仍由宿主 Agent 执行，不能把 CLI 返回成功当作任务已完成。
 
 ## 入口与责任
 
@@ -10,14 +10,16 @@
 | --- | --- |
 | 发现并匹配适用的工作流、搭档，形成能力承接安排 | [能力路由](../../abilities/competencies/ability-route/competency.md) |
 | 项目归属、必要项目事实、工程关联 | [project-route](../../abilities/competencies/project-route/competency.md) |
-| 必要知识、来源范围、时效与冲突 | [knowledge-route](../../abilities/competencies/knowledge-route/competency.md) |
+| 按实例及单元规则记录、归位、修订与整理知识 | [knowledge-organize](../../abilities/competencies/knowledge-organize/competency.md) |
 | 保存价值、唯一落点、授权、写入与验证回退 | [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md) |
 
-入口先按 ksf-runtime 的启动约定完整读取 USER.md、BOT.md、MEMORY.md，再由 runtime 识别本轮任务关系；理解目标需要项目事实时先补事实，再完成能力选择。按明确要求、有效原安排、适用项目预设、全局工作流/搭档及通用 Agent 的选择规则推进，具体优先关系由能力路由持有。完整运行、返回、组合缺口和恢复见[三路由协作](routing.md)。背景知识与维护均按需发生，空库和简单任务不强制经过全部基本功。对象的专业设计仍由[对象设计师](../../abilities/partners/ksf-object-designer/partner.md)及其三项设计基本功承接。
+入口先按 ksf-runtime 的启动约定完整读取 USER.md、BOT.md、MEMORY.md，再由 runtime 识别本轮任务关系；理解目标需要项目事实时先补事实，再完成能力选择。按明确要求、有效原安排、适用项目预设、全局工作流/搭档及通用 Agent 的选择规则推进，具体优先关系由能力路由持有。完整运行、返回、组合缺口和恢复见[项目与能力路由协作](routing.md)。背景知识与维护均按需发生，空库和简单任务不强制经过全部基本功。对象的专业设计仍由[对象设计师](../../abilities/partners/ksf-object-designer/partner.md)及其三项设计基本功承接。
 
 用户明确要求项目创建、接入或补全时，runtime 按需采用普通系统基本功[project-intake](../../abilities/competencies/project-intake/competency.md)，由项目路由准备归属、基本功形成专业安排、资产维护落实已授权保存。它不是新增路由或固定保护对象，不在启动时全量读取；资料默认复制并保留原件，工程原位关联，增量冲突保留现状并报告。
 
-四项运行基本功使用固定系统定义和 active，精确版本由入口搭档 references 声明，含义是参与使用；质量与验证范围另外记录。保护身份、路径与用户接管规则只由[对象元数据规范](../对象元数据规范.md)及程序实现持有，不在这里另定。
+用户明确要求知识记录、归位建议、补充、修订或结构整理时，runtime 按需采用普通系统基本功 knowledge-organize，读取本实例根说明及相关单元规则，形成安排后由资产维护落实。人主导内容、采纳与修订，归纳提炼按需使用适用能力；只建议零写入，明确记录和修订直接在授权范围执行。Core 提供可选认知组织方案及随包规则模板，明确采用时核对实例差异并重算链接；不在启动时全量读取，不强制框架、入口名称或认知采纳；只读路径检查不替代语义验收。
+
+固定运行基本功使用指定系统定义和 active，普通的 project-intake、knowledge-organize 沿用有效来源与用户派生。精确版本由入口搭档 references 声明，含义是参与使用；质量与验证范围另外记录。保护身份、路径与用户接管规则只由[对象元数据规范](../对象元数据规范.md)及程序实现持有，不在这里另定。
 
 ## 内容与程序边界
 
@@ -30,7 +32,7 @@
 - 新建实际工程默认使用用户根的 `repositories/<工程名>/`，父 KSF Git 忽略容器，子工程独立 Git 管理；已有工程原位关联。project-route 判断项目与工作区安排，asset-maintenance 使用 [repository CLI](../cli/repository.md) 完成创建、关联、解除关联与核实。根卡可选 repositories 路径列表保存多对多关系；仅建根卡不强制建立工程，项目归档或删除不触碰工程。
 - 用户目录可为空。首次需要项目或知识时按明确任务创建或读取，不从另一知识库补齐内容或加载其运行规则。
 
-当前已有项目基础命令；没有专用知识管理命令、持久化路由接口、全库语义索引或完整宿主事件记录。运行诊断及专项链路审计不在本轮；一般异常由入口搭档处理。外部任务上报暂缓。版本生命周期由 [ksf-maintainer](../../abilities/partners/ksf-maintainer/partner.md) 及 system-release、workspace-create、system-update、system-contribute 四项基本功承担；启动和普通 CLI 不自动检查或安装更新。当前系统的明确开发修改仍按工程规则测试、构建和验证。
+当前已有项目基础命令和本地路由记录/查询接口；Codex 已有逐轮可见对话与路由归档（见 [task](../cli/task.md)）；没有专用知识管理命令、全库语义索引或完整工具事件记录。运行诊断及专项链路审计不在本轮；一般异常由入口搭档处理。KSFAssistant 的路由适配暂缓；当前 Agent 的上报按[路由记录约定](route-reporting.md)执行。版本生命周期由 [ksf-maintainer](../../abilities/partners/ksf-maintainer/partner.md) 及 system-release、workspace-create、system-update、system-contribute 四项基本功承担；启动和普通 CLI 不自动检查或安装更新。当前系统的明确开发修改仍按工程规则测试、构建和验证。
 
 ## 旧规则的必要性筛选
 
@@ -57,3 +59,5 @@
 既往各轮实际结果和限制见带日期的[历史验证记录](minimal-runtime-validation.md)，当前轮次由实际项目的验收记录和任务检查点持有，不用历史计数代替本轮执行。测试材料放临时目录或本机运行数据，正式项目、知识、能力、收件箱、档案及目标附属原件目录不加入演示内容。修改不自动获得 Git 暂存、提交或发布授权。
 
 持续任务与自然语言行为按[任务回归案例](task-regression.md)重复核对，分别记录程序断言、当前 Agent 的实际操作、真实用户任务以及独立新会话结果。只有预期的案例保持待执行，不计入通过数。
+
+常规业务的资料按[公共资料读取约定](materials.md)由承接能力采用，不自主检索知识目录补方法。显式知识查阅、讨论、整理和能力设计可以在本次范围读取原文；知识组织与认知框架保留。旧 routing.knowledge 已移除，迁移约定见[运行协作](routing.md#独立知识路由退役与旧配置)。

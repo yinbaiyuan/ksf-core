@@ -35,7 +35,7 @@
 
 ## settings 如何生效
 
-settings 当前保存更新检查间隔和请求超时。数据文件只持有用户覆盖；系统默认值仍由 [distribution.json](../../distribution.json)持有。
+settings 保存更新检查间隔、请求超时与 routing.enabled。更新配置只持有用户覆盖，默认值由 [distribution.json](../../distribution.json)持有；路由上报默认开启，route 服务直接读取 routing.enabled，关闭不影响历史查询。实际路由运行数据留在 runtime-data/routing/v1，不放进可移植设置。
 
 system read/check/update/sync 在需要配置时调用 `configuration(root, { user: true })`，有效配置为系统默认值加 settings.updates 覆盖。检查间隔供显式 system sync 判断是否到期，请求超时供检查和下载使用。check/update 不受 sync 的间隔缓存限制。开发包的 sync 会直接跳过；rollback 不依赖这份用户配置。
 
