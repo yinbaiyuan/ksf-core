@@ -21,8 +21,10 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
   process.stdout.write('  ksf eval --help             Explicit natural-language Agent evaluations\n');
   process.stdout.write('  ksf web --help              Start the local Web server\n');
+  process.stdout.write('  ksf assistant --help       Read desktop workbench projections\n');
   process.stdout.write('  ksf route --help            Record and query local session routing\n');
   process.stdout.write('  ksf task --help             Archive Codex task turns and routing\n');
+  process.stdout.write('  ksf chat --help             Manage current chat turns and dynamic variables\n');
   process.stdout.write('  ksf launcher recover       Recover an interrupted update without Core or Node\n  ksf release --help          Build ksf-core and ksf-workspace releases\n  ksf system --help           Check, upgrade and roll back installed Core\n  ksf contribute --help       Review system changes and submit a Core PR\n');
 } else if (['release', 'system', 'contribute'].includes(command)) {
   const { runDistributionCommand } = await import('./commands/distribution.js');
@@ -33,6 +35,14 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
 } else if (command === 'web') {
   const { runWebCommand } = await import('./commands/web.js');
   process.exitCode = await runWebCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+} else if (command === 'assistant') {
+  const { runAssistantCommand } = await import('./commands/assistant.js');
+  const result = await runAssistantCommand(options, runtimeInfo().ksfRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
+} else if (command === 'chat') {
+  const { runChatCommand } = await import('./commands/chat.js');
+  const result = await runChatCommand(options, runtimeInfo().ksfRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
 } else if (command === 'task') {
   const { runTaskCommand } = await import('./commands/tasks.js');
   const result = await runTaskCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));

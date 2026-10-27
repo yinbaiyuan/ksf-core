@@ -13,6 +13,7 @@
 | web | 随包 Node 启动本地路由工作台及只读接口 | [web](web.md) |
 | route | Agent 会话路由记录、版本检查与查询 | [route](route.md) |
 | task | Codex 聊天任务逐轮原文、路由归档、Hooks 与补采 | [task](task.md) |
+| chat | 当前聊天轮次、能力参与计数、动态变量与有界自动上下文 | [chat](chat.md) |
 | runtime | 运行时完整校验 | [runtime](runtime.md) |
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
@@ -50,3 +51,5 @@ CLI 适配、对象服务、目录/契约/解析/发布模块分开。对象层�
 Core 开发仓库与发行工作区在 macOS 调用 `.agents/ksf`，Windows 对应 `.agents/ksf.ps1`（目前仅入口恢复与转交契约）；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复已发起的中断事务；启动和普通命令不检查或安装新版本，维护命令只显式调用，详见 system。
 
 共同启动可能准备 `.agents/runtime-data/runtime/`，因此命令自身只读或预览不代表整个启动过程零写入。新增或变更接口时同步对应文档、公共规范、索引和能力说明，并运行相应回归、构建及真实入口验证。通过检查不代表获准提交或发布 Git。
+
+Assistant 的同源桌面读取与独立补采接口见 [assistant](assistant.md)。

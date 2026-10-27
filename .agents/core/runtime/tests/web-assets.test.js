@@ -7,7 +7,10 @@ import { createHash } from 'node:crypto';
 import { webSourceDigest, verifyWebBuild } from '../src/web/assets.js';
 import { developmentPath, managedPath } from '../src/distribution/paths.js';
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'ksf-web-assets-')); t.after(() => rmSync(root, { recursive: true, force: true }));
+  const workspace = mkdtempSync(join(tmpdir(), 'ksf-web-assets-')); t.after(() => rmSync(workspace, { recursive: true, force: true }));
+  const root = join(workspace, 'web');
+  mkdirSync(join(workspace, 'src/routing'), { recursive: true });
+  for (const name of ['route-evolution.js', 'view-targets.js']) writeFileSync(join(workspace, 'src/routing', name), 'export {};');
   for (const d of ['src', 'scripts', 'dist/assets']) mkdirSync(join(root, d), { recursive: true });
   for (const name of ['package.json', 'package-lock.json', 'tsconfig.json', 'vite.config.ts', 'index.html']) writeFileSync(join(root, name), '{}');
   const files = { 'index.html': '<html></html>', 'THIRD_PARTY_NOTICES.txt': 'notice', 'assets/index-a.js': 'console.log("bundled")' };
@@ -23,6 +26,9 @@ test('bundled assets verify without node_modules and reject stale source, bad ha
   writeFileSync(join(f.root, 'src/main.tsx'), 'source changed');
   assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
   f.manifest.sourceDigest = webSourceDigest(f.root); f.publish();
+  writeFileSync(join(f.root, '../src/routing/route-evolution.js'), 'export const changed = true;');
+  assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
+  f.manifest.sourceDigest = webSourceDigest(f.root); f.publish();
   writeFileSync(join(f.root, 'dist/assets/index-a.js'), 'tampered');
   assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
   f.manifest.files['../../USER.md'] = 'a'.repeat(64); f.publish();
@@ -33,6 +39,16 @@ test('bundled paths reject symlinks and unsupported metadata', t => {
   rmSync(join(f.root, 'dist/assets'), { recursive: true }); symlinkSync(tmpdir(), join(f.root, 'dist/assets'));
   assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
   f.manifest.protocol = 'unknown'; f.publish();
+  assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
+});
+test('bundled wallpaper is served only when its exact bytes are in the verified manifest', t => {
+  const f = fixture(t), name = 'assets/workbench-a.jpg', bytes = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
+  writeFileSync(join(f.root, 'dist', name), bytes);
+  assert.equal(verifyWebBuild(f.root).has(`/${name}`), false);
+  f.manifest.files[name] = createHash('sha256').update(bytes).digest('hex'); f.publish();
+  const asset = verifyWebBuild(f.root).get(`/${name}`);
+  assert.equal(asset.type, 'image/jpeg'); assert.deepEqual(asset.bytes, bytes);
+  writeFileSync(join(f.root, 'dist', name), Buffer.from('changed'));
   assert.throws(() => verifyWebBuild(f.root), { code: 'WEB_BUILD_INVALID' });
 });
 test('Core build refuses missing frontend inputs instead of treating a damaged frontend as absent', t => {

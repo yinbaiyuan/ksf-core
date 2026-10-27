@@ -1,9 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultTurn, routeChanges, safeLink, timeline } from '../src/model.ts';
+import { date, defaultTurn, routeChanges, safeLink, timeline } from '../src/model.ts';
 import type { Ability, Route, Task } from '../src/types.ts';
 const ability: Ability = { id: 'partner.example.method', ref: 'partner.example.method@1.0.0', name: '实施搭档', version: '1.0.0', source: 'user', path: '能力/搭档/实施/partner.md', definitionDigest: 'a'.repeat(64), stage: 'selected', fixed: false };
 const route: Route = { summary: '真实任务', status: 'working', project: { state: 'none' }, references: [], abilities: [ability] };
+test('timestamps retain local formatting, full precision and invalid fallbacks when reused across records', () => {
+  for (const full of [false, true]) {
+    const expected = new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', ...(full ? { year: 'numeric', second: '2-digit' } : {}), hour12: false });
+    for (const value of ['2026-10-25T18:21:32+08:00', '2026-10-24T23:59:01Z', '2026-10-25T18:22:45+08:00']) assert.equal(date(value, full), expected.format(new Date(value)));
+  }
+  for (const value of [undefined, null, '', 'invalid']) assert.equal(date(value), '暂无上报');
+});
 test('default is explicitly the last reported native turn, never an inferred latest-turn route', () => {
   const task = { lastTurn: { turnId: 'new' }, latestReported: { turnId: 'reported' } } as Task;
   assert.equal(defaultTurn(task), 'reported');

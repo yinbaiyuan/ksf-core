@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { eventTime, routeEvolution, type EvolutionNode, type RouteChange } from '../route-evolution';
 import { ownershipOf, relatedOf, targetIdentity, targetKey, targetTypeNames } from '../targets';
 export type Detail = { kind: 'target'; target: Target; label: string; reason: string; at?: string } | { kind: 'ability'; ability: Ability; reason: string; at?: string } | { kind: 'project'; project: Project; label: string; reason: string; at?: string } | { kind: 'event'; event: RouteEvent; changes: string[] } | { kind: 'arrangement'; event: RouteEvent } | { kind: 'reports'; events: RouteEvent[] };
-export function markOrigin(element: HTMLElement) { document.querySelector('[data-detail-origin]')?.removeAttribute('data-detail-origin'); element.setAttribute('data-detail-origin', 'true'); }
+export function markOrigin(element: HTMLElement) { element.closest('[data-window-id]')?.querySelector('[data-detail-origin]')?.removeAttribute('data-detail-origin'); element.setAttribute('data-detail-origin', 'true'); }
 const targetIcon = (target: Target) => ({ project: BriefcaseBusiness, knowledge: BookOpen, ability: Compass, archive: Archive })[target.kind];
 const targetKinds = ['project', 'knowledge', 'ability', 'archive'] as const;
 const relatedLabel = { project: '关联项目', knowledge: '关联知识', ability: '关联能力', archive: '关联档案' };
@@ -31,8 +31,8 @@ export function RouteOverview({ route, reason, at, onDetail }: { route: Route; r
       <Icon size={18} /><span className="row-copy"><strong>{target.name}</strong><span>{label}{target.kind === 'project' && target.scope === 'archived' ? ' · 已归档' : ''}</span><Freshness item={target} /></span><ArrowUpRight size={14} className="row-chevron" />
     </button>;
   }
-  return <section className="route-section" aria-labelledby="route-heading">
-    <div className="section-heading"><div><h2 id="route-heading">路由总览</h2><p>查看本轮主归属、关联对象与能力安排</p></div><label className="stage-toggle"><input type="checkbox" checked={allStages} onChange={e => setAllStages(e.target.checked)} />全部阶段</label></div>
+  return <section className="route-section" aria-label="路由总览">
+    <div className="section-heading"><div><h2 >路由总览</h2><p>查看本轮主归属、关联对象与能力安排</p></div><label className="stage-toggle"><input type="checkbox" checked={allStages} onChange={e => setAllStages(e.target.checked)} />全部阶段</label></div>
     <div className="route-map">
       <div className="map-group project-group"><h3><Layers3 size={14} />归属与关联</h3>{ownership.target ? targetButton(ownership.target, '主归属') : <div className="project-node empty-project"><Layers3 size={18} /><span><strong>{projectName(route)}</strong><small>{ownership.state === 'none' ? '本轮明确无归属' : '等待 Agent 明确归属'}</small></span></div>}
         {targetKinds.map(kind => { const items = related.filter(t => t.kind === kind); return items.length ? <div className="reference-projects" key={kind}><div className="group-label">{relatedLabel[kind]}</div>{items.map(t => targetButton(t, '关联'))}</div> : null; })}

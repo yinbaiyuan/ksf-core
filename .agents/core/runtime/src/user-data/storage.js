@@ -62,7 +62,9 @@ export function unknownEntries(root) {
   if (!existsSync(path)) return [];
   if (!lstatSync(path).isDirectory()) fail('USER_DATA_PATH_INVALID', 'user-data must be an ordinary directory.');
   objectEntries(root); // Validate the reserved directory, without reading its records.
-  return readdirSync(path).filter(name => name !== '.gitkeep' && name !== 'abilities' && !Object.keys(namespaces).some(namespace => name === `${namespace}.json`));
+  const chats = safePath(root, `${userDataRoot}/chats`);
+  if (existsSync(chats) && !lstatSync(chats).isDirectory()) fail('USER_DATA_PATH_INVALID', 'chats must be an ordinary directory.');
+  return readdirSync(path).filter(name => name !== '.gitkeep' && name !== 'abilities' && name !== 'chats' && !Object.keys(namespaces).some(namespace => name === `${namespace}.json`));
 }
 export function withLock(root, namespace, action, objectId) {
   const store = recordDefinition(namespace, objectId), details = store.identity;

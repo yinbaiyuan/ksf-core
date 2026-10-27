@@ -2,6 +2,8 @@
 
 一个 Codex 聊天对应一个任务；每轮保存用户原话、Agent 可见过程说明、最终答复及明确上报的路由。只使用随包 Node 标准库；不修改 Codex 原件，不保存系统指令、隐藏推理或完整工具日志，不修改 KSFAssistant。
 
+当前聊天的运行计数和动态变量由独立 [chat](chat.md) 管理，可复用本命令安装的 Hook 分发；chat hooks 不开启正文采集。启用后 UserPromptSubmit 自动带入公共变量和接续能力的有界状态快照，注入不登记能力采用。task declare 保持只读，归档 turnNumber 仍是本档案内的序号，与 chat 接入后的原生计数分别表达。
+
 ## 接入和查询
 
 ```sh

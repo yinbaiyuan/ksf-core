@@ -1,46 +1,35 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createRemoteCache } from './remote-cache';
+import { useWindowContext } from './window-context';
+export const remoteCache = createRemoteCache();
 export function useRemote<T>(path: string | null, pages = 1, collection?: 'records' | 'turns') {
-  const [state, setState] = useState<{ key: string | null; data: T | null; error: string | null; loading: boolean }>({ key: path, data: null, error: null, loading: !!path });
-  const refreshRef = useRef<() => void>(() => {});
+  const { enabled } = useWindowContext();
+  const [, render] = useState(0);
+  const urls = useMemo(() => path ? Array.from({ length: collection ? pages : 1 }, (_, i) => {
+    const url = new URL(path, location.origin);
+    if (collection) { url.searchParams.set('offset', String(i * 30)); url.searchParams.set('limit', '30'); }
+    url.searchParams.sort(); return url.toString();
+  }) : [], [path, pages, collection]);
+  const key = urls.join('\n'), refreshRef = useRef<() => void>(() => {});
   useEffect(() => {
-    let alive = true, busy = false;
-    const controller = new AbortController();
-    setState(old => old.key === path ? old : { key: path, data: null, error: null, loading: !!path });
-    async function update() {
-      if (!path || busy || document.hidden) return;
-      busy = true;
-      try {
-        const bodies = await Promise.all(Array.from({ length: collection ? pages : 1 }, async (_, index) => {
-          const url = new URL(path, location.origin);
-          if (collection) { url.searchParams.set('offset', String(index * 30)); url.searchParams.set('limit', '30'); }
-          const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-          const body = await response.json();
-          if (!response.ok || !body.data) throw new Error(body.errors?.[0]?.message ?? body.error?.message ?? `读取失败（${response.status}）`);
-          return body;
-        }));
-        let data = bodies[0].data;
-        if (collection) {
-          const seen = new Set<string>();
-          data = { ...data, nextOffset: bodies.at(-1)!.data.nextOffset,
-            [collection]: bodies.flatMap(body => body.data[collection]).filter(item => {
-              const id = item.taskId && collection === 'records' ? item.taskId : item.turnId;
-              if (seen.has(id)) return false; seen.add(id); return true;
-            }) };
-        }
-        const errors = bodies.flatMap(body => body.errors ?? []);
-        if (alive) setState({ key: path, data, loading: false, error: errors.length ? `${errors.length} 条记录无法读取，当前仅展示可核对的记录` : null });
-      } catch (error) {
-        if (alive && !controller.signal.aborted) setState(old => ({ ...old, key: path, loading: false, error: error instanceof Error ? error.message : '读取失败，请重试' }));
-      } finally { busy = false; }
-    }
-    refreshRef.current = () => { void update(); };
-    void update();
-    const timer = window.setInterval(update, 3000);
-    document.addEventListener('visibilitychange', update);
-    return () => { alive = false; controller.abort(); clearInterval(timer); document.removeEventListener('visibilitychange', update); };
-  }, [path, pages, collection]);
-  const refresh = useCallback(() => refreshRef.current(), []);
-  return { data: state.key === path ? state.data : null, error: state.key === path ? state.error : null, loading: state.key !== path || state.loading, refresh };
+    if (!enabled) return;
+    const list = key.split('\n').filter(Boolean), notify = () => render(v => v + 1);
+    const off = list.map(url => remoteCache.subscribe(url, notify));
+    const visible = () => { if (!document.hidden) for (const url of list) void remoteCache.refresh(url); };
+    refreshRef.current = () => { for (const url of list) void remoteCache.refresh(url, true); };
+    document.addEventListener('visibilitychange', visible);
+    return () => { off.forEach(fn => fn()); document.removeEventListener('visibilitychange', visible); refreshRef.current = () => {}; };
+  }, [key, enabled]);
+  const entries = urls.map(url => remoteCache.read(url));
+  const revision = entries.map(e => e.revision).join(',');
+  const data = useMemo(() => {
+    const first = entries[0]?.data ?? null;
+    if (!first || !collection) return first;
+    const seen = new Set<string>();
+    return { ...first, nextOffset: entries.at(-1)?.data?.nextOffset ?? (entries.some(e => !e.data) ? 0 : null),
+      [collection]: entries.flatMap(e => e.data?.[collection] ?? []).filter(item => { const id = collection === 'records' ? item.taskId : item.turnId; if (seen.has(id)) return false; seen.add(id); return true; }) };
+  }, [key, collection, revision]);
+  return { data: data as T | null, error: entries.find(e => e.error)?.error ?? null, loading: !!path && entries.some(e => !e.data && !e.error), refresh: useCallback(() => refreshRef.current(), []) };
 }
 export function useLocation() {
   const [search, setSearch] = useState(() => new URLSearchParams(location.search));

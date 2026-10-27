@@ -2,10 +2,10 @@
 id: "workflow.ksf.entry"
 name: "KSF 入口工作流"
 description: "KSF 固定入口。先读取 ksf-runtime，由它组织当前工作过程及必要的职责交接。"
-version: 0.1.22
+version: 0.1.25
 status: active
 references:
-  - partner.ksf.runtime@0.1.21
+  - partner.ksf.runtime@0.1.24
 ---
 
 # KSF 入口工作流

@@ -1,4 +1,5 @@
 import type { Message } from './types.ts';
+import { asyncAnswers } from './structured-message.ts';
 
 /** Presentation only: message order, identity and archived content remain intact. */
 export function partitionMessages(messages: Message[]) {
@@ -7,7 +8,7 @@ export function partitionMessages(messages: Message[]) {
   for (const message of messages) {
     if (seen.has(message.id)) continue;
     seen.add(message.id);
-    if (message.role === 'user' && message.phase !== 'answer') request.push(message);
+    if (message.role === 'user' && message.phase !== 'answer' && !asyncAnswers(message)) request.push(message);
     else if (message.role === 'assistant' && ['final', 'final_answer'].includes(message.phase)) result.push(message);
     else process.push(message);
   }

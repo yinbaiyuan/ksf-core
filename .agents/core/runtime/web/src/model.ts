@@ -2,7 +2,7 @@ import type { Ability, Route, RouteEvent, Task } from './types.ts';
 import { ownershipOf, relatedOf, ownershipIdentity, ownershipLabel, targetIdentity } from './targets.ts';
 export const stageNames: Record<string, string> = { selected: '已选择', read: '已读取', adopted: '已采用' };
 export const typeNames: Record<string, string> = { workflow: '工作流', partner: '搭档', competency: '基本功', 'data-package': '数据包' };
-export const captureNames: Record<string, string> = { completed: '轮次完成', interrupted: '已中断', pending: '待补采', partial: '部分缺失', excluded: '明确排除' };
+export const captureNames: Record<string, string> = { completed: '已归档', interrupted: '已中断', pending: '待补采', partial: '部分缺失', excluded: '明确排除' };
 export const agentNames: Record<string, string> = { preparing: '准备中', working: '处理中', waiting: '等待中', completed: '已完成', paused: '已暂停', failed: '失败' };
 export const sourceName = (source: string) => source === 'system' ? '系统' : source === 'user' ? '个人' : `能力源 · ${source.replace(/^source:/, '')}`;
 export const projectName = (route?: Route | null) => route ? ownershipLabel(ownershipOf(route)) : '未上报归属';
@@ -35,7 +35,16 @@ export function routeChanges(previous: Route | null, next: Route): string[] {
   return result;
 }
 export function timeline(events: RouteEvent[]) { return events.map((event, i) => ({ event, changes: routeChanges(events[i - 1]?.snapshot ?? null, event.snapshot) })); }
+// A list renders many timestamps. Reuse formatters, never formatted values, so
+// incoming timestamps still update and short/full forms retain the local time zone.
+const dateFormats = new Map<boolean, Intl.DateTimeFormat>();
 export const date = (value?: string | null, full = false) => {
-  if (!value || !Number.isFinite(Date.parse(value))) return '暂无上报';
-  return new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', ...(full ? { year: 'numeric', second: '2-digit' } : {}), hour12: false }).format(new Date(value));
+  const timestamp = value ? Date.parse(value) : NaN;
+  if (!Number.isFinite(timestamp)) return '暂无上报';
+  let formatter = dateFormats.get(full);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', ...(full ? { year: 'numeric', second: '2-digit' } : {}), hour12: false });
+    dateFormats.set(full, formatter);
+  }
+  return formatter.format(timestamp);
 };

@@ -15,9 +15,14 @@ export function webSourceDigest(directory) {
     else fail('Unsupported frontend source entry.');
   }
   for (const name of sourceEntries) walk(name);
+  for (const name of ['route-evolution.js', 'view-targets.js']) {
+    const path = join(directory, '../src/routing', name);
+    if (lstatSync(path).isSymbolicLink()) fail('Shared frontend source cannot contain symlinks.');
+    sum.update(JSON.stringify([`shared/${name}`, hash(readFileSync(path))]));
+  }
   return sum.digest('hex');
 }
-const safeAsset = name => typeof name === 'string' && /^(?:index\.html|THIRD_PARTY_NOTICES\.txt|assets\/[A-Za-z0-9_.-]+\.(?:js|css|svg|woff2?))$/.test(name);
+const safeAsset = name => typeof name === 'string' && /^(?:index\.html|THIRD_PARTY_NOTICES\.txt|assets\/[A-Za-z0-9_.-]+\.(?:js|css|svg|jpg|woff2?|ttf))$/.test(name);
 export function verifyWebBuild(directory, { optional = false } = {}) {
   if (optional && !['package.json', 'index.html', 'src', 'dist'].some(name => existsSync(join(directory, name)))) return null;
   try {
@@ -41,8 +46,8 @@ export function verifyWebBuild(directory, { optional = false } = {}) {
       const bytes = readFileSync(current);
       if (hash(bytes) !== digest) fail('Frontend asset checksum mismatch. Rebuild the frontend.');
       if (name === 'THIRD_PARTY_NOTICES.txt') continue;
-      const type = name.endsWith('.html') ? 'text/html' : name.endsWith('.js') ? 'text/javascript' : name.endsWith('.css') ? 'text/css' : name.endsWith('.svg') ? 'image/svg+xml' : 'font/woff2';
-      assets.set(`/${name}`, { bytes, type: `${type}; charset=utf-8` });
+      const type = name.endsWith('.html') ? 'text/html' : name.endsWith('.js') ? 'text/javascript' : name.endsWith('.css') ? 'text/css' : name.endsWith('.svg') ? 'image/svg+xml' : name.endsWith('.jpg') ? 'image/jpeg' : name.endsWith('.ttf') ? 'font/ttf' : name.endsWith('.woff') ? 'font/woff' : 'font/woff2';
+      assets.set(`/${name}`, { bytes, type: /\.(?:jpg|ttf|woff2?)$/.test(name) ? type : `${type}; charset=utf-8` });
     }
     assets.set('/', assets.get('/index.html'));
     return assets;

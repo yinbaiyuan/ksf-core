@@ -1,8 +1,8 @@
 ---
 type: cli-reference
 status: active
-reviewed_for: "0.1.3"
-updated: 2026-10-24
+reviewed_for: "0.1.4"
+updated: 2026-10-27
 ---
 
 # KSF CLI 能力说明
@@ -42,6 +42,7 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `web` | 前台启动任务路由工作台、只读接口与健康接口，随包 Node 提供预构建前端 | 是，`web --json` 输出一次就绪结果 | 已启用时补采对话档案；请求只读；停止后释放端口 |
 | `route start/write/read/list` | 按原生宿主会话保存 Agent 明确报告的项目与能力安排，查询来源变化 | 是 | 仅 start/write 写入本地 routing/v1；开关关闭或 no-save 时跳过 |
 | `task list/read/sync/status/hooks/declare/hook` | Codex 聊天任务归档、只读声明、Hooks 与补采 | 是 | 查询与 declare 只读；hooks 配置并建立未来基线；sync/hook 保存原件与游标，见 [task](task.md) |
+| `chat hooks/read/context/use/write/remove/restart` | 当前聊天轮次、能力参与轮次、动态变量与有界自动状态注入 | 是 | hooks 建未来基线，原生 Hook 登记聊天计数并只读注入状态；read/context 只读，采用及修改仍显式执行，见 [chat](chat.md) |
 | `runtime verify` | 完整验证随包压缩包及已安装 Node；损坏时可重新准备 | 是，`runtime verify --json` | 可能更新安装记录或修复运行时 |
 | `build` | 校验构建输入和各平台包，生成 manifest | 是，`build --json` | 原子替换 `.agents/core/manifest.yaml` |
 | `test` | 使用随包 Node 的内置测试运行器执行 JavaScript 测试 | 否 | 测试创建独立临时目录并在结束后清理 |
@@ -333,3 +334,5 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 `ksf source init/link/unlink/list/read/check/export` 已实现。关联仓库当前工作树，不创建安装副本、版本锁或能力快照；多源身份、依赖和 Git 协作见[source](source.md)及[协议](../sources.md)。`context capabilities --source <源ID>` 可限定共享范围；对象 read/check/list 的 --source 支持源 ID。
 
 项目支持 current/archived/all 的范围发现与检查、指定范围的读取维护，以及 archive、restore、recover；工程关联支持项目 scope。默认知识与档案的实例机制见 [设计指南](../content-design.md)，根说明随新模板生成并由用户自行维护。完整操作及恢复边界以 [project](project.md) 与 [repository](repository.md)为准。
+
+Assistant 的同源桌面读取与独立补采接口见 [assistant](assistant.md)。

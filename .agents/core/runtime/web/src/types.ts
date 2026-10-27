@@ -30,3 +30,10 @@ export interface TargetHistory { entries: TargetEntry[]; sequence: { key: string
 export interface TargetContext { key: string; turnCount: number; relatedTurnCount: number; latestTurnId: string | null; latestReported: Task['latestReported'] }
 export interface TaskTarget { aliases?: string[]; key: string; kind: TargetKind | 'state'; lifecycle?: 'planned' | 'existing' | null; label: string; target: Target | null; chatCount: number; turnCount: number; lastReportedAt: string | null }
 export interface TaskTargets { targets: TaskTarget[]; totalChats: number; capture: Capture; errors: Issue[] }
+
+export type WorkMetric = 'tasks' | 'turns' | 'projects' | 'knowledge' | 'abilities';
+export type WorkPeriod = 'today' | 'week';
+export interface WorkTarget { key: string; kind: TargetKind; label: string; lifecycle: 'planned' | 'existing' }
+export interface WorkActivity { taskId: string; turnId: string; taskTitle: string; title: string; startedAt: string; navigationTarget: string; primaryTargets: WorkTarget[] }
+export interface WorkStatsPeriod { startAt: string; endAt: string; startDate: string; endDate: string; counts: Record<WorkMetric, number> }
+export interface WorkStats { generatedAt: string; timeZone: string; today: WorkStatsPeriod; week: WorkStatsPeriod; activity: WorkActivity[]; capture: { enabled: boolean; activatedAt: string | null }; errors: Issue[] }

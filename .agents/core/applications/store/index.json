@@ -1,0 +1,254 @@
+{
+  "protocol": "ksf-app-registry-v1",
+  "name": "KSF 应用",
+  "apps": [
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.terminal",
+        "name": "终端",
+        "version": "0.1.0",
+        "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
+        "author": "KSF",
+        "icon": "terminal",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "shell",
+          "filesystem",
+          "network"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 980,
+          "height": 640
+        },
+        "minSize": {
+          "width": 480,
+          "height": 320
+        },
+        "target": "darwin-arm64"
+      },
+      "package": {
+        "url": "terminal-0.1.0-darwin-arm64.ksfapp",
+        "sha256": "fd31fdd903e3575eb1bc67993cc766ecf93b01aca31c92cdd1b98d5f7139b0e0",
+        "size": 209787
+      }
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.terminal",
+        "name": "终端",
+        "version": "0.1.0",
+        "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
+        "author": "KSF",
+        "icon": "terminal",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "shell",
+          "filesystem",
+          "network"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 980,
+          "height": 640
+        },
+        "minSize": {
+          "width": 480,
+          "height": 320
+        },
+        "target": "darwin-x64"
+      },
+      "package": {
+        "url": "terminal-0.1.0-darwin-x64.ksfapp",
+        "sha256": "21cffa26d8eabe261fce53339a506c23a9adb94daec7416a40bd80b8a24c0009",
+        "size": 209220
+      }
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.terminal",
+        "name": "终端",
+        "version": "0.1.0",
+        "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
+        "author": "KSF",
+        "icon": "terminal",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "shell",
+          "filesystem",
+          "network"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 980,
+          "height": 640
+        },
+        "minSize": {
+          "width": 480,
+          "height": 320
+        },
+        "target": "win32-arm64"
+      },
+      "package": {
+        "url": "terminal-0.1.0-win32-arm64.ksfapp",
+        "sha256": "4596ff1ff867b6b6bd41e29edc893ca36b777c4eadb3f2b5f9be915b1a3bfab8",
+        "size": 1653013
+      }
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.terminal",
+        "name": "终端",
+        "version": "0.1.0",
+        "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
+        "author": "KSF",
+        "icon": "terminal",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "shell",
+          "filesystem",
+          "network"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 980,
+          "height": 640
+        },
+        "minSize": {
+          "width": 480,
+          "height": 320
+        },
+        "target": "win32-x64"
+      },
+      "package": {
+        "url": "terminal-0.1.0-win32-x64.ksfapp",
+        "sha256": "5a0c7436dfa5cb376f3e273394fbc20489374baf0f4bc64926006b963ce94997",
+        "size": 1786057
+      }
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.projects",
+        "name": "项目",
+        "version": "0.1.0",
+        "description": "从现有项目记录接上工作。集中查看项目目标、任务检查点、相关聊天、资料与成果，保留原文和来源。",
+        "author": "KSF",
+        "icon": "package",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "filesystem",
+          "shell"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 1180,
+          "height": 760
+        },
+        "minSize": {
+          "width": 540,
+          "height": 420
+        }
+      },
+      "package": {
+        "url": "projects-0.1.0.ksfapp",
+        "sha256": "1bf6b8ada5b9df4fa08ccae243ccdc393b4139248180422c60ca72d020493b9b",
+        "size": 119540
+      }
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "id": "ksf.projects",
+        "name": "项目",
+        "version": "0.1.1",
+        "description": "从现有项目记录接上工作。集中查看项目目标、任务检查点、相关聊天、资料与成果，保留原文和来源。",
+        "author": "KSF",
+        "icon": "package",
+        "sdkVersion": 1,
+        "frontend": {
+          "entry": "frontend/index.js",
+          "styles": [
+            "frontend/index.css"
+          ]
+        },
+        "backend": {
+          "runtime": "node",
+          "entry": "backend/index.mjs"
+        },
+        "permissions": [
+          "filesystem",
+          "shell"
+        ],
+        "multiInstance": true,
+        "defaultSize": {
+          "width": 1180,
+          "height": 760
+        },
+        "minSize": {
+          "width": 540,
+          "height": 420
+        }
+      },
+      "package": {
+        "url": "projects-0.1.1.ksfapp",
+        "sha256": "71fab67a511380020ace083e692a4845ac90cbcf9bb291897dd48b987555a294",
+        "size": 119739
+      }
+    }
+  ]
+}
