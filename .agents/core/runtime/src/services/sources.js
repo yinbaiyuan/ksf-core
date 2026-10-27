@@ -57,7 +57,7 @@ export function abilitySource({ root, operation, target, reference, id, name, de
       for (const type of Object.values(types)) mkdirSync(join(path, type.user), { recursive: true });
       for (const file of files) {
         const text = file === declarationFile ? YAML.stringify(declaration) : file === 'AGENTS.md'
-          ? '# KSF 能力源协作规则\n\n本仓库遵循 ksf-source.yaml 声明的 KSF 能力源协议。能力保存在 能力/ 下，一个对象一个完整 ID 目录；维护对象版本和精确引用。\n\n本仓库不是 KSF 工作区，校验使用调用方已确认的 KSF 根下的 `.agents/ksf source check --path <本仓库>`。根 AGENTS.md 仅为仓库协作说明，不作为工作流。\n\n编辑前读取现有对象与 Git 差异，保留已有修改。贡献仅提交选定对象及依赖；推送、PR 和合并按用户请求及仓库权限执行。源内依赖只由本源和 Core 满足，公开内容不携带个人修订字段、个人派生基线或其他仓库历史。\n'
+          ? '# KSF 能力源协作规则\n\n本仓库遵循 ksf-source.yaml 声明的 KSF 能力源协议。能力保存在 能力/ 下，一个对象一个目录，可用中文显示名称命名；对象身份由入口元数据中的完整 ID 确定，维护对象版本和精确引用。\n\n本仓库不是 KSF 工作区，校验使用调用方已确认的 KSF 根下的 `.agents/ksf source check --path <本仓库>`。根 AGENTS.md 仅为仓库协作说明，不作为工作流。\n\n编辑前读取现有对象与 Git 差异，保留已有修改。贡献仅提交选定对象及依赖；推送、PR 和合并按用户请求及仓库权限执行。源内依赖只由本源和 Core 满足，公开内容不携带个人修订字段、个人派生基线或其他仓库历史。\n'
           : file === 'README.md' ? `# ${name}\n\nKSF 能力源。先克隆本仓库，再使用已确认的 KSF 入口执行 source link <本仓库路径>。直接读取当前工作树；更新、贡献和回退使用普通 Git 流程。访问权限由仓库管理。\n` : '';
         writeDurably(join(path, file), text, { exclusive: true });
       }

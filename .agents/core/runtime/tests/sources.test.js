@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -102,6 +102,73 @@ test('linked objects use the live working tree, external paths and optional type
   assert.equal(context.data.workflows.objects.length, 0); // source AGENTS is not a workflow
   assert.equal(context.data.complete, true);
   assert.equal(readdirSync(path).some(name => /snapshot|cache/.test(name)), false);
+});
+
+test('Chinese source directories preserve metadata identities and discovery for every object type', t => {
+  const f = fixture(t), path = f.source('methods');
+  const entries = Object.keys(types).map((type, index) => {
+    const id = `${type}.author.method`, original = f.add(path, id);
+    const directory = join(path, types[type].user, `中文能力名称${index}`);
+    renameSync(dirname(original), directory);
+    return { type, id, file: join(directory, types[type].entry) };
+  });
+  assert.equal(f.run('link', { target: path }).data.changed, true);
+  assert.equal(f.run('check', { target: 'methods' }).data.valid, true);
+  for (const entry of entries) {
+    const result = f.query(entry.type, entry.id + '@0.1.0', 'methods');
+    assert.equal(result.data.object.path, entry.file);
+    assert.equal(result.data.object.id, entry.id);
+  }
+  const context = contextCapabilities(f.root);
+  assert.equal(context.data.complete, true);
+  assert.ok(context.data.partners.objects.some(row => row.path === entries.find(row => row.type === 'partner').file));
+});
+
+test('Chinese directory names do not bypass duplicate IDs or mismatched ID directory validation', t => {
+  const f = fixture(t), path = f.source('methods'), id = 'partner.author.method';
+  const original = f.add(path, id), chinese = join(path, types.partner.user, '中文搭档');
+  renameSync(dirname(original), chinese);
+  const duplicate = join(path, types.partner.user, '另一个中文搭档');
+  mkdirSync(duplicate); writeFileSync(join(duplicate, 'partner.md'), readFileSync(join(chinese, 'partner.md')));
+  throws(() => f.run('link', { target: path }), 'SOURCE_INVALID');
+  rmSync(duplicate, { recursive: true });
+  renameSync(chinese, join(path, types.partner.user, 'partner.author.different'));
+  const checked = f.run('check', { reference: path });
+  assert.equal(checked.data.valid, false);
+  assert.ok(checked.errors.some(error => error.code === 'OBJECT_ID_LOCATION_MISMATCH'));
+});
+
+test('export reuses Chinese directories, rebases dependency links and preserves dirty targets', t => {
+  const f = fixture(t), path = f.source('methods'), method = 'competency.author.method', owner = 'partner.author.owner';
+  const link = `[method](../../基本功/${method}/competency.md)\n`;
+  const methodFile = f.add('user', method, {}, '# method\n', { 'resources/示例.txt': 'reference' });
+  const ownerFile = f.add('user', owner, { references: [method + '@0.1.0'] }, link);
+  f.run('link', { target: path }); f.run('export', { target: 'methods', reference: owner });
+  const methodDirectory = join(path, types.competency.user, '中文方法');
+  const ownerDirectory = join(path, types.partner.user, '中文搭档');
+  renameSync(join(path, types.competency.user, method), methodDirectory);
+  renameSync(join(path, types.partner.user, owner), ownerDirectory);
+  const publishedOwner = join(ownerDirectory, 'partner.md'), publishedMethod = join(methodDirectory, 'competency.md');
+  writeFileSync(publishedOwner, readFileSync(publishedOwner, 'utf8').replace(`/${method}/`, '/中文方法/'));
+  commitSource(path);
+  assert.equal(f.run('export', { target: 'methods', reference: owner, dryRun: true }).data.wouldChange, false);
+  assert.equal(f.run('export', { target: 'methods', reference: owner }).data.changed, false);
+  writeFileSync(methodFile, readFileSync(methodFile, 'utf8').replace('version: 0.1.0', 'version: 0.1.1') + 'updated\n');
+  writeFileSync(ownerFile, readFileSync(ownerFile, 'utf8').replace('version: 0.1.0', 'version: 0.1.1').replace(`${method}@0.1.0`, `${method}@0.1.1`));
+  const previous = readFileSync(publishedMethod);
+  writeFileSync(publishedMethod, previous + 'existing local edit\n');
+  throws(() => f.run('export', { target: 'methods', reference: owner }), 'SOURCE_TARGET_DIRTY');
+  assert.match(readFileSync(publishedMethod, 'utf8'), /existing local edit/);
+  writeFileSync(publishedMethod, previous);
+  const preview = f.run('export', { target: 'methods', reference: owner, dryRun: true });
+  assert.equal(preview.data.objects.find(row => row.id === owner).directory, ownerDirectory);
+  assert.equal(preview.data.objects.find(row => row.id === method).directory, methodDirectory);
+  assert.equal(f.run('export', { target: 'methods', reference: owner }).data.changed, true);
+  assert.equal(existsSync(join(path, types.partner.user, owner)), false);
+  assert.equal(existsSync(join(path, types.competency.user, method)), false);
+  assert.match(readFileSync(publishedOwner, 'utf8'), /\.\.\/\.\.\/基本功\/中文方法\/competency\.md/);
+  assert.equal(f.query('partner', owner, 'methods').data.references[0].path, publishedMethod);
+  assert.equal(f.run('check', { target: 'methods' }).data.valid, true);
 });
 
 test('multiple sources require explicit choice while personal and exact-version precedence is preserved', t => {
