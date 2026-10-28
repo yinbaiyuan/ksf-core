@@ -25,11 +25,12 @@ function Get-KsfFingerprint([string] $Path) {
     return "$($item.Length):$($item.LastWriteTimeUtc.Ticks):$($item.CreationTimeUtc.Ticks):$([int]$item.Attributes)"
 }
 function Move-KsfRuntimeDirectory([string] $Source, [string] $Target) {
+    $deadline = [DateTime]::UtcNow.AddSeconds(10)
     for ($attempt = 0; ; $attempt++) {
         try { [IO.Directory]::Move($Source, $Target); return }
         catch {
             $nativeCode = $_.Exception.InnerException.HResult -band 65535
-            if ($attempt -ge 9 -or $nativeCode -notin @(5,32,33) -or -not [IO.Directory]::Exists($Source) -or (Test-Path -LiteralPath $Target)) { throw }
+            if ([DateTime]::UtcNow -ge $deadline -or $nativeCode -notin @(5,32,33) -or -not [IO.Directory]::Exists($Source) -or (Test-Path -LiteralPath $Target)) { throw }
             Start-Sleep -Milliseconds ([Math]::Min(250, 10 * [Math]::Pow(2,$attempt)))
         }
     }

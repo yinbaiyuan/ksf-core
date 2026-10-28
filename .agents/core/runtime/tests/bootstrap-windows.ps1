@@ -39,6 +39,23 @@ if(args[0]==='exit')process.exit(Number(args[1]));
     $result=Invoke-Fixture @('runtime','verify','--json');Assert-Check ($result.Code -eq 0) "first boot: $($result.Error)"
     $data=$result.Out | ConvertFrom-Json;Assert-Check ($data.version -ceq 'v24.21.0' -and $data.node.StartsWith($fixture)) 'exact bundled Node without global Node'
     $node=$data.node
+    # A scanner or executable image mapping can temporarily deny a directory
+    # rename after extraction. Exercise a real sharing violation beyond 2s.
+    $moveSource=Join-Path $fixture 'move-source';$moveTarget=Join-Path $fixture 'move-target'
+    [void][IO.Directory]::CreateDirectory($moveSource)
+    $moveFile=Join-Path $moveSource 'held.txt';[IO.File]::WriteAllText($moveFile,'preserve bytes')
+    $held=[IO.File]::Open($moveFile,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::None)
+    $moveScript=". $(PS-Quote (Join-Path $Root '.agents/core/runtime/bootstrap.ps1')); Move-KsfRuntimeDirectory $(PS-Quote $moveSource) $(PS-Quote $moveTarget)"
+    $moveInfo=New-Object Diagnostics.ProcessStartInfo
+    $moveInfo.FileName=$shell;$moveInfo.Arguments='-NoLogo -NoProfile -NonInteractive -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($moveScript));$moveInfo.UseShellExecute=$false;$moveInfo.CreateNoWindow=$true;$moveInfo.RedirectStandardError=$true
+    $moving=[Diagnostics.Process]::Start($moveInfo)
+    try{
+        Start-Sleep -Milliseconds 3500
+        Assert-Check (-not $moving.HasExited -and [IO.Directory]::Exists($moveSource) -and -not [IO.Directory]::Exists($moveTarget)) 'sharing violation preserves the source while waiting'
+        $held.Dispose();$held=$null
+        Assert-Check ($moving.WaitForExit(15000)) 'directory publication completes after the handle is released'
+        Assert-Check ($moving.ExitCode -eq 0 -and [IO.File]::ReadAllText((Join-Path $moveTarget 'held.txt')) -ceq 'preserve bytes') "transient directory sharing conflict is retried: $($moving.StandardError.ReadToEnd())"
+    }finally{if($null -ne $held){$held.Dispose()};if(-not $moving.HasExited){$moving.Kill();$moving.WaitForExit()};$moving.Dispose()}
     $arguments=@('hello','','中文 空格','double"quote','tail\',"single'quote")
     $result=Invoke-Fixture $arguments 'UTF8 输入';Assert-Check ($result.Code -eq 0) 'argument and stdin command succeeds'
     $data=$result.Out | ConvertFrom-Json
