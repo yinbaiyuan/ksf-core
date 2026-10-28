@@ -197,12 +197,14 @@ test('Web CLI returns a structured address-in-use error', async t => {
   assert.equal(JSON.parse(result.stdout).errors[0].code, 'WEB_ADDRESS_IN_USE');
 });
 
-test('real launcher starts with bundled Node from another cwd and stops on SIGINT or SIGTERM', { timeout: 15_000,skip:platform.name==='win32'?'POSIX SIGINT/SIGTERM semantics; Windows native launcher, manual supervisor stop and ConPTY Ctrl-C are separately accepted':false }, async t => {
+test('real launcher starts with bundled Node from another cwd and stops on SIGINT or SIGTERM', { skip:platform.name==='win32'?'POSIX SIGINT/SIGTERM semantics; Windows native launcher, manual supervisor stop and ConPTY Ctrl-C are separately accepted':false }, async t => {
   const f=routingFixture(t),source=fileURLToPath(new URL('../../../../',import.meta.url));
   for(const path of ['.agents/ksf','.agents/ksf.ps1','.agents/core'])cpSync(join(source,path),join(f.root,path),{recursive:true,filter:p=>!p.split(/[\\/]/).includes('node_modules')&&!p.split(/[\\/]/).includes('.git')});
   const isolatedLauncher=join(f.root,'.agents/ksf');
-  const prepared=spawnSync(isolatedLauncher,['hello','--json'],{encoding:'utf8',env:{...process.env,PATH:'/usr/bin:/bin'}});assert.equal(prepared.status,0,prepared.stderr);
-  for (const signal of ['SIGINT', 'SIGTERM']) {
+  // Cold fixture copying/extraction is preparation, not the readiness/shutdown
+  // latency being asserted below. Keep each real signal round trip bounded.
+  const prepared=spawnSync(isolatedLauncher,['hello','--json'],{encoding:'utf8',timeout:30_000,env:{...process.env,PATH:'/usr/bin:/bin'}});assert.equal(prepared.status,0,prepared.stderr||prepared.error?.message);
+  for (const signal of ['SIGINT', 'SIGTERM']) await t.test(signal, { timeout: 15_000 }, async t => {
     const child = spawn(isolatedLauncher, ['web', '--port', '0', '--json'], {
       cwd: tmpdir(), env: { ...process.env, PATH: '/usr/bin:/bin' }, stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -228,5 +230,5 @@ test('real launcher starts with bundled Node from another cwd and stops on SIGIN
     const replacement = await startWebServer({ root:f.root,port: ready.data.port });
     await replacement.close();
     lines.close();
-  }
+  });
 });
