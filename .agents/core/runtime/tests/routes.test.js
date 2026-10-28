@@ -1,9 +1,11 @@
+import {platform} from '../src/platform/index.js';
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, symlinkSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { once } from 'node:events';
 import { mutateRoute, readRoute, listRoutes } from '../src/services/routes.js';
 import { runRouteCommand } from '../src/commands/routes.js';
@@ -39,8 +41,8 @@ test('native identity is required, host/session and workspace identities are iso
   assert.notEqual(a.sessionKey, b.sessionKey); assert.notEqual(a.sessionKey, c.sessionKey);
   const raw = readFileSync(recordFile(f, a), 'utf8');
   assert.ok(!raw.includes(f.identity.sessionId));
-  assert.equal(statSync(recordFile(f, a)).mode & 0o777, 0o600);
-  assert.equal(statSync(join(f.root, ROUTE_DIRECTORY, 'identity.key')).mode & 0o777, 0o600);
+  if(platform.supportsPosixModes)assert.equal(statSync(recordFile(f, a)).mode & 0o777, 0o600);
+  if(platform.supportsPosixModes)assert.equal(statSync(join(f.root, ROUTE_DIRECTORY, 'identity.key')).mode & 0o777, 0o600);
   assert.equal(readRoute({ root: f.root, env: { CODEX_THREAD_ID: f.identity.sessionId } }).state, 'missing');
   assert.equal(listRoutes({ root: f.root, limit: 1 }).nextOffset, 1);
   assert.equal(listRoutes({ root: f.root, limit: 1, offset: 1 }).records.length, 1);
@@ -70,9 +72,9 @@ test('project assignment, references, no project and unresolved are explicit ful
 
 test('all four types, exact definitions, stages, fixed entries and changed sources are represented', t => {
   const f = routingFixture(t);
-  for (const type of ['workflow', 'partner', 'competency', 'data-package']) f.add(`${type}.test.method`);
+  for (const type of ['cooperation', 'partner', 'competency', 'data-package']) f.add(`${type}.test.method`);
   f.add('partner.ksf.runtime', 'system');
-  const abilities = ['workflow', 'partner', 'competency', 'data-package'].map((type, i) => f.ability(`${type}.test.method`, 'effective', i === 0 ? 'selected' : i === 1 ? 'read' : 'adopted'));
+  const abilities = ['cooperation', 'partner', 'competency', 'data-package'].map((type, i) => f.ability(`${type}.test.method`, 'effective', i === 0 ? 'selected' : i === 1 ? 'read' : 'adopted'));
   abilities.push(f.ability('partner.ksf.runtime', 'system'));
   const record = f.start({ abilities }).record;
   assert.equal(record.current.abilities.length, 5); assert.equal(record.current.abilities.at(-1).fixed, true);
@@ -93,7 +95,7 @@ test('system and linked sources use the existing resolver and source changes do 
   const linked = source.add('competency.test.linked');
   writeFileSync(linked, readFileSync(linked, 'utf8').replace('user_revision: 1\n', ''));
   // Local declaration/association uses the actual source service, no copied definitions.
-  assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', source.root]).status, 0);
+  assert.equal(spawnSync(gitBinary, ['init', '--template=', '--initial-branch=main', source.root]).status, 0);
   abilitySource({ root: f.root, operation: 'init', target: source.root, id: 'linked', name: 'Linked' });
   abilitySource({ root: f.root, operation: 'link', target: source.root });
   const record = f.start({ project: { state: 'bound', primary: { name: '项目甲', scope: 'current' } },
@@ -195,7 +197,7 @@ test('real independent CLI writers serialize conflicting revisions through the s
   const modulePath = fileURLToPath(new URL('../src/commands/routes.js', import.meta.url));
   const worker = (eventId) => {
     const input = { identity: f.identity, eventId, roundId: record.roundId, report: f.report() };
-    const script = `import {runRouteCommand} from ${JSON.stringify(modulePath)}; const r=await runRouteCommand(['write','--from','-','--if-match','1','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
+    const script = `import {runRouteCommand} from ${JSON.stringify(pathToFileURL(modulePath).href)}; const r=await runRouteCommand(['write','--from','-','--if-match','1','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
     const child = spawn(process.execPath, ['--input-type=module', '-e', script], { stdio: ['pipe', 'pipe', 'pipe'] });
     let out = ''; child.stdout.on('data', data => { out += data; }); child.stdin.end(JSON.stringify(input));
     return once(child, 'exit').then(([code]) => ({ code, value: JSON.parse(out) }));
@@ -209,7 +211,7 @@ test('real independent CLI writers serialize conflicting revisions through the s
 test('real stdin rejects oversized and invalid UTF-8/JSON input before creating a routing store', t => {
   const f = routingFixture(t);
   const modulePath = fileURLToPath(new URL('../src/commands/routes.js', import.meta.url));
-  const script = `import {runRouteCommand} from ${JSON.stringify(modulePath)};const r=await runRouteCommand(['start','--from','-','--if-match','missing','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
+  const script = `import {runRouteCommand} from ${JSON.stringify(pathToFileURL(modulePath).href)};const r=await runRouteCommand(['start','--from','-','--if-match','missing','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
   for (const input of [Buffer.alloc(65537, 32), Buffer.from([255]), Buffer.from('{')]) {
     const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8', input });
     assert.equal(result.status, 2, result.stdout + result.stderr);
@@ -220,7 +222,7 @@ test('real stdin rejects oversized and invalid UTF-8/JSON input before creating 
 
 test('real CLI waits for fragmented valid stdin and accepts it without EAGAIN or raw identity output', async t => {
   const f = routingFixture(t), modulePath = fileURLToPath(new URL('../src/commands/routes.js', import.meta.url));
-  const script = `import {runRouteCommand} from ${JSON.stringify(modulePath)};const r=await runRouteCommand(['start','--from','-','--if-match','missing','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
+  const script = `import {runRouteCommand} from ${JSON.stringify(pathToFileURL(modulePath).href)};const r=await runRouteCommand(['start','--from','-','--if-match','missing','--json'],${JSON.stringify(f.root)});process.stdout.write(r.stdout);process.exitCode=r.exitCode;`;
   const child = spawn(process.execPath, ['--input-type=module', '-e', script], { stdio: ['pipe', 'pipe', 'pipe'] });
   const payload = JSON.stringify({ identity: f.identity, eventId: 'fragmented', report: f.report() });
   let output = ''; child.stdout.on('data', data => { output += data; });

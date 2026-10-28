@@ -1,4 +1,5 @@
-import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync } from 'node:fs';
+import { platform, replaceFileSync as renameSync } from '../platform/index.js';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { withTemporaryFile } from '../shared/files.js';
@@ -56,7 +57,7 @@ export function walkFiles(root, prefix, { exclude = () => false } = {}) {
   }
   visit(prefix); return found;
 }
-export function fileMode(path) { return lstatSync(path).mode & 0o111 ? 0o755 : 0o644; }
+export function fileMode(path, declared) { return platform.fileMode(path, lstatSync(path).mode, declared); }
 export function textBytes(bytes) {
   if (bytes.length > 2 * 1024 * 1024 || bytes.includes(0)) return false;
   return Buffer.from(bytes.toString('utf8')).equals(bytes);

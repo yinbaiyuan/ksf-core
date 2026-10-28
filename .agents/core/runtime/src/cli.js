@@ -1,9 +1,16 @@
 import { fileURLToPath } from 'node:url';
 import { hello } from './services/hello.js';
 import { spawnSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
 import { types } from './objects/schema.js';
 const args = process.argv.slice(2);
 const [command, ...options] = args;
+const currentRoot = fileURLToPath(new URL('../../../../', import.meta.url));
+if (!(command === 'cooperation' && options[0] === 'migrate')) {
+  const { assertNoCooperationMigration } = await import('./migrations/guard.js');
+  try { assertNoCooperationMigration(currentRoot); }
+  catch (error) { process.stdout.write(JSON.stringify({ ok: false, command, errors: [{ code: error.code, message: error.message }] }) + '\n'); process.exit(1); }
+}
 const runtimeInfo = () => ({
   nodeVersion: process.version,
   nodePath: process.execPath,
@@ -21,8 +28,11 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
   process.stdout.write('  ksf eval --help             Explicit natural-language Agent evaluations\n');
   process.stdout.write('  ksf web --help              Start the local Web server\n');
+  process.stdout.write('  ksf app --help              Call packaged application CLI capabilities\n  ksf communication --help    Use local/LAN communication\n');
+  process.stdout.write('  ksf assistant --help       Read desktop workbench projections\n');
   process.stdout.write('  ksf route --help            Record and query local session routing\n');
   process.stdout.write('  ksf task --help             Archive Codex task turns and routing\n');
+  process.stdout.write('  ksf chat --help             Manage current chat turns and dynamic variables\n');
   process.stdout.write('  ksf launcher recover       Recover an interrupted update without Core or Node\n  ksf release --help          Build ksf-core and ksf-workspace releases\n  ksf system --help           Check, upgrade and roll back installed Core\n  ksf contribute --help       Review system changes and submit a Core PR\n');
 } else if (['release', 'system', 'contribute'].includes(command)) {
   const { runDistributionCommand } = await import('./commands/distribution.js');
@@ -33,6 +43,18 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
 } else if (command === 'web') {
   const { runWebCommand } = await import('./commands/web.js');
   process.exitCode = await runWebCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+} else if(command==='app'){
+  const {runApplicationCommand}=await import('./commands/application-cli.js');const result=await runApplicationCommand(options,currentRoot);process.stdout.write(result.stdout);process.exitCode=result.exitCode;
+} else if(command==='communication'){
+  const {runCommunicationCommand}=await import('./commands/communication.js');const result=await runCommunicationCommand(options,currentRoot);process.stdout.write(result.stdout);process.exitCode=result.exitCode;
+} else if (command === 'assistant') {
+  const { runAssistantCommand } = await import('./commands/assistant.js');
+  const result = await runAssistantCommand(options, runtimeInfo().ksfRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
+} else if (command === 'chat') {
+  const { runChatCommand } = await import('./commands/chat.js');
+  const result = await runChatCommand(options, runtimeInfo().ksfRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
 } else if (command === 'task') {
   const { runTaskCommand } = await import('./commands/tasks.js');
   const result = await runTaskCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
@@ -83,6 +105,13 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   const result = runContextCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
+} else if (command === 'cooperation') {
+  const { runCooperationCommand } = await import('./commands/cooperation.js');
+  const result = runCooperationCommand(options, currentRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
+} else if (command === 'workflow') {
+  process.stdout.write(JSON.stringify({ ok: false, command, data: null, errors: [{ code: 'COMMAND_RENAMED', message: 'Use ksf cooperation. For existing data run ksf cooperation migrate --dry-run, then --apply.' }] }) + '\n');
+  process.exitCode = 2;
 } else if (Object.hasOwn(types, command)) {
   const { runObjectCommand } = await import('./commands/objects.js');
   const result = runObjectCommand(command, options, fileURLToPath(new URL('../../../../', import.meta.url)));
@@ -107,7 +136,16 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   const testEnv = { ...process.env };
   // This child is an independent runner, including when ksf is called from a test.
   delete testEnv.NODE_TEST_CONTEXT;
-  const result = spawnSync(process.execPath, ['--test'], {
+  // Package-native dependencies may ship tests for a different runner. Fixture
+  // programs (including opt-in live acceptance) must never be auto-discovered.
+  const testFiles = ['tests', 'web/tests'].flatMap(directory => {
+    try {
+      return readdirSync(new URL(`../${directory}/`, import.meta.url)).sort()
+        .filter(name => /\.test\.(?:[cm]?js|ts)$/.test(name)).map(name => `${directory}/${name}`);
+    } catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+  });
+  if (!testFiles.length) throw new Error('No owned JavaScript test suites found.');
+  const result = spawnSync(process.execPath, ['--test', ...testFiles], {
     cwd: fileURLToPath(new URL('../', import.meta.url)), stdio: 'inherit', env: testEnv,
   });
   if (result.error) process.stderr.write(`Cannot start JavaScript tests: ${result.error.message}\n`);

@@ -1,0 +1,5 @@
+.team-example{padding:20px;overflow:auto;height:100%;box-sizing:border-box;color:#24364e;background:#fff;font:13px/1.6 system-ui}
+.team-example form,.team-example label{display:grid;gap:8px;margin:12px 0}
+.team-example input,.team-example textarea{font:inherit;padding:8px;border:1px solid #ccd5e2;border-radius:6px}
+.team-example button{font:inherit;padding:7px 12px;margin-right:8px;border:1px solid #ccd5e2;border-radius:6px;background:#f6f8fc;cursor:pointer}
+.team-example section,.team-example article{border-top:1px solid #e5eaf1;margin-top:16px;padding-top:10px;overflow-wrap:anywhere}

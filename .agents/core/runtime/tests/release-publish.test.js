@@ -1,3 +1,4 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -65,7 +66,7 @@ test('template mirror skips an already installed release and verifies a newer pu
 
 test('template mirror refuses a platform-derived filename that escapes its staging directory', async t => {
   const f = await distributionFixture(t), next = await f.next(), index = structuredClone(next.index);
-  index.platforms['../../escape'] = { core: { ...index.platforms['darwin-arm64'].core,
+  index.platforms['../../escape'] = { core: { ...index.platforms[fixtureTarget].core,
     name: 'ksf-core-0.1.1-../../escape.tar.gz', url: 'https://release.invalid/escape' } };
   let unsafeDownload = false;
   const fetcher = async url => {

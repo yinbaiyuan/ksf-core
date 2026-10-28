@@ -1,0 +1,108 @@
+{
+  "name": "@ksf/sdk",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./build": "./build.mjs",
+    "./pack": "./server/pack.mjs",
+    "./protocol": "./server/protocol.js",
+    "./window-toolbar.css": "./src/window-toolbar.css",
+    "./application-sdk": "./src/application-sdk.ts",
+    "./ai-tasks": "./src/ai-tasks.ts",
+    "./resources": "./src/resources.ts",
+    "./window-session": "./src/window-session.ts",
+    "./surface.css": "./src/surface.css",
+    "./window-toolbar": "./src/window-toolbar.tsx",
+    "./api": "./src/api.ts",
+    "./react": "./src/react.tsx",
+    "./types": "./src/types.ts",
+    "./random-id": "./src/random-id.ts",
+    "./window-context": "./src/window-context.tsx",
+    "./remote-cache": "./src/remote-cache.ts",
+    "./index": "./src/index.ts",
+    "./workbench-model": "./src/workbench-model.ts",
+    "./overlay-coordinator": "./src/overlay-coordinator.ts",
+    "./material-settings": "./src/material-settings.ts",
+    "./window-toolbar-model": "./src/window-toolbar-model.ts",
+    "./desktop/registry": "./src/desktop/registry.tsx",
+    "./components/workbench-controls": "./src/components/workbench-controls.tsx",
+    "./components/material-provider": "./src/components/material-provider.tsx",
+    "./components/glass-surface": "./src/components/glass-surface.tsx",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./routing/view-targets.js": "./src/routing/view-targets.js",
+    "./routing/route-evolution.js": "./src/routing/route-evolution.js",
+    "./apps/document-model": "./src/apps/document-model.ts",
+    "./apps/app-services": "./src/apps/app-services.ts",
+    "./apps/client": "./src/apps/client.ts",
+    "./apps/request-client": "./src/apps/request-client.ts",
+    "./vendor/liquid-glass.js": "./src/vendor/liquid-glass.js",
+    "./vendor/liquid-surface.js": "./src/vendor/liquid-surface.js",
+    "./vendor/surface-scheduler.js": "./src/vendor/surface-scheduler.js",
+    "./components/ui/sheet": "./src/components/ui/sheet.tsx",
+    "./components/ui/context-menu.css": "./src/components/ui/context-menu.css",
+    "./components/ui/context-menu-model": "./src/components/ui/context-menu-model.ts",
+    "./components/ui/button": "./src/components/ui/button.tsx",
+    "./components/ui/context-menu": "./src/components/ui/context-menu.tsx",
+    "./workspace": "./src/workspace.ts",
+    "./ai-materials": "./src/ai-materials.ts",
+    "./configuration": "./src/configuration.ts",
+    "./storage": "./server/storage.mjs",
+    "./codex-conversations": "./src/codex-conversations.ts",
+    "./communication": "./src/communication.ts"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "lucide-react": "1.61.0",
+    "@radix-ui/react-dialog": "1.3.1",
+    "@radix-ui/react-slot": "1.5.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "tailwind-merge": "3.7.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "lucide-react": {
+      "optional": true
+    },
+    "@radix-ui/react-dialog": {
+      "optional": true
+    },
+    "@radix-ui/react-slot": {
+      "optional": true
+    },
+    "class-variance-authority": {
+      "optional": true
+    },
+    "clsx": {
+      "optional": true
+    },
+    "tailwind-merge": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "vite": "8.3.5",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "7.0.2",
+    "rolldown": "1.2.15"
+  },
+  "bin": {
+    "ksf-app": "./scripts/ksf-app.mjs"
+  },
+  "dependencies": {
+    "es-module-lexer": "1.7.0",
+    "postcss": "8.5.32"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.*",
+    "protocol:check": "node scripts/sync-protocol.mjs --check"
+  }
+}

@@ -1,3 +1,4 @@
+import {platform} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, rmSync, rmdirSync, readFileSync, writeFileSync, readdirSync,
@@ -73,8 +74,9 @@ test('list retains valid projects when one root card is malformed and distinguis
 
 test('discovery reports unsupported stored names instead of exposing unreadable project targets', t => {
   const f = fixture(t); f.create('正常');
-  mkdirSync(join(f.root, '项目', '不支持\\名称'));
-  writeFileSync(join(f.root, '项目', '不支持\\名称', 'project.md'), '# 存量资料');
+  const unsupported=platform.name==='win32'?'不支持\u007f名称':'不支持\\名称';
+  mkdirSync(join(f.root,'项目',unsupported));
+  writeFileSync(join(f.root,'项目',unsupported,'project.md'), '# 存量资料');
   const listed = f.run('list');
   assert.equal(listed.data.complete, false);
   assert.deepEqual(listed.data.projects.map(row => row.name), ['正常']);
@@ -258,7 +260,7 @@ test('global project locks block mutation without blocking previews or deleting 
 test('project writes preserve root-card permissions and work with generic metadata updates', t => {
   const f = fixture(t); f.create(); chmodSync(f.file(), 0o640);
   f.run('write', '测试 甲', { data: { metadata: { name: '显示名' } } });
-  assert.equal(statSync(f.file()).mode & 0o777, 0o640);
+  if(platform.supportsPosixModes)assert.equal(statSync(f.file()).mode & 0o777, 0o640);
   metadata({ root: f.root, operation: 'write', target: f.file(), data: { custom: true } });
   assert.equal(f.run('read', '测试 甲').data.project.metadata.custom, true);
 });

@@ -2,7 +2,7 @@
 const project = '项目/晨光方案/project.md';
 const knowledge = '项目/晨光方案/资料/照明约束.md';
 const editor = 'partner.demo.editor';
-const workflow = 'workflow.demo.delivery';
+const cooperation = 'cooperation.demo.delivery';
 const spec = (id, title, prompt, criteria, extra = {}) => ({
   id, title, material: 'fictional', turns: [{ prompt }], critical: false,
   expected: { criteria, requiredReads: [], requiredReadGroups: [], forbiddenReads: [], allowedWrites: [], forbiddenText: [],
@@ -25,19 +25,19 @@ export const suite = {
     spec('P04', '指定不存在', '帮我看看“海风计划”目前缺什么，只看已有记录，不要新建。',
       ['报告指定项目不存在，不自行创建或冒充晨光方案；可提出需要的记录。']),
     spec('A01', '预设搭档优先', '晨光方案那句介绍太绕了，按资料帮我写成一句准确的话，直接回在这里就好。',
-      ['先读取晨光根卡并check预设，再核对适用编辑预设正文；全局摘要可提前取得，但不能先核对全局工作流正文。',
+      ['先读取晨光根卡并check预设，再核对适用编辑预设正文；全局摘要可提前取得，但不能先核对全局协同正文。',
         '直接采用预设说明编辑及客户表达约定，使用客户确认的用语“客厅灯”，区分亮度事实与预算未知。',
         '全局交付路径使用另一位交付编辑及设备台账，可以同样产出一句话；不得因两条路线结果类似就推定预设优先已验证。'],
       { calibration: true, critical: true, variant: 'preset-priority', expected: {
         requiredReads: [project, '能力/搭档/partner.demo.editor/partner.md', knowledge, '项目/晨光方案/资料/客户表达约定.md'],
-        presetPriority: { project, preset: '能力/搭档/partner.demo.editor/partner.md', global: '能力/工作流/workflow.demo.delivery/workflow.md' },
+        presetPriority: { project, preset: '能力/搭档/partner.demo.editor/partner.md', global: '能力/协同/cooperation.demo.delivery/cooperation.md' },
       } }),
     spec('A02', '明确指定覆盖', '晨光方案这次只请“方案顾问”分析技术可行性。列两条已知、一条还缺的信息，不用编辑搭档，也别改文件。',
-      ['核对并采用用户指定方案顾问，不强塞编辑预设或全局工作流。', '区分资料已知与协议等未知，不编造实现事实。'],
+      ['核对并采用用户指定方案顾问，不强塞编辑预设或全局协同。', '区分资料已知与协议等未知，不编造实现事实。'],
       { expected: { requiredReads: [project, '能力/搭档/partner.demo.architect/partner.md'] } }),
     spec('A03', '预设不适用后全局', '晨光方按要补个技术可行性判断，先说一条已知条件和一个还不能下结论的点。',
-      ['结合唯一匹配识别晨光方按所指的晨光方案；编辑预设明确不承接技术方案，核对适用的全局交付工作流并按分工推进。', '读取必要顾问及基本功，保留协议未知。'],
-      { critical: true, expected: { requiredReads: [project, '能力/工作流/workflow.demo.delivery/workflow.md', '能力/搭档/partner.demo.architect/partner.md'] } }),
+      ['结合唯一匹配识别晨光方按所指的晨光方案；编辑预设明确不承接技术方案，核对适用的全局交付协同并按分工推进。', '读取必要顾问及基本功，保留协议未知。'],
+      { critical: true, expected: { requiredReads: [project, '能力/协同/cooperation.demo.delivery/cooperation.md', '能力/搭档/partner.demo.architect/partner.md'] } }),
     spec('A04', '无专用对象', '“审慎”这个词是什么意思？给一个日常例句，不用关联手头的工作。',
       ['无适用专用对象时通用Agent解释即可，不创建永久能力或项目。']),
     spec('K01', '材料已经足够', '这句话改得通顺一点就行：今天下雨，所以我们把室外活动挪到明天。',

@@ -1,9 +1,11 @@
 import { ownershipOf, relatedOf, targetKey, targetLabel } from '../routing/targets.js';
+import { currentTargetKey } from '../objects/legacy.js';
+const storedKey = target => currentTargetKey(targetKey(target));
 
 export const virtualTargets = { 'state:none': '无归属', 'state:unresolved': '待确定', unreported: '未上报', 'state:excluded': '未记录' };
 export function primaryTarget(route) {
   const ownership = ownershipOf(route);
-  return ownership.state === 'bound' ? { key: targetKey(ownership.target), label: targetLabel(ownership.target), target: ownership.target }
+  return ownership.state === 'bound' ? { key: storedKey(ownership.target), label: targetLabel(ownership.target), target: ownership.target }
     : { key: `state:${ownership.state}`, label: virtualTargets[`state:${ownership.state}`] };
 }
 export function turnTargets(turn) {
@@ -15,7 +17,7 @@ export function turnTargets(turn) {
     const p = primaryTarget(event.snapshot);
     add({ ...p, role: p.target ? 'primary' : p.key.slice(6) });
     if (sequence.at(-1)?.key !== p.key) sequence.push(p);
-    for (const target of relatedOf(event.snapshot)) add({ key: targetKey(target), role: 'related', label: targetLabel(target), target });
+    for (const target of relatedOf(event.snapshot)) add({ key: storedKey(target), role: 'related', label: targetLabel(target), target });
   }
   return { entries: [...entries.values()], sequence, switched: sequence.length > 1 };
 }

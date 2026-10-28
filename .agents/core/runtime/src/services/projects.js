@@ -1,8 +1,10 @@
+import {replaceFileSync as renameSync,removePathSync as rmSync} from '../platform/index.js';
+import {portable} from '../shared/paths.js';
 import { sha256 as sha } from '../shared/hash.js';
 import { locations, publicProject, validateWrite, encodeProject, planProjectWrite, planProjectRemoval } from '../projects/plan.js';
 import { withTemporaryFile } from '../shared/files.js';
 import {
-  lstatSync, readdirSync, mkdirSync, rmdirSync, unlinkSync, linkSync, renameSync, rmSync, realpathSync,
+  lstatSync, readdirSync, mkdirSync, rmdirSync, unlinkSync, linkSync, realpathSync,
 } from 'node:fs';
 import { join, relative } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -51,10 +53,10 @@ function list(root, check = false, projectScope = 'current') {
         if (checked) errors.push(...checked.errors);
         projects.push(check ? checked.data : {
           name, scope: projectScope, title: titleOf(parsed, name), description: parsed.values.description ?? null,
-          status: parsed.values.status ?? null, path: relative(root, target),
+          status: parsed.values.status ?? null, path: portable(relative(root, target)),
         });
       } catch (error) {
-        if (check) projects.push({ name, scope: projectScope, path: relative(root, target), valid: false });
+        if (check) projects.push({ name, scope: projectScope, path: portable(relative(root, target)), valid: false });
         errors.push(errorItem(error, folder));
       }
     }
@@ -64,7 +66,7 @@ function list(root, check = false, projectScope = 'current') {
 
 function checkProject(root, name, parsed, scope = 'current') {
   const result = checkRouting({ root, name, values: parsed.values, scope });
-  return { data: { name, scope, path: relative(root, locations(root, name, scope).target), valid: result.errors.length === 0,
+  return { data: { name, scope, path: portable(relative(root, locations(root, name, scope).target)), valid: result.errors.length === 0,
     state: parsed.state, ...(result.routing ? { routing: result.routing } : {}) }, errors: result.errors };
 }
 
@@ -96,7 +98,7 @@ function tree(folder, exclude) {
     if (entry.isSymbolicLink() || (!entry.isFile() && !entry.isDirectory())) {
       fail('PROJECT_RESOURCE_UNSUPPORTED', 'Removal supports ordinary files and directories only.', { target: path });
     }
-    const name = relative(folder, path);
+    const name = portable(relative(folder, path));
     if (name.split('/').some(segment => segment.startsWith('.ksf-metadata-') || segment.startsWith('.ksf-project-'))) {
       fail('PROJECT_RESOURCE_BUSY', 'Project contains a locked or temporary resource.', { target: path });
     }

@@ -2,7 +2,7 @@
 id: "competency.ksf.project-route"
 name: "project-route"
 description: "识别项目归属，核实根卡、工程和可选 routing 预设，渐进准备必要项目事实；区分无项目、归属待定与读取失败，只向 runtime 返回上下文和缺口，不选择最终能力或扩大写入范围。"
-version: 0.1.8
+version: 0.1.9
 status: active
 references: []
 ---
@@ -13,7 +13,7 @@ references: []
 
 形成足以继续当前任务的项目上下文：明确主项目或无项目、实际读取的事实与来源、工作区关联、未决条件和下一步。结果先保存在当前任务底稿，不自动生成持久绑定或项目文件。
 
-本基本功由 ksf-runtime 按需使用，属于固定系统运行机制，用户区同名对象不能接管。能力选择由 ability-route 持有；本基本功只解决项目归属与事实准备，不代替工作流或搭档的专业判断。
+本基本功由 ksf-runtime 按需使用，属于固定系统运行机制，用户区同名对象不能接管。能力选择由 ability-route 持有；本基本功只解决项目归属与事实准备，不代替协同或搭档的专业判断。
 
 发现根卡、来源或入口缺口时，把具体缺口及影响返回 runtime。用户明确要求创建、导入、整理或补全项目时，由 runtime 按[项目接入与补全](../project-intake/competency.md)组织专业处理，再按资产维护落实保存；本路由不自行复制材料、补写事实或在每轮任务持久补全项目。
 
@@ -39,7 +39,7 @@ references: []
 
 协同过程、返回内容和完整分支遵循[核心运行、项目与能力路由协作](../../../docs/runtime/routing.md)。本基本功只向 runtime 返回，不自行调用能力路由。把主项目、资料范围、工程状态、原始 routing、逐项校验结果及具体缺口交给它；后续补充只读受影响事实。
 
-根卡可选 routing 含 workflows、partners、competencies、data_packages 列表，结构以[项目 CLI](../../../docs/cli/project.md)为准，示例见[配置模板](../../../docs/templates/project-routing.md)。读取根卡后：没有 routing 则明确无预设；存在时执行 `ksf project check <项目目录名> --json`，读取 data.routing.entries 和 errors，把有效项和错误一起返回。check 失败不阻止 project read 取得其他事实，不将失效配置当作无项目。
+根卡可选 routing 含 cooperations、partners、competencies、data_packages 列表，结构以[项目 CLI](../../../docs/cli/project.md)为准，示例见[配置模板](../../../docs/templates/project-routing.md)。读取根卡后：没有 routing 则明确无预设；存在时执行 `ksf project check <项目目录名> --json`，读取 data.routing.entries 和 errors，把有效项和错误一起返回。check 失败不阻止 project read 取得其他事实，不将失效配置当作无项目。
 
 能力项提供精确 ref 和可选 source；显式来源仅约束该项。这里不按配置直接执行、不加载全部能力或资料正文、不替对象读个人设置。项目偏好由能力路由核对任务适用性，资料由承接能力按明确约定采用。配置不授予写入权，也不充当强制入口或候选白名单。
 
@@ -63,7 +63,7 @@ references: []
 
 无项目是正常结果，不需要知识或能力先找到项目才能工作。指定项目不存在应明确报告；只有明确要求创建才交资产维护落实。档案 scope 或原位 status 为 archived 的项目默认不选，明确指定可按请求读取，不自动恢复或改 active。发现失败或根卡损坏不能当作无项目。归属未定但已授权文件可独立处理时，保留待定状态继续指定范围内工作。
 
-一个任务确定一个主项目；其他项目作为明确范围的资料引用。多个独立交付需要分别处理时，在本次任务底稿分别说明，不自动创建跨项目工作流。归属确定不产生写入权，实际写入仍以任务授权为准。
+一个任务确定一个主项目；其他项目作为明确范围的资料引用。多个独立交付需要分别处理时，在本次任务底稿分别说明，不自动创建跨项目协同。归属确定不产生写入权，实际写入仍以任务授权为准。
 
 ## 项目事实与工程事实
 

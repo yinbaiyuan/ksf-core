@@ -1,11 +1,33 @@
 {
   "index.html": {
-    "file": "assets/index-CwWeLzIs.js",
+    "file": "assets/index-DfNmCs89.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
+    "dynamicImports": [
+      "src/apps/app-store.tsx"
+    ],
     "css": [
-      "assets/index-Cqq9sb9Y.css"
+      "assets/index-Bg1K872Y.css"
+    ],
+    "assets": [
+      "assets/summit-dawn-CjlLNYcC.jpg"
     ]
+  },
+  "src/apps/app-store.tsx": {
+    "file": "assets/app-store-C9avCTBA.js",
+    "name": "app-store",
+    "src": "src/apps/app-store.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ],
+    "css": [
+      "assets/app-store-C5qhXk7S.css"
+    ]
+  },
+  "src/assets/summit-dawn.jpg": {
+    "file": "assets/summit-dawn-CjlLNYcC.jpg",
+    "src": "src/assets/summit-dawn.jpg"
   }
 }

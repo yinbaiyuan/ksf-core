@@ -2,7 +2,7 @@ import { MetadataError } from '../metadata/errors.js';
 import { parseReference, protectedPaths } from '../objects/schema.js';
 import { validSourceId } from '../sources/schema.js';
 
-export const abilityFields = { workflows: 'workflow', partners: 'partner', competencies: 'competency', data_packages: 'data-package' };
+export const abilityFields = { cooperations: 'cooperation', partners: 'partner', competencies: 'competency', data_packages: 'data-package' };
 export const fields = Object.keys(abilityFields);
 export const mapping = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const issue = (field, message, code = 'PROJECT_ROUTING_INVALID') => ({ code, message, field });
@@ -25,7 +25,8 @@ export function entryProblems(field, entry, index, scope = 'current') {
 
 export function routingProblems(value, scope = 'current') {
   if (!mapping(value)) return [issue('routing', 'Expected an optional routing mapping.')];
-  const errors = Object.keys(value).filter(key => !fields.includes(key)).map(key => key === 'knowledge'
+  const errors = Object.keys(value).filter(key => !fields.includes(key)).map(key => key === 'workflows'
+    ? issue('routing.workflows', 'Use routing.cooperations and cooperation.* references; run ksf cooperation migrate --apply for existing projects.', 'PROJECT_ROUTING_FIELD_RENAMED') : key === 'knowledge'
     ? issue('routing.knowledge', 'routing.knowledge has been removed. Remove this field; link project facts from the project body and declare reusable materials in the adopted ability.', 'PROJECT_ROUTING_KNOWLEDGE_REMOVED')
     : issue(`routing.${key}`, 'Unknown routing field.'));
   for (const field of fields) {

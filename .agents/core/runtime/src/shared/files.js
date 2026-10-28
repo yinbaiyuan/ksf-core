@@ -22,15 +22,19 @@ export function readFileSnapshot(target, { entry = lstatSync(target), noFollow =
 }
 
 export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, onCleanup } = {}) {
-  let fd;
+  let fd, owned;
   try {
     try { fd = openSync(path, 'wx', 0o600); }
     catch (error) { if (error.code === 'EEXIST') onLocked?.(); throw error; }
+    owned = fstatSync(fd);
     writeFileSync(fd, JSON.stringify(owner) + '\n');
+    // Exclusivity belongs to the atomically created name. Retaining its file
+    // handle is unnecessary and blocks parent-directory publication on Windows.
+    closeSync(fd); fd = undefined;
     return action({ lock: path });
   } finally {
-    if (fd !== undefined) {
-      const owned = fstatSync(fd); closeSync(fd);
+    if (fd !== undefined) closeSync(fd);
+    if (owned) {
       try {
         const current = lstatSync(path);
         if (owned.dev === current.dev && owned.ino === current.ino) unlinkSync(path);

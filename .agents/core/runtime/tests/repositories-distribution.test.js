@@ -1,3 +1,4 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
@@ -16,7 +17,7 @@ test('Core and workspace releases never collect private repositories or their Gi
   writeFileSync(join(folder, 'config'), sentinel);
   writeFileSync(join(f.root, 'repositories/private/source.txt'), sentinel);
   const built = await buildRelease({ root: f.root, output: join(f.directory, 'repository-isolation') });
-  const platform = built.index.platforms['darwin-arm64'];
+  const platform = built.index.platforms[fixtureTarget];
   const core = inspectCoreArchive(readFileSync(join(built.output, platform.core.name))).entries;
   const workspace = readArchive(readFileSync(join(built.output, platform.workspace.name)));
   for (const entries of [core, workspace]) {

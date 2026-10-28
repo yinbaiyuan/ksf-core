@@ -1,3 +1,4 @@
+import {gitBinary} from './helpers/platform.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, existsSync, rmSync, symlinkSync } from 'node:fs';
@@ -51,7 +52,7 @@ test('same-name ability targets remain separate by actual source and missing sou
   const f=routingFixture(t), source=routingFixture(t), id='partner.test.method';
   f.add(id,'user');f.add(id,'system');const linked=source.add(id);
   writeFileSync(linked,readFileSync(linked,'utf8').replace('user_revision: 1\n',''));
-  assert.equal(spawnSync('/usr/bin/git',['init','--template=','--initial-branch=main',source.root]).status,0);
+  assert.equal(spawnSync(gitBinary,['init','--template=','--initial-branch=main',source.root]).status,0);
   abilitySource({root:f.root,operation:'init',target:source.root,id:'linked',name:'Linked'});
   abilitySource({root:f.root,operation:'link',target:source.root});
   const goals=['user','system','linked'].map(source=>resolveReport(definitionContext(f.root),targetReport({kind:'ability',ref:id,source})).ownership.target);

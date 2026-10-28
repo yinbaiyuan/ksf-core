@@ -1,3 +1,4 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'node:http';
@@ -35,7 +36,7 @@ test('a real HTTP Release API/index/archive chain upgrades a copied workspace on
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   origin = `http://127.0.0.1:${server.address().port}`;
-  index.platforms['darwin-arm64'].core.url = origin + '/core.tar.gz';
+  index.platforms[fixtureTarget].core.url = origin + '/core.tar.gz';
   const result = await systemUpdate({ root: f.workspace, source: origin + '/latest' });
   assert.equal(result.to, '0.1.1'); assert.equal(installedManifest(f.workspace).version, '0.1.1');
 });

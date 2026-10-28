@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "sdkVersion": 2,
+  "id": "example.cards",
+  "name": "卡片示例",
+  "description": "开发包中的虚构示例",
+  "version": "1.0.0",
+  "permissions": [],
+  "cards": [
+    {
+      "id": "summary",
+      "name": "摘要",
+      "description": "独立实例配置，共享应用后端",
+      "entry": "frontend/cards/summary.js",
+      "defaultSize": {
+        "w": 2,
+        "h": 2
+      },
+      "minSize": {
+        "w": 1,
+        "h": 1
+      }
+    },
+    {
+      "id": "detail",
+      "name": "明细",
+      "description": "独立实例配置，共享应用后端",
+      "entry": "frontend/cards/detail.js",
+      "defaultSize": {
+        "w": 2,
+        "h": 2
+      },
+      "minSize": {
+        "w": 1,
+        "h": 1
+      }
+    }
+  ],
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  }
+}

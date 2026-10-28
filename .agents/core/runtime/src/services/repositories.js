@@ -1,3 +1,5 @@
+import {portable} from '../shared/paths.js';
+import { platform,gitExecutable } from '../platform/index.js';
 import { withExclusiveLock } from '../shared/files.js';
 import { lstatSync, realpathSync, readdirSync, mkdirSync, rmdirSync } from 'node:fs';
 import { resolve, join, relative, dirname, basename, isAbsolute, sep } from 'node:path';
@@ -6,7 +8,7 @@ import { MetadataError, invalid } from '../metadata/errors.js';
 import { project, updateProjectMetadata } from './projects.js';
 
 const fail = (code, message, target) => { throw new MetadataError(code, message, target ? { target } : {}); };
-const binary = process.platform === 'win32' ? 'git' : '/usr/bin/git';
+const binary = gitExecutable;
 // Local, non-mutating status for callers preparing a targeted contribution.
 export function repositoryWorktreeChanges(path, paths) {
   const result = git(path, ['-c', 'core.fsmonitor=false', 'status', '--porcelain=v1', '-z', '--untracked-files=all', '--ignored', '--', ...paths]);
@@ -18,7 +20,7 @@ export function repositoryErrorItem(error, target) {
   return { code: 'REPOSITORY_IO_FAILED', message: 'Cannot access repository files.', ...(target ? { target } : {}) };
 }
 const inside = (root, path) => { const rel = relative(root, path); return rel === '' || (!isAbsolute(rel) && rel !== '..' && !rel.startsWith('..' + sep)); };
-const display = (root, path) => inside(root, path) ? relative(root, path) || '.' : path;
+const display = (root, path) => inside(root, path) ? portable(relative(root, path)) || '.' : path;
 function stat(path) {
   try { return lstatSync(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
 }
@@ -101,6 +103,7 @@ function withRepositoryLock(root, action) {
 
 function create(root, name, dryRun, hooks) {
   if (typeof name !== 'string' || !name.trim() || ['.', '..'].includes(name) || /[/\\\x00-\x1f\x7f]/.test(name) || name.startsWith('.ksf-')) invalid('Repository creation requires one ordinary directory name.');
+  if(!platform.validSegment(name))invalid('Repository name is not supported by the native filesystem.');
   // Reserve case variants, Windows trailing dots/spaces and HFS+ ignored characters.
   const gitName = name.replace(/[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/g, '').replace(/[. ]+$/, '').toLowerCase();
   if (gitName === '.git') invalid('The name .git and its filesystem-equivalent forms are reserved for Git metadata.');
@@ -160,7 +163,7 @@ export function repository({ root, operation, target, projectName, scope = 'curr
       const remaining = before.filter(entry => entry.absolute !== path).map(entry => entry.value);
       const exists = before.some(entry => entry.absolute === path);
       if (operation === 'link') {
-        return { repositories: exists ? before.map(entry => entry.value) : [...remaining, inside(root, path) ? relative(folder, path) : path] };
+        return { repositories: exists ? before.map(entry => entry.value) : [...remaining, inside(root, path) ? portable(relative(folder, path)) : path] };
       }
       return exists ? { repositories: remaining } : {};
     }, hooks);

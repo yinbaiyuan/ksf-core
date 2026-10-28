@@ -24,3 +24,9 @@
 .DS_Store
 
 # 已跟踪文件不受忽略规则保护，提交前仍须检查差异。
+
+# Local dependency installations and build caches are not Core source.
+/.agents/core/applications/*/node_modules/
+/.agents/core/applications/*/.build/
+/.agents/core/runtime/native-build/node_modules/
+/.agents/core/runtime/vendor-build/node_modules/

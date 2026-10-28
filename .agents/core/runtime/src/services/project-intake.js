@@ -1,11 +1,13 @@
+import {portable} from '../shared/paths.js';
 import {
   constants, lstatSync, readdirSync, openSync, closeSync, fstatSync, readSync, writeSync,
   fsyncSync, fchmodSync, mkdirSync, linkSync, renameSync, unlinkSync, readFileSync,
 } from 'node:fs';
-import { resolve, join, dirname, basename, relative, isAbsolute, parse } from 'node:path';
+import { resolve, join, dirname, basename, relative as nativeRelative, isAbsolute, parse } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';
 
+const relative=(...args)=>portable(nativeRelative(...args));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hashPattern = /^[a-f0-9]{64}$/;
 const issue = (code, message) => Object.assign(new Error(message), { code });

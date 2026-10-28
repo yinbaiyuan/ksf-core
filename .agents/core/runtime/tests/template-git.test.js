@@ -1,3 +1,5 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -13,7 +15,7 @@ function fixture(t) {
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const env = { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null', GIT_TERMINAL_PROMPT: '0' };
   const git = (root, args) => {
-    const result = spawnSync('/usr/bin/git', ['-C', root, ...args], { env, encoding: 'utf8' });
+    const result = spawnSync(gitBinary, ['-C', root, ...args], { env, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr); return result.stdout.trim();
   };
   const remote = join(directory, 'remote.git'), source = join(directory, 'source'); mkdirSync(source);
@@ -35,8 +37,8 @@ function fixture(t) {
 
 test('real shipped Node archive transfers via Git, preserving bytes, executable modes, Chinese paths and deletions', async t => {
   const f = fixture(t), config = JSON.parse(readFileSync(join(repository, '.agents/core/build.json')));
-  const path = config.runtime.packages['darwin-arm64'].archive_path, bytes = readFileSync(join(repository, path));
-  assert.ok(bytes.length > 50 * 1024 * 1024, 'Regression must exercise the actual >50 MiB shipped archive.');
+  const path = config.runtime.packages[fixtureTarget].archive_path, bytes = readFileSync(join(repository, path));
+  assert.ok(bytes.length > 32 * 1024 * 1024, 'Regression must exercise the actual >32 MiB shipped archive.');
   f.entries.set(path, { path, bytes, mode: 0o644 });
   const before = f.head(), result = await publishGitTemplate(f.options());
   assert.equal(result.pushFailed, false); assert.equal(f.head(), result.commit);

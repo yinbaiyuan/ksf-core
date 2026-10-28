@@ -1,4 +1,4 @@
-import { parseReference } from '../objects/schema.js';
+import { parseReference, parseStoredReference } from '../objects/schema.js';
 import { validSourceId } from '../sources/schema.js';
 
 export const ROUTE_PROTOCOL = 'ksf-routing-v1';
@@ -73,8 +73,8 @@ export function validateStoredTarget(t) {
   if (t.kind === 'project') validateProject({ name: t.name, scope: t.scope });
   else if (t.kind === 'knowledge' || t.kind === 'archive') validateTarget({ kind: t.kind, path: t.path });
   else {
-    validateTarget({ kind: 'ability', ref: t.ref, source: t.source });
-    const ref = parseReference(t.ref);
+    if (!['user', 'system', 'effective'].includes(t.source) && !validSourceId(t.source)) invalid('Invalid historical ability source.');
+    const ref = parseStoredReference(t.ref);
     if (ref.id !== t.id || ref.version !== t.version || !isKey(t.definitionDigest) || !['user', 'system'].includes(t.source) && !validSourceId(t.source)) invalid('Invalid ability target snapshot.');
   }
 }
@@ -187,7 +187,7 @@ export function validateRecord(document, key) {
           !isKey(a.definitionDigest) || typeof a.fixed !== 'boolean' || !['selected', 'read', 'adopted'].includes(a.stage) ||
           (!['user', 'system'].includes(a.source) && !validSourceId(a.source)) ||
           (a.userRevision !== null && (!Number.isSafeInteger(a.userRevision) || a.userRevision < 1))) corrupt();
-      try { const ref = parseReference(a.ref); if (ref.id !== a.id || ref.version !== a.version) corrupt(); } catch { corrupt(); }
+      try { const ref = parseStoredReference(a.ref); if (ref.id !== a.id || ref.version !== a.version) corrupt(); } catch { corrupt(); }
     }
   };
   try { validateTargetFacts(document.targetFacts); } catch { corrupt(); }

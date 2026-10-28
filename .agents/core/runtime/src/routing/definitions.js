@@ -8,6 +8,7 @@ import { encode, validateBindings } from './schema.js';
 import { catalog, summary } from '../objects/catalog.js';
 import { resolveObject } from '../objects/references.js';
 import { parseReference } from '../objects/schema.js';
+import { currentObjectId } from '../objects/legacy.js';
 import { project } from '../services/projects.js';
 import { fail } from './schema.js';
 import { ownershipOf, relatedOf, projectProjection, resolveKnowledge } from './targets.js';
@@ -23,7 +24,7 @@ function projectTarget(context, input) {
 export const registryFor = context => context.registry ??= targetRegistry(context.root);
 export function targetLocator(t, current = false) {
   if (t.kind === 'project') return { kind: t.kind, name: t.name, scope: t.scope };
-  if (t.kind === 'ability') return { kind: t.kind, ref: current ? t.id : t.ref, source: t.source };
+  if (t.kind === 'ability') return { kind: t.kind, ref: current ? currentObjectId(t.id) : t.ref, source: t.source };
   return { kind: t.kind, path: t.path };
 }
 export function resolveExistingTarget(context, input) {
@@ -100,8 +101,10 @@ export function decorateRecord(context, document) {
     const binding = currentBinding && currentBinding.targetVersion > value.targetVersion ? { currentBinding: checkTarget(currentBinding) } : {};
     if (value.lifecycle === 'planned') return { ...value, ...binding, freshness: 'planned' };
     try {
-      const actual = resolveExistingTarget(context, targetLocator(value, true));
-      return { ...value, ...binding, freshness: actual.path === value.path && (value.kind !== 'archive' || actual.entryType === value.entryType) && (value.kind !== 'ability' || actual.definitionDigest === value.definitionDigest && actual.version === value.version) ? 'current' : 'changed' };
+      const locator = targetLocator(value, true);
+      if (locator.kind === 'ability') locator.ref = currentObjectId(locator.ref);
+      const actual = resolveExistingTarget(context, locator);
+      return { ...value, ...binding, ...(value.kind === 'ability' && actual.id !== value.id ? { currentIdentity: { id: actual.id, ref: actual.ref, path: actual.path } } : {}), freshness: actual.path === value.path && (value.kind !== 'archive' || actual.entryType === value.entryType) && (value.kind !== 'ability' || actual.definitionDigest === value.definitionDigest && actual.version === value.version) ? 'current' : 'changed' };
     } catch (error) { return { ...value, ...binding, freshness: 'unavailable', error: { code: error.code ?? 'TARGET_READ_FAILED', message: 'Recorded target entry is unavailable.' } }; }
   };
   const current = document.current;
@@ -114,13 +117,14 @@ export function decorateRecord(context, document) {
       ownership: checkedOwnership, relatedTargets, ...projectProjection(checkedOwnership, relatedTargets),
       abilities: current.abilities.map(a => {
         try {
-          const row = resolveObject(context.catalog(), { id: a.id }, a.source);
+          const currentId = currentObjectId(a.id);
+          const row = resolveObject(context.catalog(), { id: currentId }, a.source);
           let effectiveChanged = null;
           try {
-            const effective = resolveObject(context.catalog(), { id: a.id });
+            const effective = resolveObject(context.catalog(), { id: currentId });
             effectiveChanged = effective.path !== a.path || effective.source !== a.source;
           } catch { /* Pinned source freshness is independent of effective-source ambiguity. */ }
-          return { ...a, freshness: row.digest === a.definitionDigest && row.path === a.path && row.metadata.status !== 'archived' ? 'current' : 'changed',
+          return { ...a, ...(currentId !== a.id ? { currentIdentity: { id: currentId, ref: `${currentId}@${row.metadata.version}`, path: row.path } } : {}), freshness: row.digest === a.definitionDigest && row.path === a.path && row.metadata.status !== 'archived' ? 'current' : 'changed',
             effectiveChanged };
         } catch (error) { return { ...a, freshness: 'unavailable', error: { code: error.code ?? 'OBJECT_READ_FAILED', message: 'Ability definition is unavailable.' } }; }
       }),

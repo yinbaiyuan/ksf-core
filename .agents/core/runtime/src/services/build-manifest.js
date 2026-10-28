@@ -9,11 +9,14 @@ import { join, relative } from 'node:path';
 import { products } from '../distribution/products.js';
 import { developmentPath } from '../distribution/paths.js';
 import { verifyWebBuild } from '../web/assets.js';
+import { platform, gitExecutable, replaceFileSync } from '../platform/index.js';
+import { supportedTargets, runtimePackage } from '../platform/catalog.js';
+import { zipMembers } from '../platform/zip.js';
+import { portable } from '../shared/paths.js';
 
 const digest = data => createHash('sha256').update(data).digest('hex');
 const exactVersion = /^\d+\.\d+\.\d+$/;
 const sha = /^[0-9a-f]{64}$/;
-const supportedTargets = new Set(['darwin-arm64', 'darwin-x64']);
 
 function fail(code, message) {
   throw Object.assign(new Error(message), { code });
@@ -45,11 +48,11 @@ function readConfig(root) {
     fail('BUILD_CONFIG_INVALID', 'Invalid KSF version, Node.js version, or release channel.');
   }
   const packages = config.runtime.packages;
-  keys(packages, [...supportedTargets], 'packages');
+  keys(packages, supportedTargets, 'packages');
   if (Object.keys(packages).length === 0) fail('BUILD_CONFIG_INVALID', 'At least one package is required.');
   for (const [target, item] of Object.entries(packages)) {
     keys(item, ['archive_path', 'archive_sha256'], target);
-    if (typeof item.archive_path !== 'string' || !/^\.agents\/core\/runtime\/packages\/[A-Za-z0-9_.-]+\.tar\.gz$/.test(item.archive_path) ||
+    if (typeof item.archive_path !== 'string' || !/^\.agents\/core\/runtime\/packages\/[A-Za-z0-9_.-]+\.(?:tar\.gz|zip)$/.test(item.archive_path) ||
         item.archive_path.includes('..') || typeof item.archive_sha256 !== 'string' || !sha.test(item.archive_sha256)) {
       fail('BUILD_CONFIG_INVALID', `Invalid archive path or trusted SHA256 for ${target}.`);
     }
@@ -69,7 +72,7 @@ function archiveFingerprint(path) {
 }
 
 async function hashNodeMember(path, member) {
-  const child = spawn('/usr/bin/tar', ['-xOzf', path, member], { env: { ...process.env, LC_ALL: 'C' } });
+  const child = spawn(platform.tool('tar'), ['-xOzf', path, member], { env: { ...process.env, LC_ALL: 'C' } });
   const hash = createHash('sha256');
   let stderr = '';
   child.stdout.on('data', data => hash.update(data));
@@ -86,7 +89,7 @@ async function hashNodeMember(path, member) {
 }
 
 function gitInfo(root) {
-  const run = args => spawnSync('/usr/bin/git', ['-C', root, ...args], { encoding: 'utf8' });
+  const run = args => spawnSync(gitExecutable, ['-C', root, ...args], { encoding: 'utf8' });
   const top = run(['rev-parse', '--show-toplevel']);
   if (top.status !== 0 || realpathSync(top.stdout.trim()) !== root) return { source_revision: null, source_dirty: null };
   const revision = run(['rev-parse', '--verify', 'HEAD']);
@@ -98,7 +101,7 @@ function gitInfo(root) {
 function sourceDigest(root, packages) {
   const files = [];
   function walk(path) {
-    const rel = relative(root, path);
+    const rel = portable(relative(root, path));
     if (developmentPath(rel) || rel === '.agents/core/manifest.yaml' || rel === '.agents/core/release.json' || rel === '.agents/core/runtime/packages' || /^\.agents\/core\/\.manifest\.yaml\./.test(rel)) return;
     const stat = lstatSync(path);
     if (stat.isSymbolicLink()) fail('BUILD_SOURCE_INVALID', `System source must not be a symlink: ${rel}`);
@@ -135,20 +138,25 @@ export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
     const before = archiveFingerprint(path);
     const archiveSha256 = await hashFile(path);
     if (archiveSha256 !== input.archive_sha256) fail('ARCHIVE_INVALID', `Archive SHA256 mismatch for ${target}.`);
-    const archiveRoot = `node-v${config.runtime.version}-${target}`;
-    const listing = spawnSync('/usr/bin/tar', ['-tvzf', path, `${archiveRoot}/bin/node`, `${archiveRoot}/LICENSE`], {
-      encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' }, timeout: 30_000,
-    });
-    const entries = listing.stdout?.trim().split('\n') ?? [];
-    if (listing.status !== 0 || entries.length !== 2 || entries.some(entry => !entry.startsWith('-'))) {
-      fail('ARCHIVE_INVALID', `Required regular Node.js and LICENSE entries missing for ${target}.`);
+    const spec = runtimePackage(target, config.runtime.version), archiveRoot = spec.archiveRoot;
+    let nodeSha256;
+    if (spec.format === 'zip') {
+      if (!input.archive_path.endsWith('.zip')) fail('ARCHIVE_INVALID', 'Windows runtime requires its official ZIP.');
+      const members = zipMembers(readFileSync(path), [spec.nodeMember, spec.licenseMember]);
+      nodeSha256 = digest(members.get(spec.nodeMember));
+    } else {
+      const listing = spawnSync(platform.tool('tar'), ['-tvzf', path, spec.nodeMember, spec.licenseMember], {
+        encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' }, timeout: 30_000,
+      });
+      const entries = listing.stdout?.trim().split('\n') ?? [];
+      if (listing.status !== 0 || entries.length !== 2 || entries.some(entry => !entry.startsWith('-'))) fail('ARCHIVE_INVALID', `Required regular Node.js and LICENSE entries missing for ${target}.`);
+      nodeSha256 = await hashNodeMember(path, spec.nodeMember);
     }
-    const nodeSha256 = await hashNodeMember(path, `${archiveRoot}/bin/node`);
     if (before !== archiveFingerprint(path)) fail('BUILD_INPUT_CHANGED', `Archive changed while building: ${target}.`);
     fingerprints.set(path, before);
     packages[target] = { archive_path: input.archive_path, archive_root: archiveRoot,
       archive_sha256: archiveSha256, node_sha256: nodeSha256,
-      distribution_url: `https://nodejs.org/dist/v${config.runtime.version}/${archiveRoot}.tar.gz` };
+      distribution_url: spec.distributionURL };
   }
   const sourceSha256 = sourceDigest(root, packages);
   const manifest = {
@@ -176,7 +184,7 @@ export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
         [...fingerprints].some(([archive, fingerprint]) => archiveFingerprint(archive) !== fingerprint)) {
       fail('BUILD_INPUT_CHANGED', 'Build inputs changed before manifest publication.');
     }
-    renameSync(temporary, path);
+    replaceFileSync(temporary, path);
   } finally {
     if (fd !== undefined) closeSync(fd);
     rmSync(temporary, { force: true });

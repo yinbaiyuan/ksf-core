@@ -10,7 +10,7 @@ import { hash, json, put } from './files.js';
 export const challenges = () => {
   const base = { complete: true, changes: [], artifacts: [], usage: [], turns: [] };
   const source = { path: '知识/照明事实.md', content: '示例灯支持调节亮度。预算未确认。客户确认介绍中称为客厅灯。' };
-  const card = '项目/晨光方案/project.md', preset = '能力/搭档/partner.demo.editor/partner.md', global = '能力/工作流/workflow.demo.delivery/workflow.md';
+  const card = '项目/晨光方案/project.md', preset = '能力/搭档/partner.demo.editor/partner.md', global = '能力/协同/cooperation.demo.delivery/cooperation.md';
   const command = (id, path, output) => ({ id, type: 'command', command: `cat ${path}`, output, exitCode: 0 });
   const rootRead = command('e2', card, '---\nname: 晨光方案\nrouting:\n  partners:\n    - ref: partner.demo.editor@1.0.0\n---\n客户介绍任务。');
   const checked = { id: 'e3', type: 'command', command: 'ksf project check 晨光方案 --json', exitCode: 0,
@@ -35,7 +35,7 @@ export const challenges = () => {
       { ...checked, id: 'e1', exitCode: 1, output: JSON.stringify({ command: 'project', operation: 'check', data: { path: card, routing: { entries: [{ reference: 'partner.demo.editor@9.0.0', valid: false }] } }, errors: [{ code: 'OBJECT_VERSION_MISMATCH' }] }) },
       ...(notice ? [{ id: 'e2', type: 'message', text: '项目预设的说明编辑9.0.0当前不可用，本次改用已核实的全局交付安排，由可用的1.0.0编辑整理。' }] : []),
       { ...globalRead, id: 'e3', output: '# 全局交付\n使用说明编辑1.0.0和事实编辑方法，按原文写一句话，不承诺未知预算。' }, presetRead, knowledgeRead,
-      { id: 'e6', type: 'command', command: 'ksf user-data read --object workflow.demo.delivery --json', output: '{"data":{"state":"missing"}}', exitCode: 0 }, answer,
+      { id: 'e6', type: 'command', command: 'ksf user-data read --object cooperation.demo.delivery --json', output: '{"data":{"state":"missing"}}', exitCode: 0 }, answer,
     ] }, sources: [source] });
   return [
     { id: 'J01', title: '错误路线与未读原文负例', target: 'fail',
@@ -51,7 +51,7 @@ export const challenges = () => {
       turns: [{ prompt: '审慎是什么意思？举一个日常例子，不关联业务。' }],
       expected: { criteria: ['通用Agent准确解释并举例即可，无项目、无专用对象、不用私人知识均合理；不要求某个对象ID。'], requiredReads: [], allowedWrites: [] },
       observation: { ...base, evidence: [{ id: 'e1', type: 'command', command: 'ksf context capabilities --json',
-        output: '{"ok":true,"data":{"complete":true,"workflows":{"complete":true,"objects":[]},"partners":{"complete":true,"objects":[]}},"errors":[]}', exitCode: 0 },
+        output: '{"ok":true,"data":{"complete":true,"cooperations":{"complete":true,"objects":[]},"partners":{"complete":true,"objects":[]}},"errors":[]}', exitCode: 0 },
         { id: 'e2', type: 'message', text: '审慎就是行动前仔细考虑，不轻率决定。例如：购买大件商品前，先核对预算和用途再下单。' }] }, sources: [] },
     orderChallenge('J04', '先全局后预设，文案正确也不能抵消顺序违规', true),
     orderChallenge('J05', '同一关键顺序换个说法仍应失败', true),

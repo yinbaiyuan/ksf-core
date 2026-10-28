@@ -10,9 +10,12 @@
 | --- | --- | --- |
 | launcher recover | 无需 Core/Node 恢复中断升级 | [启动入口](../../runtime/launcher.md) |
 | hello | 检查启动与输出链路 | [hello](hello.md) |
+| app | 用户指定应用后读取包内 CLI 文档并调用 | [应用 CLI](../app-development/cli.md) |
+| communication | 本机与内网消息、材料、Agent 收件及回执 | [公共通信](communication.md) |
 | web | 随包 Node 启动本地路由工作台及只读接口 | [web](web.md) |
 | route | Agent 会话路由记录、版本检查与查询 | [route](route.md) |
 | task | Codex 聊天任务逐轮原文、路由归档、Hooks 与补采 | [task](task.md) |
+| chat | 当前聊天轮次、能力参与计数、动态变量与有界自动上下文 | [chat](chat.md) |
 | runtime | 运行时完整校验 | [runtime](runtime.md) |
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
@@ -27,7 +30,7 @@
 | contribute | HEAD 已提交系统修改的审查与 Core PR | [contribute](contribute.md) |
 | commit-message | 提交信息格式检查与填写模板 | [commit-message](commit-message.md) |
 | pr-description | PR 标题、正文格式检查与模板 | [pr-description](pr-description.md) |
-| workflow | 工作流对象管理 | [workflow](workflow.md) |
+| cooperation | 协同对象管理 | [cooperation](cooperation.md) |
 | partner | 搭档对象管理 | [partner](partner.md) |
 | competency | 基本功对象管理 | [competency](competency.md) |
 | data-package | 数据包对象管理 | [data-package](data-package.md) |
@@ -43,10 +46,12 @@ CLI 适配、对象服务、目录/契约/解析/发布模块分开。对象层�
 
 ## 后续能力
 
-`context capabilities` 复用对象服务，一次提供完整有效的工作流和搭档摘要；项目基础命令已实现，Codex 聊天任务归档已实现，其他上下文操作及知识管理命令尚未形成确定接口。
+`context capabilities` 复用对象服务，一次提供完整有效的协同和搭档摘要；项目基础命令已实现，Codex 聊天任务归档已实现，其他上下文操作及知识管理命令尚未形成确定接口。
 
 ## 调用与维护
 
 Core 开发仓库与发行工作区在 macOS 调用 `.agents/ksf`，Windows 对应 `.agents/ksf.ps1`（目前仅入口恢复与转交契约）；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复已发起的中断事务；启动和普通命令不检查或安装新版本，维护命令只显式调用，详见 system。
 
 共同启动可能准备 `.agents/runtime-data/runtime/`，因此命令自身只读或预览不代表整个启动过程零写入。新增或变更接口时同步对应文档、公共规范、索引和能力说明，并运行相应回归、构建及真实入口验证。通过检查不代表获准提交或发布 Git。
+
+Assistant 的同源桌面读取与独立补采接口见 [assistant](assistant.md)。

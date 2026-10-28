@@ -1,13 +1,14 @@
 import { MetadataError } from '../metadata/errors.js';
+import { currentReference } from './legacy.js';
 
 export const types = {
-  workflow: { system: '.agents/core/abilities/workflows', user: '能力/工作流', entry: 'workflow.md' },
+  cooperation: { system: '.agents/core/abilities/cooperations', user: '能力/协同', entry: 'cooperation.md' },
   partner: { system: '.agents/core/abilities/partners', user: '能力/搭档', entry: 'partner.md' },
   competency: { system: '.agents/core/abilities/competencies', user: '能力/基本功', entry: 'competency.md' },
   'data-package': { system: '.agents/core/abilities/data-packages', user: '能力/数据包', entry: 'datapackage.md' },
 };
 export const protectedPaths = {
-  'workflow.ksf.entry': 'AGENTS.md',
+  'cooperation.ksf.entry': 'AGENTS.md',
   'partner.ksf.runtime': '.agents/core/abilities/partners/ksf-runtime/partner.md',
   'competency.ksf.ability-route': '.agents/core/abilities/competencies/ability-route/competency.md',
   'competency.ksf.project-route': '.agents/core/abilities/competencies/project-route/competency.md',
@@ -26,6 +27,8 @@ export function validId(id, type) {
 
 export function parseReference(reference, type, { exact = false } = {}) {
   if (typeof reference !== 'string') fail('OBJECT_REFERENCE_INVALID', 'Expected an object ID or ID@version.', { exitCode: 2 });
+  const replacement = currentReference(reference);
+  if (replacement !== reference) fail('OBJECT_RENAMED', 'Workflow abilities are now Cooperation. Use the new identity; migrate existing data with ksf cooperation migrate --apply.', { replacement, exitCode: 2 });
   const parts = reference.split('@');
   if (parts.length > 2 || !validId(parts[0], type) || (exact && parts.length !== 2) ||
       (parts.length === 2 && !versionPattern.test(parts[1]))) {
@@ -34,13 +37,19 @@ export function parseReference(reference, type, { exact = false } = {}) {
   return { id: parts[0], version: parts[1] };
 }
 
+export function parseStoredReference(reference) {
+  const parsed = parseReference(currentReference(reference));
+  return { id: reference.split('@')[0], version: parsed.version };
+}
+
 export function validateObject(metadata, { type, source, path }) {
   const errors = [];
   const issue = (field, message, code = 'OBJECT_METADATA_INVALID') => errors.push({ code, message, target: path, field });
   for (const field of ['id', 'name', 'status', 'description', 'version']) {
     if (typeof metadata[field] !== 'string' || !metadata[field].trim()) issue(field, 'Required object field must be a nonempty string.');
   }
-  if (!validId(metadata.id, type)) issue('id', 'ID must match the storage type and use three safe path segments.');
+  if (typeof metadata.id === 'string' && currentReference(metadata.id) !== metadata.id) issue('id', `Use ${currentReference(metadata.id)}; migrate existing data with ksf cooperation migrate --apply.`, 'OBJECT_RENAMED');
+  else if (!validId(metadata.id, type)) issue('id', 'ID must match the storage type and use three safe path segments.');
   if (!statuses.has(metadata.status)) issue('status', 'Expected draft, active or archived.');
   if (!versionPattern.test(metadata.version ?? '')) issue('version', 'Expected an exact x.y.z version.');
   if (source === 'user' && (!Number.isSafeInteger(metadata.user_revision) || metadata.user_revision < 1)) issue('user_revision', 'User objects require a positive integer revision.');
@@ -55,7 +64,7 @@ export function validateObject(metadata, { type, source, path }) {
     if (!Array.isArray(metadata.references)) issue('references', 'References must be an array of ID@version strings.');
     else for (const reference of metadata.references) {
       try { parseReference(reference, undefined, { exact: true }); }
-      catch { issue('references', 'Each reference must contain a valid ID and exact version.', 'OBJECT_REFERENCE_INVALID'); }
+      catch (error) { issue('references', error.code === 'OBJECT_RENAMED' ? error.message : 'Each reference must contain a valid ID and exact version.', error.code === 'OBJECT_RENAMED' ? error.code : 'OBJECT_REFERENCE_INVALID'); }
     }
   }
   const fixed = protectedPaths[metadata.id];

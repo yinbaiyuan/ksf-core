@@ -1,3 +1,4 @@
+import{platform}from'../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync, symlinkSync, readlinkSync, realpathSync } from 'node:fs';
@@ -159,7 +160,7 @@ for (const stage of ['moved', 'card-staged', 'card-written']) test(`real SIGKILL
   const f = fixture(t), url = new URL('../src/services/projects.js', import.meta.url).href;
   const code = `import { project } from ${JSON.stringify(url)}; project({root:${JSON.stringify(f.root)},operation:'archive',name:'甲',reason:'fixture'}, {fault(stage){if(stage===${JSON.stringify(stage)}) process.kill(process.pid,'SIGKILL');}});`;
   const child = spawnSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8', timeout: 10000 });
-  assert.equal(child.signal, 'SIGKILL', child.stderr);
+  if(platform.name==='win32')assert.equal(child.status,1,child.stderr);else assert.equal(child.signal, 'SIGKILL', child.stderr);
   const operationId = f.pending();
   const recovered = runProjectCommand(['recover', operationId], f.root);
   assert.equal(recovered.exitCode, 0, recovered.stdout);

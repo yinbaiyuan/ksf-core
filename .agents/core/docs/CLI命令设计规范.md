@@ -17,7 +17,7 @@ ksf <命令> <操作> [目标] [选项]
 | 要素 | 表达什么 | 示例 |
 | --- | --- | --- |
 | 程序入口 | 使用哪个工具 | `ksf` |
-| 顶级命令 | 管理哪个对象或能力领域 | `metadata`、`partner`、`workflow` |
+| 顶级命令 | 管理哪个对象或能力领域 | `metadata`、`partner`、`cooperation` |
 | 操作 | 对该领域做什么 | `read`、`write`、`remove`、`check` |
 | 目标参数 | 操作哪个明确目标 | 文件路径或对象引用 |
 | 选项 | 输入来源、范围或输出方式 | `--fields title`、`--from data.json`、`--json` |
@@ -31,7 +31,7 @@ ksf <命令> <操作> [目标] [选项]
 ## 二、命名要求
 
 - 命令、操作、长选项使用英文小写，多词用连字符连接，例如 `data-package`、`--dry-run`。不使用下划线、驼峰或随意缩写。
-- 对象命令优先使用单数名词，例如 `partner`、`workflow`、`competency`；集合操作通过 `list` 表达，不再增加复数命令。
+- 对象命令优先使用单数名词，例如 `partner`、`cooperation`、`competency`；集合操作通过 `list` 表达，不再增加复数命令。
 - 操作使用常用动词，名称描述用户意图，不暴露内部实现步骤。
 - 同一含义只保留一个标准名称。新的通用读取使用 `read`，不并设 `get/show/read`；通用检查使用 `check`，不并设 `check/validate`。
 - `init/set/patch` 不作为通用写入的平行入口；只有存在无法用统一操作表达的独立业务目的，才设计新的操作并说明差异。

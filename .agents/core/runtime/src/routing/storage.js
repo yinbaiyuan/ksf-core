@@ -1,4 +1,5 @@
-import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync, linkSync } from 'node:fs';
+import { replaceFileSync as renameSync } from '../platform/index.js';
+import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, linkSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes, randomUUID, createHmac } from 'node:crypto';
 import { readFileSnapshot, sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';
@@ -38,7 +39,8 @@ function secret(root, create) {
   let value = bytes(root, path, 32);
   if (!value) {
     const archive = managedPath(root, '档案/对话/Codex');
-    if (recordKeys(root).length || (existsSync(archive) && readdirSync(archive).some(isKey))) fail('ROUTE_KEY_INVALID', 'Routing identity key is missing while records or task archives remain; preserve the store.');
+    const chats = managedPath(root, '.agents/user-data/chats');
+    if (recordKeys(root).length || (existsSync(archive) && readdirSync(archive).some(isKey)) || (existsSync(chats) && readdirSync(chats).some(name => isKey(name) || name === 'config.json'))) fail('ROUTE_KEY_INVALID', 'Routing identity key is missing while routing, task or chat state remains; preserve the store.');
   }
   if (!value && create) {
     const target = managedPath(root, path, true);

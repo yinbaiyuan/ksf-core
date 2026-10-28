@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "ksf.terminal",
+  "name": "终端",
+  "version": "0.1.3",
+  "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
+  "author": "KSF",
+  "icon": "terminal",
+  "sdkVersion": 1,
+  "frontend": {
+    "entry": "frontend/index.js",
+    "styles": [
+      "frontend/index.css"
+    ]
+  },
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  },
+  "permissions": [
+    "shell",
+    "filesystem",
+    "network"
+  ],
+  "multiInstance": true,
+  "defaultSize": {
+    "width": 980,
+    "height": 640
+  },
+  "minSize": {
+    "width": 480,
+    "height": 320
+  }
+}

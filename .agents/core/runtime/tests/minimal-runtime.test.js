@@ -83,7 +83,7 @@ test('runtime competencies resist real and preview mutations and cannot be taken
 test('complete discovery cannot hide a missing required runtime definition from entry read/check', t => {
   const f = fixture(t);
   rmSync(join(f.root, '.agents/core/abilities/competencies/project-route'), { recursive: true });
-  // Discovery is an inventory of Workflow/Partner summaries, not a dependency certificate.
+  // Discovery is an inventory of Cooperation/Partner summaries, not a dependency certificate.
   assert.equal(contextCapabilities(f.root).data.complete, true);
   const read = f.query('partner', 'read', 'partner.ksf.runtime');
   assert.ok(read.errors.some(error => error.code === 'OBJECT_NOT_FOUND'));

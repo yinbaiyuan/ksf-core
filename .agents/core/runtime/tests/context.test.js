@@ -32,7 +32,7 @@ function snapshot(path) {
 test('empty scopes return complete, explicitly empty groups', t => {
   const f = fixture(t);
   assert.deepEqual(contextCapabilities(f.root), {
-    data: { complete: true, workflows: { complete: true, objects: [] }, partners: { complete: true, objects: [] } }, errors: [],
+    data: { complete: true, cooperations: { complete: true, objects: [] }, partners: { complete: true, objects: [] } }, errors: [],
   });
 });
 
@@ -40,14 +40,14 @@ test('context projects full descriptions, preserves order and fixed entries, and
   const f = fixture(t), description = '  适用场景：中文、冒号 : 和符号 #。\n第二行\n\n最后一行。\n';
   f.add('partner', 'user', 'partner.test.z', { name: '中文搭档', description });
   f.add('partner', 'system', 'partner.test.a');
-  f.add('workflow', 'system', 'workflow.test.flow');
+  f.add('cooperation', 'system', 'cooperation.test.flow');
   f.add('competency', 'system', 'competency.test.method', { description: 'COMPETENCY_SENTINEL' });
   for (const [id, path] of Object.entries(protectedPaths)) f.add(id.split('.')[0], 'system', id, {}, path);
   const before = snapshot(f.root);
   const result = contextCapabilities(f.root);
   assert.equal(result.data.complete, true, JSON.stringify(result.errors));
   assert.deepEqual(result.errors, []);
-  const objects = [...result.data.workflows.objects, ...result.data.partners.objects];
+  const objects = [...result.data.cooperations.objects, ...result.data.partners.objects];
   const z = objects.find(o => o.id === 'partner.test.z');
   assert.equal(z.description, description);
   assert.equal(z.name, '中文搭档');
@@ -56,18 +56,18 @@ test('context projects full descriptions, preserves order and fixed entries, and
     assert.deepEqual(Object.keys(object), ['id', 'name', 'description', 'path', 'protected', 'source']);
     assert.equal(object.protected, Object.hasOwn(protectedPaths, object.id));
   }
-  assert.ok(objects.some(o => o.id === 'workflow.ksf.entry'));
+  assert.ok(objects.some(o => o.id === 'cooperation.ksf.entry'));
   assert.ok(objects.some(o => o.id === 'partner.ksf.runtime'));
   assert.ok(!JSON.stringify(result).includes('PRIVATE_BODY_SENTINEL'));
   assert.ok(!JSON.stringify(result).includes('COMPETENCY_SENTINEL'));
-  for (const [type, group] of [['workflow', 'workflows'], ['partner', 'partners']]) {
+  for (const [type, group] of [['cooperation', 'cooperations'], ['partner', 'partners']]) {
     assert.deepEqual(result.data[group].objects.map(o => o.id), objectQuery({ root: f.root, type, operation: 'list' }).data.objects.map(o => o.id));
   }
   assert.deepEqual(contextCapabilities(f.root), result);
   assert.deepEqual(snapshot(f.root), before);
 });
 
-for (const [type, group] of [['workflow', 'workflows'], ['partner', 'partners']]) test(`${type}: draft descriptions are discovered immediately and status changes follow object resolution`, t => {
+for (const [type, group] of [['cooperation', 'cooperations'], ['partner', 'partners']]) test(`${type}: draft descriptions are discovered immediately and status changes follow object resolution`, t => {
   const f = fixture(t), id = `${type}.test.same`;
   f.add(type, 'system', id, { description: '系统定义' });
   const path = f.add(type, 'user', id, { description: '用户定义', status: 'draft' });
@@ -93,7 +93,7 @@ test('bad override does not expose its system copy; unrelated valid objects rema
   f.add('partner', 'system', 'partner.test.valid');
   const result = contextCapabilities(f.root);
   assert.equal(result.data.complete, false);
-  assert.equal(result.data.workflows.complete, true);
+  assert.equal(result.data.cooperations.complete, true);
   assert.equal(result.data.partners.complete, false);
   assert.deepEqual(result.data.partners.objects.map(o => o.id), ['partner.test.valid']);
   assert.ok(result.errors.some(e => e.type === 'partner' && e.field === 'description'));
@@ -102,25 +102,25 @@ test('bad override does not expose its system copy; unrelated valid objects rema
 test('one missing scope keeps the other object group complete and reports its type', t => {
   const f = fixture(t);
   f.add('partner', 'system', 'partner.test.valid');
-  rmSync(join(f.root, types.workflow.user), { recursive: true });
+  rmSync(join(f.root, types.cooperation.user), { recursive: true });
   const result = contextCapabilities(f.root);
   assert.equal(result.data.complete, false);
-  assert.equal(result.data.workflows.complete, false);
+  assert.equal(result.data.cooperations.complete, false);
   assert.equal(result.data.partners.complete, true);
   assert.equal(result.data.partners.objects.length, 1);
-  assert.ok(result.errors.every(e => e.type === 'workflow'));
+  assert.ok(result.errors.every(e => e.type === 'cooperation'));
 });
 
 test('same-source duplicates are reported while a broken unrelated type is not discovered', t => {
-  const f = fixture(t), id = 'workflow.test.same';
-  f.add('workflow', 'system', id);
-  f.add('workflow', 'system', id, {}, '.agents/core/abilities/workflows/duplicate/workflow.md');
+  const f = fixture(t), id = 'cooperation.test.same';
+  f.add('cooperation', 'system', id);
+  f.add('cooperation', 'system', id, {}, '.agents/core/abilities/cooperations/duplicate/cooperation.md');
   f.add('competency', 'system', 'competency.test.broken', { description: '' });
   const result = contextCapabilities(f.root);
-  assert.equal(result.data.workflows.complete, false);
-  assert.equal(result.data.workflows.objects.length, 0);
+  assert.equal(result.data.cooperations.complete, false);
+  assert.equal(result.data.cooperations.objects.length, 0);
   assert.ok(result.errors.some(e => e.code === 'OBJECT_ID_CONFLICT'));
-  assert.ok(result.errors.every(e => e.type === 'workflow'));
+  assert.ok(result.errors.every(e => e.type === 'cooperation'));
 });
 
 test('a second discovery sees changed descriptions without an index', t => {
@@ -135,7 +135,7 @@ test('unavailable root produces two incomplete groups without throwing', t => {
   const f = fixture(t);
   const result = contextCapabilities(join(f.root, 'missing'));
   assert.equal(result.data.complete, false);
-  assert.equal(result.data.workflows.complete, false);
+  assert.equal(result.data.cooperations.complete, false);
   assert.equal(result.data.partners.complete, false);
   assert.equal(result.errors.length, 2);
 });

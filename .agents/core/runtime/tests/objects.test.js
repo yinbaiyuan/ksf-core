@@ -1,3 +1,4 @@
+import {platform} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, realpathSync, symlinkSync, chmodSync, statSync } from 'node:fs';
@@ -30,7 +31,7 @@ function fixture(t) {
 
 test('capability scopes and exact references accept only the four supported types', t => {
   const f = fixture(t);
-  assert.deepEqual(Object.keys(types), ['workflow', 'partner', 'competency', 'data-package']);
+  assert.deepEqual(Object.keys(types), ['cooperation', 'partner', 'competency', 'data-package']);
   const current = catalog(f.root);
   assert.equal(current.scopes.length, 8);
   assert.deepEqual(current.errors, []);
@@ -114,7 +115,7 @@ test('derivation copies the entire directory, preserves raw baseline and rebases
   assert.deepEqual(readFileSync(system.path), before);
   assert.deepEqual(readFileSync(join(user, '.upstream/snapshot/partner.md')), before);
   assert.deepEqual(readFileSync(join(user, 'resources/data.bin')), Buffer.from([255, 0, 1]));
-  assert.equal(statSync(join(user, 'script.js')).mode & 0o111, 0o111);
+  if(platform.supportsPosixModes)assert.equal(statSync(join(user, 'script.js')).mode & 0o111, 0o111);
   assert.equal(existsSync(join(user, 'empty')), true);
   const origin = JSON.parse(readFileSync(join(user, '.upstream/origin.json')));
   assert.equal(origin.id, system.id);assert.equal(origin.version, '0.1.0');assert.equal(origin.ksf_version, '0.0.1');assert.equal(origin.files.length, 4);
@@ -146,7 +147,7 @@ test('user takeover ignores version until an exact version is requested', t => {
   assert.equal(f.query('partner', 'read', id + '@0.1.0').data.object.source, 'user');
   assert.equal(f.query('partner', 'read', id + '@0.2.0').data.object.source, 'system');
   assert.throws(() => f.query('partner', 'read', id + '@0.3.0'), { code: 'OBJECT_VERSION_MISMATCH' });
-  assert.equal(f.query('partner', 'read', id, { source: 'system' }).data.object.path, s.path.slice(f.root.length + 1));
+  assert.equal(f.query('partner', 'read', id, { source: 'system' }).data.object.path, s.path.slice(f.root.length + 1).replaceAll('\\','/'));
   f.mutate('partner', 'write', id, { input: { metadata: { status: 'archived' } } });
   assert.equal(f.query('partner', 'read', id).data.object.source, 'system');
   assert.equal(f.query('partner', 'read', id, { source: 'user' }).data.object.metadata.status, 'archived');
@@ -227,7 +228,7 @@ test('baseline mutation is detected; user edits never change the baseline or sys
 test('read-only system resources are copied to editable user resources while originals remain untouched', t => {
   const f = fixture(t), s = f.add('partner', 'system');chmodSync(s.path, 0o444);
   const result = f.mutate('partner', 'write', s.id, { input: {} }).data;
-  assert.equal(statSync(s.path).mode & 0o777, 0o444);
+  if(platform.supportsPosixModes)assert.equal(statSync(s.path).mode & 0o777, 0o444);
   assert.ok(statSync(join(f.root, result.path)).mode & 0o200);
   assert.equal(f.mutate('partner', 'write', s.id, { input: { body: '# Edited\n' } }).data.changed, true);
 });
@@ -280,7 +281,7 @@ test('wrong entry filenames are rejected as invalid rather than exposed as usabl
   const f = fixture(t);
   const object = f.add('partner', 'system');
   const bytes = readFileSync(object.path);rmSync(object.path);
-  writeFileSync(join(object.folder, 'workflow.md'), bytes);
+  writeFileSync(join(object.folder, 'cooperation.md'), bytes);
   const listed = f.query('partner', 'list', undefined, { source: 'all' });
   assert.equal(listed.data.complete, false);assert.deepEqual(listed.data.objects, []);
   assert.ok(listed.errors.some(e => e.code === 'OBJECT_ENTRY_INVALID'));

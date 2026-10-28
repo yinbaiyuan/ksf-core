@@ -75,7 +75,7 @@ test('committed additions, deletion, permissions, binary data and Chinese paths 
   const binary = '.agents/core/binary.bin', added = '.agents/core/新增 文件.txt';
   rmSync(join(f.workspace, example)); chmodSync(join(f.workspace, 'AGENTS.md'), 0o755);
   writeAtomic(join(f.workspace, binary), Buffer.from([0, 255, 10])); writeAtomic(join(f.workspace, added), 'committed new text\n');
-  commitWorkspace(f, { paths: [example, 'AGENTS.md', binary, added] });
+  commitWorkspace(f, { paths: [example, 'AGENTS.md', binary, added], modes:{'AGENTS.md':0o755} });
   const plan = await prepareContribution({ ...contributionDescription, root: f.workspace, all: true, dryRun: true });
   assert.equal(plan.changes.find(c => c.workspace_path === example).operation, 'delete');
   assert.equal(plan.changes.find(c => c.workspace_path === 'AGENTS.md').mode, 0o755);
@@ -122,7 +122,7 @@ test('schema 2 contribution baselines support removal of the old launcher withou
   const launcher = readFileSync(join(f.root, '.agents/ksf'));
   writeAtomic(join(f.root, '.agents/bin/ksf'), launcher, 0o755);
   rmSync(join(f.root, '.agents/ksf')); rmSync(join(f.root, '.agents/ksf.ps1'));
-  git(f.root, ['add', '--', '.agents']); git(f.root, ['commit', '-m', 'Fictional old launcher source']);
+  git(f.root, ['add', '--', '.agents']);git(f.root,['update-index','--chmod=+x','.agents/bin/ksf']);git(f.root, ['commit', '-m', 'Fictional old launcher source']);
   manifest.schema_version = 2; delete manifest.launcher_protocol;
   manifest.core.revision = git(f.root, ['rev-parse', 'HEAD']);
   manifest.files['.agents/bin/ksf'] = { ...manifest.files['.agents/ksf'], source_path: '.agents/bin/ksf' };
@@ -130,7 +130,7 @@ test('schema 2 contribution baselines support removal of the old launcher withou
   writeAtomic(join(f.workspace, '.agents/core/release.json'), stableJSON(manifest));
   writeAtomic(join(f.workspace, '.agents/bin/ksf'), launcher, 0o755);
   rmSync(join(f.workspace, '.agents/ksf')); rmSync(join(f.workspace, '.agents/ksf.ps1'));
-  commitWorkspace(f, { paths: ['.agents/core', 'AGENTS.md', '.agents/bin/ksf'] });
+  commitWorkspace(f, { paths: ['.agents/core', 'AGENTS.md', '.agents/bin/ksf'],modes:{'.agents/bin/ksf':0o755} });
   await assert.rejects(() => prepareContribution({ ...contributionDescription, root: f.workspace, all: true }), { code: 'CONTRIBUTION_EMPTY' });
   assert.throws(() => validateManifest(manifest), { code: 'RELEASE_INVALID' });
   rmSync(join(f.workspace, '.agents/bin/ksf'));

@@ -1,3 +1,5 @@
+import {platform,launcherInvocation} from '../src/platform/index.js';
+import {linkOrCopy} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -29,7 +31,7 @@ function fixture(t, { license = true, symlinkNode = false } = {}) {
   mkdirSync(join(root, '.agents/core/runtime/src'), { recursive: true });
   writeFileSync(join(root, '.agents/core/runtime/src/cli.js'), '// system source fixture\n');
   const archivePath = `.agents/core/runtime/packages/${archiveRoot}.tar.gz`;
-  const packed = spawnSync('/usr/bin/tar', ['-czf', join(root, archivePath), '-C', join(root, 'contents'), archiveRoot],
+  const packed = spawnSync(platform.tool('tar'), ['-czf', join(root, archivePath), '-C', join(root, 'contents'), archiveRoot],
     { encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' } });
   assert.equal(packed.status, 0, packed.stderr);
   const config = { schema_version: 1, name: 'ksf-core', version: null,
@@ -148,19 +150,20 @@ test('real ksf build recreates a missing or malformed manifest without global No
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf clean build 测试 ')));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   mkdirSync(join(root, '.agents'), { recursive: true });
-  cpSync(join(repo, '.agents/ksf'), join(root, '.agents/ksf'));
+  for(const launcher of ['ksf','ksf.ps1'])cpSync(join(repo,'.agents',launcher),join(root,'.agents',launcher));
   cpSync(join(repo, '.agents/core/runtime'), join(root, '.agents/core/runtime'), {
-    recursive: true, filter: path => !path.includes('/packages') && !path.includes('/tests') && !developmentPath(path.slice(repo.length).replaceAll('\\', '/')),
+    recursive: true, filter: path => !path.replaceAll('\\','/').includes('/packages') && !path.replaceAll('\\','/').includes('/tests') && !developmentPath(path.slice(repo.length).replaceAll('\\', '/')),
   });
+  cpSync(join(repo, '.agents/core/applications/sdk'), join(root, '.agents/core/applications/sdk'), { recursive:true, filter:path=>!developmentPath(path.slice(repo.length).replaceAll('\\','/')) });
   cpSync(join(repo, '.agents/core/build.json'), join(root, '.agents/core/build.json'));
   const config = JSON.parse(readFileSync(join(root, '.agents/core/build.json'), 'utf8'));
   for (const item of Object.values(config.runtime.packages)) {
     mkdirSync(join(root, '.agents/core/runtime/packages'), { recursive: true });
-    linkSync(join(repo, item.archive_path), join(root, item.archive_path));
+    linkOrCopy(join(repo, item.archive_path), join(root, item.archive_path));
   }
-  const run = args => spawnSync(join(root, '.agents/ksf'), args, {
-    encoding: 'utf8', cwd: '/tmp', env: { ...process.env, PATH: '' }, timeout: 30_000,
-  });
+  const run = args => {const command=launcherInvocation(root,args);return spawnSync(command.executable,command.args,{
+    encoding:'utf8',cwd:tmpdir(),env:{...process.env,PATH:''},timeout:30000,
+  });};
   const output = join(root, '.agents/core/manifest.yaml');
   assert.equal(existsSync(output), false);
   const first = run(['build', '--json']);

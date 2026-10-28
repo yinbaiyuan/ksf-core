@@ -1,4 +1,5 @@
 import { validId } from '../objects/schema.js';
+import { currentObjectId } from '../objects/legacy.js';
 import { sha256 } from '../shared/hash.js';
 import { validateJSONMapping } from '../shared/json.js';
 import { userDataRoot, definition, validateValues, validateDocument, plain, fail } from './schema.js';
@@ -22,6 +23,7 @@ export function validateObjectDocument(document, expectedId) {
 // are shared by Core namespaces and object records, without catalog discovery.
 export function recordDefinition(namespace, objectId) {
   if (objectId !== undefined) {
+    if (currentObjectId(objectId) !== objectId) fail('OBJECT_RENAMED', 'Use the Cooperation identity and run ksf cooperation migrate --apply for existing values.', { replacement: currentObjectId(objectId) }, 2);
     if (namespace !== undefined || !validId(objectId)) fail('INVALID_ARGUMENTS', 'Supply one plain object ID, without a namespace target or @version.', {}, 2);
     const digest = sha256(objectId);
     return {

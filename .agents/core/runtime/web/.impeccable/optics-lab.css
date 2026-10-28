@@ -1,0 +1,8 @@
+body { background: #E8EDF5; }
+main { padding: 40px; }
+h1 { font-size: 24px; } p { margin-top: 12px; }
+.samples { display: flex; gap: 50px; margin-top: 40px; }
+.samples h2 { margin-bottom: 12px; font-size: 16px; }
+.optic-sample { position: relative; isolation: isolate; width: 320px; height: 220px; border-radius: 24px; --desktop-wallpaper: repeating-radial-gradient(circle at 100px 80px, #B7DFFF 0px, #B7DFFF 13px, #133F78 14px, #133F78 16px, #B7DFFF 17px, #B7DFFF 28px); }
+.optic-sample .glass-wallpaper { background-size: 320px 220px; background-position: 0 0; }
+.optic-sample .glass-wash, .optic-sample .glass-rim { display: none; }

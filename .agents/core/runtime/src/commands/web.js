@@ -1,18 +1,23 @@
 import { hasJsonFlag, parseOptions, optionSpecs } from '../shared/options.js';
 import { invalid } from '../metadata/errors.js';
 import { startWebServer, WEB_PORT } from '../services/web.js';
+import { readWebHosts, WEB_LOCAL_NAME } from '../services/web-hosts.js';
+import { runWebHostsCommand } from './web-hosts.js';
 
 export function webHelp() {
   return 'KSF web\n\nUsage:\n' +
     '  ksf web [--port <0-65535>] [--json]\n' +
+    '  ksf web hosts [--apply] [--json]\n' +
     '  ksf web --help\n\n' +
     `Start a foreground HTTP server on 127.0.0.1 (default port ${WEB_PORT}).\n` +
+    'Use http://ksf.ai/ after configuring the system hosts mapping. On macOS, port 80 needs system permission or the local launchd service.\n' +
     'Port 0 chooses a free port. Press Ctrl+C to stop.\n' +
     'Serves task turns and routing, read-only task/route APIs and GET /api/health; enabled transcript catch-up runs while open.\n' +
     '--json prints one readiness result after listening; later errors use stderr.\n';
 }
 
 export async function runWebCommand(args, root) {
+  if (args[0] === 'hosts') return runWebHostsCommand(args.slice(1));
   const json = hasJsonFlag(args);
   let instance;
   let announced = false;
@@ -32,8 +37,13 @@ export async function runWebCommand(args, root) {
     if (!/^\d+$/.test(String(parsed.port)) || Number(parsed.port) > 65535) {
       invalid('Expected --port between 0 and 65535.');
     }
-    instance = await startWebServer({ root, port: Number(parsed.port) });
+    const fd = process.env.KSF_WEB_LISTEN_FD;
+    if (fd !== undefined && (!/^\d+$/.test(fd) || Number(fd) < 3 || !Number.isSafeInteger(Number(fd)))) invalid('Invalid inherited Web listener.');
+    instance = await startWebServer({ root, port: Number(parsed.port), listenFD: fd === undefined ? undefined : Number(fd) });
     const { host, port, url, startedAt, nodeVersion } = instance;
+    const hosts = readWebHosts();
+    const localUrl = hosts.state === 'configured' ? `http://${WEB_LOCAL_NAME}${port === 80 ? '' : `:${port}`}/` : null;
+    if (port === WEB_PORT && !localUrl) process.stderr.write(`WEB_HOSTS_${hosts.state.toUpperCase()}: Configure the ksf.ai loopback entries with web hosts --apply; use the direct loopback URL until then.\n`);
     return await new Promise(resolve => {
       let stopping = false;
       const stop = error => {
@@ -51,9 +61,9 @@ export async function runWebCommand(args, root) {
       process.once('SIGTERM', onSignal);
       instance.server.once('error', onError);
       const result = { ok: true, command: 'web', operation: null,
-        data: { host, port, url, startedAt, nodeVersion }, errors: [] };
+        data: { host, port, url, localUrl, startedAt, nodeVersion, hosts: hosts.state }, errors: [] };
       announced = true;
-      process.stdout.write(json ? JSON.stringify(result) + '\n' : `KSF Web: ${url}\nPress Ctrl+C to stop.\n`);
+      process.stdout.write(json ? JSON.stringify(result) + '\n' : `KSF Web: ${localUrl ?? url}\n${localUrl ? `Direct: ${url}\n` : ''}Press Ctrl+C to stop.\n`);
     });
   } catch (error) {
     if (instance) await instance.close();

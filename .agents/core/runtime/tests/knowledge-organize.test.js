@@ -76,10 +76,11 @@ test('historical working, cache and hidden resources do not become current navig
 test('normal derived competency uses explicitly selected instance shared checker from unrelated cwd', t => {
   const f = fixture(t);
   cpSync(join(repository, '.agents/core/abilities'), join(f.root, '.agents/core/abilities'), { recursive: true });
-  for (const name of ['工作流', '搭档', '基本功', '数据包']) mkdirSync(join(f.root, '能力', name), { recursive: true });
+  for (const name of ['协同', '搭档', '基本功', '数据包']) mkdirSync(join(f.root, '能力', name), { recursive: true });
   cpSync(join(repository, 'AGENTS.md'), join(f.root, 'AGENTS.md'));
   f.put('.agents/core/manifest.yaml', 'name: KSF\nversion: 0.0.1\n');
   f.put('.agents/core/runtime/package.json', '{"type":"module"}\n');
+  f.put('.agents/core/runtime/src/shared/paths.js',readFileSync(join(repository,'.agents/core/runtime/src/shared/paths.js')));
   const program = '.agents/core/runtime/src/services/knowledge-organize.js'; f.put(program, readFileSync(join(repository, program)));
   f.put('知识/knowledge.md', '# 混合框架入口');
   const id = 'competency.ksf.knowledge-organize';

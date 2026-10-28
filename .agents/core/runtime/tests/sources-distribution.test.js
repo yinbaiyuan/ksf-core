@@ -1,3 +1,5 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdirSync, writeFileSync, readFileSync, existsSync, realpathSync } from 'node:fs';
@@ -11,7 +13,7 @@ import { systemUpdate, systemRollback } from '../src/distribution/system.js';
 
 function source(f) {
   let directory = join(f.directory, 'private-methods'); mkdirSync(directory); directory = realpathSync(directory);
-  assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', directory]).status, 0);
+  assert.equal(spawnSync(gitBinary, ['init', '--template=', '--initial-branch=main', directory]).status, 0);
   abilitySource({ root: f.workspace, operation: 'init', target: directory, id: 'private-methods', name: 'Private methods' });
   const method = join(directory, '能力/基本功/competency.author.private'); mkdirSync(method);
   const canary = 'PRIVATE_ABILITY_CONTENT_DO_NOT_PACKAGE';
@@ -31,8 +33,8 @@ test('real launcher works offline across cwd and keeps direct source content out
   // Build must not parse even corrupt private source association data.
   mkdirSync(join(f.root, '.agents/user-data'), { recursive: true });
   writeFileSync(join(f.root, '.agents/user-data/sources.json'), s.canary);
-  const release = await buildRelease({ root: f.root, output: join(f.directory, 'source-isolation-release') });
-  for (const name of ['ksf-core-0.1.0-darwin-arm64.tar.gz', 'ksf-workspace-0.1.0-darwin-arm64.tar.gz']) {
+  const release = await buildRelease({ root: f.root, platform:fixtureTarget, output: join(f.directory, 'source-isolation-release') });
+  for (const name of [`ksf-core-0.1.0-${fixtureTarget}.tar.gz`, `ksf-workspace-0.1.0-${fixtureTarget}.tar.gz`]) {
     const archive = readArchive(readFileSync(join(release.output, name)));
     assert.ok([...archive.values()].every(file => !file.bytes.includes(Buffer.from(s.canary))));
     assert.ok([...archive.keys()].every(path => !path.includes('sources.json') && !path.startsWith('repositories/')));

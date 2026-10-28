@@ -1,3 +1,4 @@
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, realpathSync, existsSync, symlinkSync } from 'node:fs';
@@ -30,7 +31,7 @@ function fixture(t) {
   const legacy = routing => { create(); writeFileSync(join(root, '项目/甲/project.md'), `---\n${YAML.stringify({ name: '甲', routing })}---\n# 原项目\n`); };
   const source = id => {
     const path = join(directory, id);
-    const git = spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', path], { encoding: 'utf8' });
+    const git = spawnSync(gitBinary, ['init', '--template=', '--initial-branch=main', path], { encoding: 'utf8' });
     assert.equal(git.status, 0, git.stderr);
     abilitySource({ root, operation: 'init', target: path, id, name: id });
     return path;
@@ -58,7 +59,7 @@ test('write validates new routing syntax before creating a project or locks', t 
     { partners: ['partner.test.p@0.1.0'] }, { partners: [{ ref: 'partner.test.p' }] },
     { partners: [{ ref: 'competency.test.p@0.1.0' }] }, { partners: [{ ref: 'partner.test.p@0.1.0', source: 'all' }] },
     { partners: [{ ref: 'partner.test.p@0.1.0', source: null }] }, { partners: [{ ref: 'partner.test.p@0.1.0', extra: 1 }] },
-    { workflows: [{ ref: 'workflow.ksf.entry@0.1.0' }] }, { competencies: [{ ref: 'competency.ksf.ability-route@0.1.0' }] },
+    { cooperations: [{ ref: 'cooperation.ksf.entry@0.1.0' }] }, { competencies: [{ ref: 'competency.ksf.ability-route@0.1.0' }] },
     ...['/tmp/secret.md', 'C:/secret.md', '../../outside.md', '../../知识/../outside.md', '../../知识/a.txt', '../../知识/a\\b.md', '../../知识/a\n.md']
       .map(path => ({ knowledge: [path] }))];
   for (const routing of invalid) assert.throws(() => f.create(routing), { code: 'PROJECT_ROUTING_INVALID', exitCode: 2 });
@@ -68,7 +69,7 @@ test('write validates new routing syntax before creating a project or locks', t 
 
 test('all four preference types resolve without any knowledge tree or settings loading', t => {
   const f = fixture(t), routing = {};
-  for (const [field, type] of [['workflows', 'workflow'], ['partners', 'partner'], ['competencies', 'competency'], ['data_packages', 'data-package']]) {
+  for (const [field, type] of [['cooperations', 'cooperation'], ['partners', 'partner'], ['competencies', 'competency'], ['data_packages', 'data-package']]) {
     const id = `${type}.test.example`; f.add('user', id); routing[field] = [{ ref: `${id}@0.1.0`, source: 'user' }];
   }
   f.create(routing);
@@ -132,12 +133,12 @@ test('exact version mismatch and explicit archived source cannot silently select
   assert.ok(checked.data.routing.entries.every(entry => !entry.valid));
 });
 
-test('project preferences leave the global workflow and partner candidate sets intact', t => {
-  const f = fixture(t); f.add('system', 'partner.test.preferred'); f.add('system', 'partner.test.other'); f.add('system', 'workflow.test.global');
+test('project preferences leave the global cooperation and partner candidate sets intact', t => {
+  const f = fixture(t); f.add('system', 'partner.test.preferred'); f.add('system', 'partner.test.other'); f.add('system', 'cooperation.test.global');
   const before = contextCapabilities(f.root);
   f.create({ partners: [{ ref: 'partner.test.preferred@0.1.0' }] }); f.run('check');
   assert.deepEqual(contextCapabilities(f.root), before);
-  assert.equal(before.data.workflows.objects.length, 1); assert.equal(before.data.partners.objects.length, 2);
+  assert.equal(before.data.cooperations.objects.length, 1); assert.equal(before.data.partners.objects.length, 2);
 });
 
 test('source selection resolves one preset without filtering other sources or changing source dependency bindings', t => {

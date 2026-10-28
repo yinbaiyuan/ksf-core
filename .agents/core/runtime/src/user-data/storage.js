@@ -1,7 +1,9 @@
+import { replaceFileSync as renameSync } from '../platform/index.js';
 import { recordDefinition, objectDataDirectory, validateObjectDocument } from './records.js';
+import { assertNoCooperationMigration } from '../migrations/guard.js';
 import { sha256 as hash } from '../shared/hash.js';
 import { readFileSnapshot, sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';
-import { existsSync, lstatSync, mkdirSync, renameSync, unlinkSync, readdirSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, unlinkSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { userDataRoot, namespaces, encode, fail } from './schema.js';
@@ -62,12 +64,15 @@ export function unknownEntries(root) {
   if (!existsSync(path)) return [];
   if (!lstatSync(path).isDirectory()) fail('USER_DATA_PATH_INVALID', 'user-data must be an ordinary directory.');
   objectEntries(root); // Validate the reserved directory, without reading its records.
-  return readdirSync(path).filter(name => name !== '.gitkeep' && name !== 'abilities' && !Object.keys(namespaces).some(namespace => name === `${namespace}.json`));
+  const chats = safePath(root, `${userDataRoot}/chats`);
+  if (existsSync(chats) && !lstatSync(chats).isDirectory()) fail('USER_DATA_PATH_INVALID', 'chats must be an ordinary directory.');
+  return readdirSync(path).filter(name => name !== '.gitkeep' && name !== 'abilities' && name !== 'chats' && !Object.keys(namespaces).some(namespace => name === `${namespace}.json`));
 }
 export function withLock(root, namespace, action, objectId) {
+  assertNoCooperationMigration(root);
   const store = recordDefinition(namespace, objectId), details = store.identity;
   const path = safePath(root, `.agents/runtime-data/user-data/${store.lockName}.lock`, { createParents: true });
-  return withExclusiveLock(path, { pid: process.pid, ...details }, () => action(), {
+  return withExclusiveLock(path, { pid: process.pid, ...details }, () => { assertNoCooperationMigration(root); return action(); }, {
     onLocked() { fail('USER_DATA_LOCKED', 'A local writer holds this namespace lock; inspect stale locks before retrying.', details); },
     onReplaced() { process.stderr.write('USER_DATA_LOCK_CLEANUP: Replaced lock was preserved.\n'); },
     onCleanup() { process.stderr.write('USER_DATA_LOCK_CLEANUP: Inspect the remaining local lock.\n'); },

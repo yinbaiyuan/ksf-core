@@ -9,7 +9,7 @@ inspect, unpack, repair or select Node.js themselves.
 
 ## Distribution and installation
 
-- `packages/` contains official Node.js `.tar.gz` archives, eligible for Git.
+- `packages/` contains official Node.js `.tar.gz` (macOS) and `.zip` (Windows) archives, eligible for Git.
 - `src/` contains KSF JavaScript business logic.
 - `.agents/runtime-data/runtime/node/<version>-<platform>-<archive_sha256>/` contains a
   local installation: `bin/node`, `LICENSE`, and `.install-record`. It is ignored
@@ -17,9 +17,9 @@ inspect, unpack, repair or select Node.js themselves.
 - `staging/` and `locks/` under `.agents/runtime-data/runtime/` hold temporary preparation
   and per-identity installation locks. They are not user knowledge or business data.
 
-The currently bundled and tested platform is **macOS ARM64**, using Node.js
-24.21.0. macOS x64 has platform detection but no bundled package. Linux is not supported.
-Windows has a separate `.agents/ksf.ps1` recovery launcher, but no Windows runtime bootstrap or package yet. An unsupported
+Bundled platforms are **macOS ARM64 and Windows x64**, using Node.js 24.21.0.
+macOS x64 has platform detection but no bundled package. Linux is not supported.
+Windows uses `.agents/ksf.ps1` and `bootstrap.ps1` with native ZIP extraction and exclusive FileStream locks. See [platform boundaries](../docs/runtime/platforms.md) for the shared contract and acceptance scope. An unsupported
 platform fails explicitly; there is no global Node.js or network fallback.
 
 The bootstrap uses macOS platform tools (`sh`, `awk`, `stat`, `shasum`, `tar`,

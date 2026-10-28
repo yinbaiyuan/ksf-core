@@ -1,3 +1,4 @@
+import{portable}from'../shared/paths.js';
 import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -71,7 +72,7 @@ export function checkKnowledge({ root, target = '知识' }, { readText = p => re
   const errors = [], unchecked = [], files = [], links = [];
   let complete = true, anchorsUnchecked = 0;
   const issue = (error, path, extra = {}) => {
-    errors.push({ code: error.code === 'ENOENT' ? 'KNOWLEDGE_PATH_MISSING' : error.code ?? 'KNOWLEDGE_READ_FAILED', path: relative(base, path), message: error.message, ...extra });
+    errors.push({ code: error.code === 'ENOENT' ? 'KNOWLEDGE_PATH_MISSING' : error.code ?? 'KNOWLEDGE_READ_FAILED', path: portable(relative(base, path)), message: error.message, ...extra });
   };
   const walk = path => {
     try {
@@ -84,7 +85,7 @@ export function checkKnowledge({ root, target = '知识' }, { readText = p => re
       } else if (!stat.isFile()) {
         complete = false; issue({ code: 'KNOWLEDGE_SPECIAL_FILE', message: 'Special file is not read.' }, path);
       } else if (extname(path).toLowerCase() === '.md') {
-        const body = readText(path); files.push(relative(base, path));
+        const body = readText(path); files.push(portable(relative(base, path)));
         for (const link of knowledgeLinks(body)) links.push({ ...link, from: path });
       }
     } catch (error) { complete = false; issue(error, path); }
@@ -92,7 +93,7 @@ export function checkKnowledge({ root, target = '知识' }, { readText = p => re
   walk(folder);
   let checked = 0, external = 0;
   for (const link of links) {
-    const at = { from: relative(base, link.from), line: link.line, target: link.target };
+    const at = { from: portable(relative(base, link.from)), line: link.line, target: link.target };
     if (/^(?:https?:|mailto:|tel:|data:|plugin:|codex:|app:)/i.test(link.target)) { external++; continue; }
     if (link.target.includes('#')) anchorsUnchecked++;
     if (link.target.startsWith('#')) continue;
@@ -117,7 +118,7 @@ export function checkKnowledge({ root, target = '知识' }, { readText = p => re
       issue({ code: failure?.code === 'ENOENT' ? 'KNOWLEDGE_LINK_MISSING' : failure?.code ?? 'KNOWLEDGE_LINK_FAILED', message: failure?.message ?? 'Link target is missing.' }, link.from, at);
     }
   }
-  return { valid: errors.length === 0, complete, root: base, target: relative(base, folder) || '.', files,
+  return { valid: errors.length === 0, complete, root: base, target: portable(relative(base, folder)) || '.', files,
     checkedLinks: checked, externalLinks: external, anchorsUnchecked, unchecked, errors,
     limits: ['file existence only; anchors, semantics and external sources are not validated', 'no implicit directory model; no symbolic-link traversal', 'working/cache/hidden trees excluded'] };
 }

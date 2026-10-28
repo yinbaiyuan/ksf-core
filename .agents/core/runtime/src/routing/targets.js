@@ -44,5 +44,5 @@ export function resolveKnowledge(context, input) {
   const entries = context.knowledgeEntries ??= knowledgeEntries(context.root);
   if (!entries.has(input.path)) fail('ROUTE_KNOWLEDGE_ENTRY_REQUIRED', 'Knowledge target must use a unit entry explicitly linked by 知识/knowledge.md.', { path: input.path });
   readEntry(context.root, input.path);
-  return { kind: 'knowledge', name: input.path.split('/')[1], path: input.path };
+  return { kind: 'knowledge', name: posix.basename(posix.dirname(input.path)), path: input.path };
 }

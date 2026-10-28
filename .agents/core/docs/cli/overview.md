@@ -1,8 +1,8 @@
 ---
 type: cli-reference
 status: active
-reviewed_for: "0.1.3"
-updated: 2026-10-24
+reviewed_for: "0.1.4"
+updated: 2026-10-27
 ---
 
 # KSF CLI 能力说明
@@ -32,6 +32,8 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 
 除无需 Core/Node 的 `launcher recover` 外，其他调用都会经过启动准备，包括帮助命令和测试命令。因此，首次调用或运行时需要修复时，可能先写入 `.agents/runtime-data/runtime/`。命令表中的文件影响指命令自身的行为，不包含这项共同的启动准备。
 
+本地 SDK v3 开发实现新增 [app](../app-development/cli.md) 与 [communication](communication.md)，依托运行中的 Web 后端。前者路由同一应用包内的 CLI；后者供 Agent 直接收发消息，未正式发行。
+
 ## 已实现命令总表
 
 | 命令 | 能力 | 支持 JSON | 命令自身的文件影响 |
@@ -42,11 +44,12 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `web` | 前台启动任务路由工作台、只读接口与健康接口，随包 Node 提供预构建前端 | 是，`web --json` 输出一次就绪结果 | 已启用时补采对话档案；请求只读；停止后释放端口 |
 | `route start/write/read/list` | 按原生宿主会话保存 Agent 明确报告的项目与能力安排，查询来源变化 | 是 | 仅 start/write 写入本地 routing/v1；开关关闭或 no-save 时跳过 |
 | `task list/read/sync/status/hooks/declare/hook` | Codex 聊天任务归档、只读声明、Hooks 与补采 | 是 | 查询与 declare 只读；hooks 配置并建立未来基线；sync/hook 保存原件与游标，见 [task](task.md) |
+| `chat hooks/read/context/use/write/remove/restart` | 当前聊天轮次、能力参与轮次、动态变量与有界自动状态注入 | 是 | hooks 建未来基线，原生 Hook 登记聊天计数并只读注入状态；read/context 只读，采用及修改仍显式执行，见 [chat](chat.md) |
 | `runtime verify` | 完整验证随包压缩包及已安装 Node；损坏时可重新准备 | 是，`runtime verify --json` | 可能更新安装记录或修复运行时 |
 | `build` | 校验构建输入和各平台包，生成 manifest | 是，`build --json` | 原子替换 `.agents/core/manifest.yaml` |
 | `test` | 使用随包 Node 的内置测试运行器执行 JavaScript 测试 | 否 | 测试创建独立临时目录并在结束后清理 |
 | `eval check/run/read` | 显式的独立Agent自然语言项目、能力与资料采用评测，运行与判分分开 | 是 | check仅临时探针；run调用Codex并保存隔离材料与报告；read只读历史 |
-| `context capabilities` | 一次组织完整有效的工作流、搭档发现描述 | 是 | 命令自身只读，不生成索引 |
+| `context capabilities` | 一次组织完整有效的协同、搭档发现描述 | 是 | 命令自身只读，不生成索引 |
 | `project list/read/write/remove/check` | 项目根卡与目录的基础管理 | 是 | write 创建或更新根卡；remove 删除整个项目目录；修改支持预览 |
 | `repository create/link/unlink/list/check` | 独立本地 Git 工程与项目关联 | 是 | create 初始化工程；link/unlink 只改根卡；修改支持预览 |
 | `release build/publish/template/mirror` | 构建完整包、Core 更新包，发布 Release 和模板 | 是 | build 写指定输出；发布写远程；修改支持预览 |
@@ -56,7 +59,7 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `pr-description check/template` | 检查 PR 标题及四项正文，或读取模板 | 是 | 命令只读；贡献 prepare 强制校验独立 PR 正文，来源说明一并冻结；不验证语义和证据 |
 | `user-data list/read/write/remove/check` | 系统命名空间及四类对象持久数据；支持 --object / --objects | 是 | 写入用户专属目录；支持预览和 etag 冲突检查 |
 | `metadata read/write/remove/check` | 任意 Markdown 的 YAML frontmatter 管理 | 是，各操作支持 --json | write/remove 可能更新明确指定文件，支持 --dry-run |
-| `workflow / partner / competency / data-package` | 各自提供 list/read/write/remove/check | 是 | 只写用户对象；首次修改系统对象派生完整目录；删除包含附件及基线；支持预览 |
+| `cooperation / partner / competency / data-package` | 各自提供 list/read/write/remove/check | 是 | 只写用户对象；首次修改系统对象派生完整目录；删除包含附件及基线；支持预览 |
 
 `--json` 是上述指定命令的选项，不是全局选项。project、context、metadata 与四类对象的参数及统一结果协议见各自说明；现有其他命令保持原协议。当前不支持自定义 manifest 输出路径、测试过滤参数、自动递增版本或其他未列出的参数。多余参数、重复选项及未知命令会返回参数错误。
 
@@ -223,7 +226,7 @@ project、context、metadata 与四类对象的业务成功与失败 JSON 都进
 ## 四类能力对象
 
 ```sh
-.agents/ksf workflow list --json
+.agents/ksf cooperation list --json
 .agents/ksf partner read partner.ksf.object-designer --part all --json
 .agents/ksf competency check competency.ksf.partner-design --json
 ```
@@ -232,7 +235,7 @@ project、context、metadata 与四类对象的业务成功与失败 JSON 都进
 
 read 可选 metadata/body/all，默认 all；不展开附属资源。write 只修改用户区，系统对象首次修改时派生完整承载目录和 .upstream/ 基线；user_revision 记录实际用户变更，派生版保留来源 version。remove 物理删除整个用户目录。发布前检查引用与并发，预览不发布变化。
 
-公共输入输出、错误、目录与文件影响见[对象命令公共规则](objects.md)，各类型入口见[命令索引](index.md)。对象管理不运行 Agent 或执行对象正文，程序契约检查不评价正文专业质量。基本功统一承载专业方法与具体执行操作，按需直接使用程序和资料。`context capabilities` 已组合有效工作流与搭档摘要，供 Agent 新路由时一次取得。
+公共输入输出、错误、目录与文件影响见[对象命令公共规则](objects.md)，各类型入口见[命令索引](index.md)。对象管理不运行 Agent 或执行对象正文，程序契约检查不评价正文专业质量。基本功统一承载专业方法与具体执行操作，按需直接使用程序和资料。`context capabilities` 已组合有效协同与搭档摘要，供 Agent 新路由时一次取得。
 
 ## 能力上下文
 
@@ -241,9 +244,9 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 .agents/ksf context capabilities --json
 ```
 
-一次组织全部有效 Workflow、Partner 的名称、原始 description、ID、定义路径和固定入口标记，按两类分组。覆盖、归档及身份解析由对象服务处理；不提供来源筛选，不改写摘要或展开正文。固定入口保留，ability-route 在下游匹配时排除。
+一次组织全部有效 Cooperation、Partner 的名称、原始 description、ID、定义路径和固定入口标记，按两类分组。覆盖、归档及身份解析由对象服务处理；不提供来源筛选，不改写摘要或展开正文。固定入口保留，ability-route 在下游匹配时排除。
 
-各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，明确指定、有效安排、适用项目预设优先，全局工作流/搭档及通用 Agent 承接仍由 ability-route 判断；项目预设不改变全局发现集合。完整协议见 [context](context.md)。
+各组保留完整性及错误。部分失败返回退出码 1，仍需读取 stdout；缺口不能被当作“无匹配”。程序组织数据，明确指定、有效安排、适用项目预设优先，全局协同/搭档及通用 Agent 承接仍由 ability-route 判断；项目预设不改变全局发现集合。完整协议见 [context](context.md)。
 
 ## 输出和错误处理
 
@@ -316,7 +319,7 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 | 四类对象专业正文契约与质量判断 | 公共对象契约及本地精确引用已实现；专业适用仍由 Agent 判断，质量需真实任务验证 |
 | 路由结果和交接的程序接口 | 待定义和实现 |
 
-理解用户目标、判断工作流适用性和澄清歧义属于 Agent 的判断职责。对象 CLI 已提供确定性列举与校验支持，不把程序检查成功等同于业务路由适用。
+理解用户目标、判断协同适用性和澄清歧义属于 Agent 的判断职责。对象 CLI 已提供确定性列举与校验支持，不把程序检查成功等同于业务路由适用。
 
 ## 后续维护方法
 
@@ -333,3 +336,5 @@ read 可选 metadata/body/all，默认 all；不展开附属资源。write 只�
 `ksf source init/link/unlink/list/read/check/export` 已实现。关联仓库当前工作树，不创建安装副本、版本锁或能力快照；多源身份、依赖和 Git 协作见[source](source.md)及[协议](../sources.md)。`context capabilities --source <源ID>` 可限定共享范围；对象 read/check/list 的 --source 支持源 ID。
 
 项目支持 current/archived/all 的范围发现与检查、指定范围的读取维护，以及 archive、restore、recover；工程关联支持项目 scope。默认知识与档案的实例机制见 [设计指南](../content-design.md)，根说明随新模板生成并由用户自行维护。完整操作及恢复边界以 [project](project.md) 与 [repository](repository.md)为准。
+
+Assistant 的同源桌面读取与独立补采接口见 [assistant](assistant.md)。

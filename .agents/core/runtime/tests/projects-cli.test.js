@@ -1,3 +1,4 @@
+import {launcherInvocation} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, cpSync, rmSync, writeFileSync, readFileSync, realpathSync, existsSync } from 'node:fs';
@@ -114,11 +115,12 @@ test('real launcher runs the full project lifecycle using bundled Node from a fo
   for (const path of ['.agents/ksf', '.agents/ksf.ps1', '.agents/core/runtime/src', '.agents/core/runtime/packages']) {
     cpSync(join(repository, path), join(f.root, path), { recursive: true });
   }
-  for (const path of ['.agents/core/runtime/bootstrap.sh', '.agents/core/runtime/package.json', '.agents/core/manifest.yaml']) {
+  for (const path of ['.agents/core/runtime/bootstrap.sh', '.agents/core/runtime/bootstrap.ps1', '.agents/core/runtime/package.json', '.agents/core/manifest.yaml']) {
     cpSync(join(repository, path), join(f.root, path));
   }
   const launch = (...args) => {
-    const result = spawnSync(join(f.root, '.agents/ksf'), ['project', ...args, '--json'],
+    const invocation=launcherInvocation(f.root,['project',...args,'--json']);
+    const result = spawnSync(invocation.executable, invocation.args,
       { cwd: tmpdir(), encoding: 'utf8', env: { ...process.env, PATH: '' }, timeout: 30_000 });
     assert.equal(result.status, 0, result.stdout + result.stderr);
     return JSON.parse(result.stdout);

@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync,
-  renameSync, rmSync, chmodSync } from 'node:fs';
+  chmodSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -17,13 +17,16 @@ import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { download, releaseIndex } from './network.js';
 import { inspectCoreArchive } from './release.js';
 import { rootFiles, launcherProtocol } from './products.js';
+import {platform,launcherInvocation,replaceFileSync as renameSync,removePathSync as rmSync} from '../platform/index.js';
+import {mergeText} from '../shared/merge-text.js';
+export {mergeText};
 
 const generated = new Set(['.agents/core/manifest.yaml']);
 const modeOf = (root, path) => existsSync(checkedPath(root, path)) ? fileMode(checkedPath(root, path)) : null;
 const equals = matchesBaseline;
-function localFile(root, path) {
+function localFile(root, path, declared) {
   const bytes = readRegular(root, path, true);
-  return bytes === null ? null : { bytes, mode: fileMode(checkedPath(root, path)) };
+  return bytes === null ? null : { bytes, mode: fileMode(checkedPath(root, path), declared) };
 }
 export function systemFingerprint(root) {
   const paths = walkFiles(root, '.agents/core').concat(rootFiles).sort();
@@ -43,7 +46,7 @@ export async function systemRead({ root, api, fetcher }) {
   const changes = [];
   for (const [path, base] of Object.entries(manifest.files)) {
     if (generated.has(path)) continue;
-    const file = localFile(root, path);
+    const file = localFile(root, path, base.mode);
     if (!equals(file, base)) changes.push({ path, state: file === null ? 'deleted' : 'modified' });
   }
   for (const path of walkFiles(root, '.agents/core').concat(rootFiles)) {
@@ -78,23 +81,11 @@ export async function systemCheck({ root, source, fetcher }) {
   return { current: current.version, latest: index.version, platform: current.platform, available: comparison > 0,
     source: resolvedSource, indexURL: url, index, artifacts };
 }
-export function mergeText(base, local, incoming) {
-  const dir = mkdtempSync(join(tmpdir(), 'ksf-merge-'));
-  try {
-    const files = ['local', 'base', 'incoming'].map(name => join(dir, name));
-    [local, base, incoming].forEach((bytes, i) => writeAtomic(files[i], bytes));
-    const response = spawnSync('/usr/bin/diff3', ['-m', '-L', 'local', '-L', 'base', '-L', 'release', ...files], {
-      encoding: 'buffer', timeout: 10000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, LC_ALL: 'C' },
-    });
-    if (![0, 1].includes(response.status)) fail('MERGE_FAILED', 'The platform diff3 tool could not complete the merge.');
-    return { bytes: response.stdout, conflict: response.status === 1 };
-  } finally { rmSync(dir, { recursive: true, force: true }); }
-}
 export async function planUpdate(root, current, incoming, entries) {
   const result = { files: new Map(), changes: [], conflicts: [] };
   const paths = [...new Set([...Object.keys(current.files), ...Object.keys(incoming.files)])].sort();
   for (const path of paths) {
-    const base = current.files[path] ?? null, next = incoming.files[path] ?? null, local = localFile(root, path);
+    const base = current.files[path] ?? null, next = incoming.files[path] ?? null, local = localFile(root, path, base?.mode);
     const remote = next ? entries.get(path) : null;
     let chosen;
     if (generated.has(path)) chosen = remote;
@@ -127,12 +118,13 @@ function backupRecords(root) {
   });
 }
 function verifyCandidate(candidate, changedPaths = []) {
-  const verify = spawnSync('/bin/sh', [join(candidate, '.agents/ksf'), 'runtime', 'verify', '--json'], {
+  const invocation = launcherInvocation(candidate, ['runtime','verify','--json']);
+  const verify = spawnSync(invocation.executable, invocation.args, {
     cwd: candidate, encoding: 'utf8', timeout: 90000, maxBuffer: 1024 * 1024,
     env: { ...process.env, KSF_SKIP_AUTO_UPDATE: '1', KSF_INSTALLED_LAUNCHER: '1' },
   });
   if (verify.status !== 0) fail('CANDIDATE_INVALID', 'Updated system did not pass its bundled runtime verification.', { stderr: verify.stderr?.slice(0, 4000), stdout: verify.stdout?.slice(0, 4000) });
-  const binaries = walkFiles(candidate, '.agents/runtime-data/runtime/node').filter(p => p.endsWith('/bin/node'));
+  const binaries = walkFiles(candidate, '.agents/runtime-data/runtime/node').filter(p => p.endsWith('/bin/node') || p.endsWith('/node.exe'));
   if (binaries.length !== 1) fail('CANDIDATE_INVALID', 'Candidate runtime installation is ambiguous.');
   const definitions = spawnSync(join(candidate, binaries[0]), [fileURLToPath(new URL('../services/validate-system.js', import.meta.url)), candidate], {
     encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024,
@@ -144,15 +136,14 @@ function verifyCandidate(candidate, changedPaths = []) {
   }
 }
 function ownerStart() {
-  const ps = spawnSync('/bin/ps', ['-p', String(process.pid), '-o', 'lstart='], { encoding: 'utf8' });
-  if (ps.status !== 0 || !ps.stdout.trim()) fail('TRANSACTION_FAILED', 'Cannot record update owner identity.');
-  return ps.stdout.trim().replace(/\s+/g, ' ');
+  try { return platform.processStart(process.pid); }
+  catch { fail('TRANSACTION_FAILED', 'Cannot record update owner identity.'); }
 }
 export function recoverTransaction(root) {
   const path = checkedPath(root, '.agents/runtime-data/system/transaction');
   if (!existsSync(path)) return { recovered: false };
-  const launcher = checkedPath(root, '.agents/ksf');
-  const result = spawnSync('/bin/sh', [launcher, 'launcher', 'recover'], {
+  const invocation = launcherInvocation(root, ['launcher','recover']);
+  const result = spawnSync(invocation.executable, invocation.args, {
     cwd: root, encoding: 'utf8', timeout: 30000, env: { ...process.env, KSF_SKIP_AUTO_UPDATE: '1' },
   });
   if (result.status !== 0) fail('UPDATE_BUSY', 'An update is active or its recovery needs attention.', { stderr: result.stderr?.slice(0, 2000) });

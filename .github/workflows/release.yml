@@ -34,7 +34,7 @@ jobs:
   prepare:
     needs: windows-launcher
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 90
     outputs:
       version: ${{ steps.bundle.outputs.version }}
       revision: ${{ steps.bundle.outputs.revision }}
@@ -65,9 +65,27 @@ jobs:
               ;;
             *) echo 'Unknown release operation'; exit 1 ;;
           esac
+          .agents/ksf build --json > /dev/null
           .agents/ksf runtime verify --json
           ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
           printf 'KSF_RELEASE_NODE=%s\n' "$ksf_node" >> "$GITHUB_ENV"
+          dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Install SDK test dependencies
+        if: inputs.operation != 'template-only'
+        working-directory: .agents/core/applications/sdk
+        run: npm ci --ignore-scripts
+      - name: Install frontend dependencies
+        if: inputs.operation != 'template-only'
+        working-directory: .agents/core/runtime/web
+        run: npm ci
+      - name: SDK tests
+        if: inputs.operation != 'template-only'
+        working-directory: .agents/core/applications/sdk
+        run: npm test
+      - name: Build frontend before server tests
+        if: inputs.operation != 'template-only'
+        working-directory: .agents/core/runtime/web
+        run: npm run build
       - name: Regression tests
         if: inputs.operation != 'template-only'
         run: .agents/ksf test

@@ -1,0 +1,9 @@
+{
+  "name": "node-diff3",
+  "version": "3.2.1",
+  "source": "https://registry.npmjs.org/node-diff3/-/node-diff3-3.2.1.tgz",
+  "repository": "https://github.com/bhousel/node-diff3",
+  "license": "MIT",
+  "integrity": "sha512-eKZcJ8RtMQ3cIaA15EgmtwG927fYnRlhtdA4Q9HAcCpAZPQhhU2XptnTH9GeAkMiX2bAXxlJSAFa9shFbztPgw==",
+  "sha256": "148e90c6e5f6e4992d3392f17ba7f6385ab229704b44abd6b51c7aca44fed719"
+}

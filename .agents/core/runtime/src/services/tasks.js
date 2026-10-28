@@ -1,6 +1,9 @@
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sessionKey } from '../routing/storage.js';
+import { chatConfig, registerChatTurn, readChatContext } from './chat.js';
+import { formatChatContext } from '../chat-state/context.js';
+import { nativeTurnsSince } from '../task-capture/codex.js';
 import { encode, fail, isToken } from '../routing/schema.js';
 import { sha256 } from '../shared/hash.js';
 import { declareTask, receipts } from '../task-capture/declarations.js';
@@ -14,13 +17,15 @@ import { targetRegistry, withTargetLock, acceptTargetChanges } from '../routing/
 import { readUserData } from './user-data.js';
 import { ownershipOf } from '../routing/targets.js';
 import { turnTargets, ownedTargets, targetRelation, targetContext, targetHistoryText } from '../task-capture/targets.js';
+import { currentTargetKey } from '../objects/legacy.js';
+import { platform } from '../platform/index.js';
 
 export { declareTask };
 const now = () => new Date().toISOString();
 const capturePolicyVersion = 2;
 const codexHome = env => env.CODEX_HOME || join(homedir(), '.codex');
 const issue = error => ({ code: error.code ?? 'TASK_CAPTURE_FAILED', message: error.code ? error.message : 'Cannot capture the local transcript.' });
-const hookCommand = root => "'" + join(resolve(root), '.agents/ksf').replaceAll("'", "'\\''") + "' task hook";
+const hookCommand = root => platform.hookCommand(resolve(root));
 function page(limit, offset) {
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100 || !Number.isSafeInteger(offset) || offset < 0) fail('INVALID_ARGUMENTS', 'Use limit 1–100 and nonnegative offset.');
 }
@@ -94,6 +99,7 @@ function targetArgument(target, project) {
   if (typeof target !== 'string' || target.length > 4096 || /[\x00-\x1f\x7f]/.test(target) || (target && project)) fail('INVALID_ARGUMENTS', 'Supply one target or legacy project context.');
 }
 function targetContextKey(root, key, all, context) {
+  key = currentTargetKey(key);
   if (!key || all.some(t => ownedTargets(t).some(e => e.key === key))) return key;
   const registry = context.registry ??= targetRegistry(root), id = registry.aliases.get(key);
   return id ? `target:${id}` : key;
@@ -188,8 +194,8 @@ export function enableCapture({ root, at = now() }) {
     return captureStatus({ root });
   });
 }
-export function installTaskHooks({ root }) {
-  enableCapture({ root });
+export function installTaskHooks({ root, capture = true }) {
+  if (capture) enableCapture({ root });
   return locked(root, 'configuration', () => {
     const old = readJSON(root, '.codex/hooks.json') ?? {};
     if (old.hooks !== undefined && (!old.hooks || typeof old.hooks !== 'object' || Array.isArray(old.hooks))) fail('TASK_HOOKS_INVALID', 'Preserve the unsupported Hooks configuration.');
@@ -321,13 +327,42 @@ export async function syncTasks({ root, transcriptPath, env = process.env, force
   return result;
 }
 export async function taskHook({ root, input, env = process.env }) {
-  if (!config(root)?.enabled) return {};
+  let captureEnabled = false, captureError = '';
+  try { captureEnabled = config(root)?.enabled; }
+  catch (error) { captureError = `KSF task capture unavailable: ${error.code ?? 'TASK_FAILED'}. Dialogue capture has not been confirmed.`; }
+  let chatEnabled = false, chatContext = '';
+  try { chatEnabled = chatConfig(root)?.enabled; }
+  catch (error) { chatContext = `KSF chat tracking unavailable: ${error.code ?? 'CHAT_FAILED'}. Do not guess the current turn number.`; }
+  if (!captureEnabled && !chatEnabled && !chatContext && !captureError) return {};
   if (!input || !isToken(input.turn_id) || !['UserPromptSubmit', 'PreCompact', 'Stop', 'Interrupt'].includes(input.hook_event_name) || typeof input.session_id !== 'string') fail('INVALID_ARGUMENTS', 'Unsupported Codex hook payload.');
+  let chatSourceValid = false, chatMeta = null;
   if (input.transcript_path) {
     try {
       const { meta } = sourceMeta(input.transcript_path);
       if (meta.id === input.session_id && belongsToRoot(meta, root) && isInternalSession(meta)) return {};
+      chatSourceValid = meta.id === input.session_id && belongsToRoot(meta, root) && !isInternalSession(meta);
+      if (chatSourceValid) chatMeta = meta;
     } catch { /* The ordinary sync path reports source failures without blocking the host. */ }
+  }
+  if (chatEnabled && input.hook_event_name === 'UserPromptSubmit') {
+    try {
+      if (!chatSourceValid) fail('CHAT_SOURCE_IDENTITY', 'Cannot verify the native chat and workspace identity.');
+      const activated = Date.parse(chatConfig(root).activatedAt), created = Date.parse(chatMeta.timestamp);
+      if (chatMeta.parent_thread_id && !Number.isFinite(created)) fail('CHAT_SOURCE_UNSUPPORTED', 'A fork needs a reliable native creation timestamp to exclude inherited turns.');
+      const countingSince = new Date(Math.max(activated, Number.isFinite(created) ? created : activated)).toISOString();
+      const observedTurnIds = await nativeTurnsSince(input.transcript_path, countingSince);
+      const state = registerChatTurn({ root, identity: { host: 'codex', sessionId: input.session_id }, turnId: input.turn_id, observedTurnIds, countingSince });
+      chatContext = `KSF chat: chatTurnNumber=${state.chatTurnNumber}; turnId=${state.turnId}; countingSince=${state.countingSince}. Counts native turns since activation, not earlier history. Before actually using a capability, call ksf chat use --object <full-id> --turn ${state.turnId} --json once this turn; it returns abilityTurnNumber and dynamic values. When Agent writes are prohibited, read only and report participation as unregistered. Variable names are chosen dynamically at runtime; no field registration is required.`;
+      try {
+        chatContext += '\n' + formatChatContext(readChatContext({ root, identity: { host: 'codex', sessionId: input.session_id } }));
+      } catch (error) {
+        chatContext += `\nKSF chat state unavailable: ${error.code ?? 'CHAT_CONTEXT_UNAVAILABLE'}. State is unknown, not empty; native counting above remains valid.`;
+      }
+    } catch (error) { chatContext = `KSF chat tracking unavailable: ${error.code ?? 'CHAT_FAILED'}. Do not guess the current turn number.`; }
+  }
+  if (!captureEnabled) {
+    const context = [chatContext, captureError].filter(Boolean).join('\n');
+    return context && input.hook_event_name === 'UserPromptSubmit' ? { hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: context } } : captureError ? { systemMessage: captureError } : {};
   }
   const taskId = sessionKey(root, { host: 'codex', sessionId: input.session_id });
   let result = input.transcript_path ? await syncTasks({ root, env, transcriptPath: input.transcript_path, hook: input, force: true }) : { errors: [{ code: 'TASK_TRANSCRIPT_MISSING' }] };
@@ -339,7 +374,7 @@ export async function taskHook({ root, input, env = process.env }) {
     result = await syncTasks({ root, env, transcriptPath: input.transcript_path, hook: input, force: true });
   }
   if (input.hook_event_name === 'UserPromptSubmit') return { hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext:
-    `KSF task capture: native turnId=${input.turn_id}; taskId=${taskId}. Enabled capture automatically archives ordinary post-baseline dialogue even without a route report. Before substantive work call the read-only ksf task declare --from - --json with turnId, eventId, policy and reason, and the explicitly selected report when known. Policies: capture (ordinary discussion/read-only/no business saves still archives dialogue), exclude (this turn), pause (chat until resume), resume. Explicit 不记录对话 means pause; 本轮不记录 means exclude. A possible dialogue-recording restriction suspends automatic capture until a signed policy resolves it; an inherited hold requires resume. Do not infer project or abilities. Update declarations when routes change and before final delivery. This declaration writes no files, including in plan mode. Missing route stays unreported, independently of dialogue capture. Capture errors: ${result.errors.map(e => e.code).join(',') || 'none'}.` } };
+    `${chatContext ? chatContext + '\n' : ''}KSF task capture: native turnId=${input.turn_id}; taskId=${taskId}. Enabled capture automatically archives ordinary post-baseline dialogue even without a route report. Before substantive work call the read-only ksf task declare --from - --json with turnId, eventId, policy and reason, and the explicitly selected report when known. Policies: capture (ordinary discussion/read-only/no business saves still archives dialogue), exclude (this turn), pause (chat until resume), resume. Explicit 不记录对话 means pause; 本轮不记录 means exclude. A possible dialogue-recording restriction suspends automatic capture until a signed policy resolves it; an inherited hold requires resume. Do not infer project or abilities. Update declarations when routes change and before final delivery. This declaration writes no files, including in plan mode. Missing route stays unreported, independently of dialogue capture. Capture errors: ${result.errors.map(e => e.code).join(',') || 'none'}.` } };
   return result.errors.length ? { systemMessage: `KSF 对话待补采：${result.errors.map(e => e.code).join(', ')}。采集失败不阻断任务。` } : {};
 }
 // Compatibility projection. Turn archives retain every event; only this view keeps 50 changes.

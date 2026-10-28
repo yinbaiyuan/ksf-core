@@ -6,7 +6,7 @@ import { contextCapabilities } from '../services/context.js';
 export function contextHelp(operation) {
   return `KSF context${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
     '  ksf context capabilities [--json] [--source <source-id>]\n\n' +
-    'Return all effective workflow and partner discovery descriptions, workflows first.\n' +
+    'Return all effective cooperation and partner discovery descriptions, cooperations first.\n' +
     'Descriptions are preserved; bodies and related resources are not included.\n' +
     'Fixed entries remain marked. ability-route owns matching and fallback decisions.\n' +
     'Partial results remain available with exit 1; invalid arguments return exit 2.\n' +
@@ -28,7 +28,7 @@ function render(result) {
   const lines = ['# KSF Capabilities'];
   if (result.data) {
     lines.push(`Complete: ${result.data.complete ? 'yes' : 'no'}`);
-    for (const [key, title] of [['workflows', 'Workflows'], ['partners', 'Partners']]) {
+    for (const [key, title] of [['cooperations', 'Cooperations'], ['partners', 'Partners']]) {
       const group = result.data[key];
       lines.push(`\n## ${title} (${group.complete ? 'complete' : 'incomplete'})`);
       if (!group.objects.length) lines.push('(empty)');

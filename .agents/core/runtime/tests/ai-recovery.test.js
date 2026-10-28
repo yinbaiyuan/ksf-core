@@ -1,0 +1,22 @@
+import {writeNodeExecutable} from './helpers/platform.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { fork } from 'node:child_process';
+import { mkdtemp,writeFile,rm,readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createWorkbenchAI } from '../src/services/ai-tasks.js';
+test('C09/C14 fixture: killed service leaves a supervised CLI receipt; restart reconciles instead of replaying',async t=>{
+  const root=await mkdtemp(join(tmpdir(),'ksf-ai-crash-')),path=join(root,'codex');let restored;
+  writeNodeExecutable(path,`#!${process.execPath}\nif(process.argv.includes('--version')){console.log('codex-cli 0.163.0');process.exit(0);}console.log(JSON.stringify({type:'thread.started',thread_id:'crash-fixture'}));await new Promise(r=>setTimeout(r,30000));\n`);
+  const child=fork(fileURLToPath(new URL('./ai-recovery-child.mjs',import.meta.url)),[root,path],{execArgv:[],stdio:['ignore','ignore','ignore','ipc']});
+  t.after(async()=>{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');await restored?.close();await rm(root,{recursive:true,force:true});});
+  let id;
+  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('child did not start')),5000);child.on('message',message=>{if(message.aiTaskId)id=message.aiTaskId;if(message.running){clearTimeout(timer);resolve();}});child.on('error',reject);});
+  await new Promise(resolve=>{child.once('exit',resolve);child.kill('SIGKILL');});
+  restored=createWorkbenchAI(root,{pollMs:10});let task;const end=Date.now()+6000;
+  do{task=await restored.get({appId:'example.crash'},id);if(task.status==='failed')break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<end);
+  assert.equal(task.status,'failed',JSON.stringify(task));assert.equal(task.execution.attempts.length,1);assert.equal(task.execution.attempts[0].stopConfirmed,true);assert.ok(task.revision>=4);
+  const disk=JSON.parse(await readFile(join(root,'.agents/user-data/ai/tasks',id+'.json'),'utf8'));assert.ok(disk.events.some(event=>event.type==='recovery-required'));assert.equal(disk.events.filter(event=>event.type==='dispatched').length,1);
+});

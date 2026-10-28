@@ -27,7 +27,7 @@ type、scope 使用小写英文。摘要默认中文，以具体动作说明结�
 
 scope 表示主要受影响模块，使用小写字母开头的英文或连字符名称，例如 project、routing、user-data、contribute、release。多个关联模块选择共同的主要模块，不在范围中堆叠文件名。scope 不是固定枚举，新增范围按实际责任命名。
 
-工作流、搭档、基本功和数据包按行为判断类型。Markdown 中的执行约定改变运行行为时，应按实际目的使用 feat、fix 或 refactor，不能仅按扩展名归为 docs。
+协同、搭档、基本功和数据包按行为判断类型。Markdown 中的执行约定改变运行行为时，应按实际目的使用 feat、fix 或 refactor，不能仅按扩展名归为 docs。
 
 ```text
 fix(project): 防止项目根卡覆盖并发修改

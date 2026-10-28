@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 2,
+  "sdkVersion": 3,
+  "id": "example.collaboration",
+  "name": "团队协作示例",
+  "description": "独立应用定义的任务传递、反馈等待和消息恢复示例",
+  "version": "1.0.1",
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 900,
+      "height": 640
+    }
+  },
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  },
+  "permissions": [
+    "messages.send",
+    "messages.receive"
+  ],
+  "activation": {
+    "messages": {
+      "channels": [
+        "team.workflow.v1"
+      ]
+    }
+  },
+  "cli": {
+    "contractVersion": 1,
+    "entry": "cli/index.mjs",
+    "documentation": "docs/cli.md",
+    "commands": [
+      {
+        "id": "inspect"
+      },
+      {
+        "id": "peers"
+      },
+      {
+        "id": "task.create"
+      },
+      {
+        "id": "task.send"
+      },
+      {
+        "id": "task.accept"
+      },
+      {
+        "id": "task.feedback"
+      },
+      {
+        "id": "task.approve"
+      },
+      {
+        "id": "send.status"
+      },
+      {
+        "id": "send.reconcile"
+      }
+    ]
+  }
+}

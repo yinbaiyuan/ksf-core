@@ -1,3 +1,4 @@
+import{platform}from'../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, cpSync, writeFileSync, readFileSync, readdirSync, lstatSync, rmSync, symlinkSync, renameSync, realpathSync } from 'node:fs';
@@ -207,7 +208,7 @@ test('a killed writer preserves its lock and published bytes until its dead owne
     const args = JSON.parse(process.argv[1]);
     applyMaterials({ ...args, plan: planMaterials(args) }, { afterPublish() { process.kill(process.pid, 'SIGKILL'); } });
   `, JSON.stringify(f.args)], { encoding: 'utf8', timeout: 10000 });
-  assert.equal(child.signal, 'SIGKILL', child.stderr);
+  if(platform.name==='win32')assert.equal(child.status,1,child.stderr);else assert.equal(child.signal, 'SIGKILL', child.stderr);
   const lock = join(f.folder, '资料', '导入记录', '.intake.lock');
   const owner = JSON.parse(readFileSync(lock, 'utf8'));
   assert.ok(Number.isSafeInteger(owner.pid) && owner.pid > 0);
@@ -229,7 +230,7 @@ test('the support CLI accepts its own saved plan envelope and preserves partial 
   const runtime = join(f.root, '.agents/core/runtime');
   mkdirSync(join(runtime, 'src/services'), { recursive: true }); mkdirSync(join(runtime, 'src/shared'), { recursive: true });
   cpSync(fileURLToPath(new URL('../src/services/project-intake.js', import.meta.url)), join(runtime, 'src/services/project-intake.js'));
-  cpSync(fileURLToPath(new URL('../src/shared/files.js', import.meta.url)), join(runtime, 'src/shared/files.js'));
+  for(const entry of ['shared','platform'])cpSync(fileURLToPath(new URL('../src/'+entry,import.meta.url)),join(runtime,'src',entry),{recursive:true});
   writeFileSync(join(runtime, 'package.json'), '{"type":"module"}');
   const invoke = args => spawnSync(process.execPath, [tool, ...args, '--json'], { encoding: 'utf8' });
   const planned = invoke(['plan', '--root', f.root, '--project', f.project, '--source', f.source]);

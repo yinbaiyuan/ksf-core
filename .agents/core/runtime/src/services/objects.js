@@ -59,6 +59,7 @@ function view(row, part) {
 }
 
 export function objectQuery({ root, type, operation, reference, source = 'effective', part = 'all', sourceScope }) {
+  if (type === 'workflow') fail('OBJECT_TYPE_RENAMED', 'Use the cooperation type; migrate existing data with ksf cooperation migrate --apply.', { replacement: 'cooperation', exitCode: 2 });
   if (!Object.hasOwn(types, type) || !['list', 'read', 'check'].includes(operation) ||
       (!['effective', 'system', 'user', ...(operation === 'list' ? ['all'] : [])].includes(source) && !validSourceId(source)) || !['metadata', 'body', 'all'].includes(part)) fail('INVALID_ARGUMENTS', 'Invalid object query.', { exitCode: 2 });
   root = canonicalRoot(root);
@@ -109,6 +110,7 @@ export function objectQuery({ root, type, operation, reference, source = 'effect
 }
 
 export function objectMutation({ root, type, operation, id, input = {}, dryRun = false }, { beforePublish, cleanup } = {}) {
+  if (type === 'workflow') fail('OBJECT_TYPE_RENAMED', 'Use the cooperation type; migrate existing data with ksf cooperation migrate --apply.', { replacement: 'cooperation', exitCode: 2 });
   if (!Object.hasOwn(types, type) || !['write', 'remove'].includes(operation) || typeof dryRun !== 'boolean') fail('INVALID_ARGUMENTS', 'Invalid object mutation.', { exitCode: 2 });
   if (operation === 'write') validateObjectInput(input);
   root = canonicalRoot(root);

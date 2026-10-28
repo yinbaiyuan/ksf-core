@@ -1,3 +1,4 @@
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, realpathSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync } from 'node:fs';
@@ -36,7 +37,7 @@ test('linked source version changes, source unlink and reinstallation keep the i
   const parent = realpathSync(mkdtempSync(join(tmpdir(), 'ksf source object data '))), root = join(parent, 'ksf'), source = join(parent, 'methods');
   t.after(() => rmSync(parent, { recursive: true, force: true }));
   for (const def of Object.values(types)) for (const origin of ['system', 'user']) mkdirSync(join(root, def[origin]), { recursive: true });
-  mkdirSync(source); assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', source]).status, 0);
+  mkdirSync(source); assert.equal(spawnSync(gitBinary, ['init', '--template=', '--initial-branch=main', source]).status, 0);
   abilitySource({ root, operation: 'init', target: source, id: 'methods', name: 'Methods' });
   const id = 'partner.test.external', folder = join(source, '能力/搭档', id); mkdirSync(folder);
   const entry = join(folder, 'partner.md');

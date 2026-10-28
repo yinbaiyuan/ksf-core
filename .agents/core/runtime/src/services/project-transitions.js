@@ -1,5 +1,6 @@
+import {portable} from '../shared/paths.js';
 import { lstatSync, readdirSync, readlinkSync, mkdirSync, renameSync, unlinkSync, realpathSync } from 'node:fs';
-import { join, relative, resolve, isAbsolute, dirname } from 'node:path';
+import { join, relative as nativeRelative, resolve, isAbsolute, dirname } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { MetadataError, invalid } from '../metadata/errors.js';
 import { readSnapshot, withWriteLock } from '../metadata/files.js';
@@ -9,6 +10,7 @@ import { locations, encodeProject, validateWrite } from '../projects/plan.js';
 import { directory, stat, load, validateName, withProjectLock, assertNoPending } from '../projects/storage.js';
 
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
+const relative=(...args)=>portable(nativeRelative(...args));
 const inside = (parent, path) => { const rel = relative(parent, path); return !isAbsolute(rel) && rel !== '..' && !rel.startsWith('../'); };
 const journalRoot = root => join(root, '.agents/runtime-data/projects/transitions');
 const pendingPath = root => join(root, '.agents/runtime-data/projects/pending.json');

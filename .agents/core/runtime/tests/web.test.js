@@ -1,3 +1,4 @@
+import{platform}from'../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
@@ -9,7 +10,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { startWebServer } from '../src/services/web.js';
 import { routingFixture } from './helpers/routing-fixture.js';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync,cpSync,mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROUTE_DIRECTORY } from '../src/routing/schema.js';
 
@@ -32,7 +33,7 @@ function call(instance, path = '/', { method = 'GET', headers = {} } = {}) {
 }
 
 async function running(t) {
-  const instance = await startWebServer({ port: 0 });
+  const instance = await startWebServer({ root:routingFixture(t).root,port: 0 });
   t.after(() => instance.close());
   return instance;
 }
@@ -90,6 +91,20 @@ test('Web reads independent persisted routing records and preserves them across 
   assert.equal((await call(server, path)).status, 500); assert.equal(readFileSync(file, 'utf8'), '{');
 });
 
+test('about exposes only current Core product metadata through guarded read-only requests', async t => {
+  const instance = await running(t);
+  const core = JSON.parse(readFileSync(new URL('../../build.json', import.meta.url), 'utf8'));
+  const result = await call(instance, '/api/about');
+  assert.equal(result.status, 200);
+  assert.deepEqual(JSON.parse(result.body), { ok: true, productName: 'KSF 工作台', coreVersion: core.version });
+  const head = await call(instance, '/api/about', { method: 'HEAD' });
+  assert.equal(head.status, 200); assert.equal(head.body, '');
+  assert.equal(head.headers['content-length'], result.headers['content-length']);
+  assert.equal((await call(instance, '/api/about', { method: 'POST' })).status, 405);
+  assert.equal((await call(instance, '/api/about', { headers: { Host: 'example.com' } })).status, 403);
+  assert.equal((await call(instance, '/api/about', { headers: { Origin: 'https://example.com' } })).status, 403);
+});
+
 test('Web serves only verified bundled chunks with a restrictive CSP', async t => {
   const instance = await running(t);
   const page = await call(instance);
@@ -98,7 +113,8 @@ test('Web serves only verified bundled chunks with a restrictive CSP', async t =
   const script = await call(instance, scriptPath), css = await call(instance, cssPath);
   assert.equal(script.status, 200); assert.equal(css.status, 200);
   assert.match(script.headers['content-type'], /^text\/javascript/); assert.match(css.headers['content-type'], /^text\/css/);
-  assert.match(page.headers['content-security-policy'], /script-src 'self'; style-src 'self'; connect-src 'self'/);
+  assert.match(page.headers['content-security-policy'], /script-src 'self'; style-src 'self' 'nonce-[A-Za-z0-9+/=]+'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'/);
+  assert.doesNotMatch(page.headers['content-security-policy'], /img-src[^;]*(?:https:|http:|\*)/);
   assert.doesNotMatch(page.headers['content-security-policy'], /unsafe-inline|unsafe-eval/);
   assert.doesNotMatch(script.body, /\beval\(/);
   for (const path of ['/src/main.tsx', '/app.js', '/dist/build.json', '/assets/missing.js', scriptPath + '.map', '/node_modules/react/package.json']) assert.equal((await call(instance, path)).status, 404, path);
@@ -121,6 +137,11 @@ test('Web rejects foreign hosts, origins and unsupported methods', async t => {
   assert.equal((await call(instance, '/', { headers: { Origin: 'https://example.com' } })).status, 403);
   assert.equal((await call(instance, '/', { headers: { Origin: `http://127.0.0.1:${instance.port}` } })).status, 200);
   assert.equal((await call(instance, '/', { headers: { Host: `localhost:${instance.port}` } })).status, 200);
+  assert.equal((await call(instance, '/', { headers: { Host: `ksf.ai:${instance.port}`, Origin: `http://ksf.ai:${instance.port}` } })).status, 200);
+  for (const host of ['ksf.ai.evil.test', 'evil.ksf.ai', `ksf.ai:${instance.port + 1}`]) {
+    assert.equal((await call(instance, '/', { headers: { Host: host } })).status, 403);
+  }
+  assert.equal((await call(instance, '/', { headers: { Origin: 'http://ksf.ai.evil.test' } })).status, 403);
   const result = await call(instance, '/api/health', { method: 'POST' });
   assert.equal(result.status, 405);
   assert.equal(result.headers.allow, 'GET, HEAD');
@@ -128,9 +149,9 @@ test('Web rejects foreign hosts, origins and unsupported methods', async t => {
 
 test('Web reports occupied and invalid ports, preserving the running server', async t => {
   const instance = await running(t);
-  await assert.rejects(startWebServer({ port: instance.port }), { code: 'WEB_ADDRESS_IN_USE' });
+  await assert.rejects(startWebServer({ root:routingFixture(t).root,port: instance.port }), { code: 'WEB_ADDRESS_IN_USE' });
   for (const port of [-1, 65536, 1.5, '4173']) {
-    await assert.rejects(startWebServer({ port }), { code: 'INVALID_ARGUMENTS' });
+    await assert.rejects(startWebServer({ root:routingFixture(t).root,port }), { code: 'INVALID_ARGUMENTS' });
   }
   assert.equal((await call(instance, '/api/health')).status, 200);
 });
@@ -148,7 +169,7 @@ test('Web closes unfinished connections within a bounded shutdown and releases i
   await received;
   await instance.close();
   await instance.close();
-  const replacement = await startWebServer({ port: instance.port });
+  const replacement = await startWebServer({ root:routingFixture(t).root,port: instance.port });
   t.after(() => replacement.close());
   assert.equal((await call(replacement, '/api/health')).status, 200);
 });
@@ -156,7 +177,9 @@ test('Web closes unfinished connections within a bounded shutdown and releases i
 test('Web CLI documents its startup and rejects invalid or repeated options', () => {
   const help = spawnSync(process.execPath, [cli, 'web', '--help'], { encoding: 'utf8' });
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /127\.0\.0\.1.*4173/);
+  assert.match(help.stdout, /127\.0\.0\.1.*80/);
+  assert.match(help.stdout, /http:\/\/ksf\.ai\//);
+  assert.match(help.stdout, /ksf web hosts/);
   for (const args of [['--port'], ['--port', '-1'], ['--port', '65536'], ['--port', '1.5'],
     ['--port', '0', '--port', '0'], ['--json', '--json'], ['--host', '0.0.0.0'], ['start'], ['--help', '--json']]) {
     const options = args.includes('--json') ? args : [...args, '--json'];
@@ -174,9 +197,13 @@ test('Web CLI returns a structured address-in-use error', async t => {
   assert.equal(JSON.parse(result.stdout).errors[0].code, 'WEB_ADDRESS_IN_USE');
 });
 
-test('real launcher starts with bundled Node from another cwd and stops on SIGINT or SIGTERM', { timeout: 15_000 }, async t => {
+test('real launcher starts with bundled Node from another cwd and stops on SIGINT or SIGTERM', { timeout: 15_000,skip:platform.name==='win32'?'POSIX SIGINT/SIGTERM semantics; Windows native launcher, manual supervisor stop and ConPTY Ctrl-C are separately accepted':false }, async t => {
+  const f=routingFixture(t),source=fileURLToPath(new URL('../../../../',import.meta.url));
+  for(const path of ['.agents/ksf','.agents/ksf.ps1','.agents/core'])cpSync(join(source,path),join(f.root,path),{recursive:true,filter:p=>!p.split(/[\\/]/).includes('node_modules')&&!p.split(/[\\/]/).includes('.git')});
+  const isolatedLauncher=join(f.root,'.agents/ksf');
+  const prepared=spawnSync(isolatedLauncher,['hello','--json'],{encoding:'utf8',env:{...process.env,PATH:'/usr/bin:/bin'}});assert.equal(prepared.status,0,prepared.stderr);
   for (const signal of ['SIGINT', 'SIGTERM']) {
-    const child = spawn(launcher, ['web', '--port', '0', '--json'], {
+    const child = spawn(isolatedLauncher, ['web', '--port', '0', '--json'], {
       cwd: tmpdir(), env: { ...process.env, PATH: '/usr/bin:/bin' }, stdio: ['ignore', 'pipe', 'pipe'],
     });
     t.after(() => { if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL'); });
@@ -191,11 +218,14 @@ test('real launcher starts with bundled Node from another cwd and stops on SIGIN
     assert.equal(ready.ok, true);
     assert.equal(ready.data.host, '127.0.0.1');
     assert.equal(ready.data.nodeVersion, process.version);
+    assert.ok(['configured', 'missing', 'conflict', 'unavailable'].includes(ready.data.hosts));
+    assert.equal('mdns' in ready.data, false);
+    if (ready.data.localUrl) assert.equal(ready.data.localUrl, `http://ksf.ai:${ready.data.port}/`);
     assert.equal((await call(ready.data, '/api/health')).status, 200);
     child.kill(signal);
     assert.deepEqual(await exited, [0, null], stderr);
     assert.equal(stderr, '');
-    const replacement = await startWebServer({ port: ready.data.port });
+    const replacement = await startWebServer({ root:f.root,port: ready.data.port });
     await replacement.close();
     lines.close();
   }

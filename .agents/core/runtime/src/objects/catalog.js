@@ -34,7 +34,6 @@ export function catalog(root, { linked = true, sourceFilter, extraSources = [] }
       if (!row.id && validId(row.metadata.id)) row.id = row.metadata.id;
       row.errors = validateObject(row.metadata, { type, source, path });
       if (external && !row.parsed.body.toString('utf8').trim()) row.errors.push({ code: 'OBJECT_BODY_REQUIRED', message: 'Published objects require a nonempty body.', target: path });
-      if (external && !folderId) row.errors.push({ code: 'OBJECT_ID_LOCATION_MISMATCH', message: 'Published object directories must use the complete object ID.', target: path, id: row.id });
       if (designatedId && row.metadata.id !== designatedId) row.errors.push({ code: 'OBJECT_ID_LOCATION_MISMATCH', message: 'Object identity does not match its designated directory or entry.', target: path, id: designatedId });
     } catch (error) {
       row.errors.push({ code: error.code ?? 'OBJECT_READ_FAILED', message: 'Cannot parse object entry.', target: path, ...(error.details?.line ? { line: error.details.line, column: error.details.column } : {}) });
@@ -85,7 +84,7 @@ export function catalog(root, { linked = true, sourceFilter, extraSources = [] }
       }
     }
   }
-  if (existsSync(join(root, 'AGENTS.md'))) load(join(root, 'AGENTS.md'), 'workflow', 'system');
+  if (existsSync(join(root, 'AGENTS.md'))) load(join(root, 'AGENTS.md'), 'cooperation', 'system');
   let entries = [];
   if (linked) {
     try { entries = configuredSources(root); }

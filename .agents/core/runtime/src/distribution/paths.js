@@ -7,7 +7,7 @@ export function validRelative(path) {
 }
 // Frontend development installations/caches are never managed Core assets.
 export function developmentPath(path) {
-  return /^\.agents\/core\/runtime\/web\/(?:node_modules|\.vite|coverage|test-results|\.impeccable\/review)(?:\/|$)/.test(path);
+  return /^\.agents\/core\/runtime\/native-build\/node_modules(?:\/|$)/.test(path) || /^\.agents\/core\/runtime\/vendor-build\/node_modules(?:\/|$)/.test(path) || /^\.agents\/core\/runtime\/web\/(?:node_modules|\.vite|coverage|test-results|\.impeccable\/review)(?:\/|$)/.test(path) || /^\.agents\/core\/applications\/[^/]+\/(?:node_modules|\.build)(?:\/|$)/.test(path);
 }
 export function managedPath(path) {
   return validRelative(path) && !developmentPath(path) && (path === 'AGENTS.md' || launcherFiles.includes(path) ||
