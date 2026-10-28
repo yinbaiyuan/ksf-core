@@ -76,7 +76,7 @@ jobs:
       - name: Core platform smoke
         working-directory: .agents/core/runtime
         env:
-          NODE_OPTIONS: '--test-reporter=tap --test-name-pattern="KSF_PLATFORM_SMOKE|UTF-8 PAX archives|distributed Terminal|build derives package|real deployed CLI|real launcher runs the full project lifecycle"'
+          NODE_OPTIONS: '--test-reporter=tap --test-name-pattern="KSF_PLATFORM_SMOKE|UTF-8 PAX archives|distributed Terminal|terminal release waits|build derives package|real deployed CLI|real launcher runs the full project lifecycle"'
         run: node src/cli.js test
       - name: Core regression
         working-directory: .agents/core/runtime
