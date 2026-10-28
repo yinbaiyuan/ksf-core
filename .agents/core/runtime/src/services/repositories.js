@@ -66,7 +66,7 @@ function commonDirectory(path, run, optional = false) {
   // Git may return a relative path; worktrees can also point through symlinks.
   const value = result.stdout.replace(/\r?\n$/, '');
   if (!value) fail('REPOSITORY_GIT_FAILED', 'Cannot inspect the repository Git storage.', path);
-  return realpathSync(resolve(path, value));
+  return realpathSync.native(resolve(path, value));
 }
 function identity(root, path, run) {
   directory(path);

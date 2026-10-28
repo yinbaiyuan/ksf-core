@@ -34,7 +34,7 @@ test('managed creation isolates Git history, keeps the exact name, and is repeat
   const f = fixture(t), created = f.call('create', '客户 方案');
   assert.equal(created.data.created, true); assert.equal(created.data.changed, true);
   const target = join(f.root, 'repositories/客户 方案');
-  assert.equal(realpathSync(git(target, ['rev-parse', '--show-toplevel'])), target);
+  assert.equal(realpathSync.native(git(target, ['rev-parse', '--show-toplevel'])), realpathSync.native(target));
   assert.equal(git(target, ['symbolic-ref', '--short', 'HEAD']), 'main');
   assert.equal(git(target, ['remote']), '');
   assert.notEqual(spawnSync(gitBinary, ['-C', target, 'rev-parse', '--verify', 'HEAD']).status, 0);

@@ -97,7 +97,7 @@ test('a custom-named user instance starts and upgrades independently of its temp
     cwd: f.directory, encoding: 'utf8', timeout: 20000, env: { ...process.env, PATH: '', KSF_SKIP_AUTO_UPDATE: '1' },
   });
   assert.equal(launched.status, 0, launched.stderr);
-  assert.equal(JSON.parse(launched.stdout).runtime.ksfRoot.replace(/[\\/]$/, ''), realpathSync(instance));
+  assert.equal(JSON.parse(launched.stdout).runtime.ksfRoot.replace(/[\\/]$/, ''), realpathSync.native(instance));
   await systemUpdate({ root: instance, from: next.coreArchive, api: new ForkAPI({ coreRoot: f.root }) });
   assert.equal(installedManifest(instance).version, '0.1.1');
   assert.equal(readFileSync(join(instance, '知识/private.md'), 'utf8'), 'FICTIONAL_PRIVATE');

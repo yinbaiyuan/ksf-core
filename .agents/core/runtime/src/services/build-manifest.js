@@ -72,7 +72,7 @@ function archiveFingerprint(path) {
 }
 
 async function hashNodeMember(path, member) {
-  const child = spawn(platform.tool('tar'), ['-xOzf', basename(path), member], { cwd: dirname(path), env: { ...process.env, LC_ALL: platform.name === 'win32' ? 'C.UTF-8' : 'C' } });
+  const child = spawn(platform.tool('tar'), ['-xOzf', basename(path), member], { cwd: dirname(path), env: tarEnvironment() });
   const hash = createHash('sha256');
   let stderr = '';
   child.stdout.on('data', data => hash.update(data));
@@ -86,6 +86,18 @@ async function hashNodeMember(path, member) {
       else resolve(hash.digest('hex'));
     });
   });
+}
+
+function tarEnvironment() {
+  const env = { ...process.env, LC_ALL: platform.name === 'win32' ? 'C.UTF-8' : 'C' };
+  if (platform.name === 'win32') {
+    // Git's GNU tar launches its adjacent gzip executable. A fixed launcher
+    // must also build with an empty caller PATH, without a global gzip setup.
+    const previous = process.env.Path ?? process.env.PATH ?? '';
+    for (const key of Object.keys(env)) if (key.toUpperCase() === 'PATH') delete env[key];
+    env.PATH = dirname(platform.tool('tar')) + (previous ? ';' + previous : '');
+  }
+  return env;
 }
 
 function gitInfo(root) {
@@ -146,10 +158,13 @@ export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
       nodeSha256 = digest(members.get(spec.nodeMember));
     } else {
       const listing = spawnSync(platform.tool('tar'), ['-tvzf', basename(path), spec.nodeMember, spec.licenseMember], {
-        cwd: dirname(path), encoding: 'utf8', env: { ...process.env, LC_ALL: platform.name === 'win32' ? 'C.UTF-8' : 'C' }, timeout: 30_000,
+        cwd: dirname(path), encoding: 'utf8', env: tarEnvironment(), timeout: 30_000,
       });
       const entries = listing.stdout?.trim().split('\n') ?? [];
-      if (listing.status !== 0 || entries.length !== 2 || entries.some(entry => !entry.startsWith('-'))) fail('ARCHIVE_INVALID', `Required regular Node.js and LICENSE entries missing for ${target}.`);
+      if (listing.status !== 0 || entries.length !== 2 || entries.some(entry => !entry.startsWith('-'))) {
+        const reason = listing.error?.message ?? listing.stderr?.trim();
+        fail('ARCHIVE_INVALID', `Required regular Node.js and LICENSE entries missing for ${target}.${reason ? ' ' + reason.slice(0, 2000) : ''}`);
+      }
       nodeSha256 = await hashNodeMember(path, spec.nodeMember);
     }
     if (before !== archiveFingerprint(path)) fail('BUILD_INPUT_CHANGED', `Archive changed while building: ${target}.`);
