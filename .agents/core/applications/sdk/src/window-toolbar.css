@@ -1,0 +1,26 @@
+:where(.ksf-sdk-surface) .window-toolbar-host,:where(.ksf-sdk-surface).window-toolbar-host { flex:1; min-width:0; align-self:stretch; display:flex; }
+:where(.ksf-sdk-surface) .window-toolbar,:where(.ksf-sdk-surface).window-toolbar { display:flex; align-items:center; flex:1; min-width:0; gap:12px; font-size:12px; position:relative; }
+:where(.ksf-sdk-surface) .window-navigation,:where(.ksf-sdk-surface).window-navigation { display:flex; align-items:center; gap:8px; min-width:0; flex:1; overflow:hidden; }
+:where(.ksf-sdk-surface) .window-navigation .app-breadcrumb,:where(.ksf-sdk-surface).window-navigation .app-breadcrumb,:where(.ksf-sdk-surface) .window-navigation .breadcrumb,:where(.ksf-sdk-surface).window-navigation .breadcrumb { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+:where(.ksf-sdk-surface) .window-navigation > button,:where(.ksf-sdk-surface).window-navigation > button,:where(.ksf-sdk-surface) .window-navigation > .window-nav-button,:where(.ksf-sdk-surface).window-navigation > .window-nav-button { border:0; background:transparent; border-radius:6px; padding:6px; display:inline-flex; align-items:center; gap:7px; min-width:0; color:inherit; cursor:pointer; flex-shrink:0; }
+:where(.ksf-sdk-surface) .window-navigation button:hover,:where(.ksf-sdk-surface).window-navigation button:hover,:where(.ksf-sdk-surface) .window-command:hover,:where(.ksf-sdk-surface).window-command:hover { background:#152f4c0b; }
+:where(.ksf-sdk-surface) .window-actions,:where(.ksf-sdk-surface).window-actions { display:flex; align-items:center; flex:none; gap:2px; }
+:where(.ksf-sdk-surface) .window-command,:where(.ksf-sdk-surface).window-command { position:relative; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; min-width:48px; height:54px; padding:4px 8px; border:0; border-radius:6px; background:transparent; color:inherit; cursor:pointer; white-space:nowrap; }
+:where(.ksf-sdk-surface) .window-command > svg,:where(.ksf-sdk-surface).window-command > svg { flex:none; width:19px; height:19px; color:#507eae; }
+:where(.ksf-sdk-surface) .command-label,:where(.ksf-sdk-surface).command-label { font-size:12px; line-height:16px; }
+:where(.ksf-sdk-surface) .window-command:disabled,:where(.ksf-sdk-surface).window-command:disabled { opacity:.4; cursor:default; }
+:where(.ksf-sdk-surface) .window-command[aria-pressed=true],:where(.ksf-sdk-surface).window-command[aria-pressed=true] { background:#dce7f3; color:#235d99; }
+:where(.ksf-sdk-surface) .window-command:focus-visible,:where(.ksf-sdk-surface).window-command:focus-visible,:where(.ksf-sdk-surface) .window-navigation button:focus-visible,:where(.ksf-sdk-surface).window-navigation button:focus-visible { outline:2px solid #4388df; outline-offset:1px; }
+:where(.ksf-sdk-surface) .command-badge,:where(.ksf-sdk-surface).command-badge { position:absolute; top:1px; right:3px; font-size:9px; line-height:13px; min-width:13px; padding:0 2px; border-radius:5px; background:#d8e7f8; color:#335d91; }
+:where(.ksf-sdk-surface) .window-overflow,:where(.ksf-sdk-surface).window-overflow { position:relative; }
+:where(.ksf-sdk-surface) .window-command-menu,:where(.ksf-sdk-surface).window-command-menu { position:absolute; z-index:80; right:0; top:calc(100% + 7px); width:226px; padding:5px; border:1px solid #ccd3dd; border-radius:9px; background:#f9fafc; box-shadow:0 12px 36px #14284430; cursor:default; }
+:where(.ksf-sdk-surface) .window-command-menu button,:where(.ksf-sdk-surface).window-command-menu button { border:0; background:transparent; padding:8px; border-radius:5px; width:100%; display:flex; align-items:center; gap:9px; color:#25354b; text-align:left; cursor:pointer; }
+:where(.ksf-sdk-surface) .window-command-menu button span,:where(.ksf-sdk-surface).window-command-menu button span { flex:1; }
+:where(.ksf-sdk-surface) .window-command-menu button:hover,:where(.ksf-sdk-surface).window-command-menu button:hover,:where(.ksf-sdk-surface) .window-command-menu button:focus-visible,:where(.ksf-sdk-surface).window-command-menu button:focus-visible { background:#e5edf8; outline:0; }
+:where(.ksf-sdk-surface) .window-command-menu button:disabled,:where(.ksf-sdk-surface).window-command-menu button:disabled { opacity:.4; cursor:default; }
+:where(.ksf-sdk-surface) .window-command-menu kbd,:where(.ksf-sdk-surface).window-command-menu kbd { font:10px system-ui; color:#697789; }
+:where(.ksf-sdk-surface) .toolbar-spin,:where(.ksf-sdk-surface).toolbar-spin { animation:toolbar-spin 1s linear infinite; }
+@keyframes toolbar-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { :where(.ksf-sdk-surface) .toolbar-spin,:where(.ksf-sdk-surface).toolbar-spin { animation:none; } }
+
+@container app (max-width:760px){:where(.ksf-sdk-surface) .document-sidebar,:where(.ksf-sdk-surface).document-sidebar,:where(.ksf-sdk-surface) .repository-sidebar,:where(.ksf-sdk-surface).repository-sidebar{top:0}}

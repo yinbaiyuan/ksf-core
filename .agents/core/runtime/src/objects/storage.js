@@ -1,6 +1,7 @@
+import { replaceFileSync as renameSync } from '../platform/index.js';
 import { writeDurably, withExclusiveLock } from '../shared/files.js';
 import {
-  existsSync, lstatSync, readdirSync, mkdirSync, renameSync, rmSync, chmodSync, realpathSync,
+  existsSync, lstatSync, readdirSync, mkdirSync, rmSync, chmodSync, realpathSync,
 } from 'node:fs';
 import { join, dirname, relative, isAbsolute } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -8,6 +9,7 @@ import { readSnapshot } from '../metadata/files.js';
 import { sha256 as sha } from '../shared/hash.js';
 import { portable } from '../shared/paths.js';
 import { fail, compare } from './schema.js';
+import { assertNoCooperationMigration } from '../migrations/guard.js';
 
 export function safeDirectory(root, relativePath, { create = false } = {}) {
   if (isAbsolute(relativePath) || relativePath.split('/').some(s => s === '..')) fail('OBJECT_PATH_INVALID', 'Expected a path below KSF root.');
@@ -22,9 +24,10 @@ export function safeDirectory(root, relativePath, { create = false } = {}) {
 }
 
 export function withObjectLock(root, action) {
+  assertNoCooperationMigration(root);
   const directory = safeDirectory(root, '.agents/runtime-data/objects', { create: true });
   const lock = join(directory, 'write.lock');
-  return withExclusiveLock(lock, { pid: process.pid }, () => action(), {
+  return withExclusiveLock(lock, { pid: process.pid }, () => { assertNoCooperationMigration(root); return action(); }, {
     onLocked() { fail('OBJECT_LOCKED', 'Object write lock exists; inspect its owner before retrying.'); },
     onReplaced() { process.stderr.write('OBJECT_LOCK_CLEANUP: Replaced lock left untouched.\n'); },
     onCleanup() { process.stderr.write('OBJECT_LOCK_CLEANUP: Inspect remaining write lock.\n'); },

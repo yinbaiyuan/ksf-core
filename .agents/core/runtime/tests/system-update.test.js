@@ -1,3 +1,5 @@
+import {platform as nativePlatform} from '../src/platform/index.js';
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { existsSync, readFileSync, rmSync, writeFileSync, symlinkSync } from 'node:fs';
@@ -99,7 +101,7 @@ test('update preview verifies the candidate but changes no live system or person
 test('checksum failures, wrong source identity and invalid candidates cannot publish a partial system', async t => {
   const f = await distributionFixture(t), next = await f.next();
   const before = systemFingerprint(f.workspace), feed = structuredClone(next.feed);
-  feed.platforms['darwin-arm64'].core.sha256 = '0'.repeat(64);
+  feed.platforms[fixtureTarget].core.sha256 = '0'.repeat(64);
   writeFileSync(next.source, stableJSON(feed));
   await assert.rejects(systemUpdate({ root: f.workspace, source: next.source }), { code: 'CHECKSUM_MISMATCH' });
   feed.core_repository = 'different/core'; writeFileSync(next.source, stableJSON(feed));
@@ -146,7 +148,7 @@ for (const point of ['old-renamed', 'new-renamed', 'committed']) {
     const script = `import {systemUpdate} from ${JSON.stringify(moduleURL)};\n` +
       `await systemUpdate({root: process.argv[1], from: process.argv[2], fault: stage => {if(stage === process.argv[3]) process.kill(process.pid, 'SIGKILL');}});`;
     const child = spawnSync(process.execPath, ['--input-type=module', '-e', script, f.workspace, next.coreArchive, point], { encoding: 'utf8', timeout: 20000 });
-    assert.equal(child.signal, 'SIGKILL', child.stderr);
+    if(nativePlatform.name==='win32')assert.equal(child.status,1,child.stderr);else assert.equal(child.signal,'SIGKILL',child.stderr);
     const recovered = f.launch(['hello', '--json']);
     assert.equal(recovered.status, 0, recovered.stdout + recovered.stderr);
     assert.equal(installedManifest(f.workspace).version, point === 'committed' ? '0.1.1' : '0.1.0');
@@ -179,7 +181,7 @@ test('normal commands never check or install a newer Release; explicit commands 
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.equal(JSON.parse(result.stdout).message, 'Hello, KSF!');
   assert.equal(installedManifest(f.workspace).version, '0.1.0');
-  assert.match(result.stderr, /^(?:KSF: preparing Node\.js [^\n]+\.\n)?$/);
+  assert.match(result.stderr.replaceAll('\r\n','\n'), /^(?:KSF: preparing Node\.js [^\n]+\.\n)?$/);
   assert.equal(existsSync(join(f.workspace, '.agents/runtime-data/system/check.json')), false);
   assert.equal((await systemRead({ root: f.workspace })).automaticUpdates, false);
   const checked = f.launch(['system', 'check', '--json']);
@@ -214,7 +216,7 @@ for (const rootFile of ['AGENTS.md', '.agents/ksf', '.agents/ksf.ps1']) {
     const script = `import {systemUpdate} from ${JSON.stringify(moduleURL)};\n` +
       `await systemUpdate({root:process.argv[1],from:process.argv[2],fault:stage=>{if(stage===process.argv[3])process.kill(process.pid,'SIGKILL');}});`;
     const child = spawnSync(process.execPath, ['--input-type=module', '-e', script, f.workspace, next.coreArchive, `root-installed:${rootFile}`], { encoding: 'utf8', timeout: 20000 });
-    assert.equal(child.signal, 'SIGKILL', child.stderr);
+    if(nativePlatform.name==='win32')assert.equal(child.status,1,child.stderr);else assert.equal(child.signal,'SIGKILL',child.stderr);
     const recovered = f.launch(['launcher', 'recover']);
     assert.equal(recovered.status, 0, recovered.stderr);
     assert.equal(systemFingerprint(f.workspace), before);
@@ -260,7 +262,7 @@ test('offline normal reads neither check the feed nor create an attempt cache', 
   for (const args of [['hello', '--json'], ['context', 'capabilities', '--json'], ['system', 'read', '--json']]) {
     const result = f.launch(args, { env: { KSF_SKIP_AUTO_UPDATE: '0' } });
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    assert.match(result.stderr, /^(?:KSF: preparing Node\.js [^\n]+\.\n)?$/);
+    assert.match(result.stderr.replaceAll('\r\n','\n'), /^(?:KSF: preparing Node\.js [^\n]+\.\n)?$/);
   }
   assert.equal(existsSync(join(f.workspace, '.agents/runtime-data/system/check.json')), false);
   assert.equal(installedManifest(f.workspace).version, '0.1.0');

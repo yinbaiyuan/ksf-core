@@ -25,6 +25,7 @@ export function objectHelp(type, operation) {
   };
   return `KSF ${type}${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
     (operation ? [lines[operation]] : Object.values(lines)).map(line => `  ksf ${type} ${line}`).join('\n') + '\n\n' +
+    (type === 'cooperation' ? '  ksf cooperation migrate (--dry-run | --apply) [--json]\n\n' : '') +
     'Defaults: --source effective; read --part all. --help or -h shows help.\n' +
     'write input: {"metadata":{...},"body":"..."}; omitted parts are retained.\n' +
     'Writes only affect user objects. A system object is derived as a whole directory.\n' +

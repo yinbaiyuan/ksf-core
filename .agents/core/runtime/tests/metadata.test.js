@@ -1,3 +1,4 @@
+import {platform} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, readdirSync, statSync, chmodSync, symlinkSync } from 'node:fs';
@@ -165,7 +166,7 @@ test('missing targets and target symlinks fail without changing linked files', t
 test('write preserves permission bits and cleans lock/temp files', t => {
   const f = fixture(t);chmodSync(f.target, 0o640);
   f.call('write', { data: { a: 1 } });
-  assert.equal(statSync(f.target).mode & 0o777, 0o640);
+  if(platform.supportsPosixModes)assert.equal(statSync(f.target).mode & 0o777, 0o640);
   assert.deepEqual(readdirSync(f.root), ['笔记.md']);
 });
 

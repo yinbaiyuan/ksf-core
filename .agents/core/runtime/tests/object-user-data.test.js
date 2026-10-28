@@ -1,3 +1,4 @@
+import {platform} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync, rmdirSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, readdirSync, chmodSync, symlinkSync, cpSync } from 'node:fs';
@@ -32,7 +33,7 @@ for (const objectId of [...Object.keys(types).map(type => `${type}.测试.对象
   assert.equal(data.objectId, objectId); assert.equal(data.revision, 1);
   assert.equal(document.object_id, objectId); assert.equal(document.schema_version, 1);
   assert.equal(Object.hasOwn(document, 'namespace'), false); assert.equal(Object.hasOwn(document, 'version'), false);
-  assert.match(f.path, /abilities\/[a-f0-9]{64}\.json$/); assert.equal(statSync(f.path).mode & 0o777, 0o600);
+  assert.match(f.path.replaceAll('\\','/'), /abilities\/[a-f0-9]{64}\.json$/); if(platform.supportsPosixModes)assert.equal(statSync(f.path).mode & 0o777, 0o600);
   assert.equal(listUserData({ root: f.root }).complete, true);
 });
 
@@ -48,7 +49,7 @@ test('merge, null, no-op bytes, permissions, literal key removal and full reset 
   f.remove({ fields: ['a.b', '__proto__', '', 'a.b'] }); assert.equal({}.polluted, undefined);
   assert.deepEqual(f.read().values, { keep: null, nested: { a: 3 } });
   assert.equal(f.remove({ fields: ['missing'] }).changed, false); assert.equal(f.read().revision, 3);
-  chmodSync(f.path, 0o640); f.write({ extra: 1 }); assert.equal(statSync(f.path).mode & 0o777, 0o640);
+  chmodSync(f.path, 0o640); f.write({ extra: 1 }); if(platform.supportsPosixModes)assert.equal(statSync(f.path).mode & 0o777, 0o640);
   f.remove({ fields: ['keep', 'nested', 'extra'] }); assert.equal(f.read().state, 'present'); assert.deepEqual(f.read().values, {});
   assert.equal(f.remove().changed, true); assert.equal(f.read().state, 'missing');
 });

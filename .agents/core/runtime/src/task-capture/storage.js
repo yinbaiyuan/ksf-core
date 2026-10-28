@@ -1,4 +1,5 @@
-import { existsSync, lstatSync, readdirSync, renameSync, unlinkSync } from 'node:fs';
+import { replaceFileSync as renameSync } from '../platform/index.js';
+import { existsSync, lstatSync, readdirSync, unlinkSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { managedPath } from '../routing/storage.js';
 import { withExclusiveLock, withTemporaryFile, readFileSnapshot, sameIdentity } from '../shared/files.js';

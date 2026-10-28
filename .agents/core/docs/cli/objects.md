@@ -1,6 +1,6 @@
 # 四类对象命令公共规则
 
-已实现。适用于 `workflow`、`partner`、`competency`、`data-package`。CLI 只适配类型、参数和输出，共享目录、契约、解析和写入服务；不启动 Agent 或执行对象正文中的操作。对象概念见[对象综述](../objects/overview.md)，公共字段见[对象元数据规范](../对象元数据规范.md)，命令设计遵循[统一规范](../CLI命令设计规范.md)。
+已实现。适用于 `cooperation`、`partner`、`competency`、`data-package`。CLI 只适配类型、参数和输出，共享目录、契约、解析和写入服务；不启动 Agent 或执行对象正文中的操作。对象概念见[对象综述](../objects/overview.md)，公共字段见[对象元数据规范](../对象元数据规范.md)，命令设计遵循[统一规范](../CLI命令设计规范.md)。
 
 ## 命令与参数
 
@@ -39,7 +39,7 @@ draft 保存后立即影响默认读取和依赖解析；首次派生默认就�
 
 | ID | 指定路径 |
 | --- | --- |
-| `workflow.ksf.entry` | `AGENTS.md` |
+| `cooperation.ksf.entry` | `AGENTS.md` |
 | `partner.ksf.runtime` | `.agents/core/abilities/partners/ksf-runtime/partner.md` |
 | `competency.ksf.ability-route` | `.agents/core/abilities/competencies/ability-route/competency.md` |
 | `competency.ksf.project-route` | `.agents/core/abilities/competencies/project-route/competency.md` |

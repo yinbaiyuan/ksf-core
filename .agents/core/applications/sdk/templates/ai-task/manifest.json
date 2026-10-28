@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "sdkVersion": 2,
+  "id": "example.ai-task",
+  "name": "AI任务示例",
+  "description": "开发包中的虚构示例",
+  "version": "1.0.0",
+  "permissions": [
+    "ai"
+  ],
+  "cards": [],
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  },
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 900,
+      "height": 640
+    },
+    "minSize": {
+      "width": 480,
+      "height": 320
+    }
+  },
+  "background": false
+}

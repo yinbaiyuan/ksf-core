@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "id": "conversations",
+  "name": "对话工作台",
+  "version": "0.1.7",
+  "description": "查看 KSF 归属聊天、原始轮次与路由，提供工作统计卡片。",
+  "author": "KSF",
+  "icon": "conversations",
+  "sdkVersion": 2,
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 1180,
+      "height": 740
+    },
+    "minSize": {
+      "width": 480,
+      "height": 420
+    }
+  },
+  "cards": [
+    {
+      "id": "work-stats",
+      "name": "工作统计",
+      "description": "今日／本周横向统计，列出今日项目、知识和能力，点击核对明细",
+      "icon": "work-stats",
+      "entry": "frontend/work-stats.js",
+      "defaultSize": {
+        "w": 4,
+        "h": 2
+      },
+      "minSize": {
+        "w": 1,
+        "h": 1
+      }
+    }
+  ],
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  },
+  "permissions": [
+    "filesystem"
+  ]
+}

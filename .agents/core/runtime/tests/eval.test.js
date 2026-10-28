@@ -91,7 +91,7 @@ test('combined listings never erase verified body reads; fixed definitions need 
   assert.deepEqual(observedReads([{ id: 'e', type: 'command', command: `ls ${path}`, output: text, exitCode: 0 }], [path], proofs, { full: true })[0].evidence, []);
 });
 test('preset body order is independent from adoption and accepts early global summaries', () => {
-  const project = '项目/甲/project.md', preset = '能力/搭档/编辑/partner.md', global = '能力/工作流/交付/workflow.md';
+  const project = '项目/甲/project.md', preset = '能力/搭档/编辑/partner.md', global = '能力/协同/交付/cooperation.md';
   const contract = { expected: { allowedWrites: [], requiredReads: [], presetPriority: { project, preset, global } } };
   const read = (id, path) => ({ id, type: 'command', command: `cat ${path}`, output: '# actual body', exitCode: 0 });
   const check = { id: 'check', type: 'command', command: 'ksf project check 甲 --json', output: JSON.stringify({ command: 'project', operation: 'check', data: { path: project, routing: { entries: [{ valid: true, object: { path: preset } }] } } }), exitCode: 0 };
@@ -191,8 +191,8 @@ test('A01 competing routes have distinct necessary methods and source material',
   assert.match(content('能力/搭档/partner.demo.editor/partner.md'), /competency.demo.edit@1.0.0/);
   assert.match(content('能力/基本功/competency.demo.edit/competency.md'), /客户表达约定/);
   assert.match(content('项目/晨光方案/资料/客户表达约定.md'), /客厅灯/);
-  assert.match(content('能力/工作流/workflow.demo.delivery/workflow.md'), /partner.demo.delivery-editor@1.0.0/);
-  assert.doesNotMatch(content('能力/工作流/workflow.demo.delivery/workflow.md'), /partner.demo.editor@/);
+  assert.match(content('能力/协同/cooperation.demo.delivery/cooperation.md'), /partner.demo.delivery-editor@1.0.0/);
+  assert.doesNotMatch(content('能力/协同/cooperation.demo.delivery/cooperation.md'), /partner.demo.editor@/);
   assert.match(content('能力/基本功/competency.demo.delivery-edit/competency.md'), /设备台账/);
   assert.match(content('项目/晨光方案/资料/设备台账.md'), /L-17/);
 });
@@ -220,8 +220,8 @@ test('frozen source contains working-tree bytes but excludes test answers and re
   assert.equal(existsSync(join(frozen, '.agents/core/runtime/tests/answers.test.js')), false);
   assert.equal(existsSync(join(frozen, '.agents/user-data/eval-routing.json')), false);
   materialize(frozen, target, suite.cases.find(c => c.id === 'P02'), manifest);
-  assert.match(readFileSync(join(target, '项目/ksf-develop/project.md'), 'utf8'), new RegExp(target));
-  assert.match(readFileSync(join(f.root, '项目/ksf-develop/project.md'), 'utf8'), new RegExp(f.root));
+  assert.ok(readFileSync(join(target, '项目/ksf-develop/project.md'), 'utf8').includes(target));
+  assert.ok(readFileSync(join(f.root, '项目/ksf-develop/project.md'), 'utf8').includes(f.root));
 });
 test('broken private case configuration is preserved and reported as invalid rather than missing', t => {
   const f = fixture(t), path = join(f.root, '.agents/user-data/eval-routing.json'); writeFileSync(path, '{broken');
@@ -251,7 +251,7 @@ function fakeInvocation(args) {
     text = JSON.stringify(judgment);
   } else {
     const priorityFixture = existsSync(join(args.workspace, '项目/晨光方案/资料/客户表达约定.md'));
-    const files = Object.keys(inventory(args.workspace)).filter(p => p.endsWith('.md') && !['知识/knowledge.md', '知识/干扰/业务建议.md'].includes(p) && (!priorityFixture || p !== '能力/工作流/workflow.demo.delivery/workflow.md'));
+    const files = Object.keys(inventory(args.workspace)).filter(p => p.endsWith('.md') && !['知识/knowledge.md', '知识/干扰/业务建议.md'].includes(p) && (!priorityFixture || p !== '能力/协同/cooperation.demo.delivery/cooperation.md'));
     tools = [{ type: 'item.completed', item: { type: 'command_execution', command: 'ksf context capabilities --json', aggregated_output: '{"data":{"complete":true}}', exit_code: 0 } },
       { type: 'item.completed', item: { type: 'command_execution', command: 'cat ' + files.join(' '),
       aggregated_output: files.map(p => readFileSync(join(args.workspace, p), 'utf8')).join('\n'), exit_code: 0 } }];

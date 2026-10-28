@@ -1,0 +1,20 @@
+.communication-settings{display:grid;gap:24px;font-size:13px;line-height:1.6}
+.communication-settings section{border-top:1px solid #e5eaf1;padding-top:16px;min-width:0}
+.communication-settings h4{margin:0 0 10px;color:#24364e}
+.communication-settings p{color:#64748b;overflow-wrap:anywhere}
+.communication-settings form,.communication-settings label{display:grid;gap:6px}
+.communication-settings form{gap:12px;margin-bottom:12px}
+.communication-settings input,.communication-settings select,.communication-settings textarea{width:100%;min-width:0;box-sizing:border-box;padding:8px 10px;border:1px solid #d4deea;border-radius:7px;background:#fff;color:#24364e;font:inherit}
+.communication-settings textarea{resize:vertical}
+.communication-settings button{border:1px solid #d4deea;border-radius:7px;padding:7px 12px;background:#fff;font:inherit;color:#24364e;text-align:left;cursor:pointer}
+.communication-settings button:disabled{opacity:.5;cursor:default}
+.communication-settings form>button{justify-self:start}
+.communication-settings .communication-check{display:flex;gap:8px;align-items:center}
+.communication-check input{width:auto}
+.communication-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.communication-list{display:grid;gap:8px;margin-top:12px}
+.communication-list article,.communication-list button{display:grid;gap:5px;overflow-wrap:anywhere}
+.communication-list article{padding:10px;background:#f6f8fc;border-radius:7px}
+.communication-list small,.communication-id{overflow-wrap:anywhere;font-size:11px}
+.communication-settings .communication-error{color:#b42318;background:#fff1f0;padding:10px;border-radius:8px}
+.communication-settings :is(input,button,select,textarea):focus-visible{outline:2px solid #79b5ef;outline-offset:1px}

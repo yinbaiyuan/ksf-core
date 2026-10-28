@@ -8,12 +8,12 @@
 
 | 需要解决的问题 | 主要定义 |
 | --- | --- |
-| 发现并匹配适用的工作流、搭档，形成能力承接安排 | [能力路由](../../abilities/competencies/ability-route/competency.md) |
+| 发现并匹配适用的协同、搭档，形成能力承接安排 | [能力路由](../../abilities/competencies/ability-route/competency.md) |
 | 项目归属、必要项目事实、工程关联 | [project-route](../../abilities/competencies/project-route/competency.md) |
 | 按实例及单元规则记录、归位、修订与整理知识 | [knowledge-organize](../../abilities/competencies/knowledge-organize/competency.md) |
 | 保存价值、唯一落点、授权、写入与验证回退 | [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md) |
 
-入口先按 ksf-runtime 的启动约定完整读取 USER.md、BOT.md、MEMORY.md，再由 runtime 识别本轮任务关系；理解目标需要项目事实时先补事实，再完成能力选择。按明确要求、有效原安排、适用项目预设、全局工作流/搭档及通用 Agent 的选择规则推进，具体优先关系由能力路由持有。完整运行、返回、组合缺口和恢复见[项目与能力路由协作](routing.md)。背景知识与维护均按需发生，空库和简单任务不强制经过全部基本功。对象的专业设计仍由[对象设计师](../../abilities/partners/ksf-object-designer/partner.md)及其三项设计基本功承接。
+入口先按 ksf-runtime 的启动约定完整读取 USER.md、BOT.md、MEMORY.md，再由 runtime 识别本轮任务关系；理解目标需要项目事实时先补事实，再完成能力选择。按明确要求、有效原安排、适用项目预设、全局协同/搭档及通用 Agent 的选择规则推进，具体优先关系由能力路由持有。完整运行、返回、组合缺口和恢复见[项目与能力路由协作](routing.md)。背景知识与维护均按需发生，空库和简单任务不强制经过全部基本功。对象的专业设计仍由[对象设计师](../../abilities/partners/ksf-object-designer/partner.md)及其三项设计基本功承接。
 
 用户明确要求项目创建、接入或补全时，runtime 按需采用普通系统基本功[project-intake](../../abilities/competencies/project-intake/competency.md)，由项目路由准备归属、基本功形成专业安排、资产维护落实已授权保存。它不是新增路由或固定保护对象，不在启动时全量读取；资料默认复制并保留原件，工程原位关联，增量冲突保留现状并报告。
 

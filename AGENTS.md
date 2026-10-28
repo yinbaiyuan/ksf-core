@@ -1,14 +1,14 @@
 ---
-id: "workflow.ksf.entry"
-name: "KSF 入口工作流"
+id: "cooperation.ksf.entry"
+name: "KSF 入口协同"
 description: "KSF 固定入口。先读取 ksf-runtime，由它组织当前工作过程及必要的职责交接。"
-version: 0.1.22
+version: 0.1.26
 status: active
 references:
-  - partner.ksf.runtime@0.1.21
+  - partner.ksf.runtime@0.1.25
 ---
 
-# KSF 入口工作流
+# KSF 入口协同
 
 收到用户请求后，先读取并遵循 [ksf-runtime](.agents/core/abilities/partners/ksf-runtime/partner.md)。
 

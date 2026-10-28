@@ -1,3 +1,4 @@
+import {portable} from '../shared/paths.js';
 import { join, relative } from 'node:path';
 import { MetadataError, invalid } from '../metadata/errors.js';
 import { validateInput, equalValues } from '../metadata/input.js';
@@ -14,7 +15,7 @@ export function locations(root, name, projectScope = 'current') {
 export function publicProject(root, name, parsed, part = 'all', projectScope = 'current') {
   const { folder, target } = locations(root, name, projectScope);
   return {
-    name, scope: projectScope, path: relative(root, target), directory: relative(root, folder), state: parsed.state,
+    name, scope: projectScope, path: portable(relative(root, target)), directory: portable(relative(root, folder)), state: parsed.state,
     ...(part !== 'body' ? { metadata: parsed.values } : {}),
     ...(part !== 'metadata' ? { body: parsed.body.toString('utf8') } : {}),
   };
@@ -61,13 +62,13 @@ export function encodeProject(current, input) {
 export function planProjectWrite(current, { root, name, data, dryRun = false }, { metadataOnly = false } = {}) {
   const encoded = encodeProject(current, data);
   const wouldChange = !current.snapshot || !encoded.bytes.equals(current.snapshot.bytes);
-  const result = { name, scope: current.projectScope ?? 'current', path: relative(root, current.target), dryRun, changed: false, wouldChange,
+  const result = { name, scope: current.projectScope ?? 'current', path: portable(relative(root, current.target)), dryRun, changed: false, wouldChange,
     ...(!metadataOnly ? { created: false, wouldCreate: !current.snapshot, changes: encoded.changes } : {}),
     project: publicProject(root, name, encoded.parsed, 'all', current.projectScope) };
   return { result, bytes: encoded.bytes, wouldChange };
 }
 
 export function planProjectRemoval(current, { root, name, dryRun = false }, entries = []) {
-  return { name, scope: current.projectScope ?? 'current', path: relative(root, current.folder), dryRun, changed: false,
+  return { name, scope: current.projectScope ?? 'current', path: portable(relative(root, current.folder)), dryRun, changed: false,
     wouldChange: !!current.snapshot, removed: false, entries };
 }

@@ -1,3 +1,4 @@
+import {gitExecutable} from '../platform/index.js';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
@@ -7,7 +8,7 @@ import { validateObject } from '../objects/schema.js';
 const excluded = /(?:^|\/)(?:\.git|node_modules|_cache|_working|\.DS_Store)(?:\/|$)/;
 const coreAccept = p => !excluded.test(p) && !/^(?:runtime\/(?:tests|src\/eval)|runtime\/src\/commands\/eval\.js|docs\/(?:cli\/eval|runtime\/routing-evaluation)\.md)(?:\/|$)/.test(p);
 const gitInit = root => {
-  const r = spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', root], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
+  const r = spawnSync(gitExecutable, ['init', '--template=', '--initial-branch=main', root], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
   if (r.status !== 0) fail('EVAL_FIXTURE_GIT', r.stderr || 'Cannot initialize isolated source identity.');
 };
 
@@ -43,7 +44,7 @@ export function freezeInstance(root, destination) {
 }
 
 const object = (root, type, id, name, description, body, references = [], source = 'user', version = '1.0.0') => {
-  const folders = { partner: '搭档', workflow: '工作流', competency: '基本功', 'data-package': '数据包' };
+  const folders = { partner: '搭档', cooperation: '协同', competency: '基本功', 'data-package': '数据包' };
   const path = `能力/${folders[type]}/${id}/${type === 'data-package' ? 'datapackage' : type}.md`;
   const metadata = { id, name, description, version, status: 'active', references, ...(source === 'user' ? { user_revision: 1 } : {}) };
   const errors = validateObject(metadata, { type, source, path });
@@ -61,14 +62,14 @@ export function fictional(root, variant) {
   object(root, 'partner', 'partner.demo.architect', '方案顾问', '判断技术可行性、前提和缺口，不负责普通文案或发布。', '# 方案顾问\n使用competency.demo.architecture@1.0.0核对资料，交付已知、缺口与条件性判断，不冒充已实施。', ['competency.demo.architecture@1.0.0']);
   object(root, 'partner', 'partner.demo.incomplete', '专项校核员', '专门校核照明兼容性，必须具备专项方法。', '# 专项校核员\n任何专业校核依赖competency.demo.missing@1.0.0；缺失时不得完成校核，可整理已有事实并说明缺口。', ['competency.demo.missing@1.0.0']);
   object(root, 'partner', 'partner.demo.publisher', '发布助理', '将说明整理后发布，文字和发布分别交付。', '# 发布助理\n先按事实编辑方法整理文字。发布必须使用本目录bin/demo-publish工具，当前没有其他发布渠道；工具不可用时仅交付文字，说明发布未完成，不自行实现工具。', ['competency.demo.edit@1.0.0']);
-  object(root, 'workflow', 'workflow.demo.delivery', '方案交付', '适用于已有资料的文字整理或技术可行性判断，组织编辑与顾问，不处理无关问答。', '# 方案交付\n若仅文字整理，由partner.demo.editor@1.0.0执行；需要技术判断时由partner.demo.architect@1.0.0核对前提。只装载当前需要的支持，保持原始交付范围，分别核对事实、未知与结果。', ['partner.demo.editor@1.0.0', 'partner.demo.architect@1.0.0']);
+  object(root, 'cooperation', 'cooperation.demo.delivery', '方案交付', '适用于已有资料的文字整理或技术可行性判断，组织编辑与顾问，不处理无关问答。', '# 方案交付\n若仅文字整理，由partner.demo.editor@1.0.0执行；需要技术判断时由partner.demo.architect@1.0.0核对前提。只装载当前需要的支持，保持原始交付范围，分别核对事实、未知与结果。', ['partner.demo.editor@1.0.0', 'partner.demo.architect@1.0.0']);
   project(root, '晨光方案', { partner: variant === 'stale' ? 'partner.demo.editor@9.0.0' : undefined });
   if (variant === 'preset-priority') {
     object(root, 'competency', 'competency.demo.edit', '客户事实编辑方法', '核对客户表达约定，按事实精简。', '# 客户事实编辑\n先读取项目/晨光方案/资料/客户表达约定.md和照明事实，使用客户确认的称呼，区分事实与未知。输出一句正文，不使用内部设备代号。');
     put(root, '项目/晨光方案/资料/客户表达约定.md', '# 客户表达约定\n本项目客户确认：介绍中的示例灯称为“客厅灯”。亮度能力按照明事实核对，预算、协议、网关需求仍未知。\n');
     object(root, 'competency', 'competency.demo.delivery-edit', '交付台账编辑方法', '依设备台账和照明事实形成内部交付说明。', '# 交付台账编辑\n先读取项目/晨光方案/资料/设备台账.md和照明事实，以台账设备代号作主语，用一句话区分已知与待确认条件。不得向外发布或扩大写入。');
     object(root, 'partner', 'partner.demo.delivery-editor', '交付编辑', '按设备台账精简现有说明，适用于交付内部核对，不执行发布。', '# 交付编辑\n使用competency.demo.delivery-edit@1.0.0核对台账与原文，以设备代号写一句交付说明。', ['competency.demo.delivery-edit@1.0.0']);
-    object(root, 'workflow', 'workflow.demo.delivery', '方案交付', '适用于已有资料的文字整理或技术判断，组织交付编辑与顾问，不处理无关问答。', '# 方案交付\n普通文字整理由partner.demo.delivery-editor@1.0.0读取台账后执行；技术判断由partner.demo.architect@1.0.0核对前提。仅交付用户要求的一句话，不额外保存或发布。', ['partner.demo.delivery-editor@1.0.0', 'partner.demo.architect@1.0.0']);
+    object(root, 'cooperation', 'cooperation.demo.delivery', '方案交付', '适用于已有资料的文字整理或技术判断，组织交付编辑与顾问，不处理无关问答。', '# 方案交付\n普通文字整理由partner.demo.delivery-editor@1.0.0读取台账后执行；技术判断由partner.demo.architect@1.0.0核对前提。仅交付用户要求的一句话，不额外保存或发布。', ['partner.demo.delivery-editor@1.0.0', 'partner.demo.architect@1.0.0']);
     put(root, '项目/晨光方案/资料/设备台账.md', '# 设备台账\n示例灯的内部设备代号为L-17，支持亮度调节；预算、协议和网关需求未确认。\n');
   }
   if (variant === 'ambiguous') project(root, '暮光方案', { description: '照明交付方案，尚缺预算和协议确认，同样需要补充灯光方案材料。' });
@@ -96,7 +97,7 @@ export function fictional(root, variant) {
     const entries = ['north', 'south'].map(id => ({ id, path: `repositories/${id}` }));
     for (const entry of entries) {
       const sourceRoot = join(root, entry.path); mkdirSync(sourceRoot, { recursive: true }); gitInit(sourceRoot);
-      put(sourceRoot, 'ksf-source.yaml', `kind: ksf-ability-source\nschema_version: 1\nid: ${entry.id}\nname: ${entry.id}\n`);
+      put(sourceRoot, 'ksf-source.yaml', `kind: ksf-ability-source\nschema_version: 2\nid: ${entry.id}\nname: ${entry.id}\n`);
       object(sourceRoot, 'partner', 'partner.demo.joint', '联合编辑', '精简说明，按事实保留边界。', '# 联合编辑\n精简说明，不编造事实。', [], entry.id, entry.id === 'south' ? '2.0.0' : '1.0.0');
     }
     json(root, '.agents/user-data/sources.json', { namespace: 'sources', revision: 1, schema_version: 1, values: { entries } });

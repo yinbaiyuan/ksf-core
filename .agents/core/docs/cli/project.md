@@ -68,7 +68,7 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 
 | 字段 | 每项格式 | 作用 |
 | --- | --- | --- |
-| workflows | `{ref: "workflow.example.delivery@0.1.0", source: "team-methods"}` | 优先核对的工作流 |
+| cooperations | `{ref: "cooperation.example.delivery@0.1.0", source: "team-methods"}` | 优先核对的协同 |
 | partners | `{ref: "partner.example.editor@0.1.0"}` | 优先核对的搭档 |
 | competencies | `{ref: "competency.example.review@0.1.0"}` | 按需采用的补充方法 |
 | data_packages | `{ref: "data-package.example.materials@0.1.0"}` | 按需使用的资料包 |

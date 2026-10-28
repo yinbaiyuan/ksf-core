@@ -5,7 +5,7 @@
 | 平台 | 入口 | 当前范围 |
 | --- | --- | --- |
 | macOS | `.agents/ksf`（系统 `/bin/sh`） | 启动、恢复及现有 Core 命令 |
-| Windows | `.agents/ksf.ps1`（Windows PowerShell 5.1 及以上） | 独立恢复、路径检查及 Core 转交契约；实际 Windows bootstrap 和 Node 包尚未实现 |
+| Windows | `.agents/ksf.ps1`（Windows PowerShell 5.1 及以上） | 独立恢复、路径检查、参数/标准输入转交；随包 Node 24.21.0 ZIP 与共享 CLI 已接入 |
 
 两个入口都放在可整体替换的 `.agents/core/` 外。Linux 尚未验证；Shell 恢复锁目前使用 macOS shlock。
 
@@ -33,7 +33,7 @@ Windows PowerShell：
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\.agents\ksf.ps1 launcher recover
 ```
 
-入口不修改全局执行策略；组织组策略仍可能限制脚本执行。不要求 Git Bash、WSL、预装 Node 或管理员权限。PS1 直接调用，当前不增加 CMD 包装层，以减少参数二次解析。上述恢复命令成功不表示 Windows 已能执行业务命令。
+入口不修改全局执行策略；组织组策略仍可能限制脚本执行。不要求 Git Bash、WSL、预装 Node 或管理员权限。PS1 直接调用，当前不增加 CMD 包装层，以减少参数二次解析。恢复命令仅证明恢复契约，业务覆盖以实机验收报告为准。
 
 `launcher recover` 成功退出 0，其他 launcher 参数退出 2；路径、锁、事务、bootstrap 等错误退出 1，诊断写 stderr，正常 Core 的 stdout 由 Core 持有。
 
@@ -43,7 +43,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\.agents\ksf.ps1 launch
 - 入口设置 KSF_ROOT、KSF_INSTALLED_LAUNCHER=1、KSF_LAUNCHER_PROTOCOL=1。
 - Shell 加载 `.agents/core/runtime/bootstrap.sh`；PowerShell 加载 `.agents/core/runtime/bootstrap.ps1`。
 - Core 定义 `ksf_bootstrap_main`，接收原参数列表。Shell 最终 exec 对应程序；PowerShell 函数设置 LASTEXITCODE 或显式 exit，入口原样返回该状态。
-- PowerShell 必须用参数数组传递，不拼接命令文本或 Invoke-Expression。未来向 node.exe 转交时仍需验证 Windows PowerShell 的本机参数编码；本轮测试只验证入口到 Core 函数的传递。
+- PowerShell 必须用参数数组传递，不拼接命令文本或 Invoke-Expression。未来向 node.exe 转交时仍需验证 Windows PowerShell 的本机参数编码；原生参数、标准输入、PowerShell 管道及直接 -File 均由 bootstrap-windows.ps1 验证。
 - Windows bootstrap 缺失时报 BOOTSTRAP_MISSING，入口不自动选择全局 Node、下载程序或宣称业务可用。
 
 ## 恢复事务协议 1

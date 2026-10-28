@@ -1,0 +1,8 @@
+.app-store-mark { display:block; flex:none; }
+@media(forced-colors:active) {
+  .app-store-mark .store-icon-plate { fill:ButtonFace; stroke:ButtonText; stroke-width:2px; }
+  .app-store-mark .store-icon-rim { stroke:none; }
+  .app-store-mark .store-icon-handle { stroke:ButtonText; }
+  .app-store-mark .store-icon-bag { fill:ButtonText; }
+  .app-store-mark .store-icon-tiles { fill:ButtonFace; }
+}

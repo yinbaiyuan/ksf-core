@@ -93,6 +93,23 @@ async function* sourceLines(stream, start) {
   }
   if (pending.length) yield { line: pending.toString('utf8'), offset: position, end: position, complete: false };
 }
+// Metadata-only reconciliation for chat counters. Never retain message bodies,
+// tool outputs or pre-activation native turns in the chat-state store.
+export async function nativeTurnsSince(path, activatedAt) {
+  const stream = createReadStream(path), ids = new Set();
+  try {
+    for await (const entry of sourceLines(stream, 0)) {
+      if (!entry.complete) continue; // The Hook supplies the current turn even before the final flush.
+      let row;
+      try { row = JSON.parse(entry.line); } catch { fail('CHAT_SOURCE_PARTIAL', 'Native transcript contains an unreadable record; counting is unconfirmed.'); }
+      if (row.type !== 'event_msg' || row.payload?.type !== 'task_started') continue;
+      const p = row.payload, at = nativeTime(p.started_at, row.timestamp);
+      if (!isToken(p.turn_id) || !Number.isFinite(Date.parse(at))) fail('CHAT_SOURCE_UNSUPPORTED', 'Unknown native turn boundary; counting is unconfirmed.');
+      if (Date.parse(at) > Date.parse(activatedAt)) ids.add(p.turn_id);
+    }
+  } finally { stream.destroy(); }
+  return [...ids];
+}
 export async function parseTranscript(path, activatedAt, startOffset = 0) {
   const result = { turns: new Map(), issues: [], bytes: startOffset, nextOffset: startOffset };
   const stream = createReadStream(path, { start: startOffset });

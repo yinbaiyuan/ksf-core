@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "id": "markdown",
+  "name": "文档",
+  "version": "0.1.6",
+  "description": "浏览、编辑和预览 KSF 文件，保留自动保存、恢复草稿和版本冲突处理。",
+  "author": "KSF",
+  "icon": "documents",
+  "sdkVersion": 2,
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 1180,
+      "height": 760
+    },
+    "minSize": {
+      "width": 540,
+      "height": 420
+    }
+  },
+  "cards": [],
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs"
+  },
+  "permissions": [
+    "filesystem"
+  ]
+}

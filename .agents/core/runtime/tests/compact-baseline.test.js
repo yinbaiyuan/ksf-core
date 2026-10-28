@@ -1,3 +1,4 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chmodSync, readFileSync, rmSync } from 'node:fs';
@@ -43,7 +44,7 @@ test('new templates contain only a small receipt; update archives retain checksu
   assert.ok(readFileSync(join(f.workspace, '.agents/core/release.json')).length < 1024);
   const loaded = inspectReleaseDirectory(f.root, f.first.output);
   assert.equal(loaded.workspaces.length, 1);
-  const core = inspectCoreArchive(readFileSync(join(f.first.output, f.first.index.platforms['darwin-arm64'].core.name)));
+  const core = inspectCoreArchive(readFileSync(join(f.first.output, f.first.index.platforms[fixtureTarget].core.name)));
   assert.ok(Object.values(core.manifest.files).every(record => record.baseline === undefined));
   assert.deepEqual(receipt, releaseReceipt(core.manifest));
 });
@@ -112,9 +113,9 @@ test('compact instance creates committed-only diffs, ignores dirty files and sub
 test('compact committed snapshots preserve deletions, executable modes, binaries and Chinese additions', async t => {
   const f = await distributionFixture(t, { compact: true }), api = apiFor(f), binary = '.agents/core/new.bin', chinese = '.agents/core/中文 新文件.txt';
   rmSync(join(f.workspace, example)); chmodSync(join(f.workspace, 'AGENTS.md'), 0o755);
-  writeAtomic(join(f.workspace, binary), Buffer.from([0, 255, 10])); writeAtomic(join(f.workspace, chinese), 'committed Chinese path\n'); commitWorkspace(f);
+  writeAtomic(join(f.workspace, binary), Buffer.from([0, 255, 10])); writeAtomic(join(f.workspace, chinese), 'committed Chinese path\n'); commitWorkspace(f,{modes:{'AGENTS.md':0o755}});
   const plan = await prepare(f, api, { paths: undefined, all: true });
-  assert.equal(plan.changes.length, 4); assert.equal(plan.changes.find(c => c.workspace_path === example).operation, 'delete');
+  assert.equal(plan.changes.length,4,JSON.stringify(plan.changes.map(item=>({path:item.workspace_path,mode:item.mode})))); assert.equal(plan.changes.find(c => c.workspace_path === example).operation, 'delete');
   assert.equal(plan.changes.find(c => c.workspace_path === 'AGENTS.md').mode, 0o755);
   assert.match(plan.changes.find(c => c.workspace_path === binary).diff, /^Binary change:/);
   assert.equal(plan.changes.find(c => c.workspace_path === chinese).operation, 'add');

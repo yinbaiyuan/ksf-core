@@ -1,3 +1,5 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -24,15 +26,15 @@ test('Core packages exclude even invalid object records; instance policies track
   mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, 'PRIVATE_OBJECT_DATA_CANARY');
   const built = await buildRelease({ root: f.root, output: join(f.directory, 'object-data-exclusion') });
   for (const product of ['ksf-core', 'ksf-workspace']) {
-    const archive = readArchive(readFileSync(join(built.output, `${product}-0.1.0-darwin-arm64.tar.gz`)));
+    const archive = readArchive(readFileSync(join(built.output, `${product}-0.1.0-${fixtureTarget}.tar.gz`)));
     assert.ok([...archive.values()].every(file => !file.bytes.includes(Buffer.from('PRIVATE_OBJECT_DATA_CANARY'))));
     assert.ok(![...archive.keys()].some(name => name.startsWith('.agents/user-data/abilities/')));
   }
   const target = '.agents/user-data/abilities/' + 'a'.repeat(64) + '.json';
-  assert.equal(spawnSync('/usr/bin/git', ['-C', f.root, 'check-ignore', '-q', target]).status, 0);
-  assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', f.workspace]).status, 0);
-  assert.equal(spawnSync('/usr/bin/git', ['-C', f.workspace, 'check-ignore', '-q', target]).status, 1);
-  assert.equal(spawnSync('/usr/bin/git', ['-C', f.workspace, 'check-ignore', '-q', target + '.x.tmp']).status, 0);
-  const attrs = spawnSync('/usr/bin/git', ['-C', f.workspace, 'check-attr', 'eol', '--', target], { encoding: 'utf8' });
+  assert.equal(spawnSync(gitBinary, ['-C', f.root, 'check-ignore', '-q', target]).status, 0);
+  assert.equal(spawnSync(gitBinary, ['init', '--template=', f.workspace]).status, 0);
+  assert.equal(spawnSync(gitBinary, ['-C', f.workspace, 'check-ignore', '-q', target]).status, 1);
+  assert.equal(spawnSync(gitBinary, ['-C', f.workspace, 'check-ignore', '-q', target + '.x.tmp']).status, 0);
+  const attrs = spawnSync(gitBinary, ['-C', f.workspace, 'check-attr', 'eol', '--', target], { encoding: 'utf8' });
   assert.equal(attrs.status, 0); assert.match(attrs.stdout, /eol: lf/);
 });

@@ -1,3 +1,4 @@
+import { gitExecutable } from '../platform/index.js';
 import { realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fail } from './errors.js';
@@ -6,7 +7,7 @@ import { parseJSON } from './files.js';
 import { sha256 } from '../shared/hash.js';
 import { validateContributionManifest } from './manifests.js';
 
-const gitBinary = process.platform === 'win32' ? 'git' : '/usr/bin/git';
+const gitBinary = gitExecutable;
 const gitEnvironment = () => {
   const env = { ...process.env, GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_NO_REPLACE_OBJECTS: '1' };
   for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY',
@@ -29,8 +30,11 @@ export function committedSource(root, { commit, binary = gitBinary } = {}) {
   };
   const top = run(['rev-parse', '--show-toplevel']);
   if (top.status !== 0) fail('CONTRIBUTION_GIT_REQUIRED', 'Use a Git repository at the KSF root and commit the intended system changes first.');
-  if (realpathSync(top.stdout.toString('utf8').replace(/\r?\n$/, '')) !== realpathSync(root)) {
-    fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.');
+  // Native resolution expands Windows 8.3 aliases, as Git and PowerShell do.
+  const gitRoot = realpathSync.native(top.stdout.toString('utf8').replace(/\r?\n$/, ''));
+  const selectedRoot = realpathSync.native(root);
+  if (gitRoot !== selectedRoot) {
+    fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.', { gitRoot, selectedRoot });
   }
   const head = run(['rev-parse', '--verify', 'HEAD^{commit}']);
   const headCommit = head.stdout.toString('utf8').trim();

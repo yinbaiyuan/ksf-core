@@ -1,0 +1,11 @@
+{
+  "subtitle": "完整本机 Shell，就在工作台。",
+  "description": "使用当前用户的本机 Shell，运行命令行工具和交互程序。\n\n支持 UTF-8、持续会话、多个窗口、Ctrl-C 和终端缩放。此应用具有当前用户的系统权限，请核对安装来源。",
+  "releaseNotes": "提供本机 PTY 会话；各窗口拥有独立终端。关闭窗口会结束对应会话。",
+  "screenshots": [
+    {
+      "path": "store-assets/overview.png",
+      "alt": "本机 Shell 的虚构项目演示"
+    }
+  ]
+}

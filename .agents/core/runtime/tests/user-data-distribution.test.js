@@ -1,3 +1,5 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -33,8 +35,8 @@ test('release reads only Core defaults and generates an empty user-data director
   writeFileSync(path, canary);
   const identityPath = join(f.root, '.agents/user-data/identity.json'); writeFileSync(identityPath, canary);
   const built = await buildRelease({ root: f.root, output: join(f.directory, 'empty-user-data-template') });
-  const core = readArchive(readFileSync(join(built.output, 'ksf-core-0.1.0-darwin-arm64.tar.gz')));
-  const workspace = readArchive(readFileSync(join(built.output, 'ksf-workspace-0.1.0-darwin-arm64.tar.gz')));
+  const core = readArchive(readFileSync(join(built.output, `ksf-core-0.1.0-${fixtureTarget}.tar.gz`)));
+  const workspace = readArchive(readFileSync(join(built.output, `ksf-workspace-0.1.0-${fixtureTarget}.tar.gz`)));
   assert.equal(workspace.get('.agents/user-data/.gitkeep').bytes.length, 0);
   assert.equal(core.has('.agents/user-data/.gitkeep'), false);
   assert.equal(workspace.has('.agents/user-data/settings.json'), false);
@@ -52,8 +54,8 @@ test('Core ignores system-user data; the user template tracks it and ignores onl
     // a Core checkout still tests its actual root policy.
     const source = name === 'core-policy' && existsSync(join(repository, '.agents/core/release.json')) ? f.root : repository;
     writeFileSync(join(root, '.gitignore'), readFileSync(join(source, ignore)));
-    assert.equal(spawnSync('/usr/bin/git', ['init', '--template=', root]).status, 0);
-    const check = path => spawnSync('/usr/bin/git', ['-C', root, 'check-ignore', '-q', path]).status;
+    assert.equal(spawnSync(gitBinary, ['init', '--template=', root]).status, 0);
+    const check = path => spawnSync(gitBinary, ['-C', root, 'check-ignore', '-q', path]).status;
     assert.equal(check('.agents/user-data/settings.json'), name === 'core-policy' ? 0 : 1);
     assert.equal(check('.agents/user-data/identity.json'), name === 'core-policy' ? 0 : 1);
     assert.equal(check('.agents/runtime-data/user-data/settings.lock'), 0);

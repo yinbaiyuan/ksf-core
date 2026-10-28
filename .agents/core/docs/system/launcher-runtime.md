@@ -50,7 +50,7 @@
 | --- | --- |
 | macOS ARM64 | 已随包提供 Node，支持现有完整启动链 |
 | macOS x64 | 有平台识别和构建描述能力，尚无对应随包运行时 |
-| Windows | PowerShell 5.1 入口已实现独立恢复、路径检查、参数及退出码转交契约；bootstrap.ps1、Windows Node 包与业务 CLI 尚未接入 |
+| Windows x64 | PowerShell 5.1 固定入口与 bootstrap 已接入，随包 Node 24.21.0 官方 ZIP；业务 CLI 与 macOS 共用 |
 | Linux | 当前未支持；Shell 恢复与安装锁依赖 macOS 原生工具 |
 
 Windows 原生恢复示例：
@@ -64,5 +64,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/ksf.ps1 launcher
 ## 维护与验证
 
 修改原生入口，需同时核对两平台参数传递、退出码、无 Core 恢复、活跃事务、协议拒绝、根文件冲突和入口自身替换；修改 bootstrap，需核对快检、完整校验、安装并发、损坏修复与中断清理。发布前实际平台验证应与本机模拟结果分开。
+
+双平台边界见 [platforms.md](../runtime/platforms.md)，Windows 原生引导测试见 [bootstrap-windows.ps1](../../runtime/tests/bootstrap-windows.ps1)。
 
 源码：[bootstrap.sh](../../runtime/bootstrap.sh)、[事务生产端 system.js](../../runtime/src/distribution/system.js)。测试：[launcher.test.js](../../runtime/tests/launcher.test.js)、[bootstrap.test.js](../../runtime/tests/bootstrap.test.js)、[system-update.test.js](../../runtime/tests/system-update.test.js)、[Windows PowerShell 测试](../../runtime/tests/launcher-windows.ps1)。Windows CI 配置保存在 Core 开发仓库的 `.github/workflows/check.yml`，不随用户实例分发；macOS 上执行 PowerShell 测试不等于 Windows 实机通过。

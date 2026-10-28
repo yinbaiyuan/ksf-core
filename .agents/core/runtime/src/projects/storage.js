@@ -1,3 +1,4 @@
+import {platform} from '../platform/index.js';
 import { lstatSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { locations } from './plan.js';
@@ -5,6 +6,7 @@ import { MetadataError, invalid } from '../metadata/errors.js';
 import { readSnapshot } from '../metadata/files.js';
 import { parseFrontmatter } from '../metadata/frontmatter.js';
 import { withExclusiveLock } from '../shared/files.js';
+import { assertNoCooperationMigration } from '../migrations/guard.js';
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
 export function assertNoPending(root) {
   const path = join(root, '.agents/runtime-data/projects/pending.json');
@@ -35,7 +37,7 @@ export function validName(name) {
 }
 
 export function validateName(name) {
-  if (!validName(name)) {
+  if (!validName(name) || !platform.validSegment(name)) {
     invalid('Project target must be one directory name, not a path; .ksf-project- is reserved.');
   }
 }
@@ -69,6 +71,7 @@ export function load(root, name, { optional = false, scope = 'current' } = {}) {
 }
 
 export function withProjectLock(root, action, { allowPending = false, recoverStale = false } = {}) {
+  assertNoCooperationMigration(root);
   directory(join(root, '.agents'), { create: true });
   const runtime = join(root, '.agents/runtime-data');
   directory(runtime, { create: true });
@@ -85,7 +88,7 @@ export function withProjectLock(root, action, { allowPending = false, recoverSta
     unlinkSync(lock);
   }
   if (!allowPending) assertNoPending(root);
-  return withExclusiveLock(lock, { pid: process.pid }, () => action(), {
+  return withExclusiveLock(lock, { pid: process.pid }, () => { assertNoCooperationMigration(root); return action(); }, {
     onLocked() { fail('PROJECT_LOCKED', 'Project write lock exists; inspect its owner before retrying.', { target: lock }); },
     onReplaced() { process.stderr.write('PROJECT_LOCK_CLEANUP: Replaced lock left untouched.\n'); },
     onCleanup() { process.stderr.write('PROJECT_LOCK_CLEANUP: Inspect remaining write lock.\n'); },

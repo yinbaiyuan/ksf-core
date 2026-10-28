@@ -1,6 +1,7 @@
+import {gitBinary,nullDevice} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -30,7 +31,7 @@ function fixture(t) {
   };
   const source = id => {
     const path = join(folder, id); mkdirSync(path);
-    const initialized = spawnSync('/usr/bin/git', ['init', '--template=', '--initial-branch=main', path], { encoding: 'utf8' });
+    const initialized = spawnSync(gitBinary, ['init', '--template=', '--initial-branch=main', path], { encoding: 'utf8' });
     assert.equal(initialized.status, 0, initialized.stderr);
     run('init', { target: path, id, name: id });
     return path;
@@ -41,7 +42,7 @@ function fixture(t) {
 const throws = (action, code) => assert.throws(action, error => error.code === code);
 function commitSource(path) {
   const run = args => {
-    const result = spawnSync('/usr/bin/git', ['-C', path, '-c', 'user.name=Source Fixture', '-c', 'user.email=source@example.invalid', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
+    const result = spawnSync(gitBinary, ['-C', path, '-c', 'user.name=Source Fixture', '-c', 'user.email=source@example.invalid', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: nullDevice, GIT_CONFIG_SYSTEM: nullDevice } });
     assert.equal(result.status, 0, result.stderr);
   };
   run(['add', '--', '能力', 'ksf-source.yaml', 'README.md', 'AGENTS.md']);
@@ -71,7 +72,7 @@ test('declaration, protocol, identity, directory and resource errors reject asso
   const f = fixture(t), path = f.source('methods'), declaration = join(path, 'ksf-source.yaml');
   const original = readFileSync(declaration);
   rmSync(declaration); throws(() => f.run('link', { target: path }), 'SOURCE_NOT_DECLARED');
-  writeFileSync(declaration, original.toString().replace('schema_version: 1', 'schema_version: 99'));
+  writeFileSync(declaration, original.toString().replace('schema_version: 2', 'schema_version: 99'));
   throws(() => f.run('link', { target: path }), 'SOURCE_VERSION_UNSUPPORTED');
   writeFileSync(declaration, original + '\nid: duplicate\n');
   throws(() => f.run('link', { target: path }), 'YAML_DUPLICATE_KEY');
@@ -90,7 +91,7 @@ test('declaration, protocol, identity, directory and resource errors reject asso
 
 test('linked objects use the live working tree, external paths and optional type directories', t => {
   const f = fixture(t), path = f.source('methods'), id = 'partner.author.method';
-  for (const type of ['workflow', 'competency', 'data-package']) rmSync(join(path, types[type].user), { recursive: true });
+  for (const type of ['cooperation', 'competency', 'data-package']) rmSync(join(path, types[type].user), { recursive: true });
   const file = f.add(path, id, {}, '# original\n');
   f.run('link', { target: path });
   assert.equal(f.query('partner', id).data.object.path, file);
@@ -99,9 +100,76 @@ test('linked objects use the live working tree, external paths and optional type
   assert.equal(f.query('partner', id).data.object.body, '# changed\n');
   const context = contextCapabilities(f.root);
   assert.equal(context.data.partners.objects[0].source, 'methods');
-  assert.equal(context.data.workflows.objects.length, 0); // source AGENTS is not a workflow
+  assert.equal(context.data.cooperations.objects.length, 0); // source AGENTS is not a cooperation
   assert.equal(context.data.complete, true);
   assert.equal(readdirSync(path).some(name => /snapshot|cache/.test(name)), false);
+});
+
+test('Chinese source directories preserve metadata identities and discovery for every object type', t => {
+  const f = fixture(t), path = f.source('methods');
+  const entries = Object.keys(types).map((type, index) => {
+    const id = `${type}.author.method`, original = f.add(path, id);
+    const directory = join(path, types[type].user, `中文能力名称${index}`);
+    renameSync(dirname(original), directory);
+    return { type, id, file: join(directory, types[type].entry) };
+  });
+  assert.equal(f.run('link', { target: path }).data.changed, true);
+  assert.equal(f.run('check', { target: 'methods' }).data.valid, true);
+  for (const entry of entries) {
+    const result = f.query(entry.type, entry.id + '@0.1.0', 'methods');
+    assert.equal(result.data.object.path, entry.file);
+    assert.equal(result.data.object.id, entry.id);
+  }
+  const context = contextCapabilities(f.root);
+  assert.equal(context.data.complete, true);
+  assert.ok(context.data.partners.objects.some(row => row.path === entries.find(row => row.type === 'partner').file));
+});
+
+test('Chinese directory names do not bypass duplicate IDs or mismatched ID directory validation', t => {
+  const f = fixture(t), path = f.source('methods'), id = 'partner.author.method';
+  const original = f.add(path, id), chinese = join(path, types.partner.user, '中文搭档');
+  renameSync(dirname(original), chinese);
+  const duplicate = join(path, types.partner.user, '另一个中文搭档');
+  mkdirSync(duplicate); writeFileSync(join(duplicate, 'partner.md'), readFileSync(join(chinese, 'partner.md')));
+  throws(() => f.run('link', { target: path }), 'SOURCE_INVALID');
+  rmSync(duplicate, { recursive: true });
+  renameSync(chinese, join(path, types.partner.user, 'partner.author.different'));
+  const checked = f.run('check', { reference: path });
+  assert.equal(checked.data.valid, false);
+  assert.ok(checked.errors.some(error => error.code === 'OBJECT_ID_LOCATION_MISMATCH'));
+});
+
+test('export reuses Chinese directories, rebases dependency links and preserves dirty targets', t => {
+  const f = fixture(t), path = f.source('methods'), method = 'competency.author.method', owner = 'partner.author.owner';
+  const link = `[method](../../基本功/${method}/competency.md)\n`;
+  const methodFile = f.add('user', method, {}, '# method\n', { 'resources/示例.txt': 'reference' });
+  const ownerFile = f.add('user', owner, { references: [method + '@0.1.0'] }, link);
+  f.run('link', { target: path }); f.run('export', { target: 'methods', reference: owner });
+  const methodDirectory = join(path, types.competency.user, '中文方法');
+  const ownerDirectory = join(path, types.partner.user, '中文搭档');
+  renameSync(join(path, types.competency.user, method), methodDirectory);
+  renameSync(join(path, types.partner.user, owner), ownerDirectory);
+  const publishedOwner = join(ownerDirectory, 'partner.md'), publishedMethod = join(methodDirectory, 'competency.md');
+  writeFileSync(publishedOwner, readFileSync(publishedOwner, 'utf8').replace(`/${method}/`, '/中文方法/'));
+  commitSource(path);
+  assert.equal(f.run('export', { target: 'methods', reference: owner, dryRun: true }).data.wouldChange, false);
+  assert.equal(f.run('export', { target: 'methods', reference: owner }).data.changed, false);
+  writeFileSync(methodFile, readFileSync(methodFile, 'utf8').replace('version: 0.1.0', 'version: 0.1.1') + 'updated\n');
+  writeFileSync(ownerFile, readFileSync(ownerFile, 'utf8').replace('version: 0.1.0', 'version: 0.1.1').replace(`${method}@0.1.0`, `${method}@0.1.1`));
+  const previous = readFileSync(publishedMethod);
+  writeFileSync(publishedMethod, previous + 'existing local edit\n');
+  throws(() => f.run('export', { target: 'methods', reference: owner }), 'SOURCE_TARGET_DIRTY');
+  assert.match(readFileSync(publishedMethod, 'utf8'), /existing local edit/);
+  writeFileSync(publishedMethod, previous);
+  const preview = f.run('export', { target: 'methods', reference: owner, dryRun: true });
+  assert.equal(preview.data.objects.find(row => row.id === owner).directory, ownerDirectory);
+  assert.equal(preview.data.objects.find(row => row.id === method).directory, methodDirectory);
+  assert.equal(f.run('export', { target: 'methods', reference: owner }).data.changed, true);
+  assert.equal(existsSync(join(path, types.partner.user, owner)), false);
+  assert.equal(existsSync(join(path, types.competency.user, method)), false);
+  assert.match(readFileSync(publishedOwner, 'utf8'), /\.\.\/\.\.\/基本功\/中文方法\/competency\.md/);
+  assert.equal(f.query('partner', owner, 'methods').data.references[0].path, publishedMethod);
+  assert.equal(f.run('check', { target: 'methods' }).data.valid, true);
 });
 
 test('multiple sources require explicit choice while personal and exact-version precedence is preserved', t => {
@@ -239,11 +307,11 @@ test('source scope and resource errors do not silently fall back to system objec
 
 test('init preserves existing guidance and rejects linked capability directories', t => {
   const f = fixture(t), path = join(f.folder, 'new-source'); mkdirSync(path);
-  spawnSync('/usr/bin/git', ['init', '--template=', path]);
+  spawnSync(gitBinary, ['init', '--template=', path]);
   writeFileSync(join(path, 'AGENTS.md'), 'existing guidance');
   f.run('init', { target: path, id: 'new-source', name: 'New source' });
   assert.equal(readFileSync(join(path, 'AGENTS.md'), 'utf8'), 'existing guidance');
-  const copy = join(f.folder, 'linked-source'); mkdirSync(copy); spawnSync('/usr/bin/git', ['init', '--template=', copy]);
+  const copy = join(f.folder, 'linked-source'); mkdirSync(copy); spawnSync(gitBinary, ['init', '--template=', copy]);
   symlinkSync(join(path, '能力'), join(copy, '能力'));
   throws(() => f.run('init', { target: copy, id: 'linked-source', name: 'Linked' }), 'SOURCE_PATH_INVALID');
   assert.equal(existsSync(join(copy, 'ksf-source.yaml')), false);
@@ -251,16 +319,16 @@ test('init preserves existing guidance and rejects linked capability directories
 
 test('managed sources stay outside parent Git tracking and duplicate source identities are rejected', t => {
   const f = fixture(t);
-  spawnSync('/usr/bin/git', ['init', '--template=', f.root]);
+  spawnSync(gitBinary, ['init', '--template=', f.root]);
   writeFileSync(join(f.root, '.gitignore'), '/repositories/\n/.agents/runtime-data/\n');
   const path = join(f.root, 'repositories/shared'); mkdirSync(path, { recursive: true });
-  spawnSync('/usr/bin/git', ['init', '--template=', path]);
+  spawnSync(gitBinary, ['init', '--template=', path]);
   f.run('init', { target: path, id: 'shared', name: 'Shared' });
   f.add(path, 'competency.author.private');
   f.run('link', { target: path });
   assert.equal(readSourceRegistry(f.root).entries[0].path, 'repositories/shared');
-  spawnSync('/usr/bin/git', ['-C', f.root, 'add', '--', '.']);
-  const tracked = spawnSync('/usr/bin/git', ['-C', f.root, 'ls-files'], { encoding: 'utf8' });
+  spawnSync(gitBinary, ['-C', f.root, 'add', '--', '.']);
+  const tracked = spawnSync(gitBinary, ['-C', f.root, 'ls-files'], { encoding: 'utf8' });
   assert.ok(!tracked.stdout.includes('repositories/'));
   const other = f.source('another');
   const declaration = join(other, 'ksf-source.yaml');
@@ -361,7 +429,7 @@ test('re-export after a normal Git clone ignores owner permissions and untracked
   mkdirSync(join(dirname(file), 'empty'));
   f.run('export', { target: 'methods', reference: id }); commitSource(path);
   const clone = join(f.folder, 'cloned-methods');
-  const copied = spawnSync('/usr/bin/git', ['clone', '--', path, clone], { encoding: 'utf8' });
+  const copied = spawnSync(gitBinary, ['clone', '--', path, clone], { encoding: 'utf8' });
   assert.equal(copied.status, 0, copied.stderr);
   f.run('unlink', { target: 'methods' }); f.run('link', { target: clone });
   assert.equal(existsSync(join(clone, types.competency.user, id, 'empty')), false);
@@ -382,4 +450,14 @@ test('Core compatibility rejects releases without source support while unconfigu
   assert.doesNotThrow(() => checkSourceCompatibility(f.root, candidate));
   const path = f.source('methods'); f.run('link', { target: path });
   throws(() => checkSourceCompatibility(f.root, candidate), 'SOURCE_CORE_INCOMPATIBLE');
+});
+
+test('Markdown export accepts CRLF clone content without changing its published version or bytes', t => {
+  const f=fixture(t),path=f.source('methods'),id='competency.author.line-endings';
+  f.run('link',{target:path}); f.add('user',id);
+  f.run('export',{target:'methods',reference:id});
+  const file=join(path,types.competency.user,id,'competency.md');
+  const bytes=readFileSync(file,'utf8').replaceAll('\n','\r\n');writeFileSync(file,bytes);
+  assert.equal(f.run('export',{target:'methods',reference:id}).data.changed,false);
+  assert.equal(readFileSync(file,'utf8'),bytes);
 });

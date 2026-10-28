@@ -1,4 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { App } from './app';
+import { Desktop } from './desktop/desktop';
+import { MaterialProvider } from './components/material-provider';
 import './styles.css';
-createRoot(document.getElementById('root')!).render(<App />);
+import './material.css';
+import 'react-grid-layout/css/styles.css';
+import './desktop.css';
+import './apps/app-store.css';
+createRoot(document.getElementById('root')!).render(<MaterialProvider><Desktop /></MaterialProvider>);

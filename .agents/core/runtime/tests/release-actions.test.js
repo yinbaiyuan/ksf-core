@@ -1,3 +1,4 @@
+import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
@@ -12,7 +13,7 @@ import { PublicationAPI } from './helpers/publication-api.js';
 import YAML from '../src/vendor/yaml/dist/index.js';
 
 function published(f) {
-  const files = new Map(['ksf-core-release.json', ...Object.values(f.first.index.platforms['darwin-arm64']).map(d => d.name)]
+  const files = new Map(['ksf-core-release.json', ...Object.values(f.first.index.platforms[fixtureTarget]).map(d => d.name)]
     .map(name => [name, readFileSync(join(f.first.output, name))]));
   const base = 'https://github.com/yinbaiyuan/ksf-core/releases/download/v0.1.0/';
   const release = { draft: false, tag_name: 'v0.1.0', assets: [...files].map(([name, bytes]) => ({ name, size: bytes.length, digest: `sha256:${sha256(bytes)}`, browser_download_url: base + name })) };
@@ -27,7 +28,7 @@ function published(f) {
   return { files, release, calls, downloads, api, fetcher };
 }
 function rewriteWorkspace(f, change) {
-  const index = structuredClone(f.first.index), descriptor = index.platforms['darwin-arm64'].workspace;
+  const index = structuredClone(f.first.index), descriptor = index.platforms[fixtureTarget].workspace;
   const entries = readArchive(readFileSync(join(f.first.output, descriptor.name)));
   change(entries);
   const bytes = createArchive([...entries.values()]);
@@ -82,10 +83,10 @@ for (const kind of ['missing-tag', 'draft', 'wrong-source', 'wrong-index-hash', 
       expected = 'RELEASE_TAG_CONFLICT';
     }
     if (kind === 'wrong-index-hash') { p.release.assets[0].digest = 'sha256:' + 'f'.repeat(64); expected = 'CHECKSUM_MISMATCH'; }
-    if (kind === 'tampered-core') { p.files.set(f.first.index.platforms['darwin-arm64'].core.name, Buffer.from('bad')); expected = 'CHECKSUM_MISMATCH'; }
+    if (kind === 'tampered-core') { p.files.set(f.first.index.platforms[fixtureTarget].core.name, Buffer.from('bad')); expected = 'CHECKSUM_MISMATCH'; }
     if (kind === 'duplicate') p.release.assets.push(p.release.assets[1]);
     if (kind === 'unsafe-name') {
-      const index = structuredClone(f.first.index); index.platforms['darwin-arm64'].core.name = '../outside';
+      const index = structuredClone(f.first.index); index.platforms[fixtureTarget].core.name = '../outside';
       const bytes = Buffer.from(stableJSON(index)); p.files.set('ksf-core-release.json', bytes);
       Object.assign(p.release.assets[0], { size: bytes.length, digest: `sha256:${sha256(bytes)}` });
     }

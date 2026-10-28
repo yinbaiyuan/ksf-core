@@ -13,6 +13,8 @@
 
 系统命名空间由 Core 注册并逐字段校验，当前包括 `settings`、`identity` 和 `sources`。能力对象另通过 `--object <id>` 使用通用 JSON 配置空间，无须逐个注册字段。两者均不承接任务正文、成果、知识、登录凭据或能力定义，也不增加第五类能力对象。
 
+当前聊天的动态运行变量与轮次使用独立 [chat](chat.md) 命令，数据在 `.agents/user-data/chats/`，不混入跨聊天的 abilities 配置。user-data list 将 chats 识别为独立功能目录，不展开聊天变量。
+
 入口文件保持原有职责；除模板生成的空目录占位外，首次真实写入时才创建命名空间文件。读取、检查和缺失目标均不自动创建配置文件。
 
 ## 调用
@@ -41,7 +43,7 @@ namespace 为已注册名称，不接受文件路径。支持命令级及操作�
 
 ## 能力对象配置与必要状态
 
-四类对象（workflow、partner、competency、data-package）均可使用，包含固定入口及关联能力源；无需先安装对象或声明字段。`--object` 只接受完整三段 ID，不接受路径、`@version` 或同时指定命名空间。数据按 ID 延续，不按来源、版本或目录分别保存；更换 ID 使用新的空间。
+四类对象（cooperation、partner、competency、data-package）均可使用，包含固定入口及关联能力源；无需先安装对象或声明字段。`--object` 只接受完整三段 ID，不接受路径、`@version` 或同时指定命名空间。数据按 ID 延续，不按来源、版本或目录分别保存；更换 ID 使用新的空间。
 
 ```sh
 .agents/ksf user-data list --objects --json

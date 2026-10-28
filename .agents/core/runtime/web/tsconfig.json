@@ -1,10 +1,212 @@
 {
   "compilerOptions": {
-    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext", "moduleResolution": "Bundler", "jsx": "react-jsx",
-    "strict": true, "noEmit": true, "skipLibCheck": true,
-    "allowImportingTsExtensions": true, "esModuleInterop": true,
-    "types": ["vite/client", "node"], "paths": { "@/*": ["./src/*"] }
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@ksf/sdk/*": [
+        "../../applications/sdk/src/*"
+      ],
+      "@codemirror/commands": [
+        "./node_modules/@codemirror/commands"
+      ],
+      "@codemirror/commands/*": [
+        "./node_modules/@codemirror/commands/*"
+      ],
+      "@codemirror/lang-markdown": [
+        "./node_modules/@codemirror/lang-markdown"
+      ],
+      "@codemirror/lang-markdown/*": [
+        "./node_modules/@codemirror/lang-markdown/*"
+      ],
+      "@codemirror/language": [
+        "./node_modules/@codemirror/language"
+      ],
+      "@codemirror/language/*": [
+        "./node_modules/@codemirror/language/*"
+      ],
+      "@codemirror/language-data": [
+        "./node_modules/@codemirror/language-data"
+      ],
+      "@codemirror/language-data/*": [
+        "./node_modules/@codemirror/language-data/*"
+      ],
+      "@codemirror/merge": [
+        "./node_modules/@codemirror/merge"
+      ],
+      "@codemirror/merge/*": [
+        "./node_modules/@codemirror/merge/*"
+      ],
+      "@codemirror/search": [
+        "./node_modules/@codemirror/search"
+      ],
+      "@codemirror/search/*": [
+        "./node_modules/@codemirror/search/*"
+      ],
+      "@codemirror/state": [
+        "./node_modules/@codemirror/state"
+      ],
+      "@codemirror/state/*": [
+        "./node_modules/@codemirror/state/*"
+      ],
+      "@codemirror/view": [
+        "./node_modules/@codemirror/view"
+      ],
+      "@codemirror/view/*": [
+        "./node_modules/@codemirror/view/*"
+      ],
+      "@lezer/markdown": [
+        "./node_modules/@lezer/markdown"
+      ],
+      "@lezer/markdown/*": [
+        "./node_modules/@lezer/markdown/*"
+      ],
+      "@radix-ui/react-dialog": [
+        "./node_modules/@radix-ui/react-dialog"
+      ],
+      "@radix-ui/react-dialog/*": [
+        "./node_modules/@radix-ui/react-dialog/*"
+      ],
+      "@radix-ui/react-slot": [
+        "./node_modules/@radix-ui/react-slot"
+      ],
+      "@radix-ui/react-slot/*": [
+        "./node_modules/@radix-ui/react-slot/*"
+      ],
+      "@radix-ui/react-tabs": [
+        "./node_modules/@radix-ui/react-tabs"
+      ],
+      "@radix-ui/react-tabs/*": [
+        "./node_modules/@radix-ui/react-tabs/*"
+      ],
+      "class-variance-authority": [
+        "./node_modules/class-variance-authority"
+      ],
+      "class-variance-authority/*": [
+        "./node_modules/class-variance-authority/*"
+      ],
+      "clsx": [
+        "./node_modules/clsx"
+      ],
+      "clsx/*": [
+        "./node_modules/clsx/*"
+      ],
+      "dompurify": [
+        "./node_modules/dompurify"
+      ],
+      "dompurify/*": [
+        "./node_modules/dompurify/*"
+      ],
+      "katex": [
+        "./node_modules/katex"
+      ],
+      "katex/*": [
+        "./node_modules/katex/*"
+      ],
+      "lucide-react": [
+        "./node_modules/lucide-react"
+      ],
+      "lucide-react/*": [
+        "./node_modules/lucide-react/*"
+      ],
+      "mermaid": [
+        "./node_modules/mermaid"
+      ],
+      "mermaid/*": [
+        "./node_modules/mermaid/*"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react/*": [
+        "./node_modules/@types/react/*"
+      ],
+      "react-dom": [
+        "./node_modules/@types/react-dom"
+      ],
+      "react-dom/*": [
+        "./node_modules/@types/react-dom/*"
+      ],
+      "react-grid-layout": [
+        "./node_modules/react-grid-layout"
+      ],
+      "react-grid-layout/*": [
+        "./node_modules/react-grid-layout/*"
+      ],
+      "react-markdown": [
+        "./node_modules/react-markdown"
+      ],
+      "react-markdown/*": [
+        "./node_modules/react-markdown/*"
+      ],
+      "react-rnd": [
+        "./node_modules/react-rnd"
+      ],
+      "react-rnd/*": [
+        "./node_modules/react-rnd/*"
+      ],
+      "rehype-highlight": [
+        "./node_modules/rehype-highlight"
+      ],
+      "rehype-highlight/*": [
+        "./node_modules/rehype-highlight/*"
+      ],
+      "rehype-katex": [
+        "./node_modules/rehype-katex"
+      ],
+      "rehype-katex/*": [
+        "./node_modules/rehype-katex/*"
+      ],
+      "rehype-sanitize": [
+        "./node_modules/rehype-sanitize"
+      ],
+      "rehype-sanitize/*": [
+        "./node_modules/rehype-sanitize/*"
+      ],
+      "remark-gfm": [
+        "./node_modules/remark-gfm"
+      ],
+      "remark-gfm/*": [
+        "./node_modules/remark-gfm/*"
+      ],
+      "remark-math": [
+        "./node_modules/remark-math"
+      ],
+      "remark-math/*": [
+        "./node_modules/remark-math/*"
+      ],
+      "tailwind-merge": [
+        "./node_modules/tailwind-merge"
+      ],
+      "tailwind-merge/*": [
+        "./node_modules/tailwind-merge/*"
+      ]
+    }
   },
-  "include": ["src", "vite.config.ts", "tests"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "tests",
+    "../../applications/*/frontend.tsx",
+    "../../applications/conversations/work-stats.tsx",
+    "../../applications/sdk/src/react.tsx"
+  ]
 }

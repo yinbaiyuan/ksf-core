@@ -5,6 +5,7 @@ import { isRevision, isRepository, isBranch } from './git-values.js';
 import { managedPath } from './paths.js';
 import { textBytes, readJSON } from './files.js';
 import { versionParts } from './versions.js';
+import { supportedTargets } from '../platform/catalog.js';
 
 export function validateProducts(value) {
   if (!value || Array.isArray(value) ||
@@ -19,7 +20,7 @@ function validateReleaseManifest(manifest, legacy) {
   if (!manifest || manifest.schema_version !== (legacy ? 2 : 3) || (!legacy && manifest.launcher_protocol !== launcherProtocol) || manifest.name !== products.core || manifest.product !== products.core ||
       !isRepository(manifest.core?.repository) || !isRevision(manifest.core?.revision) ||
       !isBranch(manifest.core.branch) || typeof manifest.development !== 'boolean' ||
-      !['darwin-arm64', 'darwin-x64'].includes(manifest.platform) || !manifest.files || Array.isArray(manifest.files)) {
+      !supportedTargets.includes(manifest.platform) || !manifest.files || Array.isArray(manifest.files)) {
     fail('RELEASE_INVALID', 'Invalid Core release manifest.');
   }
   versionParts(manifest.version);
@@ -50,7 +51,7 @@ export function validateReceipt(manifest) {
       manifest.name !== products.core || manifest.product !== products.core ||
       !isRepository(manifest.core?.repository) || !isRevision(manifest.core?.revision) || !isBranch(manifest.core?.branch) ||
       Object.keys(manifest.core).some(key => !['repository', 'branch', 'revision'].includes(key)) ||
-      typeof manifest.development !== 'boolean' || !['darwin-arm64', 'darwin-x64'].includes(manifest.platform) ||
+      typeof manifest.development !== 'boolean' || !supportedTargets.includes(manifest.platform) ||
       Object.keys(manifest).some(key => !['schema_version', 'launcher_protocol', 'name', 'product', 'version', 'platform', 'core', 'development'].includes(key))) {
     fail('RELEASE_INVALID', 'Invalid compact Core release receipt.');
   }

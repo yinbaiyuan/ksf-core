@@ -5,6 +5,7 @@ import { managedPath, recordKeys, loadRecord } from './storage.js';
 import { taskIds, turns, readJSON } from '../task-capture/storage.js';
 import { encode, fail, validateTargetFacts } from './schema.js';
 import { physicalTargetKey } from './target-identity.js';
+import { currentObjectId } from '../objects/legacy.js';
 
 export const changesFingerprint = changes => createHash('sha256').update(encode(changes)).digest('hex');
 /** Rebuildable, read-only projection. Facts live in their original turn/session, never in a second task database. */
@@ -40,9 +41,13 @@ export function targetRegistry(root) {
   for (const snapshot of observed) for (const t of [snapshot.ownership?.target, ...(snapshot.relatedTargets ?? [])].filter(Boolean)) if (t.targetId && !conflicted.has(t.targetId) && (!records.has(t.targetId) || records.get(t.targetId).targetVersion < t.targetVersion)) records.set(t.targetId, t);
   for (const id of conflicted) records.delete(id);
   for (const [id, target] of records) if (target.lifecycle !== 'planned') {
-    const key = physicalTargetKey(target), old = aliases.get(key);
-    if (old && old !== id) { errors.push({ code: 'TARGET_ALIAS_CONFLICT', message: 'An exact locator has conflicting stable target identities.' }); aliases.set(key, null); }
-    else if (!aliases.has(key)) aliases.set(key, id);
+    const keys = [physicalTargetKey(target)];
+    if (target.kind === 'ability' && currentObjectId(target.id) !== target.id) keys.push(physicalTargetKey({ ...target, id: currentObjectId(target.id) }));
+    for (const key of keys) {
+      const old = aliases.get(key);
+      if (old && old !== id) { errors.push({ code: 'TARGET_ALIAS_CONFLICT', message: 'An exact locator has conflicting stable target identities.' }); aliases.set(key, null); }
+      else if (!aliases.has(key)) aliases.set(key, id);
+    }
   }
   return { records, events, aliases, errors };
 }

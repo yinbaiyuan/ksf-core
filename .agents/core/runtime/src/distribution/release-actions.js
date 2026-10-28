@@ -1,3 +1,4 @@
+import {supportedTargets} from '../platform/catalog.js';
 // Internal Actions bridge. Public maintenance commands remain release build/publish/template.
 import { appendFileSync, existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -82,7 +83,7 @@ export async function recoverPublishedBundle({ root, directory, tag, api = new G
   // Validate all names, paths and identities before downloading any large artifact.
   const descriptors = [];
   for (const [platform, entries] of selected) {
-    if (!['darwin-arm64', 'darwin-x64'].includes(platform)) fail('PLATFORM_UNSUPPORTED', 'Unsupported recovery platform.');
+    if (!supportedTargets.includes(platform)) fail('PLATFORM_UNSUPPORTED', 'Unsupported recovery platform.');
     validateIndex(index, { platform, core: { repository } });
     for (const kind of ['core', 'workspace']) {
       const item = entries[kind], name = artifactName(kind, index.version, platform);

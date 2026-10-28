@@ -16,8 +16,15 @@ import { sourceFailure } from './schema.js';
 const missing = error => ['OBJECT_NOT_FOUND', 'OBJECT_VERSION_MISMATCH'].includes(error.code);
 // Compare Git-persisted content: owner permission bits and empty directories
 // change across clones and are not publication-version changes.
+// Markdown CRLF and LF have identical document content. Git for Windows may
+// materialize CRLF in a normal clone; comparison must not publish a new version
+// or rewrite that checkout solely for its native line endings.
+const sameBytes = (first, second) => first.bytes.equals(second.bytes) ||
+  (/\.md$/i.test(first.path) && !first.bytes.includes(0) && !second.bytes.includes(0) &&
+   Buffer.from(first.bytes.toString('utf8')).equals(first.bytes) && Buffer.from(second.bytes.toString('utf8')).equals(second.bytes) &&
+   first.bytes.toString('utf8').replaceAll('\r\n','\n') === second.bytes.toString('utf8').replaceAll('\r\n','\n'));
 const sameTree = (a, b) => a && a.files.length === b.files.length &&
-  a.files.every((file, i) => file.path === b.files[i].path && file.bytes.equals(b.files[i].bytes) && Boolean(file.mode & 0o111) === Boolean(b.files[i].mode & 0o111));
+  a.files.every((file, i) => file.path === b.files[i].path && sameBytes(file,b.files[i]) && Boolean(file.mode & 0o111) === Boolean(b.files[i].mode & 0o111));
 
 export function exportObjects({ root, sourceId, reference, versions = {}, dryRun }, hooks = {}) {
   if (!versions || typeof versions !== 'object' || Array.isArray(versions) || Object.entries(versions).some(([id, value]) => !validId(id) || typeof value !== 'string' || !versionPattern.test(value))) sourceFailure('INVALID_ARGUMENTS', 'Invalid publication version mapping.', { exitCode: 2 });
@@ -70,7 +77,8 @@ export function exportObjects({ root, sourceId, reference, versions = {}, dryRun
       const sourceDirectory = join(root, row.directory);
       const tree = readTree(sourceDirectory, { exclude: [join(sourceDirectory, '.upstream')] });
       if ([...tree.directories, ...tree.files].some(item => item.path.split('/').some(part => ['.git', '.upstream'].includes(part)))) sourceFailure('SOURCE_RESOURCE_INVALID', 'Object resources cannot contain repository history or nested personal baselines.', { id: row.id });
-      return { row, sourceDirectory, tree, target: join(destination, types[row.type].user, row.id) };
+      const existing = c.rows.find(item => item.source === sourceId && item.id === row.id);
+      return { row, sourceDirectory, tree, target: existing?.directory ?? join(destination, types[row.type].user, row.id) };
     });
     for (const plan of plans) {
       const metadata = { ...plan.row.metadata }; delete metadata.user_revision; delete metadata.upstream;
@@ -101,7 +109,6 @@ export function exportObjects({ root, sourceId, reference, versions = {}, dryRun
       plan.previous = existsSync(plan.target) ? readTree(plan.target) : null;
       plan.changed = !sameTree(plan.previous, plan.exported);
       const old = c.rows.find(row => row.source === sourceId && row.id === plan.row.id);
-      if (old && old.directory !== plan.target) sourceFailure('SOURCE_PATH_CONFLICT', 'Existing target object is outside its standard ID directory.', { id: plan.row.id });
       const versionOrder = old ? metadata.version.split('.').map(BigInt).reduce((order, part, i) => order || (part > BigInt(old.metadata.version.split('.')[i]) ? 1 : part < BigInt(old.metadata.version.split('.')[i]) ? -1 : 0), 0) : 1;
       if (old && plan.changed && versionOrder <= 0) sourceFailure('SOURCE_VERSION_REQUIRED', 'Changed published content requires a newer object version.', { id: plan.row.id, version: metadata.version });
       const entry = mapped.find(file => file.path === types[plan.row.type].entry);

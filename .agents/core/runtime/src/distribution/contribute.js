@@ -1,3 +1,4 @@
+import {platform} from '../platform/index.js';
 import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,7 +19,7 @@ function publicDiff(path, base, bytes, baseMode, mode) {
   const temporary = mkdtempSync(join(tmpdir(), 'ksf-contribution-diff-'));
   try {
     writeAtomic(join(temporary, 'before'), base ?? Buffer.alloc(0)); writeAtomic(join(temporary, 'after'), bytes ?? Buffer.alloc(0));
-    const diff = spawnSync('/usr/bin/diff', ['-u', '-L', base === null ? '/dev/null' : `a/${path}`, '-L', bytes === null ? '/dev/null' : `b/${path}`, join(temporary, 'before'), join(temporary, 'after')], {
+    const diff = spawnSync(platform.tool('diff'), ['-u', '-L', base === null ? '/dev/null' : `a/${path}`, '-L', bytes === null ? '/dev/null' : `b/${path}`, join(temporary, 'before'), join(temporary, 'after')], {
       encoding: 'utf8', timeout: 10000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, LC_ALL: 'C' },
     });
     if (![0, 1].includes(diff.status)) fail('DIFF_FAILED', 'Could not prepare the public diff.');

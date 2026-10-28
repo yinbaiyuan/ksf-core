@@ -1,3 +1,4 @@
+import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, cpSync, rmSync, readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
@@ -45,7 +46,7 @@ test('repository CLI validates parameters, JSON errors, path targets and operati
 test('CLI rejects KSF worktrees with structured errors while retaining valid list entries', t => {
   const f = fixture(t);
   const git = args => {
-    const result = spawnSync('/usr/bin/git', ['-C', f.root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
+    const result = spawnSync(gitBinary, ['-C', f.root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
     assert.equal(result.status, 0, result.stderr);
   };
   git(['init', '--template=', '--initial-branch=main']);

@@ -42,6 +42,24 @@ test('same-name projects and knowledge units, and different exact entries, keep 
   assert.equal(keys.length,3); assert.equal(new Set(keys).size,3);
   assert.ok(keys.includes(`current:${name}`)); assert.ok(keys.includes(f.knowledgeKey)); assert.ok(keys.includes(`knowledge:${otherEntry.path}`));
 });
+test('knowledge units inside categories use topic names and preserve flat names and exact identities', t => {
+  const f = taskTargetFixture(t);
+  const nested = addKnowledgeUnit(f.root, '技术/示例主题', 'overview.md');
+  const otherCategory = addKnowledgeUnit(f.root, '个人/示例主题');
+  assert.equal(f.snapshot(f.knowledge).ownership.target.name, '认知-业务公式');
+  f.save('nested-topic', 12, [f.snapshot(nested, [otherCategory])]);
+  f.save('other-category-topic', 13, [f.snapshot(otherCategory)]);
+  const catalog = listTaskTargets({ root: f.root });
+  assert.deepEqual(catalog.errors, []);
+  const first = catalog.targets.find(target => target.key === `knowledge:${nested.path}`);
+  const second = catalog.targets.find(target => target.key === `knowledge:${otherCategory.path}`);
+  assert.equal(first.label, '示例主题');
+  assert.equal(second.label, '示例主题');
+  assert.equal(first.target.name, '示例主题');
+  assert.equal(first.target.path, nested.path);
+  assert.notEqual(first.key, second.key);
+  assert.equal(listTasks({ root: f.root, target: first.key }).total, 1);
+});
 test('damaged ownership is reported as a gap and is never rewritten or guessed', t => {
   const f = taskTargetFixture(t), path = join(f.root,turnPath(f.taskId,'knowledge'));
   const invalid = JSON.parse(readFileSync(path)); invalid.routes[0].snapshot.ownership.state='future-unknown';

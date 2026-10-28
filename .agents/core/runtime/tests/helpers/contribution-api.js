@@ -1,3 +1,4 @@
+import {gitBinary} from './platform.js';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
@@ -10,7 +11,7 @@ export class ForkAPI {
     this.commit = { sha: 'c'.repeat(40), tree: { sha: 'b'.repeat(40) }, parents: [] };
   }
   git(args) {
-    const result = spawnSync('/usr/bin/git', ['-C', this.coreRoot, ...args], { maxBuffer: 256 * 1024 * 1024 });
+    const result = spawnSync(gitBinary, ['-C', this.coreRoot, ...args], { maxBuffer: 256 * 1024 * 1024 });
     if (result.status !== 0) throw new Error('Cannot read the isolated Core fixture Git objects.');
     return result.stdout;
   }

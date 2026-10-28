@@ -1,3 +1,5 @@
+import {platform} from '../src/platform/index.js';
+import {gitBinary,nullDevice} from './helpers/platform.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, readdirSync, realpathSync, symlinkSync, renameSync } from 'node:fs';
@@ -9,7 +11,7 @@ import { project } from '../src/services/projects.js';
 import { withWriteLock } from '../src/metadata/files.js';
 
 function git(root, args) {
-  const result = spawnSync('/usr/bin/git', ['-c', 'core.quotepath=false', '-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' } });
+  const result = spawnSync(gitBinary, ['-c', 'core.quotepath=false', '-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_GLOBAL: nullDevice, GIT_CONFIG_SYSTEM: nullDevice } });
   assert.equal(result.status, 0, result.stderr); return result.stdout.trim();
 }
 function fixture(t, outerGit = true) {
@@ -32,10 +34,10 @@ test('managed creation isolates Git history, keeps the exact name, and is repeat
   const f = fixture(t), created = f.call('create', '客户 方案');
   assert.equal(created.data.created, true); assert.equal(created.data.changed, true);
   const target = join(f.root, 'repositories/客户 方案');
-  assert.equal(git(target, ['rev-parse', '--show-toplevel']), target);
+  assert.equal(realpathSync.native(git(target, ['rev-parse', '--show-toplevel'])), realpathSync.native(target));
   assert.equal(git(target, ['symbolic-ref', '--short', 'HEAD']), 'main');
   assert.equal(git(target, ['remote']), '');
-  assert.notEqual(spawnSync('/usr/bin/git', ['-C', target, 'rev-parse', '--verify', 'HEAD']).status, 0);
+  assert.notEqual(spawnSync(gitBinary, ['-C', target, 'rev-parse', '--verify', 'HEAD']).status, 0);
   writeFileSync(join(target, '成果.md'), '工程正文');
   assert.equal(git(target, ['ls-files', '--others', '--exclude-standard']), '成果.md');
   assert.ok(!git(f.root, ['status', '--porcelain', '--untracked-files=all']).includes('成果.md'));
@@ -79,9 +81,11 @@ test('plain-folder instances create independent repositories and an absent conta
   assert.equal(existsSync(join(f.root, 'repositories')), false);
   assert.equal(f.call('create', 'standalone').data.created, true);
   assert.equal(existsSync(join(f.root, '.git')), false);
-  assert.equal(f.call('create', '工程 尾空格 ').data.created, true);
+  if(!platform.validSegment('工程 尾空格 '))assert.throws(()=>f.call('create','工程 尾空格 '),{code:'INVALID_ARGUMENTS'});
+  const name=platform.validSegment('工程 尾空格 ')?'工程 尾空格 ':'工程 中文 空格';
+  assert.equal(f.call('create',name).data.created,true);
   f.card('可迁移项目');
-  f.call('link', 'repositories/工程 尾空格 ', { projectName: '可迁移项目' });
+  f.call('link','repositories/'+name,{projectName:'可迁移项目'});
   const moved = join(f.directory, '移动后的 KSF'); renameSync(f.root, moved);
   assert.equal(repository({ root: moved, operation: 'check', projectName: '可迁移项目' }).data.valid, true);
 });

@@ -18,7 +18,7 @@ export function rebaseMarkdown(bytes, oldFile, newFile, objectDirectory, { mapEx
     let decoded;
     try { decoded = decodeURIComponent(pathPart.replace(/\\([\\`*{}\[\]()#+.!<> _-])/g, '$1')); } catch { return destination; }
     const target = join(dirname(oldFile), decoded);
-    const relObject = relative(objectDirectory, target);
+    const relObject = portable(relative(objectDirectory, target));
     if (!relObject.startsWith('..' + '/') && relObject !== '..' && !isAbsolute(relObject)) return destination;
     const next = portable(relative(dirname(newFile), mapExternal ? mapExternal(target) : target)) + suffix;
     return destination.startsWith('<') ? `<${next}>` : next.replace(/ /g, '%20');

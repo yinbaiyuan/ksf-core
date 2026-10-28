@@ -6,7 +6,7 @@ import { MetadataError } from '../metadata/errors.js';
 export function contextCapabilities(root, { source } = {}) {
   const data = { complete: true };
   const errors = [];
-  for (const [type, group] of [['workflow', 'workflows'], ['partner', 'partners']]) {
+  for (const [type, group] of [['cooperation', 'cooperations'], ['partner', 'partners']]) {
     try {
       const result = objectQuery({ root, type, operation: 'list', sourceScope: source });
       data[group] = {

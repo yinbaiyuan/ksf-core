@@ -10,6 +10,7 @@ import { readTree, writeDurably } from '../objects/storage.js';
 import { ordinaryDirectory, readDeclaration, readSourceRegistry, within } from '../sources/storage.js';
 import { declarationFile, validateDeclaration, sourceFailure } from '../sources/schema.js';
 import { exportObjects } from '../sources/export.js';
+import { assertNoCooperationMigration } from '../migrations/guard.js';
 
 export function sourceCatalog(root, declaration) {
   return catalog(root, { linked: false, extraSources: [{ id: declaration.id, root: declaration.root }] });
@@ -31,18 +32,19 @@ export function inspectSource(root, path, expectedId) {
   }
   return { declaration, catalog: c, errors, data: { id: declaration.id, name: declaration.name,
     ...(declaration.description !== undefined ? { description: declaration.description } : {}),
-    path: target, branch: checked.data.repositories[0].branch, schemaVersion: 1, valid: errors.length === 0,
+    path: target, branch: checked.data.repositories[0].branch, schemaVersion: 2, valid: errors.length === 0,
     objects: rows.filter(row => !row.errors.length).map(summary) } };
 }
 
 export function abilitySource({ root, operation, target, reference, id, name, description, versions, dryRun = false }, hooks = {}) {
+  if (!dryRun && ['init', 'link', 'unlink', 'export'].includes(operation)) assertNoCooperationMigration(root);
   if (!['init', 'link', 'unlink', 'list', 'read', 'check', 'export'].includes(operation) || typeof dryRun !== 'boolean') sourceFailure('INVALID_ARGUMENTS', 'Invalid ability-source operation.', { exitCode: 2 });
   root = realpathSync(root);
   if (operation === 'init') {
     const path = ordinaryDirectory(resolve(root, target));
     const checked = repository({ root, operation: 'check', target: path });
     if (checked.errors.length) sourceFailure('SOURCE_REPOSITORY_INVALID', 'Initialize or clone an independent Git repository first.', { errors: checked.errors });
-    const declaration = validateDeclaration({ kind: 'ksf-ability-source', schema_version: 1, id, name, ...(description !== undefined ? { description } : {}) });
+    const declaration = validateDeclaration({ kind: 'ksf-ability-source', schema_version: 2, id, name, ...(description !== undefined ? { description } : {}) });
     const file = join(path, declarationFile);
     if (existsSync(file)) {
       const current = readDeclaration(path);
@@ -57,7 +59,7 @@ export function abilitySource({ root, operation, target, reference, id, name, de
       for (const type of Object.values(types)) mkdirSync(join(path, type.user), { recursive: true });
       for (const file of files) {
         const text = file === declarationFile ? YAML.stringify(declaration) : file === 'AGENTS.md'
-          ? '# KSF 能力源协作规则\n\n本仓库遵循 ksf-source.yaml 声明的 KSF 能力源协议。能力保存在 能力/ 下，一个对象一个完整 ID 目录；维护对象版本和精确引用。\n\n本仓库不是 KSF 工作区，校验使用调用方已确认的 KSF 根下的 `.agents/ksf source check --path <本仓库>`。根 AGENTS.md 仅为仓库协作说明，不作为工作流。\n\n编辑前读取现有对象与 Git 差异，保留已有修改。贡献仅提交选定对象及依赖；推送、PR 和合并按用户请求及仓库权限执行。源内依赖只由本源和 Core 满足，公开内容不携带个人修订字段、个人派生基线或其他仓库历史。\n'
+          ? '# KSF 能力源协作规则\n\n本仓库遵循 ksf-source.yaml 声明的 KSF 能力源协议。能力保存在 能力/ 下，一个对象一个目录，可用中文显示名称命名；对象身份由入口元数据中的完整 ID 确定，维护对象版本和精确引用。\n\n本仓库不是 KSF 工作区，校验使用调用方已确认的 KSF 根下的 `.agents/ksf source check --path <本仓库>`。根 AGENTS.md 仅为仓库协作说明，不作为协同。\n\n编辑前读取现有对象与 Git 差异，保留已有修改。贡献仅提交选定对象及依赖；推送、PR 和合并按用户请求及仓库权限执行。源内依赖只由本源和 Core 满足，公开内容不携带个人修订字段、个人派生基线或其他仓库历史。\n'
           : file === 'README.md' ? `# ${name}\n\nKSF 能力源。先克隆本仓库，再使用已确认的 KSF 入口执行 source link <本仓库路径>。直接读取当前工作树；更新、贡献和回退使用普通 Git 流程。访问权限由仓库管理。\n` : '';
         writeDurably(join(path, file), text, { exclusive: true });
       }

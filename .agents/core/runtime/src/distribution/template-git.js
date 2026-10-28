@@ -1,3 +1,4 @@
+import { gitExecutable } from '../platform/index.js';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -8,7 +9,7 @@ import { isRevision, isRepository, isBranch } from './git-values.js';
 // Large base64 JSON bodies can be rejected by the Git Database REST API.
 // Git's pack protocol also reuses unchanged blobs already held by the target.
 export const gitTemplateThreshold = 8 * 1024 * 1024;
-const executable = process.platform === 'win32' ? 'git' : '/usr/bin/git';
+const executable = gitExecutable;
 
 export function verifyTemplateGit() {
   if (spawnSync(executable, ['--version'], { timeout: 5000, stdio: 'ignore' }).status !== 0)

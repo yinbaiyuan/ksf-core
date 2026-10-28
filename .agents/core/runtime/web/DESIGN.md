@@ -1,455 +1,325 @@
 ---
-version: "alpha"
-name: "KSF 工作台"
-description: "用于按归属与聊天回看本轮安排和对话的专业桌面工作台。"
+version: alpha
+name: KSF 工作台
+description: 雪山桌面、实色应用窗口、悬浮 Dock 与清晰文稿的 PC Web OS
 colors:
-  primary: "#22664f"
-  primary-hover: "#19563f"
-  background: "#f5f6f7"
-  surface: "#ffffff"
-  foreground: "#252b33"
-  muted: "#626b76"
-  border: "#e2e6e9"
-  sidebar: "#f3f5f6"
-  selected: "#e8f1ec"
-  ghost-hover: "#e9edef"
-  outline-text: "#424c57"
-  task-background: "#f0f6f2"
-  task-foreground: "#254d38"
-  warning: "#855b16"
-  error: "#a33838"
+  primary: "#0066D6"
+  focus: "#004C9E"
+  action-start: "#0872D4"
+  action-end: "#0965CB"
+  action-hover-end: "#086AD4"
+  selection-ink: "#003C78"
+  round-badge-end: "#096AD7"
+  white: "#FFFFFF"
+  paper: "#FDFEFF"
+  foreground: "#202632"
+  muted: "#58657A"
+  directory-text: "#17283E"
+  directory-muted: "#243147"
+  navigation-link: "#003568"
+  border: "#E3E8F1"
+  ground: "#B8C7D8"
+  glass-panel: "#FFFFFFA3"
+  glass-workspace: "#FFFFFFA3"
+  glass-chat: "#FFFFFFB8"
+  glass-round: "#FFFFFFB8"
+  glass-toolbar: "#FFFFFF9E"
+  glass-lens: "#FFFFFF99"
+  fallback-surface: "#EDF2FA"
+  search-surface: "#FFFFFF40"
+  search-focus-surface: "#FFFFFF99"
+  relation-surface: "#EDF5FF"
+  relation-text: "#0066C7"
+  process-surface: "#F1F5FB"
+  code-surface: "#F0F4FA"
+  search-match: "#FFE997"
+  search-match-text: "#463719"
+  text-selection: "#C9E1FF"
+  text-selection-ink: "#123969"
+  warning: "#855B16"
+  error: "#A33838"
 typography:
   context-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "12px"
-    fontWeight: 550
-    lineHeight: 1.6
-  round-section:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "18px"
-    fontWeight: 650
-    lineHeight: 1.5
-  route-summary:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "14px"
-    fontWeight: 500
-    lineHeight: 1.8
-  route-fact-label:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "12px"
-    fontWeight: 400
-    lineHeight: 1.6
-  route-node-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "14px"
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 20px
     fontWeight: 600
-    lineHeight: 1.8
-  ability-stage:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "12px"
-    fontWeight: 500
-    lineHeight: 1.6
-  heading:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "25px"
-    fontWeight: 650
-    lineHeight: 1.4
-    letterSpacing: "-0.025em"
-  heading-narrow:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "21px"
-    fontWeight: 650
-    lineHeight: 1.4
-    letterSpacing: "-0.02em"
-  detail-heading:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "21px"
-    fontWeight: 600
-    lineHeight: 1.5
+    lineHeight: 1.45
+    letterSpacing: -0.025em
   section:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "16px"
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 19px
     fontWeight: 600
-    lineHeight: 1.6
-  task-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "15px"
-    fontWeight: 600
-    lineHeight: 1.65
-  body:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "14px"
-    fontWeight: 400
-    lineHeight: 1.6
-  reading:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "14px"
-    fontWeight: 400
-    lineHeight: 1.9
-  reading-narrow:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "13px"
-    fontWeight: 400
-    lineHeight: 1.95
-  button:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "13px"
-    fontWeight: 500
-    lineHeight: 1.3
-  row-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "12px"
-    fontWeight: 550
-    lineHeight: 1.6
-  chat-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "12px"
-    fontWeight: 550
     lineHeight: 1.5
-  route-value:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "14px"
-    fontWeight: 600
-    lineHeight: 1.6
-  route-value-narrow:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "13px"
-    fontWeight: 600
-    lineHeight: 1.6
-  ability-type:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "11px"
-    fontWeight: 400
-    lineHeight: 1.6
-  metadata:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "11px"
-    fontWeight: 400
-    lineHeight: 1.6
-  compact-metadata:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
-    fontSize: "10px"
-    fontWeight: 400
-    lineHeight: 1.6
-  technical:
-    fontFamily: "ui-monospace, SFMono-Regular, Consolas, monospace"
-    fontSize: "10px"
+  body:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 15px
     fontWeight: 400
     lineHeight: 1.85
+  navigation:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 1.55
+  caption:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 1.6
+  route-value:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 14px
+    fontWeight: 550
+    lineHeight: 1.6
+  body-subheading:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 17px
+    fontWeight: 600
+    lineHeight: 1.5
+  button:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+    fontSize: 13px
+    fontWeight: 500
+    lineHeight: 1.3
+  round-number:
+    fontFamily: ui-monospace, SFMono-Regular, Consolas, monospace
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 1.7
 rounded:
-  badge: "4px"
-  selector: "5px"
-  control: "6px"
-  row: "7px"
-  message: "8px"
-  relation: "9px"
+  shell: 22px
+  sheet: 20px
+  document: 17px
+  selection: 11px
+  field: 10px
+  control: 9px
+  section-tab: 999px
+  round-badge: 6px
+  label: 5px
+  match: 3px
 spacing:
-  xs: "4px"
-  compact: "6px"
-  sm: "8px"
-  control: "12px"
-  md: "16px"
-  narrow: "18px"
-  panel: "20px"
-  lg: "24px"
-  tablet: "28px"
-  xl: "32px"
-  bottom: "40px"
-  wide: "48px"
+  micro: 3px
+  xs: 4px
+  sm: 8px
+  shell: 18px
+  md: 16px
+  lg: 24px
+  reading-inset: 28px
+  section-gap: 26px
+  directory: 264px
+  rounds: 264px
+  reader-measure: 860px
 components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.surface}"
-    typography: "{typography.button}"
-    rounded: "{rounded.control}"
-    padding: "7px 10px"
-  button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.muted}"
-    typography: "{typography.button}"
-    rounded: "{rounded.control}"
-    padding: "7px 10px"
-  button-ghost-hover:
-    backgroundColor: "{colors.ghost-hover}"
-    textColor: "{colors.foreground}"
-  button-outline:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.outline-text}"
-    typography: "{typography.button}"
-    rounded: "{rounded.control}"
-    padding: "7px 10px"
-  search-field:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.muted}"
-    rounded: "{rounded.control}"
-    padding: "0px 9px"
-    height: "34px"
-  selected-project:
-    backgroundColor: "#e5ece8"
-    typography: "{typography.row-title}"
-    rounded: "{rounded.control}"
-    padding: "5px 7px 5px 0px"
+  directory:
+    textColor: "{colors.directory-text}"
+    rounded: "{rounded.shell}"
+    width: "{spacing.directory}"
   selected-chat:
-    backgroundColor: "{colors.selected}"
-    typography: "{typography.chat-title}"
-    rounded: "{rounded.control}"
-    padding: "6px 7px"
-    height: "52px"
+    textColor: "{colors.selection-ink}"
+    rounded: "{rounded.selection}"
+    padding: 9px
+  round-sidebar:
+    width: "{spacing.rounds}"
   selected-round:
-    backgroundColor: "#eaf2ed"
-    rounded: "{rounded.control}"
-    padding: "6px 7px"
-  round-context:
+    rounded: "{rounded.selection}"
+    padding: 11px 10px
+  reader:
+    backgroundColor: "{colors.paper}"
     textColor: "{colors.foreground}"
-    typography: "{typography.context-title}"
-    padding: "12px 28px"
-  round-section:
-    typography: "{typography.round-section}"
-  section-navigation:
-    textColor: "{colors.muted}"
-    padding: "0px 28px"
-    height: "40px"
-  capture-chip:
-    backgroundColor: "{colors.ghost-hover}"
-    textColor: "{colors.muted}"
-    typography: "{typography.compact-metadata}"
-    rounded: "{rounded.badge}"
-    padding: "1px 6px"
-  relation-container:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.relation}"
-    padding: "23px 24px 14px"
-  route-summary:
-    typography: "{typography.route-summary}"
-  route-fact-label:
-    textColor: "{colors.muted}"
-    typography: "{typography.route-fact-label}"
-  route-value-link:
-    textColor: "{colors.primary}"
-    typography: "{typography.route-value}"
-    padding: "3px 0px"
-    height: "32px"
-  route-evolution:
-    backgroundColor: "{colors.surface}"
-    padding: "0px 0px 0px 20px"
-  route-node-heading:
-    textColor: "#304a39"
-    typography: "{typography.route-node-title}"
-  route-ability-stage:
-    typography: "{typography.ability-stage}"
-  request-message:
-    backgroundColor: "#f5f7f6"
+    typography: "{typography.body}"
+    rounded: "{rounded.document}"
+  button-primary:
+    textColor: "{colors.white}"
+    typography: "{typography.button}"
     rounded: "{rounded.control}"
-    padding: "12px 16px 15px"
-  final-message:
-    backgroundColor: "{colors.surface}"
-    typography: "{typography.reading}"
+    padding: 7px 10px
+  button-ghost:
+    textColor: "{colors.muted}"
+    typography: "{typography.button}"
+    rounded: "{rounded.control}"
+    padding: 7px 10px
+  button-outline:
+    typography: "{typography.button}"
+    rounded: "{rounded.control}"
+    padding: 7px 10px
+  search-field:
+    backgroundColor: "{colors.search-surface}"
+    textColor: "{colors.directory-text}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.field}"
+    height: 35px
+  search-field-focus:
+    backgroundColor: "{colors.search-focus-surface}"
+  section-tab:
+    typography: "{typography.navigation}"
+    rounded: "{rounded.section-tab}"
+    padding: 5px 11px
+  section-tab-current:
+    backgroundColor: "{colors.white}"
+  relation-primary:
+    backgroundColor: "{colors.relation-surface}"
+    textColor: "{colors.relation-text}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.label}"
   process-records:
-    backgroundColor: "#f8faf9"
-    rounded: "{rounded.control}"
-    padding: "14px 16px"
-  task-node:
-    backgroundColor: "{colors.task-background}"
-    textColor: "{colors.task-foreground}"
-    typography: "{typography.task-title}"
-    rounded: "{rounded.relation}"
-    padding: "21px 15px 17px"
-  detail-sheet:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "{colors.process-surface}"
+    rounded: "{rounded.selection}"
+    padding: 17px
+  reader-tool:
+    width: 32px
+    height: 32px
+  route-evolution:
     textColor: "{colors.foreground}"
-    width: "420px"
+    typography: "{typography.route-value}"
 ---
 
 # Design System: KSF 工作台
 
-## Overview
+## 当前 Web OS 外壳
 
-**Creative North Star: "专业桌面工作台"**
+系统操作集中在紧贴左上角Logo下沿、向右下展开的“系统设置”面板，Logo和侧栏设置按钮打开同一窗口，默认桌面管理。左侧184px分类依次为桌面管理、外观设置、采集与诊断、关于 KSF；右侧独立滚动。目标尺寸860×620px，以Logo按钮左边和下边为锚点，菜单和桌面侧栏左边统一距网页8px；Logo入口与侧栏共用48px宽占位，图标中心对齐；随视口和入口尺寸变化重新对齐，右侧与底部至少16px；从左上原点轻量放大展开，减少动态效果时关闭动画；小于640px时分类改为顶部横向导航。实色内容、浅灰分类区、紧凑行距和清晰选中态。外观表单、抽屉材质预览、诊断和关于在窗口内展示，不重复打开同类抽屉。不显示顶部标题栏和关闭叉号，分类区与内容区直接从面板顶部开始；保留仅供辅助技术读取的标题和说明。顶部左右两角为直角，底部保留18px圆角；Escape和遮罩可关闭，恢复打开入口焦点；分类支持方向键与Home/End。关于继续读取运行Core真实版本，失败保留产品信息并提供重试；健康检查只在诊断分类可见时订阅。
 
-以 Linear / VS Code 一类专业桌面工具为视觉参照，面向日常回看本地 KSF 对话与安排的用户。归属聊天树和轮次栏采用紧凑行式导航；项目、知识单元、能力目标与档案共用一层对象行，以小标题区分类型；阅读区沿请求、路由、结果三个章节展开，长名称、中文和技术信息按真实内容排版。
+KSF整体标识由KsfLogo上下组合：22px原创KsfMark山峰居上，7px KSF字标居中置于山峰下方，整体宽24px、高28px。左侧略低、右侧略高的双峰共用水平基底，无雪线、不镜像。Logo、座右铭、雪山背景和32px顶栏沿用现有设计，顶栏右侧仅日期时间；Dock只保留三个应用和显示桌面，底部70px、距页面底部4px。应用可用区仍从顶栏下沿延伸至Dock上沿，左右贴齐页面。最大化直角填满实际测得的可用区，还原保留位置和大小；普通窗口14px圆角。
 
-灰白表面承载信息，克制绿色标记当前选择、安排与可操作状态。主要层级由表面明度、细边框和留白建立；临时抽屉使用侧向阴影。图标使用统一线性 SVG，界面使用系统字体，无需下载字体或装饰图片。
+桌面卡片区左侧预留64px，栏本体48px、左右8px留白，40px图标按钮。侧栏垂直居中，默认50dvh，按图标数量向上下延长；高度上限为视口高度减288px（极短窗口至少164px），为座右铭和底部Dock留出空间，超过上限仅列表滚动。底部固定新增与设置；悬停和键盘聚焦在右侧显示名称，选中项圆角高亮。侧栏仅桌面显示，应用进入后隐藏，显示桌面恢复上次分组。分组支持名称、图标、上移/下移和确认删除，至少保留一组。编辑未保存时切换提供保存、放弃、继续编辑。应用窗口状态全局独立于分组。
 
-**Key Characteristics:**
+桌面标题区常态96px，座右铭顶端仍在页面52px，横向恢复页面左侧（宽窗28px，窄窗16px），24px字、窄PC窗口22px，辅助文字11px；不显示英文。卡片第0行从页面128px起，相对上一版上移46px。头部与卡片滚动区用弹性布局，窄窗编辑工具换行自然增高，不重复计算固定头部高度。宽屏卡片区两侧距网页均72px，取消重复横向内边距与1536px宽度上限。小于640px时左80px避让侧栏、右16px，保留内容宽度；经典滚动条使用双侧等量预留，避免滚动出现后破坏平衡。基础格保持正方形，横纵间距均24px；以96px为最小目标选择1–12列，将剩余宽度均分到格子，完整铺满可用宽度，没有整格取整后的末尾留白。设可用宽W、列数C，格边长S=(W−(C−1)×24)/C；n×m卡片宽为n×S+(n−1)×24，高为m×S+(m−1)×24，n/m为1–12正整数；默认继续阅读2×2、最近对话4×3、归属概览2×2。名称在卡片底部外侧，4px留白、16px行高，占用格间隙，不挤压卡片尺寸。内容独立滚动，宽或高为1格时切换为可打开应用的紧凑图标入口。编辑时显示与实际格边长一致的正方形参考格和占格尺寸，拖动卡片或名称移动、右下角吸附缩放，也支持方向键移动/Shift＋方向键缩放。窄窗仅投影并填入空位，未编辑不改保存坐标；保存实际编辑结果。卡片库由注册表生成，新增卡片填入当前可见网格的首个可用位置。整个桌面编辑过程暂停网格作用域的玻璃测量、背景对齐和滤镜更新，丢弃已排队的同域工作；卡片采用轻量浅色预览。拖动和缩放中间及松手均不重建材质，点击完成或取消退出编辑后，按最终位置与尺寸合并恢复一次完整玻璃。不逐指针事件更新React桌面状态。像素预览与整数落位分开：拖动和缩放按rAF合并，只刷新正在操作的卡片，格内10px等小位移也连续跟随；占位及松手结果仍按整数格吸附。CardGrid适配react-grid-layout 2.3.0中像素位置保存在ref、GridItem却仅按整数坐标缓存的漏刷新问题，不通过反复更新整个桌面草稿绕过。结束、取消编辑或卸载时取消待执行的刷新，保留碰撞避让、滚动和键盘路径。编辑状态禁用网格及占位过渡，避免跟手延迟；容器观察仅宽度改变时更新网格，忽略高度变化，不触发全局光学同步。暂停跟随React编辑状态生命周期，退出编辑或卸载均恢复，指针取消、失焦与页面隐藏不破坏编辑状态。
 
-- 桌面同时呈现归属聊天树、完整轮次栏与阅读详情。
-- 绿色集中表达选择、当前安排、链接与焦点。
-- 紧凑上下文与章节跳转保持定位，路由以细线串联平面信息行，完整安排与来源详情按需进入抽屉。
-- 窄屏逐级收起导航，保持正文可用宽度。
+桌面偏好使用ksf.workbench.desktop.v2，包含grid: square-v1标识、分组列表、各组布局、当前分组ID及窗口边界。未带正方格标识的旧v1/v2坐标按横向2/3、纵向1/2换算至新格单位并排除重叠，尺寸取正整数；v1迁移为主页。分组、顺序、图标、当前组、空布局与窗口偏好保留，继续过滤退役采集卡；标识随保存写入，避免重复换算，原v1保留作为回退。新分组为空白，主动清空后保持空白；卡片可在不同组独立添加。分组操作自动保存，卡片编辑完成时保存，失败明确“仅本次生效”。
+
+桌面卡片、Dock与状态栏保留可调光学材质；侧栏使用半透明磨砂表面。应用窗口、内部目录、选中项、章节和来源抽屉均为实色，不挂载折射滤镜或背景副本。正文按窗口宽度适配，1100与760两个容器阈值控制三栏/归属抽屉/双目录抽屉。正文15px，轮次标题20px（窄窗18px），导航13px，状态栏12px。系统中文字体离线可用。
+
+减少透明度/增加对比度时提供实色底，减少动态效果关闭动画、位移与回弹。统一模态窗口高于桌面、应用和Dock，记录所属窗口与焦点触发器。下文历史阅读区、光学实现与内容规则继续适用，外壳与系统设置行为以本节为准。
+
+交互期间的材质计算遵循[性能约定](PERFORMANCE.md)：卡片移动按区域合并rAF背景对齐；缩放复用已解码贴图，结束后恢复精确光学。正文与窗口内容更新独立于时钟及无变化轮询。
 
 ## Colors
 
-调色由灰白中性表面与单一绿色强调组成。规范值以上方 token 为准；sidecar 的八阶色带仅供面板预览，不是额外的界面颜色规范。
+蓝色用于动作和当前位置，冷白纸面承载正文。原创背景src/assets/summit-dawn.jpg包含雪山、登山者和日出云海，不作为业务证据。tint与清晰前景独立；frontmatter透明色以8位hex表达代表值，CSS采用精确的小数alpha。
 
 ### Primary
 
-- **工作台绿**（`primary`）：链接、焦点、品牌标记和当前状态；悬停主按钮使用 `primary-hover`。
-- **浅绿选择面**（`selected`）：选中的聊天。归属树当前对象与选中轮次使用相近的浅绿表面，具体值随各自组件记录。
-- **任务浅绿面与深绿文字**（`task-background`、`task-foreground`）：保留给旧版路由关系节点；归属树当前对象也使用深绿文字。主详情的归属与关联对象名称采用绿色文字链接。
+当前聊天标题使用selection-ink（深蓝），轮次归属使用navigation-link；主按钮、轮次数字和文稿链接沿用各自语义色。导航主文为directory-text，辅助字为directory-muted，不沿用强背景下的浅辅助字。
 
-### Neutral
+### Material
 
-- **纯白内容面**（`surface`）：顶栏、主阅读区、输入框、抽屉及最终答复；请求使用轻灰绿底，展开的过程记录使用更浅的灰绿底。
-- **侧栏灰**（`sidebar`）：归属聊天树及代码块；轮次栏使用更接近白色的浅灰表面。
-- **工作区浅灰**（`background`）：全局底层与旧版路由阅读背景。
-- **正文深灰**（`foreground`）与 **辅助灰**（`muted`）：正文和元信息；次级描边按钮文字使用 `outline-text`。
-- **边界浅灰**（`border`）：分栏、消息边界和行分隔；`ghost-hover` 提供幽灵按钮悬停及中性采集标签的轻微色差。
+面板／工作区tint为64%白，当前聊天／轮次72%，阅读工具62%，章节副本为60%白。对比度按这些色层覆盖最暗背景的下界核对，不把上游建议的8–20%白直接当作小号正文可读的证明。章节副本透明，按原始Skill关闭色散，避免预乘alpha发白。不能给前景设置整体透明度或滤镜。
 
-### Semantic states
+### Neutral and State
 
-- **警告棕**（`warning`）：来源变化、归属切换与需要留意的状态。
-- **错误红**（`error`）：读取错误与诊断问题。状态底色和专用边框保留在组件样例中，不扩展成第二套主色。
-- **轮次关系标签**：本项目／本知识单元／本能力／本档案用浅绿，仅关联用浅蓝灰，其他归属与未知状态用中性浅灰；无归属、待确定、未上报和未记录均保留各自文字。
-- **待创建目标**：名称旁用 `muted` 辅助灰文字写明“待创建”，沿用元信息层级；该生命周期状态不使用警告色。
+paper承载长正文，foreground与muted用于文稿主次文字。directory-text与directory-muted用于透明导航；search-surface是轻微下陷的输入面，focus时提高白面浓度。fallback-surface用于减少透明度与提高对比度偏好。关系、过程、代码、搜索命中、文本选择及异常继续使用已有语义色。
 
-**The State Color Rule.** 绿色服务于选中、当前安排、链接与焦点；关系、警告与错误均配文字或图标，不单靠颜色传达含义。
+**The Material Color Rule.** 背景、光学、色层与清晰前景分别持有职责，正文不透出背景。
+
+**The State Evidence Rule.** 当前聊天以透镜轮廓和蓝色标题、当前轮次以透镜和数字标记表达，搜索与文本选择保持独立。
 
 ## Typography
 
-**界面与正文字体：** Apple / Windows / 中文系统无衬线字体栈，具体顺序见 typography token。
+**Body Font:** frontmatter 的系统字体栈；macOS 使用本机系统中文字体，Windows 回退 Microsoft YaHei，不加载网络字体。
+**Label/Mono Font:** 轮次数字与技术原文使用系统等宽字体，时间使用 tabular 数字。
 
-**技术字体：** 系统等宽字体栈，仅用于路径、摘要标识和代码原文。时间单独使用 `tabular-nums`。
+主层级为当前轮次主题、章节、正文、导航和辅助信息，对应 context-title、section、body、navigation、caption（20／19／15／13／12px；窄窗主题18px）。主题字重 600，当前聊天标题为600、当前轮次标题为550。原聊天标题退为辅助来源，正文最大行宽为 72ch，行高由 body 定义。
 
-标题依靠字号和中等字重建立层级；界面标签保持常规大小写。没有独立展示字体或营销式超大标题。
+路由值采用 route-value（14px），正文三级标题采用 body-subheading（17px），按钮采用 button。轮次栏标题为 14px／600，品牌为 24px／700，抽屉标题为 20px。局部“本地”标记保留 11px，它不作为通用辅助字号。小按钮和搜索输入采用 12px。层级来自字号、字重、位置与间距，不使用装饰性展示字体。
 
-### Hierarchy
-
-- **紧凑上下文**：聊天名使用 `context-title`，单行省略并保留完整提示；轮次为 12px、600 字重，时间和采集状态使用 `compact-metadata`。
-- **详情章节与路由简述**：请求、路由、结果使用 `round-section`；一次呈现的路由简述使用 `route-summary`。抽屉内容名称使用 `detail-heading`；`section` 保留给兼容路由章节。
-- **导航名称**：四类目标名称接近 `row-title`，聊天名称使用 `chat-title`；均单行省略。类型分组标题使用辅助灰、11px、600 字重与 18px 行高，低于可选择的对象行。“待创建”使用 11px、400 字重，保持完整文字。轮次号保留 11px、550 字重，摘要为 12px、1.5 行高。聊天和轮次元信息使用 `compact-metadata`。
-- **归属、关联对象与能力信息行**：左列标签使用 `route-fact-label`，名称统一使用 `route-value`，视口不超过 767px 时使用 `route-value-narrow`；能力类型使用 `ability-type`。来源版本进入抽屉，来源变化仍在名称旁用文字和图标提示。
-- **路由演进**：节点标题使用 `route-node-title`；时间与“末次安排”标记使用紧凑元信息。时间线和“当时完整安排”中的能力阶段使用 `ability-stage`（12px、500 字重），与能力名称并列或自然换行；这项局部阅读层级不改变归属、聊天、轮次等紧凑导航。
-- **界面正文与元信息**：分别使用 `body`、`metadata` 和 `compact-metadata`；按钮使用 `button`。
-- **请求与结果阅读**：使用 `reading`，主详情窄屏仍保持 14px、1.9 行高；正文行宽上限为 75ch，段落保留自然间隔。`reading-narrow` 保留给原有兼容消息样式。
-- **技术详情**：`technical`；代码原文保持空白与换行，长标识允许断行。
-- **旧版路由标题**：`heading`、`heading-narrow` 与 `task-title` 只对应兼容入口的页面标题和关系节点。
+**The Reading Hierarchy Rule.** 当前轮次主题优先于聊天原题；正文连续阅读，技术标识才使用等宽字体。
 
 ## Layout
 
-工作台占满视口高度（100dvh），无全局 1440px 宽度上限。桌面以归属聊天树（280px）、轮次栏（220px）和可伸缩详情形成三栏。归属树、轮次栏和本轮正文分别滚动；顶栏、紧凑上下文和章节导航位于正文滚动区之外。顶栏常规高 50px。
+默认目录和轮次各 264px。桌面使用本页 Web OS 外壳；应用内部横向内缩8px、间距8px，目录与工作区各自为独立圆角玻璃壳。工作区内轮次栏贴近文稿，文稿外侧留小间隙。目录可在 216–360px、轮次在 220–360px 间调整；上限同时受窗口与另一栏限制，为阅读区保留约 496px。分隔线支持拖动、方向键每次 8px、Shift 加方向键每次 32px，以及 Home／End。轮次栏可收起进入专注阅读。
 
-主阅读区为白色。上下文内边距为 12px 28px，聊天名下方紧排轮次、时间和采集状态；章节导航为 40px 高的文字入口。正文内边距为 24px 28px 60px，文档最大宽度为 960px。请求、路由、结果同页排列，章节间以 28px 外间距、24px 上内边距和细分隔线区分。
+阅读正文最大宽度为860px，容器居中，普通窗口左右内边距28px；标题区内缩22px。窄窗标题区内缩17px、正文18px，章节与前后轮分为两行。正文段落另受 72ch 行宽限制，代码和宽表格只在自身容器内横向滚动。目录、轮次和正文分别滚动。
 
-路由默认展开为纵向时间线：左侧留出 20px 轨道，空心小圆点与 1px 细线串联节点；节点之间留出 22px，最后节点不加尾部空白。标题、时间与末次标记在同一行自然换行，事实和变化紧贴标题排列。节点无背景块、外框或阴影，归属、关联对象与能力继续使用平面对齐信息行。
+应用窗口不超过1099px时，归属进入左侧抽屉；不满760px时轮次也进入抽屉。窗口外壳留白保持不变。阅读容器不超过 760px 时隐藏章节计数；不超过 610px 时压缩章节间距，前后轮以图标呈现；不超过 560px 时路由标签列进一步缩窄。大屏也沿用同一阅读轴线。章节之间留 26px，分隔后留 24px；紧密关联的控件主要采用 3–8px 间距。
 
-时间线节点的标签列为 76px、列间距 10px，首节点事实行间距 3px；能力类型在右内容区再分出 48px 标签列与 8px 间距，能力名称纵向排列，空类型不占位。后续节点的变化行间距为 5px，同次调整在一个节点内连续排列。完整安排抽屉使用 90px 标签列、12px 列间距与 7px 行间距，能力类型列为 56px。过程记录和记录信息仍采用轻量折叠行。
-
-右侧来源详情抽屉宽度为 `min(420px, 100vw)`；归属聊天树与轮次导航分别使用左侧抽屉，宽度均为 `min(320px, 100vw)`。导航抽屉保留各自列表，不把导航堆在正文上方；一次只显示当前打开的抽屉。
-
-### Responsive behavior
-
-- **1100px 及以上**：280px 归属聊天树、220px 轮次栏和详情并列显示。
-- **768–1099px**：归属聊天树进入独立左侧抽屉，顶栏保留入口；轮次栏为 200px，详情继续阅读。
-- **767px 及以下**：两级导航分别进入左侧抽屉；详情独占主区，上下文提供“选择轮次”按钮，顶栏隐藏服务文字。路由名称点击区域最小高度为 40px，名称字号为 13px；能力类型与名称改为上下排列，消息操作允许换行。
-- **阅读栏宽度 560px 及以下**：上下文内边距为 11px 18px，章节导航横向留白为 18px，正文内边距为 20px 18px 44px；时间线节点的标签列收至 66px、列间距为 8px，标题行间距收至 7px。完整安排事实行使用 76px 标签列与 8px 间距。这是内容容器条件，不等同于视口断点。
-- **视口 680px 及以下**：顶栏高 46px，右侧来源详情抽屉占满视口；主详情的请求与结果继续使用同一阅读字号。
-
-间距采用紧凑的小步长节奏；导航行、上下文与路由信息密排，章节及阅读段落之间留出更大间隔。frontmatter 只列复用间距。
-
-旧版路由仅通过 `?view=routes` 进入：保留项目组—任务节点—能力组的关系图与无箭头连线。该图的横向／纵向切换和 1650px 宽屏留白只适用于兼容视图，不作为主工作台的布局模板。
+**The Reading Axis Rule.** 窗口内阅读保持稳定内缩、清晰层级和受控行宽；专注模式保留正文可读性。
 
 ## Elevation & Depth
 
-常规表面以灰白明度差和细边框建立深度。导航行、安排、消息和能力行不带阴影；临时抽屉以覆盖层和侧向软阴影表示当前交互范围。
+面板、选中项和按钮使用从原始components.js提取的Surface；背景副本、阴影、tint与前景独立。面板／选中项采用折射24、bezel .3、曲率4、色散.1、blur2、高光.5、宽2px。按钮采用14／.8／3／.12／0／.6／1.5px。原始形状、sRGB、objectBoundingBox与引擎补偿由既有liquid-glass.js保持，不从记忆重写。
 
-### Shadow Vocabulary
+Surface为可调透镜预留28px bleed，外壳overflow允许阴影和形变。已知背景采用C图像副本，按真实背景rect注册，滚动和分栏后仍对齐。背景独立成层，亮度、饱和度和构图同时更新真实背景与副本，正文不参与滤镜。地图最长边限制1280px、DPR上限2，尺寸或DPR变化更新形状，移动只对齐；额外观察PC栏容器，修复固定尺寸控件随分栏平移而未重对齐的情况。此上限是工程适配，不是原始默认。
 
-- **右侧来源详情抽屉**（`-12px 0 36px #172a221f`）：从右侧覆盖主内容。
-- **左侧导航抽屉**（`12px 0 36px #172a221f`）：容纳归属聊天树或完整轮次列表。
-- **遮罩**（`#1e2a2429`）：覆盖背景，明确抽屉的交互范围。
+章节采用B装饰副本，只复制三枚已知UI标签，使用折射5、bezel .35、曲率4、色散0、高光.6、宽1.5px。保留原生文档导航语义、aria-current、URL与焦点，不改为单选组件。createSpring采用380／28驱动位置并随速度轻微拉伸；不经React状态逐帧渲染。来源抽屉是D背板，折射为0、blur20；其他引擎可用常规磨砂回退，不声称已跨浏览器验证。
 
-**The Flat Workspace Rule.** 工作区、安排和消息在静止时使用表面与细边框；侧向软阴影留给覆盖工作区的抽屉。
+### Shadow and motion
 
-路由时间线的层级只来自圆点、细线、文字与行间距；节点、变化项和其中的能力行不再各包一层容器。
+- 面板／按钮仅保留原始Surface的0 4px 12px rgb(0 0 0 / .1)；不叠额外倒角或粗亮边。
+- 章节指示器使用0 1px 3px rgb(0 0 0 / .08)。
+- 按钮按下使用600／36弹簧，透镜增宽10px、减高4px；选中项轻微增宽4px、减高1.5px。真实文字与命中区域不缩放，不用CSS scale。
+- 减少动态效果关闭按压形变；减少透明度／高对比度销毁光学控制器并使用实色。销毁时清理观察器、控件监听、弹簧与滤镜；Surface共享的滚动／resize注册按文档生命周期管理实例集合。
 
-右侧抽屉进入使用短距离平移和局部裁切（210ms，`cubic-bezier(.16, 1, .3, 1)`），遮罩淡入为 150ms。按钮颜色过渡为 150ms；加载图标使用 1.6s 呼吸提示。减少动态效果偏好会禁用动画与过渡。
+### 本机材质设置
+
+Logo 菜单“外观设置…”提供430px宽的实色侧面板，不加遮罩或模糊，允许继续操作和观察工作台。对象选择及重置操作常驻，参数区独立滚动；关闭和Escape返回触发入口。雪山背景、目录框、工作区背景框、聊天选中、轮次选中、按钮、章节透镜和详情抽屉各自控制。常用光学、色层和形状参数直接展示，曲率／折射率／光照／阴影和适用的弹簧反馈置于“更多参数”。保留章节副本色散为0、抽屉采用磨砂的实现边界。
+
+默认值继续采用上述配方。用户改动即时生效并保存在当前浏览器的材质偏好，支持当前对象和全部恢复；系统辅助偏好优先。任意自定义颜色与透明度不沿用默认配方的对比度结论。设置面板本身保持实色，保证任意参数下仍能调整与恢复。
+
+默认设置对象为“主阅读区”，控制轮次标题、章节栏及请求／路由／结果的统一背景。该区域复用已知背景的Surface，正文和控件保持独立前景；清除遮挡材质的固定白底。默认色层#FDFEFF、100%不透明、磨砂8px、圆角17px，降低不透明度后显现折射和背景。阴影由可调外框绘制以避开内容裁切。原工作区项明确称为外层背景框，避免误认为已经覆盖正文。
+
+详情抽屉未打开时也必须能观察调整：选中该对象后，在设置左侧显示380px宽的实时材质预览，和430px设置面板间留16px；PC窄窗口保持两者在视口内。预览使用实际Sheet类和GlassSurface，照片及示例内容明确标记，不展示业务原文；随参数更新，关闭设置或切换对象时卸载。设置面板的固定实色与被调整的抽屉明确区分。
+
+### Assets, implementation and reference
+
+- 用户指定安装入口：https://liquidglass.dev/install-skill.sh 。使用官方skill-installer将固定提交安装到Codex，不执行远程管道脚本。原始Skill随KSF液态玻璃基本功保存，搭档按任务采用。
+- [liquidglass.dev](https://liquidglass.dev/)及[固定提交](https://github.com/gentpan/liquidglass/tree/068ad226f53e1ca62d857f78bdc32f58f3c5fce7)是本版实现依据。原始组件基准保留在.impeccable/review/skill-glass/compare.html。
+- src/vendor/liquid-surface.js来自原始Surface，外部CSS来自对应层规则，避免注入style标签；createGlass核心继续使用CSP兼容的CSSOM适配，MIT许可随生产资源打包。React装饰宿主独立，不让第三方组件移动React业务子树。
+- 原创雪山背景由内建imagegen生成，PNG原件保留，生产为JPEG；完整提示词在本轮review目录。不是Apple资产、真实登山记录或用户照片。
+- 当前截图、源码对照、参数与验证见.impeccable/review/skill-glass/。仅实测当前Chromium IAB；上游三引擎结论不等于本项目已测Safari／Firefox。CSP、离线加载和归档安全边界不扩大。
+
+**The Opaque Document Rule.** 光学处理装饰图像与固定UI标签，归档正文保持实色和正常字形。
 
 ## Shapes
 
-整体采用小圆角和细边框。`control` 用于按钮、输入、归属聊天树行、轮次行、请求容器、展开的过程记录与代码块；`message` 保留给原有兼容消息样式。小标签使用 `badge`。旧版路由继续使用 `relation` 关系容器与任务节点、`row` 项目节点；`selector` 保留给原有选择控件。状态点为圆形。
+外壳采用 shell 圆角（22px），文稿采用 document（17px），抽屉采用 sheet（20px）。聊天与轮次选择为 selection（11px），搜索为 field（10px），常规控件为 control（9px），章节入口为 section-tab 胶囊（999px）。圆角大小随容器尺度变化，保留明显柔和轮廓。
 
-归属对象、聊天和轮次以各自浅绿表面表达选择，聊天和轮次再加轻描边。主详情的归属、关联对象与能力为无卡片边界的文字链接；悬停时名称出现下划线、尾部箭头加深。
+当前轮次数字采用 round-badge（6px），关系与本地标记采用 label（5px），命中词采用 match（3px）。文稿顶部工具为圆形（32px），轮次收起工具为圆形（28px）；品牌图标为 38px 方形加 11px 圆角。演进节点为圆点（7px）加浅蓝外圈，细线连接连续记录。Lucide SVG 保持一致线性风格。
 
 ## Components
 
 ### Buttons
 
-紧凑、文字清楚的桌面控件。基础按钮为 `control` 圆角，常规最小高度 34px、内边距 7px 10px；小按钮最小高度 28px，图标按钮为 34px 方形。
-
-- **Ghost**：默认导航和辅助操作，辅助灰文字、透明底；悬停切换至 `ghost-hover` 与正文深灰。
-- **Outline**：白色底与细边框，供刷新、移动端选择轮次等操作使用；悬停加深边框并轻微改变底色。
-- **Primary**：组件库保留绿色底与白字变体，悬停使用 `primary-hover`，按真实操作需要使用。
-- **Focus / Disabled**：可见焦点为主色 2px 外轮廓，偏移 3px；禁用按钮透明度为 50%，不接收指针事件。
-
-### Chips
-
-通用采集标签使用 `badge` 圆角、紧凑元信息与轻底色；详情上下文使用无底色文字变体，保留状态文字和语义色。轮次关系标签使用同类小圆角与紧凑文字，归属切换在旁边单独写为棕色提示。路由中的已选择、已读取、已采用阶段为无底色文字，均保持可见；“末次安排”使用轻浅绿底的小标记。
-
-### Cards / Containers
-
-路由直接放在白色阅读面中，以一次简述、纵向时间线和对齐信息行组织。四类主归属、关联对象与能力安排使用相同的文字链接形式，不使用铺满宽度的大对象块或能力卡片；节点之间由轨道和留白连接，不添加嵌套卡片或每节点外框。
-
-请求使用浅灰绿底、细描边与 `control` 圆角，内边距为 12px 16px 15px。最终答复直接排在白色文档面中；多条消息之间留出间距和细分隔线。过程记录默认折叠，展开后使用浅灰绿容器，内边距为 14px 16px。
+当前聊天用透镜与深蓝标题表达。阅读工具为两枚独立32px玻璃按钮，轮次收起为28px；使用Surface原始烘焙边缘与接触阴影。按下只改变装饰透镜几何，文字和真实按钮保持稳定；释放回弹。辅助文本按钮不加玻璃。焦点保持深蓝2px可见轮廓，禁用沿用原生语义。
 
 ### Inputs / Fields
 
-归属聊天搜索采用白底、细描边与 `control` 圆角，高 34px；输入文字为 12px。焦点进入后边框变为主色，输入光标跟随主色。占位提示为“搜索归属、聊天或历史路由”。“全部阶段”复选框仅保留在兼容路由视图。
+搜索使用 search-surface 半透明蓝灰底、1px 淡边与轻内阴影。目录高 35px，轮次高 32px。聚焦时增加白面浓度、蓝色内边线与浅蓝光圈；文字和占位保持深色，清空入口沿用原交互。
 
 ### Navigation
 
-归属聊天树将展开按钮与对象选择按钮分开。项目、知识单元、能力目标与档案在同一层，以公文包、书本、指南针和归档盒线性图标区分；“项目”“知识”“能力”“档案”是不可交互的小标题，不增加一层导航。已归档项目仍列在项目组。其他状态归入“其他”组；分组有记录时才显示，不预置空目标菜单。组间距为 12px，标题外间距为 8px 10px 4px。
+类别标题只分组。当前聊天是浅色玻璃透镜，标题蓝色600字重、辅助字深色；当前轮次是浅色透镜加蓝色数字，标题最多两行，其他轮次保持紧凑。完整名称保留于可访问名称和提示。
 
-待创建目标沿用相同对象行，在名称和计数之间显示不收缩的“待创建”文字。目标落成后沿用原分支、聊天与计数，不增加重复导航项；选中、悬停与焦点处理保持一致。
+请求／路由／结果组成轻底控制组，UI标签装饰副本在透镜区域呈现，通过弹簧在三项之间滑动。按钮保留aria-current与原有章节跳转、焦点和URL行为，不改成另一套Tab数据模型。记录信息入口与前后轮保持相邻。窄PC阅读容器小于760px时隐藏辅助计数。分栏调整命中与键盘行为不变，焦点细线改为更深蓝。
 
-桌面对象按钮最小高度 32px，导航抽屉的对象行保留 44px 目标；聊天缩进 14px。对象名称、计数同行显示；聊天行最小高度 52px、内边距 6px 7px，12px 名称单行省略，10px 相关轮次及时间位于下一行。知识单元提示保留完整入口路径；聊天保留完整标题提示，可访问名称还包含相关轮次与时间。选中对象使用浅灰绿底，选中聊天使用浅绿底和轻描边。关联对象只出现在本轮详情，不增加导航分支或归属计数。
+### Chips
 
-完整轮次栏采用约 50px 的两行紧凑项：首行并列轮次号与单行省略摘要，次行显示时间、关系标签与切换提示。摘要保持 12px，时间与关系保持 10px；完整内容通过悬停提示及可访问名称保留。选中轮次使用浅绿底与轻描边；仅关联和其他归属轮次仍使用相同结构，保留完整聊天上下文。导航收起后分别进入归属聊天树与轮次抽屉，正文保留各自入口。
+关系、采集和能力阶段使用紧凑文字，普通关系为微圆角与轻色面；轮次行内关系去掉底色。阅读顶部采集状态采用透明背景。警告、错误与阶段始终保留语义文字。暖黄命中词不承担归属或当前选择。
 
-### Round document and source sheet
+### Reading Containers
 
-聊天、轮次、时间与采集状态集中在紧凑上下文中。下方“请求、路由、结果”是三个章节跳转入口，当前章节使用绿色文字与 2px 下边界；点击后定位到对应标题并保留可见焦点。右端“记录信息”入口可打开并定位文档底部的折叠区域，存在读取或采集提示时显示数量。
+请求和结果在同一白色文稿上连续阅读，请求没有额外填色卡片；长请求约八行预览，可展开全文。过程记录折叠后展开为 process-surface 的柔和容器。原文、修订、代码与附件采用局部浅蓝灰面和 10px 圆角。文稿保持阅读轴线与正文行宽。
 
-请求区显示用户原话，长内容约八行预览，提供“展开完整请求／收起请求”；进入正文焦点时展开。原文切换和复制始终对应完整内容。结果区完整呈现最终答复，保留同样的原文与复制操作；过程说明、交互问题、用户选择及其他可见回复统一收进“过程记录”，展开后保留原顺序。
+### Route Evolution
 
-路由区只呈现一次简述，下面默认展开真实安排的纵向演进。只有一个节点时，标题为“已确认安排”；存在多个节点时，首节点为“首次确认”，末节点保留调整标题并加“末次安排”标记。标题旁展示对应事件时间，无法解析时明确写“时间不可用”。
+演进线采用浅蓝细线、圆点和对齐信息行。能力名称使用深色，归属链接使用操作蓝，来源与版本退为辅助层级。节点和来源详情进入临时玻璃抽屉；抽屉带遮罩，关闭后焦点返回触发入口。
 
-首节点用主归属、关联对象、能力安排展示完整安排；主归属可以是四类目标之一，无归属与待确定直接写为状态文字。关联项目、关联知识、关联能力、关联档案按类型分行，空行隐藏。能力目标是正在设计或维护的对象，在主归属或关联对象行呈现；处理本轮所用的能力另列在能力安排中，按工作流、搭档、基本功、数据包分组，空类型隐藏，每项直接显示实际阶段。
-
-后续节点使用相同的标签与名称层级展示实质差异；四类目标之间的主归属切换采用前后名称、类型图标和细箭头表达，关联对象的增减单独标注。同一事件中的归属、关联、能力增减、阶段或精确定义变化排在同一节点内。同一目标从待创建落成时，演进节点写“目标已建立”，变化行写“目标已绑定”，并列绑定前后目标。阶段变化以前后文字和细箭头表达；精确定义变化并列前后名称、版本、来源及必要说明。固定入口不展示。来源已变化或不可用在名称旁标作“来源现状”，不依赖打开抽屉才能发现，也不改变历史节点的名称与安排。
-
-**The Flat Evolution Rule.** 首节点完整、后续节点只写真实差异，沿原始确认顺序排成平面时间线；不为完成状态、重复快照或仅摘要、说明、时间变化增加节点，不补造缺失阶段，也不按时间重排。
-
-每个节点下方提供轻量“查看当时完整安排”入口，打开对应事件的完整快照。归属、关联对象和能力名称仍为可点击文字，常规最小高度为 32px；窄屏保留 40px 目标。上一安排使用辅助灰和较轻名称字重，与当前值用细箭头连接；能力阶段保持可读文字，不缩成微小装饰标签。
-
-归属、能力、当时完整安排和原始上报使用右侧来源详情抽屉，名称、来源、版本及说明分层呈现，内容绑定被点击节点的原始事件；移出项保留移出前的事件，新增项使用新增事件。知识单元抽屉写明“归属记录本轮的主要目标，不表示知识正文已经更新”，技术信息保留精确知识入口。能力目标抽屉写明它是正在设计或维护的能力，本轮采用的能力另行记录。待创建目标的历史抽屉保留“待创建目标”范围与当时说明；后续已绑定的信息单列在默认折叠的“后续绑定信息”中，不替换当时状态。来源不可用时仍展示历史名称、路径、记录时间与当时安排说明。技术标识按需展开。抽屉可用 Escape 关闭，关闭后返回触发项焦点。记录信息集中容纳采集状态、Agent 最近上报、轮次信息、读取与采集提示及重新读取操作；“原始上报数据”是其中的技术入口。旧版关系图只保留在兼容入口。
+**The Evidence Row Rule.** 路由变化维持连续信息行，以对齐、细线和留白串联；玻璃和接触阴影不扩散到每一项能力。
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** 用浅灰导航、白色阅读面和细边框区分区域。
-- **Do** 保持归属聊天树、轮次栏和本轮正文各自的滚动范围。
-- **Do** 在窄屏逐级收起导航，并保留归属聊天树与轮次的独立入口。
-- **Do** 用不可交互的小标题区分项目、知识、能力与档案，让具体目标直接展开聊天。
-- **Do** 用辅助灰文字标明“待创建”，在历史抽屉中分开呈现当时状态与后续绑定。
-- **Do** 用紧凑上下文和三个章节入口保持定位，让请求、路由、结果在同页连续阅读。
-- **Do** 用细线和留白串联路由节点，首节点显示完整安排，后续同次变化合并在平面信息行中。
-- **Do** 将归属、关联对象和能力排成对齐信息行，实际能力阶段直接可见，来源版本按需查看，来源现状保持外露。
-- **Do** 在每个节点提供“查看当时完整安排”，让原始上报保留在记录信息的技术入口。
-- **Do** 完整显示最终答复，将过程记录与记录信息分别折叠，长请求仍可完整展开、复制和查看原文。
-- **Do** 为按钮、导航行和折叠项保留可见焦点；详情长名称换行，导航单行省略时保留完整提示与可访问名称。
-- **Do** 将技术标识与原文代码设为等宽字体，时间使用等宽数字。
+- **Do** 按原始Skill建立同背景基准，保留真正背景副本、原始形状高光、少量接触阴影与弹簧反馈。
+- **Do** 区分蓝色标题的当前聊天透镜、带数字标记的当前轮次与白色正文，维持各层文字对比。
+- **Do** 在默认、窄 PC 窗口和专注模式中保持标题、章节与正文的统一阅读轴线。
+- **Do** 按容器尺度使用柔和圆角，按钮保留短促悬停、按压和可见键盘焦点。
+- **Do** 保留实色回退、减少透明度与减少动态效果支持。
+- **Do** 使用离线系统中文字体与统一 Lucide 线性 SVG；长文保持 72ch 以内的行宽。
 
 ### Don't:
 
-- **Don't** 把旧版关系图或路由／对话页签作为主工作台的页面模板。
-- **Don't** 把主归属重新放进大块，或将能力恢复为独立卡片。
-- **Don't** 把关联对象画成聊天归属，预置空目标菜单，或用知识归属暗示正文已更新。
-- **Don't** 把能力目标混入本轮采用清单，或为同一目标的落成新增重复归属分支。
-- **Don't** 把路由演进折叠为默认隐藏的变化列表，或在时间线节点内嵌套卡片。
-- **Don't** 把完成状态、重复快照或仅摘要、说明、时间变化画成安排节点，也不要补造阶段或事件时间。
-- **Don't** 为普通工作区容器增加浮起阴影、装饰渐变或模糊玻璃。
-- **Don't** 把归属聊天树或轮次列表堆在移动端正文上方。
-- **Don't** 用颜色单独表达轮次关系、来源变化、读取错误或上报状态。
+- **Don't** 恢复已被用户否决的钴蓝整块目录、荧黄当前聊天或 paper／stone／night 冷淡平面方向。
+- **Don't** 叠自制多圈倒角、凹凸阴影或手写滤镜冒充原始玻璃；不在没有图像输入时只加大blur。
+- **Don't** 为每条路由和每项能力增加玻璃卡片、厚阴影或多层边框。
+- **Don't** 把浅色辅助字放到低对比材质面，或只靠颜色表达状态；小号白字需覆盖整个渐变区间达到普通文字对比度。
+- **Don't** 把原聊天标题提升到当前轮次主题之上，或用导航截断方式处理阅读正文。
+- **Don't** 将本轮实现、代码检查或静态审查写成用户验收，也不据此宣称手机端或完整 WCAG 认证通过。

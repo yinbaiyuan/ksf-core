@@ -37,7 +37,7 @@ distribution 的错误、路径、文件操作、版本、配置和发行清单�
 
 `user-data read settings --json`：cli.js → [commands/user-data.js](../../runtime/src/commands/user-data.js) → [services/user-data.js](../../runtime/src/services/user-data.js) → schema 与 storage。schema 确认 settings 已注册，storage 读取和校验文件快照，服务整理结果，命令层输出 JSON。目标缺失成功返回 missing，不生成默认配置文件。
 
-`context capabilities --json`：cli.js → [commands/context.js](../../runtime/src/commands/context.js) → [services/context.js](../../runtime/src/services/context.js) → [services/objects.js](../../runtime/src/services/objects.js)。对象层决定有效身份、用户接管与错误；context 只投影工作流和搭档的发现字段。程序不据此自动作语义匹配。
+`context capabilities --json`：cli.js → [commands/context.js](../../runtime/src/commands/context.js) → [services/context.js](../../runtime/src/services/context.js) → [services/objects.js](../../runtime/src/services/objects.js)。对象层决定有效身份、用户接管与错误；context 只投影协同和搭档的发现字段。程序不据此自动作语义匹配。
 
 ## 输入输出与副作用
 
@@ -57,7 +57,7 @@ distribution 的错误、路径、文件操作、版本、配置和发行清单�
 4. 增加实际行为测试：参数拒绝、查询缺失或部分结果、写入冲突及文件保留；有跨 cwd 路径输入时验证从其他目录调用。测试放入临时工作区，避免修改真实用户数据。
 5. 同步 [CLI 索引](../cli/index.md)、[能力总览](../cli/overview.md)和命令说明；机制变化时更新本目录对应专题，再通过 build 刷新摘要。
 
-调用示例、已有操作词和通用选项是词汇约定，不表示新命令必须全部实现。精确接口以命令帮助和相应文档为准；Windows 当前尚不能执行这些完整业务命令。
+调用示例、已有操作词和通用选项是词汇约定，不表示新命令必须全部实现。精确接口以命令帮助和相应文档为准；Windows x64 已通过平台适配器接入同一 CLI，具体测试覆盖见双平台验收记录。
 
 ## 实现与验证来源
 

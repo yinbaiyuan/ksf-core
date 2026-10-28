@@ -7,10 +7,11 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, sep } from 'node:path';
-import { afterEach, beforeEach, test } from 'node:test';
+import { afterEach, beforeEach, test, describe } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 
+describe('POSIX shell runtime bootstrap',{skip:process.platform!=='darwin'?'Windows native ZIP/PowerShell counterpart: bootstrap-windows.ps1':false},()=>{
 const runtime = fileURLToPath(new URL('../', import.meta.url));
 const repo = fileURLToPath(new URL('../../../../', import.meta.url));
 const platform = 'darwin-arm64';
@@ -327,4 +328,6 @@ test('manual verification reads the archive even with a ready installation', () 
   assert.notEqual(result.status, 0);
   assert.equal(result.stdout, '');
   assert.match(result.stderr, /ARCHIVE_INVALID/);
+});
+
 });

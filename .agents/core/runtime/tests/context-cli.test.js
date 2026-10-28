@@ -46,15 +46,15 @@ test('unknown operations, filters, targets and repeated flags return exit 2', t 
   }
 });
 
-test('text and JSON expose the same complete set with workflows first and raw descriptions', t => {
+test('text and JSON expose the same complete set with cooperations first and raw descriptions', t => {
   const root = fixture(t), folder = join(root, types.partner.system, 'partner.test.demo');
   mkdirSync(folder);
   const description = '中文第一行\n第二行\n\n最后一行。\n';
   writeFileSync(join(folder, 'partner.md'), `---\nid: partner.test.demo\nname: 示例搭档\nstatus: active\nversion: 0.1.0\ndescription: |\n  中文第一行\n  第二行\n\n  最后一行。\n---\nPRIVATE_BODY\n`);
   const text = runContextCommand(['capabilities'], root);
   assert.equal(text.exitCode, 0);
-  assert.ok(text.stdout.indexOf('## Workflows') < text.stdout.indexOf('## Partners'));
-  assert.match(text.stdout, /Workflows \(complete\)\n\(empty\)/);
+  assert.ok(text.stdout.indexOf('## Cooperations') < text.stdout.indexOf('## Partners'));
+  assert.match(text.stdout, /Cooperations \(complete\)\n\(empty\)/);
   assert.ok(text.stdout.includes(description));
   assert.ok(text.stdout.includes('partner.test.demo'));
   assert.match(text.stdout, /Definition: .agents\/core\/abilities\/partners\/partner.test.demo\/partner.md/);
@@ -69,16 +69,16 @@ test('text and JSON expose the same complete set with workflows first and raw de
 
 test('partial failure is exit 1 with business JSON on stdout and useful data retained', t => {
   const root = fixture(t);
-  rmSync(join(root, types.workflow.system), { recursive: true });
+  rmSync(join(root, types.cooperation.system), { recursive: true });
   const result = runContextCommand(['capabilities', '--json'], root);
   assert.equal(result.exitCode, 1);
   const response = JSON.parse(result.stdout);
   assert.equal(response.ok, false);
   assert.equal(response.data.complete, false);
-  assert.equal(response.data.workflows.complete, false);
+  assert.equal(response.data.cooperations.complete, false);
   assert.equal(response.data.partners.complete, true);
   const text = runContextCommand(['capabilities'], root);
-  assert.equal(text.exitCode, 1);assert.match(text.stdout, /Workflows \(incomplete\)/);
+  assert.equal(text.exitCode, 1);assert.match(text.stdout, /Cooperations \(incomplete\)/);
   assert.match(text.stdout, /## Errors/);
 });
 
@@ -96,7 +96,7 @@ test('real JS entry propagates results and exit codes outside the KSF cwd with e
   rmSync(join(root, types.partner.user), { recursive: true });
   const partial = launch('capabilities', '--json');
   assert.equal(partial.status, 1);assert.equal(partial.stderr, '');
-  assert.equal(JSON.parse(partial.stdout).data.workflows.complete, true);
+  assert.equal(JSON.parse(partial.stdout).data.cooperations.complete, true);
   assert.equal(JSON.parse(partial.stdout).data.partners.complete, false);
   const invalid = launch('capabilities', '--source', 'system', '--json');
   assert.equal(invalid.status, 2);assert.equal(invalid.stderr, '');

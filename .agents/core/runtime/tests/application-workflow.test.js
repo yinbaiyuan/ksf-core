@@ -1,0 +1,20 @@
+import {createApplicationStorage} from '../src/services/application-storage.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {randomUUID} from 'node:crypto';
+import {activate} from '../../applications/sdk/templates/collaboration/backend.mjs';
+import {createCoordinator} from '../src/services/workbench-common.js';
+test('app-owned workflow separates request waits, validates sources, deduplicates and keeps approval distinct',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-workflow-'));t.after(()=>rm(root,{recursive:true,force:true}));const incoming=new Map(),operations=new Map(),materials=new Map();let id=0;
+ const ctx={dataDirectory:root,locks:createCoordinator(),messages:{async status(key){if(!operations.has(key))throw Object.assign(Error('missing'),{code:'COMM_OPERATION_NOT_FOUND'});return operations.get(key);},async registerFile(input){const materialId=String(++id);materials.set(materialId,JSON.parse(await readFile(input.path,'utf8')));return {materialId};},async send(input){operations.set(input.operationId,{operationId:input.operationId,status:'preparing',body:materials.get(input.parts[0].materialId)});return operations.get(input.operationId);},async read(messageId){return {manifest:{payloadPartId:'body',parts:[{partId:'body',byteLength:100}]}};},async readPart(messageId){return {path:incoming.get(messageId)};}},peers:{list:async()=>[]}};
+ const host=createApplicationStorage(root),caller={appId:'example.workflow'};ctx.storage={read:name=>host.read(caller,name),write:(...args)=>host.write(caller,...args)};ctx.dataDirectory=join(root,'.agents/user-data/applications/data/example.workflow');
+ let app=await activate(ctx);const createId=randomUUID(),created=await app.call('task.create',{operationId:createId,title:'目标'}),taskId=created.taskId;assert.deepEqual(await app.call('task.create',{operationId:createId,title:'目标'}),created);await assert.rejects(app.call('task.create',{operationId:createId,title:'其他目标'}),{code:'TEAM_INPUT_INVALID'});
+ const peerA={nodeId:'a'.repeat(64),endpoint:{kind:'app',id:'example.collaboration'}},peerB={nodeId:'b'.repeat(64),endpoint:{kind:'app',id:'example.collaboration'}},one=randomUUID(),two=randomUUID();for(const [requestId,to] of [[one,peerA],[two,peerB]])await app.call('task.send',{operationId:randomUUID(),taskId,requestId,to});
+ async function feedback(requestId,from,eventId=randomUUID()){const messageId=eventId,path=join(root,messageId+'.json');await writeFile(path,JSON.stringify({kind:'feedback',taskId,requestId,text:'结果'}));incoming.set(messageId,path);return {eventId,messageId,channel:'team.workflow.v1',from};}
+ await assert.rejects(app.onMessage(await feedback(one,peerB)),{code:'TEAM_INPUT_INVALID'});assert.equal((await app.call('inspect')).requests[one].status,'waiting');const event=await feedback(two,peerB);await app.onMessage(event);await app.onMessage(event);assert.equal((await app.call('inspect')).requests[one].status,'waiting');assert.equal((await app.call('inspect')).requests[two].status,'review');
+ app=await activate(ctx);await app.onMessage(event);assert.equal(Object.keys((await app.call('inspect')).events).length,1);await app.call('task.approve',{operationId:randomUUID(),requestId:two});assert.equal((await app.call('inspect')).requests[two].status,'approved');await assert.rejects(app.onMessage(await feedback(two,peerB)),{code:'TEAM_INPUT_INVALID'});assert.equal((await app.call('inspect')).requests[two].status,'approved');
+ const before=await readFile(join(ctx.dataDirectory,'workflow.json'),'utf8');await writeFile(join(ctx.dataDirectory,'workflow.json'),JSON.stringify({schemaVersion:99}));await assert.rejects(activate(ctx),{code:'TEAM_DATA_INCOMPATIBLE'});assert.equal(JSON.parse(await readFile(join(ctx.dataDirectory,'workflow.json'),'utf8')).schemaVersion,99);assert(before.includes(taskId));
+});

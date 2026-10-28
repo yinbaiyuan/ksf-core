@@ -1,4 +1,5 @@
-import { constants, realpathSync, renameSync, accessSync } from 'node:fs';
+import { replaceFileSync as renameSync } from '../platform/index.js';
+import { constants, realpathSync, accessSync } from 'node:fs';
 import { dirname, basename, join } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSnapshot, sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';

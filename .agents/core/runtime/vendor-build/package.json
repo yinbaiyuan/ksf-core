@@ -1,0 +1,12 @@
+{
+  "name": "ksf-communication-vendor-build",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "node build.mjs"},
+  "dependencies": {
+    "@peculiar/x509": "2.2.0",
+    "bonjour-service": "1.4.0",
+    "reflect-metadata": "0.2.2"
+  },
+  "devDependencies": {"rolldown": "1.2.15"}
+}
