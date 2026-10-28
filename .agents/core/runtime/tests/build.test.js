@@ -8,7 +8,7 @@ import {
   realpathSync, rmSync, symlinkSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { buildManifest } from '../src/services/build-manifest.js';
@@ -31,8 +31,8 @@ function fixture(t, { license = true, symlinkNode = false } = {}) {
   mkdirSync(join(root, '.agents/core/runtime/src'), { recursive: true });
   writeFileSync(join(root, '.agents/core/runtime/src/cli.js'), '// system source fixture\n');
   const archivePath = `.agents/core/runtime/packages/${archiveRoot}.tar.gz`;
-  const packed = spawnSync(platform.tool('tar'), ['-czf', join(root, archivePath), '-C', join(root, 'contents'), archiveRoot],
-    { encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' } });
+  const packed = spawnSync(platform.tool('tar'), ['-czf', relative(join(root, 'contents'), join(root, archivePath)), archiveRoot],
+    { cwd: join(root, 'contents'), encoding: 'utf8', env: { ...process.env, LC_ALL: platform.name === 'win32' ? '.UTF8' : 'C' } });
   assert.equal(packed.status, 0, packed.stderr);
   const config = { schema_version: 1, name: 'ksf-core', version: null,
     runtime: { version: '99.0.0', release_channel: 'lts', packages: {

@@ -88,6 +88,8 @@ jobs:
         run: npm run build
       - name: Regression tests
         if: inputs.operation != 'template-only'
+        env:
+          NODE_OPTIONS: --test-reporter=tap
         run: .agents/ksf test
       - name: Build once or recover the exact published bundle
         id: bundle

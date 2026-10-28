@@ -7,7 +7,7 @@ export const encodedCommand = script => ['-NoLogo', '-NoProfile', '-NonInteracti
 const quote = value => "'" + value.replaceAll("'", "''") + "'";
 
 export const windows = {
-  terminalLaunch(env = process.env) { const shell=env.ComSpec??env.COMSPEC??win32.join(env.SystemRoot??'C:\\Windows','System32/cmd.exe');return {shell,args:[],env:{...env,TERM:'xterm-256color',COLORTERM:'truecolor'}}; },
+  terminalLaunch(env = process.env) { const shell=env.ComSpec??env.COMSPEC??win32.join(env.SystemRoot??'C:\\Windows','System32/cmd.exe');return {shell,args:win32.basename(shell).toLowerCase()==='cmd.exe'?['/d','/k','chcp 65001 >nul']:[],env:{...env,TERM:'xterm-256color',COLORTERM:'truecolor'}}; },
   reserveDirectoryRename:async()=>null,
   name: 'win32', validSegment: name => !/[<>:"\/\\|?*\x00-\x1f]/.test(name) && !/[. ]$/.test(name) && !/^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(name), supervisorOptions: {detached:true,windowsHide:true}, supportsPosixModes: false,
   // NTFS has no POSIX executable bit. Preserve the declared Git/archive mode;

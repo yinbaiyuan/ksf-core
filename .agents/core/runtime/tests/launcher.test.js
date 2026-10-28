@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 
 const repository = fileURLToPath(new URL('../../../../', import.meta.url));
 function fixture(t) {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'ksf launcher 中文 space ')));
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'ksf launcher 中文 space ')));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const put = (path, bytes) => { mkdirSync(dirname(join(root, path)), { recursive: true }); writeFileSync(join(root, path), bytes); };
   put('AGENTS.md', 'old agents\n');

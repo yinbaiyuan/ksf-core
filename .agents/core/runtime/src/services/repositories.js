@@ -76,7 +76,7 @@ function identity(root, path, run) {
     parentIsolation(root, run);
   }
   const top = git(real, ['rev-parse', '--show-toplevel'], run);
-  if (top.status !== 0 || realpathSync(top.stdout.replace(/\r?\n$/, '')) !== real) fail('REPOSITORY_ROOT_MISMATCH', 'The selected directory must itself be a Git working-tree root, not inherit its parent repository.', path);
+  if (top.status !== 0 || realpathSync.native(top.stdout.replace(/\r?\n$/, '')) !== realpathSync.native(real)) fail('REPOSITORY_ROOT_MISMATCH', 'The selected directory must itself be a Git working-tree root, not inherit its parent repository.', path);
   const outerCommon = commonDirectory(root, run, true);
   if (outerCommon && commonDirectory(real, run) === outerCommon) fail('REPOSITORY_SHARED_GIT', 'The engineering repository must not share Git history with the outer KSF repository; use an independent repository.', path);
   const branch = git(real, ['symbolic-ref', '--quiet', '--short', 'HEAD'], run);

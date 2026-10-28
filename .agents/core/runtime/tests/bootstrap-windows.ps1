@@ -13,7 +13,7 @@ Remove-Item Env:PROCESSOR_ARCHITECTURE -ErrorAction SilentlyContinue
 $env:PATH=(Join-Path $env:SystemRoot 'System32')+';'+(Split-Path $shell)
 function Start-Fixture([string[]]$Arguments,[string]$InputText='',[switch]$KeepInputOpen,[switch]$DirectFile){
     $launcher=Join-Path $fixture '.agents/ksf.ps1'
-    $script="`$ksfFixtureArguments=@("+(($Arguments | ForEach-Object {PS-Quote $_}) -join ',')+"); & $(PS-Quote $launcher) @ksfFixtureArguments; exit `$LASTEXITCODE"
+    $script="function Get-FileHash { throw 'Bootstrap must hash without external cmdlet discovery' }; `$ksfFixtureArguments=@("+(($Arguments | ForEach-Object {PS-Quote $_}) -join ',')+"); & $(PS-Quote $launcher) @ksfFixtureArguments; exit `$LASTEXITCODE"
     $info=New-Object Diagnostics.ProcessStartInfo
     $info.FileName=$shell;$info.Arguments=if($DirectFile){'-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File '+[char]34+$launcher+[char]34+' query'}else{'-NoLogo -NoProfile -NonInteractive -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($script))};$info.UseShellExecute=$false;$info.CreateNoWindow=$true
     $info.RedirectStandardOutput=$true;$info.RedirectStandardError=$true;$info.RedirectStandardInput=$true;$info.WorkingDirectory=[IO.Path]::GetTempPath()

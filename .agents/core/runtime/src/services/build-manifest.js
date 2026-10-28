@@ -5,7 +5,7 @@ import {
   closeSync, existsSync, fsyncSync, lstatSync, openSync, readFileSync, readdirSync,
   realpathSync, renameSync, rmSync, statSync, writeFileSync,
 } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, dirname, basename } from 'node:path';
 import { products } from '../distribution/products.js';
 import { developmentPath } from '../distribution/paths.js';
 import { verifyWebBuild } from '../web/assets.js';
@@ -72,7 +72,7 @@ function archiveFingerprint(path) {
 }
 
 async function hashNodeMember(path, member) {
-  const child = spawn(platform.tool('tar'), ['-xOzf', path, member], { env: { ...process.env, LC_ALL: 'C' } });
+  const child = spawn(platform.tool('tar'), ['-xOzf', basename(path), member], { cwd: dirname(path), env: { ...process.env, LC_ALL: platform.name === 'win32' ? '.UTF8' : 'C' } });
   const hash = createHash('sha256');
   let stderr = '';
   child.stdout.on('data', data => hash.update(data));
@@ -91,7 +91,7 @@ async function hashNodeMember(path, member) {
 function gitInfo(root) {
   const run = args => spawnSync(gitExecutable, ['-C', root, ...args], { encoding: 'utf8' });
   const top = run(['rev-parse', '--show-toplevel']);
-  if (top.status !== 0 || realpathSync(top.stdout.trim()) !== root) return { source_revision: null, source_dirty: null };
+  if (top.status !== 0 || realpathSync.native(top.stdout.trim()) !== realpathSync.native(root)) return { source_revision: null, source_dirty: null };
   const revision = run(['rev-parse', '--verify', 'HEAD']);
   const status = run(['status', '--porcelain', '--untracked-files=all', '--', '.', ':(exclude).agents/core/manifest.yaml']);
   return { source_revision: revision.status === 0 ? revision.stdout.trim() : null,
@@ -145,8 +145,8 @@ export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
       const members = zipMembers(readFileSync(path), [spec.nodeMember, spec.licenseMember]);
       nodeSha256 = digest(members.get(spec.nodeMember));
     } else {
-      const listing = spawnSync(platform.tool('tar'), ['-tvzf', path, spec.nodeMember, spec.licenseMember], {
-        encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' }, timeout: 30_000,
+      const listing = spawnSync(platform.tool('tar'), ['-tvzf', basename(path), spec.nodeMember, spec.licenseMember], {
+        cwd: dirname(path), encoding: 'utf8', env: { ...process.env, LC_ALL: platform.name === 'win32' ? '.UTF8' : 'C' }, timeout: 30_000,
       });
       const entries = listing.stdout?.trim().split('\n') ?? [];
       if (listing.status !== 0 || entries.length !== 2 || entries.some(entry => !entry.startsWith('-'))) fail('ARCHIVE_INVALID', `Required regular Node.js and LICENSE entries missing for ${target}.`);

@@ -30,8 +30,11 @@ export function committedSource(root, { commit, binary = gitBinary } = {}) {
   };
   const top = run(['rev-parse', '--show-toplevel']);
   if (top.status !== 0) fail('CONTRIBUTION_GIT_REQUIRED', 'Use a Git repository at the KSF root and commit the intended system changes first.');
-  if (realpathSync(top.stdout.toString('utf8').replace(/\r?\n$/, '')) !== realpathSync(root)) {
-    fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.');
+  // Native resolution expands Windows 8.3 aliases, as Git and PowerShell do.
+  const gitRoot = realpathSync.native(top.stdout.toString('utf8').replace(/\r?\n$/, ''));
+  const selectedRoot = realpathSync.native(root);
+  if (gitRoot !== selectedRoot) {
+    fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.', { gitRoot, selectedRoot });
   }
   const head = run(['rev-parse', '--verify', 'HEAD^{commit}']);
   const headCommit = head.stdout.toString('utf8').trim();

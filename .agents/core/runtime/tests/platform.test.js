@@ -36,6 +36,11 @@ test('CLI compatibility includes only explicitly validated platform/version comb
 test('case-insensitive Windows environment selection retains Path and SystemRoot',()=>{
   assert.deepEqual(selectEnvironment({Path:'tools',SystemRoot:'windows',USERPROFILE:'user',SECRET:'omit'},['PATH','SYSTEMROOT','USERPROFILE']),{Path:'tools',SystemRoot:'windows',USERPROFILE:'user'});
 });
+test('Windows command sessions enable UTF-8 without changing custom command interpreters',()=>{
+  const win=platformServices('win32');
+  assert.deepEqual(win.terminalLaunch({COMSPEC:'C:\\Windows\\System32\\cmd.exe'}).args,['/d','/k','chcp 65001 >nul']);
+  assert.deepEqual(win.terminalLaunch({ComSpec:'C:\\Tools\\custom.exe'}).args,[]);
+});
 test('native adapter inspects its actual process identity and preserves argument arrays',()=>{
   assert.ok(platform.processStart(process.pid));
   const args=['metadata','--from','中文 space','quote"value','trailing\\',''];
@@ -64,7 +69,7 @@ test('UTF-8 PAX archives round-trip through the shared reader and the native ext
   const name='知识/中文 目录/原始资料.md',bytes=createArchive([{path:name,bytes:Buffer.from('中文内容\n')}]);
   assert.equal(readArchive(bytes).get(name).bytes.toString(),'中文内容\n');
   const archive=join(root,'fixture.tar.gz'),out=join(root,'out');writeFileSync(archive,bytes);mkdirSync(out);
-  const result=spawnSync(platform.tool('tar'),['-xzf',archive,'-C',out],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);
+  const result=spawnSync(platform.tool('tar'),['-xzf','../fixture.tar.gz'],{cwd:out,encoding:'utf8',env:{...process.env,LC_ALL:platform.name==='win32'?'.UTF8':process.env.LC_ALL}});assert.equal(result.status,0,result.stderr);
   assert.equal(readFileSync(join(out,name),'utf8'),'中文内容\n');
 });
 

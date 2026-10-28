@@ -14,7 +14,12 @@ function Assert-KsfRuntimePath([string] $Path) {
         if ($null -ne $item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { Stop-KsfRuntime 'UNSAFE_PATH' "Symbolic link or junction: $current" }
     }
 }
-function Get-KsfHash([string] $Path) { return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function Get-KsfHash([string] $Path) {
+    $stream = [IO.File]::OpenRead($Path)
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($hasher.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
+    finally { $stream.Dispose(); $hasher.Dispose() }
+}
 function Get-KsfFingerprint([string] $Path) {
     $item = Get-Item -LiteralPath $Path -Force
     return "$($item.Length):$($item.LastWriteTimeUtc.Ticks):$($item.CreationTimeUtc.Ticks):$([int]$item.Attributes)"
