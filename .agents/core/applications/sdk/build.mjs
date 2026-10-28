@@ -1,7 +1,7 @@
 import {sourcePath} from './server/source-path.mjs';
 import {scopeApplicationCSS} from './server/styles.mjs';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname, resolve } from 'node:path';
 import {existsSync} from 'node:fs';
 import { readFile, writeFile, mkdir, rm, readdir, cp, lstat } from 'node:fs/promises';
@@ -19,7 +19,7 @@ function toolchain(root){
 }
 export async function buildApplication(root,options={}){return withStoreLock(resolve(root),()=>buildApplicationUnlocked(root,options),{lockName:'.ksf-build.lock'});}
 async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntries={},quiet=false}={}){
-  root=resolve(root);const tools=toolchain(root),{build}=await import(tools.vite),react=(await import(tools.react)).default,{rolldown}=await import(tools.rolldown);const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8')),out=join(root,'.build');
+  root=resolve(root);const tools=toolchain(root),{build}=await import(pathToFileURL(tools.vite).href),react=(await import(pathToFileURL(tools.react).href)).default,{rolldown}=await import(pathToFileURL(tools.rolldown).href);const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8')),out=join(root,'.build');
   await rm(out,{recursive:true,force:true});await mkdir(join(out,'frontend'),{recursive:true});
   const sdkPackage=JSON.parse(await readFile(join(sdkRoot,'package.json'),'utf8')),appPackage=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
   validateManifest(manifest);

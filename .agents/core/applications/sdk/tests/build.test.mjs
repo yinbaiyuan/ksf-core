@@ -1,9 +1,27 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm,symlink} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {fileURLToPath} from 'node:url';import {execFile} from 'node:child_process';import {promisify} from 'node:util';
+import {mkdtemp,mkdir,writeFile,readFile,rm,symlink,cp,readdir} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,dirname} from 'node:path';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';import {execFile} from 'node:child_process';import {promisify} from 'node:util';
 import {decodePackage} from '../server/protocol.js';
 const exec=promisify(execFile),cli=fileURLToPath(new URL('../scripts/ksf-app.mjs',import.meta.url));
 async function temp(t){const root=await mkdtemp(join(tmpdir(),'ksf-tool-test-'));t.after(()=>rm(root,{recursive:true,force:true}));return root;}
 async function app(root,id){await mkdir(root);await mkdir(join(root,'src'));await writeFile(join(root,'package.json'),JSON.stringify({name:id,type:'module'}));await writeFile(join(root,'manifest.json'),JSON.stringify({schemaVersion:2,sdkVersion:2,id,name:id,version:'1.0.0',description:'Synthetic',window:{entry:'frontend/index.js'},cards:[{id:'index',name:'Index',description:'Legal card ID',defaultSize:{w:3,h:2},minSize:{w:2,h:1},entry:'frontend/index-card.js'}],permissions:[]}));await writeFile(join(root,'ksf-build.json'),JSON.stringify({entries:{window:'src/window.tsx',cards:{index:'src/card.tsx'}}}));await writeFile(join(root,'src/window.tsx'),'export function mount(root){root.textContent="window"}');await writeFile(join(root,'src/card.tsx'),'export function mount(root){root.textContent="card"}');}
+test('build imports toolchains from literal URL-sensitive paths on every platform', async t => {
+ const root=await temp(t),target=join(root,'应用 # literal%'),modules=join(target,'node_modules');
+ await app(target,'example.paths');await mkdir(modules);
+ const require=createRequire(import.meta.url),dependencies=dirname(dirname(require.resolve('vite/package.json')));
+ for(const entry of await readdir(dependencies,{withFileTypes:true})){
+  if(!entry.isDirectory())continue;
+  const source=join(dependencies,entry.name),destination=join(modules,entry.name);
+  // Copy Vite so resolution retains the sensitive path; junctions avoid copying
+  // unrelated native dependencies and also work without symlink privileges.
+  if(entry.name==='vite')await cp(source,destination,{recursive:true});
+  else await symlink(source,destination,'junction');
+ }
+ const result=JSON.parse((await exec(process.execPath,[cli,'build',target,'--store',join(root,'store'),'--json'])).stdout);
+ assert.equal(result.ok,true);
+ const decoded=decodePackage(await readFile(join(root,'store','example.paths-1.0.0.ksfapp')));
+ assert.match(decoded.files.get('frontend/index.js').data.toString(),/window/);
+ assert.match(decoded.files.get('frontend/cards/index.js').data.toString(),/card/);
+});
 test('explicit entry builds isolate the legal index card; concurrent publications retain both index entries and immutable versions',async t=>{const root=await temp(t),store=join(root,'store');await Promise.all([app(join(root,'a'),'example.a'),app(join(root,'b'),'example.b')]);const build=name=>exec(process.execPath,[cli,'build',join(root,name),'--store',store,'--json']);const output=await Promise.all(['a','b'].map(build));for(const result of output)assert.equal(JSON.parse(result.stdout).ok,true);await Promise.all([build('a'),build('a')]);const index=JSON.parse(await readFile(join(store,'index.json'),'utf8'));assert.equal(index.apps.length,2);const bytes=await readFile(join(store,'example.a-1.0.0.ksfapp')),decoded=decodePackage(bytes);assert.equal(decoded.manifest.window.entry,'frontend/index.js');assert.equal(decoded.manifest.cards[0].entry,'frontend/cards/index.js');assert.match(decoded.files.get('frontend/index.js').data.toString(),/window/);assert.match(decoded.files.get('frontend/cards/index.js').data.toString(),/card/);await writeFile(join(root,'a/src/card.tsx'),'export function mount(root){root.textContent="changed"}');await assert.rejects(build('a'));assert.deepEqual(await readFile(join(store,'example.a-1.0.0.ksfapp')),bytes);assert.equal(JSON.parse(await readFile(join(store,'index.json'),'utf8')).apps.length,2);});
 test('CLI executes through package-manager symlinks, creates missing parent directories and reports contract errors as JSON',async t=>{const root=await temp(t),link=join(root,'ksf-app');await symlink(cli,link);const target=join(root,'nested/window');const created=await exec(process.execPath,[link,'create',target,'--template','window','--json']);assert.equal(JSON.parse(created.stdout).ok,true);await writeFile(join(target,'manifest.json'),'{}');await assert.rejects(exec(process.execPath,[link,'check',target,'--json']),error=>{const report=JSON.parse(error.stdout);return report.ok===false&&report.diagnostics[0].severity==='error';});});
 
