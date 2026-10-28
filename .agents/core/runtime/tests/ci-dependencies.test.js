@@ -28,3 +28,23 @@ test('CI installs both application toolchains before running Core tests and uses
   }
   assert.ok(suites > 0, 'At least one repository workflow must execute Core tests.');
 });
+
+test('CI verifies the shipped runtime through a launcher without forging bootstrap proof', t => {
+  const directory = fileURLToPath(new URL('../../../../.github/workflows/', import.meta.url));
+  if (!existsSync(directory)) { t.skip('Installed Core packages do not include repository workflows.'); return; }
+  let checks = 0;
+  for (const name of readdirSync(directory).filter(name => /\.ya?ml$/.test(name))) {
+    const workflow = YAML.parse(readFileSync(join(directory, name), 'utf8'));
+    for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
+      for (const step of job.steps ?? []) {
+        if (!/runtime\s+verify\b/.test(step.run ?? '')) continue;
+        checks++;
+        const command = step.run.replaceAll('\\', '/');
+        assert.doesNotMatch(command, /\bnode\s+.*cli\.js\s+runtime\s+verify\b/, `${name}/${jobName}: invoke the launcher for runtime verification`);
+        assert.match(command, /\.agents\/ksf(?:\.ps1)?\s+runtime\s+verify\b/, `${name}/${jobName}: invoke a KSF launcher`);
+        assert.doesNotMatch(command, /KSF_BOOTSTRAP_VERIFIED/, `${name}/${jobName}: the launcher must create bootstrap proof`);
+      }
+    }
+  }
+  assert.ok(checks > 0, 'Repository workflows must verify the shipped runtime.');
+});

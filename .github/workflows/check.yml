@@ -55,8 +55,15 @@ jobs:
       - name: Install frontend dependencies
         working-directory: .agents/core/runtime/web
         run: npm ci
-      - name: Verify shipped runtime
-        run: node .agents/core/runtime/src/cli.js runtime verify --json
+      - name: Verify shipped runtime on macOS
+        if: runner.os == 'macOS'
+        run: ./.agents/ksf runtime verify --json
+      - name: Verify shipped runtime on Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & .\.agents\ksf.ps1 runtime verify --json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: SDK tests
         working-directory: .agents/core/applications/sdk
         run: npm test
