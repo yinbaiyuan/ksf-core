@@ -9,6 +9,7 @@ import {runtimePackage} from '../src/platform/catalog.js';
 import {mergeText} from '../src/shared/merge-text.js';
 import {createArchive,readArchive} from '../src/distribution/archive.js';
 import {supportedCodexVersion} from '../src/ai-tasks/executors/codex-compatibility.js';
+import {terminalText} from './helpers/platform.js';
 
 test('both adapters implement the same native-operation contract',()=>{
   for(const name of ['darwin','win32']){
@@ -41,6 +42,11 @@ test('Windows command sessions enable UTF-8 without changing custom command inte
   assert.deepEqual(win.terminalLaunch({COMSPEC:'C:\\Windows\\System32\\cmd.exe'}).args,['/d','/k','chcp 65001 >nul']);
   assert.deepEqual(win.terminalLaunch({ComSpec:'C:\\Tools\\custom.exe'}).args,[]);
 });
+test('ConPTY absolute row updates retain semantic UTF-8 output lines',()=>{
+  const output='\x1b[?25lC:\\>echo KSF_UTF8_中文\x1b[4;1HKSF_UTF8_中文\x1b[6;1HC:\\>\x1b[?25h';
+  assert.match(terminalText(output,'win32'),/KSF_UTF8_中文\n/);
+  assert.equal(terminalText(output,'darwin'),output);
+});
 test('native adapter inspects its actual process identity and preserves argument arrays',()=>{
   assert.ok(platform.processStart(process.pid));
   const args=['metadata','--from','中文 space','quote"value','trailing\\',''];
@@ -69,7 +75,7 @@ test('UTF-8 PAX archives round-trip through the shared reader and the native ext
   const name='知识/中文 目录/原始资料.md',bytes=createArchive([{path:name,bytes:Buffer.from('中文内容\n')}]);
   assert.equal(readArchive(bytes).get(name).bytes.toString(),'中文内容\n');
   const archive=join(root,'fixture.tar.gz'),out=join(root,'out');writeFileSync(archive,bytes);mkdirSync(out);
-  const result=spawnSync(platform.tool('tar'),['-xzf','../fixture.tar.gz'],{cwd:out,encoding:'utf8',env:{...process.env,LC_ALL:platform.name==='win32'?'.UTF8':process.env.LC_ALL}});assert.equal(result.status,0,result.stderr);
+  const result=spawnSync(platform.tool('tar'),['-xzf','../fixture.tar.gz'],{cwd:out,encoding:'utf8',env:{...process.env,LC_ALL:platform.name==='win32'?'C.UTF-8':process.env.LC_ALL}});assert.equal(result.status,0,result.stderr);
   assert.equal(readFileSync(join(out,name),'utf8'),'中文内容\n');
 });
 

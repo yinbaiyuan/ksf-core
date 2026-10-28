@@ -1,11 +1,10 @@
-import {shellCommands} from './helpers/platform.js';
+import {shellCommands,terminalText} from './helpers/platform.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
-import { stripVTControlCharacters } from 'node:util';
 import { createApplicationManager } from '../src/applications/manager.js';
 import { encodePackage, decodePackage, checksum,compareVersions } from '../src/applications/protocol.js';
 import { startWebServer } from '../src/services/web.js';
@@ -137,7 +136,7 @@ test('distributed Terminal uses a real PTY with UTF-8 output, resizing, Ctrl-C a
   const catalog = await manager.catalog(), app = catalog.apps.filter(a => a.manifest.id === 'ksf.terminal' && !a.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version))[0]; assert.ok(app, 'current platform needs a distributed Terminal package');
   await manager.install({ trusted: true, sourceId: 'builtin', appId: app.manifest.id, version: app.manifest.version, digest: app.package.sha256 });
   const instance = await manager.launch(app.manifest.id, app.package.sha256), session = await manager.call(instance.id, 'create', { cols: 80, rows: 24 }); let cursor = 0;
-  async function until(pattern, timeout = 10000) { const until = Date.now() + timeout; let text = ''; while (Date.now() < until) { const out = await manager.call(instance.id, 'read', { id: session.id, after: cursor }); cursor = out.seq; text += out.chunks.map(c => c.data).join(''); if (pattern.test(process.platform==='win32'?stripVTControlCharacters(text):text)) return text; } assert.fail(`missing ${pattern} in terminal output: ${JSON.stringify(text.slice(-4096))}`); }
+  async function until(pattern, timeout = 10000) { const until = Date.now() + timeout; let text = ''; while (Date.now() < until) { const out = await manager.call(instance.id, 'read', { id: session.id, after: cursor }); cursor = out.seq; text += out.chunks.map(c => c.data).join(''); if (pattern.test(terminalText(text))) return text; } assert.fail(`missing ${pattern} in terminal output: ${JSON.stringify(text.slice(-4096))}`); }
   await manager.call(instance.id, 'write', { id: session.id, data: shellCommands.echo('KSF_UTF8_中文') }); await until(/KSF_UTF8_中文\r?\n/);
   await manager.call(instance.id, 'resize', { id: session.id, cols: 101, rows: 33 }); await manager.call(instance.id, 'write', { id: session.id, data: shellCommands.size }); await until(process.platform==='win32'?/33[\s\S]*101|101[\s\S]*33/:/33 101/);
   await manager.call(instance.id, 'write', { id: session.id, data: shellCommands.wait }); await new Promise(resolve => setTimeout(resolve, 150)); await manager.call(instance.id, 'write', { id: session.id, data: '\x03' }); await manager.call(instance.id, 'write', { id: session.id, data: shellCommands.echo('KSF_INTERRUPT_OK') }); await until(/KSF_INTERRUPT_OK\r?\n/);

@@ -4,6 +4,7 @@ import {spawnSync} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {platform} from '../../src/platform/index.js';
 import {powershell,encodedCommand} from '../../src/platform/windows.js';
+import {stripVTControlCharacters} from 'node:util';
 
 export const gitBinary=platform.tool('git');
 export const nullDevice=platform.name==='win32'?'NUL':'/dev/null';
@@ -30,6 +31,10 @@ class Fixture{
 }
 
 export const shellCommands=platform.name==='win32'?{echo:marker=>`echo ${marker}\r`,wait:'ping -t 127.0.0.1\r',size:'mode con\r'}:{echo:marker=>`printf '${marker}\\n'\r`,wait:'sleep 30\r',size:'stty size\r'};
+
+// ConPTY redraws console rows with absolute cursor addressing rather than
+// literal CR/LF. Match visible line text while preserving POSIX VT checks.
+export const terminalText=(value,name=platform.name)=>name==='win32'?stripVTControlCharacters(value.replace(/\x1b\[\d+;\d+[Hf]/g,'\n')):value;
 
 // Minimal ZIP container for native lifecycle fixtures. Production bootstrap is
 // tested separately against the actual pinned official Windows distribution.

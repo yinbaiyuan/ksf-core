@@ -21,7 +21,16 @@ export const windows = {
         win32.join(process.env.ProgramFiles??'C:\\Program Files','Git/cmd/git.exe'),win32.join(process.env.LOCALAPPDATA??'C:\\Users/Default/AppData/Local','Programs/Git/cmd/git.exe')];
       return candidates.find(existsSync)??'git.exe';
     }
-    if(name==='tar')return win32.join(process.env.SystemRoot||'C:\\Windows','System32/tar.exe');
+    if(name==='tar'){
+      // Git's GNU tar handles UTF-8 PAX names; the inbox bsdtar on supported
+      // Windows versions can reject them even with a UTF-8 CRT locale.
+      const git=this.tool('git');
+      if(win32.isAbsolute(git)&&existsSync(git)){
+        const directory=win32.dirname(git);
+        for(const offset of ['../usr/bin/tar.exe','../../usr/bin/tar.exe']){const path=win32.resolve(directory,offset);if(existsSync(path))return path;}
+      }
+      return win32.join(process.env.SystemRoot||'C:\\Windows','System32/tar.exe');
+    }
     if(name==='diff'){
       const directory=win32.dirname(this.tool('git'));
       for(const offset of ['../usr/bin/diff.exe','../../usr/bin/diff.exe']){const path=win32.resolve(directory,offset);if(existsSync(path))return path;}
