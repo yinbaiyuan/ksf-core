@@ -1,6 +1,6 @@
 import {realpathSync} from 'node:fs';
 import { readdir, lstat, readFile, writeFile, mkdir } from 'node:fs/promises';
-import { join, dirname, resolve, posix } from 'node:path';
+import { join, dirname, basename, resolve, posix } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { encodePackage, decodePackage, checksum, validPath } from './protocol.js';
 
@@ -30,7 +30,7 @@ export async function packApplication(directory, output) {
   await walk('frontend'); if (manifest.backend) await walk('backend');
   if(manifest.cli){await walk('cli');await walk('docs');}
   const bytes = encodePackage(manifest, files);await validateBuiltPackage(bytes);await withStoreLock(dirname(output),async()=>{let existing;try{existing=await readFile(output);}catch(error){if(error.code!=='ENOENT')throw error;}if(existing&&checksum(existing)!==checksum(bytes))throw Object.assign(Error('同版本应用包已有不同内容，请递增版本。'),{code:'APP_VERSION_REUSED'});await atomicWrite(output,bytes);});
-  return { manifest, package: { url: output.split('/').at(-1), sha256: checksum(bytes), size: bytes.length } };
+  return { manifest, package: { url: basename(output), sha256: checksum(bytes), size: bytes.length } };
 }
 export async function runPackCLI(directory,output){
   if(!directory||!output){console.error('Usage: node pack.mjs <built-app-directory> <output.ksfapp>');process.exitCode=2;}

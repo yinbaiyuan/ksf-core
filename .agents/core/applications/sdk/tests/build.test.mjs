@@ -18,6 +18,7 @@ test('build imports toolchains from literal URL-sensitive paths on every platfor
  }
  const result=JSON.parse((await exec(process.execPath,[cli,'build',target,'--store',join(root,'store'),'--json'])).stdout);
  assert.equal(result.ok,true);
+ assert.equal(result.entry.package.url,'example.paths-1.0.0.ksfapp');
  const decoded=decodePackage(await readFile(join(root,'store','example.paths-1.0.0.ksfapp')));
  assert.match(decoded.files.get('frontend/index.js').data.toString(),/window/);
  assert.match(decoded.files.get('frontend/cards/index.js').data.toString(),/card/);
