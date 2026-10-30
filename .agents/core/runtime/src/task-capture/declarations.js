@@ -18,7 +18,7 @@ function sign(root, body) {
 // Pure read-only declaration. The collector is the only writer of host transcripts.
 export function declareTask({ root, input, env = process.env, now = new Date().toISOString() }) {
   keys(input, ['identity', 'turnId', 'eventId', 'policy', 'reason', 'report', 'targetBindings'], 'task declaration');
-  if (!config(root)?.enabled) fail('TASK_CAPTURE_DISABLED', 'Enable task capture before declaring a turn.');
+  if (!config(root)) fail('TASK_CAPTURE_DISABLED', 'Enable task capture before declaring a turn.');
   const identity = hostIdentity(input.identity, env);
   if (identity.host !== 'codex' || !isToken(input.turnId) || !isToken(input.eventId) ||
       !['capture', 'exclude', 'pause', 'resume'].includes(input.policy) || !text(input.reason, 2000)) fail('INVALID_ARGUMENTS', 'Supply native turnId, unique eventId, policy and a short explicit reason.');

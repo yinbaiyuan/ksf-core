@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 2,
-  "id": "git",
-  "name": "Git 仓库",
-  "version": "0.1.7",
+  "schemaVersion": 1,
+  "id": "com.ksf.git",
+  "name": "KSF仓库",
+  "version": "0.1.15",
   "description": "查看和管理本地 Git 仓库、变更、历史、分支与同步。",
   "author": "KSF",
   "icon": "git",
-  "sdkVersion": 2,
+  "sdkVersion": 1,
   "window": {
     "entry": "frontend/index.js",
     "multiInstance": true,
@@ -22,12 +22,15 @@
   "cards": [],
   "backend": {
     "runtime": "node",
-    "entry": "backend/index.mjs"
+    "entry": "backend/index.mjs",
+    "lifecycle": "on-demand"
   },
   "permissions": [
     "filesystem",
     "shell",
     "network",
     "environment"
-  ]
+  ],
+  "minCoreVersion": "0.3.2",
+  "dataStores": []
 }

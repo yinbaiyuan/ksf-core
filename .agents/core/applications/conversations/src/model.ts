@@ -2,7 +2,7 @@ import type { Ability, Route, RouteEvent, Task } from './types.ts';
 import { ownershipOf, relatedOf, ownershipIdentity, ownershipLabel, targetIdentity } from './targets.ts';
 export const stageNames: Record<string, string> = { selected: '已选择', read: '已读取', adopted: '已采用' };
 export const typeNames: Record<string, string> = { cooperation: '协同', partner: '搭档', competency: '基本功', 'data-package': '数据包' };
-export const captureNames: Record<string, string> = { completed: '已归档', interrupted: '已中断', pending: '待补采', partial: '部分缺失', excluded: '明确排除' };
+export const captureNames: Record<string, string> = { completed: '采集完整', interrupted: '已中断', pending: '待补采', partial: '部分缺失', excluded: '明确排除' };
 export const agentNames: Record<string, string> = { preparing: '准备中', working: '处理中', waiting: '等待中', completed: '已完成', paused: '已暂停', failed: '失败' };
 export const sourceName = (source: string) => source === 'system' ? '系统' : source === 'user' ? '个人' : `能力源 · ${source.replace(/^source:/, '')}`;
 export const projectName = (route?: Route | null) => route ? ownershipLabel(ownershipOf(route)) : '未上报归属';

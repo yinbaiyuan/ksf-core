@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.ksf.knowledge",
+  "name": "KSF知识",
+  "version": "0.1.0",
+  "description": "KSF知识系统应用占位，当前提供空白窗口。",
+  "author": "KSF",
+  "icon": "knowledge",
+  "minCoreVersion": "0.3.2",
+  "permissions": [],
+  "dataStores": [],
+  "cards": [],
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {"width": 980, "height": 720},
+    "minSize": {"width": 480, "height": 320}
+  }
+}

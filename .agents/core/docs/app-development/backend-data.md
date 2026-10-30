@@ -1,52 +1,91 @@
 # 后端、生命周期与数据
 
-## 五种生命周期
+SDK工具包为1.0.0，清单schemaVersion与运行协议sdkVersion均为1，最低Core明确声明。本契约完整起步，不按历史结构提供适配分支。
 
-| 对象 | 启动/保持 | 结束与恢复 |
+## 后端与运行
+
+后端导出 `activate(context)`，返回 `call(method,params,caller?)`、可选 `startBackground()`、`onMessage()`、`dispose()`。同一应用版本共享受管后端；窗口与卡片持有各自租约，业务状态不能放在“当前窗口”全局变量。`on-demand` 按调用激活，`resident` 要求background权限及startBackground；详见[生命周期](lifecycle.md)。
+
+`context.tasks.run(action)` 只保活本次进程中的工作。`context.background.retain({key,reason})` 保存跨主服务重启的运行需求，业务结束后release；恢复步骤与去重由应用持有。RPC等待超时不等于业务停止，结果未知时按原操作编号查询，不能盲重放。关闭前端不停止有后台需求的应用，停止主服务则停止受管后台。
+
+## 存储范围与声明
+
+| scope | 目录 | 用途 |
 | --- | --- | --- |
-| 窗口 | 用户打开，持有界面租约 | 关闭保护通过后清理并释放；临时UI状态与业务数据分别恢复 |
-| 卡片 | 安装启用应用且桌面包含该实例 | 可被版本切换重挂载；配置和布局不随运行进程删除 |
-| 短期任务 | context.tasks.run(action)保活 | action结束释放；不是持久任务队列 |
-| 显式后台 | background:true及background能力，startBackground | 安装/启用/工作台启动恢复；停用、升级等待任务后dispose；服务退出尽力清理后停止，业务自行恢复 |
-| AI任务 | 提交持久确认后由Core执行 | 关闭窗口/订阅不取消；重启核对原attempt，未知不盲重放 |
+| user | .agents/user-data/applications/data/<appId>/ | 用户业务数据 |
+| runtime | .agents/runtime-data/applications/data/<appId>/ | 本机持久状态；被Git忽略，重启后保留 |
 
-v2同应用版本的界面共享一个后端，业务状态不能放在“当前窗口”全局变量。v1保持每窗口独立进程。跨工作台服务的后台所有权会检查，不能重复启动同一业务调度。
+包目录不可变。runtime不等于可丢弃缓存，删除运行目录会删除其中的数据和设备身份。原件、缓存、凭据和业务备份须分别设计；不把模型密钥写入普通JSON。
 
-## 后端契约
+清单声明固定文件：
 
-导出 activate(context)，返回call(method,params,caller?)，可选dispose和startBackground。v2 context提供appId、version、workspace、dataDirectory、services.call、locks.run和tasks.run。caller包含instanceId、surfaceId、kind及cardId；由宿主构造，参数里的身份不能替代它。
+```json
+{"name":"state.json","scope":"user","schemaVersion":2,"migrateFrom":[1]}
+```
 
-activate和startBackground需在10秒握手内完成；startBackground只恢复状态、注册计时器并迅速返回，不等待永不结束的循环。普通RPC参数最大1 MiB，最多128个在途调用，等待上限20秒。特殊宿主文件/Git兼容适配不扩大第三方普通RPC。
+普通 JSON 顶层带schemaVersion，内部结构保持应用原样。SDK封装为 `{schemaVersion,revision,data}`。版本2仅用于下例业务格式演示，清单schemaVersion及sdkVersion仍为1。无受管数据时清单填dataStores:[]。
 
-RPC超时仅表示调用方停止等待，后端可能仍在执行。APP_CALL_TIMEOUT含outcomeUnknown；按业务主键查询原操作，禁止自动重试写入。后端真正返回/退出前，执行租约保留，停用/升级不假装工作已完成。
-
-长操作用tasks.run，并在业务数据保存操作编号。tasks.run只保活，不提供断电重放。应用必须定义自己的中断核对规则。后端dispose应停止计时器并关闭本应用资源，宿主关闭宽限1.5秒后可强制结束；重要数据不能等到dispose才首次保存。
-
-## 文件与锁
-
-工作区原件使用workspace公共服务或前端createWorkspaceClient。文件读写保留保护策略、8 MiB文本、20 MiB图片、版本冲突及原位编辑。不要绕过保护路径或把任意本机路径当工作区文件。
-
-修改共享资源时使用context.locks.run(规范绝对资源键,action)；文件与Git共用Core锁。应用数据使用自己的数据目录和明确串行更新。锁不代替业务幂等，不能拿着资源锁等待用户交互或模型返回。
-
-## 持久化与迁移
+## SDK：检查、读取、修改、显式迁移
 
 ```js
 import {createJSONStore} from '@ksf/sdk/storage';
-const store=createJSONStore(context,{name:'state.json',schemaVersion:1,initial:{count:0},validate:d=>Number.isInteger(d.count)});
-const current=await store.read();
-const saved=await store.update(d=>({count:d.count+1}),{revision:current.revision});
+const storeFor = context => createJSONStore(context, {
+  name:'state.json', scope:'user', schemaVersion:2,
+  initial:{total:0}, validate:d=>Number.isSafeInteger(d.total),
+  migrations:{1:old=>({total:old.count})}
+});
+export async function prepareData(context) {
+  const store=storeFor(context);
+  await store.migrate();
+}
+export function activate(context) {
+  const store=storeFor(context);
+  return {async call(method) {
+    if(method==='read')return store.read();
+    if(method==='increment') {
+      const current=await store.read();
+      return store.update(d=>({total:d.total+1}),{revision:current.revision});
+    }
+  }};
+}
 ```
 
-read返回schemaVersion/revision/data；update在文件锁内读、校验、原子替换；revision不一致报APP_DATA_CONFLICT。写失败、未知schema或迁移失败保留原件。migrate(data,fromVersion)必须返回新数据，不能自行修改原文件；迁移后的read仍需通过校验，成功update才落盘。
+- inspect()只检查，返回missing/current/migration-required/unsupported及etag、现有/目标版本。缺文件不创建目录或文件。
+- read()只读；缺文件返回initial、revision0，不落盘；不在读取时自动迁移。格式不符时报错。
+- update()在锁内读取、校验并以原etag提交；schema不符拒绝覆盖，revision不符报APP_DATA_CONFLICT。
+- migrate()只在prepareData中显式调用。按明确来源版本选函数，转换克隆后的data并校验；成功后revision加1。已是目标版本或缺文件返回changed:false。转换函数只变换数据，不发送消息、启动任务或操作外部业务。
 
-应用业务数据放dataDirectory；包目录视为不可变。临时缓存可再生成，不能和唯一业务原件混在一起。保存profile选择、businessRunId、stepId、幂等键、aiTaskId、已处理revision及发布回执；不保存模型密钥或隐藏推理。
+## 普通 JSON 的宿主迁移
 
-回退包不回退数据。必须声明旧版本能否读取新schema，不能时先用备份或受支持迁移恢复。卸载保留数据不等于可忽略备份；暂不提供自动通用数据降级。
+```js
+export async function prepareData(context) {
+  const state=await context.storage.inspect('records.json',{scope:'runtime'});
+  if(state.state==='missing'||state.state==='current')return;
+  const original=await context.storage.read('records.json',{scope:'runtime'});
+  const old=JSON.parse(original.text);
+  const next={schemaVersion:2,items:old.records};
+  if(!Array.isArray(next.items))throw Error('records校验失败');
+  await context.storage.migrate('records.json',{
+    scope:'runtime',text:JSON.stringify(next),ifMatch:original.etag,
+    fromVersion:1,toVersion:2
+  });
+}
+```
 
-## SDK v3：持久保活、消息激活与 CLI
+清单必须声明records.json的相同范围、目标版本与来源。宿主用真实调用应用和已安装包核验声明；不接受参数伪造身份。返回新etag、fromVersion、toVersion、migrationId、backupRef。普通write只允许声明的当前格式，不能用于绕过迁移。
 
-运行承载仍为 KSF Web 后端。关闭 Web 前端与停止后端分别处理；前端关闭不停止具备后台条件的应用，后端停止后不要求应用独立存活。
+## 原件保护及失败恢复
 
-SDK v3 在现有显式后台基础上提供持久业务保活、已授权消息到达时激活，并由应用持有完整工作流及反馈等待。持久保活顺序、接管/去重、暂停和恢复以[通信与工作流](communication.md)为契约主件；当前 `tasks.run()` 不因此获得持久恢复能力。
+每个文件执行读取转换、候选校验、锁内重读、原件副本持久保存、暂存文件同步、原子替换、读回校验。副本写入失败、etag变化或未登记来源均不提交。Windows替换遇短暂共享冲突有限重试，始终不先删除正式文件。
 
-[包内 CLI](cli.md)复用同版本受管后台与业务数据，按需加载 CLI 适配器并调用共享业务处理器；工作台与 Agent 共用操作和权限规则。`createCLI/context.invoke` 属于包内 CLI 适配器上下文，不能与业务后端 context 混用。
+原件位于相同范围的 `applications/migrations/<appId>/<migrationId>/before.json`，旁边migration.json记录来源/目标版本、前后摘要、包摘要及prepared/committed状态，不自动清理。迁移后响应丢失或中断时先inspect正式文件；已达目标则跳过。prepared记录不证明正式文件尚未替换，必须核对现状。不要盲目复制旧副本覆盖新工作。
+
+多文件依次迁移，部分成功不自动倒退；应用在全部就绪前不接收业务。副本只服务于文件迁移恢复，不等于完整备份。SQLite、外部数据库、多文件事务和业务降级由应用负责。
+
+## 升级、回退与离线诊断
+
+`ksf app data inspect <appId> --json` 不启动服务或应用、不创建文件，按已安装清单检查。安装预览显示最低Core、数据格式与迁移需求。升级等窗口、真实调用、后台任务和文件操作排空后，再次核对并切换。
+
+回退只切应用包，目标必须满足Core/SDK/平台条件且直接读取现有数据。schema不符拒绝回退；不自动恢复副本或降级数据。Core在独立data-compatibility.json中持有自己的唯一持久格式契约，升级与回退同时检查目标Core及所有已安装应用的要求。
+
+工作区文档继续用workspace服务读写；共享文件/Git资源使用context.locks.run，不把应用存储锁当业务幂等或跨文件事务。

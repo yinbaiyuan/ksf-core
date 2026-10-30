@@ -24,7 +24,7 @@ Git 默认保留最左侧**仓库列表**，包含搜索、收藏和状态摘要
 
 `/?app=markdown&path=项目/示例/说明.md` 打开文件；`/?app=git&repo=<id>` 打开仓库。旧 target/task/turn/project 与 `?view=routes` 链接保留。Dock 按应用显示窗口，多窗口共享同一文档缓冲区，目录和大纲按窗口宽度收起。
 
-文档树根层只按顺序显示 `.agents/`、`@收件箱/`、`档案/`、`能力/`、`项目/`、`知识/`、`repositories/`、`AGENTS.md`、`BOT.md`、`MEMORY.md`、`README.md`、`USER.md`，缺失条目直接省略，名称沿用磁盘原名。名单集中维护在 `workspace-files.js` 的 `ROOT_ENTRIES`，没有虚拟目录或设置入口。此规则只整理根层显示，子目录、搜索、最近打开、原链接与文件读写仍按现有规则工作；新增非白名单根条目默认不显示。
+文档树根层只按顺序显示 `.agents/`、`@收件箱/`、`档案/`、`能力/`、`项目/`、`知识/`、`repositories/`、`AGENTS.md`、`BOT.md`、`README.md`、`USER.md`，缺失条目直接省略，名称沿用磁盘原名。名单集中维护在 `workspace-files.js` 的 `ROOT_ENTRIES`，没有虚拟目录或设置入口。此规则只整理根层显示，子目录、搜索、最近打开、原链接与文件读写仍按现有规则工作；新增非白名单根条目默认不显示。
 
 Markdown 使用 CodeMirror 6，提供即时预览、源码、分栏和阅读。支持 GFM、代码高亮、本地图片、相对链接、KaTeX 与 Mermaid。即时预览中的链接可 Cmd/Ctrl+单击打开；阅读和分栏预览直接点击链接。HTML 不执行，远程图片不自动加载。图片粘贴、拖放和文件选择写入文档同级 assets，返回相对链接。
 

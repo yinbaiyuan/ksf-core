@@ -1,0 +1,1 @@
+{"extends":"../../runtime/web/tsconfig.json","compilerOptions":{"typeRoots":["../../runtime/web/node_modules/@types"],"types":["node"]},"include":["frontend.tsx","monitor.tsx","model.ts","env.d.ts","tests"],"exclude":[".build"]}

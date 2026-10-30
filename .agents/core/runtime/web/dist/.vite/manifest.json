@@ -1,6 +1,6 @@
 {
   "index.html": {
-    "file": "assets/index-DfNmCs89.js",
+    "file": "assets/index-74n3ysFb.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -8,14 +8,15 @@
       "src/apps/app-store.tsx"
     ],
     "css": [
-      "assets/index-Bg1K872Y.css"
+      "assets/index-BvDDJg4J.css"
     ],
     "assets": [
-      "assets/summit-dawn-CjlLNYcC.jpg"
+      "assets/summit-dawn-CjlLNYcC.jpg",
+      "assets/ksf-favicon-J5dv2kU6.svg"
     ]
   },
   "src/apps/app-store.tsx": {
-    "file": "assets/app-store-C9avCTBA.js",
+    "file": "assets/app-store-CnK4EYMI.js",
     "name": "app-store",
     "src": "src/apps/app-store.tsx",
     "isDynamicEntry": true,
@@ -25,6 +26,10 @@
     "css": [
       "assets/app-store-C5qhXk7S.css"
     ]
+  },
+  "src/assets/ksf-favicon.svg": {
+    "file": "assets/ksf-favicon-J5dv2kU6.svg",
+    "src": "src/assets/ksf-favicon.svg"
   },
   "src/assets/summit-dawn.jpg": {
     "file": "assets/summit-dawn-CjlLNYcC.jpg",

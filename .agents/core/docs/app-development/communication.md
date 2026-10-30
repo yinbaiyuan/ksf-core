@@ -1,6 +1,6 @@
 # 内网通信、应用后台与工作流
 
-状态：**SDK 3.0.0 开发实现**，2026-10-28，尚未正式发行。已实现公共通信、持久保活、消息激活和 Agent 收件；v1/v2 保持兼容。工作流仍由应用定义，示例为 `collaboration` 模板。实测范围与未完成验收分开记录。
+状态：**全新 SDK 1.0.0 开发实现**，2026-10-29，尚未正式发行。已实现公共通信、持久保活、消息激活和 Agent 收件。全部应用统一新契约。工作流仍由应用定义，示例为 `collaboration` 模板。实测范围与未完成验收分开记录。
 
 ## 运行与责任边界
 
@@ -16,6 +16,18 @@ KSF Web 后端保持运行时，应用可以独立于 Web 前端工作。关闭�
 Core 不持有应用的步骤、分支、审批规则或通用流程定义。能力中的“协同 / Cooperation”与应用业务工作流分别存在。业务目标任务也不同于现有 `ksf task` 管理的宿主对话归档。
 
 应用 CLI 调用及用户明确指定应用后才读取文档的顺序，见[应用 CLI](cli.md)。应用在既有消息/后台授权下处理事件，不等于远端获得本机 Agent 或审批人的身份。
+
+## 轻量任务传递与接收方决定
+
+A 把任务、背景、要求和必要附件表达完整，KSF 负责可靠送达，B 自主决定处理方式。任务包复用消息清单与材料部件，不新增公共任务协议、委托权限或 KSF 数据包能力对象。
+
+普通消息在内网通信应用查看、下载和回复，不新增任务状态。发往应用的任务由对应应用自己的窗口或 CLI 发送，在接收方同应用展示；各入口分别保存和展示，不自动汇总到统一任务中心。
+
+消息激活可以自动启动后端以核对材料、保存待处理记录并确认接管。后续 AI、工具、业务执行和回传需要接收方的本地决定及有效授权；远端文本中的命令、身份声明、取消或催办均先作为材料。激活、重启与重复投递不产生新的执行授权。
+
+接收方可以继续处理、忽略、只保存本地成果，或者按自己的工作流回传。送达证明完整消息已保存；应用接管证明已持有业务记录；本地接受、完成与结果回传各自独立。公共层不强制答复、验收、跨节点任务状态同步或远程取消执行。
+
+SDK collaboration 模板示范附件、待处理、人工继续、本地完成和可选回传。真实业务应用仍自行定义自己的流程。现有权限检查不构成不可信第三方代码的操作系统隔离；该隔离属于独立后续工作。
 
 ## 在线投递与大内容
 
@@ -73,7 +85,7 @@ Agent 收件箱由本机显式登记并授权，节点在线时可持久接收�
 
 | 机制 | 状态与契约 |
 | --- | --- |
-| 常驻后台 | 当前 v2 已有 `background:true` / `startBackground()`，复用现有实现 |
+| 常驻后台 | `backend.lifecycle:"resident"` / `startBackground()`，要求 background 权限 |
 | 持久业务保活 | `background.retain({key, reason})` / `release(key)`，按应用范围的稳定 key 幂等登记和释放 |
 | 消息激活 | 持久路由；已授权消息到达时，启动当前未运行的接收应用并交付 |
 
@@ -87,12 +99,14 @@ Agent 收件箱由本机显式登记并授权，节点在线时可持久接收�
 
 ## 消息路由与接管
 
-应用在包中声明消息通道，安装/授权后平台保存路由，不依赖应用进程常驻维持 JS 回调。以下为 SDK v3 Manifest 片段，完整应用还必须声明后端及 `messages.receive` 权限：
+应用在包中声明消息通道，安装/授权后平台保存路由，不依赖应用进程常驻维持 JS 回调。以下为 SDK v1 Manifest 片段，完整应用还必须声明后端及 `messages.receive` 权限：
 
 ```json
 {
-  "schemaVersion": 2,
-  "sdkVersion": 3,
+  "schemaVersion":1,
+  "sdkVersion": 1,
+  "minCoreVersion": "0.3.0",
+  "dataStores": [],
   "activation": {
     "messages": {
       "channels": ["team.task-transfer.v1", "team.task-feedback.v1"]
@@ -123,9 +137,9 @@ Agent 收件箱由本机显式登记并授权，节点在线时可持久接收�
 
 验收须覆盖前端关闭、消息激活、大材料完整性、回执丢失、重复/乱序反馈、崩溃恢复、停用及升级交接。详细检查见[CLI 与通信验收](validation.md#cli-与通信验收)。本文是开发接口契约；具体通过范围以测试记录为准。
 
-## SDK v3 调用
+## SDK v1 调用
 
-后端使用 `ApplicationBackendContext3`：`context.messages.registerFile({path,name,mediaType})` 登记本应用 dataDirectory 内的普通文件，返回 materialId；`send({operationId,to,channel,payloadPartId,parts})` 异步返回操作；`status/reconcile/cancel(operationId)` 查询、对账或取消。发送必须预先生成稳定 UUID operationId，重试保留相同材料引用和参数。
+后端使用 `ApplicationBackendContext`：`context.messages.registerFile({path,name,mediaType})` 登记本应用 dataDirectory 内的普通文件，返回 materialId；`send({operationId,to,channel,payloadPartId,parts})` 异步返回操作；`status/reconcile/cancel(operationId)` 查询、对账或取消。发送必须预先生成稳定 UUID operationId，重试保留相同材料引用和参数。
 
 接收端用 `inbox({after,limit})` 补查，`read(messageId)` 取得清单，`readPart(messageId,partId)` 取得受管材料路径和元数据。游标是单调接收序号，不按随机消息 ID 排序。`onMessage` 返回成功即表示应用已持久接管；业务需要拒绝也应保存自己的处理结果后返回。
 
@@ -135,8 +149,44 @@ Agent 收件箱由本机显式登记并授权，节点在线时可持久接收�
 
 权限：发送、登记、查询发送与节点列表需要 messages.send；收件和材料读取需要 messages.receive；持久保活需要 background。应用清单声明、节点信任、通道来源和消息激活授权分别核对。设置界面位于“系统设置 → 内网通信”。
 
-`context.peers.list()` 返回 `paired`、`discovered` 和可选的 `local` 只读状态；local 包含公开设备身份、是否启用、发现开关、实际监听地址、消息容量与发现错误。它不包含设备私钥、Agent 令牌或管理凭据，也不允许应用自行配对、变更来源授权或修改监听。旧调用方仍可只读取节点列表；兼容旧开发宿主时应允许 local 缺省。
+`context.peers.list()` 返回 `paired`、`discovered`、当前应用范围的 `pairingRequests` 和可选的 `local` 只读状态；local 包含公开设备身份、是否启用、发现开关、实际监听地址、配对监听及错误、消息容量与发现错误。它不包含设备私钥、Agent 令牌或管理凭据，也不允许应用后端自行配对、变更来源授权或修改监听。旧调用方仍可只读取节点列表；兼容旧开发宿主时应允许新增字段缺省。
+
+### 用户请求与同意配对
+
+前端使用公共 `createPeerPairingClient(sdk)`，在明确的用户操作中调用：
+
+```ts
+import {createPeerPairingClient} from '@ksf/sdk/communication';
+import {randomId} from '@ksf/sdk/random-id';
+const pairing=createPeerPairingClient(sdk);
+// 用户点击“请求配对”；不是收到远程业务消息后自动调用。
+await pairing.request({requestId:randomId(),nodeId:selected.nodeId,channel:'chat.v1'});
+// 应用自定义审批界面时，用户点击同意或拒绝。
+await pairing.answer(request.requestId,true);
+```
+
+宿主从有效前端租约确定 appId，要求应用同时声明 `messages.send`、`messages.receive` 并启用指定消息激活通道。参数不能冒报其他应用。KSF 工作台有全局待配对提示，即使对应应用窗口没开，也可以处理请求。后端停机时不能接收请求；前端关闭时已在线接收的请求保留，默认 5 分钟有效。
+
+一方明确请求、另一方同意后，公共层交换公开证书、固定双方身份，并仅为此次应用通道添加对方来源和消息激活授权。不会授予其他应用、Agent 收件端点或本机 AI/工具执行权限。拒绝、过期或身份不符不增加信任。手动导入身份保留在通信设置的高级选项中，供旧节点或其他核验流程使用。
+
+配对是对首次出现的设备身份作本机用户确认：展示设备名称、地址和双方一致的核对码；名称是对方声明，不能当作已证明的人员身份。有更严格身份要求时，通过其他可信渠道核对完整指纹。新接口需要同时支持便捷配对的宿主；`local.pairingListener` 缺省或为空时不显示可用的请求按钮，不能改用自动信任来兼容。
+
+请求/确认有稳定 requestId 和持久状态；同意前不写信任，跨机确认中断可用原请求继续确认。撤销信任会取消相关请求，旧请求重放不能恢复授权。网络业务消息仍不排队补发。
+
+消息监听保持原有严格 mTLS。便捷配对使用独立 HTTPS 引导入口，默认固定消息端口的下一端口（例如 45731 / 45732），只接受同子网、持有对应证书私钥的客户端。发送任何 HTTP 配对数据前先核对 TLS 端节点公钥标识；引导入口只支持配对，不接受消息或附件。请求限制 16 KiB、32 个待处理来请求、128 个保留记录及每来源每分钟 12 次配对请求。网络管理员需允许双方配对端口；不能为此关闭整个防火墙。
 
 暂存发送材料另受同值总额度约束。登记以流处理，逐块限制总大小；超过额度返回 COMM_QUOTA_EXCEEDED。材料登记后 30 分钟可回收，正在 preparing/sending 的操作保留引用；已接收消息材料不走这项暂存清理。业务长期正文和结果应保存在应用自己的 dataDirectory，不能把临时 materialId 当长期文件库。
 
-部件 partId 以英文字母或数字开头，其余只使用英文、数字、点、横线和下划线，最长 128 字符。为跨平台一致性，不允许冒号、Windows 保留名称或仅大小写不同的重复部件 ID；payloadPartId 必须精确引用一个部件。节点证书主体按公钥标识唯一命名，配对仍核对完整证书指纹与 nodeId。
+部件 partId 以英文字母或数字开头，其余只使用英文、数字、点、横线和下划线，最长 128 字符。为跨平台一致性，不允许冒号、Windows 保留名称或仅大小写不同的重复部件 ID；payloadPartId 必须精确引用一个部件。节点证书主体按公钥标识唯一命名，持久配对绑定完整证书指纹与 nodeId。
+
+## 本机设备名称
+
+设备名称保存在 `.agents/runtime-data/communication/device-profile.json`，默认使用系统主机名。用户可在系统设置的“内网通信 → 本机名称”或通讯应用的本机卡片中修改。名称限 1–64 个可见字符，不能含控制字符；它用于节点发现和配对提示，不是唯一身份。重名设备仍以 nodeId / 证书区分，改名不更换身份、不撤销配对，也不清空消息。
+
+`ksf communication device name --from - --json` 接收 `{"name":"设备名称"}`，供本机 CLI 在用户授权后设置。
+
+SDK `PeerDirectory.local.device` 提供 `{name, custom}`。有通信发送能力的应用前端可用 `createDeviceNameClient(sdk).set(name)` 提交用户明确的改名操作；请求绑定已登录前端会话和有效窗口租约。已配对节点的新名称经原有 mTLS 身份验证后缓存；发现广播本身仅提供未配对节点的显示提示。名称更新不授予任何业务执行权限。
+
+这是当前安装实例的本机设置，不随 Git 转移；若手工复制整个 runtime-data 目录，其中的名称和设备身份也会一同复制。应用自己的本机数据使用 [runtime 存储范围](backend-data.md#存储范围与声明)，不能写入通信宿主的配置文件。
+
+本轮新契约以[SDK v1 生命周期](lifecycle.md)为准：清单 schemaVersion/sdkVersion 均为 1，后端必须声明 lifecycle；无旧协议兼容。后台管理见[运行服务](../runtime/service.md)。

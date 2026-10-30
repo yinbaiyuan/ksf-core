@@ -10,7 +10,7 @@ export function webHelp() {
     '  ksf web hosts [--apply] [--json]\n' +
     '  ksf web --help\n\n' +
     `Start a foreground HTTP server on 127.0.0.1 (default port ${WEB_PORT}).\n` +
-    'Use http://ksf.ai/ after configuring the system hosts mapping. On macOS, port 80 needs system permission or the local launchd service.\n' +
+    'Use http://ksf.ai:1313/ after configuring the system hosts mapping. Use the user login service for background operation.\n' +
     'Port 0 chooses a free port. Press Ctrl+C to stop.\n' +
     'Serves task turns and routing, read-only task/route APIs and GET /api/health; enabled transcript catch-up runs while open.\n' +
     '--json prints one readiness result after listening; later errors use stderr.\n';
@@ -52,6 +52,7 @@ export async function runWebCommand(args, root) {
         process.off('SIGINT', onSignal);
         process.off('SIGTERM', onSignal);
         instance.server.off('error', onError);
+        instance.server.off('ksf-stop',onSignal);
         if (error) report(error);
         instance.close().then(() => resolve(error ? 1 : 0), failure => { report(failure); resolve(1); });
       };
@@ -60,6 +61,7 @@ export async function runWebCommand(args, root) {
       process.once('SIGINT', onSignal);
       process.once('SIGTERM', onSignal);
       instance.server.once('error', onError);
+      instance.server.once('ksf-stop',onSignal);
       const result = { ok: true, command: 'web', operation: null,
         data: { host, port, url, localUrl, startedAt, nodeVersion, hosts: hosts.state }, errors: [] };
       announced = true;

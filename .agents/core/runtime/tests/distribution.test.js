@@ -73,7 +73,9 @@ test('complete release includes the system and empty user skeleton, excluding pr
   assert.ok(![...entries.keys()].some(path => path.startsWith('源档/')));
   assert.equal(existsSync(join(result.template, '源档')), false);
   assert.ok(!entries.has('知识/fictional-private.md'));
-  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) {
+  assert.equal(entries.has('MEMORY.md'), false);
+  assert.equal(entries.has('.agents/core/distribution/template/MEMORY.md'), false);
+  for (const path of ['USER.md', 'BOT.md']) {
     assert.deepEqual(entries.get(path).bytes, readFileSync(join(f.root, '.agents/core/distribution/template', path)));
     assert.equal(entries.get(path).mode, 0o644);
     assert.equal(entries.has(path.toLowerCase()), false);
@@ -245,11 +247,32 @@ test('verified legacy workspace layouts remain valid and generated documents mus
     workspace.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(releaseReceipt(manifest)));
     save(platform.core, core); save(platform.workspace, workspace);
   };
+  // A legacy MEMORY is accepted only when it exactly matches a verified Core source.
+  const memoryPath = 'MEMORY.md', memorySource = '.agents/core/distribution/template/MEMORY.md';
+  const memory = { path: memoryPath, bytes: Buffer.from('# Fictional legacy memory template\n'), mode: 0o644 };
+  workspace.set(memoryPath, memory);
+  save(platform.workspace, workspace);
+  assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' });
+  const source = { ...memory, path: memorySource };
+  core.set(memorySource, source); workspace.set(memorySource, source);
+  manifest.files[memorySource] = { sha256: sha256(source.bytes), mode: source.mode, source_path: memorySource };
+  core.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(manifest));
+  workspace.get('.agents/core/release.json').bytes = Buffer.from(stableJSON(releaseReceipt(manifest)));
+  save(platform.core, core); save(platform.workspace, workspace);
+  assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has(memoryPath), true);
+  for (const replacement of [null, { ...memory, bytes: Buffer.from('altered memory') }, { ...memory, mode: 0o755 }]) {
+    if (replacement) workspace.set(memoryPath, replacement); else workspace.delete(memoryPath);
+    save(platform.workspace, workspace);
+    assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' });
+  }
+  workspace.set(memoryPath, memory);
+  removeDocuments([memoryPath]);
+  assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has(memoryPath), false);
   // Old releases did not contain knowledge rules or cognition template sources.
   removeDocuments(knowledgeFrameworkFiles);
   assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('知识/rules/README.md'), false);
-  // Previous knowledge/archive layout, before the three collaboration templates.
-  removeDocuments(['USER.md', 'BOT.md', 'MEMORY.md']);
+  // Previous knowledge/archive layout, before the collaboration templates.
+  removeDocuments(['USER.md', 'BOT.md']);
   assert.equal(inspectReleaseDirectory(f.root, f.first.output).workspaces[0].entries.has('档案/archive.md'), true);
   workspace.set('USER.md', { path: 'USER.md', bytes: Buffer.from('unexpected personal file'), mode: 0o644 });
   save(platform.workspace, workspace);

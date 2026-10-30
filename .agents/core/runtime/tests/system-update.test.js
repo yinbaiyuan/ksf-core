@@ -15,7 +15,8 @@ test('Release check and upgrade work without Git, preserve private files and use
   const f = await distributionFixture(t), next = await f.next('0.1.1', { '.agents/core/example.txt': sample.replace('last', 'release') });
   writeAtomic(join(f.workspace, '知识/private.md'), 'FICTIONAL_PRIVATE_CONTENT');
   writeAtomic(join(f.workspace, '能力/个人定制.md'), 'FICTIONAL_USER_CAPABILITY');
-  for (const name of ['USER.md', 'BOT.md', 'MEMORY.md']) rmSync(join(f.workspace, name));
+  assert.equal(existsSync(join(f.workspace, 'MEMORY.md')), false);
+  for (const name of ['USER.md', 'BOT.md']) rmSync(join(f.workspace, name));
   const ignore = readFileSync(join(f.workspace, '.gitignore'));
   writeAtomic(join(f.workspace, '.agents/runtime-data/local-cache.txt'), 'FICTIONAL_CACHE');
   const checked = await systemCheck({ root: f.workspace, source: next.source });

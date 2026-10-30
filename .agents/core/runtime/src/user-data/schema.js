@@ -1,5 +1,12 @@
 import { validId } from '../objects/schema.js';
 import { validSourceId } from '../sources/schema.js';
+import {createRequire} from 'node:module';
+import {validateIncubation} from '../incubation/schema.js';
+const require=createRequire(import.meta.url);
+// Basic CLI namespaces remain usable in a minimal runtime checkout. Preference
+// validation loads the shared SDK module only when that namespace is present.
+const validateDesktop=value=>require('../../../applications/sdk/src/shared/preferences-validation.js').validateDesktop(value);
+const validateAppearance=value=>require('../../../applications/sdk/src/shared/preferences-validation.js').validateAppearance(value);
 
 export const userDataRoot = '.agents/user-data';
 export class UserDataError extends Error {
@@ -47,6 +54,13 @@ function identity(values) {
 // Only Core-owned, explicitly validated namespaces belong here. Ordinary work,
 // project checkpoints and user capability bodies have their existing locations.
 export const namespaces = Object.freeze({
+  incubation: Object.freeze({schemaVersion:1,kind:'incubation',description:'Instance incubation lifecycle and resumable configuration receipts.',validate:validateIncubation}),
+  instance: Object.freeze({schemaVersion:1,kind:'instance',description:'Portable instance display name; does not alter device or object identity.',validate(values){
+    keys(values,['name'],'instance');
+    if(values.name!==undefined && (typeof values.name!=='string'||!values.name.trim()||[...values.name].length>64||/[\p{Cc}\p{Cf}]/u.test(values.name))) fail('USER_DATA_INVALID','实例名称需要 1–64 个可见字符。');
+  }}),
+  desktop: Object.freeze({schemaVersion:2,kind:'desktop',description:'Instance-wide desktop groups, application shortcuts, cards and default window bounds.',validate(values){keys(values,['preferences'],'desktop');if(values.preferences!==undefined)validateDesktop(values.preferences);}}),
+  appearance: Object.freeze({schemaVersion:1,kind:'appearance',description:'Instance-wide workbench appearance.',validate(values){keys(values,['settings'],'appearance');if(values.settings!==undefined)validateAppearance(values.settings);}}),
   sources: Object.freeze({ schemaVersion: 1, kind: 'sources', description: 'Direct local ability-source repository associations; no capability copies.', validate(values) {
     keys(values, ['entries'], 'sources');
     if (values.entries === undefined) return;
@@ -69,7 +83,7 @@ export function validateValues(namespace, values) { definition(namespace).valida
 export function validateDocument(namespace, document) {
   const schema = definition(namespace);
   keys(document, ['schema_version', 'namespace', 'revision', 'values'], namespace);
-  if (document.schema_version !== schema.schemaVersion) fail('USER_DATA_VERSION_UNSUPPORTED', 'The namespace format is not supported by this Core; preserve the original file.', { namespace, schemaVersion: document.schema_version });
+  if (document.schema_version !== schema.schemaVersion && !(namespace === 'desktop' && document.schema_version === 1)) fail('USER_DATA_VERSION_UNSUPPORTED', 'The namespace format is not supported by this Core; preserve the original file.', { namespace, schemaVersion: document.schema_version });
   if (document.namespace !== namespace || !Number.isSafeInteger(document.revision) || document.revision < 1) fail('USER_DATA_INVALID', 'Invalid namespace or revision.', { namespace });
   validateValues(namespace, document.values);
   return document;

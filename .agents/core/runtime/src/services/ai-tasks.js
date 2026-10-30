@@ -10,6 +10,6 @@ export function createWorkbenchAI(root, options = {}) {
   const ai = createAITaskService(root, { ...options, executors: { 'deepseek-responses-v1': createDeepSeekExecutor(options), 'openai-responses-v1': createResponsesExecutor(options), 'openai-transcription-v1':createTranscriptionExecutor(options),codex: createCodexExecutor(), ...options.executors } });
   // A fresh workspace remains untouched until first use. Existing queues resume
   // even when no application window is open.
-  if (existsSync(join(root, '.agents/user-data/ai'))) void ai.start().catch(() => {});
+  if (options.autoStart!==false&&existsSync(join(root, '.agents/user-data/ai'))) void ai.start().catch(() => {});
   return ai;
 }

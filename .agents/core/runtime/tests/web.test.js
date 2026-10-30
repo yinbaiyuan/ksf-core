@@ -51,8 +51,11 @@ test('Web serves the packaged page and live health over loopback, including HEAD
   assert.equal((await call(instance, '/index.html')).body, page.body);
   const health = await call(instance, '/api/health?check=1');
   assert.equal(health.status, 200);
-  assert.deepEqual(JSON.parse(health.body), { ok: true, service: 'ksf-web',
+  const payload = JSON.parse(health.body);
+  assert.deepEqual(payload, { ok: true, service: 'ksf-core', pid: process.pid,
+    nonce: payload.nonce, reason: 'foreground', frontend: {state: 'ready'},
     nodeVersion: process.version, startedAt: instance.startedAt });
+  assert.match(payload.nonce, /^[a-f0-9-]{36}$/);
   assert.equal(health.headers['cache-control'], 'no-store');
   const head = await call(instance, '/', { method: 'HEAD' });
   assert.equal(head.status, 200);
@@ -177,8 +180,8 @@ test('Web closes unfinished connections within a bounded shutdown and releases i
 test('Web CLI documents its startup and rejects invalid or repeated options', () => {
   const help = spawnSync(process.execPath, [cli, 'web', '--help'], { encoding: 'utf8' });
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /127\.0\.0\.1.*80/);
-  assert.match(help.stdout, /http:\/\/ksf\.ai\//);
+  assert.match(help.stdout, /127\.0\.0\.1.*1313/);
+  assert.match(help.stdout, /http:\/\/ksf\.ai:1313\//);
   assert.match(help.stdout, /ksf web hosts/);
   for (const args of [['--port'], ['--port', '-1'], ['--port', '65536'], ['--port', '1.5'],
     ['--port', '0', '--port', '0'], ['--json', '--json'], ['--host', '0.0.0.0'], ['start'], ['--help', '--json']]) {
@@ -190,9 +193,11 @@ test('Web CLI documents its startup and rejects invalid or repeated options', ()
   }
 });
 
-test('Web CLI returns a structured address-in-use error', async t => {
+test('Web command returns a structured address-in-use error without touching the daily host', async t => {
   const instance = await running(t);
-  const result = spawnSync(process.execPath, [cli, 'web', '--port', String(instance.port), '--json'], { encoding: 'utf8' });
+  const root = routingFixture(t).root, handler = new URL('../src/commands/web.js', import.meta.url).href;
+  const script = `import {runWebCommand} from ${JSON.stringify(handler)};process.exitCode=await runWebCommand(${JSON.stringify(['--port',String(instance.port),'--json'])},${JSON.stringify(root)});`;
+  const result = spawnSync(process.execPath, ['--input-type=module','--eval',script], { encoding: 'utf8' });
   assert.equal(result.status, 1, result.stderr);
   assert.equal(JSON.parse(result.stdout).errors[0].code, 'WEB_ADDRESS_IN_USE');
 });

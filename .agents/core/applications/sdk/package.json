@@ -1,16 +1,20 @@
 {
   "name": "@ksf/sdk",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "exports": {
+    "./runtime-monitor": "./src/runtime-monitor.ts",
     ".": "./src/index.ts",
     "./build": "./build.mjs",
     "./pack": "./server/pack.mjs",
     "./protocol": "./server/protocol.js",
     "./window-toolbar.css": "./src/window-toolbar.css",
+    "./application-menu": "./src/application-menu.ts",
     "./application-sdk": "./src/application-sdk.ts",
     "./ai-tasks": "./src/ai-tasks.ts",
+    "./ai-services": "./src/ai-services.ts",
+    "./capabilities": "./src/capabilities.ts",
     "./resources": "./src/resources.ts",
     "./window-session": "./src/window-session.ts",
     "./surface.css": "./src/surface.css",
@@ -50,7 +54,10 @@
     "./configuration": "./src/configuration.ts",
     "./storage": "./server/storage.mjs",
     "./codex-conversations": "./src/codex-conversations.ts",
-    "./communication": "./src/communication.ts"
+    "./communication": "./src/communication.ts",
+    "./files": "./src/files.ts",
+    "./workflows": "./src/workflows.ts",
+    "./workflow-contract": "./server/workflow-contract.mjs"
   },
   "peerDependencies": {
     "react": "19.3.1",

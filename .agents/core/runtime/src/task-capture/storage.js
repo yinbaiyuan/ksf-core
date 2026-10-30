@@ -80,6 +80,16 @@ export function turns(root, taskId, { onError } = {}) {
 export function config(root) {
   const value = readJSON(root, `${CAPTURE}/config.json`);
   if (value && (value.protocol !== PROTOCOL || !Number.isFinite(Date.parse(value.activatedAt)) || typeof value.enabled !== 'boolean')) fail('TASK_CONFIG_INVALID', 'Unsupported task capture configuration.');
+  if(value?.intervals!==undefined){
+    if(!Array.isArray(value.intervals)||!value.intervals.length)fail('TASK_CONFIG_INVALID','Unsupported capture intervals; preserve the original.');
+    let previous=-Infinity;
+    for(let index=0;index<value.intervals.length;index++){
+      const interval=value.intervals[index],from=Date.parse(interval?.from),to=interval?.to===null?Infinity:Date.parse(interval?.to);
+      if(!Number.isFinite(from)||from<previous||!(to>=from)||(!Number.isFinite(to)&&!(interval.to===null&&index===value.intervals.length-1)))fail('TASK_CONFIG_INVALID','Capture intervals overlap or are invalid.');
+      previous=to;
+    }
+    if(value.enabled&&value.intervals.at(-1).to!==null)fail('TASK_CONFIG_INVALID','Capture switch and intervals differ.');
+  }
   return value;
 }
 export function summarizeTurn(value) {

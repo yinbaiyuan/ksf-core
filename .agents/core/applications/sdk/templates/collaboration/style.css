@@ -3,3 +3,10 @@
 .team-example input,.team-example textarea{font:inherit;padding:8px;border:1px solid #ccd5e2;border-radius:6px}
 .team-example button{font:inherit;padding:7px 12px;margin-right:8px;border:1px solid #ccd5e2;border-radius:6px;background:#f6f8fc;cursor:pointer}
 .team-example section,.team-example article{border-top:1px solid #e5eaf1;margin-top:16px;padding-top:10px;overflow-wrap:anywhere}
+.team-example select{font:inherit;padding:8px;border:1px solid #ccd5e2;border-radius:6px;background:#fff}
+.team-example textarea{min-height:90px;resize:vertical}
+.team-example pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin:12px 0}
+.team-example small{color:#526579}.team-example button:disabled{opacity:.55;cursor:default}
+.team-example [role=alert]{color:#a32626}.team-example [role=status]{color:#285c48}
+.team-files{padding-left:20px}.team-files button{margin-left:12px;padding:2px 8px}
+@media(max-width:560px){.team-example{padding:12px}.team-example button{margin-bottom:8px}}

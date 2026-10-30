@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "com.ksf.projects",
+  "name": "KSF项目",
+  "version": "0.2.10",
+  "description": "从现有项目记录接上工作。集中查看项目目标、任务检查点、相关聊天、资料与成果，保留原文和来源。",
+  "author": "KSF",
+  "icon": "package",
+  "sdkVersion": 1,
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs",
+    "lifecycle": "on-demand"
+  },
+  "permissions": [
+    "filesystem",
+    "shell",
+    "codex-conversations"
+  ],
+  "window": {
+    "entry": "frontend/index.js",
+    "styles": [
+      "frontend/index.css"
+    ],
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 1180,
+      "height": 760
+    },
+    "minSize": {
+      "width": 540,
+      "height": 420
+    }
+  },
+  "minCoreVersion": "0.3.2",
+  "dataStores": [
+    {
+      "name": "conversations.json",
+      "scope": "user",
+      "schemaVersion": 1,
+      "migrateFrom": []
+    },
+    {
+      "name": "preferences.json",
+      "scope": "user",
+      "schemaVersion": 1,
+      "migrateFrom": []
+    }
+  ]
+}

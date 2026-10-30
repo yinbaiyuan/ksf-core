@@ -1,14 +1,46 @@
 {
-  "schemaVersion": 2,
-  "sdkVersion": 2,
-  "id": "example.cards",
-  "version": "1.0.0",
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.example.cards",
+  "version": "1.0.2",
   "name": "卡片验收应用",
   "description": "无主窗口，提供两种卡片；仅用于隔离验收。",
   "permissions": [],
   "cards": [
-    { "id": "summary", "name": "摘要卡片", "description": "每张卡片独立配置", "entry": "frontend/summary.js", "defaultSize": { "w": 2, "h": 2 }, "minSize": { "w": 1, "h": 1 } },
-    { "id": "detail", "name": "明细卡片", "description": "每张卡片独立配置", "entry": "frontend/detail.js", "defaultSize": { "w": 2, "h": 2 }, "minSize": { "w": 1, "h": 1 } }
+    {
+      "id": "summary",
+      "name": "摘要卡片",
+      "description": "每张卡片独立配置",
+      "entry": "frontend/summary.js",
+      "defaultSize": {
+        "w": 2,
+        "h": 2
+      },
+      "minSize": {
+        "w": 1,
+        "h": 1
+      }
+    },
+    {
+      "id": "detail",
+      "name": "明细卡片",
+      "description": "每张卡片独立配置",
+      "entry": "frontend/detail.js",
+      "defaultSize": {
+        "w": 2,
+        "h": 2
+      },
+      "minSize": {
+        "w": 1,
+        "h": 1
+      }
+    }
   ],
-  "backend": { "runtime": "node", "entry": "backend/index.mjs" }
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs",
+    "lifecycle": "on-demand"
+  },
+  "minCoreVersion": "0.3.0",
+  "dataStores": []
 }

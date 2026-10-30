@@ -6,7 +6,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Frames, frame, parse, stringify, DesktopIPC, requestRef } from '../src/codex-conversations/protocol.js';
-import { createDraft } from '../src/codex-conversations/app-server.js';
+import { createDraft, desktopProjectForRoot } from '../src/codex-conversations/app-server.js';
 import { questionsOf, messagesOf, activeTurn, pageMessages, turnsOf } from '../src/codex-conversations/state.js';
 import { createCodexConversations } from '../src/services/codex-conversations.js';
 import { sessionKey } from '../src/routing/storage.js';
@@ -73,6 +73,25 @@ async function finish(service, op) {
 }
 const createParams = { operationId: 'create-op-0001', project: { name: '虚构项目', scope: 'current' }, text: '虚构材料\r\n  保留原文\n' };
 
+test('activity monitor observes only bound native turns and rejects a stale stop before dispatch',async t=>{
+  const {service,peer}=await serviceFixture(t);await finish(service,service.create(caller,createParams));
+  const state=peer.states.get(threadId);state.turns.at(-1).status='running';peer.bump();
+  let row;for(let i=0;i<100;i++){row=(await service.monitorSnapshot()).tasks[0];if(row)break;await delay(10);}
+  assert.equal(row.kind,'conversation');assert.equal(row.turnId,state.turns.at(-1).id);
+  state.turns.push({id:'newer-turn-0001',status:'running',items:[]});peer.bump();
+  const count=peer.requests.filter(r=>r.method==='thread-follower-interrupt-turn').length;
+  await assert.rejects(service.monitorInterrupt({threadId,turnId:row.turnId,version:row.version,operationId:'monitor-old-stop'}),{code:'MONITOR_STALE'});
+  assert.equal(peer.requests.filter(r=>r.method==='thread-follower-interrupt-turn').length,count);
+  const current=await service.read(caller,{threadId});const op=await service.monitorInterrupt({threadId,turnId:current.turnId,version:current.version,operationId:'monitor-new-stop'});await finish(service,op);
+  assert.equal(state.turns.at(-1).status,'interrupted');
+});
+test('bound observation revalidates the known native original without repeated discovery',async t=>{
+  const {service,options,root}=await serviceFixture(t);await finish(service,service.create(caller,createParams));const original=options.catalog;let discoveries=0;options.catalogTtlMs=0;options.catalog=()=>{discoveries++;return original();};
+  await service.read(caller,{threadId});assert.equal(discoveries,1);discoveries=0;await service.read(caller,{threadId});await service.read(caller,{threadId});assert.equal(discoveries,0);
+  const path=join(root,threadId+'.jsonl');await writeFile(path,JSON.stringify({type:'session_meta',payload:{id:threadId,cwd:join(root,'different-root'),source:'vscode'}})+'\n');
+  await assert.rejects(service.read(caller,{threadId}),{code:'CODEX_WORKSPACE_MISMATCH'});assert.equal(discoveries,0);
+});
+
 test('framing handles every split point, coalescing, invalid lengths and exact numeric request identities', () => {
   const raw = '{"id":9007199254740993,"str":"9007199254740993"}', value = parse(raw);
   assert.equal(typeof value.id, 'bigint'); assert.equal(stringify(value), raw); assert.notDeepEqual(requestRef(value.id), requestRef(value.str));
@@ -93,10 +112,10 @@ test('Desktop handshake, authoritative owner, numeric stale snapshots and reconn
 });
 test('Node draft has no model turn, injects only facts and waits for writer exit', async t => {
   const root = await fixture(t), executable = join(root, 'mock-codex'), log = join(root, 'log');
-  writeNodeExecutable(executable, `#!${process.execPath}\nconst fs=require('fs'),rl=require('readline').createInterface({input:process.stdin});let closed=false;const close=()=>{if(!closed){closed=true;fs.appendFileSync(${JSON.stringify(log)},'closed\\n');}process.exit(0)};process.on('SIGTERM',close);rl.on('close',close);rl.on('line',s=>{const m=JSON.parse(s);fs.appendFileSync(${JSON.stringify(log)},m.method+'\\n');if(m.id)process.stdout.write(JSON.stringify({id:m.id,result:m.method==='thread/start'?{thread:{id:'${threadId}'}}:{}})+'\\n')});`);
+  writeNodeExecutable(executable, `#!${process.execPath}\nconst fs=require('fs'),rl=require('readline').createInterface({input:process.stdin});let closed=false;const close=()=>{if(!closed){closed=true;fs.appendFileSync(${JSON.stringify(log)},'closed\\n');}process.exit(0)};process.on('SIGTERM',close);rl.on('close',close);rl.on('line',s=>{const m=JSON.parse(s);fs.appendFileSync(${JSON.stringify(log)},m.method+'\\n');if(m.id)process.stdout.write(JSON.stringify({id:m.id,result:m.method==='project/list'?{data:[{id:'native-ksf-project',name:'ksf',roots:[{path:${JSON.stringify(root)}}]}]}:m.method==='thread/start'?{thread:{id:'${threadId}',projectId:'native-ksf-project'}}:{}})+'\\n')});`);
   assert.equal(await createDraft({ root, name: '虚构任务', executable }), threadId);
   const lines = (await readFile(log, 'utf8')).trim().split('\n');
-  assert.deepEqual(lines, ['initialize', 'initialized', 'thread/start', 'thread/name/set', 'thread/inject_items', 'closed']);
+  assert.deepEqual(lines, ['initialize', 'initialized', 'project/list', 'thread/start', 'thread/name/set', 'thread/inject_items', 'closed']);
 });
 test('create dispatches exactly once, preserves original bytes, uses inherited Desktop settings, stores no prompt', async t => {
   const { service, peer, root } = await serviceFixture(t);
@@ -174,4 +193,21 @@ test('owner discovery retries a transient native miss but preserves protocol rej
  assert.equal(await ipc.owner('thread-fixture',{waitMs:1000}),'desktop-fixture');assert.equal(calls,2);
  calls=0;ipc.request=async()=>{calls++;throw Object.assign(Error('unsupported-version'),{code:'CODEX_REJECTED'});};
  await assert.rejects(ipc.owner('thread-fixture',{waitMs:1000}),{code:'CODEX_REJECTED',message:'unsupported-version'});assert.equal(calls,1);
+});
+
+
+test('Desktop project resolution matches canonical roots, pages safely and refuses ambiguous or absent membership',async t=>{
+  const root=await fixture(t),calls=[];
+  const server={async call(method,input){calls.push({method,input});return input.cursor?{data:[{id:'ksf-project',name:'ksf',roots:[{path:root}]}],nextCursor:null}:{data:[{id:'other',roots:[{path:root+'/other'}]}],nextCursor:'second'};}};
+  assert.equal((await desktopProjectForRoot(server,root)).id,'ksf-project');assert.equal(calls[1].input.cursor,'second');
+  await assert.rejects(desktopProjectForRoot({call:async()=>({data:[]})},root),{code:'CODEX_PROJECT_REQUIRED'});
+  await assert.rejects(desktopProjectForRoot({call:async()=>({data:[{id:'one',roots:[{path:root}]},{id:'two',roots:[{path:root}]}]})},root),{code:'CODEX_PROJECT_AMBIGUOUS'});
+});
+
+test('draft sends the native project identity and refuses to inject a message when acknowledgement differs',async t=>{
+  const root=await fixture(t),executable=join(root,'mock-project-codex'),log=join(root,'project-requests');
+  writeNodeExecutable(executable,`#!${process.execPath}\nconst fs=require('fs');require('readline').createInterface({input:process.stdin}).on('line',s=>{const m=JSON.parse(s);fs.appendFileSync(${JSON.stringify(log)},s+'\\n');if(m.id)process.stdout.write(JSON.stringify({id:m.id,result:m.method==='project/list'?{data:[{id:'ksf-project',roots:[{path:${JSON.stringify(root)}}]}]}:m.method==='thread/start'?{thread:{id:'thread-project-mismatch',projectId:'other-project'}}:{}})+'\\n')});`);
+  await assert.rejects(createDraft({root,name:'test',executable}),{code:'CODEX_PROJECT_MISMATCH'});
+  const requests=(await readFile(log,'utf8')).trim().split('\n').map(JSON.parse);
+  assert.equal(requests.find(r=>r.method==='thread/start').params.projectId,'ksf-project');assert(!requests.some(r=>r.method==='thread/inject_items'));
 });

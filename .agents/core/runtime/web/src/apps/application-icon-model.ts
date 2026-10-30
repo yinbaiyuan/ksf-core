@@ -1,9 +1,10 @@
 import type {ApplicationManifest,StoreApplication,StoreCatalog} from './application-model.ts';
 import {storeImageURL} from './store-model.ts';
-const aliases:Record<string,string>={'ksf.projects':'projects','app-store':'store',markdown:'documents'};
-const known=new Set(['projects','store','documents','conversations','git','terminal']);
+import {applicationLinkId} from '../../../../applications/sdk/src/shared/application-identities.js';
+const aliases:Record<string,string>={'com.ksf.documentation':'manual','com.ksf.projects':'projects','com.ksf.knowledge':'knowledge','com.ksf.abilities':'abilities','com.ksf.app-store':'store','com.ksf.markdown':'documents','com.ksf.conversations':'flywheel','com.ksf.git':'git','com.ksf.terminal':'terminal','com.yinbaiyuan.daily-meeting':'meeting','com.yinbaiyuan.daily-brief':'brief','com.yinbaiyuan.camp-tasks':'tasks','com.ksf.cooperation-center':'cooperation','com.ksf.activity-monitor':'monitor'};
+const known=new Set(['activity','knowledge','abilities','projects','store','documents','manual','conversations','flywheel','git','terminal','meeting','brief','tasks','lan','monitor','cooperation','handshake']);
 export function applicationIconModel(id:string,manifest?:Pick<ApplicationManifest,'icon'>,app?:StoreApplication){
-  const key=aliases[id]??app?.display.manifest.icon??manifest?.icon??'';
+  const key=aliases[applicationLinkId(id)]??app?.display.manifest.icon??manifest?.icon??'';
   const image=app?.display.listing?.icon;
   return {key:known.has(key)?key:'package',imageURL:image&&app?storeImageURL(app,image):null};
 }

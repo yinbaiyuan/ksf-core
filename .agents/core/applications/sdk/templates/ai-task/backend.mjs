@@ -41,3 +41,5 @@ export async function activate(context) {
     dispose(){}
   };
 }
+
+export async function prepareData(context){await createJSONStore(context,{initial:{run:null}}).migrate();}

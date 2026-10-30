@@ -24,7 +24,6 @@
 .os-menu > div h3,.dock-context-menu h3 { display: flex; justify-content: space-between; font-size: 11px; color: #52637a; font-weight: 500; padding: 7px 10px 9px; margin: 0; }
 .os-menu > div button small,.dock-context-menu button small { display: block; font-size: 10px; opacity: .8; margin-top: 3px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .desktop-surface { position: absolute; inset: var(--desktop-statusbar-height) 72px calc(var(--desktop-dock-height) + var(--desktop-dock-bottom) + 12px) 72px; display: flex; flex-direction: column; }
-.desktop-surface[hidden] { display: none; }
 .desktop-heading { display: flex; flex-shrink: 0; flex-wrap: wrap; justify-content: space-between; align-items: end; column-gap: 24px; row-gap: 12px; min-height: 96px; padding: 20px 0; }
 .desktop-motto { margin-left: -44px; align-self: flex-start; }
 .desktop-heading h1 { color: #193656; font-size: 24px; line-height: 1.35; font-weight: 600; letter-spacing: -.6px; margin: 0 0 5px; text-shadow: 0 1px 16px #ffffff8a; }
@@ -46,7 +45,10 @@
 .desktop-widget::after { content: ''; position: absolute; inset: 1px; border: 1px solid #ffffff38; border-radius: inherit; pointer-events: none; }
 .widget-content { height: 100%; padding: 17px 18px; overflow: auto; scrollbar-width: thin; }
 .widget-content.is-compact { padding: 8px; }
-.widget-caption { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; line-height: 16px; font-size: 11px; font-weight: 500; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #20334a; text-shadow: 0 1px 6px #ffffffb3; }
+.widget-caption { position: absolute; top: 100%; left: 0; right: 0; display: flex; justify-content: center; padding-top: 3px; line-height: 18px; font-size: 12px; font-weight: 600; color: #fff; user-select: none; }
+.widget-caption > span { min-width: 0; max-width: 100%; padding-inline: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-text-stroke: .3px #13243c80; paint-order: stroke fill; text-shadow: 0 1px 2px #071528e6,0 0 1px #071528,0 0 6px #07152880; }
+@media (prefers-contrast: more) { .widget-caption > span { -webkit-text-stroke: .5px #071528; text-shadow: 0 1px 2px #000; } }
+@media (forced-colors: active) { .widget-caption > span { color: CanvasText; background: Canvas; -webkit-text-stroke: 0; text-shadow: none; } }
 .widget-shortcut { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 100%; border: 0; border-radius: 14px; background: transparent; color: #225c97; }
 .widget-shortcut span { font-size: 10px; }
 .widget-shortcut:hover { background: #ffffff4d; }
@@ -60,6 +62,7 @@
 .desktop-grid[data-glass-interacting] .glass-surface { visibility: hidden; }
 
 .is-editing .desktop-widget { outline: 1px dashed #ffffffdb; outline-offset: 4px; }
+.is-editing .desktop-widget:focus-visible { outline: 2px solid #0755b8; }
 .desktop-grid .react-grid-item.react-grid-placeholder { z-index: 0; opacity: 1; background: #d9e2eb73; border: 0; outline: 0; border-radius: var(--card-radius,24px); box-shadow: none; transition: none; pointer-events: none; }
 .react-grid-item { transition: none; }
 .react-grid-item > .react-resizable-handle { z-index: 3; width: 22px; height: 22px; bottom: 6px; right: 6px; }
@@ -89,8 +92,10 @@
 .os-app-content { width:100%; height:100%; min-width:0; min-height:0; overflow:auto; overscroll-behavior:contain; border-radius:inherit; }
 .os-app-overlays { position:absolute; inset:0; z-index:100; pointer-events:none; overflow:hidden; isolation:isolate; contain:layout style; border-radius:inherit; }
 .os-app-overlays > * { pointer-events:auto; }
-.os-dock { position: absolute; bottom: var(--desktop-dock-bottom); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; height: var(--desktop-dock-height); padding: 7px 13px; z-index: 1000; border-radius: var(--glass-dock-radius,26px); isolation: isolate; border: .5px solid #ffffff91; box-shadow: inset 0 1px #ffffff91; }
-.dock-item { width: 49px; height: 54px; display: flex; align-items: center; justify-content: center; position: relative; background: none; border: 0; padding: 0 0 4px; }
+.os-dock { position: absolute; bottom: var(--desktop-dock-bottom); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; height: var(--desktop-dock-height); max-width: calc(100vw - 16px); padding: 7px 13px; z-index: 1000; border-radius: var(--glass-dock-radius,26px); isolation: isolate; border: .5px solid #ffffff91; box-shadow: inset 0 1px #ffffff91; }
+.dock-item { width: 49px; height: 54px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; background: none; border: 0; padding: 0 0 4px; }
+.dock-applications { display: flex; align-items: center; gap: 10px; min-width: 0; overflow-x: auto; padding-block: 7px; margin-block: -7px; scrollbar-width: none; }
+.launcher-icon { color: #fff; background: linear-gradient(145deg,#8799b6,#546988); }
 .app-icon { display: grid; place-items: center; width: 45px; height: 45px; border-radius: 13px; color: #fff; box-shadow: inset 0 1px 1px #ffffff9c, inset 0 -1px 1px #152d5550, 0 3px 7px #133b6b29; transition: transform 160ms ease; }
 .dock-item:hover .app-icon { transform: translateY(-5px); }.dock-item:active .app-icon { transform: translateY(0); }
 .conversation-icon { background: linear-gradient(145deg,#74c6ff,#317cf2 60%,#1450c5); }
@@ -102,9 +107,23 @@
 .dock-context-menu button > span { min-width: 0; overflow-wrap: anywhere; }
 .dock-context-menu button > svg { flex-shrink: 0; }
 .dock-context-menu button:focus-visible { outline: 2px solid #0755b8; outline-offset: -2px; }
-.dock-divider { width: 1px; height: 37px; background: #24466c24; margin-inline: 2px; }
+.dock-divider { width: 1px; height: 37px; flex-shrink: 0; background: #24466c24; margin-inline: 2px; }
 .desktop-empty { text-align: center; color: #2c4d72; padding: 40px; }.desktop-empty button { border: 1px solid white; background: #ffffffbb; border-radius: 8px; padding: 8px 14px; }
 .sheet { z-index: 2200; }.sheet-overlay { z-index: 2100; }.drawer-material-stage { z-index: 2200; }
+/* Application grid opens directly above its permanent Dock button. */
+.application-launcher { position: fixed; z-index: 2000; display: flex; padding: 12px; box-sizing: border-box; border: 1px solid #cbd5e2; border-radius: 20px; background: #f7f9fc; color: #263c56; box-shadow: 0 12px 40px #142e4d40,0 2px 6px #142e4d1a; }
+.application-launcher::after { content: ''; position: absolute; left: var(--launcher-arrow-left); bottom: -8px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg); border-right: 1px solid #cbd5e2; border-bottom: 1px solid #cbd5e2; background: #f7f9fc; pointer-events: none; }
+.launcher-applications { display: grid; grid-template-columns: repeat(auto-fill,minmax(84px,1fr)); align-content: start; gap: 6px; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 4px; scrollbar-width: thin; }
+.launcher-application { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; padding: 10px 4px; border: 1px solid transparent; border-radius: 13px; background: transparent; color: inherit; cursor: pointer; }
+.launcher-application:hover { border-color: #d5dfeb; background: #e8eef6; }
+.launcher-application:focus-visible { outline: 2px solid #1769bd; outline-offset: -2px; }
+.launcher-application .desktop-app-icon { width: 56px; height: 56px; border-radius: 13px; }
+.launcher-application-name { max-width: 100%; font-size: 12px; line-height: 1.5; text-align: center; overflow-wrap: anywhere; }
+.launcher-context-menu { z-index: 2050; width: 232px; min-width: 0; max-height: calc(100dvh - 16px); }
+.launcher-context-menu button:disabled { color: #718096; cursor: default; }
+.launcher-context-menu button:disabled:hover { color: #718096; background: transparent; }
+@media (forced-colors: active) { .application-launcher,.application-launcher::after { background: Canvas; color: CanvasText; border-color: CanvasText; } }
+
 .widget-library { display: grid; gap: 12px; margin: 24px 0; }.widget-library article { display: flex; align-items: center; gap: 12px; background: #fff9; border: 1px solid #ffffff; border-radius: 14px; padding: 16px; }.widget-library article > span { display: grid; place-items: center; color: #4672a8; background: #e2edfa; border-radius: 12px; width: 46px; height: 46px; flex-shrink: 0; }.widget-library h3 { font-size: 14px; margin: 0 0 5px; }.widget-library p { font-size: 11px; margin: 0; color: #526b87; line-height: 1.6; }.widget-library button { display: flex; gap: 4px; align-items: center; margin-left: auto; padding: 6px 8px; border: 1px solid #cbdcf0; background: #fff; border-radius: 8px; color: #185da8; font-size: 11px; white-space: nowrap; }
 .sheet:has(.widget-library),.sheet:has(.window-coordinate-form) { background: #f3f7fc; }
 .about-logo { display: flex; justify-content: center; padding: 5px 0 16px; }
@@ -201,11 +220,11 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 .system-settings > .sheet-body { padding: 0; display: grid; grid-template-columns: 184px minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; }
 .settings-navigation { display: flex; flex-direction: column; min-height: 0; background: #f5f7fa; border-right: 1px solid #e5eaf1; padding: 22px 12px 14px; }
 .settings-brand { display: flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; padding: 0 8px 24px; }
-.settings-tabs { display: grid; gap: 6px; }
+.settings-tabs { display: grid; gap: 6px; min-height: 0; overflow: auto; align-content: start; }
 .settings-tabs button { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 9px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #43546b; text-align: left; font-size: 13px; cursor: pointer; }
 .settings-tabs button:hover { background: #e9eef5; }
 .settings-tabs button[aria-selected="true"] { background: #fff; border-color: #e5eaf1; color: #075ba8; box-shadow: 0 2px 5px #19334e08; }
-.settings-local-note { margin: auto 8px 0; padding-top: 24px; font-size: 10px; line-height: 1.6; color: #718096; }
+.settings-local-note { margin: auto 8px 0; padding-top: 24px; font-size: 10px; line-height: 1.6; color: #718096; flex-shrink: 0; }
 .settings-page { min-width: 0; min-height: 0; padding: 26px 30px 18px; overflow: auto; scrollbar-width: thin; }
 .settings-page-title { margin: 0 0 24px; font-size: 18px; font-weight: 600; color: #24364e; }
 .settings-page button { cursor: pointer; }
@@ -271,3 +290,30 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 @media (forced-colors: active) { .desktop-sidebar, .sidebar-tooltip, .sheet.system-settings { background: Canvas; color: CanvasText; border-color: CanvasText; }.sidebar-button.selected, .settings-tabs button[aria-selected="true"] { outline: 2px solid Highlight; } }
 
 .dock-window-target{padding:7px 11px 3px;font-size:10px;color:#7b889b;border-top:1px solid #dce3ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.system-settings > .sr-only { position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+
+.settings-documentation-link{margin:12px 16px 0;padding:8px 10px;text-align:left;border:1px solid var(--border,#dbe2ec);border-radius:7px;background:transparent;color:inherit;font-size:12px}.settings-documentation-link:disabled{opacity:.5;cursor:default}
+
+/* Launchers share the grid with cards, without mounting an application surface. */
+.desktop-application { position:absolute; inset:0; display:grid; place-items:center; }
+.application-shortcut-launch { width:100%; height:100%; display:grid; place-items:center; border-radius:18px; outline-offset:-3px; }
+.application-shortcut-launch:hover { background:#ffffff26; }
+.application-shortcut-launch:focus-visible { outline:2px solid #0865c9; }
+.application-shortcut-launch[aria-disabled=true] { opacity:.55; }
+.is-editing .application-shortcut-launch { opacity:1; outline:1px dashed #ffffffdb; }
+.is-editing .application-shortcut-launch:focus-visible { outline:2px solid #0865c9; }
+.desktop-app-icon { width:64px; height:64px; border-radius:15px; box-shadow:0 4px 12px #16314e22,inset 0 0 0 .5px #ffffff70; }
+.desktop-application > .widget-edit-tools { position:absolute; right:0; top:0; z-index:4; display:flex; gap:3px; }
+.shortcut-error { color:#963c29; font-size:12px; }
+.status-app-icon { width:20px; height:20px; border-radius:5px; }
+.background-apps { display:flex; align-items:center; gap:4px; flex:none; height:100%; }
+.background-app-menu summary { width:24px; height:26px; padding:2px; justify-content:center; }
+.background-apps .os-menu > div { position:fixed; top:32px; right:12px; width:240px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 48px); overflow:auto; }
+.background-state { margin:0; padding:0 10px 7px; font-size:11px; color:#65768b; }
+.background-app-menu section + section { border-top:1px solid #dce3ed; margin-top:5px; padding-top:5px; }
+.background-apps.is-stale summary { opacity:.5; }
+.background-unknown { display:grid; place-items:center; width:24px; height:24px; border:1px solid #8492a8; border-radius:50%; }
+.status-right time { white-space:nowrap; }
+@media(max-width:639px){.os-statusbar{padding-right:8px}.status-right{gap:8px}.status-left,.status-right{column-gap:8px}.desktop-app-icon{width:60px;height:60px}}
+@media(forced-colors:active){.application-shortcut-launch:focus-visible{outline-color:Highlight}.desktop-app-icon,.status-app-icon{border:1px solid ButtonText}.background-apps .os-menu>div{background:Canvas;color:CanvasText}}

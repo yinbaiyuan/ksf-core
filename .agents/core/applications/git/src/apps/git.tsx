@@ -2,7 +2,7 @@ import './git.css';
 import { useEffect, useRef, useState } from 'react';
 import { Archive, ArrowDown, ArrowLeft, ArrowUp, Check, ChevronRight, FileText, Folder, GitBranch, GitMerge, History, PanelLeft, RefreshCw, Settings2, GitCommitHorizontal, Download, X } from 'lucide-react';
 import type { AppProps } from '@ksf/sdk/desktop/registry';
-import { useWindowContext, useWindowState } from '@ksf/sdk/window-context';
+import { useApplicationMenu, useApplicationSettings, useWindowContext, useWindowState } from '@ksf/sdk/window-context';
 import { randomId } from '@ksf/sdk/random-id';
 import { Sheet } from '@ksf/sdk/components/ui/sheet';
 import { getSession, query, request, useResource, workspaceChanged } from '@ksf/sdk/apps/client';
@@ -35,7 +35,7 @@ export function GitApp({ search, navigate, openApp }: AppProps) {
   const root=useRef<HTMLDivElement>(null), [appWidth,setAppWidth]=useState(1200), [repositoryDrawer,setRepositoryDrawer]=useState(false), [issuesOpen,setIssuesOpen]=useState(false);
   useEffect(()=>{if(!root.current)return;const observer=new ResizeObserver(()=>setAppWidth(root.current?.clientWidth??1200));observer.observe(root.current);return()=>observer.disconnect();},[]);
   const toggleRepositories=()=>appWidth<900?setRepositoryDrawer(value=>!value):setSidebar(value=>!value);
-  const chooseRepository=(id:string|null)=>{navigate({app:'git',repo:id,path:null});setRepositoryDrawer(false);};
+  const chooseRepository=(id:string|null)=>{navigate({app:'com.ksf.git',repo:id,path:null});setRepositoryDrawer(false);};
   const repo = catalog.data?.repositories.find(r => r.id === repoId);
   useEffect(() => { void getSession().then(session => { try { const saved: unknown = JSON.parse(localStorage.getItem(`ksf.git.favorites.${session.instanceId}`) ?? '[]'); if (Array.isArray(saved)) setFavorites(saved.filter(v => typeof v === 'string')); } catch {} }); }, []);
   const favorite = (id: string) => { const next = favorites.includes(id) ? favorites.filter(x => x !== id) : [...favorites, id]; setFavorites(next); void getSession().then(session => { try { localStorage.setItem(`ksf.git.favorites.${session.instanceId}`, JSON.stringify(next)); } catch {} }); };
@@ -55,6 +55,7 @@ export function GitApp({ search, navigate, openApp }: AppProps) {
 function RepositoryWorkspace({ repo, path, catalogRefresh, openApp, repositoriesVisible, toggleRepositories, navigationDocked }: { repo: Repository; navigationDocked:boolean; repositoriesVisible:boolean; toggleRepositories:()=>void; path: string; catalogRefresh: () => void; openApp: AppProps['openApp'] }) {
   const preferences=useGitPreferences();
   const [nodeState,setNodeState]=useWindowState<GitNode|null>('git-node-'+repo.id,null), node:GitNode=nodeState??{kind:'worktree'}, [lastCommit,setLastCommit]=useWindowState('git-last-commit-'+repo.id,''), [drawer,setDrawer]=useState(false), [width,setWidth]=useState(1200), [narrowTab,setNarrowTab]=useWindowState('git-narrow-tab-'+repo.id,'graph'), [settingsOpen,setSettingsOpen]=useState(false);
+  useApplicationSettings(()=>setSettingsOpen(true));
   const commitPending=useRef(false);
   const prefix = `/api/git/repositories/${repo.id}`, status = useResource<GitStatus>(prefix + '/status', 4000), refs = useResource<GitRefs>(prefix + '/refs', 10000);
   const [view, setView] = useWindowState('git-view-' + repo.id, 'changes'), [selection, setSelection] = useState<Selection | null>(null), [historyPath, setHistoryPath] = useState(''), [historyRev, setHistoryRev] = useWindowState('git-history-scope-'+repo.id,'');
@@ -69,6 +70,10 @@ function RepositoryWorkspace({ repo, path, catalogRefresh, openApp, repositories
   const tree = useResource<{ path: string; rev: string; entries: { path: string; name: string; type: string; mode: string }[] }>(view === 'files' ? query(prefix + '/tree', { path: treePath, rev: treeRev }) : null);
   const busy = starting || !!operation && ['queued', 'running'].includes(operation.status);
   const refresh = () => { status.refresh(); refs.refresh(); tree.refresh(); catalogRefresh(); workspaceChanged(); };
+  useApplicationMenu([
+    {id:'repository',label:'仓库',children:[{id:'repository.refresh',label:'刷新仓库',disabled:busy,onAction:refresh},{id:'repository.settings',label:'仓库设置…',onAction:()=>setSettingsOpen(true)}]},
+    {id:'display',label:'显示',children:[{id:'display.wrap',label:'差异自动换行',checked:preferences.value.wrap,onAction:({checked})=>preferences.update({wrap:checked!})}]},
+  ]);
   useEffect(() => { if (path) { setSelection({ path, staged: false }); setNodeState({kind:'worktree'}); setView('changes'); setNarrowTab('details'); } }, [path]);
   useEffect(() => { let live = true; void getSession().then(async session => { try { const id = localStorage.getItem(`ksf.git.operation.${session.instanceId}.${repo.id}`); if (id) { const op = await request<Operation>('/api/git/operations/' + id); if (live) { if (['completed', 'failed'].includes(op.status)) processed.current = op.id; setOperation(op); } } } catch (error) { if ((error as { code?: string }).code === 'GIT_OPERATION_UNKNOWN') try { localStorage.removeItem(`ksf.git.operation.${session.instanceId}.${repo.id}`); } catch {} if (live) setError((error as Error).message); } }); return () => { live = false; }; }, [repo.id]);
   useEffect(() => {
@@ -94,7 +99,7 @@ function RepositoryWorkspace({ repo, path, catalogRefresh, openApp, repositories
   };
   const ask = (action: string, title = actionLabels[action], values: Record<string, unknown> = {}) => { if (!current || busy) return; setReviewLimit(200); const target = remoteTarget(current.branch, current.remotes); setForm({ action, title, version: current.version, input: { name: action === 'branch-create' ? 'codex/' : '', startPoint: 'HEAD', checkout: true, remote: target.remote, branch: target.branch, setUpstream: !current.branch.upstream, includeUntracked: false, restoreIndex: true, message: action === 'commit' ? draft.message : '', ...values } }); setError(''); };
   const updateForm = (name: string, value: unknown) => setForm(previous => previous ? { ...previous, input: { ...previous.input, ...(name === 'startPoint' || name === 'name' && previous.action === 'merge' ? { expectedOid: undefined } : {}), [name]: value } } : null);
-  const edit = (file: string) => openApp?.('markdown', new URLSearchParams({ path: repo.path === '.' ? file : `${repo.path}/${file}` }).toString());
+  const edit = (file: string) => openApp?.('com.ksf.markdown', new URLSearchParams({ path: repo.path === '.' ? file : `${repo.path}/${file}` }).toString());
   const showHistory = (path = '', rev = '') => { setHistoryPath(path); setHistoryRev(rev); setView('history'); setNarrowTab('graph'); if(rev)setNodeState({kind:'commit',oid:rev}); else if(lastCommit||current?.branch.oid)setNodeState({kind:'commit',oid:lastCommit||current!.branch.oid!}); };
   const selectNode=(next:GitNode)=>{setNodeState(next);if(next.kind==='commit')setLastCommit(next.oid);setView('history');setNarrowTab('details');setDrawer(false);};
   const openHistory=(ref='',oid='')=>{setHistoryRev(ref);setHistoryPath('');setView('history');setDrawer(false);setNarrowTab('graph');const target=oid||lastCommit||current?.branch.oid;if(target){setNodeState({kind:'commit',oid:target});setLastCommit(target);}};

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync, appendFileSync, readFileSync, existsSync, mkdirSync, rmSync, readdirSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { routingFixture } from './helpers/routing-fixture.js';
-import { enableCapture, declareTask, syncTasks, listTasks, readTask, installTaskHooks, taskHook, taskRouteProjections } from '../src/services/tasks.js';
+import { enableCapture, configureCapture, declareTask, syncTasks, listTasks, readTask, installTaskHooks, taskHook, taskRouteProjections } from '../src/services/tasks.js';
 import { sessionKey } from '../src/routing/storage.js';
 import { turnPath, CAPTURE, ARCHIVE } from '../src/task-capture/storage.js';
 import { runTaskCommand } from '../src/commands/tasks.js';
@@ -27,6 +27,16 @@ function fixture(t) {
   const read = turnId => readTask({ root: f.root, taskId: id, turnId }).turn;
   return { ...f, home, path, env, id, append, start, message, receipt, output, sync, read };
 }
+test('global archive pause never backfills disabled turns after restart and preserves chat privacy state',async t=>{
+ const f=fixture(t);f.start('before','2026-01-02T00:00:00Z');f.message('before-u','user','保留旧正文');await f.sync();
+ configureCapture({root:f.root,enabled:false,at:'2026-01-03T00:00:00Z'});
+ f.start('disabled','2026-01-04T00:00:00Z');f.message('off-u','user','不能补采的正文');f.output(f.receipt('disabled','privacy-pause','pause'));
+ assert.equal((await f.sync()).skipped,true);
+ configureCapture({root:f.root,enabled:true,at:'2026-01-05T00:00:00Z'});
+ f.start('after','2026-01-06T00:00:00Z');f.message('after-u','user','仍然遵守聊天暂停');await f.sync();
+ assert.equal(f.read('before').messages[0].content[0].text,'保留旧正文');assert.equal(f.read('disabled').messages.length,0);assert.equal(f.read('after').messages.length,0);
+ f.start('resumed','2026-01-07T00:00:00Z');f.message('resume-u','user','恢复后的正文');f.output(f.receipt('resumed','privacy-resume','resume'));await f.sync();assert.equal(f.read('resumed').messages[0].content[0].text,'恢复后的正文');
+});
 test('future native rounds, exact messages and route declarations survive restart without Web', async t => {
   const f = fixture(t);
   f.start('old', '2025-12-31T00:00:00Z'); f.message('old', 'user', '不可导入的历史');

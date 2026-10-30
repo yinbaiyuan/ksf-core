@@ -17,7 +17,10 @@ test('a shipped workspace has reachable optional rules and empty cognition paths
     assert.equal(entries.get(path).mode, 0o644);
   }
   assert.deepEqual(readdirSync(join(f.workspace, '知识')).sort(), ['.gitkeep', 'knowledge.md', 'rules']);
-  assert.deepEqual(readdirSync(join(f.workspace, '.agents/user-data')), ['.gitkeep']);
+  assert.deepEqual(readdirSync(join(f.workspace, '.agents/user-data')).sort(), ['.gitkeep', 'incubation.json']);
+  const incubation=JSON.parse(readFileSync(join(f.workspace, '.agents/user-data/incubation.json'),'utf8'));
+  assert.deepEqual(incubation.values,{status:'pending'});
+  assert.equal(incubation.namespace,'incubation');
   assert.equal(existsSync(join(f.workspace, '能力/基本功/competency.yinbaiyuan.knowledge-extraction')), false);
   const result = checkKnowledge({ root: f.workspace });
   assert.equal(result.valid, true, JSON.stringify(result.errors));

@@ -11,8 +11,10 @@ import { configuration } from './configuration.js';
 import { digestObject, isSHA, sha256, stableJSON } from '../shared/hash.js';
 import { fail } from './errors.js';
 import { installedManifest, validateManifest, releaseReceipt, validateProducts } from './manifests.js';
+import {assertCoreDataCompatibility} from '../data-compatibility.js';
 import { checkSourceCompatibility } from '../sources/compatibility.js';
 import { isRepository, isRevision } from './git-values.js';
+import { developmentPath } from './paths.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { download, releaseIndex } from './network.js';
 import { inspectCoreArchive } from './release.js';
@@ -29,7 +31,7 @@ function localFile(root, path, declared) {
   return bytes === null ? null : { bytes, mode: fileMode(checkedPath(root, path), declared) };
 }
 export function systemFingerprint(root) {
-  const paths = walkFiles(root, '.agents/core').concat(rootFiles).sort();
+  const paths = walkFiles(root, '.agents/core', { exclude: developmentPath }).concat(rootFiles).sort();
   return digestObject(paths.map(path => [path, sha256(readRegular(root, path)), fileMode(checkedPath(root, path))]));
 }
 export async function systemRead({ root, api, fetcher }) {
@@ -49,7 +51,7 @@ export async function systemRead({ root, api, fetcher }) {
     const file = localFile(root, path, base.mode);
     if (!equals(file, base)) changes.push({ path, state: file === null ? 'deleted' : 'modified' });
   }
-  for (const path of walkFiles(root, '.agents/core').concat(rootFiles)) {
+  for (const path of walkFiles(root, '.agents/core', { exclude: developmentPath }).concat(rootFiles)) {
     if (path !== '.agents/core/release.json' && !generated.has(path) && !Object.hasOwn(manifest.files, path) && !/\.tmp$/.test(path) && localFile(root, path) !== null) changes.push({ path, state: 'added' });
   }
   return { mode: 'workspace', installed: true, version: manifest.version, platform: manifest.platform,
@@ -113,6 +115,7 @@ function backupRecords(root) {
   if (!existsSync(path)) return [];
   return readdirSync(path).sort().reverse().flatMap(id => {
     if (!/^[A-Za-z0-9._-]+$/.test(id)) return [];
+    if (!lstatSync(checkedPath(root, `.agents/runtime-data/system/backups/${id}`)).isDirectory()) return [];
     const record = readJSON(root, `.agents/runtime-data/system/backups/${id}/meta.json`, true);
     return record ? [{ ...record, id }] : [];
   });
@@ -251,6 +254,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
     writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(releaseReceipt(incoming)));
     verifyCandidate(staging, plan.changes.map(c => c.path));
     checkSourceCompatibility(root, staging);
+    await assertCoreDataCompatibility(root,join(staging,'.agents/core'));
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed during update validation.');
     if (dryRun) return { ...result, wouldChange: true };
     return { ...result, ...commitCandidate(root, staging, { before, from: current.version, to: incoming.version, fault }) };
@@ -273,6 +277,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
     }
     verifyCandidate(staging);
     checkSourceCompatibility(root, staging);
+    await assertCoreDataCompatibility(root,join(staging,'.agents/core'));
     if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun };
     return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault }), dryRun };
   } finally { rmSync(staging, { recursive: true, force: true }); }

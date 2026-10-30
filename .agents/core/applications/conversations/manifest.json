@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 2,
-  "id": "conversations",
-  "name": "对话工作台",
-  "version": "0.1.7",
-  "description": "查看 KSF 归属聊天、原始轮次与路由，提供工作统计卡片。",
+  "schemaVersion": 1,
+  "id": "com.ksf.conversations",
+  "name": "KSF飞轮",
+  "version": "0.2.21",
+  "description": "汇聚工作记录、回顾结果与改进建议，推动项目、知识和能力持续积累。",
   "author": "KSF",
-  "icon": "conversations",
-  "sdkVersion": 2,
+  "icon": "flywheel",
+  "sdkVersion": 1,
   "window": {
     "entry": "frontend/index.js",
     "multiInstance": true,
@@ -38,9 +38,70 @@
   ],
   "backend": {
     "runtime": "node",
-    "entry": "backend/index.mjs"
+    "entry": "backend/index.mjs",
+    "lifecycle": "resident"
   },
   "permissions": [
-    "filesystem"
-  ]
+    "filesystem",
+    "background",
+    "ai",
+    "codex-conversations"
+  ],
+  "minCoreVersion": "0.3.2",
+  "dataStores": [],
+  "cli": {
+    "contractVersion": 1,
+    "entry": "cli/index.mjs",
+    "documentation": "docs/cli.md",
+    "commands": [
+      {
+        "id": "overview",
+        "description": "回顾概览与运行状态"
+      },
+      {
+        "id": "profiles",
+        "description": "可用执行配置"
+      },
+      {
+        "id": "configure",
+        "description": "设置自动回顾"
+      },
+      {
+        "id": "generate",
+        "description": "生成指定日期报告"
+      },
+      {
+        "id": "report",
+        "description": "读取报告"
+      },
+      {
+        "id": "confirm",
+        "description": "用户审阅并归档"
+      },
+      {
+        "id": "resume",
+        "description": "恢复原运行"
+      },
+      {
+        "id": "suggestions",
+        "description": "查询建议"
+      },
+      {
+        "id": "suggestion",
+        "description": "更新建议状态"
+      },
+      {
+        "id": "chats",
+        "description": "按归档状态查询聊天"
+      },
+      {
+        "id": "restore",
+        "description": "恢复对话"
+      },
+      {
+        "id": "retry",
+        "description": "显式重试已确认失败的任务"
+      }
+    ]
+  }
 }

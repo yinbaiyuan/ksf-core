@@ -9,11 +9,12 @@ import {supportedCodexVersion} from './codex-compatibility.js';
 export async function runCodex(spec, { signal, onIdentity = async () => {}, env = process.env } = {}) {
   const version = spawnSync(spec.executablePath, ['--version'], { encoding: 'utf8', timeout: 10000, maxBuffer: 8192, env });
   requireAI(version.status === 0 && supportedCodexVersion(version.stdout??''), 'AI_CLI_VERSION_UNSUPPORTED', 'Codex CLI 版本不属于已验证范围，请核对安装版本。');
-  const cwd = await mkdtemp(join(tmpdir(), 'ksf-ai-codex-'));
-  const finalPath = join(cwd, 'final.txt'), schemaPath = join(cwd, 'output-schema.json');
+  const cwd = spec.execution?.work ?? await mkdtemp(join(tmpdir(), 'ksf-ai-codex-'));
+  const finalPath = spec.execution?.finalPath ?? join(cwd, 'final.txt'), schemaPath = join(cwd, 'output-schema.json');
   if (spec.schema) await writeFile(schemaPath, JSON.stringify(spec.schema), { mode: 0o400 });
-  const args = ['--no-daemon', '-a', 'never', 'exec', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--ephemeral', '--json', '--color', 'never', '--sandbox', 'read-only', '-C', cwd, '-o', finalPath, '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"'];
-  for (const feature of ['shell_tool', 'apps', 'plugins', 'hooks', 'multi_agent', 'multi_agent_v2', 'browser_use', 'computer_use', 'code_mode_host']) args.push('--disable', feature);
+  const args = ['--no-daemon', '-a', 'never', 'exec', ...(spec.execution?['--strict-config']:['--ignore-user-config']), '--ignore-rules', '--skip-git-repo-check', '--ephemeral', '--json', '--color', 'never', ...(!spec.execution?['--sandbox','read-only']:[]), '-C', cwd, '-o', finalPath, '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"'];
+  for (const feature of ['shell_tool', 'apps', 'plugins', 'hooks', 'multi_agent', 'multi_agent_v2', 'browser_use', 'computer_use', 'code_mode_host']) if(!['shell_tool','code_mode_host'].includes(feature)||!spec.execution?.shell)args.push('--disable', feature);
+  if(spec.execution?.shell)args.push('--enable','shell_tool','--enable','code_mode_host');
   if (spec.model) args.push('-m', spec.model);
   if (spec.reasoningEffort) args.push('-c', `model_reasoning_effort="${spec.reasoningEffort}"`);
   if (spec.schema) args.push('--output-schema', schemaPath);

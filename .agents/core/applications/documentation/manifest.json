@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.ksf.documentation",
+  "name": "KSF手册",
+  "version": "0.1.5",
+  "description": "离线阅读完整KSF手册，按路线浏览、搜索正文和跳转章节。",
+  "author": "KSF",
+  "icon": "manual",
+  "minCoreVersion": "0.3.2",
+  "dataStores": [],
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 1160,
+      "height": 780
+    },
+    "minSize": {
+      "width": 540,
+      "height": 420
+    }
+  },
+  "cards": [],
+  "permissions": [
+    "filesystem"
+  ]
+}

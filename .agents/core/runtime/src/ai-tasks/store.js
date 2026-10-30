@@ -59,6 +59,6 @@ export async function createAIStore(root) {
       requireAI(['queued','running','retry_wait','reconciling','succeeded','failed','cancelled'].includes(task.status)&&Number.isSafeInteger(task.revision)&&task.events.length===task.revision&&task.events.every((event,index)=>event.seq===index+1)&&task.events.at(-1).status===task.status&&task.requestDigest===sha256(canonical(task.request))&&task.appId===task.caller?.appId,'AI_STORAGE_INVALID','任务状态、请求摘要或事件序列损坏，拒绝派发。');
       tasks.set(task.aiTaskId, task);
     }
-    return { home, runtime, tasks, close, async save(task) { await atomicJSON(join(home, 'tasks', task.aiTaskId + '.json'), task); tasks.set(task.aiTaskId, task); } };
+    return { root, home, runtime, tasks, close, async save(task) { await atomicJSON(join(home, 'tasks', task.aiTaskId + '.json'), task); tasks.set(task.aiTaskId, task); } };
   } catch (error) { await close(); throw error; }
 }

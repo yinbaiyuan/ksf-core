@@ -22,7 +22,7 @@ export const darwin = {
   ],
   openURI: uri => ({ executable: '/usr/bin/open', args: [uri] }),
   processStart(pid) {
-    const result = spawnSync('/bin/ps', ['-p', String(pid), '-o', 'lstart='], { encoding: 'utf8' });
+    const result = spawnSync('/bin/ps', ['-p', String(pid), '-o', 'lstart='], { encoding: 'utf8',env:{...process.env,LC_ALL:'C'} });
     if (result.status !== 0 || !result.stdout.trim()) throw new Error('Cannot inspect process start identity.');
     return result.stdout.trim().replace(/\s+/g, ' ');
   },

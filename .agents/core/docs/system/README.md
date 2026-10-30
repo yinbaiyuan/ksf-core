@@ -28,7 +28,7 @@ flowchart TD
 
 Windows x64 已接入固定入口、PowerShell bootstrap、随包 Node ZIP 和同一套业务 CLI，平台边界见 [双平台架构](../runtime/platforms.md)。`hello`、`build`、`test`、`runtime verify` 等简单命令由 cli.js 直接处理，其他命令按各自适配层分发。普通启动只准备本地环境和恢复已发起事务，不检查远程版本或自动升级。
 
-[`web`](../cli/web.md) 通过同一启动器和随包 Node 提供前台本地 HTTP 服务，提供随包路由页、只读查询及健康接口，不暴露工作区目录或运行 Agent；命令适配层管理参数和启停，服务层持有 HTTP 路由与连接生命周期。
+[`web`](../cli/web.md) 通过同一启动器和随包 Node 提供前台本地 HTTP 服务，提供工作台、受控读写、应用与公共接口及健康检查，不把实例根作为静态目录或自动运行Agent；命令适配层管理参数和启停，服务层持有 HTTP 路由与连接生命周期。
 
 路由记录由 [route](../cli/route.md) 的服务与存储层持有，位于 runtime-data/routing/v1。Agent 明确上报，CLI 与 Web 共用查询规则；关闭 Web 不影响记录。快照与有限历史不是项目检查点或完整聊天，KSFAssistant 适配后续进行。
 
@@ -36,7 +36,7 @@ Windows x64 已接入固定入口、PowerShell bootstrap、随包 Node ZIP 和�
 
 | 位置 | 持有内容 | 生命周期与归属 |
 | --- | --- | --- |
-| 根 `USER.md`、`BOT.md`、`MEMORY.md` | 用户长期设定、Agent 协作方式与短期续接 | 用户内容，由 runtime 完整读取；不属于 Core 或对象 user-data，升级回滚不补写、不覆盖 |
+| 根 `USER.md`、`BOT.md` | 用户长期设定与 Agent 协作方式 | 用户内容，由 runtime 完整读取；不属于 Core 或对象 user-data，升级回滚不补写、不覆盖 |
 | 根 `AGENTS.md` | Agent 运行入口 | 系统管理，发行与升级按基线处理 |
 | `.agents/ksf`、`.agents/ksf.ps1` | 原生启动、恢复与 Core 转交 | 位于 Core 外，保持小而稳定；变化时仍可随发行更新 |
 | `.agents/core/abilities/` | 系统协同、搭档、基本功和数据包 | 随 Core 发行；业务定义规则见对象文档 |
@@ -52,7 +52,7 @@ Core 源码与用户实例采用不同的忽略规则。Core 忽略真实用户�
 
 Agent 的整体调度、项目与能力路由返回、能力约定的资料读取、无项目/能力/资料缺口及局部重规划见[核心运行、项目与能力路由协作](../runtime/routing.md)。这是 Agent 采用的运行约定，不是新增语义调度服务。
 
-项目的最小继续信息按[任务检查点约定](../runtime/task-checkpoints.md)保存在项目材料中，属于可备份的用户内容。当前没有后台任务服务或自动完整会话采集，未保存的信息仍依赖宿主会话。
+项目的最小继续信息按[任务检查点约定](../runtime/task-checkpoints.md)保存在项目材料中，属于可备份的用户内容。独立主服务承载应用、AI和通信，对话采集由已授权Hooks及服务执行；未保存或未采集的信息仍依赖宿主会话。完整聊天归档也不等于项目检查点或自动恢复所有上下文。
 
 ## 文档的责任与时效
 
@@ -94,3 +94,7 @@ Agent 的整体调度、项目与能力路由返回、能力约定的资料读�
 ## Codex 聊天任务档案
 
 [task](../cli/task.md) 将启用后的原生轮次归档到 `档案/对话/Codex/`，游标和基线留在 task-capture 运行目录。声明服务只读核验项目与能力并返回签名回执，采集器读取宿主可见消息和回执；当前路由由原件投影，旧记录不迁移。Web 前台服务启动及运行时补采，关闭后项目 Hooks 和 CLI 仍可独立工作。
+
+## 当前主服务与完整阅读入口
+
+[完整系统文档](../README.md)提供五条阅读路线。[调用链](../handbook/architecture.md)串联Agent、CLI、主服务、应用和外部协作；[后台服务](../runtime/service.md)、[配置中心](../configuration-center.md)、[数据地图](../reference/data-map.md)分别持有运行、配置和所有权。前端资源失效不停止管理API和应用后台。新模板通过[首次孵化](../cli/incubation.md)进入正常runtime，旧实例缺少孵化状态继续正常运行。

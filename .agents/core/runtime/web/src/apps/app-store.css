@@ -7,3 +7,11 @@
 .store-app-link>div>span,.store-facts span,.store-information dt,.store-developer{color:#707581}.store-get.is-solid,.store-detail-actions .store-get{background:#0872df}
 
 .store-source-badge{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:6px;background:color-mix(in srgb,var(--store-accent,#087bff) 12%,transparent);color:var(--store-accent,#087bff);font-size:11px;font-weight:600;vertical-align:middle}.store-source-fixed{font-size:12px;color:var(--store-muted,#687485);white-space:nowrap}
+
+.store-app-title{display:flex;align-items:baseline;gap:8px;min-width:0;}
+.store-app-title>span:first-child{min-width:0;overflow-wrap:anywhere;}
+.store-cli-badge{display:inline-flex;align-items:center;flex:none;vertical-align:middle;white-space:nowrap;font-size:10px;font-weight:550;letter-spacing:.01em;line-height:1.5;border:0;border-radius:4px;padding:1px 5px;color:#527599;background:#edf3f9;margin:0;}
+.store-detail .store-app-title{align-items:center;flex-wrap:wrap;}
+.store-dialog>.store-cli-badge{margin-bottom:10px;}
+.store-detail-actions{flex-wrap:wrap;}
+.store-detail-actions small{font-size:11px;margin-left:5px;}

@@ -33,7 +33,9 @@ export function inspectReleaseDirectory(root, directory) {
         if (core.manifest.core.revision !== index.core_revision || core.manifest.development) fail('RELEASE_INVALID', 'Artifact revision or development status differs from the index.');
       } else {
         const entries = readArchive(bytes);
-        const documents = workspaceDocuments.filter(path => core.entries.has(`.agents/core/distribution/template/${path}`));
+        // MEMORY is no longer generated. Accept it only for a verified older
+        // bundle that carries its exact template source; never allow arbitrary extras.
+        const documents = [...workspaceDocuments, 'MEMORY.md'].filter(path => core.entries.has(`.agents/core/distribution/template/${path}`));
         const modern = documents.includes('档案/archive.md');
         const directories = modern ? userDirectories : [...userDirectories.filter(path => path !== '档案' && !path.startsWith('档案/')), '归档'];
         const extra = new Set(['README.md', '.gitignore', '.gitattributes', '.ksf-template.json', ...documents, ...directories.map(d => `${d}/.gitkeep`)]);

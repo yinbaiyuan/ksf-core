@@ -27,6 +27,8 @@ sync 默认扫描 `$CODEX_HOME/sessions` 与 archived_sessions（默认 ~/.codex
 
 ## 只读声明
 
+正文归档的全局开关通过[配置中心](../configuration-center.md)的 capture 领域管理。停用不删除既有正文，重新启用不补采停用期间开始的新轮次；已有逐聊天隐私规则保持优先。已经初始化但全局停用时，declare 仍可返回只读签名回执以表达策略，不会开启采集或写入正文。
+
 UserPromptSubmit 向 Runtime 提供准确 turnId 与 taskId。当前 Agent 在开始、路由确认/改变、采用能力和交付前运行 `ksf task declare --from - --json`，输入如下：
 
 ```json

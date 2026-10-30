@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {mountReact,useApplicationSDK} from '@ksf/sdk/react';
 import {createAIMaterialClient} from '@ksf/sdk/ai-materials';
-import type {AIMaterial,AIServiceDescription,ApplicationSDK2} from '@ksf/sdk';
+import type {AIMaterial,AIServiceDescription,ApplicationSDK} from '@ksf/sdk';
 import './style.css';
 function App() {
   const sdk=useApplicationSDK(),upload=useRef<AbortController|null>(null);
@@ -52,4 +52,4 @@ function App() {
     <pre>{JSON.stringify(state,null,2)}</pre>
   </main>;
 }
-export const mount=(container:HTMLElement,sdk:ApplicationSDK2)=>mountReact(App,container,sdk);
+export const mount=(container:HTMLElement,sdk:ApplicationSDK)=>mountReact(App,container,sdk);

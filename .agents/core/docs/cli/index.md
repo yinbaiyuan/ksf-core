@@ -12,7 +12,7 @@
 | hello | 检查启动与输出链路 | [hello](hello.md) |
 | app | 用户指定应用后读取包内 CLI 文档并调用 | [应用 CLI](../app-development/cli.md) |
 | communication | 本机与内网消息、材料、Agent 收件及回执 | [公共通信](communication.md) |
-| web | 随包 Node 启动本地路由工作台及只读接口 | [web](web.md) |
+| web | 前台调试主服务，提供工作台、应用和公共接口 | [web](web.md) |
 | route | Agent 会话路由记录、版本检查与查询 | [route](route.md) |
 | task | Codex 聊天任务逐轮原文、路由归档、Hooks 与补采 | [task](task.md) |
 | chat | 当前聊天轮次、能力参与计数、动态变量与有界自动上下文 | [chat](chat.md) |
@@ -20,9 +20,16 @@
 | build | 校验构建输入并生成 manifest | [build](build.md) |
 | test | 随包 Node 执行 JavaScript 测试 | [test](test.md) |
 | eval | 独立Agent自然语言项目、能力与资料采用批测、证据与评审 | [eval](eval.md) |
+| incubate | 首次孵化草稿、完成、跳过及恢复 | [incubate](incubation.md) |
+| assistant | 工作台投影及独立补采接口 | [assistant](assistant.md) |
+| config | 配置目录、版本读写、应用状态与导出 | [config](config.md) |
+| service | 独立主服务、诊断及登录自启动 | [service](service.md) |
+| open | 确保主服务就绪并打开工作台 | [open](open.md) |
+| source | 独立Git能力源关联、检查及导出 | [source](source.md) |
 | user-data | 系统设置、本地身份、能力源关联及对象配置／必要状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
-| context | 组织 Agent 所需的能力发现上下文 | [context](context.md) |
+| context | 返回固定运行入口及能力发现上下文 | [context](context.md) |
+| incubate | 首次设置、预检提交、恢复与明确跳过 | [incubation](incubation.md) |
 | project | 项目根卡与目录的基础管理 | [project](project.md) |
 | repository | 本地独立 Git 工程创建、项目关联与检查 | [repository](repository.md) |
 | release | 发行构建、发布和官方模板镜像 | [release](release.md) |
@@ -46,11 +53,11 @@ CLI 适配、对象服务、目录/契约/解析/发布模块分开。对象层�
 
 ## 后续能力
 
-`context capabilities` 复用对象服务，一次提供完整有效的协同和搭档摘要；项目基础命令已实现，Codex 聊天任务归档已实现，其他上下文操作及知识管理命令尚未形成确定接口。
+`context entry` 按实例孵化状态返回固定 Core 工作要求；`context capabilities` 复用对象服务，一次提供完整有效的协同和搭档摘要。项目基础命令与 Codex 聊天任务归档已实现；知识管理命令尚未形成确定接口。
 
 ## 调用与维护
 
-Core 开发仓库与发行工作区在 macOS 调用 `.agents/ksf`，Windows 对应 `.agents/ksf.ps1`（目前仅入口恢复与转交契约）；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复已发起的中断事务；启动和普通命令不检查或安装新版本，维护命令只显式调用，详见 system。
+Core 开发仓库与发行工作区在 macOS 调用 `.agents/ksf`，Windows 对应 `.agents/ksf.ps1`（已接入随包运行时和共享业务CLI）；其他 cwd 使用入口绝对路径。没有默认安装全局别名。普通路径基于入口定位的 KSF 根。固定入口先恢复已发起的中断事务；启动和普通命令不检查或安装新版本，维护命令只显式调用，详见 system。
 
 共同启动可能准备 `.agents/runtime-data/runtime/`，因此命令自身只读或预览不代表整个启动过程零写入。新增或变更接口时同步对应文档、公共规范、索引和能力说明，并运行相应回归、构建及真实入口验证。通过检查不代表获准提交或发布 Git。
 
