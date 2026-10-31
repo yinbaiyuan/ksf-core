@@ -7,6 +7,7 @@ import {platform} from '../../platform/index.js';
 import {supportedCodexVersion} from './codex-compatibility.js';
 
 export async function runCodex(spec, { signal, onIdentity = async () => {}, env = process.env } = {}) {
+  requireAI(!signal?.aborted, 'AI_EXECUTION_TIMEOUT', '受管 Codex 执行已停止。');
   const version = spawnSync(spec.executablePath, ['--version'], { encoding: 'utf8', timeout: 10000, maxBuffer: 8192, env });
   requireAI(version.status === 0 && supportedCodexVersion(version.stdout??''), 'AI_CLI_VERSION_UNSUPPORTED', 'Codex CLI 版本不属于已验证范围，请核对安装版本。');
   const cwd = spec.execution?.work ?? await mkdtemp(join(tmpdir(), 'ksf-ai-codex-'));
@@ -19,6 +20,8 @@ export async function runCodex(spec, { signal, onIdentity = async () => {}, env 
   if (spec.reasoningEffort) args.push('-c', `model_reasoning_effort="${spec.reasoningEffort}"`);
   if (spec.schema) args.push('--output-schema', schemaPath);
   args.push('-');
+  // Preparation yields to cancellation; never start a new CLI after it stops.
+  requireAI(!signal?.aborted, 'AI_EXECUTION_TIMEOUT', '受管 Codex 执行已停止。');
   const child = spawn(spec.executablePath, args, { cwd, env, detached: platform.detachedChildren, stdio: ['pipe', 'pipe', 'pipe'] });
   let line = '', total = 0, parseError, threadId, completed = false, usage = null, settled = false;
   let identityError;
