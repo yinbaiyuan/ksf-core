@@ -152,7 +152,9 @@ jobs:
           retention-days: 14
   release:
     needs: prepare
-    if: inputs.operation != 'template-only'
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' &&
+          inputs.operation != 'template-only' }}
     runs-on: macos-15
     timeout-minutes: 20
     permissions:
