@@ -1,12 +1,31 @@
 // CI receipts are evidence only when obtained from a successful trusted Actions
 // run. Local result caches are never read by this module.
-import {readFileSync,readdirSync,writeFileSync,appendFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {readFileSync,readdirSync,writeFileSync,appendFileSync,existsSync,lstatSync,realpathSync,rmSync,symlinkSync,mkdirSync} from 'node:fs';
+import {join,resolve,dirname} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {loadCatalog,sha256,fail} from './catalog.js';
 import {createTestPlan,parseTestOptions} from './planner.js';
 import {gitExecutable} from '../platform/index.js';
+
+// GNU tar can restore an NTFS junction as a plain directory. Recreate declared
+// first-party file dependencies during CI preparation, before fingerprints or
+// tests; Node must resolve TypeScript through its actual workspace source.
+export function restorePreparedLinks(root){
+ const catalog=loadCatalog(root),directories=new Set(Object.values(catalog.components).map(c=>resolve(root,c.directory)));
+ for(const directory of directories){
+  if(!existsSync(join(directory,'node_modules'))||!existsSync(join(directory,'package.json')))continue;
+  const pkg=JSON.parse(readFileSync(join(directory,'package.json'),'utf8'));
+  for(const [name,spec] of Object.entries({...pkg.dependencies,...pkg.devDependencies})){
+   if(typeof spec!=='string'||!spec.startsWith('file:'))continue;
+   const target=resolve(directory,spec.slice(5));
+   if(!directories.has(target)||!existsSync(join(target,'package.json'))||!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i.test(name))fail('TEST_CI_PREPARATION_INVALID','Local test dependencies must name a registered first-party component.');
+   const link=join(directory,'node_modules',name);
+   if(existsSync(link)&&lstatSync(link).isSymbolicLink()&&realpathSync(link)===realpathSync(target))continue;
+   rmSync(link,{recursive:true,force:true});mkdirSync(dirname(link),{recursive:true});symlinkSync(target,link,process.platform==='win32'?'junction':'dir');
+  }
+ }
+}
 
 export function sourceIdentity(root){
  const git=spawnSync(gitExecutable,['-C',root,'ls-files','-z','--','.agents/core','.agents/ksf','.agents/ksf.ps1','AGENTS.md','.github','.gitignore','.gitattributes'],{encoding:'utf8',maxBuffer:32*1024*1024});
@@ -57,6 +76,9 @@ async function main(){
  if(command==='plan'){
   const plan=createTestPlan(root,parseTestOptions(args.length?['--changed','--base',args[0]]:[]));
   appendFileSync(process.env.GITHUB_OUTPUT,`full=${process.env.KSF_MANUAL_FULL==='true'||plan.requiredFullComponents.length>0}\n`);
+ }else if(command==='restore-links'){
+  if(process.env.GITHUB_ACTIONS!=='true')fail('TEST_CI_PREPARATION_INVALID','Prepared dependency repair is restricted to CI preparation.');
+  restorePreparedLinks(root);
  }else if(command==='stamp'){
   const envelope=JSON.parse(readFileSync(args[0],'utf8'));if(!envelope.ok)fail('TEST_PROOF_INVALID','Test execution failed.');
   writeFileSync(args[1],JSON.stringify({...envelope.data,...sourceIdentity(root)},null,2)+'\n');

@@ -1,5 +1,9 @@
 # Preserve managed-system text and binary bytes when checked out on Windows.
 AGENTS.md text eol=lf
+README.md text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.github/** text eol=lf
 .agents/ksf text eol=lf
 .agents/ksf.ps1 text eol=lf
 .agents/core/** text=auto eol=lf

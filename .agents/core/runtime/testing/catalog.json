@@ -177,10 +177,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.14,
-        "win32": 4
+        "darwin": 0.46,
+        "win32": 0.79
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-execution-grants",
@@ -215,10 +215,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.97,
-        "win32": 4
+        "darwin": 0.39,
+        "win32": 0.72
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-executors",
@@ -253,10 +253,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.07,
-        "win32": 4.49
+        "darwin": 0.92,
+        "win32": 3.82
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-recovery",
@@ -291,10 +291,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 2.37
+        "darwin": 0.34,
+        "win32": 1.51
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-services-http",
@@ -329,10 +329,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
-        "win32": 4
+        "darwin": 0.24,
+        "win32": 0.29
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-tasks",
@@ -367,10 +367,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.72,
-        "win32": 3.08
+        "darwin": 1.52,
+        "win32": 3.02
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ai-workbench",
@@ -405,10 +405,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.6,
-        "win32": 2.46
+        "darwin": 1.02,
+        "win32": 2.2
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-background",
@@ -443,10 +443,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.82,
-        "win32": 4.1
+        "darwin": 0.79,
+        "win32": 3.13
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-cards",
@@ -481,10 +481,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.08,
-        "win32": 6.64
+        "darwin": 2.36,
+        "win32": 6.26
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-cli",
@@ -529,10 +529,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6.24,
-        "win32": 10.94
+        "darwin": 4.5,
+        "win32": 6.06
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-data",
@@ -577,10 +577,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.29,
-        "win32": 6.3
+        "darwin": 2.11,
+        "win32": 5.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-default-source",
@@ -615,10 +615,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.34,
-        "win32": 1.0
+        "darwin": 0.46,
+        "win32": 0.66
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-development",
@@ -653,10 +653,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.09,
-        "win32": 2.22
+        "darwin": 1.21,
+        "win32": 1.72
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-file-export",
@@ -691,10 +691,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
-        "win32": 4
+        "darwin": 0.25,
+        "win32": 0.6
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-identities",
@@ -729,10 +729,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.47,
-        "win32": 3.25
+        "darwin": 2.86,
+        "win32": 4.43
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-import",
@@ -767,10 +767,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.68,
-        "win32": 1.99
+        "darwin": 0.71,
+        "win32": 1.45
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-offline-origin",
@@ -805,10 +805,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.32,
-        "win32": 4
+        "darwin": 0.23,
+        "win32": 0.28
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-registry",
@@ -853,10 +853,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-store",
@@ -901,10 +901,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.58,
-        "win32": 1.17
+        "darwin": 0.43,
+        "win32": 1.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-workflow-lightweight",
@@ -939,10 +939,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
-        "win32": 4
+        "darwin": 0.19,
+        "win32": 0.3
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:application-workflow",
@@ -977,10 +977,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.3,
-        "win32": 4
+        "darwin": 0.23,
+        "win32": 0.37
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:applications",
@@ -1018,10 +1018,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.05,
-        "win32": 24.76
+        "darwin": 4.18,
+        "win32": 16.02
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:assistant",
@@ -1056,10 +1056,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.74,
-        "win32": 2.68
+        "darwin": 0.76,
+        "win32": 2.71
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:background-service",
@@ -1087,10 +1087,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 22.09,
+        "darwin": 22.85,
         "win32": 40.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:bootstrap",
@@ -1117,10 +1117,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 12.0,
+        "darwin": 6.51,
         "win32": 150
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:build",
@@ -1148,10 +1148,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9.88,
-        "win32": 38.85
+        "darwin": 9.28,
+        "win32": 23.88
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:bundled-applications",
@@ -1189,10 +1189,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 4.25,
-        "win32": 18.44
+        "darwin": 6.85,
+        "win32": 13.77
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:capabilities",
@@ -1227,10 +1227,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.48,
-        "win32": 1.9
+        "darwin": 0.6,
+        "win32": 2.03
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:chat-context",
@@ -1265,10 +1265,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.82,
-        "win32": 3.37
+        "darwin": 0.56,
+        "win32": 2.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:chat-distribution",
@@ -1296,10 +1296,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 45.72,
-        "win32": 182.59
+        "darwin": 26.04,
+        "win32": 117.45
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:chat",
@@ -1334,10 +1334,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.21,
-        "win32": 1.57
+        "darwin": 0.57,
+        "win32": 1.65
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:ci-dependencies",
@@ -1372,10 +1372,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:cli-options",
@@ -1410,10 +1410,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
-        "win32": 4
+        "darwin": 0.21,
+        "win32": 0.3
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:cli",
@@ -1448,10 +1448,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.34,
-        "win32": 2.34
+        "darwin": 1.46,
+        "win32": 2.66
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:codex-conversation-bridge",
@@ -1480,10 +1480,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.81,
-        "win32": 1.2
+        "darwin": 0.51,
+        "win32": 1.05
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:codex-conversation-permissions",
@@ -1518,10 +1518,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.48,
-        "win32": 4
+        "darwin": 0.22,
+        "win32": 0.82
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:codex-conversations",
@@ -1557,10 +1557,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.9,
-        "win32": 6.96
+        "darwin": 1.9,
+        "win32": 3.43
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:commit-message",
@@ -1595,10 +1595,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.59,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:communication-control",
@@ -1626,10 +1626,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.64,
-        "win32": 3.7
+        "darwin": 4.56,
+        "win32": 4.27
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:communication-device",
@@ -1657,10 +1657,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.44,
-        "win32": 150
+        "darwin": 0.27,
+        "win32": 0.59
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:communication-pairing-control",
@@ -1695,10 +1695,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.58,
-        "win32": 5.53
+        "darwin": 2.12,
+        "win32": 6.9
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:communication-pairing",
@@ -1733,10 +1733,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.8,
-        "win32": 3.04
+        "darwin": 1.85,
+        "win32": 4.97
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:communication",
@@ -1764,10 +1764,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.1,
-        "win32": 18.6
+        "darwin": 9.34,
+        "win32": 15.55
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:configuration",
@@ -1802,10 +1802,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.83,
-        "win32": 1.45
+        "darwin": 1.97,
+        "win32": 0.96
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:context-cli",
@@ -1840,10 +1840,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.08,
-        "win32": 1.51
+        "darwin": 0.63,
+        "win32": 0.74
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:context",
@@ -1878,10 +1878,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.41,
-        "win32": 4
+        "darwin": 0.29,
+        "win32": 0.33
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:conversation-review-desktop",
@@ -1910,10 +1910,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.37,
-        "win32": 1.64
+        "darwin": 0.23,
+        "win32": 3.76
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:conversation-review-process",
@@ -1942,10 +1942,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 1.08,
-        "win32": 4.24
+        "darwin": 0.7,
+        "win32": 1.59
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:conversation-review",
@@ -1981,10 +1981,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.3,
-        "win32": 16.1
+        "darwin": 1.51,
+        "win32": 34.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:cooperation-migration",
@@ -2019,10 +2019,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.06,
-        "win32": 7.62
+        "darwin": 0.87,
+        "win32": 4.0
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:data-compatibility",
@@ -2057,10 +2057,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.56,
-        "win32": 4
+        "darwin": 0.33,
+        "win32": 0.69
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:distribution",
@@ -2088,10 +2088,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 134.56,
-        "win32": 684.85
+        "darwin": 147.47,
+        "win32": 383.63
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:documentation",
@@ -2127,10 +2127,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.68,
-        "win32": 1.06
+        "darwin": 0.61,
+        "win32": 1.5
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:eval",
@@ -2165,10 +2165,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.23,
-        "win32": 10.48
+        "darwin": 3.19,
+        "win32": 4.99
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:four-targets",
@@ -2203,10 +2203,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.87,
-        "win32": 9.2
+        "darwin": 2.16,
+        "win32": 3.48
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:git-catalog",
@@ -2242,10 +2242,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.53,
-        "win32": 9.67
+        "darwin": 3.42,
+        "win32": 8.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:git-settings",
@@ -2274,10 +2274,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9.37,
-        "win32": 47.31
+        "darwin": 15.21,
+        "win32": 32.1
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:git-workbench-detail",
@@ -2306,10 +2306,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 13.01,
-        "win32": 67.87
+        "darwin": 16.2,
+        "win32": 40.8
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:host-services",
@@ -2344,10 +2344,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.38,
-        "win32": 1.16
+        "darwin": 0.32,
+        "win32": 0.65
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:identity",
@@ -2382,10 +2382,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.47,
-        "win32": 4
+        "darwin": 0.45,
+        "win32": 0.66
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:incubation-distribution",
@@ -2413,10 +2413,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 57.38,
-        "win32": 187.43
+        "darwin": 37.79,
+        "win32": 184.86
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:incubation",
@@ -2451,10 +2451,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.53,
-        "win32": 11.19
+        "darwin": 2.75,
+        "win32": 6.32
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:knowledge-framework",
@@ -2482,10 +2482,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 34.24,
-        "win32": 216.19
+        "darwin": 20.22,
+        "win32": 119.59
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:knowledge-organize",
@@ -2520,10 +2520,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.43,
-        "win32": 4
+        "darwin": 0.35,
+        "win32": 1.0
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:knowledge-route-retirement",
@@ -2551,10 +2551,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 61.41,
-        "win32": 137.88
+        "darwin": 26.45,
+        "win32": 205.68
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:launcher",
@@ -2582,10 +2582,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.42,
-        "win32": 6.96
+        "darwin": 0.78,
+        "win32": 5.36
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:lifecycle",
@@ -2613,10 +2613,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 67.84,
-        "win32": 213.08
+        "darwin": 42.22,
+        "win32": 266.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:matched-switch",
@@ -2644,10 +2644,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 4.14,
-        "win32": 3.05
+        "darwin": 2.19,
+        "win32": 3.48
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:metadata-cli",
@@ -2682,10 +2682,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.18,
-        "win32": 1.59
+        "darwin": 0.92,
+        "win32": 1.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:metadata",
@@ -2721,9 +2721,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0.41,
-        "win32": 1.1
+        "win32": 0.66
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:minimal-runtime",
@@ -2758,10 +2758,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.56,
-        "win32": 7.09
+        "darwin": 1.91,
+        "win32": 3.56
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:mutation-plans",
@@ -2796,10 +2796,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.16,
+        "win32": 0.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:object-user-data-distribution",
@@ -2827,10 +2827,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 54.64,
-        "win32": 177.46
+        "darwin": 26.3,
+        "win32": 175.47
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:object-user-data-lifecycle",
@@ -2865,10 +2865,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.57,
-        "win32": 4
+        "darwin": 0.97,
+        "win32": 2.12
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:object-user-data",
@@ -2903,10 +2903,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.62,
-        "win32": 1.76
+        "darwin": 0.88,
+        "win32": 0.94
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:objects-cli",
@@ -2941,10 +2941,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.45,
-        "win32": 3.22
+        "darwin": 1.44,
+        "win32": 2.39
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:objects",
@@ -2979,10 +2979,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.52,
-        "win32": 3.4
+        "darwin": 1.33,
+        "win32": 2.45
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:path-identity",
@@ -3017,10 +3017,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.85,
-        "win32": 4.08
+        "darwin": 1.7,
+        "win32": 1.8
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:platform",
@@ -3055,10 +3055,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
-        "win32": 4
+        "darwin": 0.27,
+        "win32": 0.84
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:pr-description",
@@ -3093,10 +3093,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.18,
+        "win32": 0.22
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:project-intake",
@@ -3131,10 +3131,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.9,
-        "win32": 5.99
+        "darwin": 1.38,
+        "win32": 1.91
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:project-routing",
@@ -3169,10 +3169,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.89,
-        "win32": 3.28
+        "darwin": 1.61,
+        "win32": 2.52
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:project-transitions",
@@ -3207,10 +3207,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.3,
-        "win32": 3.85
+        "darwin": 2.05,
+        "win32": 3.5
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:projects-cli",
@@ -3246,10 +3246,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.84,
-        "win32": 15.51
+        "darwin": 4.82,
+        "win32": 12.62
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:projects",
@@ -3285,10 +3285,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.41,
-        "win32": 1.92
+        "darwin": 0.37,
+        "win32": 0.66
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:release-network",
@@ -3316,10 +3316,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 38.49,
-        "win32": 115.25
+        "darwin": 19.37,
+        "win32": 124.84
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:release-publish",
@@ -3347,10 +3347,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 122.1,
-        "win32": 672.88
+        "darwin": 66.1,
+        "win32": 338.83
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:repositories-cli",
@@ -3385,10 +3385,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.71,
-        "win32": 11.03
+        "darwin": 2.67,
+        "win32": 5.68
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:repositories-distribution",
@@ -3416,10 +3416,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 54.09,
-        "win32": 227.38
+        "darwin": 25.39,
+        "win32": 165.27
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:repositories",
@@ -3454,10 +3454,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7.45,
-        "win32": 27.44
+        "darwin": 15.93,
+        "win32": 11.49
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:routes",
@@ -3492,10 +3492,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.79,
-        "win32": 4.7
+        "darwin": 2.23,
+        "win32": 5.41
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:runtime-layers",
@@ -3530,10 +3530,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
-        "win32": 4
+        "darwin": 0.13,
+        "win32": 0.14
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:runtime-monitor-http",
@@ -3569,10 +3569,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.36,
-        "win32": 3.09
+        "darwin": 0.41,
+        "win32": 2.26
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:runtime-monitor",
@@ -3608,10 +3608,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.55,
-        "win32": 1.26
+        "darwin": 0.42,
+        "win32": 2.41
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:shared-files",
@@ -3646,10 +3646,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:sources-distribution",
@@ -3677,10 +3677,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 81.39,
-        "win32": 267.66
+        "darwin": 53.3,
+        "win32": 246.6
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:sources",
@@ -3715,10 +3715,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8.02,
-        "win32": 26.0
+        "darwin": 9.56,
+        "win32": 18.37
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:system-backups",
@@ -3746,10 +3746,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.17,
-        "win32": 150
+        "darwin": 0.2,
+        "win32": 0.2
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:system-development-paths",
@@ -3777,10 +3777,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 56.91,
-        "win32": 195.06
+        "darwin": 20.57,
+        "win32": 108.74
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:system-update",
@@ -3808,10 +3808,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 60.97,
-        "win32": 283.52
+        "darwin": 107.85,
+        "win32": 392.61
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:task-checkpoints",
@@ -3846,10 +3846,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.95,
-        "win32": 2.94
+        "darwin": 1.06,
+        "win32": 1.72
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:task-projects",
@@ -3884,10 +3884,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.22,
-        "win32": 4
+        "darwin": 0.24,
+        "win32": 0.45
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:task-targets",
@@ -3922,10 +3922,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.72,
-        "win32": 3.19
+        "darwin": 1.08,
+        "win32": 4.34
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:tasks-web",
@@ -3961,10 +3961,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.96,
-        "win32": 1.88
+        "darwin": 0.9,
+        "win32": 1.54
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:tasks",
@@ -3999,10 +3999,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7.57,
-        "win32": 22.13
+        "darwin": 5.8,
+        "win32": 10.11
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:template-git",
@@ -4037,10 +4037,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 17.17,
-        "win32": 26.38
+        "darwin": 15.37,
+        "win32": 23.95
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:terminal-lifecycle",
@@ -4076,10 +4076,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
-        "win32": 4
+        "darwin": 0.12,
+        "win32": 0.67
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:user-data-distribution",
@@ -4107,10 +4107,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 57.43,
-        "win32": 251.78
+        "darwin": 23.21,
+        "win32": 168.52
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:user-data",
@@ -4145,10 +4145,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.5,
-        "win32": 1.77
+        "darwin": 0.7,
+        "win32": 1.41
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:web-about",
@@ -4183,10 +4183,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.15
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:web-assets",
@@ -4221,10 +4221,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.24,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.36
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:web-hosts",
@@ -4259,10 +4259,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:web",
@@ -4297,10 +4297,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 12.26,
-        "win32": 7.45
+        "darwin": 9.85,
+        "win32": 7.72
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:work-stats",
@@ -4336,10 +4336,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.62,
-        "win32": 4.85
+        "darwin": 2.41,
+        "win32": 3.5
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:workbench-root-tree",
@@ -4374,10 +4374,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.38,
-        "win32": 4
+        "darwin": 0.4,
+        "win32": 1.01
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:workbench-session",
@@ -4412,10 +4412,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.35,
-        "win32": 4
+        "darwin": 0.37,
+        "win32": 0.85
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:workbench",
@@ -4443,10 +4443,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 15.01,
-        "win32": 65.96
+        "darwin": 26.22,
+        "win32": 57.59
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:ai-client",
@@ -4470,10 +4470,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.37,
-        "win32": 4
+        "darwin": 0.4,
+        "win32": 0.4
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:application-bridge",
@@ -4497,10 +4497,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.19,
+        "win32": 0.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:application-icon",
@@ -4524,10 +4524,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.2,
+        "win32": 0.18
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:application-import",
@@ -4551,10 +4551,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
-        "win32": 4
+        "darwin": 0.2,
+        "win32": 0.27
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:application-model",
@@ -4578,10 +4578,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:application-shortcuts",
@@ -4605,10 +4605,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:apps",
@@ -4632,10 +4632,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
-        "win32": 4
+        "darwin": 0.21,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:cli-document-model",
@@ -4659,10 +4659,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.22
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:configuration-preferences",
@@ -4686,10 +4686,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.42,
-        "win32": 4
+        "darwin": 0.47,
+        "win32": 0.47
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:context-menu",
@@ -4713,10 +4713,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.16,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:conversation-model",
@@ -4740,10 +4740,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.18
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:cooperation",
@@ -4767,10 +4767,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.19,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:desktop",
@@ -4794,10 +4794,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
-        "win32": 4
+        "darwin": 0.22,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:git-sidebar",
@@ -4821,10 +4821,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.22
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:global-application-menu",
@@ -4848,10 +4848,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.16,
+        "win32": 0.19
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:grid-interaction",
@@ -4877,10 +4877,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.16,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:material-settings",
@@ -4904,10 +4904,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.14
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:model",
@@ -4931,10 +4931,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.19,
+        "win32": 0.25
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:overlay-boundary",
@@ -4958,10 +4958,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.18
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:performance",
@@ -4985,10 +4985,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
-        "win32": 4
+        "darwin": 0.3,
+        "win32": 0.36
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:random-id",
@@ -5012,10 +5012,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:request-client",
@@ -5039,10 +5039,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
-        "win32": 4
+        "darwin": 0.22,
+        "win32": 0.28
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:route-evolution",
@@ -5066,10 +5066,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
-        "win32": 4
+        "darwin": 0.22,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:store-model",
@@ -5093,10 +5093,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:surface-lifecycle",
@@ -5120,10 +5120,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.16,
+        "win32": 0.18
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:surface-scheduler",
@@ -5147,10 +5147,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:window-session",
@@ -5174,10 +5174,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:window-toolbar",
@@ -5201,10 +5201,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.11,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.24
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:work-stats",
@@ -5228,10 +5228,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.15,
+        "win32": 0.14
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "web:workbench",
@@ -5255,10 +5255,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.23
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:ai-services-build",
@@ -5289,10 +5289,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.3,
-        "win32": 150
+        "darwin": 0.24,
+        "win32": 0.42
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:ai-services",
@@ -5317,10 +5317,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
-        "win32": 4
+        "darwin": 0.23,
+        "win32": 0.25
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:application-menu",
@@ -5345,10 +5345,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.17,
+        "win32": 0.15
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:build",
@@ -5379,10 +5379,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.04,
-        "win32": 150
+        "darwin": 4.03,
+        "win32": 9.37
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:capabilities",
@@ -5407,10 +5407,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.18,
+        "win32": 0.22
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:cli-documents",
@@ -5438,10 +5438,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.18,
+        "win32": 0.17
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:clients",
@@ -5466,10 +5466,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
-        "win32": 4
+        "darwin": 0.19,
+        "win32": 0.27
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:codex-conversations",
@@ -5494,10 +5494,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 4
+        "darwin": 0.14,
+        "win32": 0.15
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:headless",
@@ -5528,10 +5528,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.19,
-        "win32": 150
+        "darwin": 0.4,
+        "win32": 0.29
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:migration-contract",
@@ -5556,10 +5556,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
-        "win32": 4
+        "darwin": 0.11,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:pairing",
@@ -5584,10 +5584,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.23,
+        "win32": 0.19
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:styles",
@@ -5615,10 +5615,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
-        "win32": 4
+        "darwin": 0.13,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.activity-monitor:model",
@@ -5641,10 +5641,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
-        "win32": 4
+        "darwin": 0.22,
+        "win32": 0.16
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.cooperation-center:desktop",
@@ -5667,10 +5667,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.34,
-        "win32": 150
+        "darwin": 0.2,
+        "win32": 2.03
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.cooperation-center:integration",
@@ -5693,10 +5693,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.77,
-        "win32": 150
+        "darwin": 0.39,
+        "win32": 5.5
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.cooperation-center:offers",
@@ -5719,10 +5719,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.28,
-        "win32": 4
+        "darwin": 0.23,
+        "win32": 0.76
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.cooperation-center:tasks",
@@ -5745,10 +5745,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
-        "win32": 4
+        "darwin": 0.28,
+        "win32": 2.69
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.cooperation-center:workflows",
@@ -5784,10 +5784,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 54.6,
-        "win32": 150
+        "darwin": 26.23,
+        "win32": 91.69
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.projects:backend",
@@ -5812,10 +5812,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.3,
+        "darwin": 0.34,
         "win32": 4
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "app:com.ksf.projects:install",
@@ -5838,10 +5838,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 150
+        "darwin": 0.66,
+        "win32": 2.12
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:windows-launcher",
@@ -5870,9 +5870,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 6
+        "win32": 1.86
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:testing",
@@ -5907,10 +5907,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.43,
-        "win32": 4
+        "darwin": 3.31,
+        "win32": 2.82
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribute",
@@ -5938,10 +5938,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 112.55,
-        "win32": 261.36
+        "darwin": 72.4,
+        "win32": 556.46
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribute-baseline",
@@ -5969,10 +5969,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 19.21,
-        "win32": 83.44
+        "darwin": 67.08,
+        "win32": 285.29
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribute-publication",
@@ -6000,10 +6000,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 20.6,
-        "win32": 75.61
+        "darwin": 57.01,
+        "win32": 299.08
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribute-recovery",
@@ -6031,10 +6031,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23.58,
-        "win32": 101.42
+        "darwin": 38.51,
+        "win32": 275.39
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribute-cache",
@@ -6062,10 +6062,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 13.26,
-        "win32": 72.95
+        "darwin": 37.56,
+        "win32": 175.78
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:compact-baseline",
@@ -6093,10 +6093,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 15.88,
-        "win32": 120.07
+        "darwin": 27.08,
+        "win32": 143.38
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:compact-baseline-integrity",
@@ -6124,10 +6124,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18.45,
-        "win32": 184.43
+        "darwin": 74.95,
+        "win32": 415.9
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:compact-baseline-lifecycle",
@@ -6155,10 +6155,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 16.52,
-        "win32": 90.07
+        "darwin": 35.8,
+        "win32": 207.93
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:release-actions",
@@ -6186,10 +6186,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 5.27,
-        "win32": 57.86
+        "darwin": 19.48,
+        "win32": 61.62
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:release-actions-recovery",
@@ -6217,10 +6217,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 6.64,
-        "win32": 51.09
+        "darwin": 38.28,
+        "win32": 137.94
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:release-actions-contract",
@@ -6248,10 +6248,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 4.38,
-        "win32": 47.44
+        "darwin": 17.76,
+        "win32": 56.18
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:committed-source",
@@ -6286,10 +6286,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.1,
-        "win32": 5
+        "darwin": 1.45,
+        "win32": 3.77
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "sdk:check",
@@ -6314,10 +6314,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.28,
-        "win32": 5
+        "darwin": 0.16,
+        "win32": 0.15
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:testing-ci",
@@ -6352,10 +6352,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4
+        "darwin": 0.42,
+        "win32": 0.63
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:bootstrap-windows",
@@ -6384,9 +6384,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 45
+        "win32": 15.48
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:system-update-recovery",
@@ -6414,10 +6414,72 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 60.97,
-        "win32": 283.52
+        "darwin": 40,
+        "win32": 250
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Remaining four cases after native CI 41184436954 demonstrated the mixed recovery file exceeded its Windows group timeout."
+    },
+    {
+      "id": "core:system-update-io-recovery",
+      "path": ".agents/core/runtime/tests/system-update-io-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 310
+      },
+      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
+    },
+    {
+      "id": "core:system-update-interruption",
+      "path": ".agents/core/runtime/tests/system-update-interruption.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 70,
+        "win32": 310
+      },
+      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
     },
     {
       "id": "core:system-update-roots",
@@ -6445,10 +6507,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 60.97,
-        "win32": 283.52
+        "darwin": 134.09,
+        "win32": 585.56
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
       "id": "core:contribution-validation",
@@ -6483,10 +6545,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.1,
-        "win32": 5
+        "darwin": 0.19,
+        "win32": 0.21
       },
-      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     }
   ],
   "timingBaseline": {

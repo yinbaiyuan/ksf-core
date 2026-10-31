@@ -124,6 +124,8 @@ jobs:
           $details = & ./.agents/ksf.ps1 hello --json | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Restore declared local SDK links
+        run: node .agents/core/runtime/src/testing/ci.js restore-links
       - name: Full deterministic shard
         run: |
           node .agents/core/runtime/src/cli.js test --suite full --shard ${{ matrix.shard }} --json > result.json

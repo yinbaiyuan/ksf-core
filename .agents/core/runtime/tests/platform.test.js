@@ -4,7 +4,7 @@ import {mkdtempSync,writeFileSync,readFileSync,rmSync,mkdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
-import {platformServices,platform,replaceFile,replaceFileSync,selectEnvironment,launcherInvocation} from '../src/platform/index.js';
+import {platformServices,platform,replaceFile,replaceFileSync,selectEnvironment,launcherInvocation,retryFileRead} from '../src/platform/index.js';
 import {runtimePackage} from '../src/platform/catalog.js';
 import {mergeText} from '../src/shared/merge-text.js';
 import {createArchive,readArchive} from '../src/distribution/archive.js';
@@ -63,6 +63,16 @@ test('shared replacement publishes complete bytes for synchronous and asynchrono
   const target=join(dir,'record');writeFileSync(target,'old');writeFileSync(join(dir,'new'),'完整内容');
   await replaceFile(join(dir,'new'),target);assert.equal(readFileSync(target,'utf8'),'完整内容');
   writeFileSync(join(dir,'new'),'second');replaceFileSync(join(dir,'new'),target);assert.equal(readFileSync(target,'utf8'),'second');
+});
+test('native read retries recover sharing conflicts but preserve permanent and unrelated errors',async()=>{
+  const sharing=Object.assign(new Error('sharing conflict'),{code:'EPERM'});let attempts=0;
+  const read=()=>{if(++attempts<3)throw sharing;return 'complete';};
+  if(platform.name==='win32'){assert.equal(await retryFileRead(read),'complete');assert.equal(attempts,3);}
+  else{await assert.rejects(retryFileRead(read),error=>error===sharing);assert.equal(attempts,1);}
+  attempts=0;await assert.rejects(retryFileRead(()=>{attempts++;throw sharing;}),error=>error===sharing);
+  assert.equal(attempts,platform.name==='win32'?9:1);
+  const disk=Object.assign(new Error('disk error'),{code:'EIO'});attempts=0;
+  await assert.rejects(retryFileRead(()=>{attempts++;throw disk;}),error=>error===disk);assert.equal(attempts,1);
 });
 test('shared three-way merge preserves independent edits, identical edits, CRLF and EOF',()=>{
   const merge=(base,a,b)=>mergeText(Buffer.from(base),Buffer.from(a),Buffer.from(b));

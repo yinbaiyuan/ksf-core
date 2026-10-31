@@ -17,6 +17,13 @@ export function selectEnvironment(env, allowed) {
 }
 const retryDelay = attempt => Math.min(250, 10 * 2 ** attempt);
 const retryable = (error, attempt) => attempt < 8 && platform.replaceErrors.includes(error.code);
+// NTFS may deny a reader while another process replaces or deletes the name.
+// Retry the whole read so validation applies to the entry actually observed;
+// persistent access failures remain errors, never a missing-file fallback.
+export async function retryFileRead(read) {
+  for (let attempt = 0;; attempt++) try { return await read(); }
+  catch (error) { if (!retryable(error, attempt)) throw error; await new Promise(resolve => setTimeout(resolve, retryDelay(attempt))); }
+}
 export async function replaceFile(source, target) {
   for (let attempt = 0;; attempt++) try { await rename(source, target); return; }
   catch (error) { if (!retryable(error, attempt)) throw error; await new Promise(resolve => setTimeout(resolve, retryDelay(attempt))); }
