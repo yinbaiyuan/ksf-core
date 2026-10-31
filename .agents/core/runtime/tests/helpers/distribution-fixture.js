@@ -50,7 +50,19 @@ export async function distributionFixture(t, { legacyEntry = false, sourceRoot =
     // Component lifecycle tests use a synthetic runtime; application binaries
     // have independent native package/PTY acceptance. Do not recompress every
     // historical app release for each transaction fault injection.
-    filter: path => path !== installedMarker && !developmentPath(relative(sourceRoot, path).replaceAll('\\', '/')) && !relative(sourceRoot,path).replaceAll('\\','/').includes('/runtime/packages') && !relative(sourceRoot,path).replaceAll('\\','/').includes('/runtime/tests') && !path.endsWith('.ksfapp') && !relative(sourceRoot,path).replaceAll('\\','/').includes('/applications/store/media') });
+    filter: path => {
+      const rel=relative(sourceRoot,path).replaceAll('\\','/');
+      if(path===installedMarker||developmentPath(rel)||/\/(?:runtime\/(?:packages|tests|web)|applications\/store\/media)(?:\/|$)/.test(rel)||path.endsWith('.ksfapp'))return false;
+      // Transaction fixtures exercise the CLI, definitions and real archive /
+      // Git machinery. UI bundles and application build inputs have separate
+      // package/frontend acceptance and must not be copied per fault scenario.
+      if(rel.startsWith('.agents/core/applications/')){
+        const parts=rel.slice('.agents/core/applications/'.length).split('/');
+        if(!['sdk','store'].includes(parts[0]))return false;
+        if(parts[0]==='sdk'&&['tests','templates','build','scripts'].includes(parts[1]))return false;
+      }
+      return true;
+    } });
   writeFileSync(join(root,'.agents/core/applications/store/index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',name:'Lifecycle fixture',apps:[]}));
   for (const entry of ['ksf', 'ksf.ps1']) cpSync(join(sourceRoot, '.agents', entry), join(root, '.agents', entry));
   cpSync(join(sourceRoot, 'AGENTS.md'), join(root, 'AGENTS.md'));

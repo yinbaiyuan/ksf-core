@@ -50,7 +50,9 @@ async function durableCopy(root,source,target){
   await replaceFile(target,target+'.incomplete-'+randomUUID());await syncDirectory(dirname(target));
  }
  await mkdir(dirname(target),{recursive:true});await cp(source,target,{recursive:true,errorOnExist:true,force:false,preserveTimestamps:true});
- async function sync(path){const st=await lstat(path);if(st.isDirectory()){for(const name of await readdir(path))await sync(join(path,name));await syncDirectory(path);}else{const fd=await open(path,'r');try{await fd.sync();}finally{await fd.close();}}}
+ // Windows FlushFileBuffers requires a writable handle, including for an
+ // already-copied backup. Never ignore a failed flush or commit its migration.
+ async function sync(path){const st=await lstat(path);if(st.isDirectory()){for(const name of await readdir(path))await sync(join(path,name));await syncDirectory(path);}else{const fd=await open(path,process.platform==='win32'?'r+':'r');try{await fd.sync();}finally{await fd.close();}}}
  await sync(target);await syncDirectory(dirname(target));assert((await inventory(root,source)).digest===(await inventory(root,target)).digest,'APP_ID_MIGRATION_BACKUP','原件副本核验失败。');
 }
 /** Called only after host drain. A durable journal makes moves and rewrites idempotent after interruption. */
