@@ -122,6 +122,21 @@ test('independent Git metadata in an otherwise redundant payload is never retire
   const result = cleanupRuntimeArtifacts({ root: f.root, apply: true });
   assert.equal(result.removed.length, 0); assert(result.warnings[0].files.includes('.git'));
 });
+test('a Git blob at another path does not preserve an uncommitted source filename', t => {
+  const f = fixture(t), old = f.switchRun('2026-01-01'); f.switchRun('2026-01-02');
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')));
+  Object.assign(env, { GIT_CONFIG_GLOBAL: nullDevice, GIT_CONFIG_SYSTEM: nullDevice, GIT_TERMINAL_PROMPT: '0' });
+  const git = args => { const r = spawnSync(gitBinary, ['-C', f.root, ...args], { encoding: 'utf8', env }); assert.equal(r.status, 0, r.stderr); };
+  git(['init', '--template=', '--initial-branch=main']);
+  git(['config', 'user.name', 'Isolated Fixture']); git(['config', 'user.email', 'test@example.invalid']); git(['config', 'commit.gpgsign', 'false']);
+  f.put('.agents/core/other.js', 'identical source');
+  git(['add', '--', '.agents/core/other.js']); git(['commit', '-m', 'Preserve other synthetic source']);
+  f.put(`${old}/previous-core/uncommitted-name.js`, 'identical source');
+  const result = cleanupRuntimeArtifacts({ root: f.root, apply: true });
+  assert.equal(result.removed.length, 0);
+  assert.deepEqual(result.warnings[0].files, ['uncommitted-name.js']);
+  assert(existsSync(join(f.root, old, 'previous-core/uncommitted-name.js')));
+});
 test('missing latest payload cannot cause the last still usable rollback to be deleted', t => {
   const f = fixture(t), available = f.switchRun('2026-01-01'), missing = f.switchRun('2026-01-02');
   rmSync(join(f.root, missing, 'previous-core'), { recursive: true });

@@ -58,13 +58,16 @@ function sourceProtection(root) {
     committed = new Set();
     const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')));
     Object.assign(env, { GIT_OPTIONAL_LOCKS: '0', GIT_NO_LAZY_FETCH: '1', GIT_TERMINAL_PROMPT: '0', GIT_NO_REPLACE_OBJECTS: '1' });
-    const run = args => spawnSync(gitExecutable, ['--no-replace-objects', '-C', root, ...args], { env, encoding: 'utf8', timeout: 10000, maxBuffer: 32 * 1024 * 1024 });
+    const run = args => spawnSync(gitExecutable, ['--no-replace-objects', '-c', 'core.quotePath=false', '-C', root, ...args], { env, encoding: 'utf8', timeout: 10000, maxBuffer: 32 * 1024 * 1024 });
     const top = run(['rev-parse', '--show-toplevel']);
     if (top.status !== 0 || realpathSync.native(top.stdout.trim()) !== realpathSync.native(root)) return committed;
     const reachable = run(['rev-list', '--objects', 'HEAD']), stored = run(['cat-file', '--batch-all-objects', '--batch-check=%(objectname)', '--unordered']);
     if (reachable.status !== 0 || stored.status !== 0) return committed;
     const available = new Set(stored.stdout.trim().split(/\r?\n/));
-    for (const row of reachable.stdout.split(/\r?\n/)) { const oid = row.split(' ', 1)[0]; if (available.has(oid)) committed.add(oid); }
+    for (const row of reachable.stdout.split(/\r?\n/)) {
+      const space = row.indexOf(' '), oid = row.slice(0, space);
+      if (space > 0 && available.has(oid)) committed.add(row);
+    }
     return committed;
   };
   return path => {
@@ -79,7 +82,7 @@ function sourceProtection(root) {
         const bytes = readFileSync(at);
         try { if (readRegular(root, current, true)?.equals(bytes)) return; } catch { /* Unreadable primary is not proof. */ }
         const oid = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
-        if (gitObjects().has(oid)) return;
+        if (gitObjects().has(`${oid} ${current}`)) return;
       }
       unprotected.push(rel);
     }
