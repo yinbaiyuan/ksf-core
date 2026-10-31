@@ -55,12 +55,15 @@ test('nested trees keep directory ordering, skip rules and protected policies', 
 });
 
 test('HTTP root filtering preserves hidden-file searches, direct access and saves', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const { root, files } = await fixture(t);
   await mkdir(join(root, '旧目录'));
   await writeFile(join(root, '旧目录/说明.md'), 'root-whitelist-needle');
   await writeFile(join(root, '隐藏笔记.md'), 'root-whitelist-needle');
   await writeFile(join(root, 'USER.md'), '# 用户\n');
-  const server = await startWebServer({ root, port: 0, capture: false }); t.after(() => server.close());
+  server = await startWebServer({ root, port: 0, capture: false });
   const get = async path => { const response = await fetch(new URL(path, server.url)); assert.equal(response.status, 200); return (await response.json()).data; };
   const tree = await get('/api/workspace/tree');
   // Local CLI control publishes its private descriptor under runtime-data at startup.

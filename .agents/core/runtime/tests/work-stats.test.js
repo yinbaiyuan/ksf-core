@@ -112,8 +112,11 @@ test('archive projection yields between batches instead of monopolizing the even
 });
 
 test('HTTP work statistics are guarded read-only routes with validated time zones and live archive data', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const f = fixture(t); f.put('a', 'live', new Date().toISOString(), [route(project('甲'))]);
-  const server = await startWebServer({ root: f.root, port: 0, capture: false }); t.after(() => server.close());
+  server = await startWebServer({ root: f.root, port: 0, capture: false });
   const path = server.url + 'api/work-stats?timeZone=Asia%2FShanghai'; const response = await fetch(path), data = (await response.json()).data;
   assert.equal(response.status, 200); assert.equal(data.today.counts.turns, 1); assert.equal(data.activity[0].turnId, 'live');
   assert.equal((await fetch(path, { method: 'HEAD' })).status, 200);

@@ -31,8 +31,11 @@ function source(t, { withReport = true } = {}) {
   return {...f,home,path,env,append,taskId};
 }
 test('task HTTP queries paginate summaries, lazily read body, recover after restart and enforce local boundaries',async t=>{
+  let server;
+  t.after(() => server?.close());
+
   const f=source(t);await syncTasks({root:f.root,env:f.env});
-  let server=await startWebServer({root:f.root,port:0,capture:false});t.after(()=>server.close());
+  server=await startWebServer({root:f.root,port:0,capture:false});
   const list=JSON.parse((await call(server,'/api/tasks')).body);assert.equal(list.data.total,1);
   const taskPath=`/api/tasks/${f.taskId}`,turn=taskPath+'/turns/turn-one';
   const detail=JSON.parse((await call(server,taskPath)).body);assert.equal(detail.data.turns[0].messages,undefined);
@@ -55,9 +58,12 @@ test('task HTTP queries paginate summaries, lazily read body, recover after rest
   assert.equal(JSON.parse((await call(server,'/api/tasks')).body).ok,false);
 });
 test('Web automatically exposes input and final answer for a turn without any Agent declaration or route', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const f = source(t, { withReport: false });
   f.append({ type: 'response_item', timestamp: '2026-01-02T00:00:03Z', payload: { type: 'message', id: 'answer', role: 'assistant', phase: 'final_answer', content: [{ type: 'output_text', text: '没有路由也有最终答复' }] } });
-  let server = await startWebServer({ root: f.root, port: 0, captureEnv: f.env }); t.after(() => server.close());
+  server = await startWebServer({ root: f.root, port: 0, captureEnv: f.env });
   const path = `/api/tasks/${f.taskId}/turns/turn-one`;
   let turn;
   // Startup catch-up is intentionally asynchronous; wait for its observable result.
@@ -76,11 +82,14 @@ test('Web automatically exposes input and final answer for a turn without any Ag
   assert.deepEqual(JSON.parse((await call(server, path)).body).data.turn.messages, turn.messages);
 });
 test('Stop retries final flush and Web catch-up remains independent of host Hooks',async t=>{
+  let server;
+  t.after(() => server?.close());
+
   const f=source(t);
   const stopping=taskHook({root:f.root,env:f.env,input:{hook_event_name:'Stop',session_id:f.env.CODEX_THREAD_ID,turn_id:'turn-one',transcript_path:f.path}});
   setTimeout(()=>f.append({type:'response_item',timestamp:'2026-01-02T00:00:03Z',payload:{type:'message',id:'answer',role:'assistant',phase:'final_answer',content:[{type:'output_text',text:'完整答复'}]}}),80);
   assert.deepEqual(await stopping,{});
-  let server=await startWebServer({root:f.root,port:0,captureEnv:f.env});t.after(()=>server.close());
+  server=await startWebServer({root:f.root,port:0,captureEnv:f.env});
   const path=`/api/tasks/${f.taskId}/turns/turn-one`;
   assert.equal(JSON.parse((await call(server,path)).body).data.turn.status,'completed');
   await server.close();
@@ -94,8 +103,11 @@ test('Stop retries final flush and Web catch-up remains independent of host Hook
 });
 
 test('task HTTP filters before pagination and route-only reads omit conversation bodies', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const f = source(t); await syncTasks({ root: f.root, env: f.env });
-  const server = await startWebServer({ root: f.root, port: 0, capture: false }); t.after(() => server.close());
+  server = await startWebServer({ root: f.root, port: 0, capture: false });
   const result = JSON.parse((await call(server, '/api/tasks?project=state%3Anone&limit=1')).body).data;
   assert.equal(result.total, 1); assert.equal(result.records[0].latestReported.turnId, 'turn-one');
   assert.equal(JSON.parse((await call(server, '/api/tasks?q=missing')).body).data.total, 0);
@@ -106,8 +118,11 @@ test('task HTTP filters before pagination and route-only reads omit conversation
 });
 
 test('project catalog and contextual turn APIs expose historical membership and keep local access checks', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const { taskProjectFixture } = await import('./helpers/task-project-fixture.js');
-  const f = taskProjectFixture(t), server = await startWebServer({ root: f.root, port: 0, capture: false }); t.after(() => server.close());
+  const f = taskProjectFixture(t);server = await startWebServer({ root: f.root, port: 0, capture: false });
   const catalog = JSON.parse((await call(server, '/api/task-projects')).body).data;
   assert.equal(catalog.projects.find(p => p.key === f.key('A')).primaryTurnCount, 3);
   assert.equal(catalog.projects.some(p => p.key === f.key('C')), false);

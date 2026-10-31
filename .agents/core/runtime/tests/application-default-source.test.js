@@ -42,7 +42,10 @@ test('default source wins equal versions while installed apps retain their origi
   assert.equal(groupStoreApplications(entries,sources,{'com.example.equal':{active:{manifest,source:team}}})[0].candidate.source.id,team.id);
 });
 test('HTTP refuses to change or remove the fixed source without restarting',async t=>{
-  const {startWebServer}=await import('../src/services/web.js'),f=await fixture(t),server=await startWebServer({root:f.root,port:0,capture:false,applications:{storeDirectory:join(f.root,'store'),fetcher:async()=>new Response(JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}))}});t.after(()=>server.close());
+  let server;
+  t.after(() => server?.close());
+
+  const {startWebServer}=await import('../src/services/web.js'),f=await fixture(t);server=await startWebServer({root:f.root,port:0,capture:false,applications:{storeDirectory:join(f.root,'store'),fetcher:async()=>new Response(JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}))}});
   const base=server.url.slice(0,-1),session=(await(await fetch(base+'/api/workbench/session')).json()).data,started=(await(await fetch(base+'/api/health')).json()).startedAt;
   for(const [path,input] of [['/api/apps/source',{...fixed,enabled:false}],['/api/apps/source/remove',{id:fixed.id}]]){
     const response=await fetch(base+path,{method:'POST',headers:{Origin:base,'X-KSF-Token':session.token,'Content-Type':'application/json'},body:JSON.stringify(input)});assert.equal(response.status,403);assert.equal((await response.json()).error.code,'APP_SOURCE_LOCKED');

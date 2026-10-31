@@ -33,8 +33,9 @@ function call(instance, path = '/', { method = 'GET', headers = {} } = {}) {
 }
 
 async function running(t) {
-  const instance = await startWebServer({ root:routingFixture(t).root,port: 0 });
-  t.after(() => instance.close());
+  let instance;
+  t.after(() => instance?.close());
+  instance = await startWebServer({ root:routingFixture(t).root,port: 0 });
   return instance;
 }
 
@@ -64,9 +65,12 @@ test('Web serves the packaged page and live health over loopback, including HEAD
 });
 
 test('Web reads independent persisted routing records and preserves them across server restart', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const f = routingFixture(t);
-  let server = await startWebServer({ root: f.root, port: 0 });
-  t.after(() => server.close());
+  server = await startWebServer({ root: f.root, port: 0 });
+
   let result = await call(server, '/api/routes');
   assert.equal(JSON.parse(result.body).data.total, 0);
   assert.equal(existsSync(join(f.root, ROUTE_DIRECTORY)), false);
@@ -160,6 +164,9 @@ test('Web reports occupied and invalid ports, preserving the running server', as
 });
 
 test('Web closes unfinished connections within a bounded shutdown and releases its port', { timeout: 6_000 }, async t => {
+  let replacement;
+  t.after(() => replacement?.close());
+
   const instance = await running(t);
   const accepted = once(instance.server, 'connection');
   const socket = connect(instance.port, instance.host);
@@ -172,8 +179,8 @@ test('Web closes unfinished connections within a bounded shutdown and releases i
   await received;
   await instance.close();
   await instance.close();
-  const replacement = await startWebServer({ root:routingFixture(t).root,port: instance.port });
-  t.after(() => replacement.close());
+  replacement = await startWebServer({ root:routingFixture(t).root,port: instance.port });
+
   assert.equal((await call(replacement, '/api/health')).status, 200);
 });
 

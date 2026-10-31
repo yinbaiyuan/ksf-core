@@ -66,7 +66,10 @@ test('preview quota prevents unbounded retained uploads and cancellation release
   const f=await fixture(t),reviews=[];for(let i=0;i<8;i++)reviews.push(await f.preview());await assert.rejects(f.preview(),{code:'APP_IMPORT_LIMIT'});await f.manager.discardImport(reviews[0].importId);await f.preview();
 });
 test('binary HTTP imports require a session, reject over-limit streams and install without service restart',async t=>{
-  const f=await fixture(t),server=await startWebServer({root:f.root,port:0,capture:false,applications: { defaultSource: null, storeDirectory:f.store}});t.after(()=>server.close());
+  let server;
+  t.after(() => server?.close());
+
+  const f=await fixture(t);server=await startWebServer({root:f.root,port:0,capture:false,applications: { defaultSource: null, storeDirectory:f.store}});
   const base=server.url.slice(0,-1),get=async path=>(await(await fetch(base+path)).json()),start=(await get('/api/health')).startedAt,auth=(await get('/api/workbench/session')).data;
   const upload=(bytes,token=auth.token,type='application/octet-stream')=>fetch(base+'/api/apps/import/preview?name='+encodeURIComponent('朋友分享.ksfapp'),{method:'POST',headers:{Origin:base,'Content-Type':type,'X-KSF-Token':token},body:bytes});
   assert.equal((await upload(pack(),'bad')).status,403);assert.equal((await upload(pack(),auth.token,'text/plain')).status,415);assert.equal((await upload(Buffer.alloc(MAX_PACKAGE+1))).status,413);

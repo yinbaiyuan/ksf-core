@@ -121,7 +121,10 @@ test('another application manager cannot switch a release or uninstall a live fo
   await f.manager.release(instance.id); assert.equal((await other.snapshot()).installed[0].active.manifest.version, '2.0.0');
 });
 test('live HTTP server installs and runs an app without changing its health start identity', async t => {
-  const f = await fixture(t), server = await startWebServer({ root: f.root, port: 0, capture: false, applications: { defaultSource: null, storeDirectory: f.store } }); t.after(() => server.close());
+  let server;
+  t.after(() => server?.close());
+
+  const f = await fixture(t);server = await startWebServer({ root: f.root, port: 0, capture: false, applications: { defaultSource: null, storeDirectory: f.store } });
   const origin = server.url.slice(0, -1), get = async path => (await fetch(origin + path)).json();
   const start = (await get('/api/health')).startedAt, auth = (await get('/api/workbench/session')).data;
   const post = async (path, input, token = auth.token) => { const response = await fetch(origin + path, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-KSF-Token': token }, body: JSON.stringify(input) }); return { status: response.status, body: await response.json() }; };
