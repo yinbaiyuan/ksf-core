@@ -3,6 +3,7 @@ import {existsSync, readdirSync, readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
 import {test} from 'node:test';
+import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 
 test('CI installs both application toolchains before running Core tests and uses the owned test entry', t => {
@@ -47,4 +48,27 @@ test('CI verifies the shipped runtime through a launcher without forging bootstr
     }
   }
   assert.ok(checks > 0, 'Repository workflows must verify the shipped runtime.');
+});
+
+test('CI Node environment flags can start the bundled runtime before selecting tests', t => {
+  const directory = fileURLToPath(new URL('../../../../.github/workflows/', import.meta.url));
+  if (!existsSync(directory)) { t.skip('Installed Core packages do not include repository workflows.'); return; }
+  let checked = 0;
+  for (const name of readdirSync(directory).filter(name => /\.ya?ml$/.test(name))) {
+    const workflow = YAML.parse(readFileSync(join(directory, name), 'utf8'));
+    for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
+      for (const step of job.steps ?? []) {
+        const options = step.env?.NODE_OPTIONS ?? job.env?.NODE_OPTIONS;
+        if (!options) continue;
+        const resolved = options.replaceAll('${{ matrix.shard }}', '1/1');
+        assert.doesNotMatch(resolved, /\$\{\{/, `${name}/${jobName}: supply a matrix example for new Node flags`);
+        const result = spawnSync(process.execPath, ['--eval', ''], {
+          env: {...process.env, NODE_OPTIONS: resolved}, encoding: 'utf8', timeout: 15000,
+        });
+        assert.equal(result.status, 0, `${name}/${jobName}/${step.name}: ${result.stderr || result.error?.message}`);
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked > 0);
 });
