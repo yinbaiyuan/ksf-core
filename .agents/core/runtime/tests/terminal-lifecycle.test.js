@@ -10,14 +10,14 @@ import * as path from 'node:path';
 
 test('ConPTY output EOF disposes its worker without needing a final data event',()=>{
   let disposals=0;
-  class Socket extends EventEmitter{setEncoding(){}}
+  class Socket extends EventEmitter{setEncoding(){}destroy(){this.destroyed=true;}}
   class Connection{onReady(){}dispose(){disposals++;}}
   const native={startProcess:()=>({fd:1,pty:2,conin:'synthetic-in',conout:'synthetic-out'}),connect:()=>({pid:123})};
   const modules={fs:{openSync:()=>1},os:{release:()=> '10.0.26100'},path,child_process:{},net:{Socket},'./windowsConoutConnection':{ConoutConnection:Connection},'./utils':{loadNativeModule:()=>({module:native})}};
   const exports={};
   runInNewContext(readFileSync(new URL('../native/node-pty/lib/windowsPtyAgent.js',import.meta.url),'utf8'),{exports,require:name=>{assert.ok(name in modules,`Unexpected pinned dependency: ${name}`);return modules[name];}});
   const agent=new exports.WindowsPtyAgent('cmd.exe',[],{},tmpdir(),80,24,false,true,true,false);
-  assert.equal(disposals,0);agent.outSocket.emit('close');assert.equal(disposals,1);
+  assert.equal(disposals,0);assert.notEqual(agent.inSocket.destroyed,true);agent.outSocket.emit('close');assert.equal(disposals,1);assert.equal(agent.inSocket.destroyed,true);
   agent.outSocket.emit('close');assert.equal(disposals,1);
 });
 

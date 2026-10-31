@@ -7,6 +7,6 @@ const text=await readFile(join(source,'lib/windowsPtyAgent.js'),'utf8');
 const anchor='        this._conoutSocketWorker = new windowsConoutConnection_1.ConoutConnection(term.conout, this._useConptyDll);\n';
 if(text.split(anchor).length!==2||text.includes('// KSF: close the worker'))throw Error('Pinned node-pty ConPTY worker source changed; review the compatibility patch.');
 await mkdir(target,{recursive:true});for(const name of ['lib','prebuilds','package.json','LICENSE']){await rm(join(target,name),{recursive:true,force:true});await cp(join(source,name),join(target,name),{recursive:true,filter:path=>!/(?:\.pdb|\.map|\.d\.ts)$/.test(path)});}
-await writeFile(join(target,'lib/windowsPtyAgent.js'),text.replace(anchor,anchor+"        // KSF: close the worker even when ConPTY emits EOF without final data.\n        this._outSocket.once('close', function () { _this._conoutSocketWorker.dispose(); });\n"));
+await writeFile(join(target,'lib/windowsPtyAgent.js'),text.replace(anchor,anchor+"        // KSF: close the worker and input on ConPTY EOF without final data.\n        this._outSocket.once('close', function () { if (_this._inSocket) _this._inSocket.destroy(); _this._conoutSocketWorker.dispose(); });\n"));
 for(const name of await readdir(join(target,'prebuilds')))if(name.startsWith('darwin-'))await chmod(join(target,'prebuilds',name,'spawn-helper'),0o755);
 console.log('Vendored node-pty 1.1.0 into the workbench native boundary.');
