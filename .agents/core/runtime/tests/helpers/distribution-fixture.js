@@ -169,7 +169,7 @@ export async function distributionFixture(t, options = {}) {
     return { ...result, source, coreArchive: join(result.output, index.platforms[fixtureTarget].core.name), feed: index };
   };
   const launch = (args, options = {}) => { const invocation=launcherInvocation(workspace,args); return spawnSync(invocation.executable, invocation.args, {
-    cwd: tmpdir(), encoding: 'utf8', timeout: 20000,
+    cwd: tmpdir(), encoding: 'utf8', timeout: options.timeoutMs ?? 20000,
     env: { ...process.env, PATH: '', KSF_SKIP_AUTO_UPDATE: '1', ...options.env },
   }); };
   return { directory, root, workspace, first, next, save, launch, build };

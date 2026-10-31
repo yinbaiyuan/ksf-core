@@ -6507,10 +6507,103 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 134.09,
-        "win32": 585.56
+        "darwin": 60,
+        "win32": 240
       },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+      "timingBasis": "Three CLI/launcher policy cases retained after splitting the mixed Windows group observed in CI 41186681465."
+    },
+    {
+      "id": "core:system-update-root-interruption",
+      "path": ".agents/core/runtime/tests/system-update-root-interruption.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 80,
+        "win32": 250
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
+    },
+    {
+      "id": "core:system-update-root-conflicts",
+      "path": ".agents/core/runtime/tests/system-update-root-conflicts.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 50,
+        "win32": 150
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
+    },
+    {
+      "id": "core:system-update-root-candidates",
+      "path": ".agents/core/runtime/tests/system-update-root-candidates.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 210
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
     },
     {
       "id": "core:contribution-validation",
