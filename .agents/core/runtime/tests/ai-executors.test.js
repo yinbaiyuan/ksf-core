@@ -7,6 +7,9 @@ import { join } from 'node:path';
 import { createAITaskService } from '../src/ai-tasks/service.js';
 import { createResponsesExecutor } from '../src/ai-tasks/executors/api-text.js';
 import { createCodexExecutor } from '../src/ai-tasks/executors/codex.js';
+import { runCodex } from '../src/ai-tasks/executors/codex-run.js';
+import fsPromises from 'node:fs/promises';
+import { syncBuiltinESMExports } from 'node:module';
 import { createTranscriptionExecutor } from '../src/ai-tasks/executors/api-transcription.js';
 
 const caller={appId:'example.adapter'};
@@ -14,13 +17,13 @@ const connection={id:'api',kind:'api',enabled:true,protocolId:'openai-responses-
 const profile={id:'test',executorId:'api',enabled:true,model:'synthetic-model',timeoutMs:2000,maxAttempts:1,retryDelayMs:10,maxInputBytes:1000000,maxOutputBytes:4096};
 const request=(extra={})=>({contractVersion:'ai-task-v1',idempotencyKey:'one',profileId:'test',instruction:'仅整理输入',inputs:[{kind:'text',text:'虚构材料'}],outputSpec:{format:'text'},...extra});
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function wait(service,id,status='succeeded'){const end=Date.now()+5000;let task;do{task=await service.get(caller,id);if(task.status===status)return task;if(['failed','reconciling'].includes(task.status)&&task.status!==status)assert.fail(JSON.stringify(task));await delay(10);}while(Date.now()<end);assert.fail('timeout '+JSON.stringify(task));}
-async function fixture(t,{fetcher,kind='api',executablePath,protocolId='openai-responses-v1',environment={SYNTHETIC_AI_KEY:'fixture-never-persist'}}={}){
+async function wait(service,id,status='succeeded',budgetMs=5000){const end=Date.now()+budgetMs;let task;do{task=await service.get(caller,id);if(task.status===status)return task;if(['failed','reconciling'].includes(task.status)&&task.status!==status)assert.fail(JSON.stringify(task));await delay(10);}while(Date.now()<end);assert.fail('timeout '+JSON.stringify(task));}
+async function fixture(t,{fetcher,kind='api',executablePath,protocolId='openai-responses-v1',environment={SYNTHETIC_AI_KEY:'fixture-never-persist'},timeoutMs=profile.timeoutMs}={}){
   const root=await mkdtemp(join(tmpdir(),'ksf-ai-adapter-'));
   const service=createAITaskService(root,{pollMs:10,env:{...process.env,...environment},executors:{'openai-responses-v1':createResponsesExecutor({fetcher}),'openai-transcription-v1':createTranscriptionExecutor({fetcher}),codex:createCodexExecutor()}});
   t.after(async()=>{await service.close();await rm(root,{recursive:true,force:true});});
   await service.config('connections',{revision:0,items:[kind==='api'?{...connection,protocolId}:{id:'api',kind:'codex',enabled:true,executablePath,concurrency:1}]});
-  await service.config('profiles',{revision:0,items:[profile]});return{root,service};
+  await service.config('profiles',{revision:0,items:[{...profile,timeoutMs}]});return{root,service};
 }
 const response=body=>new Response(JSON.stringify(body),{headers:{'content-type':'application/json'}});
 test('C11/C12 fixture: Responses maps complete text, identity and usage without saving raw reasoning or credentials',async t=>{
@@ -49,13 +52,32 @@ async function fakeCLI(t,mode='success'){
   return writeNodeExecutable(path,source);
 }
 test('C13 fixture: managed CLI worker decodes completion, saves final output and strips raw reasoning',async t=>{
-  const executablePath=await fakeCLI(t);const f=await fixture(t,{kind:'codex',executablePath});const accepted=await f.service.submit(caller,request());const done=await wait(f.service,accepted.aiTaskId);assert.equal(done.output.value,'完成');assert.equal(done.execution.attempts[0].nativeSessionId,'synthetic-session');assert.match(done.execution.attempts[0].cliVersion,/0.163.0/);
+  const executablePath=await fakeCLI(t);const f=await fixture(t,{kind:'codex',executablePath,timeoutMs:30000});const accepted=await f.service.submit(caller,request());const done=await wait(f.service,accepted.aiTaskId,'succeeded',15000);assert.equal(done.output.value,'完成');assert.equal(done.execution.attempts[0].nativeSessionId,'synthetic-session');assert.match(done.execution.attempts[0].cliVersion,/0.163.0/);
   const data=await readFile(join(f.root,'.agents/user-data/ai/tasks',done.aiTaskId+'.json'),'utf8');assert.ok(!data.includes('private-synthetic-reasoning'));
 });
 test('C14 fixture: cancellation stops only the owned worker and reports actual settlement separately',async t=>{
-  const executablePath=await fakeCLI(t,'hang');const f=await fixture(t,{kind:'codex',executablePath});const accepted=await f.service.submit(caller,request());
-  const end=Date.now()+4000;let running;do{running=await f.service.get(caller,accepted.aiTaskId);if(running.execution.attempts[0]?.pid)break;await delay(10);}while(Date.now()<end);
-  assert.ok(running.execution.attempts[0].pid);const cancelled=await f.service.cancel(caller,accepted.aiTaskId);assert.equal(cancelled.status,'cancelled');
-  let settled;do{settled=await f.service.get(caller,accepted.aiTaskId);if(settled.execution.attempts[0].stopConfirmed)break;await delay(10);}while(Date.now()<end);
+  const executablePath=await fakeCLI(t,'hang');const f=await fixture(t,{kind:'codex',executablePath,timeoutMs:30000});const accepted=await f.service.submit(caller,request());
+  // A PID is published before a native launcher has started its CLI child.
+  // Observe the CLI's own event before testing cancellation of active work.
+  const readyBy=Date.now()+15000;let running;do{running=await f.service.get(caller,accepted.aiTaskId);if(running.execution.attempts[0]?.nativeSessionId)break;await delay(10);}while(Date.now()<readyBy);
+  assert.equal(running.execution.attempts[0]?.nativeSessionId,'synthetic-session');assert.ok(running.execution.attempts[0].pid);
+  const cancelled=await f.service.cancel(caller,accepted.aiTaskId);assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.execution.attempts[0].stopConfirmed,false);
+  const stoppedBy=Date.now()+10000;let settled;do{settled=await f.service.get(caller,accepted.aiTaskId);if(settled.execution.attempts[0].stopConfirmed)break;await delay(10);}while(Date.now()<stoppedBy);
   assert.equal(settled.execution.attempts[0].stopConfirmed,true);assert.equal(settled.output,null);
+});
+for(const phase of ['before preparation','during preparation'])test('cancelled CLI never launches '+phase,async t=>{
+  const executablePath=await fakeCLI(t),controller=new AbortController();let identities=0;
+  const original=fsPromises.mkdtemp;let release,ready;
+  const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{ready=resolve;});
+  if(phase==='before preparation')controller.abort();
+  else {
+    fsPromises.mkdtemp=async(...args)=>{const directory=await original(...args);if(String(args[0]).includes('ksf-ai-codex-')){t.after(()=>rm(directory,{recursive:true,force:true}));ready();await gate;}return directory;};
+    syncBuiltinESMExports();
+  }
+  const pending=runCodex({executablePath,prompt:'synthetic cancellation',maxOutputBytes:4096},{signal:controller.signal,onIdentity:async()=>{identities++;}});
+  try {
+    if(phase==='during preparation'){await Promise.race([entered,pending.then(()=>assert.fail('CLI finished before the preparation barrier.'))]);controller.abort();release();}
+    await assert.rejects(pending,{code:'AI_EXECUTION_TIMEOUT'});
+    assert.equal(identities,0,'A cancelled preparation must not spawn a CLI process.');
+  } finally {release();fsPromises.mkdtemp=original;syncBuiltinESMExports();await pending.catch(()=>{});}
 });
