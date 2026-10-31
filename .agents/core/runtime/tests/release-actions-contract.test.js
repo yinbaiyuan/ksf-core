@@ -53,6 +53,11 @@ test('Core Actions contract uses one artifact ID, pinned publisher, gated templa
   assert.deepEqual(workflow.on.push.tags, ['v*']);
   assert.deepEqual(workflow.on.workflow_dispatch.inputs.operation.options, ['release', 'template-only']);
   assert.equal(workflow.permissions.contents, 'read'); assert.equal(workflow.jobs.release.permissions.contents, 'write');
+  // Reusing a proof skips verification. Descendants must override GitHub's
+  // implicit success() condition and gate on the actual preparation result.
+  assert.match(workflow.jobs.prepare.if, /!cancelled\(\)/);
+  assert.match(workflow.jobs.release.if, /!cancelled\(\).*needs.prepare.result == 'success'/s);
+  assert.match(workflow.jobs.release.if, /inputs.operation != 'template-only'/);
   assert.deepEqual(workflow.jobs.template.needs, ['prepare', 'release']);
   assert.match(workflow.jobs.template.if, /!cancelled\(\).*needs.prepare.result == 'success'/s);
   assert.match(workflow.jobs.template.if, /inputs.operation == 'template-only'/);
