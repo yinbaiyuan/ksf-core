@@ -60,6 +60,6 @@ test('application lease and version gates reject unknown viewers and replaced ap
   await f.manager.runtimeManage({action:'stop',appId:f.manifest.id});await f.manager.startBackground();assert.equal((await f.manager.runtimeSnapshot()).applications[0].state,'stopped');
 });
 test('terminal monitoring lists only existing scopes and closes only the matched session identity',async()=>{
-  let exit;let kills=0;const terminal=createWorkbenchTerminal('/tmp',{loadPTY:async()=>({spawn(){return {pid:99999999,onData(){},onExit(cb){exit=cb;},kill(){kills++;exit({exitCode:0});},write(){},resize(){}};}})}),caller={appId:'terminal',runtimeId:'r',instanceId:'w'};
+  let exit;let kills=0;const terminal=createWorkbenchTerminal(tmpdir(),{loadPTY:async()=>({spawn(){return {pid:99999999,onData(){},onExit(cb){exit=cb;},kill(){kills++;exit({exitCode:0});},write(){},resize(){}};}})}),caller={appId:'terminal',runtimeId:'r',instanceId:'w'};
   assert.deepEqual(await terminal.monitorSnapshot(),[]);await terminal.create(caller,{cols:80,rows:24});const [row]=await terminal.monitorSnapshot();assert.equal(row.appId,'terminal');await assert.rejects(terminal.monitorClose({monitorId:'wrong'}),{code:'MONITOR_STALE'});await terminal.monitorClose({monitorId:row.monitorId});assert.equal(kills,1);const ended=(await terminal.monitorSnapshot())[0];assert.equal(ended.stopped,true);assert.ok(ended.finishedAt);await assert.rejects(terminal.monitorClose({monitorId:row.monitorId}),{code:'MONITOR_STALE'});await terminal.dispose();
 });
