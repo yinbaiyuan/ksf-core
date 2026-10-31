@@ -1,7 +1,7 @@
-import type {ApplicationSDK2} from './application-sdk';
+import type {ApplicationSDK} from './application-sdk';
 import type {AIMaterial} from './ai-tasks';
 import {APIError,type WorkbenchSession} from './apps/request-client.ts';
-export function createAIMaterialClient(sdk:Pick<ApplicationSDK2,'instanceId'|'getSession'|'request'>,fetcher:typeof fetch=fetch){return {
+export function createAIMaterialClient(sdk:Pick<ApplicationSDK,'instanceId'|'getSession'|'request'>,fetcher:typeof fetch=fetch){return {
  async upload(metadata:{name:string;mimeType:string},blob:Blob,{signal}:{signal?:AbortSignal}={}):Promise<AIMaterial>{
   if(blob.size>128*1024*1024)throw new APIError('材料超过128 MiB。','AI_INPUT_TOO_LARGE');
   let auth=await sdk.getSession();

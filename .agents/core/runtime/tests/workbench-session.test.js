@@ -7,11 +7,14 @@ import { startWebServer } from '../src/services/web.js';
 import { createWorkbenchClient, APIError } from '../web/src/apps/request-client.ts';
 
 test('open client saves after real server restart; conflicts still protect external changes', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const root = await realpath(await mkdtemp(join(tmpdir(), 'ksf-session-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   await writeFile(join(root, '说明.md'), 'original\r\n');
-  let server = await startWebServer({ root, port: 0, capture: false });
-  t.after(() => server.close());
+  server = await startWebServer({ root, port: 0, capture: false });
+
   const origin = server.url.slice(0, -1), writes = [];
   const client = createWorkbenchClient((url, options) => {
     if (options.method === 'POST') writes.push(JSON.parse(options.body));

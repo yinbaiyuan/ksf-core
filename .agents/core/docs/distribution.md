@@ -10,7 +10,7 @@ KSF 分为系统、用户模板和用户实例三层：
 
 三种身份的程序定义统一位于 [products.js](../runtime/src/distribution/products.js)。命令入口仍为 `.agents/ksf`，不随用户实例目录或仓库名称变化。
 
-Agent 入口为 AGENTS.md → [ksf-runtime](../abilities/partners/ksf-runtime/partner.md) → ability-route；系统维护选择 [ksf-maintainer](../abilities/partners/ksf-maintainer/partner.md)，按发布、创建工作区、升级或贡献基本功执行。职责和情境判断由对象定义持有，本文持有发行协议与程序行为。检查、安装和公开提交分别核对用户要求，不因发现新版本而安装。
+Agent 入口为 AGENTS.md → `context entry` → Core 孵化指导或 [ksf-runtime](../abilities/partners/ksf-runtime/partner.md) → ability-route；孵化状态由实例保存，新模板只带通用 pending 初始状态，旧实例缺失时进入正常 runtime。状态切换不修改 Core 或 AGENTS，规则见[孵化接口](cli/incubation.md)。系统维护选择 [ksf-maintainer](../abilities/partners/ksf-maintainer/partner.md)，按发布、创建工作区、升级或贡献基本功执行。检查、安装和公开提交分别核对用户要求，不因发现新版本而安装。
 
 Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项目、知识、能力、收件箱和档案目录由发行程序生成，不再创建根级 `源档/`。原件随目标保存，默认使用目标的 `资料/`，已有附属资料目录保持原位；一份原件一个主归属，其他目标引用。Core 源码中的能力发现允许用户目录不存在；模板和用户实例仍检查用户能力目录的完整性。`repositories/` 是可选的用户工程容器，首次使用 repository create 时建立，不生成受跟踪占位文件；模板忽略规则排除整个容器。已有实例启用时需在其自己的 .gitignore 中补 `/repositories/`，升级继续保留用户忽略规则。
 
@@ -22,7 +22,7 @@ Core 源码不保留用户根目录或占位文件；ksf-workspace 模板的项�
 
 仓库模板：打开官方 ksf-workspace 页面，点击 **Use this template → Create a new repository**，名称默认建议 `ksf`，也可自定义，选择 **Private** 后创建，再克隆自己的用户实例仓库。公开仓库的 fork 也公开，个人资料应进入自己的私有仓库。用户实例具有独立历史，升级和贡献均不依赖这个历史。
 
-macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其他 cwd 使用入口绝对路径。Windows 当前只实现入口恢复和 Core 转交契约，运行时尚未接入。Core 开发仓库不会自动升级。入口职责与协议见[启动入口](../runtime/launcher.md)。
+macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其他 cwd 使用入口绝对路径。Windows x64 已实现原生bootstrap、随包Node与共享业务CLI，平台与实机范围见[平台说明](runtime/platforms.md)。Core 开发仓库不会自动升级。入口职责与协议见[启动入口](../runtime/launcher.md)。
 
 ## 文件归属
 
@@ -171,4 +171,8 @@ Core 配置变量 KSF_TEMPLATE_APP_CLIENT_ID 与 Secret KSF_TEMPLATE_APP_PRIVATE
 
 若旧发行的模板发布程序有缺陷，单纯重跑旧作业仍会使用旧程序。合入修复后，从含修复的 main 发起 `template-only` 并指定原标签（例如 `v0.1.1`）。prepare 冻结维护程序提交，下载并校验原版三个资产；template 使用固定维护程序处理原产物。原标签、Core 提交、压缩包、索引及摘要保持原样，不以重新发布同版本修复程序。正常发行的程序来源仍与当次 Core 源码一致。
 
-新工作区从已验证 Core 模板源生成根 `USER.md`、`BOT.md`、`MEMORY.md`、`知识/knowledge.md`、`知识/rules/` 公共约定、可选认知定义与空模板骨架、`档案/archive.md` 和个人、企业、项目空档案分区，不再生成根级归档或源档。旧模板按包内源文件识别旧布局，已知空占位可兼容；未知额外文件和非空占位继续拒绝。三份根协作文件与知识、档案根说明均归用户实例；真实根协作文件不进入 Core 发行或公开贡献。升级和回滚不覆盖其定制、不补写缺失文件，也不自动改名或移动旧资料。包内没有新增协作或知识规则模板源的旧包仍可校验；存在对应模板源时，生成文件必须逐字节匹配，空目录占位必须为空且为 0644。模板文件按显式白名单生成并校验，不读取实例知识正文。Core 包只携带模板源；升级不将它们自动复制到用户知识目录。
+新工作区从已验证 Core 模板源生成根 `USER.md`、`BOT.md`、`知识/knowledge.md`、`知识/rules/` 公共约定、可选认知定义与空模板骨架、`档案/archive.md` 和个人、企业、项目空档案分区，不再生成根级归档或源档。旧模板按包内源文件识别旧布局，已知空占位可兼容；未知额外文件和非空占位继续拒绝。两份根协作文件与知识、档案根说明均归用户实例；真实根协作文件不进入 Core 发行或公开贡献。升级和回滚不覆盖其定制、不补写缺失文件，也不自动改名或移动旧资料。包内没有新增协作或知识规则模板源的旧包仍可校验；存在对应模板源时，生成文件必须逐字节匹配，空目录占位必须为空且为 0644。模板文件按显式白名单生成并校验，不读取实例知识正文。Core 包只携带模板源；升级不将它们自动复制到用户知识目录。
+
+## 持久数据兼容
+
+更新与回退同时核对目标Core的data-compatibility.json和已安装应用的宿主要求；不兼容、缺声明或读失败保留原件并拒绝切换。本轮不主动改变Core业务数据格式。详见[Core数据兼容](runtime/data-compatibility.md)。

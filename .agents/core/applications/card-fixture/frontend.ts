@@ -1,6 +1,6 @@
-import type { ApplicationSDK2 } from '@ksf/sdk/react';
+import type { ApplicationSDK } from '@ksf/sdk/react';
 import './style.css';
-export function mount(root:HTMLElement,sdk:ApplicationSDK2){
+export function mount(root:HTMLElement,sdk:ApplicationSDK){
   root.classList.add('card-fixture');
   const label=document.createElement('strong'),value=document.createElement('span'),button=document.createElement('button'),runtime=document.createElement('small'),crash=document.createElement('button');
   label.textContent=sdk.cardId==='summary'?'摘要卡片':'明细卡片';button.textContent='增加数值';crash.textContent='模拟后端故障';

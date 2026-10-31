@@ -1,3 +1,4 @@
+import {createExecutionGrants} from './execution-grants.js';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { createCoordinator } from '../services/workbench-common.js';
@@ -9,8 +10,9 @@ import { requestContract, outputValue, canonical, clone, sha256, requireAI, fail
 // Only the managed service bridge constructs caller. User parameters are never
 // spread into it; trusted application code is still not an OS security boundary.
 export function createAITaskService(root, { executors = {}, now = Date.now, pollMs = 250, env = process.env } = {}) {
+  const grants=createExecutionGrants(root);
   const coordinator = createCoordinator(), active = new Map();
-  let store, starting, timer, closing = false, startupError;
+  let store, starting, timer, closing = false, paused = false, startupError;
   const iso = () => new Date(now()).toISOString();
   function event(task, type) { task.revision++; task.events.push({ seq: task.revision, type, status: task.status, at: iso() }); task.timestamps.updatedAt = iso(); }
   function view(task) {
@@ -38,6 +40,7 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
   function own(caller, id) { identifier(id); const task = store.tasks.get(id); requireAI(task && task.appId === caller.appId, 'AI_TASK_NOT_FOUND', '任务不存在或不属于此应用。', { status: 404 }); return task; }
   function callerCheck(caller) { requireAI(caller && typeof caller.appId === 'string' && caller.appId.length > 0, 'AI_CALLER_INVALID', '缺少受管应用身份。', { status: 403 }); }
   async function submit(caller, input) {
+    requireAI(!paused,'AI_SERVICE_STOPPING','AI 服务正在停止接收新任务。',{status:409});
     callerCheck(caller); const request = requestContract(input); await start();
     const result = await coordinator.run('state', async () => {
       const requestDigest = sha256(canonical(request));
@@ -58,19 +61,28 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
       const materials = []; let bytes = Buffer.byteLength(request.instruction);
       for (const input of request.inputs) { if (input.kind === 'material') { const material = await materialSnapshot(store, caller, input); materials.push(material); bytes += material.size; } else bytes += Buffer.byteLength(input.text); }
       requireAI(bytes <= profile.maxInputBytes, 'AI_INPUT_TOO_LARGE', '输入超过当前执行配置上限。');
-      const task = { schemaVersion: 1, aiTaskId: randomUUID(), appId: caller.appId, caller: clone(caller), request, requestDigest, snapshot: { profile, connection, profileRevision: profiles.revision, connectionRevision: connections.revision, materials }, status: 'queued', revision: 0, attempts: [], events: [], warnings: [], timestamps: { receivedAt: iso(), updatedAt: iso() } };
+      const executionGrant=request.executionGrant?await grants.resolveGrant(caller,request.executionGrant):null;
+      if(executionGrant?.scope.capability==='project'||executionGrant?.scope.shell||executionGrant?.scope.network)requireAI(connection.kind==='codex','AI_CAPABILITY_UNSUPPORTED','目录、工具或网络执行需要受限 Codex 执行连接。');
+      if(executionGrant)profile.maxAttempts=1;
+      const task = { schemaVersion: 1, aiTaskId: randomUUID(), appId: caller.appId, caller: clone(caller), request, requestDigest, snapshot: { ...(executionGrant?{executionGrant}:{}), profile, connection, profileRevision: profiles.revision, connectionRevision: connections.revision, materials }, status: 'queued', revision: 0, attempts: [], events: [], warnings: [], timestamps: { receivedAt: iso(), updatedAt: iso() } };
       event(task, 'accepted'); await store.save(task); return view(task);
     });
     queueMicrotask(() => { void tick().catch(error => { startupError = error; }); }); return result;
   }
-  async function describe(caller){callerCheck(caller);await start();const profiles=await readConfig(store.home,'profiles'),connections=await readConfig(store.home,'connections');return {contractVersion:'ai-task-v1',limits:{requestBytes:768*1024,textMaterialBytes:512*1024,uploadBytes:128*1024*1024},profiles:profiles.items.filter(profile=>profile.enabled&&connections.items.some(c=>c.id===profile.executorId&&c.enabled&&executors[c.kind==='codex'?'codex':c.protocolId])).map(profile=>{const connection=connections.items.find(c=>c.id===profile.executorId);return {id:profile.id,model:profile.model??null,capabilities:connection.protocolId==='openai-transcription-v1'?['audio-transcription','json']:['text','json'],limits:{maxInputBytes:profile.maxInputBytes,maxOutputBytes:profile.maxOutputBytes,timeoutMs:profile.timeoutMs,maxAttempts:profile.maxAttempts}};})};}
+  async function describe(caller){
+    callerCheck(caller);await start();const profiles=await readConfig(store.home,'profiles'),connections=await readConfig(store.home,'connections');
+    return {contractVersion:'ai-task-v1',limits:{requestBytes:768*1024,textMaterialBytes:512*1024,uploadBytes:128*1024*1024},profiles:profiles.items.filter(profile=>profile.enabled&&connections.items.some(c=>c.id===profile.executorId&&c.enabled&&executors[c.kind==='codex'?'codex':c.protocolId])).map(profile=>{
+      const connection=connections.items.find(c=>c.id===profile.executorId);
+      return {id:profile.id,executorId:connection.id,kind:connection.kind,...(connection.protocolId?{protocolId:connection.protocolId}:{}),model:profile.model??null,capabilities:connection.protocolId==='openai-transcription-v1'?['audio-transcription','json']:['text','json'],limits:{maxInputBytes:profile.maxInputBytes,maxOutputBytes:profile.maxOutputBytes,timeoutMs:profile.timeoutMs,maxAttempts:profile.maxAttempts}};
+    })};
+  }
   async function get(caller, id) { callerCheck(caller); await start(); return view(own(caller, id)); }
-  async function readResult(caller,id){callerCheck(caller);await start();const task=own(caller,id);requireAI(task.status==='succeeded','AI_RESULT_UNAVAILABLE','任务尚无可采用的成功结果。');const artifact=await readJSON(join(store.home,'results',id+'.json'));requireAI(artifact.schemaVersion===1&&artifact.aiTaskId===id&&sha256(canonical(artifact.value))===task.output.artifacts[0].sha256,'AI_STORAGE_INVALID','结果摘要校验失败。');return{resultId:id,format:artifact.format,value:artifact.value,sha256:task.output.artifacts[0].sha256};}
+  async function readResult(caller,id){callerCheck(caller);await start();const task=own(caller,id);requireAI(task.status==='succeeded','AI_RESULT_UNAVAILABLE','任务尚无可采用的成功结果。');const artifact=await readJSON(join(store.home,'results',id+'.json'));requireAI(artifact.schemaVersion===1&&artifact.aiTaskId===id&&sha256(canonical(artifact.value))===task.output.artifacts[0].sha256,'AI_STORAGE_INVALID','结果摘要校验失败。');return{resultId:id,format:artifact.format,value:artifact.value,sha256:task.output.artifacts[0].sha256,...(artifact.executionFiles?{executionFiles:artifact.executionFiles}: {})};}
   async function adminGet(id){identifier(id);await start();const task=store.tasks.get(id);requireAI(task,'AI_TASK_NOT_FOUND','任务不存在。',{status:404});return view(task);}
   async function events(caller, id, afterSeq = 0) { callerCheck(caller); await start(); requireAI(Number.isSafeInteger(afterSeq) && afterSeq >= 0, 'AI_REQUEST_INVALID', '事件游标无效。'); const task = own(caller, id); const items = task.events.filter(e => e.seq > afterSeq).slice(0, 100); return { events: clone(items), afterSeq: items.at(-1)?.seq ?? afterSeq, hasMore:task.events.some(e=>e.seq>(items.at(-1)?.seq??afterSeq)), snapshot: view(task) }; }
-  async function cancel(caller, id) {
+  async function cancel(caller, id, expectedRevision) {
     callerCheck(caller); await start();
-    const result = await coordinator.run('state', async () => { const task = clone(own(caller, id)); if (!terminal(task.status)) { task.status = 'cancelled'; task.output = null; task.timestamps.cancelRequestedAt = iso(); task.timestamps.finishedAt = iso(); event(task, 'cancelled'); await store.save(task); } return view(task); });
+    const result = await coordinator.run('state', async () => { const task = clone(own(caller, id));requireAI(expectedRevision===undefined||String(task.revision)===expectedRevision,'MONITOR_STALE','AI 任务状态已变化，请刷新。',{status:409}); if (!terminal(task.status)) { task.status = 'cancelled'; task.output = null; task.timestamps.cancelRequestedAt = iso(); task.timestamps.finishedAt = iso(); event(task, 'cancelled'); await store.save(task); } return view(task); });
     active.get(id)?.controller.abort('cancelled'); return result;
   }
   function expired(task) { return task.request.deadlineAt && Date.parse(task.request.deadlineAt) <= now(); }
@@ -83,7 +95,7 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
     const timeout = setTimeout(() => controller.abort('timeout'), Math.max(1, Math.min(profile.timeoutMs, remaining)));
     const executor = executors[initial.snapshot.connection.kind === 'codex' ? 'codex' : initial.snapshot.connection.protocolId];
     let result, error;
-    try { result = recovered ? await recovered.read() : await executor.execute({ task: clone(initial), attemptId, store, signal: controller.signal, env, record: patch => updateAttempt(id, attemptId, patch) }); }
+    try { if(initial.request.executionGrant)await grants.resolveGrant(initial.caller,initial.request.executionGrant);result = recovered ? await recovered.read() : await executor.execute({ task: clone(initial), attemptId, store, signal: controller.signal, env, record: patch => updateAttempt(id, attemptId, patch) }); }
     catch (caught) { error = caught; }
     finally { clearTimeout(timeout); }
     await coordinator.run('state', async () => {
@@ -94,7 +106,7 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
       if (!error && !controller.signal.aborted && !expired(next)) {
         try {
           const value = outputValue(result.text, next.request.outputSpec, profile.maxOutputBytes);
-          const artifact = { schemaVersion: 1, aiTaskId: id, attemptId, format: next.request.outputSpec.format, value };
+          const artifact = { schemaVersion: 1, aiTaskId: id, attemptId, format: next.request.outputSpec.format, value, ...(result.executionFiles?{executionFiles:result.executionFiles}: {}) };
           await atomicJSON(join(store.home, 'results', id + '.json'), artifact);
           next.output = { format: next.request.outputSpec.format, value, artifacts: [{ resultId: id, sha256: sha256(canonical(value)) }] };
           next.usage = result.usage ?? null;next.warnings = result.warnings ?? []; Object.assign(attempt, result.execution ?? {}); next.status = 'succeeded'; next.error = null;
@@ -115,10 +127,11 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
     });
   }
   async function tick() {
-    if (closing || !store || startupError) return;
+    if (closing || paused || !store || startupError) return;
     await coordinator.run('dispatch', async () => {
       for (const saved of store.tasks.values()) {
-        if (closing) return;
+        if(saved.request.executionGrant&&!terminal(saved.status)){try{await grants.resolveGrant(saved.caller,saved.request.executionGrant);}catch{await cancel(saved.caller,saved.aiTaskId);continue;}}
+        if (closing || paused) return;
         if (active.has(saved.aiTaskId)) continue;
         const attempt = saved.attempts.at(-1);
         if (attempt && !attempt.stopConfirmed && (saved.status === 'reconciling' || terminal(saved.status))) {
@@ -153,8 +166,19 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
       }
     });
   }
-  async function config(kind, input) { requireAI(['connections', 'profiles'].includes(kind), 'AI_REQUEST_INVALID', '未知配置类型。'); await start(); return coordinator.run('state', () => input === undefined ? readConfig(store.home, kind) : writeConfig(store.home, kind, input)); }
+  async function config(kind, input, options={}) { requireAI(['connections', 'profiles'].includes(kind), 'AI_REQUEST_INVALID', '未知配置类型。'); await start(); return coordinator.run('state', () => input === undefined ? readConfig(store.home, kind) : writeConfig(store.home, kind, input,options)); }
   async function inspect() { await start(); return { tasks: [...store.tasks.values()].sort((a, b) => b.timestamps.receivedAt.localeCompare(a.timestamps.receivedAt)).slice(0, 100).map(view), connections: await readConfig(store.home, 'connections'), profiles: await readConfig(store.home, 'profiles') }; }
+  async function configureExecution(caller,input){
+    requireAI(caller?.appId==='com.ksf.cooperation-center'&&caller.source==='surface'&&caller.humanWindow===true,'AI_HUMAN_REQUIRED','规则授权只能在合作中心窗口设置。',{status:403});
+    return coordinator.run('execution-grants',()=>grants.configure(caller,input,{validate:async()=>{
+      if(input.published===true&&['plan','auto'].includes(input.handling)&&input.target?.provider!=='codex-desktop'){
+        await start();const profiles=await readConfig(store.home,'profiles'),connections=await readConfig(store.home,'connections'),profile=profiles.items.find(p=>p.id===input.scope?.profileId&&p.enabled),connection=connections.items.find(c=>c.id===profile?.executorId&&c.enabled);
+        requireAI(profile&&connection,'AI_PROFILE_UNAVAILABLE','请选择可用的 AI 执行配置。');
+        requireAI(!input.target||input.target.provider==='profile'||input.target.provider===(connection.kind==='api'?'api':'codex-cli'),'AI_PROFILE_UNAVAILABLE','执行配置与所选 API/CLI 方式不一致。');
+        if(input.scope.capability==='project'||input.scope.shell||input.scope.network)requireAI(connection.kind==='codex','AI_CAPABILITY_UNSUPPORTED','指定项目、命令工具或工具网络权限需要选择 Codex 执行配置。');
+      }
+    }}));
+  }
   async function checkConnection(id){identifier(id);await start();const connection=(await readConfig(store.home,'connections')).items.find(item=>item.id===id);requireAI(connection,'AI_PROFILE_UNAVAILABLE','连接不存在。');const executor=executors[connection.kind==='codex'?'codex':connection.protocolId];requireAI(executor?.check,'AI_CAPABILITY_UNSUPPORTED','适配器不提供连接检查。');return executor.check({connection,env});}
   async function register(caller, metadata, text) { callerCheck(caller); requireAI(typeof text === 'string' && Buffer.byteLength(text) <= 512 * 1024, 'AI_INPUT_TOO_LARGE', 'RPC 材料仅支持 512 KiB 文本；录音请用流式入口。'); await start(); return registerMaterial(store, caller, [Buffer.from(text)], metadata); }
   async function upload(caller, metadata, stream) { callerCheck(caller); await start(); return registerMaterial(store, caller, stream, metadata); }
@@ -166,5 +190,18 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
     await Promise.allSettled([...active.values()].map(entry => entry.promise));
     await store?.close();
   }
-  return { start, describe, submit, get, readResult,adminGet,cancel, events, config, inspect, checkConnection,register, upload, close, tick };
+  const runtimeStatus=()=>({error:startupError?{code:startupError.code??'AI_SERVICE_FAILED',message:'AI 服务初始化或执行恢复失败，请检查受管 AI 数据。'}:null,active:active.size,queued:store?[...store.tasks.values()].filter(task=>['queued','retry_wait'].includes(task.status)).length:0,paused});
+  const pauseDispatch=async()=>{paused=true;await coordinator.run('dispatch',async()=>{});};
+  const resumeDispatch=()=>{paused=false;void tick().catch(()=>{});};
+  async function monitorSnapshot(){
+    if(!starting)return {tasks:[],owners:[]};await starting;if(startupError)throw startupError;
+    const all=[...store.tasks.values()].sort((a,b)=>b.timestamps.receivedAt.localeCompare(a.timestamps.receivedAt));
+    const live=task=>!terminal(task.status)||active.has(task.aiTaskId)||task.attempts.some(a=>!a.stopConfirmed);
+    const selected=[...all.filter(live),...all.filter(t=>!live(t)).slice(0,100)];
+    return {tasks:selected.map(task=>{const attempt=task.attempts.at(-1),pending=terminal(task.status)&&attempt&&!attempt.stopConfirmed;
+      return {id:'ai:'+task.aiTaskId,nativeId:task.aiTaskId,kind:'ai',appId:task.appId,name:typeof task.request.context?.name==='string'?task.request.context.name:'AI · '+task.request.profileId,status:pending?(task.status==='cancelled'&&active.has(task.aiTaskId)?'cancelling':'unknown'):task.status,version:String(task.revision),startedAt:task.timestamps.startedAt??task.timestamps.receivedAt,receivedAt:task.timestamps.receivedAt,finishedAt:pending?null:task.status==='cancelled'?attempt?.finishedAt??task.timestamps.finishedAt:task.timestamps.finishedAt,profileId:task.request.profileId,model:task.snapshot.profile.model??null,error:task.error,stopConfirmed:attempt?.stopConfirmed??null,actions:!terminal(task.status)?['stop']:[],resourceNote:task.snapshot.connection.kind==='api'?'远端 API 资源不可统计':'本地受管执行',historyScope:'AI 服务保存的近期记录'};
+    }),owners:all.filter(live).flatMap(t=>{const a=t.attempts.at(-1);return a?.workerPid?[{id:'ai:'+t.aiTaskId,pid:a.workerPid}]:[];})};
+  }
+  async function monitorCancel(id,version){requireAI(store?.tasks.has(id),'AI_TASK_NOT_FOUND','AI 任务不存在。',{status:404});return cancel({appId:store.tasks.get(id).appId},id,version);}
+  return { executionRules:caller=>coordinator.run('execution-grants',()=>grants.read(caller)),configureExecution, monitorSnapshot,monitorCancel,runtimeStatus,pauseDispatch,resumeDispatch,start, describe, submit, get, readResult,adminGet,cancel, events, config, inspect, checkConnection,register, upload, close, tick };
 }

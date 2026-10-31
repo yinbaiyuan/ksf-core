@@ -11,7 +11,11 @@
 | `.agents/runtime-data/` | 本机运行时、缓存、进程身份、锁、升级事务和备份，默认不提交 |
 | `项目/`、`知识/`、`能力/` 等正常用户空间 | 正常工作中的项目进展、任务记录、草稿、成果、知识和个人能力 |
 
-系统命名空间由 Core 注册并逐字段校验，当前包括 `settings`、`identity` 和 `sources`。能力对象另通过 `--object <id>` 使用通用 JSON 配置空间，无须逐个注册字段。两者均不承接任务正文、成果、知识、登录凭据或能力定义，也不增加第五类能力对象。
+系统命名空间由 Core 注册并逐字段校验，当前包括 `settings`、`identity`、`sources`、`instance`、`desktop`、`appearance` 和 `incubation`。incubation 保存首次孵化生命周期及必要恢复回执，通常经[孵化接口](incubation.md)管理，不应手动伪造完成状态。能力对象另通过 `--object <id>` 使用通用 JSON 配置空间，无须逐个注册字段。两者均不承接任务正文、成果、知识、登录凭据或能力定义，也不增加第五类能力对象。
+
+`instance` 接受显示名 `name`；`desktop` 接受完整的 `preferences` 桌面模型；`appearance` 接受完整的 `settings` 材质模型。默认值、浏览器迁移、GUI/CLI 共用接口及生效规则见[统一配置中心](../configuration-center.md)。旧命名空间与顶层字段更新规则保持兼容。
+
+`desktop` 新写入使用 `schema_version:2`，读取继续支持旧版本1且不改写原件。布局中的 `kind:"app"` 表示固定1×1的应用启动图标，同一分组按 `appId` 去重；缺省 `kind` 的旧条目仍是功能卡片。`preferences.shortcuts` 保存主页分组身份和已处理的安装身份，与布局一起进行版本检查和发布。Core 数据兼容检查阻止切换到不支持版本2的旧读取方；其他命名空间的版本保持不变。
 
 当前聊天的动态运行变量与轮次使用独立 [chat](chat.md) 命令，数据在 `.agents/user-data/chats/`，不混入跨聊天的 abilities 配置。user-data list 将 chats 识别为独立功能目录，不展开聊天变量。
 
@@ -29,7 +33,7 @@
 .agents/ksf user-data remove settings --if-match '<etag>' --dry-run --json
 ```
 
-namespace 为已注册名称，不接受文件路径。支持命令级及操作级 `--help`、`-h`。`list` 不接受位置目标，其他操作指定一个命名空间或 `--object <id>`，两者互斥。`--` 结束选项解析。Windows 对应 `.agents/ksf.ps1`；目前 Windows 实际 bootstrap 尚未接入，独立存储模块使用 Node 标准库，不能据此宣称 Windows 完整 CLI 已可用。
+namespace 为已注册名称，不接受文件路径。支持命令级及操作级 `--help`、`-h`。`list` 不接受位置目标，其他操作指定一个命名空间或 `--object <id>`，两者互斥。`--` 结束选项解析。Windows 对应 `.agents/ksf.ps1`；Windows 已接入随包 Node 与共享业务 CLI；实际平台行为及验证范围见[平台支持](../runtime/platforms.md)。
 
 | 操作 | 参数及作用 |
 | --- | --- |

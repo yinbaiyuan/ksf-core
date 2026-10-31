@@ -1,3 +1,8 @@
+import {readJSON as readServiceJSON} from '../communication/contracts.js';
+import {spawn} from 'node:child_process';
+import {acquireServiceLock,processIdentity} from './service-lock.js';
+import {join} from 'node:path';
+import {readServicePolicy,configureAutostart,serviceLogs,serviceDoctor} from './service-manager.js';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { listRoutes, readRoute } from './routes.js';
@@ -8,25 +13,31 @@ import { WEB_LOCAL_NAME } from './web-hosts.js';
 import { readWorkbenchAbout } from './web-about.js';
 
 export const WEB_HOST = '127.0.0.1';
-export const WEB_PORT = 80;
+export const WEB_PORT = 1313;
 
 const failure = (code, message) => Object.assign(new Error(message), { code });
 
 // Only these explicit routes are public. Never use the KSF root as a static directory.
-export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURLToPath(new URL('../../../../../', import.meta.url)), capture = true, captureEnv = process.env, applications,ai } = {}) {
+async function startHTTPServer({ port = WEB_PORT, listenFD, root = fileURLToPath(new URL('../../../../../', import.meta.url)), capture = true, captureEnv = process.env, applications,ai,reason='foreground',webDirectory } = {}) {
   if (!Number.isInteger(port) || port < 0 || port > 65535) {
     throw failure('INVALID_ARGUMENTS', 'Expected a port between 0 and 65535.');
   }
   if (listenFD !== undefined && (!Number.isSafeInteger(listenFD) || listenFD < 3)) {
     throw failure('INVALID_ARGUMENTS', 'Expected an inherited listener descriptor of at least 3.');
   }
-  const assets = verifyWebBuild(fileURLToPath(new URL('../../web/', import.meta.url)));
+  let assets,frontend={state:'unchecked'};
+  const loadAssets=()=>{if(!assets&&frontend.state!=='unavailable')try{assets=verifyWebBuild(webDirectory??fileURLToPath(new URL('../../web/',import.meta.url)));frontend={state:'ready'};}catch(error){frontend={state:'unavailable',code:error.code??'WEB_BUILD_UNAVAILABLE'};}return assets;};
+  const identity=processIdentity();
   const startedAt = new Date().toISOString();
-  const workbench = createWorkbenchHTTP(root, { applications,ai });
+  const workbench = createWorkbenchHTTP(root, {applications,ai,service:{logs:()=>serviceLogs(root),doctor:()=>serviceDoctor(root),isStopping:()=>workbench.draining(),async status(){return {state:'running',pid:process.pid,startedAt,reason,frontend,ai:workbench.ai.runtimeStatus(),communication:await workbench.communication.then(service=>service.runtimeStatus(),()=>({error:{code:'COMM_START_FAILED'}})),...await readServicePolicy(root),port:address.port,url:address.url};},autostart:input=>configureAutostart(root,input.enabled,{ifMatch:input.ifMatch,applyOnly:input.applyOnly}),async restart(input={}){await workbench.quiesce(input);const child=spawn(process.execPath,[fileURLToPath(new URL('./service-restart.js',import.meta.url)),root,String(process.pid),identity.processStart,String(address.port)],{detached:true,stdio:'ignore',windowsHide:true});try{await new Promise((r,j)=>{child.once('spawn',r);child.once('error',j);});}catch(error){workbench.resume();throw error;}child.unref();setTimeout(()=>server.emit('ksf-stop'),100);return {state:'restarting'};},async stop(input={}){await workbench.quiesce(input);setTimeout(()=>server.emit('ksf-stop'),100);return {state:'stopping'};}}});
   let address;
   const server = createServer({ headersTimeout: 10_000, requestTimeout: 0 }, async (request, response) => {
     let bodyDeadline=setTimeout(()=>request.destroy(),10000);bodyDeadline.unref();
     const clearBodyDeadline=()=>clearTimeout(bodyDeadline);request.once('end',clearBodyDeadline);request.once('close',clearBodyDeadline);
+    response.once('finish',clearBodyDeadline);
+    // The deadline protects incoming bodies, never a slow GET or a later request
+    // reusing the same keep-alive connection after this response completed.
+    if(!request.headers['transfer-encoding']&&Number(request.headers['content-length']??0)===0)clearBodyDeadline();
     request.allowLargeBody=()=>{clearBodyDeadline();bodyDeadline=setTimeout(()=>request.destroy(),15*60*1000);bodyDeadline.unref();request.setTimeout(30000,()=>request.destroy());};
     const send = (status, body, type = 'application/json; charset=utf-8', extra = {}) => {
       const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body);
@@ -61,12 +72,12 @@ export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURL
     if (!['GET', 'HEAD'].includes(request.method)) {
       reject(405, 'WEB_METHOD_NOT_ALLOWED', 'Use GET or HEAD.', { Allow: 'GET, HEAD' }); return;
     }
-    if (assets.has(pathname)) {
+    if (!pathname.startsWith('/api/') && loadAssets()?.has(pathname)) {
       const asset = assets.get(pathname);
       send(200, asset.bytes, asset.type); return;
     }
     if (pathname === '/api/health') {
-      send(200, JSON.stringify({ ok: true, service: 'ksf-web', nodeVersion: process.version, startedAt }) + '\n'); return;
+      send(200, JSON.stringify({ ok: true, service:'ksf-core',nodeVersion:process.version,startedAt,pid:process.pid,nonce:identity.nonce,reason,frontend }) + '\n'); return;
     }
     if (pathname === '/api/about') {
       try { send(200, JSON.stringify(readWorkbenchAbout()) + '\n'); }
@@ -117,6 +128,7 @@ export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURL
       }
       return;
     }
+    if(!pathname.startsWith('/api/')&&frontend.state==='unavailable'){reject(503,'WEB_FRONTEND_UNAVAILABLE','工作台界面资源不可用；后台与 CLI 继续运行。');return;}
     reject(404, 'WEB_NOT_FOUND', 'Route not found.');
   });
   try {
@@ -125,6 +137,7 @@ export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURL
       server.listen(listenFD === undefined ? { port, host: WEB_HOST } : { fd: listenFD }, () => { server.off('error', reject); resolve(); });
     });
   } catch (error) {
+    await workbench.close();
     if (error.code === 'EADDRINUSE') throw failure('WEB_ADDRESS_IN_USE', `Port ${port} is already in use. Choose another --port.`);
     if (error.code === 'EACCES') throw failure('WEB_PORT_PERMISSION_REQUIRED', `Port ${port} requires system permission. On macOS, install the local launchd service or choose an unprivileged --port.`);
     throw failure('WEB_START_FAILED', 'Cannot start the local Web server.');
@@ -136,7 +149,7 @@ export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURL
   }
   const actualPort = bound.port;
   address = { host: WEB_HOST, port: actualPort, url: `http://${WEB_HOST}${actualPort === 80 ? '' : `:${actualPort}`}/` };
-  try{await workbench.publishControl(address.url);}catch(error){await new Promise(resolve=>server.close(resolve));await workbench.close();throw error;}
+  try{await workbench.publishControl(address.url,identity);workbench.start();}catch(error){await new Promise(resolve=>server.close(resolve));await workbench.close();throw error;}
   let syncing = false, stopped = false;
   const catchUp = async () => {
     if (syncing || stopped || !capture) return;
@@ -163,4 +176,12 @@ export async function startWebServer({ port = WEB_PORT, listenFD, root = fileURL
       return closing;
     },
   };
+}
+
+export async function startWebServer(options={}){
+  const root=options.root??fileURLToPath(new URL('../../../../../',import.meta.url));
+  if(await readServiceJSON(join(root,'.agents/runtime-data/service/deployment.json'),null))throw Object.assign(Error('正在配套更新 Core 与应用，尚不能启动。'),{code:'SERVICE_DEPLOYING'});
+  const unlock=await acquireServiceLock(join(root,'.agents/runtime-data/service/host.lock'));
+  try{if(options.attemptId){const request=await readServiceJSON(join(root,'.agents/runtime-data/service/start-request.json'),null);if(request?.id!==options.attemptId||request.cancelled)throw failure('SERVICE_START_SUPERSEDED','启动请求已被后续启动或手动停止取代。');}const instance=await startHTTPServer({...options,root});const close=instance.close;let closing;const managed={...instance,close(){return closing??=(async()=>{try{await close();}finally{await unlock();}})();}};instance.server.once('ksf-stop',()=>void managed.close().catch(error=>process.stderr.write('SERVICE_CLOSE_FAILED: '+error.message+'\n')));return managed;}
+  catch(error){await unlock();throw error;}
 }

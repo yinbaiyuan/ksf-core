@@ -2,9 +2,10 @@
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import {AsyncLocalStorage} from 'node:async_hooks';
-let application, cliReady, cliDefinition, cliDirectory, closing=false, next=0;
+let application, cliReady, cliDefinition, cliDirectory, closing=false, next=0, phase='preparing';
 const callContext=new AsyncLocalStorage();
 const pending=new Map();
+const tasks=new Map();
 const send=value=>{if(process.connected)process.send(value);};
 const errorFrom=value=>Object.assign(new Error(value.message),value);
 function service(service,method,params=[]){
@@ -26,26 +27,29 @@ process.on('message',async message=>{
     try{
       const module=await import(pathToFileURL(join(message.directory,message.manifest.backend.entry)).href);
       if(typeof module.activate!=='function')throw new Error('后端必须导出 activate(context)。');
-      const context={sdkVersion:message.manifest.sdkVersion,appId:message.manifest.id,version:message.manifest.version,dataDirectory:message.dataDirectory,workspace:message.workspace,services:{call:service},storage:{read:name=>service('storage','read',[name]),write:(name,text,options)=>service('storage','write',[name,text,options])}};
-      if(context.sdkVersion>=2){
+      const context={sdkVersion:message.manifest.sdkVersion,appId:message.manifest.id,version:message.manifest.version,dataDirectory:message.dataDirectory,runtimeDataDirectory:message.runtimeDataDirectory,workspace:message.workspace,services:{call:service},storage:{read:(name,options)=>service('storage','read',[name,options]),write:(name,text,options)=>service('storage','write',[name,text,options]),inspect:(name,options)=>service('storage','inspect',[name,options]),migrate:(name,input)=>service('storage','migrate',[name,input])}};
+      {
         context.services={call:service};
         context.locks={async run(key,action){const token=await service('runtime','lock',[key]);try{return await action();}finally{await service('runtime','unlock',[token]);}}};
-        context.tasks={async run(action){const token=await service('runtime','retain');try{return await action();}finally{await service('runtime','release',[token]);}}};
+        context.tasks={async run(action,options){const controller=new AbortController(),token=await service('runtime','retain',options?[options]:[]);tasks.set(token,controller);let status='succeeded',error;try{return await action(controller.signal);}catch(e){status=controller.signal.aborted?'cancelled':'failed';error=e.message;throw e;}finally{tasks.delete(token);await service('runtime','release',[{token,status:controller.signal.aborted&&status==='succeeded'?'cancelled':status,error}]);}}};
       }
-      if(context.sdkVersion===3){
+      {
         context.background={retain:input=>service('background','retain',[input]),release:key=>service('background','release',[key]),list:()=>service('background','list')};
         context.messages=Object.fromEntries(['send','status','reconcile','cancel','inbox','read','readPart','registerFile'].map(method=>[method,(...args)=>service('messages',method,args)]));
         context.peers={list:()=>service('peers','list')};
       }
+      if(message.manifest.dataStores.some(store=>store.migrateFrom.length)&&typeof module.prepareData!=='function')throw Object.assign(Error('有迁移声明的应用必须导出 prepareData(context)。'),{code:'APP_DATA_PREPARE_REQUIRED'});
+      if(module.prepareData!==undefined){if(typeof module.prepareData!=='function')throw Object.assign(Error('prepareData 必须是函数。'),{code:'APP_DATA_PREPARE_REQUIRED'});await module.prepareData(Object.freeze({sdkVersion:context.sdkVersion,appId:context.appId,version:context.version,storage:Object.freeze(context.storage),locks:Object.freeze(context.locks)}));}
+      await service('storage','ready');phase='activating';send({type:'phase',phase});
       application=await module.activate(context);
-      if(typeof application?.call!=='function')throw new Error('后端必须提供 call(method, params)。');
-      if(message.manifest.background===true){if(typeof application.startBackground!=='function')throw new Error('后台应用必须提供 startBackground()。');await application.startBackground();}
+      if(!application||typeof application!=='object')throw new Error('后端必须返回应用对象。');
+      if(message.manifest.backend.lifecycle==='resident'){if(typeof application.startBackground!=='function')throw new Error('后台应用必须提供 startBackground()。');await application.startBackground();}
       else if(message.resumePersistent&&typeof application.startBackground==='function')await application.startBackground();
       cliDefinition=message.manifest.cli;cliDirectory=message.directory;
       if(message.manifest.activation?.messages&&typeof application.onMessage!=='function')throw new Error('消息激活应用必须提供 onMessage(event)。');
       send({type:'ready'});
-    }catch(error){send({type:'failed',message:error.message});setTimeout(close,10);}
-  }else if(['call','cli','message'].includes(message.type)){
+    }catch(error){send({type:'failed',message:error.message,error:{code:error.code??(phase==='preparing'?'APP_DATA_PREPARE_FAILED':'APP_START_FAILED'),message:error.message,status:error.status,data:error.data}});setTimeout(close,10);}
+  }else if(['call','cli','message','workflow'].includes(message.type)){
     try{if(!application||closing)throw new Error('应用尚未就绪。');let value;
       if(message.type==='message'){if(typeof application.onMessage!=='function')throw new Error('应用未提供消息处理入口。');value=await application.onMessage(message.params);}
       else if(message.type==='cli'){
@@ -57,5 +61,6 @@ process.on('message',async message=>{
       }else value=await callContext.run(message.caller,()=>application.call(message.method,message.params,message.caller));
       send({type:'result',id:message.id,value});}
     catch(error){send({type:'result',id:message.id,error:{code:error.code??'APP_CALL_FAILED',message:error.message,status:error.status,data:error.data}});}
-  }else if(message.type==='close')await close();
+  }else if(message.type==='task-cancel'){tasks.get(message.token)?.abort('user-cancel');}
+  else if(message.type==='close')await close();
 });

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,mkdir,writeFile,readFile,rm,copyFile} from 'node:fs/promises';import {join} from 'node:path';import {tmpdir} from 'node:os';
+import {systemRead} from '../src/distribution/system.js';
+test('system read ignores ordinary backup-folder files without changing them or hiding valid backups',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-backup-read-'));t.after(()=>rm(root,{recursive:true,force:true}));await mkdir(join(root,'.agents/core'),{recursive:true});await copyFile(new URL('../../distribution.json',import.meta.url),join(root,'.agents/core/distribution.json'));
+ await writeFile(join(root,'.agents/core/release.json'),JSON.stringify({schema_version:4,launcher_protocol:1,name:'ksf-core',product:'ksf-core',version:'0.3.4',platform:'darwin-arm64',development:true,core:{repository:'example/ksf-core',branch:'main',revision:'a'.repeat(40)}}));
+ const backups=join(root,'.agents/runtime-data/system/backups');await mkdir(join(backups,'valid-backup'),{recursive:true});await writeFile(join(backups,'valid-backup/meta.json'),JSON.stringify({from:'0.3.3',to:'0.3.4',operation:'update'}));await writeFile(join(backups,'.DS_Store'),'synthetic metadata');const result=await systemRead({root});assert.equal(result.version,'0.3.4');assert.equal(result.backups.length,1);assert.equal(result.backups[0].id,'valid-backup');assert.equal(await readFile(join(backups,'.DS_Store'),'utf8'),'synthetic metadata');
+});

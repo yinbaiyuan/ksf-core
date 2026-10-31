@@ -60,8 +60,11 @@ test('configuration writes share the operation queue and reject the second concu
  assert.equal(operations.filter(operation=>operation.status==='completed').length,1);assert.equal(operations.find(operation=>operation.status==='failed').error.code,'GIT_SETTINGS_CHANGED');const winner=operations.findIndex(operation=>operation.status==='completed');assert.equal((await f.git.settings(f.repo.id)).identity.name.value,requests[winner].value);
 });
 test('settings HTTP contract stays read-only and configuration operations require the existing session protection',async t=>{
+  let server;
+  t.after(() => server?.close());
+
  const {startWebServer}=await import('../src/services/web.js'),{createWorkbenchClient}=await import('../web/src/apps/request-client.ts');
- const f=await fixture(t),server=await startWebServer({root:f.root,port:0,capture:false});t.after(()=>server.close());const origin=server.url.slice(0,-1);
+ const f=await fixture(t);server=await startWebServer({root:f.root,port:0,capture:false});const origin=server.url.slice(0,-1);
  const client=createWorkbenchClient((url,options)=>fetch(new URL(url,origin),{...options,headers:{...options.headers,Origin:origin,'Sec-Fetch-Site':'same-origin'}}));
  const endpoint=`/api/git/repositories/${f.repo.id}/settings`,settings=await client.request(endpoint);assert.equal(settings.identity.name.value,'Fixture');assert.match(settings.settingsVersion,/^[a-f0-9]{64}$/);
  const request={repo:f.repo.id,action:'config-set',field:'name',value:'HTTP Fixture',settingsVersion:settings.settingsVersion,requestId:crypto.randomUUID()};

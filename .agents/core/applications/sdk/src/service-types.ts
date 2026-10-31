@@ -19,7 +19,14 @@ export interface AIService {
 /** Method signatures for context.services.call(service, method, paramsArray). Identity is host-bound. */
 export interface ApplicationPublicServices {workspace:WorkspaceService;ai:AIService}
 export interface TaskActivity {taskId:string;turnId:string;startedAt:string;title:string;taskTitle:string;navigationTarget:string;primaryTargets:{key:string;kind:string;label:string;lifecycle:string}[]}
-export interface TaskActivityService {activity():Promise<{activity:TaskActivity[];errors:{taskId?:string;turnId?:string;code:string;message:string}[];capture:{enabled:boolean;activatedAt:string|null}}>}
+export interface ReviewSourceMessage {id:string;at:string;role:string;phase?:string;timeKnown:boolean;omittedContentTypes:string[]}
+export interface ReviewSourceTurn {taskId:string;turnId:string;revision:number;digest:string;allowed:boolean;startedAt:string;updatedAt:string;status:string;issues:{code:string;message?:string}[];route:unknown;messages:ReviewSourceMessage[];title?:string}
+export interface ReviewSourceChat {taskId:string;title:string;fingerprint:string;turns:(Omit<ReviewSourceTurn,'messages'|'route'> & {messageCount:number})[];latestMessageAt:string|null;latestTurnId:string|null;errors:{code:string;message:string}[]}
+export interface TaskActivityService {
+ activity():Promise<{activity:TaskActivity[];errors:{taskId?:string;turnId?:string;code:string;message:string}[];capture:{enabled:boolean;activatedAt:string|null}}>;
+ reviewSources(input?:{startAt?:string;endAt?:string;taskId?:string;limit?:number;offset?:number}):Promise<{records:ReviewSourceTurn[];chats:ReviewSourceChat[];total:number;nextOffset:number|null;errors:{taskId?:string;turnId?:string;code:string;message:string}[];capture:{enabled:boolean;activatedAt:string|null}}>;
+ readReviewTurn(input:{taskId:string;turnId:string;revision?:number;offset?:number;limit?:number}):Promise<Omit<ReviewSourceTurn,'messages'> & {messages:(ReviewSourceMessage & {text:string;truncated:boolean})[];total:number;nextOffset:number|null}>;
+}
 export interface ApplicationPublicServices {tasks:TaskActivityService}
 
 import type {MessageService,PeerService} from './communication';

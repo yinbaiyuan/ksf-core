@@ -1,6 +1,6 @@
 # 应用包内 CLI 与 Agent 调用
 
-状态：**SDK 3.0.0 开发实现**，2026-10-28，尚未正式发行。支持 Manifest schema 2 / SDK 协议 3，同时兼容已有 v1/v2 应用。可运行模板为 `ksf-app create <目录> --template collaboration`；程序与实机证据见项目实施记录。
+状态：**SDK 1.0.0 开发实现**，2026-10-29，尚未正式发行。统一采用 Manifest schema 1 / SDK 协议 1，全部应用按新契约重建。可运行模板为 `ksf-app create <目录> --template collaboration`；程序与实机证据见项目实施记录。
 
 ## 职责与调用路径
 
@@ -25,8 +25,10 @@
 
 ```json
 {
-  "schemaVersion": 2,
-  "sdkVersion": 3,
+  "schemaVersion":1,
+  "sdkVersion": 1,
+  "minCoreVersion": "0.3.0",
+  "dataStores": [],
   "cli": {
     "contractVersion": 1,
     "entry": "cli/index.mjs",
@@ -48,7 +50,19 @@
 
 打包和安装需校验路径、文件存在性、完整性、模块及文档引用；缺少入口或引用越界时拒绝包。安装只登记静态声明，不执行 CLI 代码。包目录不可变，配置及结果仍保存到应用数据目录。
 
-本扩展要求 SDK 协议 3，旧宿主会明确拒绝，新宿主保留已有 v1/v2 应用行为。本页不改变现有 Manifest v2 的窗口/卡片要求，也不增加纯 CLI 安装单元。当前包限制及可用字段见 [Manifest](manifest.md)。
+CLI 属于完整 SDK v1，可用于没有窗口和卡片的纯后台应用。清单必须符合新结构，旧 SDK 包不支持。当前包限制及可用字段见 [Manifest](manifest.md)。
+
+## 商店标识与标准文档入口
+
+`manifest.cli` 是唯一能力依据，不增加开关或新的清单字段。宿主在商店列表、详情和安装/导入预览显示“支持 CLI”；已安装列表依据当前生效包，候选包及等待切换包不会替代当前版本的能力标识。
+
+带窗口的 CLI 应用由宿主在工作台顶部的应用名称菜单中固定提供“CLI 文档”，紧跟“关于”。开发者不需要注册，也不能用自定义菜单覆盖或移除。已安装应用的商店详情另有标注已安装版本的文档入口，纯后台、仅卡片和停用应用同样可用。未安装应用只显示能力标识，不为阅读下载包。
+
+宿主在打开入口的应用窗口内显示文档弹层；从商店进入则归属商店窗口。阅读不启动后台、不加载 CLI 执行模块、不执行命令、不启用应用。其他窗口继续可用，弹层沿用窗口内焦点、Escape 和关闭规则。文档显示应用名称、版本及路径，支持 Markdown、纯文本和 JSON/schema；HTML 不执行，图片与外部资源不自动加载，链接仅能导航到同包允许的文档范围。失败可重试，版本变化须显式刷新。
+
+主文档必须存在、非空、UTF-8 有效且不超过 256 KiB；SDK 打包和宿主安装共用校验。子文档位于 `docs/` 的 `.md`、`.txt`、`.json`，schema 位于 `cli/schemas/` 的 `.json`；每次读取同样核对包完整性、路径、UTF-8 和单文件大小。现有合规应用升级宿主后自动获得入口，无需重打包或迁移数据。
+
+只读 HTTP 接口：`GET /api/apps/cli/docs?appId=<id>&digest=<完整包摘要>&path=<可选包内路径>`。`path` 缺省为主文档；返回 `appId`、`name`、`version`、`packageDigest`、`path`、`text`、`commands`。应用停用不阻止阅读，CLI 执行仍要求启用。摘要不匹配返回 `APP_RELEASE_CHANGED`，路径/编码错误返回 `APP_CLI_DOCUMENT_INVALID`，超限返回 `APP_CLI_DOCUMENT_TOO_LARGE`，完整性错误返回 `APP_PACKAGE_INTEGRITY`；不回退读取其他版本。
 
 ## 包内模块契约
 
@@ -74,6 +88,8 @@ export function createCLI(context) {
 
 CLI 模块在该应用的受管后台内按需加载，KSF CLI 主进程只做通用路由、结构化输入输出和本机转交。初始化应有界返回，应用不在模块初始化时启动业务。执行租约、结果未知及长操作处理沿用应用调用约定，不能把 CLI 变成第二套业务状态或后台调度。
 
+已记录身份迁移的安装可通过登记的旧应用 ID 读取文档、执行命令、检查数据或管理后台；结果使用当前身份，包摘要、启用状态和调用权限照常校验。未迁移的安装不自动建立别名，也不按名称寻找替代应用。
+
 ## KSF CLI 入口
 
 以下命令依赖运行中的本机 Web 后端：
@@ -90,7 +106,7 @@ ksf app exec <appId> <commandId> --from - --json
 | `docs` | 用户已指定应用后，返回入口文档、版本、包摘要和按需文档引用；不执行代码 |
 | `exec` | 核对安装/启用、命令、调用授权及预期包摘要，取得对应版本租约，再转交包内入口 |
 
-例如 `ksf app exec example.team task.create --from - --json` 自动定位该应用包的入口，Agent 无需查安装目录或直接运行包文件。标准输入为：
+例如 `ksf app exec com.example.team task.create --from - --json` 自动定位该应用包的入口，Agent 无需查安装目录或直接运行包文件。标准输入为：
 
 ```json
 {
@@ -112,7 +128,7 @@ CLI 实现、声明、入口文档和子文档必须绑定同一包摘要。解�
 
 本机入口绑定调用主体，应用继续核对业务权限及审批条件。用户指定应用不等于授权其全部写操作；文档也不产生新授权。Agent 履行先指定、后读文档、再调用的约定，宿主不能仅凭命令中自报的 appId 就证明用户已指定。
 
-Web 后端不可用、应用未安装/停用、不支持 CLI、命令未知、参数无效、版本冲突和结果未知应分别报告，不自动安装、启用、换应用或重发写操作。验收要求见[CLI 与通信验收](validation.md#cli-与通信验收)。
+Web 后端不可用、执行时应用未安装/停用、不支持 CLI、命令未知、参数无效、版本冲突和结果未知应分别报告，不自动安装、启用、换应用或重发写操作。验收要求见[CLI 与通信验收](validation.md#cli-与通信验收)。
 
 ## CLI 使用说明的最小内容
 
@@ -123,3 +139,7 @@ Web 后端不可用、应用未安装/停用、不支持 CLI、命令未知、�
 - 子文档和 schema 的包内引用，版本变化及数据兼容限制。
 
 代码实现、程序验证、真实安装和用户验收分别报告。公共 API 以[接口参考](api.md)及 SDK 类型为准。
+
+## 初始兼容契约与迁移
+
+清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1、SDK工具包=1.0.0。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。

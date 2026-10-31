@@ -40,7 +40,7 @@ function validateReleaseManifest(manifest, legacy) {
   for (let i = 0; i + 1 < sorted.length; i++) {
     if (sorted[i + 1].startsWith(`${sorted[i]}/`)) fail('RELEASE_INVALID', `File/directory collision: ${sorted[i]}.`);
   }
-  for (const required of ['AGENTS.md', ...launchers, '.agents/core/build.json', '.agents/core/manifest.yaml', '.agents/core/distribution.json']) {
+  for (const required of ['AGENTS.md', ...launchers, '.agents/core/build.json', '.agents/core/data-compatibility.json', '.agents/core/manifest.yaml', '.agents/core/distribution.json']) {
     if (!Object.hasOwn(manifest.files, required)) fail('RELEASE_INVALID', `Required file absent: ${required}.`);
   }
   if (manifest.files[launchers[0]].mode !== 0o755) fail('RELEASE_INVALID', 'Release launcher must be executable.');

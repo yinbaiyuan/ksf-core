@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm,readFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir,hostname} from 'node:os';
+import {createCommunicationService} from '../src/communication/service.js';
+import {createDeviceProfile} from '../src/communication/device-profile.js';
+test('local name survives restarts, stays outside user data and updates discovery without rotating identity or listener',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-device-')),ads=[];let service; t.after(async()=>{await service?.close();await rm(root,{recursive:true,force:true});});
+ const factory=()=>({on(){},publish(options){ads.push(options);return {stop(){}};},find(){return {on(){},stop(){}};},destroy(done){done();}});
+ service=await createCommunicationService(root,{discoveryFactory:factory});assert.equal((await service.snapshot()).device.name,hostname());
+ await service.configure({enabled:true,host:'127.0.0.1',port:0,discovery:true});const before=await service.snapshot(),previousAnnouncement=ads.at(-1).name;
+ assert.equal((await service.setDevice({name:'  超哥的 Mac  '})).name,'超哥的 Mac');const after=await service.snapshot();
+ assert.equal(after.identity.nodeId,before.identity.nodeId);assert.deepEqual(after.listener,before.listener);assert.deepEqual(after.pairingListener,before.pairingListener);assert.equal(ads.at(-1).txt.name,'超哥的 Mac');assert.notEqual(ads.at(-1).name,previousAnnouncement);const renamedAnnouncement=ads.at(-1).name;await service.setDevice({name:'超哥的 Mac'});assert.notEqual(ads.at(-1).name,renamedAnnouncement,'every announcement has a new instance name even when a previous name is reused');
+ assert.equal((await service.peerDirectory()).local.device.name,'超哥的 Mac');assert.equal(JSON.parse(await readFile(join(root,'.agents/runtime-data/communication/device-profile.json'),'utf8')).name,'超哥的 Mac');
+ assert.equal((await readFile(join(root,'.agents/user-data/communication/config.json'),'utf8')).includes('超哥的 Mac'),false);
+ for(const name of ['', '  ', 'x'.repeat(65),'a\nb','a\u202eb'])await assert.rejects(service.setDevice({name}),{code:'COMM_DEVICE_NAME_INVALID'});
+ assert.equal((await service.snapshot()).device.name,'超哥的 Mac');await service.close();service=await createCommunicationService(root,{discoveryFactory:factory});assert.equal((await service.snapshot()).device.name,'超哥的 Mac');assert.equal((await service.snapshot()).identity.nodeId,before.identity.nodeId);
+ const clone=await mkdtemp(join(tmpdir(),'ksf-device-clone-'));t.after(()=>rm(clone,{recursive:true,force:true}));assert.equal((await createDeviceProfile(clone)).get().name,hostname());
+});

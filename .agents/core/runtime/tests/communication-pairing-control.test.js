@@ -1,0 +1,24 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {randomUUID} from 'node:crypto';
+import {startWebServer} from '../src/services/web.js';
+import {encodePackage,checksum} from '../src/applications/protocol.js';
+test('frontend pairing is session-protected and derives application identity from the actual window lease',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-pairing-http-')),web=await startWebServer({root,port:0,capture:false});t.after(async()=>{await web.close();await rm(root,{recursive:true,force:true});});
+ const token=(await(await fetch(web.url+'api/workbench/session')).json()).data.token;
+ const post=async(path,input,session=true,type='application/json')=>{const response=await fetch(web.url+path,{method:'POST',headers:{Origin:web.url.slice(0,-1),'content-type':type,...(session?{'X-KSF-Token':token}:{})},body:type==='application/json'?JSON.stringify(input):input});return {status:response.status,...await response.json()};};
+ assert.equal((await post('api/communication/pairing-request?instanceId=fake',{},false)).status,403);
+ assert.equal((await post('api/communication/pairing-request?instanceId=fake',{})).status,410);
+ const manifest={schemaVersion:1,minCoreVersion:'0.3.0',dataStores:[],sdkVersion:1,id:'com.example.pairing',name:'Pairing fixture',description:'Synthetic',version:'1.0.0',window:{entry:'frontend/index.js'},backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'},permissions:['messages.send','messages.receive'],activation:{messages:{channels:['allowed.v1']}}},data=Buffer.from('export function mount(){return{dispose(){}}}'),bytes=encodePackage(manifest,{'frontend/index.js':{content:data.toString('base64'),sha256:checksum(data),mode:0o644},'backend/index.mjs':(()=>{const text=Buffer.from('export function activate(){return{call(){return{}},onMessage(){return{accepted:true}}}}');return{content:text.toString('base64'),sha256:checksum(text),mode:0o644};})()});
+ const preview=await post('api/apps/import/preview?name=fixture.ksfapp',bytes,true,'application/octet-stream');assert.equal(preview.ok,true);
+ const installed=await post('api/apps/import/install',{importId:preview.data.importId,digest:preview.data.package.sha256,trusted:true});assert.equal(installed.ok,true);
+ const lease=await post('api/apps/launch',{appId:manifest.id,digest:preview.data.package.sha256,surface:{kind:'window',surfaceId:'pairing-control-test'}});assert.equal(lease.ok,true);const instanceId=lease.data.id??lease.data.instanceId;
+ assert.equal((await post('api/communication/device-name?instanceId='+instanceId,{name:'测试本机'},false)).status,403);assert.equal((await post('api/communication/device-name?instanceId=fake',{name:'测试本机'})).status,410);assert.equal((await post('api/communication/device-name?instanceId='+instanceId,{name:'测试本机'})).data.name,'测试本机');
+ const result=await post('api/communication/pairing-request?'+new URLSearchParams({instanceId}),{requestId:randomUUID(),nodeId:'f'.repeat(64),appId:'spoofed.app',channel:'wrong.v1'});assert.equal(result.error.code,'COMM_PAIRING_APP_UNAVAILABLE');
+ const scoped=await post('api/communication/pairing-request?'+new URLSearchParams({instanceId}),{requestId:randomUUID(),nodeId:'f'.repeat(64),appId:'spoofed.app',channel:'allowed.v1'});assert.equal(scoped.error.code,'COMM_DISABLED','caller app comes from lease, not spoofed body');
+ await post('api/apps/release',{instanceId});const released=await post('api/communication/pairing-request?'+new URLSearchParams({instanceId}),{requestId:randomUUID(),nodeId:'f'.repeat(64),channel:'allowed.v1'});assert.equal(released.status,410);
+ const publicRequests=await fetch(web.url+'api/communication/pairings');assert.equal(publicRequests.status,200);assert.deepEqual((await publicRequests.json()).data,[]);
+});

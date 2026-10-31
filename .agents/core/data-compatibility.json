@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "sdkVersions": [
+    1
+  ],
+  "formats": [
+    {
+      "id": "namespaces",
+      "root": ".agents/user-data",
+      "pattern": "^(identity|settings|sources|instance|desktop|appearance|incubation)\\.json$",
+      "versionField": "schema_version",
+      "versions": [
+        1,
+        2
+      ],
+      "recursive": false
+    },
+    {
+      "id": "ability-settings",
+      "root": ".agents/user-data/abilities",
+      "pattern": "^[a-f0-9]{64}\\.json$",
+      "versionField": "schema_version",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "chat-state",
+      "root": ".agents/user-data/chats",
+      "pattern": "^(config\\.json|[a-f0-9]{64}/(shared|turns)\\.json|[a-f0-9]{64}/abilities/[a-f0-9]{64}\\.json)$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true
+    },
+    {
+      "id": "application-index",
+      "root": ".agents/user-data/applications",
+      "pattern": "^state\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "application-background",
+      "root": ".agents/user-data/applications/background",
+      "pattern": "^[a-z][a-z0-9.-]+\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "application-policy",
+      "root": ".agents/runtime-data/applications",
+      "pattern": "^policy\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "codex-conversations",
+      "root": ".agents/user-data/codex-conversations/v1",
+      "pattern": "^state\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "ai-config",
+      "root": ".agents/user-data/ai",
+      "pattern": "^(connections|profiles)\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "ai-tasks",
+      "root": ".agents/user-data/ai/tasks",
+      "pattern": "^[a-f0-9-]{36}\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "ai-results",
+      "root": ".agents/user-data/ai/results",
+      "pattern": "^[a-f0-9-]{36}\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "communication-config",
+      "root": ".agents/user-data/communication",
+      "pattern": "^config\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "communication-messages",
+      "root": ".agents/user-data/communication/messages",
+      "pattern": "^[a-f0-9-]{36}/state\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true
+    },
+    {
+      "id": "communication-identity",
+      "root": ".agents/runtime-data/communication/identity",
+      "pattern": "^device\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "device-profile",
+      "root": ".agents/runtime-data/communication",
+      "pattern": "^device-profile\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "service-policy",
+      "root": ".agents/runtime-data/service",
+      "pattern": "^policy\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "routing",
+      "root": ".agents/runtime-data/routing/v1",
+      "pattern": "^[a-f0-9]{64}\\.json$",
+      "versionField": "protocol",
+      "versions": [
+        "ksf-routing-v1"
+      ],
+      "recursive": false
+    },
+    {
+      "id": "task-capture",
+      "root": ".agents/runtime-data/task-capture",
+      "pattern": "^config\\.json$",
+      "versionField": "protocol",
+      "versions": [
+        "ksf-task-archive-v1"
+      ],
+      "recursive": false
+    },
+    {
+      "id": "task-archive",
+      "root": "档案/对话/Codex",
+      "pattern": "^[a-f0-9]{64}/(task\\.json|turns/[a-zA-Z0-9._:-]+\\.json)$",
+      "versionField": "protocol",
+      "versions": [
+        "ksf-task-archive-v1"
+      ],
+      "recursive": true
+    },
+    {
+      "id": "user-migration-receipts",
+      "root": ".agents/user-data/applications/migrations",
+      "pattern": "^[a-z][a-z0-9.-]+/[a-f0-9-]{36}/migration\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true
+    },
+    {
+      "id": "runtime-migration-receipts",
+      "root": ".agents/runtime-data/applications/migrations",
+      "pattern": "^[a-z][a-z0-9.-]+/[a-f0-9-]{36}/migration\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true
+    },
+    {
+      "id": "ai-materials",
+      "root": ".agents/user-data/ai/materials",
+      "pattern": "^[a-f0-9-]{36}\\.bin\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "communication-operations",
+      "root": ".agents/user-data/communication/operations",
+      "pattern": "^[a-f0-9-]{36}\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "communication-sequence",
+      "root": ".agents/user-data/communication",
+      "pattern": "^sequence\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "value": "counter"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "communication-materials",
+      "root": ".agents/user-data/communication/materials",
+      "pattern": "^[a-f0-9-]{36}\\.bin\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "materialId": "string",
+        "owner": "string",
+        "name": "string",
+        "mediaType": "string",
+        "byteLength": "counter",
+        "sha256": "digest",
+        "createdAt": "counter"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "git-operation-ledger",
+      "root": ".agents/user-data/applications/data/com.ksf.git",
+      "legacyRoots": [
+        ".agents/user-data/applications/data/git"
+      ],
+      "pattern": "^operations\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "kind": "git-ledger"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "eval-bindings",
+      "root": ".agents/user-data",
+      "pattern": "^eval-routing\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "cooperation-migration",
+      "root": ".agents/runtime-data/cooperation-migration",
+      "pattern": "^state\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "project-transition-records",
+      "root": ".agents/runtime-data/projects/transitions",
+      "pattern": "^[a-f0-9-]{36}/record\\.json$",
+      "versionField": "schema_version",
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "project-transition-pending",
+      "root": ".agents/runtime-data/projects",
+      "pattern": "^pending\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "operationId": "string"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "contribution-plans",
+      "root": ".agents/runtime-data/contributions",
+      "pattern": "^[a-f0-9-]{36}/plan\\.json$",
+      "versionField": "schema_version",
+      "versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "contribution-receipts",
+      "root": ".agents/runtime-data/contributions",
+      "pattern": "^[a-f0-9-]{36}/(attempted|submitted)\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "id": "string",
+        "digest": "digest"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "core-backup-receipts",
+      "root": ".agents/runtime-data/system/backups",
+      "pattern": "^[a-zA-Z0-9-]+/meta\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "from": "string",
+        "to": "string",
+        "operation": "string",
+        "afterFingerprint": "digest",
+        "createdAt": "string"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "matched-switch-receipts",
+      "root": ".agents/runtime-data/t15-switch",
+      "pattern": "^[a-f0-9-]{36}/switch\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "routing-identity-key",
+      "root": ".agents/runtime-data/routing/v1",
+      "pattern": "^identity\\.key$",
+      "versionField": "$bytes",
+      "byteLength": 32,
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "configuration-application",
+      "root": ".agents/runtime-data/configuration/apply",
+      "pattern": "^[a-f0-9]{64}\\.json$",
+      "versionField": "$shape",
+      "shape": {
+        "etag": "string",
+        "application": "object"
+      },
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "application-identity-migration",
+      "root": ".agents/runtime-data/t15-switch",
+      "pattern": "^[a-f0-9-]{36}/identity\\.json$",
+      "recursive": true,
+      "maxDepth": 1,
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ]
+    },
+    {
+      "id": "cooperation-execution-rules",
+      "root": ".agents/runtime-data/ai/execution-grants",
+      "pattern": "^rules\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1,
+        2,
+        3
+      ],
+      "recursive": false
+    }
+  ]
+}

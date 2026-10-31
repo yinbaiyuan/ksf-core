@@ -18,12 +18,12 @@ test('catalog placeholders never imply a clean repository and dirty filtering ke
 });
 
 test('application URLs isolate resources and preserve existing conversation deep links', () => {
-  assert.equal(appFromSearch('?task=one&turn=two'), 'conversations'); assert.equal(appFromSearch('?view=routes'), 'conversations');
-  assert.equal(appFromSearch('?app=markdown&path=USER.md'), 'markdown'); assert.equal(appFromSearch('?app=git&repo=abc'), 'git');
-  assert.equal(resourceKey('markdown', 'path=项目%2F测试.md'), '项目/测试.md');
-  assert.equal(resourceKey('git', 'repo=abc'), 'abc'); assert.equal(resourceKey('conversations', 'task=one'), 'one');
-  assert.equal(windowTitle('markdown', 'path=项目%2F测试.md'), '测试.md');
-  assert.equal(new URLSearchParams(appSearch('conversations', 'app=git&task=one')).has('app'), false);
+  assert.equal(appFromSearch('?task=one&turn=two'), 'com.ksf.conversations'); assert.equal(appFromSearch('?view=routes'), 'com.ksf.conversations');
+  assert.equal(appFromSearch('?app=markdown&path=USER.md'), 'com.ksf.markdown'); assert.equal(appFromSearch('?app=git&repo=abc'), 'com.ksf.git');
+  assert.equal(resourceKey('com.ksf.markdown', 'path=项目%2F测试.md'), '项目/测试.md');
+  assert.equal(resourceKey('com.ksf.git', 'repo=abc'), 'abc'); assert.equal(resourceKey('com.ksf.conversations', 'task=one'), 'one');
+  assert.equal(windowTitle('com.ksf.markdown', 'path=项目%2F测试.md'), '测试.md');
+  assert.equal(new URLSearchParams(appSearch('com.ksf.conversations', 'app=git&task=one')).has('app'), false);
 });
 test('localized text edits preserve BOM, frontmatter, CRLF and untouched mixed newlines', () => {
   const raw = '\uFEFF---\r\nid: hello\r\n---\r\n# 中文\r\nlast\n';

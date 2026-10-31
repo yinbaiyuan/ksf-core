@@ -1,17 +1,18 @@
 {
-  "schemaVersion": 2,
-  "sdkVersion": 2,
-  "id": "example.ai-task",
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.example.ai-task",
   "name": "AI任务示例",
   "description": "开发包中的虚构示例",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "permissions": [
     "ai"
   ],
   "cards": [],
   "backend": {
     "runtime": "node",
-    "entry": "backend/index.mjs"
+    "entry": "backend/index.mjs",
+    "lifecycle": "on-demand"
   },
   "window": {
     "entry": "frontend/index.js",
@@ -25,5 +26,13 @@
       "height": 320
     }
   },
-  "background": false
+  "minCoreVersion": "0.3.2",
+  "dataStores": [
+    {
+      "name": "state.json",
+      "scope": "user",
+      "schemaVersion": 1,
+      "migrateFrom": []
+    }
+  ]
 }

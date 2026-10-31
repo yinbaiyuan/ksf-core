@@ -1,11 +1,16 @@
 .application-icon[data-icon] { overflow:hidden; display:grid; place-items:center; flex:none; background:linear-gradient(145deg,#f0f3f8,#e2e9f4); color:#6484ae; }
 .application-icon > svg { width:52%; height:52%; }
 .application-icon > img { width:100%; height:100%; object-fit:cover; }
+.application-icon > .application-emblem { width:100%; height:100%; }
 .application-icon[data-icon=terminal] { background:#202329; color:#fff; }
 .application-icon[data-icon=documents] { background:linear-gradient(145deg,#ffb95b,#ed832e); color:#fff; }
 .application-icon[data-icon=conversations] { background:linear-gradient(145deg,#66b0ff,#1874df); color:#fff; }
+.application-icon[data-icon=flywheel] { background:linear-gradient(145deg,#5878ef,#293a91); color:#fff; }
+.application-icon[data-icon=knowledge] { background:linear-gradient(145deg,#4ac5a1,#19765f); color:#fff; }
+.application-icon[data-icon=abilities] { background:linear-gradient(145deg,#ab89f1,#6742b5); color:#fff; }
 .application-icon[data-icon=git] { background:linear-gradient(145deg,#ff9173,#e45b3e); color:#fff; }
 .application-icon[data-icon=projects] { background:linear-gradient(145deg,#9c8af8,#6551ca); color:#fff; }
 .application-icon[data-icon=store] { background:transparent; color:#0878e8; }
 .application-icon[data-icon=store] > svg { width:100%; height:100%; }
+.application-icon[data-icon=cooperation],.application-icon[data-icon=handshake]{background:linear-gradient(145deg,#40b8d0,#3161c8);color:#fff}
 @media(forced-colors:active){.application-icon[data-icon] { background:ButtonFace; color:ButtonText; border:1px solid ButtonText; }}

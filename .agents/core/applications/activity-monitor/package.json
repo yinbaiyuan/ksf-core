@@ -1,0 +1,16 @@
+{
+  "name": "@ksf/activity-monitor",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@ksf/sdk": "file:../sdk",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "lucide-react": "1.61.0"
+  }
+}

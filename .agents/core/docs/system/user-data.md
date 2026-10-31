@@ -1,6 +1,8 @@
 # 系统级用户数据
 
-`.agents/user-data/` 保存 KSF 程序和能力对象需要、并应随用户实例保留的用户设置和必要状态。它与本机 [runtime-data](runtime-data.md)分开，也与正常工作中的项目、任务记录、草稿、成果和知识分开。当前注册 settings、identity 和 sources；其他命名空间必须先有明确格式和消费方。返回[架构总览](README.md)。
+`.agents/user-data/` 保存 KSF 程序和能力对象需要、并应随用户实例保留的用户设置和必要状态。它与本机 [runtime-data](runtime-data.md)分开，也与正常工作中的项目、任务记录、草稿、成果和知识分开。当前注册 settings、identity、sources、instance、desktop、appearance 和 incubation；其他命名空间必须先有明确格式和消费方。incubation 由[首次孵化](../cli/incubation.md)消费，保存生命周期与必要恢复回执，不保存任务正文。返回[架构总览](README.md)。
+
+[统一配置中心](../configuration-center.md)组织跨模块的管理入口、作用范围和生效反馈，复用本篇的存储、校验与版本规则；不集中搬迁 AI、通信和本机策略。桌面和外观由实例保存，浏览器原件仅用于显式迁移与读取缓存。
 
 命令参数、字段范围和完整结果契约由 [user-data 命令](../cli/user-data.md)持有。本篇解释实现分层、使用路径和后续扩展。
 
@@ -61,7 +63,7 @@ identity 通过现有 user-data write 保存 name、email、namespace，read/che
 
 ## 跨设备与扩展
 
-用户实例可通过自己的 Git、备份或目录同步工具迁移 user-data。用户模板允许正式 JSON 文件入库，忽略原子写入临时文件，并用 gitattributes 保持 JSON 的 LF。Core 源码忽略真实用户值，发行只生成空目录占位；升级与回滚不覆盖该目录。迁移时排除 runtime-data，新设备自行准备环境与锁。
+用户实例可通过自己的 Git、备份或目录同步工具迁移 user-data。用户模板允许正式 JSON 文件入库，忽略原子写入临时文件，并用 gitattributes 保持 JSON 的 LF。Core 源码忽略真实用户值，发行只从唯一模板源生成通用孵化 pending 状态及空目录占位；升级与回滚不覆盖该目录。迁移时排除 runtime-data，新设备自行准备环境与锁。
 
 增加一种系统级用户数据时：
 
@@ -75,7 +77,7 @@ identity 通过现有 user-data write 保存 name、email、namespace，read/che
 
 [user-data.test.js](../../runtime/tests/user-data.test.js)覆盖格式、CLI、并发、路径和跨设备复制；[identity.test.js](../../runtime/tests/identity.test.js)覆盖本地身份字段、部分设置、独立删除和离线操作；[user-data-distribution.test.js](../../runtime/tests/user-data-distribution.test.js)覆盖实际升级回滚保留、Core 打包隔离及 Git 边界。[system.js](../../runtime/src/distribution/system.js)消费 settings，[release.js](../../runtime/src/distribution/release.js)生成模板空目录。
 
-存储模块采用 Node 标准库，尚不能据此宣称 Windows 完整 CLI 已可运行。当前没有自动跨设备同步服务，也没有通用凭据存储或第五类能力对象。
+存储模块与业务CLI已通过平台适配接入Windows；具体原生文件行为和恢复按对应实机记录验收。当前没有自动跨设备同步服务，也没有通用凭据存储或第五类能力对象。
 
 ## sources 本地能力源关联
 

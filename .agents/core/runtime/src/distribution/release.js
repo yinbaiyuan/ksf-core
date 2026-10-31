@@ -27,7 +27,7 @@ export const knowledgeFrameworkFiles = [
   ...['1理论与模型/科学类比', '1理论与模型/提炼模型', '2事实与案例/定性定量', '2事实与案例/假设驱动']
     .map(path => `知识/rules/templates/cognition/${path}/.gitkeep`),
 ];
-export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', 'MEMORY.md', ...knowledgeFrameworkFiles];
+export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', '.agents/user-data/incubation.json', ...knowledgeFrameworkFiles];
 function revisionInfo(root, allowDirty) {
   const git = args => spawnSync(gitExecutable, ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
   const rev = git(['rev-parse', '--verify', 'HEAD']);

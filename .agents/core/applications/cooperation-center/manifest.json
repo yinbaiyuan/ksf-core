@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.ksf.cooperation-center",
+  "name": "KSF合作",
+  "description": "声明可承接事项，以 KSF 实例为单位发起、处理和交付合作任务，管理历史与消息。",
+  "version": "0.4.1",
+  "author": "KSF",
+  "icon": "handshake",
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": false,
+    "defaultSize": {
+      "width": 1180,
+      "height": 780
+    },
+    "minSize": {
+      "width": 520,
+      "height": 440
+    }
+  },
+  "backend": {
+    "runtime": "node",
+    "entry": "backend/index.mjs",
+    "lifecycle": "resident"
+  },
+  "permissions": [
+    "messages.send",
+    "messages.receive",
+    "ai",
+    "background",
+    "data.export",
+    "workflows.invoke",
+    "codex-conversations",
+    "projects.read"
+  ],
+  "activation": {
+    "messages": {
+      "channels": [
+        "lan.message.v1"
+      ]
+    }
+  },
+  "cli": {
+    "contractVersion": 1,
+    "entry": "cli/index.mjs",
+    "documentation": "docs/cli.md",
+    "commands": [
+      {
+        "id": "peers"
+      },
+      {
+        "id": "conversations"
+      },
+      {
+        "id": "message.send"
+      },
+      {
+        "id": "message.status"
+      },
+      {
+        "id": "message.reconcile"
+      },
+      {
+        "id": "task.create"
+      },
+      {
+        "id": "task.list"
+      },
+      {
+        "id": "task.get"
+      },
+      {
+        "id": "task.action"
+      },
+      {
+        "id": "task.comment"
+      },
+      {
+        "id": "task.material"
+      },
+      {
+        "id": "task.deliver"
+      },
+      {
+        "id": "task.rework"
+      },
+      {
+        "id": "policy.list"
+      },
+      {
+        "id": "policy.match"
+      },
+      {
+        "id": "sync.status"
+      },
+      {
+        "id": "sync.retry"
+      },
+      {
+        "id": "task.export"
+      },
+      {
+        "id": "material.import"
+      },
+      {
+        "id": "material.text"
+      },
+      {
+        "id": "material.read"
+      },
+      {
+        "id": "offer.list"
+      },
+      {
+        "id": "offer.preview"
+      },
+      {
+        "id": "peer.offers"
+      },
+      {
+        "id": "peer.offers.refresh"
+      },
+      {
+        "id": "execution.catalog"
+      },
+      {
+        "id": "task.result"
+      },
+      {
+        "id": "workflow.catalog"
+      }
+    ]
+  },
+  "minCoreVersion": "0.3.5",
+  "dataStores": [
+    {
+      "name": "messages.json",
+      "scope": "user",
+      "schemaVersion": 3,
+      "migrateFrom": [
+        1,
+        2
+      ]
+    }
+  ]
+}

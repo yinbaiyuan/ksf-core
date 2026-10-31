@@ -2,7 +2,7 @@
 id: "competency.ksf.ability-route"
 name: "能力路由"
 description: "根据目标与上下文，优先核对明确指定、有效原安排和适用项目预设，再在全局按协同、搭档匹配；核对正文、精确来源和依赖，区分无专用对象、方法不足、执行条件缺失和发现失败，向 runtime 返回承接安排或具体缺口。"
-version: 0.1.6
+version: 0.1.7
 status: active
 references: []
 ---
@@ -185,4 +185,4 @@ routing.competencies 和 data_packages 是按需补充支持，不是初始承�
 
 对象公共字段、接管、状态和版本遵循[对象元数据规范](../../../docs/对象元数据规范.md)。程序输出、正文读取、任务适用及真实执行分别记录，不因命令成功宣称已完成路由或业务交付。
 
-本文 CLI 示例采用 macOS 的 `.agents/ksf`；Windows 入口为 `.agents/ksf.ps1`，当前运行时与业务 CLI 尚未接入。入口恢复不等于对象发现或读取成功；受限时继续不依赖 CLI 的工作，不用全局 Node 绕过。支持边界见[启动入口](../../../runtime/launcher.md)。
+本文 CLI 示例采用 macOS 的 `.agents/ksf`；Windows 入口为 `.agents/ksf.ps1`，现已接入随包运行时与共享业务 CLI；Windows 调用使用 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/ksf.ps1。入口恢复不等于对象发现或读取成功；受限时继续不依赖 CLI 的工作，不用全局 Node 绕过。支持边界见[启动入口](../../../runtime/launcher.md)。

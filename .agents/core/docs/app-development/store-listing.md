@@ -1,6 +1,6 @@
 # 商店展示资料与最新版本
 
-**已实现，SDK工具2.2.0新增。** 商店资料位于应用源条目的可选`listing`，不进入Manifest或`.ksfapp`。旧v1/v2包和旧索引继续可用；素材缺失时使用内置图标和Manifest说明。
+**SDK v1 展示资料。** 商店资料位于应用源条目的可选`listing`，不进入Manifest或`.ksfapp`。应用源索引与执行包分别管理；素材缺失时使用内置图标和Manifest说明。
 
 ## 开发工程
 
@@ -41,7 +41,7 @@ npx --no-install ksf-app build . --listing-only --store ../store --json
 
 `check`的输入是工程目录，输出人类/JSON诊断；非法字段、图片、容量或路径是阻断错误。`build`先校验，发布不可变包及图片，再原子更新索引。`--listing-only`需要存在对应ID/版本的本地包和索引，重新校验包摘要和Manifest；结果返回更新条目，覆盖该版本全部平台变体的展示资料。没有版本报`APP_RELEASE_MISSING`，非法素材报`APP_LISTING_INVALID`；失败不改变原索引和包。下载源部署时同步部署media目录。
 
-展示文本或截图变化允许更新同版本listing；执行代码或Manifest变化仍必须递增应用版本。SDK2.1.0旧交付不被替换。
+展示文本或截图变化允许更新同版本listing；执行代码或Manifest变化仍必须递增应用版本。展示资料与可执行包独立核对。
 
 ## 浏览与安装规则
 
@@ -52,3 +52,7 @@ npx --no-install ksf-app build . --listing-only --store ../store --json
 `POST /api/apps/install`沿用`{appId,sourceId,version,digest,trusted:true}`。服务端复核最新兼容版本和来源；旧确认报409 `APP_RELEASE_CHANGED`，来源改变报409 `APP_SOURCE_CHANGED`，应用应刷新并重新确认，不能自动替换目标后继续安装。更新保留停用状态；旧窗口和任务仍按租约规则延迟切换。没有自动更新或批量信任。
 
 `GET /api/apps/media?sourceId=...&appId=...&version=...&digest=...`返回已在当前启用源声明、通过摘要与容量校验的图片及正确MIME，不接受任意URL或本机路径。失败用图标/占位恢复，不阻断应用安装。图片缓存不包含模型凭据或业务数据。
+
+## CLI 能力标识
+
+宿主依据页面所展示版本的 `manifest.cli` 自动显示“支持 CLI”，不读取 listing 文案作为能力声明。已安装列表采用当前生效包；详情、候选及安装/导入预览各跟随展示的包版本。已安装应用的详情另提供当前安装版本的 CLI 文档入口，即使停用、纯后台或仅有卡片也可阅读。未安装只展示标识，不下载文档包。见 [CLI 文档标准](cli.md#商店标识与标准文档入口)。

@@ -177,7 +177,10 @@ test('operation IDs deduplicate requests and stale repository state cannot execu
   const index = (await runGit(folder, ['diff', '--cached'])).stdout; assert.equal(index, '');
 });
 test('HTTP write routes require exact local origin, JSON and session token; old APIs stay read-only', async t => {
-  const f = await fixture(t), server = await startWebServer({ root: f.root, port: 0, capture: false }); t.after(() => server.close());
+  let server;
+  t.after(() => server?.close());
+
+  const f = await fixture(t);server = await startWebServer({ root: f.root, port: 0, capture: false });
   const call = (path, input, headers = {}) => fetch(server.url + path, { method: input ? 'POST' : 'GET', headers: input ? { Origin: server.url.slice(0, -1), 'Content-Type': 'application/json', ...headers } : headers, body: input ? JSON.stringify(input) : undefined });
   const session = (await (await call('api/workbench/session')).json()).data;
   const file = (await (await call('api/workspace/file?path=USER.md')).json()).data;

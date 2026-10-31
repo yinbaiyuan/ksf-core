@@ -1,5 +1,7 @@
 # context 命令
 
+固定入口另提供 `ksf context entry --json`，按实例孵化状态返回完整 Core 工作要求，不启动后台或初始化状态；详见[孵化接口](incubation.md)。下文 capabilities 契约保持不变。
+
 ## 状态与职责
 
 已实现 `capabilities`。为 Agent 组织当前 KSF 的完整有效 Cooperation、Partner 发现信息，输出先协同组、后搭档组；排列不是实际选择顺序。复用对象服务的有效列表查询，用户接管、归档回退、冲突及固定入口保护均由对象层处理，不维护第二套扫描或 YAML 解析逻辑，不启动对象 CLI 子进程。

@@ -1,6 +1,6 @@
 # 可直接改造的接口示例
 
-以下使用SDK 2.2.0。每个异步示例都必须显示错误，不能把catch改成静默成功。完整工程与依赖锁以开发包的apps/为准；此页解释组合方式。
+以下使用SDK 1.0.0。每个异步示例都必须显示错误，不能把catch改成静默成功。完整工程与依赖锁以开发包的apps/为准；此页解释组合方式。
 
 ## React、导航、工具栏、临时状态与关闭保护
 
@@ -11,7 +11,7 @@ import {mountReact,useApplicationSDK} from '@ksf/sdk/react';
 import {useWindowState} from '@ksf/sdk/window-context';
 import {WindowToolbar} from '@ksf/sdk/window-toolbar';
 import {Sheet} from '@ksf/sdk/components/ui/sheet';
-import type {ApplicationSDK2} from '@ksf/sdk';
+import type {ApplicationSDK} from '@ksf/sdk';
 function App(){
  const sdk=useApplicationSDK();
  const surface=useSyncExternalStore(sdk.subscribe,sdk.getSnapshot);
@@ -47,7 +47,7 @@ function App(){
   <Sheet open={details} onOpenChange={setDetails} title="详情"><p>未保存时先保存或放弃，再关闭窗口。</p></Sheet>
  </main>;
 }
-export const mount=(container:HTMLElement,sdk:ApplicationSDK2)=>mountReact(App,container,sdk);
+export const mount=(container:HTMLElement,sdk:ApplicationSDK)=>mountReact(App,container,sdk);
 ```
 
 配套后端：
@@ -93,8 +93,8 @@ read无写副作用；save成功替换原位文件，必须使用版本；move�
 ## 原生DOM卡片的可见状态与独立配置
 
 ```ts
-import type {ApplicationSDK2} from '@ksf/sdk';
-export function mount(container:HTMLElement,sdk:ApplicationSDK2){
+import type {ApplicationSDK} from '@ksf/sdk';
+export function mount(container:HTMLElement,sdk:ApplicationSDK){
  let alive=true,revision=0;
  async function render(){
   const current=++revision,snapshot=sdk.getSnapshot();
@@ -138,6 +138,6 @@ if(status.status==='succeeded'){
 
 ## 后台入口
 
-background:true、permissions含background、backend.startBackground三者配套。startBackground中恢复应用已有进度，按显式用户设置决定是否注册计时器，然后迅速返回。dispose停止计时器。每次短期工作用context.tasks.run，重要步骤落盘；日期、时区、错过的执行与补跑由应用定义。
+backend.lifecycle为resident、permissions含background、后端返回startBackground三者配套。startBackground中恢复应用已有进度，按显式用户设置决定是否注册计时器，然后迅速返回。dispose停止计时器。每次短期工作用context.tasks.run，重要步骤落盘；日期、时区、错过的执行与补跑由应用定义。
 
 开发包ai-task/backend.mjs提供不执行任何定时工作的可选入口。启用后台不自动等于启用业务定时。工作台退出会停止应用进程，不能承诺系统级准点任务或离线继续运行。

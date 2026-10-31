@@ -2,7 +2,7 @@
 
 本地开发实现，2026-10-28，尚未正式发行。由当前 KSF Web 后端持有通信与应用进程；CLI 通过当前根的私有本机控制入口调用。Web 后端未运行时返回 COMM_BACKEND_UNAVAILABLE，不自行启动服务或业务应用。
 
-Agent 可以直接调用本命令，无需选择或安装业务应用。应用业务 CLI 的选择规则另见[应用 CLI](../app-development/cli.md)。示例中的 ksf 在当前实例对应 `.agents/ksf`；Windows 正式运行时分发尚未接入，本次 Windows 验证使用设备现有 Node 直接运行测试代码。
+Agent 可以直接调用本命令，无需选择或安装业务应用。应用业务 CLI 的选择规则另见[应用 CLI](../app-development/cli.md)。示例中的 ksf 在当前实例对应 `.agents/ksf`；Windows 通过随包 Node 与共享业务 CLI 调用；较早专项使用设备现有 Node 的证据不替代当前启动器或原生浏览器验收，见[平台支持](../runtime/platforms.md)。
 
 ```sh
 ksf communication config read --json

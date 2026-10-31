@@ -58,14 +58,15 @@ function listObjectData(root) {
 function nextDocument(store, values, revision) {
   const document = store.document(values, revision);
   // The limit applies to the complete persisted envelope, including previews.
-  if (store.identity.objectId !== undefined && Buffer.byteLength(encode(document)) > 1024 * 1024) fail('USER_DATA_INVALID', 'User data exceeds 1 MiB.');
+  if (Buffer.byteLength(encode(document)) > 1024 * 1024) fail('USER_DATA_INVALID', 'User data exceeds 1 MiB.');
   return document;
 }
-export function writeUserData({ root, namespace, objectId, values, ifMatch, dryRun = false, beforePublish }) {
+export function writeUserData({ root, namespace, objectId, values, ifMatch, dryRun = false, beforePublish, removeFields = [] }) {
   const store = recordDefinition(namespace, objectId); store.validateValues(values);
   const mutate = () => {
     const before = snapshot(root, namespace, objectId); expect(before, ifMatch);
-    const merged = { ...(before.document?.values ?? {}), ...values };
+    const retained=Object.fromEntries(Object.entries(before.document?.values??{}).filter(([key])=>!removeFields.includes(key)));
+    const merged = { ...retained, ...values };
     store.validateValues(merged);
     const changed = encode(merged) !== encode(before.document?.values ?? {});
     const revision = changed ? (before.document?.revision ?? 0) + 1 : before.document?.revision ?? null;

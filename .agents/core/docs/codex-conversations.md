@@ -1,10 +1,12 @@
 # Codex Desktop 项目对话
 
-`codex-conversations-v1` 是工作台的原生会话服务，首版在本机 macOS 使用。项目应用通过 SDK v2 公共服务桥调用；Desktop 执行并保存线程，Core 保存关联与操作回执。DeepSeek/API 和隔离的 Codex CLI AI 任务服务继续使用原有契约。
+`codex-conversations-v1` 是工作台的原生会话服务，当前已接入macOS和Windows，精确客户端版本与原生验收范围见[平台说明](runtime/platforms.md)。项目应用通过 SDK v1 公共服务桥调用；Desktop 执行并保存线程，Core 保存关联与操作回执。DeepSeek/API 和隔离的 Codex CLI AI 任务服务继续使用原有契约。
+
+系统设置“AI 任务服务”提供 Desktop 连接状态、详情及项目入口。其他业务可使用 `@ksf/sdk/ai-services` 的 `createAIServiceClient` 统一发现/选择任务或会话路径，再通过其 conversations 客户端接续；仍需声明 codex-conversations 权限，不会自动拓宽权限。调用示例见[统一AI接入](app-development/ai.md#按业务选择执行路径)。
 
 ## 调用与身份
 
-应用声明 `codex-conversations` 权限，后端使用 `@ksf/sdk/codex-conversations` 的 `createCodexConversationsClient(context)`。宿主从已核验的应用包绑定 appId、version、releaseDigest，拒绝未声明权限或 SDK v1 应用。根目录由宿主提供；接口不接受 cwd、IPC 地址、任意方法或持有者参数。
+应用声明 `codex-conversations` 权限，后端使用 `@ksf/sdk/codex-conversations` 的 `createCodexConversationsClient(context)`。宿主从已核验的应用包绑定 appId、version、releaseDigest，拒绝未声明权限或不符合当前SDK v1完整契约的应用。根目录由宿主提供；接口不接受 cwd、IPC 地址、任意方法或持有者参数。
 
 | 方法 | 输入 | 结果 |
 | --- | --- | --- |
@@ -24,7 +26,7 @@
 
 ## 创建与接续
 
-1. 使用 Desktop 随包 CLI 启动短生命周期 App Server，以 KSF 根创建持久线程。
+1. 使用 Desktop 随包 CLI 启动短生命周期 App Server，分页读取 Codex 项目，按规范化根目录精确匹配唯一项目；以 KSF 根和原生 projectId 创建持久线程，并核对原生返回的项目身份。缺少、歧义或不匹配时停止，不退回普通对话。KSF 内的业务归属项目仍保留在首句定位中，与 Codex 侧栏项目分开。
 2. 设置名称，注入最小事实元数据，等待草稿写进程退出。此阶段不启动模型轮次。
 3. 用 `codex://threads/<id>` 打开 Desktop，轮询只读持有者发现。
 4. 经持有者发送一次正常 userMessage。首句包含明确项目定位以及逐字保留的用户原文；不额外增加“上下文就绪”轮次。
@@ -54,6 +56,6 @@ KSF 正常从根 `AGENTS.md → ksf-runtime` 进入，能力发现、预设、�
 
 ## 兼容与验证
 
-适配移植自 KSFAssistant 的本机实际源码，含 MIT 许可、源文件摘要和私有协议兼容边界，见 [NOTICE](../runtime/src/codex-conversations/NOTICE.md)。App Server 使用公开协议，Desktop IPC 属于需按版本回归的私有适配；不能据此宣称任意版本和平台兼容。其他平台明确返回 unavailable。
+适配移植自 KSFAssistant 的本机实际源码，含 MIT 许可、源文件摘要和私有协议兼容边界，见 [NOTICE](../runtime/src/codex-conversations/NOTICE.md)。App Server 使用公开协议，Desktop IPC 属于需按版本回归的私有适配；不能据此宣称任意版本和平台兼容。macOS/Windows之外的平台返回unavailable；支持平台也需满足具体客户端适配范围。
 
 协议与恢复测试：`node --test .agents/core/runtime/tests/codex-conversation*.test.js`。另运行 SDK 测试、项目应用构建/安装测试以及受影响的应用宿主、chat、task 测试。程序测试不能代替工作台新建、Desktop 项目列表可见、原生消息、双端续聊及 KSF 状态的实机验收。

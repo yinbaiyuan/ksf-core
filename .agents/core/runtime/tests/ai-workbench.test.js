@@ -10,9 +10,9 @@ const file=text=>{const bytes=Buffer.from(text);return{content:bytes.toString('b
 const request={contractVersion:'ai-task-v1',idempotencyKey:'one',profileId:'test',instruction:'整理虚构材料',inputs:[],outputSpec:{format:'text'}};
 async function fixture(t,execute=async()=>({text:'完成'})){
   const root=await mkdtemp(join(tmpdir(),'ksf-ai-workbench-')),store=join(root,'store');await mkdir(store);
-  const manifest={schemaVersion:2,sdkVersion:2,id:'example.ai',version:'1.0.0',name:'AI acceptance',description:'Synthetic service bridge acceptance',window:{entry:'frontend/index.js'},backend:{runtime:'node',entry:'backend/index.mjs'},permissions:[]};
+  const manifest={schemaVersion:1,minCoreVersion:'0.3.0',dataStores:[],sdkVersion:1,id:'com.example.ai',version:'1.0.0',name:'AI acceptance',description:'Synthetic service bridge acceptance',window:{entry:'frontend/index.js'},backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'},permissions:[]};
   const bytes=encodePackage(manifest,{'frontend/index.js':file('export function mount(){}'),'backend/index.mjs':file("export function activate(ctx){return{call(method,params){return ctx.services.call('ai',method,params)}}}")});
-  const entry={manifest,package:{url:'example.ksfapp',sha256:checksum(bytes),size:bytes.length}};await writeFile(join(store,'example.ksfapp'),bytes);await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[entry]}));
+  const entry={manifest,package:{url:'com.example.ksfapp',sha256:checksum(bytes),size:bytes.length}};await writeFile(join(store,'com.example.ksfapp'),bytes);await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[entry]}));
   const wb=createWorkbenchHTTP(root,{applications:{storeDirectory:store},ai:{pollMs:10,executors:{'openai-responses-v1':{execute}}}});
   const server=createServer((req,res)=>{void wb.handle(req,new URL(req.url,'http://localhost'),(status,body,type)=>{res.writeHead(status,{'content-type':type??'application/json'});res.end(body);}).then(handled=>{if(!handled){res.writeHead(404);res.end();}});});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   t.after(async()=>{await new Promise(resolve=>server.close(resolve));await wb.close();await rm(root,{recursive:true,force:true});});
@@ -28,7 +28,7 @@ async function fixture(t,execute=async()=>({text:'完成'})){
 }
 test('C15/C16: installed v2 app binds its identity, submits asynchronously and recovers after closing its window',async t=>{
   let finish,seen;const f=await fixture(t,async({task})=>{seen=task.caller;return new Promise(resolve=>{finish=resolve;});});const instance=await f.launch();const accepted=await f.call(instance,'submit',[request]);assert.equal(accepted.status,'queued');
-  const deadline=Date.now()+3000;while(!finish&&Date.now()<deadline)await new Promise(r=>setTimeout(r,10));assert.equal(seen.appId,'example.ai');assert.equal(seen.version,'1.0.0');assert.match(seen.releaseDigest,/^[a-f0-9]{64}$/);
+  const deadline=Date.now()+3000;while(!finish&&Date.now()<deadline)await new Promise(r=>setTimeout(r,10));assert.equal(seen.appId,'com.example.ai');assert.equal(seen.version,'1.0.0');assert.match(seen.releaseDigest,/^[a-f0-9]{64}$/);
   await f.wb.applications.release(instance.id);finish({text:'窗口关闭后完成'});let task;
   do{task=(await f.wb.ai.inspect()).tasks[0];if(task.status==='succeeded')break;await new Promise(r=>setTimeout(r,10));}while(Date.now()<deadline);
   const reopened=await f.launch();const result=await f.call(reopened,'get',[accepted.aiTaskId]);assert.equal(result.status,'succeeded');assert.equal(result.output.value,'窗口关闭后完成');

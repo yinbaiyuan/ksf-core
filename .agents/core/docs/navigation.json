@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "home": ".agents/core/docs/README.md",
+  "additional": [
+    ".agents/core/runtime/launcher.md",
+    ".agents/core/runtime/bootstrap.md",
+    ".agents/core/runtime/build.md",
+    ".agents/core/applications/sdk/README.md"
+  ],
+  "groups": [
+    {
+      "id": "understand",
+      "title": "理解 KSF",
+      "description": "定位、立字模型、对象与术语",
+      "pages": [
+        ".agents/core/docs/README.md",
+        ".agents/core/docs/handbook/overview.md",
+        ".agents/core/docs/reference/glossary.md",
+        ".agents/core/docs/objects/overview.md"
+      ],
+      "prefixes": [
+        ".agents/core/docs/objects/",
+        ".agents/core/docs/content-design.md"
+      ]
+    },
+    {
+      "id": "use",
+      "title": "使用 KSF",
+      "description": "从首次使用到真实工作与协作",
+      "pages": [
+        ".agents/core/docs/handbook/getting-started.md",
+        ".agents/core/docs/handbook/first-task.md",
+        ".agents/core/docs/handbook/identity-configuration.md",
+        ".agents/core/docs/handbook/assets.md",
+        ".agents/core/docs/handbook/abilities.md",
+        ".agents/core/docs/handbook/task-execution.md",
+        ".agents/core/docs/handbook/workbench.md",
+        ".agents/core/docs/handbook/ai.md",
+        ".agents/core/docs/handbook/collaboration.md",
+        ".agents/core/docs/handbook/examples.md",
+        ".agents/core/docs/handbook/documentation-reader.md"
+      ],
+      "prefixes": [
+        ".agents/core/docs/handbook/"
+      ]
+    },
+    {
+      "id": "develop",
+      "title": "开发应用与能力",
+      "description": "SDK、CLI、规范和可执行示例",
+      "pages": [
+        ".agents/core/docs/app-development/README.md",
+        ".agents/core/docs/app-development/AI-START.md",
+        ".agents/core/docs/app-development/quickstart.md",
+        ".agents/core/docs/cli/index.md",
+        ".agents/core/docs/reference/documentation-maintenance.md"
+      ],
+      "prefixes": [
+        ".agents/core/docs/app-development/",
+        ".agents/core/docs/cli/",
+        ".agents/core/docs/templates/",
+        ".agents/core/docs/对象元数据规范.md",
+        ".agents/core/docs/CLI命令设计规范.md",
+        ".agents/core/applications/"
+      ]
+    },
+    {
+      "id": "mechanism",
+      "title": "理解系统机制",
+      "description": "调用链、Agent运行、AI与通信的边界",
+      "pages": [
+        ".agents/core/docs/handbook/architecture.md",
+        ".agents/core/docs/system/README.md",
+        ".agents/core/docs/runtime/routing.md",
+        ".agents/core/docs/reference/data-map.md"
+      ],
+      "prefixes": [
+        ".agents/core/docs/system/",
+        ".agents/core/docs/runtime/",
+        ".agents/core/docs/ai-task",
+        ".agents/core/docs/codex-conversations.md",
+        ".agents/core/runtime/"
+      ]
+    },
+    {
+      "id": "maintain",
+      "title": "维护与排障",
+      "description": "后台、配置、兼容、备份与恢复",
+      "pages": [
+        ".agents/core/docs/operations/daily.md",
+        ".agents/core/docs/operations/troubleshooting.md",
+        ".agents/core/docs/operations/backup-migration.md",
+        ".agents/core/docs/reference/compatibility.md",
+        ".agents/core/docs/runtime/service.md",
+        ".agents/core/docs/configuration-center.md",
+        ".agents/core/docs/runtime/data-compatibility.md"
+      ],
+      "prefixes": [
+        ".agents/core/docs/operations/",
+        ".agents/core/docs/reference/"
+      ]
+    }
+  ]
+}

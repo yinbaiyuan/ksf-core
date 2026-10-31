@@ -1,10 +1,10 @@
 {
-  "schemaVersion": 2,
-  "sdkVersion": 3,
-  "id": "example.collaboration",
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.example.collaboration",
   "name": "团队协作示例",
-  "description": "独立应用定义的任务传递、反馈等待和消息恢复示例",
-  "version": "1.0.1",
+  "description": "发送任务与附件，由接收方决定处理，本地完成和结果回传分开",
+  "version": "1.1.1",
   "window": {
     "entry": "frontend/index.js",
     "multiInstance": true,
@@ -15,7 +15,8 @@
   },
   "backend": {
     "runtime": "node",
-    "entry": "backend/index.mjs"
+    "entry": "backend/index.mjs",
+    "lifecycle": "on-demand"
   },
   "permissions": [
     "messages.send",
@@ -49,6 +50,12 @@
         "id": "task.accept"
       },
       {
+        "id": "task.ignore"
+      },
+      {
+        "id": "task.complete"
+      },
+      {
         "id": "task.feedback"
       },
       {
@@ -61,5 +68,14 @@
         "id": "send.reconcile"
       }
     ]
-  }
+  },
+  "minCoreVersion": "0.3.2",
+  "dataStores": [
+    {
+      "name": "workflow.json",
+      "scope": "user",
+      "schemaVersion": 1,
+      "migrateFrom": []
+    }
+  ]
 }

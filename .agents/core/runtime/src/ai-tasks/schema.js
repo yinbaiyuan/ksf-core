@@ -56,7 +56,7 @@ export function strictSchema(schema) {
   schema.anyOf?.forEach(strictSchema);
 }
 export function requestContract(input) {
-  exact(input, ['contractVersion', 'idempotencyKey', 'profileId', 'instruction', 'inputs', 'outputSpec', 'context', 'requirements', 'deadlineAt', 'limits', 'methodRefs']);
+  exact(input, ['contractVersion', 'idempotencyKey', 'profileId', 'instruction', 'inputs', 'outputSpec', 'context', 'requirements', 'deadlineAt', 'limits', 'methodRefs','executionGrant']);
   requireAI(input.contractVersion === 'ai-task-v1', 'AI_REQUEST_INVALID', '不支持的 AI 请求契约版本。');
   requireAI(typeof input.idempotencyKey === 'string' && input.idempotencyKey.length > 0 && input.idempotencyKey.length <= 256, 'AI_REQUEST_INVALID', '需要稳定的幂等键。');
   identifier(input.profileId);
@@ -80,6 +80,7 @@ export function requestContract(input) {
   if (input.context !== undefined) requireAI(object(input.context) && Buffer.byteLength(JSON.stringify(input.context)) <= 8192, 'AI_REQUEST_INVALID', '业务关联信息过大。');
   if (input.limits !== undefined) exact(input.limits, ['maxAttempts', 'timeoutMs', 'maxOutputBytes']);
   requireAI(Buffer.byteLength(JSON.stringify(input)) <= 768 * 1024, 'AI_INPUT_TOO_LARGE', '普通任务请求过大，请登记材料。');
+  if(input.executionGrant!==undefined){exact(input.executionGrant,['id','revision','taskId','contentDigest','phase']);requireAI(typeof input.executionGrant.id==='string'&&Number.isSafeInteger(input.executionGrant.revision),'AI_REQUEST_INVALID','执行授权无效。');}
   return clone(input);
 }
 export function outputValue(text, spec, maxBytes) {

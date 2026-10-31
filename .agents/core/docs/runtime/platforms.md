@@ -24,35 +24,35 @@ Core 的业务协议、对象/项目、能力路由、聊天状态、任务归�
 
 Windows Desktop CLI 已实测 `0.165.0-alpha.1.2` 的本地认证、App Server、IPC 和真实托管 AI 执行；兼容表只增加这个 Windows 精确版本。稳定 0.163.x 原有范围保持。新版本应先做实际协议与执行验收，不能直接放宽到全部 alpha。
 
-Desktop URI 操作需要 lawis 的交互会话；SSH 会话可访问命名管道及 CLI，但系统可能拒绝启动桌面 URI。工作台手动入口以当前用户 Interactive Token 启动，无登录或开机触发器。发现会话持有者时只对暂时无客户端和超时进行有界只读重试；发送结果未知时保留回执并对账，不自动重发。
+Desktop URI 操作需要 当前用户的交互会话；SSH 会话可访问命名管道及 CLI，但系统可能拒绝启动桌面 URI。工作台入口以当前用户 Interactive Token 启动；启用自启动后添加当前用户登录触发器。发现会话持有者时只对暂时无客户端和超时进行有界只读重试；发送结果未知时保留回执并对账，不自动重发。
 
 ## 验证入口
 
 - 共用业务与平台契约：`node --test runtime/tests/*.test.js`（在 runtime 工作目录执行时用 `node --test tests/*.test.js`）。
 - Windows 原生引导：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/core/runtime/tests/bootstrap-windows.ps1 -Root <实例根>`。
 - POSIX Shell 引导测试只在 macOS 运行；Windows 使用上述真实 ZIP/PowerShell 测试替代。其他跳过必须单独说明平台原因。
-- 手动工作台：`.agents/core/runtime/tools/workbench-windows.ps1 -Action start|stop|status|logs`；日志在 `.agents/runtime-data/web/workbench.log`。
+- 手动工作台：`.agents/core/runtime/tools/workbench-windows.ps1 -Action start|stop|status|logs`；统一后台日志在 `.agents/runtime-data/service/`。
 
 支持目标与已验收结果分开。Windows 原生隔离评估、其他 CPU 架构、真实断电和长期运行不能由单次单元测试推断为通过；具体结果以本次验收报告为准。
 
 ## Windows 手动使用
 
-在资源管理器中运行 `runtime/tools/start-workbench.cmd`；停止和日志分别使用同目录 `stop-workbench.cmd`、`logs-workbench.cmd`。这些入口定位其所在实例，默认监听 127.0.0.1:4317。计划任务只用于把进程放入当前用户交互会话，没有开机或登录触发器。关闭浏览器不结束后台；停止入口发送带实例 nonce 和启动身份的请求，避免结束其他实例。
+在资源管理器中运行 `runtime/tools/start-workbench.cmd`；停止和日志分别使用同目录 `stop-workbench.cmd`、`logs-workbench.cmd`。这些入口定位其所在实例，默认监听 127.0.0.1:1313。计划任务以当前用户交互身份运行；service autostart enable 添加登录触发器，disable 移除触发器。关闭浏览器不结束后台；停止入口发送带实例 nonce 和启动身份的请求，避免结束其他实例。
 
 命令示例：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\ksf\.agents\ksf.ps1 hello --json
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\ksf\.agents\core\runtime\tools\workbench-windows.ps1 -Action start -Port 4317
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\ksf\.agents\core\runtime\tools\workbench-windows.ps1 -Action start
 ```
 
-Mac 可使用 `ssh -N -L 4317:127.0.0.1:4317 lawis@192.168.100.80`，然后访问 `http://127.0.0.1:4317/`。浏览器写接口按当前 Origin 校验，转发不向局域网开放工作台 HTTP。ConPTY 和 Desktop 原生交互以 Windows 本机会话验收为准。
+Mac 可使用 `ssh -N -L 1313:127.0.0.1:1313 user@windows-host`，然后访问 `http://127.0.0.1:1313/`。浏览器写接口按当前 Origin 校验，转发不向局域网开放工作台 HTTP。ConPTY 和 Desktop 原生交互以 Windows 本机会话验收为准。
 
 ## 应用与工作台的边界
 
-应用应发布一个通用 `.ksfapp`，macOS 与 Windows 安装相同 SHA256 的包。应用业务、界面、状态格式和调用参数不按操作系统分叉；平台特性由工作台宿主实现。原有 `target` / `nodeAbi` 清单仍兼容历史第三方包，不作为官方应用的新打包方式。
+应用应发布一个通用 `.ksfapp`，macOS 与 Windows 安装相同 SHA256 的包。应用业务、界面、状态格式和调用参数不按操作系统分叉；平台特性由工作台宿主实现。新清单严格按 SDK v1 校验；需要原生平台约束时可声明 `target` / `nodeAbi`。
 
-- `context.services.call('terminal', method, [input])`：create/list/read/write/resize/close。宿主从已验证的窗口租约注入 runtimeId/instanceId，应用不传 PID 或选择所有者。终端尺寸、UTF-8 数据、输出游标和退出回执共享；Shell、登录参数、ConPTY/PTY、原生二进制由宿主选择。窗口关闭、租约过期和后端进程退出都会清理该窗口会话；其他窗口不受影响。SDK v1 增加公共服务桥，仍维持每窗口独立后端的旧生命周期。
+- `context.services.call('terminal', method, [input])`：create/list/read/write/resize/close。宿主从已验证的窗口租约注入 runtimeId/instanceId，应用不传 PID 或选择所有者。终端尺寸、UTF-8 数据、输出游标和退出回执共享；Shell、登录参数、ConPTY/PTY、原生二进制由宿主选择。窗口关闭、租约过期和后端进程退出都会清理该窗口会话；其他窗口不受影响。SDK v1 后端按应用共享；终端资源按窗口租约隔离。
 - `context.services.call('git', method, args)`：Git 应用仅调用公共服务。仓库发现、可执行文件、环境清理、进程树、工作区写入锁和操作回执由工作台处理。回执继续保存在原应用的 `operations.json`，应用升级不迁移格式，关闭窗口不取消已受理操作。
 - `context.services.call('projects', 'list'|'read'|'tasks', [input])`：宿主直接调用共享项目与任务服务；项目应用不再生成 Shell/PowerShell 命令。
 - `context.storage.read(name)` 返回 `{exists,text,etag,path}`；`write(name,text,{ifMatch?})` 返回 `{etag,path}`。宿主限定到调用应用的数据目录，只接受普通 `.json/.md/.txt` 文件和 8 MiB 以内文本；同目录原子替换、fsync、原生重试及进程锁共用实现。ifMatch 可为 null，表示文件须尚不存在；冲突保留原件。SDK `createJSONStore` 继续负责业务校验、迁移和 revision，通过宿主保存。独立 Node 测试的旧 context 保留便携式文件后备实现。

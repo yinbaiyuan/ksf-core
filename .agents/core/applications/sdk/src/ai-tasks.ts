@@ -5,13 +5,14 @@ export interface AIRequest {
   contractVersion:'ai-task-v1'; idempotencyKey:string;profileId:string;instruction:string;
   inputs:({kind:'text';name?:string;text:string}|{kind:'material';materialId:string;sha256:string})[];
   outputSpec:{format:'text';mediaType?:'text/plain'|'text/markdown'}|{format:'json';schema:Record<string,unknown>};
+  executionGrant?:{id:string;revision:number;taskId:string;contentDigest:string;phase:'plan'|'execute'};
   methodRefs?:[];context?:Record<string,unknown>;requirements?:string[];deadlineAt?:string;
   limits?:{maxAttempts?:number;timeoutMs?:number;maxOutputBytes?:number};
 }
 export interface AIError {code:string;message:string;outcomeUnknown:boolean}
 export interface AIAttempt {attemptId:string;startedAt:string;finishedAt?:string;stopConfirmed:boolean;executionOutcome:'running'|'completed'|'failed'|'unknown';pid?:number;processStart?:string;threadId?:string;turnId?:string;responseId?:string;[key:string]:unknown}
 export interface AITimestamps {receivedAt:string;updatedAt:string;startedAt?:string;finishedAt?:string;cancelRequestedAt?:string}
-export interface AIResult<T=unknown> {resultId:string;format:'text'|'json';value:T;sha256:string}
+export interface AIResult<T=unknown> {resultId:string;format:'text'|'json';value:T;sha256:string;executionFiles?:{name:string;path:string;sha256:string;size:number;mediaType:string}[]}
 export interface AITask<T=unknown> {
   aiTaskId:string;application:{appId:string;version?:string;releaseDigest?:string};status:AIStatus;revision:number;context:Record<string,unknown>;
   output:{format:'text'|'json';value:T;artifacts:{resultId:string;sha256:string}[]}|null;
@@ -20,10 +21,10 @@ export interface AITask<T=unknown> {
   execution:{executorId:string;profileId:string;profileRevision:number;connectionRevision:number;model:string|null;attempts:AIAttempt[]};
 }
 export interface AIEvents<T=unknown> {events:{seq:number;type:string;status:AIStatus;at:string}[];afterSeq:number;hasMore?:boolean;snapshot:AITask<T>}
-export interface AIServiceDescription {contractVersion:'ai-task-v1';limits:{requestBytes:number;textMaterialBytes:number;uploadBytes:number};profiles:{id:string;model:string|null;capabilities:string[];limits:{maxInputBytes:number;maxOutputBytes:number;timeoutMs:number;maxAttempts:number}}[]}
+export interface AIServiceDescription {contractVersion:'ai-task-v1';limits:{requestBytes:number;textMaterialBytes:number;uploadBytes:number};profiles:{id:string;executorId:string;kind:'api'|'codex';protocolId?:string;model:string|null;capabilities:string[];limits:{maxInputBytes:number;maxOutputBytes:number;timeoutMs:number;maxAttempts:number}}[]}
 export interface AIMaterial {materialId:string;version:number;sha256:string;size:number;mimeType:string;name:string}
 export function createAIClient(context:Pick<ApplicationBackendContext,'services'>) {
-  function call<T>(method:string,...params:unknown[]):Promise<T>{if(!context.services)throw new Error('AI 服务需要 SDK v2 公共服务桥。');return context.services.call<T>('ai',method,params);}
+  function call<T>(method:string,...params:unknown[]):Promise<T>{if(!context.services)throw new Error('AI 服务需要 SDK v1 公共服务桥。');return context.services.call<T>('ai',method,params);}
   return {
     describe:()=>call<AIServiceDescription>('describe'),
     submit:<T=unknown>(request:AIRequest)=>call<AITask<T>>('submit',request),

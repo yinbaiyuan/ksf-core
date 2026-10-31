@@ -1,6 +1,6 @@
 import {APIError,createWorkbenchClient} from './request-client.ts';
-import type {ApplicationSDK2} from '../application-sdk';
-type Bridge=Pick<ApplicationSDK2,'getSession'|'request'>;
+import type {ApplicationSDK} from '../application-sdk';
+type Bridge=Pick<ApplicationSDK,'getSession'|'request'>;
 /** Keep the page's original CSP nonce and reconstruct errors in the package's own realm. */
 export function createSurfaceClient(fetcher?:typeof fetch){
   const native=createWorkbenchClient(fetcher);let bridge:Bridge|undefined;

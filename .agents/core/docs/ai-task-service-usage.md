@@ -9,10 +9,10 @@
 
 - DeepSeek 连接使用 `kind: api`、`protocolId: deepseek-responses-v1`、`baseURL: https://api.deepseek.com`、`credentialRef: env:DEEPSEEK_API_KEY`、`concurrency: 1`，模型为 `deepseek-flash`。供应商、默认模型和变量名已由用户确认；仍需配置真实账户并验收。只保存凭据引用，后台服务需要实际具备对应环境变量；连接检查仅证明本地配置与引用存在，未发起模型请求。
 - 另保留 `openai-responses-v1` 和 `openai-transcription-v1`，对应 OpenAI 文本/专用文件转写，基础地址示例为 `https://api.openai.com/v1`、凭据引用 `env:OPENAI_API_KEY`。切换供应商使用明确协议，不能仅改地址推定兼容。
-- Codex 连接使用 `kind: codex`、可执行文件绝对路径、可选的 `codexHome`、并发额度。检查执行 `--version` 与 `login status`，不读取或复制认证文件。首版明确限定已经验证的 `0.163.x`，其他版本需先验证适配。
+- Codex 连接使用 `kind: codex`、可执行文件绝对路径、可选的 `codexHome`、并发额度。检查执行 `--version` 与 `login status`，不读取或复制认证文件。稳定0.163.x及已记录的Windows精确alpha范围见[平台兼容](runtime/platforms.md)，其他版本需先验证适配。
 - 执行配置声明 `id`、`executorId`、`enabled`、`model`（API 必填）、`timeoutMs`（1000—3600000）、`maxAttempts`（1—5）、`retryDelayMs`（0—60000）、`maxInputBytes`（最多 128 MiB）、`maxOutputBytes`（最多 512 KiB）；可选 `maxOutputTokens`、`reasoningEffort`。模型选项是否受供应商支持仍需真实调用核对。
 
-SDK v2 应用后端可以直接调用公共服务，或打包使用 SDK 的 `createAIClient(context)`：
+SDK v1 应用后端可以直接调用公共服务，或打包使用 SDK 的 `createAIClient(context)`：
 
 ```ts
 import { createAIClient } from '@ksf/sdk/ai-tasks';
@@ -55,6 +55,7 @@ JSON 输出根类型为 object，所有对象显式 `additionalProperties:false`
 | /api/ai/config | {kind:"connections" 或 "profiles"} | 读配置及全局 revision |
 | /api/ai/config | {kind,config:{revision,items}} | 乐观校验后更新整类配置 |
 | /api/ai/check | {executorId} | 本地连接及认证引用检查，明确返回检查范围 |
+| /api/ai/desktop | {} | Desktop 会话连接状态；不创建线程或模型轮次，不接受执行操作参数 |
 | /api/ai/task | {aiTaskId} | 按编号读取历史任务，不限于最近列表 |
 
 任务重试只用于已知可安全重试的限流或输出修复，保留任务编号并创建新 attempt。API HTTP 5xx、发送后网络断线及未完整取得响应均保守进入 reconciling。OpenAI Responses 使用 store:false；DeepSeek Responses 按其官方无状态协议提交，不添加未声明的 store/strict 字段，默认 reasoning.effort 为 none，显式 minimal/medium 分别映射为 low/high。两路线均只取最终文本并统一校验，不保存推理过程；没有可查询的持久上游结果时，不具备自动 API 对账能力。取消仍未确认停止的执行后，原并发额度继续占用；不能通过改状态假装远端已停止。
@@ -69,7 +70,7 @@ CLI 使用监督 worker、独立临时工作目录、只读沙箱、stdin 指令
 
 ## 应用后台入口
 
-需要无窗口运行的 SDK v2 应用可以显式声明 `background:true`，同时在 permissions 列出 `background`，后端返回 `startBackground()`。工作台启动、安装/启用后会启动此入口；`dispose()` 应停止计时器。后台保留与 tasks.run 的短期保活分别管理，不用永久任务阻塞更新。后台不能自行越过在途调用/操作的排空条件。
+需要常驻的 SDK v1 应用声明 `backend.lifecycle:"resident"`，同时在 permissions 列出 `background`，后端返回 `startBackground()`。主服务启动、安装/启用后启动此入口；按需应用使用 `on-demand`，业务持续期间用 tasks.run 或持久后台保活。`dispose()` 应停止计时器。后台保留与 tasks.run 的短期保活分别管理，不用永久任务阻塞更新。后台不能自行越过在途调用/操作的排空条件。
 
 应用的日期、时区、定时、补跑、业务状态和发布回执仍由应用代码保存。Core 不解释“早会”“日刊”或业务 DAG。机器离线不承诺准点，具体补跑/截止策略由应用实现。
 

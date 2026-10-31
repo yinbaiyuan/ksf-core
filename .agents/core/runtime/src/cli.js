@@ -25,8 +25,10 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write('  ksf commit-message --help   Check commit messages or print the template\n');
   process.stdout.write('  ksf pr-description --help   Check PR descriptions or print the template\n');
   process.stdout.write('  ksf source --help           Associate and share Git ability sources\n');
+  process.stdout.write('  ksf config --help           Manage the unified configuration center\n  ksf incubate --help         Configure and finish first-use incubation\n');
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
   process.stdout.write('  ksf eval --help             Explicit natural-language Agent evaluations\n');
+  process.stdout.write('  ksf service --help          Manage the independent background service\n  ksf open                    Start the service and open the workbench\n');
   process.stdout.write('  ksf web --help              Start the local Web server\n');
   process.stdout.write('  ksf app --help              Call packaged application CLI capabilities\n  ksf communication --help    Use local/LAN communication\n');
   process.stdout.write('  ksf assistant --help       Read desktop workbench projections\n');
@@ -40,6 +42,12 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
   process.exitCode = result.exitCode;
+} else if(command==='incubate'){
+  const {runIncubationCommand}=await import('./commands/incubation.js');const result=await runIncubationCommand(options,currentRoot);process.stdout.write(result.stdout);process.exitCode=result.exitCode;
+} else if(command==='config'){
+  const {runConfigurationCommand}=await import('./commands/configuration.js');const result=await runConfigurationCommand(options,currentRoot);process.stdout.write(result.stdout);process.exitCode=result.exitCode;
+} else if (command === 'service'||command==='open') {
+  const {runServiceCommand}=await import('./commands/service.js');const result=await runServiceCommand(options,currentRoot,{open:command==='open'});process.stdout.write(result.stdout);process.exitCode=result.exitCode;
 } else if (command === 'web') {
   const { runWebCommand } = await import('./commands/web.js');
   process.exitCode = await runWebCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
@@ -125,6 +133,11 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
 } else if (command === 'build' && (options.length === 0 || (options.length === 1 && options[0] === '--json'))) {
   try {
     const { buildManifest } = await import('./services/build-manifest.js');
+    if ((await import('node:fs')).existsSync(new URL('../../docs/navigation.json', import.meta.url))) {
+      const {runDocumentation} = await import('../tools/documentation.mjs');
+      const docs = await runDocumentation(currentRoot, {check:true});
+      if (!docs.ok) throw Object.assign(new Error('System documentation requires regeneration or correction: '+JSON.stringify(docs.errors)), {code:'DOCUMENTATION_INVALID'});
+    }
     const result = await buildManifest(fileURLToPath(new URL('../../../../', import.meta.url)));
     process.stdout.write(options.includes('--json') ? `${JSON.stringify(result)}\n` : `KSF manifest generated: ${result.manifestPath}\n`);
   } catch (failure) {

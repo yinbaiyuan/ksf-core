@@ -16,7 +16,7 @@ export function filePolicy(path) {
 }
 
 // Root navigation only: keep this ordered list as the single place to add entries.
-const ROOT_ENTRIES = ['.agents', '@收件箱', '档案', '能力', '项目', '知识', 'repositories', 'AGENTS.md', 'BOT.md', 'MEMORY.md', 'README.md', 'USER.md'];
+const ROOT_ENTRIES = ['.agents', '@收件箱', '档案', '能力', '项目', '知识', 'repositories', 'AGENTS.md', 'BOT.md', 'README.md', 'USER.md'];
 const ROOT_ORDER = new Map(ROOT_ENTRIES.map((name, index) => [name, index]));
 const TEXT_LIMIT = 8 * 1024 * 1024;
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== '..' && !rel.startsWith('..' + sep); };

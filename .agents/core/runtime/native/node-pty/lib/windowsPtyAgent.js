@@ -72,8 +72,8 @@ var WindowsPtyAgent = /** @class */ (function () {
         this._outSocket.setEncoding('utf8');
         // The conout socket must be ready out on another thread to avoid deadlocks
         this._conoutSocketWorker = new windowsConoutConnection_1.ConoutConnection(term.conout, this._useConptyDll);
-        // KSF: close the worker even when ConPTY emits EOF without final data.
-        this._outSocket.once('close', function () { _this._conoutSocketWorker.dispose(); });
+        // KSF: close the worker and input on ConPTY EOF without final data.
+        this._outSocket.once('close', function () { if (_this._inSocket) _this._inSocket.destroy(); _this._conoutSocketWorker.dispose(); });
         this._conoutSocketWorker.onReady(function () {
             _this._conoutSocketWorker.connectSocket(_this._outSocket);
         });

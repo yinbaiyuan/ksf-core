@@ -1,3 +1,4 @@
+import {createCoreHost} from './core-host.js';
 import {project as projectService} from './projects.js';
 import {listTasks} from './tasks.js';
 import {createWorkbenchGit} from './workbench-git.js';
@@ -21,26 +22,11 @@ async function readJSON(request) {
   catch (error) { if (error.code) throw error; throw problem('WEB_BODY_INVALID', '请求不是有效 JSON。'); }
 }
 export function createWorkbenchHTTP(root, options = {}) {
-  const coordinator = createCoordinator(), files = createWorkspaceFiles(root, coordinator),activity=createTaskActivitySource(files.root);
-  const appStorage=createApplicationStorage(files.root),gitCaller={appId:'git'};
-  let gitReady;
-  const hostGit=()=>gitReady??=(async()=>{const record=await appStorage.read(gitCaller,'operations.json');const ledger=record.exists?JSON.parse(record.text):[];assert(Array.isArray(ledger),'APP_DATA_INVALID','Git 操作记录无效，请保留原件。');return createWorkbenchGit(files.root,files,coordinator,{ledger,persist:value=>appStorage.write(gitCaller,'operations.json',JSON.stringify(value))});})();
-  const gitMethods=['list','owner','status','diff','history','commit','tree','refs','conflict','stashDetail','start','operation','settings','invalidate'];
-  const gitService=Object.fromEntries(gitMethods.map(method=>[method,async(...params)=>(await hostGit())[method](...params)]));
-  const ai=createWorkbenchAI(files.root,options.ai);
-  const codexConversations=createCodexConversations(files.root,options.codexConversations);
-  let communicationReady,control;
-  const appCaller=caller=>({kind:'app',id:caller.appId});
-  const messages=Object.fromEntries(['send','getOperation','reconcile','cancel','inbox','readMessage','readPart'].map(method=>[({getOperation:'status',readMessage:'read'})[method]??method,async(caller,...args)=>(await communicationReady)[method](appCaller(caller),...args)]));
-  messages.registerFile=(caller,input)=>control.registerFile(caller,input);
-  const applications=createApplicationManager(files.root,{...options.applications,locks:coordinator,services:{projects:{list:input=>projectService({root:files.root,operation:'list',scope:input?.scope??'all'}),read:input=>projectService({root:files.root,operation:'read',name:input?.name,scope:input?.scope??'current'}),tasks:input=>{const {errors,...data}=listTasks({root:files.root,target:input?.target,limit:input?.limit??20,offset:input?.offset??0});return {data,errors};}},git:gitService,messages,peers:{list:async()=>(await communicationReady).peerDirectory()},'codex-conversations':Object.fromEntries(CONVERSATION_METHODS.map(method=>[method,(...params)=>codexConversations[method](...params)])),ai:Object.fromEntries(['describe','submit','get','readResult','cancel','events','register'].map(method=>[method,(...params)=>ai[method](...params)])),tasks:{activity:()=>activity.read()},workspace:Object.fromEntries(['locate','tree','read','search','save','saveUnlocked','create','createUnlocked','move','unlock','upload'].map(method=>[method,(...params)=>files[method](...params)]))}});
-  communicationReady=createCommunicationService(files.root,{applications});communicationReady.catch(()=>{});
-  control=createLocalControl(files.root,{applications,communication:communicationReady});
-  const backgroundReady=applications.startBackground().catch(()=>{});
-  const git=Object.fromEntries(['list','owner','status','diff','history','commit','tree','refs','conflict','stashDetail','start','operation','settings','invalidate'].map(method=>[method,(...params)=>method==='invalidate'?applications.notify('git',method,params):applications.invoke('git',method,params)]));
+  const host=options.host??createCoreHost(root,options);
+  const {files,activity,applications,ai,codexConversations,communication:communicationReady,control,configuration,git}=host;
   const token = randomBytes(32).toString('hex'), nonce = randomBytes(24).toString('base64');
   const secureEqual = value => typeof value === 'string' && value.length === token.length && timingSafeEqual(Buffer.from(value), Buffer.from(token));
-  const matches = pathname => pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
+  const matches = pathname => (pathname==='/api/config'||pathname.startsWith('/api/config/')) || pathname.startsWith('/api/runtime/') || pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
   async function handle(request, url, send, response) {
     if (!matches(url.pathname) && !url.pathname.startsWith('/api/ai/')) return false;
     const json = (status, data) => send(status, JSON.stringify({ ok: true, data }) + '\n');
@@ -54,16 +40,26 @@ export function createWorkbenchHTTP(root, options = {}) {
         assert(!request.headers['sec-fetch-site'] || request.headers['sec-fetch-site'] === 'same-origin', 'WEB_WRITE_FORBIDDEN', '拒绝跨站写请求。', 403);
         assert(secureEqual(request.headers['x-ksf-token']), 'WEB_SESSION_EXPIRED', '工作台会话已失效，请重新连接后保存。', 403);
       }
+      if(write&&host.draining()&&!url.pathname.startsWith('/api/runtime/'))throw problem('SERVICE_STOPPING','后台正在退出，请稍后重试。',409);
+      if(url.pathname==='/api/config'||url.pathname.startsWith('/api/config/')){
+        const input=write?await readJSON(request):{};
+        if(url.pathname==='/api/config'){assert(!write,'WEB_METHOD_NOT_ALLOWED','目录仅支持读取。',405);json(200,await configuration.list());}
+        else if(url.pathname==='/api/config/export'){assert(write,'WEB_METHOD_NOT_ALLOWED','配置导出需要 POST。',405);json(200,await configuration.export(input));}
+        else{const domain=decodeURIComponent(url.pathname.slice('/api/config/'.length));json(200,write?await configuration.perform(domain,input.operation??'write',input):await configuration.read(domain));}
+        return true;
+      }
+      if(url.pathname==='/api/runtime/monitor'){assert(write,'WEB_METHOD_NOT_ALLOWED','监控接口需要会话保护的 POST。',405);json(200,await host.monitor.perform(await readJSON(request)));return true;}
+      if(url.pathname.startsWith('/api/runtime/')){const input=write?await readJSON(request):{};if(url.pathname==='/api/runtime/apps')json(200,await applications.runtimeManage(input));else if(url.pathname==='/api/runtime/service'){const operation=input.operation??'status';assert(options.service&&['status','logs','doctor','stop','restart','autostart'].includes(operation),'SERVICE_OPERATION_INVALID','未知服务操作。');assert(write||operation==='status','WEB_METHOD_NOT_ALLOWED','管理操作需要 POST。',405);json(200,await options.service[operation](input));}else throw problem('WEB_NOT_FOUND','接口不存在。',404);return true;}
       if(url.pathname.startsWith('/api/communication/'))return await control.handle(request,url,send,response);
       if(url.pathname==='/api/work-stats'){
         const zones=url.searchParams.getAll('timeZone'),refresh=url.searchParams.getAll('refresh');
         assert(zones.length<=1&&refresh.length<=1&&(!refresh.length||refresh[0]==='1'),'INVALID_ARGUMENTS','统计参数无效。');
-        const data=await applications.invoke('conversations','stats.read',{...(zones.length?{timeZone:zones[0]}:{}),refresh:refresh[0]==='1'});
+        const data=await applications.invoke('com.ksf.conversations','stats.read',{...(zones.length?{timeZone:zones[0]}:{}),refresh:refresh[0]==='1'});
         send(200,JSON.stringify({ok:!data.errors.length,data,errors:data.errors})+'\n');return true;
       }
       const query = key => { const values = url.searchParams.getAll(key); assert(values.length <= 1, 'INVALID_ARGUMENTS', `参数 ${key} 重复。`); return values[0] ?? undefined; };
       const path = query('path') ?? '', route = url.pathname;
-      if (route === '/api/workbench/session' && !write) { json(200, { instanceId: files.instanceId, token, nonce, capabilities: ['workspace', 'git', 'applications-v1', 'applications-v2', 'ai-tasks-v1', 'codex-conversations-v1','host-terminal-v1','app-storage-v1','projects-v1'], sessionId: nonce }); return true; }
+      if (route === '/api/workbench/session' && !write) { json(200, { instanceId: files.instanceId, token, nonce, capabilities: ['workspace', 'git', 'applications-v1', 'ai-tasks-v1', 'codex-conversations-v1','host-terminal-v1','app-storage-v1','app-storage-runtime-v1','projects-v1','config-v1','runtime-monitor-v1'], sessionId: nonce }); return true; }
       if (route.startsWith('/api/ai/')) {
         assert(write,'WEB_METHOD_NOT_ALLOWED','AI 配置与管理接口需要会话保护的 POST。',405);
         if(route==='/api/ai/material-upload') {
@@ -73,6 +69,11 @@ export function createWorkbenchHTTP(root, options = {}) {
         }
         const input=await readJSON(request);
         if(route==='/api/ai/inspect')json(200,{...await ai.inspect(),backgroundErrors:applications.getBackgroundErrors()});
+        else if(route==='/api/ai/desktop'){
+          assert(input&&typeof input==='object'&&!Array.isArray(input)&&Object.keys(input).length===0,'INVALID_ARGUMENTS','Desktop 状态检查不接受操作参数。');
+          const state=await codexConversations.check({appId:'ksf.workbench'});
+          json(200,{available:state.available,contractVersion:state.contractVersion,platform:state.platform,...(state.executable?{executable:state.executable}:{}),permissionProfile:state.permissions?.id??null,...(state.code?{code:state.code,message:state.message}:{}),checkedAt:new Date().toISOString()});
+        }
         else if(route==='/api/ai/config')json(200,await ai.config(input.kind,input.config));
         else if(route==='/api/ai/check')json(200,await ai.checkConnection(input.executorId));
         else if(route==='/api/ai/task') {
@@ -88,8 +89,14 @@ export function createWorkbenchHTTP(root, options = {}) {
       if (route.startsWith('/app-store/')) { assert(!write, 'WEB_METHOD_NOT_ALLOWED', '应用源资源只支持读取。', 405); const name = route.slice('/app-store/'.length); send(200, await applications.storeAsset(name), name.endsWith('.json') ? 'application/json' : 'application/octet-stream'); return true; }
       if (route.startsWith('/api/apps/')) {
         if (!write) {
+          if (route === '/api/apps/cli/docs') {
+            const appId=query('appId'),digest=query('digest');
+            assert(typeof appId==='string'&&/^[a-z][a-z0-9.-]{1,79}$/.test(appId)&&typeof digest==='string'&&/^[a-f0-9]{64}$/.test(digest),'INVALID_ARGUMENTS','CLI 文档需要应用标识和完整包摘要。');
+            json(200,await applications.cliDocs(appId,{expectedPackageDigest:digest,path:query('path')}));return true;
+          }
           if (route === '/api/apps/installed') { json(200, await applications.snapshot()); return true; }
           if (route === '/api/apps/catalog') { json(200, await applications.catalog()); return true; }
+          if(route==='/api/apps/file-read'){let params;try{params=JSON.parse(query('params')??'{}');}catch{throw problem('INVALID_ARGUMENTS','导出参数无效。');}assert(Buffer.byteLength(JSON.stringify(params))<=8192,'INVALID_ARGUMENTS','导出参数过大。');const file=await applications.download(query('instanceId'),params);send(200,file.bytes,'application/octet-stream',{'X-Content-Type-Options':'nosniff','Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(file.name),'Cache-Control':'no-store'});return true;}
           if (route === '/api/apps/media') { const asset=await applications.media({sourceId:query('sourceId'),appId:query('appId'),version:query('version'),digest:query('digest')});send(200,asset.bytes,asset.type,{'X-Content-Type-Options':'nosniff','Cache-Control':'private, max-age=300'});return true; }
           throw problem('WEB_METHOD_NOT_ALLOWED', '应用操作需要 POST。', 405);
         }
@@ -161,5 +168,5 @@ export function createWorkbenchHTTP(root, options = {}) {
     }
     return true;
   }
-  return { handle, nonce, files, git, applications, ai, codexConversations, communication:communicationReady,publishControl:control.publish, close: async () => { await backgroundReady;await control.drain();await applications.close();if(gitReady)await (await gitReady).close();await (await communicationReady.catch(()=>null))?.close();await control.close(); await ai.close(); await codexConversations.close(); } };
+  return {start:host.start,resume:host.resume,quiesce:host.quiesce,draining:host.draining,handle, nonce, files, git, applications, ai, codexConversations, communication:communicationReady,publishControl:control.publish, close:()=>host.close() };
 }

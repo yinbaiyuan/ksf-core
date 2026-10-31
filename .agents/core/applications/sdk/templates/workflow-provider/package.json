@@ -1,0 +1,1 @@
+{"name":"ksf-workflow-provider-example","version":"1.0.0","private":true,"type":"module","scripts":{"build":"ksf-app build ."},"dependencies":{"@ksf/sdk":"file:../..","react":"19.3.1","react-dom":"19.3.1"}}

@@ -2,7 +2,7 @@
 
 Core 持有通用职责、设计方法、采用顺序和程序边界；用户通过 `知识/knowledge.md` 与 `档案/archive.md` 及其明确链接的规则设计自己的组织与维护方式。新工作区提供可编辑根导航、知识 rules/、可选认知模板和空档案分区；Core 升级不覆盖这些用户文件。没有完整模型也能工作，不把本机分类和私人材料写入 Core。
 
-根 USER.md、BOT.md、MEMORY.md 分别持有稳定身份偏好、Agent 协作方式与短期续接，不作为知识或档案分区。短期线索后续可按授权沉淀到四类资产；“睡眠”尚待设计，不以本机制自动整理或晋升。加载与维护见[根协作约定](runtime/user-collaboration.md)。
+根 USER.md、BOT.md 分别持有稳定身份偏好和 Agent 协作方式，不作为知识或档案分区。加载与维护见[根协作约定](runtime/user-collaboration.md)。
 
 ## 责任与唯一位置
 

@@ -16,7 +16,8 @@
     "allowJs": true,
     "types": [
       "vite/client"
-    ]
+    ],
+    "preserveSymlinks": true
   },
   "include": [
     "*.tsx",

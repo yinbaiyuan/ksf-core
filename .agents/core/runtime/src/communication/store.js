@@ -3,6 +3,7 @@ import {open,rename,rm,lstat,readdir,statfs} from 'node:fs/promises';
 import {join} from 'node:path';
 import {hostname} from 'node:os';
 import {createCoordinator} from '../services/workbench-common.js';
+import {readConfigFile,publishConfigFile,canonical} from '../configuration/storage.js';
 import {DEFAULTS,ensure,error,uuid,hash,label,endpoint,endpointKey,sha256,safeDirectory,readJSON,atomicJSON,syncDirectory} from './contracts.js';
 
 export function validateManifest(manifest,bytes,limits){
@@ -20,7 +21,7 @@ export async function createCommunicationStore(root,{now=Date.now}={}){
  const path=join(runtime,'writer.lock');for(let attempt=0;attempt<2;attempt++)try{writer=await open(path,'wx',0o600);await writer.writeFile(JSON.stringify(owner));return;}catch(e){if(e.code!=='EEXIST')throw e;const before=await readJSON(path,null);let stale=false;if(before?.hostname===owner.hostname&&Number.isSafeInteger(before.pid))try{process.kill(before.pid,0);}catch(p){stale=p.code==='ESRCH';}if(attempt===0&&stale&&JSON.stringify(await readJSON(path,null))===JSON.stringify(before)){await rm(path);continue;}throw error('COMM_OTHER_HOST_RUNNING','此 KSF 根的通信服务已有拥有者。',409);}}
  const init=()=>locks.run('initialize',initialize);
  const config=()=>readJSON(join(home,'config.json'),{schemaVersion:1,revision:0,...DEFAULTS,peers:{},endpoints:{},grants:{}});
- async function update(action){await init();return locks.run('config',async()=>{const value=await config(),result=await action(value);value.revision++;await atomicJSON(join(home,'config.json'),value);return result??value;});}
+ async function update(action){await init();return locks.run('config',async()=>{const before=readConfigFile(root,'.agents/user-data/communication/config.json'),value=await config(),prior=canonical(value),result=await action(value);if(canonical(value)!==prior){value.revision++;publishConfigFile(root,before,value);}return result??value;});}
  const path=id=>{ensure(uuid(id),'COMM_MESSAGE_INVALID','消息 ID 无效。');return join(home,'messages',id);};
  const record=id=>readJSON(join(path(id),'state.json'),null);
  async function writeRecord(id,value){await atomicJSON(join(path(id),'state.json'),value);}

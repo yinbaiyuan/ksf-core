@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.ksf.activity-monitor",
+  "name": "活动监视器",
+  "description": "查看 KSF 正在执行的任务、后台应用和资源占用，并管理它们的运行。",
+  "version": "0.1.4",
+  "author": "KSF",
+  "icon": "activity",
+  "minCoreVersion": "0.3.2",
+  "dataStores": [],
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": false,
+    "defaultSize": {
+      "width": 1120,
+      "height": 740
+    },
+    "minSize": {
+      "width": 620,
+      "height": 440
+    }
+  },
+  "cards": [],
+  "permissions": [
+    "runtime.read",
+    "runtime.manage"
+  ]
+}

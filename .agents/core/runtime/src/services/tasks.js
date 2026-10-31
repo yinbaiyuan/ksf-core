@@ -1,3 +1,4 @@
+import {readConfigFile,expectConfig,publishConfigFile} from '../configuration/storage.js';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sessionKey } from '../routing/storage.js';
@@ -22,7 +23,7 @@ import { platform } from '../platform/index.js';
 
 export { declareTask };
 const now = () => new Date().toISOString();
-const capturePolicyVersion = 2;
+const capturePolicyVersion = 3;
 const codexHome = env => env.CODEX_HOME || join(homedir(), '.codex');
 const issue = error => ({ code: error.code ?? 'TASK_CAPTURE_FAILED', message: error.code ? error.message : 'Cannot capture the local transcript.' });
 const hookCommand = root => platform.hookCommand(resolve(root));
@@ -183,17 +184,28 @@ export function captureStatus({ root }) {
     trust: 'Codex must review and trust the exact hook definitions; KSF does not read or modify trust records.',
     lastSync: readJSON(root, `${CAPTURE}/last-sync.json`) };
 }
-export function enableCapture({ root, at = now() }) {
-  return locked(root, 'configuration', () => {
-    const previous = config(root);
-    if (!previous) {
-      // Initialize the shared root-local identity key once. No native identifier is persisted here.
-      sessionKey(root, { host: 'codex', sessionId: 'identity-initialization' }, true);
-      writeJSON(root, `${CAPTURE}/config.json`, { protocol: PROTOCOL, enabled: true, activatedAt: at });
-    } else if (!previous.enabled) writeJSON(root, `${CAPTURE}/config.json`, { ...previous, enabled: true });
-    return captureStatus({ root });
+export function configureCapture({root,enabled,ifMatch,at=now(),install=false}) {
+  if(typeof enabled!=='boolean'||!Number.isFinite(Date.parse(at)))fail('INVALID_ARGUMENTS','采集开关或时间无效。');
+  const result=locked(root,'configuration',()=>{
+    const before=readConfigFile(root,`${CAPTURE}/config.json`),previous=config(root);
+    if(ifMatch!==undefined)expectConfig(before,ifMatch);
+    // An explicit initial opt-out must survive later initialization defaults.
+    // Reads remain nonmutating; only this write operation records the choice.
+    if(previous?.enabled===enabled)return captureStatus({root});
+    const intervals=structuredClone(previous?.intervals??(previous?.enabled?[{from:previous.activatedAt,to:null}]:[]));
+    // Keep the existing nonempty-interval format: an initial disabled policy
+    // has a closed, zero-duration marker and never includes a captured instant.
+    if(!previous&&!enabled)intervals.push({from:at,to:at});
+    if(enabled&&!previous?.enabled)while(intervals.at(-1)?.to===null)intervals.pop();
+    if(enabled){sessionKey(root,{host:'codex',sessionId:'identity-initialization'},true);intervals.push({from:at,to:null});}
+    else if(intervals.at(-1)?.to===null)intervals.at(-1).to=at;
+    publishConfigFile(root,before,{...(previous??{protocol:PROTOCOL,activatedAt:at}),enabled,intervals});
+    return captureStatus({root});
   });
+  if(enabled&&install)installTaskHooks({root,capture:false});
+  return result;
 }
+export function enableCapture({root,at=now()}) {return configureCapture({root,enabled:true,at});}
 export function installTaskHooks({ root, capture = true }) {
   if (capture) enableCapture({ root });
   return locked(root, 'configuration', () => {
@@ -211,13 +223,13 @@ export function installTaskHooks({ root, capture = true }) {
     return captureStatus({ root });
   });
 }
-function mergeTurn(root, taskId, source, paused, held) {
+function mergeTurn(root, taskId, source, paused, held, captureAllowed=true) {
   const old = readTurn(root, taskId, source.turnId);
   const routingAllowed = readUserData({ root, namespace: 'settings' }).values.routing?.enabled !== false;
   const changes = old?.targetFacts?.length || routingAllowed && source.outputs.some(output => receipts(root, output.output, taskId, source.turnId).some(d => d.targetChanges?.length));
-  return changes ? withTargetLock(root, () => mergeTurnUnlocked(root, taskId, source, paused, held)) : mergeTurnUnlocked(root, taskId, source, paused, held);
+  return changes ? withTargetLock(root, () => mergeTurnUnlocked(root, taskId, source, paused, held, captureAllowed)) : mergeTurnUnlocked(root, taskId, source, paused, held, captureAllowed);
 }
-function mergeTurnUnlocked(root, taskId, source, paused, held) {
+function mergeTurnUnlocked(root, taskId, source, paused, held, captureAllowed=true) {
   const old = readTurn(root, taskId, source.turnId);
   const declarations = structuredClone(old?.declarations ?? []), issues = [...source.issues];
   for (const output of source.outputs) for (const body of receipts(root, output.output, taskId, source.turnId)) {
@@ -227,7 +239,9 @@ function mergeTurnUnlocked(root, taskId, source, paused, held) {
     else if (!prior) declarations.push(body);
     else if (prior.fingerprint && old?.policy === 'pending') declarations[declarations.indexOf(prior)] = body;
   }
-  const { policy, chatPaused, explicitExcluded, capturePolicyHeld, chatPolicyHeld } = capturePolicy({ old, messages: source.messages, declarations, paused, held });
+  const { policy:sourcePolicy, chatPaused, explicitExcluded, capturePolicyHeld, chatPolicyHeld } = capturePolicy({ old, messages: source.messages, declarations, paused, held });
+  const policy=captureAllowed?sourcePolicy:'exclude';
+  if(!captureAllowed)issues.push({code:'TASK_CAPTURE_DISABLED',message:'此轮开始于正文归档停用期间，不补采正文。'});
   if (policy === 'pending' && chatPolicyHeld) issues.push({ code: 'TASK_CAPTURE_POLICY_PENDING', message: '检测到对话记录限制，等待明确采集策略；正文尚未保存。' });
   const messages = policy === 'capture' ? structuredClone(old?.messages ?? []) : [];
   if (policy === 'capture') for (const message of source.messages) {
@@ -278,6 +292,7 @@ function mergeTurnUnlocked(root, taskId, source, paused, held) {
 }
 export async function syncTasks({ root, transcriptPath, env = process.env, force = false, hook } = {}) {
   const settings = config(root);
+  const configurationVersion=sha256(encode(settings));
   if (!settings?.enabled) return { skipped: true, reason: 'disabled', captured: 0, errors: [] };
   const home = codexHome(env), names = titles(home), files = transcriptPath ? [resolve(transcriptPath)] : discover(home);
   let captured = 0;
@@ -292,10 +307,10 @@ export async function syncTasks({ root, transcriptPath, env = process.env, force
       if (!taskId) fail('TASK_KEY_INVALID', 'Missing task identity key.');
       const sourceId = sha256(path), indexPath = `${CAPTURE}/sources/${sourceId}.json`;
       const cursor = readJSON(root, indexPath);
-      if (!force && !hook && cursor?.policyVersion === capturePolicyVersion && cursor.size === stat.size && cursor.mtimeMs === stat.mtimeMs) continue;
+      if (!force && !hook && cursor?.policyVersion === capturePolicyVersion && cursor.configurationVersion===configurationVersion && cursor.size === stat.size && cursor.mtimeMs === stat.mtimeMs) continue;
       // Recheck the current native round; completed earlier rounds need not be read again.
       // Full CLI sync, source replacement or shrink rebuilds from the original boundary.
-      const resume = !force && !hook && cursor?.policyVersion === capturePolicyVersion && cursor.ino === stat.ino && stat.size > cursor.size && cursor.resumeOffset <= stat.size ? cursor.resumeOffset : 0;
+      const resume = !force && !hook && cursor?.policyVersion === capturePolicyVersion && cursor.configurationVersion===configurationVersion && cursor.ino === stat.ino && stat.size > cursor.size && cursor.resumeOffset <= stat.size ? cursor.resumeOffset : 0;
       const parsed = await parseTranscript(path, settings.activatedAt, resume);
       if (hook && ['UserPromptSubmit', 'Interrupt'].includes(hook.hook_event_name) && isToken(hook.turn_id)) {
         const turn = parsed.turns.get(hook.turn_id);
@@ -310,7 +325,9 @@ export async function syncTasks({ root, transcriptPath, env = process.env, force
         const pendingOffsets = [];
         for (const source of [...merged.values()].sort((a, b) => a.startedAt.localeCompare(b.startedAt))) {
           if (parsed.turns.has(source.turnId)) {
-            const saved = mergeTurn(root, taskId, source, paused, held); paused = saved.chatPaused; held = saved.chatPolicyHeld; captured++;
+            const retained=readTurn(root,taskId,source.turnId);
+            const allowed=retained?.messages?.length>0||!settings.intervals||settings.intervals.some(interval=>Date.parse(source.startedAt)>Date.parse(interval.from)&&(interval.to===null||Date.parse(source.startedAt)<Date.parse(interval.to)));
+            const saved = mergeTurn(root, taskId, source, paused, held,allowed); paused = saved.chatPaused; held = saved.chatPolicyHeld; captured++;
             if (Number.isSafeInteger(source.startOffset) && ['pending', 'partial'].includes(saved.status)) pendingOffsets.push(source.startOffset);
           }
           else { paused = source.chatPaused; held = Boolean(source.chatPolicyHeld); }
@@ -318,7 +335,7 @@ export async function syncTasks({ root, transcriptPath, env = process.env, force
         rebuildTask(root, taskId, names.get(meta.id));
         const latest = [...parsed.turns.values()].at(-1)?.startOffset;
         const resumeOffset = pendingOffsets.length ? Math.min(...pendingOffsets) : latest ?? parsed.nextOffset;
-        writeJSON(root, indexPath, { protocol: PROTOCOL, policyVersion: capturePolicyVersion, taskId, path, size: stat.size, ino: stat.ino, resumeOffset, mtimeMs: stat.mtimeMs, lastSync: now() });
+        writeJSON(root, indexPath, { protocol: PROTOCOL, policyVersion: capturePolicyVersion, configurationVersion, taskId, path, size: stat.size, ino: stat.ino, resumeOffset, mtimeMs: stat.mtimeMs, lastSync: now() });
       });
     } catch (error) { errors.push(issue(error)); }
   }

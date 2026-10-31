@@ -2,7 +2,7 @@
 id: "competency.ksf.project-route"
 name: "project-route"
 description: "识别项目归属，核实根卡、工程和可选 routing 预设，渐进准备必要项目事实；区分无项目、归属待定与读取失败，只向 runtime 返回上下文和缺口，不选择最终能力或扩大写入范围。"
-version: 0.1.9
+version: 0.1.10
 status: active
 references: []
 ---
@@ -97,4 +97,4 @@ references: []
 
 以上是待验证场景，实际读取、选择和结果分别记录。文件存在或结构检查成功不证明归属正确；程序检查、Agent 走查和真实任务证据分开。
 
-本文 CLI 示例采用 macOS 的 `.agents/ksf`；Windows 入口为 `.agents/ksf.ps1`，当前运行时与业务 CLI 尚未接入。入口恢复不等于对象发现或读取成功；受限时继续不依赖 CLI 的工作，不用全局 Node 绕过。支持边界见[启动入口](../../../runtime/launcher.md)。
+本文 CLI 示例采用 macOS 的 `.agents/ksf`；Windows 入口为 `.agents/ksf.ps1`，现已接入随包运行时与共享业务 CLI；Windows 调用使用 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/ksf.ps1。入口恢复不等于对象发现或读取成功；受限时继续不依赖 CLI 的工作，不用全局 Node 绕过。支持边界见[启动入口](../../../runtime/launcher.md)。

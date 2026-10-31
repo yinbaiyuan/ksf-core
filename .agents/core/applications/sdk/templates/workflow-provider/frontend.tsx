@@ -1,0 +1,5 @@
+import {useEffect,useState} from 'react';
+import {mountReact,useApplicationSDK} from '@ksf/sdk/react';
+import '@ksf/sdk/surface.css';
+function App(){const sdk=useApplicationSDK(),runId=new URLSearchParams(sdk.getSnapshot().search).get('resource')??'',[run,setRun]=useState<any>(null),[error,setError]=useState('');useEffect(()=>{if(!runId)return;const read=()=>void sdk.call('run.get',{runId}).then(setRun).catch(e=>setError(e.message));read();const timer=setInterval(read,1500);return()=>clearInterval(timer);},[sdk,runId]);return <main style={{padding:20}}><h2>工作流示例</h2>{!runId&&<p>通过合作中心承接声明启动流程，或通过示例 CLI 发出合作任务。</p>}{run&&<><p>{run.progress} · {run.status}</p>{run.result&&<p>{run.result.summary}</p>}{run.status==='waiting'&&run.workflowId==='text-normalize'&&<button onClick={()=>void sdk.call('run.review',{runId,revision:run.revision}).then(setRun).catch(e=>setError(e.message))}>确认此版本成果</button>}<p>已续办 {run.continuations??0} 个等待点</p></>}{error&&<p role="alert">{error}</p>}</main>;}
+export const mount=(container:HTMLElement,sdk:Parameters<typeof mountReact>[2])=>mountReact(App,container,sdk);

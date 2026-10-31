@@ -129,7 +129,10 @@ test('signed knowledge declarations archive ordinary discussion independently of
   assert.deepEqual(readFileSync(join(f.root,k.path)),before);
 });
 test('target HTTP endpoints keep read-only local boundaries and expose full round history', async t => {
-  const f = taskTargetFixture(t), server = await startWebServer({ root:f.root,port:0,capture:false }); t.after(() => server.close());
+  let server;
+  t.after(() => server?.close());
+
+  const f = taskTargetFixture(t);server = await startWebServer({ root:f.root,port:0,capture:false });
   const call = (path, headers = {}, method = 'GET') => new Promise((resolve,reject) => {
     const req = request({hostname:server.host,port:server.port,path,headers,method}, res => {const chunks=[];res.on('data',c=>chunks.push(c));res.on('end',()=>resolve({status:res.statusCode,body:JSON.parse(Buffer.concat(chunks))}));});req.on('error',reject);req.end();
   });

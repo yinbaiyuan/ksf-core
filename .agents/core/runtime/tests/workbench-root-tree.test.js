@@ -13,18 +13,19 @@ async function fixture(t) {
   return { root, files: createWorkspaceFiles(root, createCoordinator()) };
 }
 
-test('root tree lists only the twelve allowed entries in the requested order with real paths', async t => {
+test('root tree lists only the allowed entries in order and omits legacy MEMORY with real paths', async t => {
   const { root, files } = await fixture(t);
   for (const name of ['repositories', '知识', '项目', '能力', '档案', '@收件箱', '.agents', '.codex', '.github', '.obsidian', '其他目录']) await mkdir(join(root, name));
   for (const name of ['USER.md', 'README.md', 'MEMORY.md', 'BOT.md', 'AGENTS.md', '.gitignore', '.env', '其他文件.md']) await writeFile(join(root, name), name);
   const tree = await files.tree();
-  const expected = ['.agents', '@收件箱', '档案', '能力', '项目', '知识', 'repositories', 'AGENTS.md', 'BOT.md', 'MEMORY.md', 'README.md', 'USER.md'];
+  const expected = ['.agents', '@收件箱', '档案', '能力', '项目', '知识', 'repositories', 'AGENTS.md', 'BOT.md', 'README.md', 'USER.md'];
   assert.deepEqual(tree.entries.map(e => e.name), expected);
   assert.deepEqual(tree.entries.map(e => e.path), expected);
   assert.equal(tree.path, ''); assert.match(tree.version, /^[a-f0-9]{64}$/);
   assert.equal(tree.entries[0].policy, 'system');
   assert.equal(tree.entries.find(e => e.name === 'README.md').policy, 'system');
   assert.equal(tree.entries.find(e => e.name === 'USER.md').policy, 'editable');
+  assert.equal((await files.read('MEMORY.md')).text, 'MEMORY.md');
 });
 
 test('missing root entries are omitted and newly created unlisted files stay hidden', async t => {
@@ -54,12 +55,15 @@ test('nested trees keep directory ordering, skip rules and protected policies', 
 });
 
 test('HTTP root filtering preserves hidden-file searches, direct access and saves', async t => {
+  let server;
+  t.after(() => server?.close());
+
   const { root, files } = await fixture(t);
   await mkdir(join(root, '旧目录'));
   await writeFile(join(root, '旧目录/说明.md'), 'root-whitelist-needle');
   await writeFile(join(root, '隐藏笔记.md'), 'root-whitelist-needle');
   await writeFile(join(root, 'USER.md'), '# 用户\n');
-  const server = await startWebServer({ root, port: 0, capture: false }); t.after(() => server.close());
+  server = await startWebServer({ root, port: 0, capture: false });
   const get = async path => { const response = await fetch(new URL(path, server.url)); assert.equal(response.status, 200); return (await response.json()).data; };
   const tree = await get('/api/workspace/tree');
   // Local CLI control publishes its private descriptor under runtime-data at startup.

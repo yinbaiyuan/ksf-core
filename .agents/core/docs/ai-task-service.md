@@ -27,14 +27,14 @@
 
 | 当前入口 | 已有基础 | 本设计需要增加的能力 |
 | --- | --- | --- |
-| [应用 SDK 主类型](../applications/sdk/src/application-sdk.ts)、[SDK 说明](../applications/sdk/README.md) | SDK v2 后端公共服务调用、任务保活、资源锁 | AI 任务的公共类型、能力发现及调用辅助 |
+| [应用 SDK 主类型](../applications/sdk/src/application-sdk.ts)、[SDK 说明](../applications/sdk/README.md) | SDK v1 后端公共服务调用、任务保活、资源锁 | AI 任务的公共类型、能力发现及调用辅助 |
 | [应用管理器](../runtime/src/applications/manager.js)、[应用宿主](../runtime/src/applications/host.js) | 共享后端、服务消息桥、按应用版本运行；普通应用调用有超时 | 在可信运行实例处绑定调用应用身份；AI 调用立即返回任务编号 |
 | [工作台网关](../runtime/src/services/workbench-http.js) | 注入 workspace、tasks 等公共服务；工作台令牌与来源校验 | 注册 AI 服务、管理接口和查询接口，保持已有服务兼容 |
 | [Web 生命周期](../runtime/src/services/web.js) | 启动工作台服务并统一关闭 | 启动 AI 恢复与派发，停止接单、保存现场并清理受管执行进程 |
 | [文件原子写入工具](../runtime/src/shared/files.js) | 文件快照、独占锁、临时文件与 fsync | AI 领域的版本检查、跨进程单写者和恢复规则 |
 | [评测 Codex 调用](../runtime/src/eval/codex.js) | 隔离评测中的 exec 调用和事件处理经验 | 独立业务适配器；不直接复用评测凭据复制及评测专用权限策略 |
 
-源码还处于应用 SDK v2 迁移中的工作区；实施前必须重新核对实际主件和已有差异。runtime/web 中的兼容类型不作为另一份 SDK 类型主件。
+应用统一使用 SDK v1 主件；后台上下文与前端类型均从 @ksf/sdk 导入。
 
 ~~~mermaid
 flowchart LR
@@ -267,7 +267,7 @@ Core 发行携带源码与虚构示例，保留实例数据。未知存储版本
 | 测试 | runtime/tests/ 下拟新增 ai-*，扩展 applications、web、distribution 等现有专项 | 状态、接入、归属、故障和升级保留分别验证 |
 | 构建发行 | [build-manifest.js](../runtime/src/services/build-manifest.js)、[发行路径](../runtime/src/distribution/paths.js)及相应测试 | 复核新模块、依赖和 SDK 的打包范围；实例材料、凭据及任务不得进入发行物 |
 | 两个业务应用 | 独立应用工程，具体位置在实施时确定 | 应用代码持有流程、纪要/早读数据与验收，不塞进 Core AI 模块 |
-| 无窗口定时触发配套 | 已实现Manifest v2显式background及startBackground；管理器协调安装/启用、排空后切换和重启恢复 | 仅保障应用入口能被启动，定时和补跑逻辑仍由应用持有；不是 AI 任务字段或业务流程引擎 |
+| 无窗口定时触发配套 | 已实现Manifest schema 1 的 backend.lifecycle（on-demand/resident）及 startBackground；管理器协调安装/启用、排空后切换和重启恢复 | 仅保障应用入口能被启动，定时和补跑逻辑仍由应用持有；不是 AI 任务字段或业务流程引擎 |
 
 不改变现有 services/tasks.js 的对话归档语义、chat.js 的原生轮次和变量语义，也不将 AI 调用改造成新的聊天归属或能力路由。
 

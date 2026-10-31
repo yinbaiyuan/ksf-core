@@ -30,7 +30,8 @@ test('test command forwards a failing test runner exit code without global Node'
     'import { test } from "node:test"; import assert from "node:assert/strict";\n' +
     'test("deliberate runner failure", () => assert.fail("EXPECTED_TEST_FAILURE"));\n');
   const result = spawnSync(process.execPath, [join(fixture, 'src/cli.js'), 'test'], {
-    encoding: 'utf8', env: { ...process.env, PATH: '' }, timeout: 15_000,
+    // The fixture owns its complete tiny suite; outer CI sharding must not select it.
+    encoding: 'utf8', env: { ...process.env, PATH: '', NODE_OPTIONS: '' }, timeout: 15_000,
   });
   assert.equal(result.status, 1, result.stderr);
   assert.match(result.stdout, /EXPECTED_TEST_FAILURE/);
@@ -56,7 +57,8 @@ test('test command includes both owned suites and excludes vendored tests and fi
   writeFileSync(join(fixture, 'native/upstream/foreign.test.js'), 'throw Error("VENDORED_TEST_MUST_NOT_RUN");');
   writeFileSync(join(fixture, 'tests/acceptance-fixture.mjs'), 'throw Error("FIXTURE_MUST_NOT_RUN");');
   const result = spawnSync(process.execPath, [join(fixture, 'src/cli.js'), 'test'], {
-    encoding: 'utf8', env: { ...process.env, PATH: '' }, timeout: 15_000,
+    // The fixture owns its complete tiny suite; outer CI sharding must not select it.
+    encoding: 'utf8', env: { ...process.env, PATH: '', NODE_OPTIONS: '' }, timeout: 15_000,
   });
   assert.equal(result.status, 0, result.stderr + result.stdout);
   assert.match(result.stdout, /OWNED_CORE_SUITE/);

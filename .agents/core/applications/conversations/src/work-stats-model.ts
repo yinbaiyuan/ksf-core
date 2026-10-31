@@ -1,5 +1,5 @@
 import type { WorkActivity, WorkMetric, WorkPeriod, WorkStats, WorkTarget } from './types';
-export const workMetrics: { id: WorkMetric; label: string }[] = [{ id: 'tasks', label: '任务' }, { id: 'turns', label: '对话轮次' }, { id: 'projects', label: '项目' }, { id: 'knowledge', label: '知识' }, { id: 'abilities', label: '能力' }];
+export const workMetrics: { id: WorkMetric; label: string }[] = [{ id: 'tasks', label: '聊天' }, { id: 'turns', label: '对话轮次' }, { id: 'projects', label: '项目' }, { id: 'knowledge', label: '知识' }, { id: 'abilities', label: '能力' }];
 export const workPeriodLabels = { today: '今日', week: '本周' };
 export const workPageSize = 30;
 export function workRows(data: WorkStats, period: WorkPeriod, target?: string) {

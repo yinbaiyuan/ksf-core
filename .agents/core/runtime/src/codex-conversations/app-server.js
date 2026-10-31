@@ -1,7 +1,7 @@
 // KSFAssistant draft-thread sequence; MIT attribution in NOTICE.md.
 import { spawn, execFile } from 'node:child_process';
 import { access } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { constants, realpathSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -57,28 +57,46 @@ export class AppServer {
     try { await this.exited; } finally { clearTimeout(terminate); clearTimeout(force); }
   }
 }
-export async function createDraft({ root, name, onCreated, executable }) {
-  const server = new AppServer(executable ?? await locateCLI(), root);
+export async function desktopProjectForRoot(server, root) {
+  const canonical = path => { try { return realpathSync(path); } catch { return null; } };
+  const expectedRoot = canonical(root);
+  if (!expectedRoot) throw failure('CODEX_PROJECT_REQUIRED', '当前 KSF 项目目录不可读取。');
+  const projects = []; let cursor;
+  for (let page = 0; page < 100; page++) {
+    const result = await server.call('project/list', { limit: 100, ...(cursor ? {cursor} : {}) });
+    if (!Array.isArray(result.data)) throw failure('CODEX_PROJECT_UNAVAILABLE', 'Codex 未返回可核验的项目目录，未创建普通对话。');
+    projects.push(...result.data); cursor = result.nextCursor;
+    if (!cursor) break;
+    if (page === 99) throw failure('CODEX_PROJECT_UNAVAILABLE', 'Codex 项目目录未完整读取，未创建对话。');
+  }
+  const matched = projects.filter(p => typeof p.id === 'string' && p.roots?.some(r => typeof r.path === 'string' && canonical(r.path) === expectedRoot));
+  if (matched.length !== 1) throw failure(matched.length ? 'CODEX_PROJECT_AMBIGUOUS' : 'CODEX_PROJECT_REQUIRED', matched.length ? '当前 KSF 目录对应多个 Codex 项目，请明确项目根后重试。' : '请先在 Codex 添加当前 KSF 目录为项目；不会创建到普通对话。');
+  return {id:matched[0].id,name:matched[0].name};
+}
+export async function createDraft({ root, name, onCreated, executable, execution }) {
+  const server = new AppServer(executable ?? await locateCLI(), execution?.workingDirectory??root);
   try {
-    const permissions = workbenchPermissions(root);
+    const permissions = execution?{id:execution.permissionProfile}:workbenchPermissions(root);
     await server.start();
+    const desktopProject = await desktopProjectForRoot(server, root);
     if (permissions) {
       let cursor, found = false;
       for (let page = 0; page < 8; page++) {
-        const profiles = await server.call('permissionProfile/list', { cwd: root, ...(cursor ? { cursor } : {}) });
+        const profiles = await server.call('permissionProfile/list', { cwd: execution?.workingDirectory??root, ...(cursor ? { cursor } : {}) });
         found = profiles.data?.some(p => p.id === permissions.id && p.allowed === true);
         cursor = profiles.nextCursor;
         if (found || !cursor) break;
       }
       if (!found) throw failure('CODEX_PERMISSIONS_UNAVAILABLE', '当前 Codex 不允许使用已选择的 KSF 聊天状态权限。');
     }
-    const started = await server.call('thread/start', { cwd: root, serviceName: 'ksf_workbench', ...(permissions ? { permissions: permissions.id } : {}) });
+    const started = await server.call('thread/start', { cwd: execution?.workingDirectory??root, ...(execution?{runtimeWorkspaceRoots:execution.workspaceRoots,approvalPolicy:'never'}:{}),projectId: desktopProject.id, serviceName: 'ksf_workbench', ...(permissions ? { permissions: permissions.id } : {}) });
     const threadId = started.thread?.id;
     if (!/^[a-zA-Z0-9_-]{8,128}$/.test(threadId ?? '')) throw failure('CODEX_PROTOCOL', 'App Server 未返回有效线程。');
-    await onCreated?.(threadId, { permissionProfile: started.activePermissionProfile?.id ?? null });
+    await onCreated?.(threadId, { permissionProfile: started.activePermissionProfile?.id ?? null, desktopProjectId: desktopProject.id });
+    if (started.thread?.projectId !== desktopProject.id) throw failure('CODEX_PROJECT_MISMATCH', '原生线程没有归入当前 KSF 的 Codex 项目，未投递首句。');
     if (permissions && started.activePermissionProfile?.id !== permissions.id) throw failure('CODEX_PERMISSIONS_MISMATCH', '原生线程没有采用所选 KSF 聊天状态权限，未投递首句。');
     await server.call('thread/name/set', { threadId, name });
-    await server.call('thread/inject_items', { threadId, items: [{ type: 'message', role: 'user', content: [{ type: 'input_text', text: JSON.stringify({ taskName: name, workingDirectory: root }) }] }] });
+    await server.call('thread/inject_items', { threadId, items: [{ type: 'message', role: 'user', content: [{ type: 'input_text', text: JSON.stringify({ taskName: name, workingDirectory: execution?.workingDirectory??root }) }] }] });
     return threadId;
   } finally { await server.close(); } // A second writer must never race Desktop's resume.
 }

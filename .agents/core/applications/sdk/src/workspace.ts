@@ -1,9 +1,9 @@
-import type {ApplicationSDK2} from './application-sdk';
+import type {ApplicationSDK} from './application-sdk';
 import type {WorkspaceFile,TreeEntry} from './workspace-types';
 export type {WorkspaceFile,TreeEntry};
 const query=(path:string,input:Record<string,string>)=>path+'?'+new URLSearchParams(input);
 /** This client is bound to one surface. It never owns an application's business state. */
-export function createWorkspaceClient(sdk:Pick<ApplicationSDK2,'request'|'resources'>){
+export function createWorkspaceClient(sdk:Pick<ApplicationSDK,'request'|'resources'>){
  const changed=()=>{if(typeof window!=='undefined')window.dispatchEvent(new Event('ksf:workspace-change'));};
  const write=async<T>(method:string,input:unknown)=>{const result=await sdk.request<T>('/api/workspace/'+method,input);changed();return result;};
  return {

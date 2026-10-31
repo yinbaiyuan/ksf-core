@@ -1,13 +1,15 @@
 # 工作台应用安装与运行机制
 
-开发入口统一为[应用开发者手册](app-development/README.md)，AI开发者先读[AI-START](app-development/AI-START.md)。SDK包2.2.1、Manifest/宿主协议v2，保留v1兼容。
+[统一配置中心](configuration-center.md)提供系统设置与全部可用能力的独立配置管理，不展示应用列表。应用业务设置由应用拥有；工作台顶部的活动应用菜单提供关于、可选设置和退出入口，SDK 仅注册打开设置的动作，不声明业务配置字段。桌面分组、卡片配置和外观由实例保存，旧浏览器偏好按版本显式迁移，原件保留。
 
-应用为唯一安装单元，提供可选主窗口、多种卡片及可选后端。前端预构建ESM/CSS动态加载，后端独立Node进程；v1每窗口独立，v2同版本共享。显式后台、短任务租约与持久AI任务分别管理，详见[后端生命周期](app-development/backend-data.md)。
+开发入口统一为[应用开发者手册](app-development/README.md)，AI 开发者先读 [AI-START](app-development/AI-START.md)。当前实现统一使用 `@ksf/sdk@1.0.0`、`schemaVersion:1`、`sdkVersion:1`；新 v1 重新定义完整应用契约，不加载旧结构，不提供历史版本分支或兼容类型。Core、SDK、应用业务版本与业务数据版本分别管理。
 
-应用商店合并默认与多个HTTP(S)源，展示来源和能力，核对摘要后原子安装。前后端按不可变release配对，升级保留旧窗口及在途操作，排空后切换卡片/后台。桌面v3兼容旧布局，缺失或卸载应用保留恢复占位。公共诊断独立保留。
+应用是唯一安装单元，可提供窗口、卡片及后端，也可只有后端。界面入口与后台策略分别声明：没有后端的应用只加载界面；`on-demand` 后端由界面、CLI 或授权消息启动，租约、调用和任务排空后退出；`resident` 后端随主服务启动并要求后台权限；没有界面的后端作为纯后台应用管理。同一应用版本共享后台，各窗口保留独立实例上下文。任务租约、持久保活及显式停止策略见[后端与数据](app-development/backend-data.md)。
 
-包、容量、平台、版本及SDK兼容以[Manifest和包协议](app-development/manifest.md)为准；发版、回退、停用卸载与v1入口见[发布与兼容](app-development/release.md)。应用模型调用统一经过[AI服务](app-development/ai.md)，业务流程仍归应用。
+[独立主服务](runtime/service.md)统一管理应用、AI、通信与会话。关闭浏览器不停止后台；CLI 在主服务就绪后调用。工作台“运行与后台”和 `ksf app runtime` 展示进程、启动原因、租约、任务及保活原因。用户显式停止或停用的应用不会被界面、CLI 或消息自动恢复。
 
-前端共享JavaScript/DOM，后端拥有当前用户权限。权限列表不构成沙箱，SHA256不是发布者认证。首次引入新宿主代码仍需宿主切换；应用安装升级不重启主服务。不可信开发者沙箱、签名市场和跨设备持续执行不属于当前实现。
+应用商店合并默认与多个 HTTP(S) 源，展示来源和能力，核对摘要后原子安装。前后端按不可变 release 配对，升级保留旧窗口及在途操作，排空后切换卡片/后台。桌面布局与业务数据各自持久化，缺失或卸载应用保留恢复占位。包、容量、平台与 SDK 校验以 [Manifest 和包协议](app-development/manifest.md)为准；发布、升级、回退、停用和卸载见[发布与升级](app-development/release.md)。
 
-规划中的[包内 CLI 与 Agent 调用](app-development/cli.md)、[内网通信与应用工作流](app-development/communication.md)已纳入开发手册：CLI 随包交付并由 KSF CLI 统一调用，用户指定应用后才读取对应文档；工作流归应用，公共层补在线投递、持久保活及消息激活。这些新契约尚未实现，不改变当前 SDK/宿主版本。
+[包内 CLI](app-development/cli.md)、[通信与应用工作流](app-development/communication.md)、持久保活和消息激活均已实现。CLI 随包交付，由 KSF CLI 统一调用；先读取当前包文档与摘要，再使用稳定操作 ID。业务结果未知时查询原操作，不自动重发。工作流由应用组织，宿主提供公共投递与运行能力。模型调用统一经过 [AI 服务](app-development/ai.md)。
+
+前端共享 JavaScript/DOM，后端拥有当前用户权限。权限列表不构成沙箱，SHA-256 只校验内容完整性。首次引入新宿主代码需切换宿主；应用安装升级不重启主服务。不可信开发者沙箱、签名市场和跨设备持续执行仍不属于当前实现。

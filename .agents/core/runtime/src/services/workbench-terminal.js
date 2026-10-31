@@ -2,6 +2,7 @@ import {platform} from '../platform/index.js';
 const nativePTY=()=>import('../../native/node-pty/lib/index.js').then(module=>module.default??module);
 import { realpathSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
+import {randomUUID} from 'node:crypto';
 
 async function terminalScope(workspace,loadPTY) {
   const pty=await loadPTY();
@@ -16,6 +17,7 @@ async function terminalScope(workspace,loadPTY) {
   }
   function stop(session) {
     return session.stopping??=(async()=>{
+      session.stopRequested=true;
       if(!session.exited)session.terminal.kill();
       for(const wake of session.waiters)wake();
       let timer;
@@ -34,11 +36,12 @@ async function terminalScope(workspace,loadPTY) {
         const cwd=realpathSync(requested);if(!statSync(cwd).isDirectory())fail('工作目录不是目录。');
         const {shell,args,env}=platform.terminalLaunch();
         const terminal=pty.spawn(shell,args,{name:'xterm-256color',cols:input.cols,rows:input.rows,cwd,env,...(platform.name==='win32'?{useConptyDll:true}:{})});
-        const id = String(terminal.pid), session = { terminal, chunks: [], seq: 0, bytes: 0, waiters: new Set(), exited: false, exitCode: null, cwd, shell };
+        const id = String(terminal.pid), session = { terminal, monitorId:randomUUID(),startedAt:new Date().toISOString(),chunks: [], seq: 0, bytes: 0, waiters: new Set(), exited: false, exitCode: null, cwd, shell };
+        try{session.processStart=platform.processStart(terminal.pid);}catch{}
         let complete;session.completion=new Promise(resolve=>{complete=resolve;});
         sessions.set(id, session);
         terminal.onData(data => append(session, data));
-        terminal.onExit(event => { session.exited = true; session.exitCode = event.exitCode; append(session, '');complete(); });
+        terminal.onExit(event => { session.exited = true;session.finishedAt=new Date().toISOString(); session.exitCode = event.exitCode; append(session, '');complete(); });
         return { id, pid: terminal.pid, cwd, shell, cols: input.cols, rows: input.rows };
       }
       if (method === 'list') return [...sessions].map(([id, s]) => ({ id, cwd: s.cwd, shell: s.shell, exited: s.exited }));
@@ -54,6 +57,8 @@ async function terminalScope(workspace,loadPTY) {
       if (method === 'close') { await stop(session);sessions.delete(input.id);return {}; }
       fail('未知终端操作。');
     },
+    monitorSnapshot(){return [...sessions].map(([id,s])=>({id,monitorId:s.monitorId,pid:s.terminal.pid,processStart:s.processStart,cwd:s.cwd,shell:s.shell,startedAt:s.startedAt,finishedAt:s.finishedAt,stopped:s.stopRequested===true,exited:s.exited,exitCode:s.exitCode}));},
+    async monitorClose(input){const session=[...sessions.values()].find(s=>s.monitorId===input.monitorId);if(!session||session.exited)throw Object.assign(Error('终端会话已经结束，请刷新。'),{code:'MONITOR_STALE',status:409});await stop(session);return {state:'stopped'};},
     async dispose() { disposed=true;await Promise.all([...sessions.values()].map(stop));sessions.clear(); },
   };
 }
@@ -66,8 +71,8 @@ export function createWorkbenchTerminal(workspace,{loadPTY=nativePTY}={}) {
   const service=Object.fromEntries(methods.map(method=>[method,async(caller,input={})=>{
     if(disposed)throw new Error('终端服务已关闭。');
     const id=key(caller);let entry=scopes.get(id);
-    if(!entry){if(method!=='create'&&method!=='list')throw new Error('终端会话已结束，请新建会话。');entry=terminalScope(workspace,loadPTY);scopes.set(id,entry);entry.catch(()=>{if(scopes.get(id)===entry)scopes.delete(id);});}
+    if(!entry){if(method!=='create'&&method!=='list')throw new Error('终端会话已结束，请新建会话。');entry=terminalScope(workspace,loadPTY);entry.caller={...caller};scopes.set(id,entry);entry.catch(()=>{if(scopes.get(id)===entry)scopes.delete(id);});}
     return (await entry).call(method,input);
   }]));
-  return {...service,release,async dispose(){disposed=true;await Promise.all([...scopes.values()].map(async entry=>(await entry).dispose()));scopes.clear();}};
+  return {...service,release,async monitorSnapshot(){return (await Promise.all([...scopes.values()].map(async entry=>(await entry).monitorSnapshot().map(row=>({...row,appId:entry.caller.appId,runtimeId:entry.caller.runtimeId}))))).flat();},async monitorClose(input){for(const entry of scopes.values())if((await entry).monitorSnapshot().some(row=>row.monitorId===input.monitorId))return (await entry).monitorClose(input);throw Object.assign(Error('终端会话已不存在。'),{code:'MONITOR_STALE',status:409});},async dispose(){disposed=true;await Promise.all([...scopes.values()].map(async entry=>(await entry).dispose()));scopes.clear();}};
 }

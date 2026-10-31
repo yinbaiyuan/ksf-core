@@ -1,4 +1,5 @@
-import { isAbsolute, join } from 'node:path';
+import { isAbsolute, join,resolve } from 'node:path';
+import {readConfigFile,expectConfig,publishConfigFile,canonical} from '../configuration/storage.js';
 import { atomicJSON, readJSON } from './store.js';
 import { exact, identifier, integer, requireAI, clone } from './schema.js';
 
@@ -34,15 +35,18 @@ export function profileContract(item) {
   if (item.reasoningEffort !== undefined) requireAI(['minimal', 'low', 'medium', 'high'].includes(item.reasoningEffort), 'AI_REQUEST_INVALID', '不支持的推理设置。');
   return clone(item);
 }
-export async function writeConfig(home, kind, input) {
+export async function writeConfig(home, kind, input,options={}) {
   exact(input, ['revision', 'items']);
   const current = await readConfig(home, kind);
+  const root=resolve(home,'../../..'),before=readConfigFile(root,'.agents/user-data/ai/'+kind+'.json');
+  if(options.ifMatch!==undefined)expectConfig(before,options.ifMatch);
   requireAI(input.revision === current.revision, 'AI_CONFIG_CONFLICT', '配置已变化，请刷新后修改。', { status: 409 });
   requireAI(Array.isArray(input.items) && input.items.length <= 64, 'AI_REQUEST_INVALID', '配置列表过大。');
   const items = input.items.map(kind === 'connections' ? connectionContract : profileContract);
   requireAI(new Set(items.map(item => item.id)).size === items.length, 'AI_REQUEST_INVALID', '配置标识重复。');
+  if(canonical(items)===canonical(current.items)||options.applyOnly)return current;
   const next = { schemaVersion: 1, revision: current.revision + 1, items };
-  await atomicJSON(join(home, kind + '.json'), next); return next;
+  publishConfigFile(root,before,next); return next;
 }
 export function credential(connection, env = process.env) {
   const value = env[connection.credentialRef?.slice(4)];
