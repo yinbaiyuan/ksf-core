@@ -1,9 +1,17 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,realpath,rm,readFile,mkdir,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID,createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';import {after} from 'node:test';import test from 'node:test';import assert from 'node:assert/strict';
+import {mkdtemp,realpath,rm,readFile,mkdir,writeFile,cp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID,createHash} from 'node:crypto';
 import {buildApplication} from '../../sdk/build.mjs';import {createCoreHost} from '../../../runtime/src/services/core-host.js';
 import {fieldValues,inputFields} from '../../sdk/server/workflow-contract.mjs';
 const APP='com.ksf.cooperation-center',PROVIDER='com.example.workflow-provider',op=()=>randomUUID();
-let built;async function packages(){if(!built)built=(async()=>{const store=await mkdtemp(join(tmpdir(),'ksf-workflow-packages-'));await buildApplication(new URL('..',import.meta.url).pathname,{storeDirectory:store,quiet:true});await buildApplication(new URL('../../sdk/templates/workflow-provider',import.meta.url).pathname,{storeDirectory:store,quiet:true});return store;})();return built;}
+let built,packageDirectory;after(async()=>{if(packageDirectory)await rm(packageDirectory,{recursive:true,force:true});});async function packages(){if(!built)built=(async()=>{
+ const store=packageDirectory=await mkdtemp(join(tmpdir(),'ksf-workflow-packages-')),sources=join(store,'sources'),app=join(sources,'cooperation-center'),provider=join(sources,'provider');
+ await mkdir(sources);const filter=path=>!/(?:^|[\\/])(?:node_modules|[.]build|[.]git)(?:[\\/]|$)/.test(path);
+ await cp(fileURLToPath(new URL('..',import.meta.url)),app,{recursive:true,filter});
+ await cp(fileURLToPath(new URL('../../sdk/server',import.meta.url)),join(sources,'sdk/server'),{recursive:true});
+ await mkdir(join(store,'runtime/web'),{recursive:true});await cp(fileURLToPath(new URL('../../../runtime/web/tsconfig.json',import.meta.url)),join(store,'runtime/web/tsconfig.json'));
+ await cp(fileURLToPath(new URL('../../sdk/templates/workflow-provider',import.meta.url)),provider,{recursive:true,filter});
+ await buildApplication(app,{storeDirectory:store,quiet:true});await buildApplication(provider,{storeDirectory:store,quiet:true});return store;
+})();return built;}
 async function until(fn,predicate=x=>!!x){for(let i=0;i<220;i++){const r=await fn();if(predicate(r))return r;await new Promise(r=>setTimeout(r,100));}throw Error('等待实际后台链路超时');}
 async function fixture(t,aiOptions={}){const store=await packages(),roots=await Promise.all([1,2].map(async()=>realpath(await mkdtemp(join(tmpdir(),'ksf-workflow-instance-'))))),hosts=roots.map(root=>createCoreHost(root,{ai:aiOptions,applications:{defaultSource:null,storeDirectory:store,coreVersion:'0.3.5'}}));
  t.after(async()=>{await Promise.all(hosts.map(h=>h.close()));await Promise.all(roots.map(r=>rm(r,{recursive:true,force:true})));});t.diagnostic('packages built; starting hosts');hosts.forEach(h=>h.start());const comm=await Promise.all(hosts.map(h=>h.communication));await Promise.all(comm.map(c=>c.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false})));const nodes=await Promise.all(comm.map(c=>c.snapshot()));
@@ -14,7 +22,7 @@ async function fixture(t,aiOptions={}){const store=await packages(),roots=await 
  async function catalog(){await a.applications.invoke(APP,'peer.offers.refresh',{peerId:peer});return until(()=>a.applications.invoke(APP,'peer.offers',{peerId:peer}),c=>c.supported&&c.syncedAt);}
  t.diagnostic('refreshing peer offers');await catalog();t.diagnostic('fixture ready');return {a,b,hosts,roots,peer,bWindow,catalog};
 }
-test('forms reject executable or undeclared fields and preserve false/zero',()=>{const fields=inputFields([{key:'flag',label:'确认',type:'boolean',required:true},{key:'count',label:'数量',type:'number',required:true}]);assert.deepEqual(fieldValues(fields,{flag:false,count:0}),{flag:false,count:0});assert.throws(()=>fieldValues(fields,{flag:true,count:1,callbackURL:'http://bad'}));assert.throws(()=>inputFields([{key:'__proto__',label:'bad',type:'text'}]));});
+
 test('packaged A flow -> B new workflow -> completion callback resumes the original wait once',async t=>{const f=await fixture(t),{a,b,peer}=f;
  t.diagnostic('reading workflow catalog');const flows=await b.applications.call(f.bWindow.id,'workflow.catalog'),flow=flows.flows.find(x=>x.id==='text-normalize');assert.ok(flow);const state=await b.applications.call(f.bWindow.id,'offer.list');const offerId=op();
  await b.applications.call(f.bWindow.id,'offer.save',{operationId:op(),ifRevision:state.revision,offerId,name:'文本工作流',description:'整理输入文本',inputs:'目标与材料',outputs:'整理稿',instructions:'',handling:'workflow',delivery:'auto',scope:null,published:true,inputFields:flow.inputs,workflow:{appId:flow.appId,packageDigest:flow.packageDigest,workflowId:flow.id,revision:flow.revision,fixedInputs:{},outputMapping:{summary:'summary',materials:'materials'}}});

@@ -22,6 +22,7 @@ KSF 以人为主体，把认知与资产、可复用的 AI 能力、实际工作
 - [工作台与应用](handbook/workbench.md)：窗口、卡片、后台和安装更新。
 - [AI三条交互路径](handbook/ai.md)、[跨实例协作](handbook/collaboration.md)。
 - [术语](reference/glossary.md)、[数据地图](reference/data-map.md)、[CLI索引](cli/index.md)。
+- [开发与测试规范](testing.md)：本地、CI、发行的验证范围、选测和证据规则。
 
 ## 怎样阅读和使用
 

@@ -110,7 +110,7 @@ declaration fails closed.
 ## Development verification
 
 ```sh
-.agents/ksf test
+.agents/ksf test --suite full
 ```
 
 The entry first prepares the bundled Node.js, then runs its built-in `node:test`

@@ -1,8 +1,9 @@
 import {sourcePath} from './server/source-path.mjs';
+import {checkApplication,isTestSource} from './server/check.mjs';
 import {scopeApplicationCSS} from './server/styles.mjs';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, relative } from 'node:path';
 import {existsSync} from 'node:fs';
 import { readFile, writeFile, mkdir, rm, readdir, cp, lstat } from 'node:fs/promises';
 import {packApplication} from './server/pack.mjs';
@@ -19,7 +20,7 @@ function toolchain(root,{frontend=true}={}){
 }
 export async function buildApplication(root,options={}){return withStoreLock(resolve(root),()=>buildApplicationUnlocked(root,options),{lockName:'.ksf-build.lock'});}
 async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntries={},quiet=false}={}){
-  root=resolve(root);const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));validateManifest(manifest);const frontend=!!manifest.window||!!manifest.cards?.length,tools=toolchain(root,{frontend}),{rolldown}=await import(pathToFileURL(tools.rolldown).href),out=join(root,'.build');let build,react;if(frontend){({build}=await import(pathToFileURL(tools.vite).href));react=(await import(pathToFileURL(tools.react).href)).default;}
+  root=resolve(root);const checked=await checkApplication(root);if(!checked.ok)throw Object.assign(Error('应用源码检查失败。'),{code:'APP_SOURCE_CHECK_FAILED',diagnostics:checked.diagnostics});const productionOnly={name:'ksf-production-only',load(id){const rel=relative(root,id.split('?')[0]);if(!id.includes('node_modules')&&isTestSource(id))throw Object.assign(Error('生产包不能加载测试装置：'+rel),{code:'APP_TEST_IMPORT'});}};const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));validateManifest(manifest);const frontend=!!manifest.window||!!manifest.cards?.length,tools=toolchain(root,{frontend}),{rolldown}=await import(pathToFileURL(tools.rolldown).href),out=join(root,'.build');let build,react;if(frontend){({build}=await import(pathToFileURL(tools.vite).href));react=(await import(pathToFileURL(tools.react).href)).default;}
   await rm(out,{recursive:true,force:true});await mkdir(join(out,'frontend'),{recursive:true});
   const sdkPackage=JSON.parse(await readFile(join(sdkRoot,'package.json'),'utf8')),appPackage=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
   validateManifest(manifest);
@@ -28,13 +29,13 @@ async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntri
   const alias=[{find:'@ksf/sdk',replacement:join(sdkRoot,'src')}];
   for(const name of names){if(name==='@ksf/sdk')continue;const location=[root,sdkRoot,resolve(sdkRoot,'../../runtime/web')].flatMap(directory=>createRequire(join(directory,'package.json')).resolve.paths(name)??[]).map(path=>join(path,name)).find(path=>existsSync(join(path,'package.json')));if(location)alias.push({find:name,replacement:location});}
   const entries={};if(manifest.window){entries.index=sourcePath(root,sourceEntries.window??'frontend.tsx');manifest.window.entry='frontend/index.js';}for(const card of manifest.cards??[]){entries['cards/'+card.id]=sourcePath(root,sourceEntries.cards?.[card.id]??card.id+'.tsx');card.entry='frontend/cards/'+card.id+'.js';}
-  if(Object.keys(entries).length)await build({configFile:false,root:root,define:{'process.env.NODE_ENV':JSON.stringify('production')},plugins:[react()],resolve:{alias},logLevel:quiet?'silent':'warn',build:{outDir:join(out,'frontend'),emptyOutDir:true,minify:true,target:'es2022',cssCodeSplit:false,lib:{entry:entries,formats:['es']},rolldownOptions:{output:{entryFileNames:'[name].js',chunkFileNames:'chunks/[name]-[hash].js',assetFileNames:'assets/[name]-[hash][extname]'}}}});
+  if(Object.keys(entries).length)await build({configFile:false,root:root,define:{'process.env.NODE_ENV':JSON.stringify('production')},plugins:[productionOnly,react()],resolve:{alias},logLevel:quiet?'silent':'warn',build:{outDir:join(out,'frontend'),emptyOutDir:true,minify:true,target:'es2022',cssCodeSplit:false,lib:{entry:entries,formats:['es']},rolldownOptions:{output:{entryFileNames:'[name].js',chunkFileNames:'chunks/[name]-[hash].js',assetFileNames:'assets/[name]-[hash][extname]'}}}});
   async function collect(relative){const files=[];for(const item of await readdir(join(out,relative),{withFileTypes:true})){const path=relative+'/'+item.name;if(item.isDirectory())files.push(...await collect(path));else if(item.name.endsWith('.css'))files.push(path);}return files;}const styles=await collect('frontend');for(const path of styles)await writeFile(join(out,path),scopeApplicationCSS(await readFile(join(out,path),'utf8'),manifest));
   if(manifest.window)manifest.window.styles=styles;for(const card of manifest.cards??[])card.styles=styles;
-  if(manifest.backend){const backendSource=sourcePath(root,sourceEntries.backend??'backend.mjs');await mkdir(join(out,'backend'),{recursive:true});const bundle=await rolldown({input:backendSource,platform:'node',external:/^node:/});await bundle.write({format:'esm',file:join(out,manifest.backend.entry),codeSplitting:false,banner:"import { createRequire as __ksfRequire } from 'node:module'; const require = __ksfRequire(import.meta.url);"});await bundle.close();}
+  if(manifest.backend){const backendSource=sourcePath(root,sourceEntries.backend??'backend.mjs');await mkdir(join(out,'backend'),{recursive:true});const bundle=await rolldown({input:backendSource,plugins:[productionOnly],platform:'node',external:/^node:/});await bundle.write({format:'esm',file:join(out,manifest.backend.entry),codeSplitting:false,banner:"import { createRequire as __ksfRequire } from 'node:module'; const require = __ksfRequire(import.meta.url);"});await bundle.close();}
   if(manifest.cli){
     const cliSource=sourcePath(root,sourceEntries.cli??manifest.cli.entry);await mkdir(join(out,dirname(manifest.cli.entry)),{recursive:true});
-    const bundle=await rolldown({input:cliSource,platform:'node',external:/^node:/});await bundle.write({format:'esm',file:join(out,manifest.cli.entry),codeSplitting:false,banner:"import {createRequire as __ksfRequire} from 'node:module';const require=__ksfRequire(import.meta.url);"});await bundle.close();
+    const bundle=await rolldown({input:cliSource,plugins:[productionOnly],platform:'node',external:/^node:/});await bundle.write({format:'esm',file:join(out,manifest.cli.entry),codeSplitting:false,banner:"import {createRequire as __ksfRequire} from 'node:module';const require=__ksfRequire(import.meta.url);"});await bundle.close();
     async function resources(path){const source=join(root,path),stat=await lstat(source);if(stat.isSymbolicLink())throw Error('CLI 资源不能是符号链接。');if(stat.isDirectory()){await mkdir(join(out,path),{recursive:true});for(const name of await readdir(source))await resources(path+'/'+name);}else{sourcePath(root,path);await mkdir(dirname(join(out,path)),{recursive:true});await cp(source,join(out,path));}}
     await resources('docs');try{await resources('cli/schemas');}catch(e){if(e.code!=='ENOENT')throw e;}
   }

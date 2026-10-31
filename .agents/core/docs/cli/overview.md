@@ -174,10 +174,10 @@ bootstrap 是不依赖 Node 的启动准备层，整个过程由固定程序执�
 ## JavaScript 测试
 
 ```sh
-.agents/ksf test
+.agents/ksf test --suite quick
 ```
 
-入口先准备随包 Node，再使用同一个可执行文件运行内置 `node:test`。测试结果直接输出，失败退出码会传回调用方；当前不支持 `test --json` 或附加测试参数。
+入口先准备随包 Node，再使用同一个可执行文件运行内置 `node:test`。默认执行快速档；全量显式 `--suite full`。支持组件、变更、文件、分片、JSON 和只读计划，详见 [test 命令](test.md)及[统一测试规范](../testing.md)。失败和输入变化均不能作为通过证明。
 
 测试数量以源码和本次命令实际输出为准。当前覆盖文件：
 

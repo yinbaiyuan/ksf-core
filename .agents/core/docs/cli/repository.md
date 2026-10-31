@@ -87,7 +87,7 @@ link/unlink 使用项目服务的同一写锁，在锁内读取最新字段并�
 
 - [命令适配](../../runtime/src/commands/repositories.js)、[仓库服务](../../runtime/src/services/repositories.js)及[项目服务](../../runtime/src/services/projects.js)。
 - [仓库服务测试](../../runtime/tests/repositories.test.js)、[CLI 测试](../../runtime/tests/repositories-cli.test.js)及[发行隔离测试](../../runtime/tests/repositories-distribution.test.js)。
-- 运行 `.agents/ksf test`、`.agents/ksf build --json`、`.agents/ksf runtime verify --json`；测试在临时目录创建虚构工程，真实通过范围以输出为准。
+- 运行 `.agents/ksf test --suite quick`、`.agents/ksf build --json`、`.agents/ksf runtime verify --json`；测试在临时目录创建虚构工程，真实通过范围以输出为准。
 
 返回[命令索引](index.md)。
 

@@ -28,7 +28,7 @@ test('launcher recovery needs no Core, runtime, Git or network; arguments and ro
   assert.equal(f.run('launcher', 'recover').status, 0);
   assert.equal(f.run('hello').status, 1);
   assert.match(f.run('hello').stderr, /BOOTSTRAP_MISSING/);
-  if(platform.name==='win32')f.put('.agents/core/runtime/bootstrap.ps1', `function ksf_bootstrap_main { foreach($value in @($env:KSF_ROOT,$env:KSF_LAUNCHER_PROTOCOL)+$args){Write-Output ('<'+$value+'>')};$global:LASTEXITCODE=37 }`);
+  if(platform.name==='win32')f.put('.agents/core/runtime/bootstrap.ps1', `[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);function ksf_bootstrap_main { foreach($value in @($env:KSF_ROOT,$env:KSF_LAUNCHER_PROTOCOL)+$args){Write-Output ('<'+$value+'>')};$global:LASTEXITCODE=37 }`);
   else f.put('.agents/core/runtime/bootstrap.sh', 'ksf_bootstrap_main() { printf "<%s>\\n" "$KSF_ROOT" "$KSF_LAUNCHER_PROTOCOL" "$@"; exit 37; }\n');
   const args = ['hello', '中文 space', '', 'quote"', '$HOME;*', '--json'];
   const result = f.run(...args);

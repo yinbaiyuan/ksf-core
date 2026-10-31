@@ -1,0 +1,6503 @@
+{
+  "schemaVersion": 1,
+  "components": {
+    "core": {
+      "directory": ".agents/core/runtime",
+      "testRoots": [
+        ".agents/core/runtime/tests"
+      ]
+    },
+    "web": {
+      "directory": ".agents/core/runtime/web",
+      "testRoots": [
+        ".agents/core/runtime/web/tests"
+      ]
+    },
+    "sdk": {
+      "directory": ".agents/core/applications/sdk",
+      "testRoots": [
+        ".agents/core/applications/sdk/tests"
+      ]
+    },
+    "app:com.ksf.abilities": {
+      "directory": ".agents/core/applications/abilities",
+      "testRoots": [
+        ".agents/core/applications/abilities/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.activity-monitor": {
+      "directory": ".agents/core/applications/activity-monitor",
+      "testRoots": [
+        ".agents/core/applications/activity-monitor/tests"
+      ]
+    },
+    "app:com.ksf.conversations": {
+      "directory": ".agents/core/applications/conversations",
+      "testRoots": [
+        ".agents/core/applications/conversations/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.cooperation-center": {
+      "directory": ".agents/core/applications/cooperation-center",
+      "testRoots": [
+        ".agents/core/applications/cooperation-center/tests"
+      ]
+    },
+    "app:com.ksf.documentation": {
+      "directory": ".agents/core/applications/documentation",
+      "testRoots": [
+        ".agents/core/applications/documentation/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.markdown": {
+      "directory": ".agents/core/applications/documents",
+      "testRoots": [
+        ".agents/core/applications/documents/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.git": {
+      "directory": ".agents/core/applications/git",
+      "testRoots": [
+        ".agents/core/applications/git/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.knowledge": {
+      "directory": ".agents/core/applications/knowledge",
+      "testRoots": [
+        ".agents/core/applications/knowledge/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    },
+    "app:com.ksf.projects": {
+      "directory": ".agents/core/applications/projects",
+      "testRoots": [
+        ".agents/core/applications/projects/tests"
+      ]
+    },
+    "app:com.ksf.terminal": {
+      "directory": ".agents/core/applications/terminal",
+      "testRoots": [
+        ".agents/core/applications/terminal/tests"
+      ],
+      "coverageNotes": "No app-owned business tests; declared shared host/model coverage does not certify complete app behavior."
+    }
+  },
+  "risks": [
+    {
+      "paths": [
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/migrations",
+        ".agents/core/runtime/src/testing",
+        ".agents/core/runtime/testing",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/services/*storage*",
+        ".agents/core/runtime/src/services/*lock*",
+        ".agents/core/applications/sdk",
+        ".github",
+        "**/package-lock.json",
+        "**/package.json",
+        ".agents/core/build.json",
+        ".agents/core/runtime/src/commands/test.js",
+        ".agents/core/runtime/src/cli.js",
+        ".agents/core/runtime/src/metadata",
+        ".agents/core/runtime/src/user-data",
+        ".agents/core/runtime/src/chat-state",
+        ".agents/core/runtime/src/task-capture",
+        ".agents/core/runtime/src/communication",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/objects",
+        ".agents/core/runtime/src/data-compatibility.js",
+        ".agents/core/runtime/src/ai-tasks",
+        ".agents/core/runtime/src/codex-conversations",
+        ".agents/core/applications/card-fixture",
+        ".agents/core/runtime/src/services/tasks.js",
+        ".agents/core/runtime/src/services/chat.js",
+        ".agents/core/runtime/src/services/configuration.js",
+        ".agents/core/runtime/src/services/git-settings.js"
+      ],
+      "components": [
+        "core",
+        "web",
+        "sdk",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "reason": "Shared persistence, lifecycle, SDK, toolchain or test-policy change requires full native verification."
+    }
+  ],
+  "tests": [
+    {
+      "id": "core:ai-deepseek",
+      "path": ".agents/core/runtime/tests/ai-deepseek.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-execution-grants",
+      "path": ".agents/core/runtime/tests/ai-execution-grants.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.97,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-executors",
+      "path": ".agents/core/runtime/tests/ai-executors.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.07,
+        "win32": 4.49
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-recovery",
+      "path": ".agents/core/runtime/tests/ai-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.61,
+        "win32": 2.37
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-services-http",
+      "path": ".agents/core/runtime/tests/ai-services-http.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.2,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-tasks",
+      "path": ".agents/core/runtime/tests/ai-tasks.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.72,
+        "win32": 3.08
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ai-workbench",
+      "path": ".agents/core/runtime/tests/ai-workbench.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.6,
+        "win32": 2.46
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-background",
+      "path": ".agents/core/runtime/tests/application-background.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.82,
+        "win32": 4.1
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-cards",
+      "path": ".agents/core/runtime/tests/application-cards.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.08,
+        "win32": 6.64
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-cli",
+      "path": ".agents/core/runtime/tests/application-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 6.24,
+        "win32": 10.94
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-data",
+      "path": ".agents/core/runtime/tests/application-data.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.29,
+        "win32": 6.3
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-default-source",
+      "path": ".agents/core/runtime/tests/application-default-source.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.34,
+        "win32": 1.0
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-development",
+      "path": ".agents/core/runtime/tests/application-development.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.09,
+        "win32": 2.22
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-file-export",
+      "path": ".agents/core/runtime/tests/application-file-export.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.19,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-identities",
+      "path": ".agents/core/runtime/tests/application-identities.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.47,
+        "win32": 3.25
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-import",
+      "path": ".agents/core/runtime/tests/application-import.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.68,
+        "win32": 1.99
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-offline-origin",
+      "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.32,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-registry",
+      "path": ".agents/core/runtime/tests/application-registry.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.16,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-store",
+      "path": ".agents/core/runtime/tests/application-store.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.58,
+        "win32": 1.17
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-workflow-lightweight",
+      "path": ".agents/core/runtime/tests/application-workflow-lightweight.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.21,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:application-workflow",
+      "path": ".agents/core/runtime/tests/application-workflow.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.3,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:applications",
+      "path": ".agents/core/runtime/tests/applications.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 3.05,
+        "win32": 24.76
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:assistant",
+      "path": ".agents/core/runtime/tests/assistant.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.74,
+        "win32": 2.68
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:background-service",
+      "path": ".agents/core/runtime/tests/background-service.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 22.09,
+        "win32": 40.23
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:bootstrap",
+      "path": ".agents/core/runtime/tests/bootstrap.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 12.0,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:build",
+      "path": ".agents/core/runtime/tests/build.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 9.88,
+        "win32": 38.85
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:bundled-applications",
+      "path": ".agents/core/runtime/tests/bundled-applications.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 4.25,
+        "win32": 18.44
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:capabilities",
+      "path": ".agents/core/runtime/tests/capabilities.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.48,
+        "win32": 1.9
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:chat-context",
+      "path": ".agents/core/runtime/tests/chat-context.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.82,
+        "win32": 3.37
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:chat-distribution",
+      "path": ".agents/core/runtime/tests/chat-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 45.72,
+        "win32": 182.59
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:chat",
+      "path": ".agents/core/runtime/tests/chat.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.21,
+        "win32": 1.57
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:ci-dependencies",
+      "path": ".agents/core/runtime/tests/ci-dependencies.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.18,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:cli-options",
+      "path": ".agents/core/runtime/tests/cli-options.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.15,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:cli",
+      "path": ".agents/core/runtime/tests/cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.34,
+        "win32": 2.34
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:codex-conversation-bridge",
+      "path": ".agents/core/runtime/tests/codex-conversation-bridge.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.81,
+        "win32": 1.2
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:codex-conversation-permissions",
+      "path": ".agents/core/runtime/tests/codex-conversation-permissions.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.48,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:codex-conversations",
+      "path": ".agents/core/runtime/tests/codex-conversations.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.9,
+        "win32": 6.96
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:commit-message",
+      "path": ".agents/core/runtime/tests/commit-message.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.59,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:communication-control",
+      "path": ".agents/core/runtime/tests/communication-control.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 3.64,
+        "win32": 3.7
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:communication-device",
+      "path": ".agents/core/runtime/tests/communication-device.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.44,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:communication-pairing-control",
+      "path": ".agents/core/runtime/tests/communication-pairing-control.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.58,
+        "win32": 5.53
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:communication-pairing",
+      "path": ".agents/core/runtime/tests/communication-pairing.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.8,
+        "win32": 3.04
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:communication",
+      "path": ".agents/core/runtime/tests/communication.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 14.1,
+        "win32": 18.6
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:configuration",
+      "path": ".agents/core/runtime/tests/configuration.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.83,
+        "win32": 1.45
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:context-cli",
+      "path": ".agents/core/runtime/tests/context-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.08,
+        "win32": 1.51
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:context",
+      "path": ".agents/core/runtime/tests/context.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.41,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:conversation-review-desktop",
+      "path": ".agents/core/runtime/tests/conversation-review-desktop.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.37,
+        "win32": 1.64
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:conversation-review-process",
+      "path": ".agents/core/runtime/tests/conversation-review-process.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 1.08,
+        "win32": 4.24
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:conversation-review",
+      "path": ".agents/core/runtime/tests/conversation-review.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.3,
+        "win32": 16.1
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:cooperation-migration",
+      "path": ".agents/core/runtime/tests/cooperation-migration.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.06,
+        "win32": 7.62
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:data-compatibility",
+      "path": ".agents/core/runtime/tests/data-compatibility.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.56,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:distribution",
+      "path": ".agents/core/runtime/tests/distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 134.56,
+        "win32": 684.85
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:documentation",
+      "path": ".agents/core/runtime/tests/documentation.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.documentation"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        "README.md",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.68,
+        "win32": 1.06
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:eval",
+      "path": ".agents/core/runtime/tests/eval.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5.23,
+        "win32": 10.48
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:four-targets",
+      "path": ".agents/core/runtime/tests/four-targets.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.87,
+        "win32": 9.2
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:git-catalog",
+      "path": ".agents/core/runtime/tests/git-catalog.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.git"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.53,
+        "win32": 9.67
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:git-settings",
+      "path": ".agents/core/runtime/tests/git-settings.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.git"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 9.37,
+        "win32": 47.31
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:git-workbench-detail",
+      "path": ".agents/core/runtime/tests/git-workbench-detail.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.git"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 13.01,
+        "win32": 67.87
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:host-services",
+      "path": ".agents/core/runtime/tests/host-services.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.38,
+        "win32": 1.16
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:identity",
+      "path": ".agents/core/runtime/tests/identity.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.47,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:incubation-distribution",
+      "path": ".agents/core/runtime/tests/incubation-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 57.38,
+        "win32": 187.43
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:incubation",
+      "path": ".agents/core/runtime/tests/incubation.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5.53,
+        "win32": 11.19
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:knowledge-framework",
+      "path": ".agents/core/runtime/tests/knowledge-framework.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 34.24,
+        "win32": 216.19
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:knowledge-organize",
+      "path": ".agents/core/runtime/tests/knowledge-organize.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.43,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:knowledge-route-retirement",
+      "path": ".agents/core/runtime/tests/knowledge-route-retirement.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 61.41,
+        "win32": 137.88
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:launcher",
+      "path": ".agents/core/runtime/tests/launcher.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.42,
+        "win32": 6.96
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:lifecycle",
+      "path": ".agents/core/runtime/tests/lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 67.84,
+        "win32": 213.08
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:matched-switch",
+      "path": ".agents/core/runtime/tests/matched-switch.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 4.14,
+        "win32": 3.05
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:metadata-cli",
+      "path": ".agents/core/runtime/tests/metadata-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.18,
+        "win32": 1.59
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:metadata",
+      "path": ".agents/core/runtime/tests/metadata.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.41,
+        "win32": 1.1
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:minimal-runtime",
+      "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.56,
+        "win32": 7.09
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:mutation-plans",
+      "path": ".agents/core/runtime/tests/mutation-plans.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:object-user-data-distribution",
+      "path": ".agents/core/runtime/tests/object-user-data-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 54.64,
+        "win32": 177.46
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:object-user-data-lifecycle",
+      "path": ".agents/core/runtime/tests/object-user-data-lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.57,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:object-user-data",
+      "path": ".agents/core/runtime/tests/object-user-data.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.62,
+        "win32": 1.76
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:objects-cli",
+      "path": ".agents/core/runtime/tests/objects-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.45,
+        "win32": 3.22
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:objects",
+      "path": ".agents/core/runtime/tests/objects.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.52,
+        "win32": 3.4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:path-identity",
+      "path": ".agents/core/runtime/tests/path-identity.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.85,
+        "win32": 4.08
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:platform",
+      "path": ".agents/core/runtime/tests/platform.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:pr-description",
+      "path": ".agents/core/runtime/tests/pr-description.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:project-intake",
+      "path": ".agents/core/runtime/tests/project-intake.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.9,
+        "win32": 5.99
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:project-routing",
+      "path": ".agents/core/runtime/tests/project-routing.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.89,
+        "win32": 3.28
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:project-transitions",
+      "path": ".agents/core/runtime/tests/project-transitions.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.3,
+        "win32": 3.85
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:projects-cli",
+      "path": ".agents/core/runtime/tests/projects-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 4.84,
+        "win32": 15.51
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:projects",
+      "path": ".agents/core/runtime/tests/projects.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.41,
+        "win32": 1.92
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:release-network",
+      "path": ".agents/core/runtime/tests/release-network.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 38.49,
+        "win32": 115.25
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:release-publish",
+      "path": ".agents/core/runtime/tests/release-publish.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 122.1,
+        "win32": 672.88
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:repositories-cli",
+      "path": ".agents/core/runtime/tests/repositories-cli.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.71,
+        "win32": 11.03
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:repositories-distribution",
+      "path": ".agents/core/runtime/tests/repositories-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 54.09,
+        "win32": 227.38
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:repositories",
+      "path": ".agents/core/runtime/tests/repositories.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 7.45,
+        "win32": 27.44
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:routes",
+      "path": ".agents/core/runtime/tests/routes.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.79,
+        "win32": 4.7
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:runtime-layers",
+      "path": ".agents/core/runtime/tests/runtime-layers.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.17,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:runtime-monitor-http",
+      "path": ".agents/core/runtime/tests/runtime-monitor-http.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.activity-monitor"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.36,
+        "win32": 3.09
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:runtime-monitor",
+      "path": ".agents/core/runtime/tests/runtime-monitor.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.activity-monitor"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.55,
+        "win32": 1.26
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:shared-files",
+      "path": ".agents/core/runtime/tests/shared-files.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:sources-distribution",
+      "path": ".agents/core/runtime/tests/sources-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 81.39,
+        "win32": 267.66
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:sources",
+      "path": ".agents/core/runtime/tests/sources.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 8.02,
+        "win32": 26.0
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:system-backups",
+      "path": ".agents/core/runtime/tests/system-backups.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.17,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:system-development-paths",
+      "path": ".agents/core/runtime/tests/system-development-paths.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 56.91,
+        "win32": 195.06
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:system-update",
+      "path": ".agents/core/runtime/tests/system-update.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60.97,
+        "win32": 283.52
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:task-checkpoints",
+      "path": ".agents/core/runtime/tests/task-checkpoints.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.95,
+        "win32": 2.94
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:task-projects",
+      "path": ".agents/core/runtime/tests/task-projects.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.22,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:task-targets",
+      "path": ".agents/core/runtime/tests/task-targets.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.72,
+        "win32": 3.19
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:tasks-web",
+      "path": ".agents/core/runtime/tests/tasks-web.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.96,
+        "win32": 1.88
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:tasks",
+      "path": ".agents/core/runtime/tests/tasks.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 7.57,
+        "win32": 22.13
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:template-git",
+      "path": ".agents/core/runtime/tests/template-git.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 17.17,
+        "win32": 26.38
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:terminal-lifecycle",
+      "path": ".agents/core/runtime/tests/terminal-lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:user-data-distribution",
+      "path": ".agents/core/runtime/tests/user-data-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 57.43,
+        "win32": 251.78
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:user-data",
+      "path": ".agents/core/runtime/tests/user-data.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.5,
+        "win32": 1.77
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:web-about",
+      "path": ".agents/core/runtime/tests/web-about.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:web-assets",
+      "path": ".agents/core/runtime/tests/web-assets.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.24,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:web-hosts",
+      "path": ".agents/core/runtime/tests/web-hosts.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.18,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:web",
+      "path": ".agents/core/runtime/tests/web.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 12.26,
+        "win32": 7.45
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:work-stats",
+      "path": ".agents/core/runtime/tests/work-stats.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.conversations"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.62,
+        "win32": 4.85
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:workbench-root-tree",
+      "path": ".agents/core/runtime/tests/workbench-root-tree.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.38,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:workbench-session",
+      "path": ".agents/core/runtime/tests/workbench-session.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.35,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:workbench",
+      "path": ".agents/core/runtime/tests/workbench.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 15.01,
+        "win32": 65.96
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:ai-client",
+      "path": ".agents/core/runtime/web/tests/ai-client.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.37,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:application-bridge",
+      "path": ".agents/core/runtime/web/tests/application-bridge.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:application-icon",
+      "path": ".agents/core/runtime/web/tests/application-icon.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:application-import",
+      "path": ".agents/core/runtime/web/tests/application-import.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:application-model",
+      "path": ".agents/core/runtime/web/tests/application-model.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:application-shortcuts",
+      "path": ".agents/core/runtime/web/tests/application-shortcuts.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:apps",
+      "path": ".agents/core/runtime/web/tests/apps.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:cli-document-model",
+      "path": ".agents/core/runtime/web/tests/cli-document-model.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:configuration-preferences",
+      "path": ".agents/core/runtime/web/tests/configuration-preferences.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.42,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:context-menu",
+      "path": ".agents/core/runtime/web/tests/context-menu.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:conversation-model",
+      "path": ".agents/core/runtime/web/tests/conversation-model.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:cooperation",
+      "path": ".agents/core/runtime/web/tests/cooperation.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:desktop",
+      "path": ".agents/core/runtime/web/tests/desktop.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.16,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:git-sidebar",
+      "path": ".agents/core/runtime/web/tests/git-sidebar.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:global-application-menu",
+      "path": ".agents/core/runtime/web/tests/global-application-menu.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:grid-interaction",
+      "path": ".agents/core/runtime/web/tests/grid-interaction.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [
+        "react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:material-settings",
+      "path": ".agents/core/runtime/web/tests/material-settings.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:model",
+      "path": ".agents/core/runtime/web/tests/model.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:overlay-boundary",
+      "path": ".agents/core/runtime/web/tests/overlay-boundary.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:performance",
+      "path": ".agents/core/runtime/web/tests/performance.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.18,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:random-id",
+      "path": ".agents/core/runtime/web/tests/random-id.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:request-client",
+      "path": ".agents/core/runtime/web/tests/request-client.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:route-evolution",
+      "path": ".agents/core/runtime/web/tests/route-evolution.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.16,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:store-model",
+      "path": ".agents/core/runtime/web/tests/store-model.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:surface-lifecycle",
+      "path": ".agents/core/runtime/web/tests/surface-lifecycle.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:surface-scheduler",
+      "path": ".agents/core/runtime/web/tests/surface-scheduler.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:window-session",
+      "path": ".agents/core/runtime/web/tests/window-session.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:window-toolbar",
+      "path": ".agents/core/runtime/web/tests/window-toolbar.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:work-stats",
+      "path": ".agents/core/runtime/web/tests/work-stats.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "web:workbench",
+      "path": ".agents/core/runtime/web/tests/workbench.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:ai-services-build",
+      "path": ".agents/core/applications/sdk/tests/ai-services-build.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.3,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:ai-services",
+      "path": ".agents/core/applications/sdk/tests/ai-services.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:application-menu",
+      "path": ".agents/core/applications/sdk/tests/application-menu.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:build",
+      "path": ".agents/core/applications/sdk/tests/build.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 3.04,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:capabilities",
+      "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:cli-documents",
+      "path": ".agents/core/applications/sdk/tests/cli-documents.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:clients",
+      "path": ".agents/core/applications/sdk/tests/clients.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.15,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:codex-conversations",
+      "path": ".agents/core/applications/sdk/tests/codex-conversations.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.12,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:headless",
+      "path": ".agents/core/applications/sdk/tests/headless.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.19,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:migration-contract",
+      "path": ".agents/core/applications/sdk/tests/migration-contract.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:pairing",
+      "path": ".agents/core/applications/sdk/tests/pairing.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:styles",
+      "path": ".agents/core/applications/sdk/tests/styles.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.activity-monitor:model",
+      "path": ".agents/core/applications/activity-monitor/tests/model.test.ts",
+      "owner": "app:com.ksf.activity-monitor",
+      "covers": [
+        "app:com.ksf.activity-monitor"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/activity-monitor",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:desktop",
+      "path": ".agents/core/applications/cooperation-center/tests/desktop.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.34,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:integration",
+      "path": ".agents/core/applications/cooperation-center/tests/integration.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.77,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:offers",
+      "path": ".agents/core/applications/cooperation-center/tests/offers.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.28,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:tasks",
+      "path": ".agents/core/applications/cooperation-center/tests/tasks.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.21,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:workflows",
+      "path": ".agents/core/applications/cooperation-center/tests/workflows.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [
+        {
+          "component": "sdk",
+          "name": "rolldown"
+        },
+        {
+          "component": "web",
+          "name": "vite"
+        },
+        {
+          "component": "sdk",
+          "name": "postcss"
+        }
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 54.6,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.projects:backend",
+      "path": ".agents/core/applications/projects/tests/backend.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.3,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "app:com.ksf.projects:install",
+      "path": ".agents/core/applications/projects/tests/install.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.61,
+        "win32": 150
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:windows-launcher",
+      "path": ".agents/core/runtime/tests/launcher-windows.ps1",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "kind": "powershell",
+      "suite": "quick",
+      "platforms": [
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/ksf.ps1",
+        ".agents/core/build.json",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0,
+        "win32": 6
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:testing",
+      "path": ".agents/core/runtime/tests/testing.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2.43,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribute",
+      "path": ".agents/core/runtime/tests/contribute.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 112.55,
+        "win32": 261.36
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribute-baseline",
+      "path": ".agents/core/runtime/tests/contribute-baseline.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 19.21,
+        "win32": 83.44
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribute-publication",
+      "path": ".agents/core/runtime/tests/contribute-publication.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 20.6,
+        "win32": 75.61
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribute-recovery",
+      "path": ".agents/core/runtime/tests/contribute-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 23.58,
+        "win32": 101.42
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribute-cache",
+      "path": ".agents/core/runtime/tests/contribute-cache.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 13.26,
+        "win32": 72.95
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:compact-baseline",
+      "path": ".agents/core/runtime/tests/compact-baseline.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 15.88,
+        "win32": 120.07
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:compact-baseline-integrity",
+      "path": ".agents/core/runtime/tests/compact-baseline-integrity.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 18.45,
+        "win32": 184.43
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:compact-baseline-lifecycle",
+      "path": ".agents/core/runtime/tests/compact-baseline-lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 16.52,
+        "win32": 90.07
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:release-actions",
+      "path": ".agents/core/runtime/tests/release-actions.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 5.27,
+        "win32": 57.86
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:release-actions-recovery",
+      "path": ".agents/core/runtime/tests/release-actions-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 6.64,
+        "win32": 51.09
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:release-actions-contract",
+      "path": ".agents/core/runtime/tests/release-actions-contract.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 4.38,
+        "win32": 47.44
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:committed-source",
+      "path": ".agents/core/runtime/tests/committed-source.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.1,
+        "win32": 5
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "sdk:check",
+      "path": ".agents/core/applications/sdk/tests/check.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.28,
+        "win32": 5
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:testing-ci",
+      "path": ".agents/core/runtime/tests/testing-ci.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 4
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:bootstrap-windows",
+      "path": ".agents/core/runtime/tests/bootstrap-windows.ps1",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "kind": "powershell",
+      "suite": "quick",
+      "platforms": [
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/ksf.ps1",
+        ".agents/core/build.json",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0,
+        "win32": 45
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:system-update-recovery",
+      "path": ".agents/core/runtime/tests/system-update-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60.97,
+        "win32": 283.52
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:system-update-roots",
+      "path": ".agents/core/runtime/tests/system-update-roots.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60.97,
+        "win32": 283.52
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    },
+    {
+      "id": "core:contribution-validation",
+      "path": ".agents/core/runtime/tests/contribution-validation.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.1,
+        "win32": 5
+      },
+      "timingBasis": "estimate from successful CI 41163854305 and local targeted timings; seed/batch groups adjusted, not an acceptance result"
+    }
+  ],
+  "timingBaseline": {
+    "historicalCI": "41163854305",
+    "macRegressionSeconds": 1069,
+    "windowsShardSeconds": [
+      229,
+      804,
+      1591,
+      2698
+    ],
+    "note": "seconds are scheduling estimates; actual run receipts hold measured durations. Preparation and queue excluded."
+  }
+}

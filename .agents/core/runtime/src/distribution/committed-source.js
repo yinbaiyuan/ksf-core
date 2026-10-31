@@ -1,6 +1,7 @@
 import { gitExecutable } from '../platform/index.js';
 import { realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { fail } from './errors.js';
 import { managedPath, validRelative } from './paths.js';
 import { parseJSON } from './files.js';
@@ -20,9 +21,9 @@ export const contributionPath = path => (managedPath(path) || path === '.agents/
 
 // Git plumbing reads immutable objects, never the index, filters or working files.
 export function committedSource(root, { commit, binary = gitBinary } = {}) {
-  const run = args => {
+  const run = (args, options = {}) => {
     const result = spawnSync(binary, ['--no-replace-objects', '--literal-pathspecs', '-C', root, ...args], {
-      env: gitEnvironment(), timeout: 30000, maxBuffer: 256 * 1024 * 1024,
+      env: gitEnvironment(), timeout: 30000, maxBuffer: 256 * 1024 * 1024, ...options,
     });
     if (result.error?.code === 'ENOENT') fail('CONTRIBUTION_GIT_REQUIRED', 'Git is required to contribute already committed system changes.');
     if (result.error) fail('CONTRIBUTION_GIT_FAILED', 'Could not read the local Git objects.');
@@ -61,7 +62,50 @@ export function committedSource(root, { commit, binary = gitBinary } = {}) {
     if (result.status !== 0) fail('CONTRIBUTION_SOURCE_MISSING', 'Could not read a recorded system blob.');
     return { bytes: result.stdout, mode: entry.mode === '100755' ? 0o755 : 0o644 };
   };
-  return { sourceCommit, headCommit, entries, read };
+  // One size query and bounded batches instead of one Git process per file.
+  // Read only OIDs from the already pinned tree, never working files or filters.
+  function* readBatches(paths) {
+    const unique = [...new Set(paths)], present = unique.filter(path => entries.has(path));
+    for (const path of present) { const e = entries.get(path); if (e.type !== 'blob' || !['100644', '100755'].includes(e.mode)) fail('CONTRIBUTION_FILE_TYPE', `Only regular committed system files may be contributed: ${path}.`); }
+    const sizes = new Map();
+    if (present.length) {
+      const checked = run(['cat-file', '--batch-check=%(objectname) %(objecttype) %(objectsize)'], { input: present.map(path => entries.get(path).object).join('\n') + '\n' });
+      const rows = checked.stdout?.toString('utf8').trim().split('\n') ?? [];
+      if (checked.status !== 0 || rows.length !== present.length) fail('CONTRIBUTION_SOURCE_MISSING', 'Could not inspect the recorded system blobs.');
+      rows.forEach((row, index) => {
+        const [oid, type, size] = row.split(' '), expected = entries.get(present[index]).object;
+        if (oid !== expected || type !== 'blob' || !/^\d+$/.test(size) || +size > 256 * 1024 * 1024) fail('CONTRIBUTION_SOURCE_MISSING', 'Invalid or oversized recorded system blob.');
+        sizes.set(present[index], +size);
+      });
+    }
+    let batch = [], size = 0;
+    const flush = function* () {
+      if (!batch.length) return;
+      const selected = batch.filter(path => entries.has(path)), files = new Map();
+      if (selected.length) {
+        const result = run(['cat-file', '--batch'], { input: selected.map(path => entries.get(path).object).join('\n') + '\n', maxBuffer: Math.max(1024, size + selected.length * 160) });
+        if (result.status !== 0) fail('CONTRIBUTION_SOURCE_MISSING', 'Could not read a recorded system batch.');
+        let offset = 0;
+        for (const path of selected) {
+          const entry = entries.get(path), end = result.stdout.indexOf(10, offset), header = result.stdout.subarray(offset, end).toString('utf8').split(' '), length = sizes.get(path);
+          if (end < offset || header[0] !== entry.object || header[1] !== 'blob' || header[2] !== String(length)) fail('CONTRIBUTION_SOURCE_MISSING', 'Malformed recorded system batch.');
+          const bytes = result.stdout.subarray(end + 1, end + 1 + length);
+          const oid = createHash(entry.object.length === 64 ? 'sha256' : 'sha1').update(Buffer.from(`blob ${length}\0`)).update(bytes).digest('hex');
+          if (bytes.length !== length || result.stdout[end + 1 + length] !== 10 || oid !== entry.object) fail('CONTRIBUTION_SOURCE_MISSING', 'Recorded blob identity does not match the pinned tree.');
+          files.set(path, { bytes, mode: entry.mode === '100755' ? 0o755 : 0o644 }); offset = end + length + 2;
+        }
+        if (offset !== result.stdout.length) fail('CONTRIBUTION_SOURCE_MISSING', 'Unexpected data after the recorded system batch.');
+      }
+      yield batch.map(path => [path, files.get(path) ?? null]); batch = []; size = 0;
+    };
+    for (const path of unique) {
+      const bytes = sizes.get(path) ?? 0;
+      if (batch.length && (size + bytes > 8 * 1024 * 1024 || batch.length >= 128)) yield* flush();
+      batch.push(path); size += bytes;
+    }
+    yield* flush();
+  }
+  return { sourceCommit, headCommit, entries, read, readBatches };
 }
 
 export function contributionBaseline(source) {

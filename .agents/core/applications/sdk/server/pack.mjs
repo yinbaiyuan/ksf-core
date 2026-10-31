@@ -1,4 +1,4 @@
-import {realpathSync} from 'node:fs';
+import {realpathSync,existsSync} from 'node:fs';
 import { readdir, lstat, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname, basename, resolve, posix } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -39,4 +39,4 @@ export async function runPackCLI(directory,output){
   if(!directory||!output){console.error('Usage: node pack.mjs <built-app-directory> <output.ksfapp>');process.exitCode=2;}
   else console.log(JSON.stringify(await packApplication(resolve(directory),resolve(output)),null,2));
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(realpathSync(process.argv[1])).href)await runPackCLI(...process.argv.slice(2));
+if(process.argv[1]&&existsSync(process.argv[1])&&import.meta.url===pathToFileURL(realpathSync(process.argv[1])).href)await runPackCLI(...process.argv.slice(2));

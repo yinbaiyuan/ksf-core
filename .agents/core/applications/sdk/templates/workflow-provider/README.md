@@ -25,3 +25,5 @@ workflow.signal 将事件与原等待点推进放在同一 SQLite 事务中。�
 运行、等待点、事件和操作保存在 dataDirectory/workflow.sqlite，材料位于 materials/<sha256>；后端不依赖窗口保持打开。业务代码位于 backend.mjs，窗口仅呈现和人工确认。SDK/宿主接口见[工作流契约](../../../../docs/app-development/workflows.md)。
 
 隔离双实例测试位于 Core applications/cooperation-center/tests/workflows.test.mjs，覆盖真实后台进程和 mTLS 通信、乱序结果、暂停、回执丢失重启、人工复核及失效运行。测试中的 API/CLI 执行器是合成适配器，需要另做实际模型验收。
+
+测试遵循 SDK 开发手册中的统一测试规范（docs/testing.md）。第一方应用的自有测试必须登记到 Core 测试清单；独立应用保留自己的测试入口。测试装置放在 tests/，生产入口不得导入测试代码。

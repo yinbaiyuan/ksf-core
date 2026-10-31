@@ -38,7 +38,7 @@ React + TypeScript + Vite + Tailwind CSS。`src/components/ui/` 使用 shadcn/ui
 
 ## 开发与构建
 
-在此目录执行 `npm ci`，然后 `npm run typecheck`、`npm test`、`npm run build`。依赖版本固定在 package.json 和 package-lock.json。构建必须使用 KSF 已安装的随包 Node：将 `ksf hello --json` 的 `runtime.nodePath` 所在目录放到开发命令 PATH 最前，npm 可使用开发机已有安装。发行用户不需要 npm。
+遵循[统一测试规范](../../docs/testing.md)。首次准备、锁文件变化或环境失效时执行 `npm ci`；定向修改按需执行类型检查、`ksf test --component web` 和前端构建。依赖版本固定在 package.json 和 package-lock.json。构建必须使用 KSF 已安装的随包 Node：将 `ksf hello --json` 的 `runtime.nodePath` 所在目录放到开发命令 PATH 最前，npm 可使用开发机已有安装。发行用户不需要 npm。
 
 `npm run dev` 仅供开发，监听本机并将 `/api` 代理到 127.0.0.1:80 的现有 KSF 服务。日常使用从 KSF 根运行 `.agents/ksf web`，它只提供 `dist/` 中校验过的预构建资源。
 

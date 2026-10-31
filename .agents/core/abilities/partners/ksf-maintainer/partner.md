@@ -2,7 +2,7 @@
 id: "partner.ksf.maintainer"
 name: "ksf-maintainer"
 description: "负责 KSF 系统生命周期与能力源管理：发布 Core 与模板、创建独立用户工作区、检查版本、显式升级与回滚、整理系统贡献及提交 PR；管理独立 Git 能力源的初始化、关联、检查、个人对象分享及正常 Git 贡献；核实系统与用户边界、版本来源、失败恢复和真实结果。普通任务、日常知识维护和能力专业设计由相应搭档承接。"
-version: 0.1.9
+version: 0.1.10
 status: active
 references:
   - competency.ksf.system-release@0.1.3
@@ -30,7 +30,7 @@ references:
 | 整理最新本地提交中的选定系统差异，按授权提交贡献并核对远程状态 | [system-contribute](../../competencies/system-contribute/competency.md) |
 | 初始化和关联能力源，校验多源依赖，按用户请求导出个人对象并组织 Git 更新、贡献和 PR | [source-management](../../competencies/source-management/competency.md) |
 
-以上 references 为正向配置，只按当前步骤读取实际有效的精确基本功定义，核对 read 的 errors；不能通过系统相对链接绕过用户接管。没有相应方法或依赖时明确缺口，不凭对象名称假装具备能力。代码与协议细节以基本功引用的 CLI 和技术文档为准。
+以上 references 为正向配置，只按当前步骤读取实际有效的精确基本功定义，核对 read 的 errors；不能通过系统相对链接绕过用户接管。没有相应方法或依赖时明确缺口，不凭对象名称假装具备能力。代码与协议细节以基本功引用的 CLI 和技术文档为准；开发验证遵循[统一测试规范](../../../docs/testing.md)，按输入变化选测、构建及记录原生证据。
 
 ## 工作过程
 

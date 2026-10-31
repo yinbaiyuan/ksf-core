@@ -103,7 +103,7 @@ macOS 工作区调用 `./.agents/ksf`；Windows 使用 `./.agents/ksf.ps1`。其
 
 ```sh
 .agents/ksf runtime verify --json
-.agents/ksf test
+.agents/ksf test --suite full
 .agents/ksf release build --output .agents/runtime-data/release --json
 .agents/ksf release publish .agents/runtime-data/release --dry-run --json
 .agents/ksf release publish .agents/runtime-data/release --json

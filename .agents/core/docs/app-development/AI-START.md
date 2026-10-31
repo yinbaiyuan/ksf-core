@@ -38,3 +38,5 @@
 ## 初始兼容契约与迁移
 
 清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1、SDK工具包=1.0.0。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
+
+开发验证按[统一测试规范](../testing.md)选择定向、快速和全量；不将安装依赖、全量回归和发行预演机械绑定每次修改。
