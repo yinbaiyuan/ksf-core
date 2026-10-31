@@ -145,6 +145,617 @@
   ],
   "tests": [
     {
+      "id": "app:com.ksf.activity-monitor:model",
+      "path": ".agents/core/applications/activity-monitor/tests/model.test.ts",
+      "owner": "app:com.ksf.activity-monitor",
+      "covers": [
+        "app:com.ksf.activity-monitor"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/activity-monitor",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.22,
+        "win32": 0.16
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:desktop",
+      "path": ".agents/core/applications/cooperation-center/tests/desktop.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.2,
+        "win32": 2.03
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:integration",
+      "path": ".agents/core/applications/cooperation-center/tests/integration.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.39,
+        "win32": 5.5
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:offers",
+      "path": ".agents/core/applications/cooperation-center/tests/offers.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.23,
+        "win32": 0.76
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:tasks",
+      "path": ".agents/core/applications/cooperation-center/tests/tasks.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.28,
+        "win32": 2.69
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.cooperation-center:workflows",
+      "path": ".agents/core/applications/cooperation-center/tests/workflows.test.mjs",
+      "owner": "app:com.ksf.cooperation-center",
+      "covers": [
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/cooperation-center",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [
+        {
+          "component": "sdk",
+          "name": "rolldown"
+        },
+        {
+          "component": "web",
+          "name": "vite"
+        },
+        {
+          "component": "sdk",
+          "name": "postcss"
+        }
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 26.23,
+        "win32": 91.69
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.projects:backend",
+      "path": ".agents/core/applications/projects/tests/backend.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.34,
+        "win32": 4
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "app:com.ksf.projects:install",
+      "path": ".agents/core/applications/projects/tests/install.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.66,
+        "win32": 2.12
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:ai-services-build",
+      "path": ".agents/core/applications/sdk/tests/ai-services-build.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.24,
+        "win32": 0.42
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:ai-services",
+      "path": ".agents/core/applications/sdk/tests/ai-services.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.23,
+        "win32": 0.25
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:application-menu",
+      "path": ".agents/core/applications/sdk/tests/application-menu.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.17,
+        "win32": 0.15
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:build",
+      "path": ".agents/core/applications/sdk/tests/build.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 4.03,
+        "win32": 9.37
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:capabilities",
+      "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.18,
+        "win32": 0.22
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:check",
+      "path": ".agents/core/applications/sdk/tests/check.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.16,
+        "win32": 0.15
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:cli-documents",
+      "path": ".agents/core/applications/sdk/tests/cli-documents.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.18,
+        "win32": 0.17
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:clients",
+      "path": ".agents/core/applications/sdk/tests/clients.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.19,
+        "win32": 0.27
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:codex-conversations",
+      "path": ".agents/core/applications/sdk/tests/codex-conversations.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.14,
+        "win32": 0.15
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:headless",
+      "path": ".agents/core/applications/sdk/tests/headless.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 0.4,
+        "win32": 0.29
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:migration-contract",
+      "path": ".agents/core/applications/sdk/tests/migration-contract.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.11,
+        "win32": 0.21
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:pairing",
+      "path": ".agents/core/applications/sdk/tests/pairing.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.23,
+        "win32": 0.19
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "sdk:styles",
+      "path": ".agents/core/applications/sdk/tests/styles.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.13,
+        "win32": 0.21
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
       "id": "core:ai-deepseek",
       "path": ".agents/core/runtime/tests/ai-deepseek.test.js",
       "owner": "core",
@@ -1093,6 +1704,37 @@
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
+      "id": "core:bootstrap-windows",
+      "path": ".agents/core/runtime/tests/bootstrap-windows.ps1",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "kind": "powershell",
+      "suite": "quick",
+      "platforms": [
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/ksf.ps1",
+        ".agents/core/build.json",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0,
+        "win32": 15.48
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
       "id": "core:bootstrap",
       "path": ".agents/core/runtime/tests/bootstrap.test.js",
       "owner": "core",
@@ -1601,6 +2243,44 @@
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
+      "id": "core:committed-source",
+      "path": ".agents/core/runtime/tests/committed-source.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.45,
+        "win32": 3.77
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
       "id": "core:communication-control",
       "path": ".agents/core/runtime/tests/communication-control.test.js",
       "owner": "core",
@@ -1770,6 +2450,99 @@
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
+      "id": "core:compact-baseline-integrity",
+      "path": ".agents/core/runtime/tests/compact-baseline-integrity.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 74.95,
+        "win32": 415.9
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:compact-baseline-lifecycle",
+      "path": ".agents/core/runtime/tests/compact-baseline-lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 35.8,
+        "win32": 207.93
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:compact-baseline",
+      "path": ".agents/core/runtime/tests/compact-baseline.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 27.08,
+        "win32": 143.38
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
       "id": "core:configuration",
       "path": ".agents/core/runtime/tests/configuration.test.js",
       "owner": "core",
@@ -1880,6 +2653,230 @@
       "seconds": {
         "darwin": 0.29,
         "win32": 0.33
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:contribute-baseline",
+      "path": ".agents/core/runtime/tests/contribute-baseline.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 67.08,
+        "win32": 285.29
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:contribute-cache",
+      "path": ".agents/core/runtime/tests/contribute-cache.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 37.56,
+        "win32": 175.78
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:contribute-committed-baseline",
+      "path": ".agents/core/runtime/tests/contribute-committed-baseline.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 300
+      },
+      "timingBasis": "Split seven committed-baseline and legacy-source cases from a native Windows file observed at 556 seconds in CI."
+    },
+    {
+      "id": "core:contribute-publication",
+      "path": ".agents/core/runtime/tests/contribute-publication.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 57.01,
+        "win32": 299.08
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:contribute-recovery",
+      "path": ".agents/core/runtime/tests/contribute-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 38.51,
+        "win32": 275.39
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:contribute",
+      "path": ".agents/core/runtime/tests/contribute.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 280
+      },
+      "timingBasis": "Six committed-workspace/export cases remain after isolating all seven baseline/legacy cases; preserve all assertions."
+    },
+    {
+      "id": "core:contribution-validation",
+      "path": ".agents/core/runtime/tests/contribution-validation.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.19,
+        "win32": 0.21
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
@@ -2553,6 +3550,37 @@
       "seconds": {
         "darwin": 26.45,
         "win32": 205.68
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:windows-launcher",
+      "path": ".agents/core/runtime/tests/launcher-windows.ps1",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "kind": "powershell",
+      "suite": "quick",
+      "platforms": [
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/ksf.ps1",
+        ".agents/core/build.json",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0,
+        "win32": 1.86
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
@@ -3291,6 +4319,99 @@
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
+      "id": "core:release-actions-contract",
+      "path": ".agents/core/runtime/tests/release-actions-contract.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 17.76,
+        "win32": 56.18
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:release-actions-recovery",
+      "path": ".agents/core/runtime/tests/release-actions-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 38.28,
+        "win32": 137.94
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:release-actions",
+      "path": ".agents/core/runtime/tests/release-actions.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 19.48,
+        "win32": 61.62
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
       "id": "core:release-network",
       "path": ".agents/core/runtime/tests/release-network.test.js",
       "owner": "core",
@@ -3614,6 +4735,44 @@
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
     {
+      "id": "core:runtime-retention",
+      "path": ".agents/core/runtime/tests/runtime-retention.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Mac native source custody, recovery and retention boundaries; Git-dependent cases use the platform tool in isolated repositories."
+    },
+    {
       "id": "core:shared-files",
       "path": ".agents/core/runtime/tests/shared-files.test.js",
       "owner": "core",
@@ -3781,6 +4940,223 @@
         "win32": 108.74
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:system-update-interruption",
+      "path": ".agents/core/runtime/tests/system-update-interruption.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 70,
+        "win32": 310
+      },
+      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
+    },
+    {
+      "id": "core:system-update-io-recovery",
+      "path": ".agents/core/runtime/tests/system-update-io-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 310
+      },
+      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
+    },
+    {
+      "id": "core:system-update-recovery",
+      "path": ".agents/core/runtime/tests/system-update-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 40,
+        "win32": 250
+      },
+      "timingBasis": "Remaining four cases after native CI 41184436954 demonstrated the mixed recovery file exceeded its Windows group timeout."
+    },
+    {
+      "id": "core:system-update-root-candidates",
+      "path": ".agents/core/runtime/tests/system-update-root-candidates.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 210
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
+    },
+    {
+      "id": "core:system-update-root-conflicts",
+      "path": ".agents/core/runtime/tests/system-update-root-conflicts.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 50,
+        "win32": 150
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
+    },
+    {
+      "id": "core:system-update-root-interruption",
+      "path": ".agents/core/runtime/tests/system-update-root-interruption.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 80,
+        "win32": 250
+      },
+      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
+    },
+    {
+      "id": "core:system-update-roots",
+      "path": ".agents/core/runtime/tests/system-update-roots.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 240
+      },
+      "timingBasis": "Three CLI/launcher policy cases retained after splitting the mixed Windows group observed in CI 41186681465."
     },
     {
       "id": "core:system-update",
@@ -4078,6 +5454,82 @@
       "seconds": {
         "darwin": 0.12,
         "win32": 0.67
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:testing-ci",
+      "path": ".agents/core/runtime/tests/testing-ci.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.42,
+        "win32": 0.63
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
+    },
+    {
+      "id": "core:testing",
+      "path": ".agents/core/runtime/tests/testing.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3.31,
+        "win32": 2.82
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     },
@@ -5257,1420 +6709,6 @@
       "seconds": {
         "darwin": 0.17,
         "win32": 0.23
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:ai-services-build",
-      "path": ".agents/core/applications/sdk/tests/ai-services-build.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [
-        "postcss",
-        "es-module-lexer",
-        "vite",
-        "rolldown",
-        "@vitejs/plugin-react"
-      ],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 0.24,
-        "win32": 0.42
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:ai-services",
-      "path": ".agents/core/applications/sdk/tests/ai-services.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.23,
-        "win32": 0.25
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:application-menu",
-      "path": ".agents/core/applications/sdk/tests/application-menu.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": true,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.17,
-        "win32": 0.15
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:build",
-      "path": ".agents/core/applications/sdk/tests/build.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [
-        "postcss",
-        "es-module-lexer",
-        "vite",
-        "rolldown",
-        "@vitejs/plugin-react"
-      ],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 4.03,
-        "win32": 9.37
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:capabilities",
-      "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": true,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.18,
-        "win32": 0.22
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:cli-documents",
-      "path": ".agents/core/applications/sdk/tests/cli-documents.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [
-        "postcss",
-        "es-module-lexer"
-      ],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.18,
-        "win32": 0.17
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:clients",
-      "path": ".agents/core/applications/sdk/tests/clients.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": true,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.19,
-        "win32": 0.27
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:codex-conversations",
-      "path": ".agents/core/applications/sdk/tests/codex-conversations.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.14,
-        "win32": 0.15
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:headless",
-      "path": ".agents/core/applications/sdk/tests/headless.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [
-        "postcss",
-        "es-module-lexer",
-        "vite",
-        "rolldown",
-        "@vitejs/plugin-react"
-      ],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 0.4,
-        "win32": 0.29
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:migration-contract",
-      "path": ".agents/core/applications/sdk/tests/migration-contract.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.11,
-        "win32": 0.21
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:pairing",
-      "path": ".agents/core/applications/sdk/tests/pairing.test.ts",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.23,
-        "win32": 0.19
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:styles",
-      "path": ".agents/core/applications/sdk/tests/styles.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [
-        "postcss",
-        "es-module-lexer"
-      ],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.13,
-        "win32": 0.21
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.activity-monitor:model",
-      "path": ".agents/core/applications/activity-monitor/tests/model.test.ts",
-      "owner": "app:com.ksf.activity-monitor",
-      "covers": [
-        "app:com.ksf.activity-monitor"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/activity-monitor",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.22,
-        "win32": 0.16
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.cooperation-center:desktop",
-      "path": ".agents/core/applications/cooperation-center/tests/desktop.test.mjs",
-      "owner": "app:com.ksf.cooperation-center",
-      "covers": [
-        "app:com.ksf.cooperation-center"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/cooperation-center",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 0.2,
-        "win32": 2.03
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.cooperation-center:integration",
-      "path": ".agents/core/applications/cooperation-center/tests/integration.test.mjs",
-      "owner": "app:com.ksf.cooperation-center",
-      "covers": [
-        "app:com.ksf.cooperation-center"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/cooperation-center",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 0.39,
-        "win32": 5.5
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.cooperation-center:offers",
-      "path": ".agents/core/applications/cooperation-center/tests/offers.test.mjs",
-      "owner": "app:com.ksf.cooperation-center",
-      "covers": [
-        "app:com.ksf.cooperation-center"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/cooperation-center",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.23,
-        "win32": 0.76
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.cooperation-center:tasks",
-      "path": ".agents/core/applications/cooperation-center/tests/tasks.test.mjs",
-      "owner": "app:com.ksf.cooperation-center",
-      "covers": [
-        "app:com.ksf.cooperation-center"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/cooperation-center",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.28,
-        "win32": 2.69
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.cooperation-center:workflows",
-      "path": ".agents/core/applications/cooperation-center/tests/workflows.test.mjs",
-      "owner": "app:com.ksf.cooperation-center",
-      "covers": [
-        "app:com.ksf.cooperation-center"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/cooperation-center",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [
-        {
-          "component": "sdk",
-          "name": "rolldown"
-        },
-        {
-          "component": "web",
-          "name": "vite"
-        },
-        {
-          "component": "sdk",
-          "name": "postcss"
-        }
-      ],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 26.23,
-        "win32": 91.69
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.projects:backend",
-      "path": ".agents/core/applications/projects/tests/backend.test.mjs",
-      "owner": "app:com.ksf.projects",
-      "covers": [
-        "app:com.ksf.projects"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/projects",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [
-        "yaml"
-      ],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.34,
-        "win32": 4
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "app:com.ksf.projects:install",
-      "path": ".agents/core/applications/projects/tests/install.test.mjs",
-      "owner": "app:com.ksf.projects",
-      "covers": [
-        "app:com.ksf.projects"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/projects",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 0.66,
-        "win32": 2.12
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:windows-launcher",
-      "path": ".agents/core/runtime/tests/launcher-windows.ps1",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "kind": "powershell",
-      "suite": "quick",
-      "platforms": [
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/ksf.ps1",
-        ".agents/core/build.json",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0,
-        "win32": 1.86
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:testing",
-      "path": ".agents/core/runtime/tests/testing.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/runtime/src",
-        ".agents/core/runtime/tests/helpers",
-        ".agents/core/abilities",
-        ".agents/core/docs",
-        ".agents/core/distribution",
-        ".agents/core/build.json",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 3.31,
-        "win32": 2.82
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:contribute",
-      "path": ".agents/core/runtime/tests/contribute.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 60,
-        "win32": 280
-      },
-      "timingBasis": "Six committed-workspace/export cases remain after isolating all seven baseline/legacy cases; preserve all assertions."
-    },
-    {
-      "id": "core:contribute-committed-baseline",
-      "path": ".agents/core/runtime/tests/contribute-committed-baseline.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 60,
-        "win32": 300
-      },
-      "timingBasis": "Split seven committed-baseline and legacy-source cases from a native Windows file observed at 556 seconds in CI."
-    },
-    {
-      "id": "core:contribute-baseline",
-      "path": ".agents/core/runtime/tests/contribute-baseline.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 67.08,
-        "win32": 285.29
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:contribute-publication",
-      "path": ".agents/core/runtime/tests/contribute-publication.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 57.01,
-        "win32": 299.08
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:contribute-recovery",
-      "path": ".agents/core/runtime/tests/contribute-recovery.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 38.51,
-        "win32": 275.39
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:contribute-cache",
-      "path": ".agents/core/runtime/tests/contribute-cache.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 37.56,
-        "win32": 175.78
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:compact-baseline",
-      "path": ".agents/core/runtime/tests/compact-baseline.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 27.08,
-        "win32": 143.38
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:compact-baseline-integrity",
-      "path": ".agents/core/runtime/tests/compact-baseline-integrity.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 74.95,
-        "win32": 415.9
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:compact-baseline-lifecycle",
-      "path": ".agents/core/runtime/tests/compact-baseline-lifecycle.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 35.8,
-        "win32": 207.93
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:release-actions",
-      "path": ".agents/core/runtime/tests/release-actions.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 19.48,
-        "win32": 61.62
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:release-actions-recovery",
-      "path": ".agents/core/runtime/tests/release-actions-recovery.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 38.28,
-        "win32": 137.94
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:release-actions-contract",
-      "path": ".agents/core/runtime/tests/release-actions-contract.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 17.76,
-        "win32": 56.18
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:committed-source",
-      "path": ".agents/core/runtime/tests/committed-source.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/runtime/src",
-        ".agents/core/runtime/tests/helpers",
-        ".agents/core/abilities",
-        ".agents/core/docs",
-        ".agents/core/distribution",
-        ".agents/core/build.json",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 1.45,
-        "win32": 3.77
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "sdk:check",
-      "path": ".agents/core/applications/sdk/tests/check.test.mjs",
-      "owner": "sdk",
-      "covers": [
-        "sdk"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/applications/sdk",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".agents/core/runtime/src/applications/protocol.js",
-        ".agents/core/runtime/src/applications/identities.js"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.16,
-        "win32": 0.15
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:testing-ci",
-      "path": ".agents/core/runtime/tests/testing-ci.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/runtime/src",
-        ".agents/core/runtime/tests/helpers",
-        ".agents/core/abilities",
-        ".agents/core/docs",
-        ".agents/core/distribution",
-        ".agents/core/build.json",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.42,
-        "win32": 0.63
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:bootstrap-windows",
-      "path": ".agents/core/runtime/tests/bootstrap-windows.ps1",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "kind": "powershell",
-      "suite": "quick",
-      "platforms": [
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/ksf.ps1",
-        ".agents/core/build.json",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0,
-        "win32": 15.48
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
-    },
-    {
-      "id": "core:system-update-recovery",
-      "path": ".agents/core/runtime/tests/system-update-recovery.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 40,
-        "win32": 250
-      },
-      "timingBasis": "Remaining four cases after native CI 41184436954 demonstrated the mixed recovery file exceeded its Windows group timeout."
-    },
-    {
-      "id": "core:system-update-io-recovery",
-      "path": ".agents/core/runtime/tests/system-update-io-recovery.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 60,
-        "win32": 310
-      },
-      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
-    },
-    {
-      "id": "core:system-update-interruption",
-      "path": ".agents/core/runtime/tests/system-update-interruption.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 70,
-        "win32": 310
-      },
-      "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion."
-    },
-    {
-      "id": "core:system-update-roots",
-      "path": ".agents/core/runtime/tests/system-update-roots.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 60,
-        "win32": 240
-      },
-      "timingBasis": "Three CLI/launcher policy cases retained after splitting the mixed Windows group observed in CI 41186681465."
-    },
-    {
-      "id": "core:system-update-root-interruption",
-      "path": ".agents/core/runtime/tests/system-update-root-interruption.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 80,
-        "win32": 250
-      },
-      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
-    },
-    {
-      "id": "core:system-update-root-conflicts",
-      "path": ".agents/core/runtime/tests/system-update-root-conflicts.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 50,
-        "win32": 150
-      },
-      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
-    },
-    {
-      "id": "core:system-update-root-candidates",
-      "path": ".agents/core/runtime/tests/system-update-root-candidates.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "full",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 600000,
-      "seconds": {
-        "darwin": 60,
-        "win32": 210
-      },
-      "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases."
-    },
-    {
-      "id": "core:contribution-validation",
-      "path": ".agents/core/runtime/tests/contribution-validation.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/runtime/src",
-        ".agents/core/runtime/tests/helpers",
-        ".agents/core/abilities",
-        ".agents/core/docs",
-        ".agents/core/distribution",
-        ".agents/core/build.json",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.19,
-        "win32": 0.21
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded."
     }

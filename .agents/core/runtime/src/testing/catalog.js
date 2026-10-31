@@ -14,7 +14,7 @@ export function safePath(root, path) {
   for (const part of rel.split('/')) { current = join(current, part); if (existsSync(current) && lstatSync(current).isSymbolicLink()) fail('TEST_PATH_INVALID', 'Test inputs cannot traverse symlinks.', { target: path }); }
   return { full, rel };
 }
-const ignored = new Set(['node_modules', '.build', '.git', '.vite', 'coverage', 'test-results', '.impeccable']);
+const ignored = new Set(['node_modules', '.build', '.git', '.vite', 'coverage', 'test-results', '.impeccable', '.DS_Store']);
 export function walk(root, path) {
   const { full, rel } = safePath(root, path);
   if (!existsSync(full)) return [];

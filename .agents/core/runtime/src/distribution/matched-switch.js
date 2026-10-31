@@ -10,6 +10,7 @@ import {serviceStatus,stopService} from '../services/service-manager.js';
 import {assert} from '../services/workbench-common.js';
 import {walkFiles,readRegular,fileMode,checkedPath} from './files.js';
 import {developmentPath} from './paths.js';
+import {retainRuntimeArtifacts} from './retention.js';
 import {migrateApplicationOrigins} from '../applications/default-source.js';
 import {LEGACY_APPLICATION_IDS,inspectApplicationIdentityMigration,prepareApplicationIdentityMigration,applyApplicationIdentityMigration} from './application-identities.js';
 const coreEtag=root=>sha(JSON.stringify(walkFiles(root,'.agents/core',{exclude:path=>developmentPath(path)||path.endsWith('/.DS_Store')}).sort().map(path=>[path,sha(readRegular(root,path)),fileMode(checkedPath(root,path))])));
@@ -89,10 +90,11 @@ export async function prepareMatchedSwitch(root,candidate,options={}){
  const plan=await inspectMatchedSwitch(root,candidate,options),id=randomUUID(),folder=join(plan.root,'.agents/runtime-data/t15-switch',id);await mkdir(folder,{recursive:true,mode:0o700});
  await durableWrite(join(folder,'before-state.json'),await readFile(join(plan.root,'.agents/user-data/applications/state.json')));
  const core=join(folder,'core');await mkdir(core);
+ try{
  for(const [path,entry] of Object.entries(plan.inventory.files))if(path.startsWith('.agents/core/')){const target=join(core,path.slice('.agents/core/'.length));await mkdir(dirname(target),{recursive:true});await durableWrite(target,await ordinary(plan.candidate,join(plan.candidate,path)),{mode:entry.mode??0o644});}
  const receiptPath=join(core,'release.json');if(await exists(receiptPath)){const receipt=await json(receiptPath);assert(receipt.schema_version===4,'MATCHED_INVENTORY_INVALID','配套切换使用紧凑开发版 Core 回执。');receipt.platform=process.platform+'-'+process.arch;await atomicJSON(receiptPath,receipt);}
  // Build dependencies are local tooling, never carried in the delivery archive.
- for(const path of ['applications/sdk/node_modules','runtime/web/node_modules','runtime/vendor-build/node_modules','runtime/native-build/node_modules','runtime/web/.vite','runtime/web/coverage','runtime/web/test-results','runtime/web/.impeccable/review',...(await readdir(join(plan.root,'.agents/core/applications')).catch(()=>[])).flatMap(name=>['applications/'+name+'/node_modules','applications/'+name+'/.build'])]){
+ for(const path of ['applications/sdk/node_modules','runtime/web/node_modules','runtime/vendor-build/node_modules','runtime/native-build/node_modules','runtime/web/.vite','runtime/web/coverage','runtime/web/test-results','runtime/web/.impeccable/review',...(await readdir(join(plan.root,'.agents/core/applications'),{withFileTypes:true}).catch(()=>[])).filter(item=>item.isDirectory()&&!item.isSymbolicLink()).flatMap(item=>['applications/'+item.name+'/node_modules','applications/'+item.name+'/.build'])]){
   const source=join(plan.root,'.agents/core',path),target=join(core,path);if(await exists(source)&&!await exists(target)){await mkdir(dirname(target),{recursive:true});await cp(source,target,{recursive:true,dereference:false});}
  }
  await installPackages(plan.root,plan.candidate,plan);
@@ -100,10 +102,18 @@ export async function prepareMatchedSwitch(root,candidate,options={}){
  const coreFiles={};for(const path of Object.keys(plan.inventory.files).filter(path=>path.startsWith('.agents/core/'))){const rel=path.slice('.agents/core/'.length);coreFiles[rel]=sha(await readFile(join(core,rel)));}
  const receipt={schemaVersion:1,id,coreFiles,root:plan.root,candidate:plan.candidate,beforeCoreEtag:plan.beforeCoreEtag,beforeEtag:plan.beforeEtag,beforeSettingsEtag:plan.beforeSettingsEtag,candidateEtag:plan.candidateEtag,nextEtag:sha(await readFile(join(folder,'next-state.json'))),targetVersion:plan.targetVersion,migrateIds:plan.migrateIds,phase:'prepared',applications:plan.applications,at:new Date().toISOString()};
  await atomicJSON(join(folder,'switch.json'),receipt);await syncDirectory(dirname(folder));await syncDirectory(join(plan.root,'.agents/runtime-data'));return {receipt:join(folder,'switch.json'),...receipt};
+ }catch(error){
+  // Preparation has not switched Core or the install index. Its owned staging
+  // copy is disposable; preserve only the original index and bounded diagnosis.
+  await atomicJSON(join(folder,'prepare-failure.json'),{schemaVersion:1,at:new Date().toISOString(),code:error.code??'MATCHED_PREPARE_FAILED',message:error.message.slice(0,2000)});
+  await rm(join(folder,'switch.json'),{force:true});
+  await rm(core,{recursive:true,force:true});throw error;
+ }
 }
 async function receiptFor(root,path){root=resolve(root);path=resolve(path);const base=join(root,'.agents/runtime-data/t15-switch'),rel=relative(base,path);assert(/^[a-f0-9-]{36}[\\/]switch\.json$/.test(rel),'MATCHED_RECEIPT_INVALID','恢复必须使用本实例的切换回执。');const receipt=await json(path);assert(receipt.schemaVersion===1&&receipt.root===root,'MATCHED_RECEIPT_INVALID','回执不属于当前实例。');return {receipt,path,folder:dirname(path),root};}
 export async function applyMatchedSwitch(root,path,{recover=false,fault}={}){
  const context=await receiptFor(root,path),r=context.receipt,folder=context.folder;root=context.root;
+ if(r.phase!=='complete')assert(!await exists(join(folder,'retention.json')),'MATCHED_ARTIFACTS_RETIRED','此候选已按保留策略退役，请重新准备；原回执保留。');
  if(r.phase==='complete'){if(r.wasRunning&&!r.serviceRestored){await restoreInstalledService(root);r.serviceRestored=true;await atomicJSON(path,r);}return r;}
  assert(recover||r.phase==='prepared','MATCHED_RECOVERY_REQUIRED','上次切换尚未完成，请使用 recover。');
  const statePath=join(root,'.agents/user-data/applications/state.json'),marker=join(root,'.agents/runtime-data/service/deployment.json'),core=join(root,'.agents/core'),previous=join(folder,'previous-core');
@@ -135,6 +145,9 @@ export async function applyMatchedSwitch(root,path,{recover=false,fault}={}){
  if(r.phase==='committed'){
   await rm(marker,{force:true});await syncDirectory(dirname(marker));await save('complete');
   if(r.wasRunning){await restoreInstalledService(root);r.serviceRestored=true;await atomicJSON(path,r);}
+ }
+ if(r.phase==='complete'&&(!r.wasRunning||r.serviceRestored)){
+  const retention=retainRuntimeArtifacts(root,'switches');r.retention={removed:retention.removed?.length??0,errors:retention.errors,warnings:retention.warnings??[]};await atomicJSON(path,r);
  }
  return r;
 }

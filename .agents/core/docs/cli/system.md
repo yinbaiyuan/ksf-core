@@ -9,6 +9,7 @@
 | `system update [--source <地址或索引文件> \| --from <Core包>] [--dry-run]` | 校验、合并、升级；from 指定更新包 |
 | `system sync [--quiet]` | 仅显式调用时按间隔检查和升级，记录尝试结果 |
 | `system rollback [--dry-run]` | 恢复上次事务保存的系统 |
+| `system cleanup [--apply \| --dry-run]` | 默认只预览受管材料退役；apply 才清理 |
 
 各操作支持 json、单独 help。quiet 仅限 sync，与 json 互斥。source 与 from 互斥，不持久改变来源；文件按 KSF 根定位。接受 HTTPS、本地文件和 loopback HTTP；拒绝公开明文 HTTP、带凭据地址和降级重定向。
 
@@ -47,3 +48,9 @@ JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失�
 入口独立恢复可调用 `ksf launcher recover`，不需要 Core 或 Node。协议、并发改动保护与 Windows 范围见[启动入口](../../runtime/launcher.md)。
 
 实现 system.js、network.js 和模板固定启动器；system-update.test.js 覆盖合并、回滚、故障注入和真实 SIGKILL，release-network.test.js 使用真实本机 HTTP。
+
+## 清理运行材料
+
+`ksf system cleanup --json` 返回候选、保留项、警告及可释放容量，不修改目标；`--apply` 与 `--dry-run` 互斥。应用清理前再次核对回执、文件和源码保护依据，错误保留现场。唯一文件或独立 Git 历史尚未保全时，`warnings` 中返回 `source-not-preserved`，该材料不会进入候选。
+
+本命令只管理已识别的切换／正式备份及统一测试材料，保留最近可用回退。范围、源码归属与任务结束处理见[运行数据与源码保留](../runtime/runtime-data.md)。业务状态及未知历史目录需另外核对，不根据日期批量删除。
