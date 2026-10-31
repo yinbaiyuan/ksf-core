@@ -5,6 +5,7 @@ import { availableParallelism, tmpdir, homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { platform, removePathSync } from '../platform/index.js';
 import { inputFingerprints, fail } from './catalog.js';
+import { retainRuntimeArtifacts } from '../distribution/retention.js';
 
 export function testEnvironment(input = process.env) {
   const env = { ...input, KSF_SKIP_AUTO_UPDATE: '1' };
@@ -20,6 +21,8 @@ function readJSON(path) { try { return JSON.parse(readFileSync(path, 'utf8')); }
 function writeJSON(path, value) { const temporary = `${path}.${randomUUID()}.tmp`; writeFileSync(temporary, JSON.stringify(value, null, 2) + '\n'); renameSync(temporary, path); }
 export async function executeTestPlan(root, plan, { progress = line => process.stderr.write(line + '\n') } = {}) {
   if (plan.missingDependencies.length) fail('TEST_DEPENDENCIES_MISSING', 'Selected tests have missing locked dependencies. No tests were started.', { missingDependencies: plan.missingDependencies });
+  const retention = retainRuntimeArtifacts(root, 'tests');
+  for (const error of retention.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);
   const runId = randomUUID(), base = join(root, '.agents/runtime-data/tests'), directory = join(base, runId), cache = join(base, 'cache');
   mkdirSync(directory, { recursive: true }); mkdirSync(cache, { recursive: true });
   const before = inputFingerprints(root, plan.catalog, plan.tests), results = new Array(plan.tests.length), active = new Set();
@@ -100,5 +103,7 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   const result = { schemaVersion: 1, runId, startedAt, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - start), status: ok ? plan.tests.length ? 'passed' : plan.status : cancelled ? 'cancelled' : changed.length ? 'inputs-changed' : 'failed', complete: ok, platform: process.platform, architecture: process.arch, nodeVersion: process.version, catalogDigest: plan.catalog.digest, suite: plan.suite, scope: plan.scope, component: plan.component, shard: plan.options.shard ?? null, selectedFiles: plan.selectedFiles, assignedFiles: plan.tests.map(t => t.path), requiredFullComponents: plan.requiredFullComponents, excludedPlatform: plan.excludedPlatform, inputFingerprints: before, changedInputs: changed, results, summary: { executed: results.filter(r => !['reused', 'not-executed'].includes(r.status)).length, reused: results.filter(r => r.status === 'reused').length, failed: results.filter(r => !['passed', 'reused'].includes(r.status)).length, platformNotApplicable: plan.excludedPlatform.length }, reportPath: join(directory, 'report.json') };
   result.gaps=plan.gaps; result.temporaryDirectory = temporaryDirectory; result.cleanupError=cleanupError??null;
   writeJSON(result.reportPath, result);
+  const retained = retainRuntimeArtifacts(root, 'tests', { keepRunId: runId });
+  for (const error of retained.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);
   return { ok, result };
 }

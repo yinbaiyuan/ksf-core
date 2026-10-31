@@ -35,6 +35,17 @@ for(const phase of ['switching','old-core-saved','core-installed','index-install
 test('changed user settings reject a prepared switch before replacing Core',async t=>{
  const f=await fixture(t),p=await prepareMatchedSwitch(f.root,f.candidate),state=JSON.parse(await readFile(f.statePath));state.installed['com.example.switch'].enabled=true;await f.write(f.statePath,state);await assert.rejects(applyMatchedSwitch(f.root,p.receipt),{code:'APP_DATA_CONFLICT'});assert.equal(JSON.parse(await readFile(join(f.root,'.agents/core/build.json'))).version,'0.2.0');
 });
+test('preparation ignores Finder files and removes its own failed Core copy',async t=>{
+ const f=await fixture(t);await f.write(join(f.root,'.agents/core/applications/.DS_Store'),'Finder');
+ const p=await prepareMatchedSwitch(f.root,f.candidate);assert.equal(p.phase,'prepared');
+ await f.write(join(f.candidate,'.agents/core/release.json'),{schema_version:3});
+ const inventory=JSON.parse(await readFile(join(f.candidate,'inventory.json'))),bytes=await readFile(join(f.candidate,'.agents/core/release.json'));
+ inventory.files['.agents/core/release.json']={sha256:checksum(bytes),size:bytes.length};await f.write(join(f.candidate,'inventory.json'),inventory);
+ await assert.rejects(prepareMatchedSwitch(f.root,f.candidate),{code:'MATCHED_INVENTORY_INVALID'});
+ const {readdir}=await import('node:fs/promises');let failures=0;
+ for(const name of await readdir(join(f.root,'.agents/runtime-data/t15-switch'))){const base=join(f.root,'.agents/runtime-data/t15-switch',name);try{await lstat(join(base,'prepare-failure.json'));failures++;await assert.rejects(lstat(join(base,'core')),{code:'ENOENT'});}catch(error){if(error.code!=='ENOENT')throw error;}}
+ assert.equal(failures,1);assert.equal(JSON.parse(await readFile(join(f.root,'.agents/core/build.json'))).version,'0.2.0');
+});
 test('a concurrent Core edit is preserved and blocks the prepared replacement',async t=>{
  const f=await fixture(t),p=await prepareMatchedSwitch(f.root,f.candidate);await f.write(join(f.root,'.agents/core/build.json'),{version:'0.2.1'});await assert.rejects(applyMatchedSwitch(f.root,p.receipt),{code:'MATCHED_CORE_CHANGED'});assert.equal(JSON.parse(await readFile(join(f.root,'.agents/core/build.json'))).version,'0.2.1');
 });

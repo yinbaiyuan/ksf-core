@@ -21,6 +21,7 @@ import { inspectCoreArchive } from './release.js';
 import { rootFiles, launcherProtocol } from './products.js';
 import {platform,launcherInvocation,replaceFileSync as renameSync,removePathSync as rmSync} from '../platform/index.js';
 import {mergeText} from '../shared/merge-text.js';
+import {retainRuntimeArtifacts} from './retention.js';
 export {mergeText};
 
 const generated = new Set(['.agents/core/manifest.yaml']);
@@ -117,7 +118,7 @@ function backupRecords(root) {
     if (!/^[A-Za-z0-9._-]+$/.test(id)) return [];
     if (!lstatSync(checkedPath(root, `.agents/runtime-data/system/backups/${id}`)).isDirectory()) return [];
     const record = readJSON(root, `.agents/runtime-data/system/backups/${id}/meta.json`, true);
-    return record ? [{ ...record, id }] : [];
+    return record && !existsSync(join(path, id, 'retention.json')) ? [{ ...record, id }] : [];
   });
 }
 function verifyCandidate(candidate, changedPaths = []) {
@@ -212,7 +213,8 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
     fault?.('committed', transaction);
     const backups = checkedPath(root, '.agents/runtime-data/system/backups'); mkdirSync(backups, { recursive: true });
     renameSync(transaction, join(backups, id));
-    return { backup: id, from, to, changed: true };
+    const retention = retainRuntimeArtifacts(root, 'switches');
+    return { backup: id, from, to, changed: true, retention: { removed: retention.removed?.length ?? 0, errors: retention.errors, warnings: retention.warnings ?? [] } };
   } catch (error) {
     if (error?.simulateCrash) throw error;
     if (!committed && existsSync(transaction)) {

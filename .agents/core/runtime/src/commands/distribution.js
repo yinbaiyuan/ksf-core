@@ -17,6 +17,7 @@ const specs = {
     update: { options: ['source', 'from', 'dry-run'], usage: 'update [--source <URL or index file> | --from <Core archive>] [--dry-run]' },
     sync: { options: ['quiet'], usage: 'sync [--quiet]' },
     rollback: { options: ['dry-run'], usage: 'rollback [--dry-run]' },
+    cleanup: { options: ['apply', 'dry-run'], usage: 'cleanup [--apply | --dry-run]' },
   },
   contribute: {
     prepare: { options: ['paths', 'all', 'title', 'body', 'body-file', 'pr-body', 'pr-body-file', 'dry-run'], usage: 'prepare (--paths <system-file...> | --all) --title <type(scope): summary> (--body <commit-body> | --body-file <file>) (--pr-body <PR-body> | --pr-body-file <file>) [--dry-run]' },
@@ -24,7 +25,7 @@ const specs = {
     submit: { target: true, options: ['reviewed', 'dry-run'], usage: 'submit <contribution-id> --reviewed <preview-digest> [--dry-run]' },
   },
 };
-const booleans = new Set(['json', 'help', 'allow-dirty', 'dry-run', 'release-only', 'all', 'quiet']);
+const booleans = new Set(['json', 'help', 'allow-dirty', 'dry-run', 'release-only', 'all', 'quiet', 'apply']);
 export function distributionHelp(command, operation) {
   const selected = operation ? [specs[command][operation]] : Object.values(specs[command]);
   const notes = {
@@ -56,6 +57,7 @@ export function parseDistributionArgs(command, args) {
   }
   if (spec.target !== (parsed.target !== undefined) && (spec.target || parsed.target !== undefined)) invalid(spec.target ? 'A target is required.' : 'This operation does not accept a target.');
   if (parsed.source !== undefined && parsed.from !== undefined) invalid('--source and --from are mutually exclusive.');
+  if (parsed.apply && parsed.dryRun) invalid('--apply and --dry-run are mutually exclusive.');
   if (parsed.quiet && parsed.json) invalid('--quiet and --json are mutually exclusive.');
   if (command === 'contribute' && operation === 'prepare' && (!!parsed.paths === !!parsed.all)) invalid('Choose exactly one of --paths or --all.');
   if (command === 'contribute' && operation === 'prepare') {
@@ -76,7 +78,11 @@ export async function runDistributionCommand(command, args, root) {
     const parsed = parseDistributionArgs(command, args); quiet = parsed.quiet === true;
     if (parsed.help) return { stdout: distributionHelp(command, parsed.operation), stderr: '', exitCode: 0 };
     let data;
-    if (command === 'system') {
+    if (command === 'system' && parsed.operation === 'cleanup') {
+      const { cleanupRuntimeArtifacts } = await import('../distribution/retention.js');
+      data = cleanupRuntimeArtifacts({ root, apply: parsed.apply === true });
+      if (data.errors.length) throw new DistributionError('CLEANUP_INCOMPLETE', 'Some artifacts were retained after cleanup errors.', data);
+    } else if (command === 'system') {
       const system = await import('../distribution/system.js');
       const methods = { read: system.systemRead, check: system.systemCheck, update: system.systemUpdate, rollback: system.systemRollback, sync: system.systemSync };
       data = await methods[parsed.operation]({ root, ...parsed });

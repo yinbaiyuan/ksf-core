@@ -422,6 +422,28 @@
         3
       ],
       "recursive": false
+    },
+    {
+      "id": "core-backup-retention",
+      "root": ".agents/runtime-data/system/backups",
+      "pattern": "^[a-zA-Z0-9-]+/retention\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
+    },
+    {
+      "id": "matched-switch-retention",
+      "root": ".agents/runtime-data/t15-switch",
+      "pattern": "^[a-f0-9-]{36}/(?:retention|prepare-failure)\\.json$",
+      "versionField": "schemaVersion",
+      "versions": [
+        1
+      ],
+      "recursive": true,
+      "maxDepth": 1
     }
   ]
 }
