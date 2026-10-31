@@ -53,3 +53,5 @@ python3 -m http.server 8048 --bind 127.0.0.1 --directory ./distribution
 AI 模板没有 profile 时，在工作台系统设置的 AI 任务服务中配置连接与执行配置；应用不负责写管理配置。真实 API/CLI 的认证与兼容要求见实例操作说明，不因示例能安装就认定已具备模型能力。
 
 本轮新契约以[SDK v1 生命周期](lifecycle.md)为准：清单 schemaVersion/sdkVersion 均为 1，后端必须声明 lifecycle；无旧协议兼容。后台管理见[运行服务](../runtime/service.md)。
+
+开发验证按[统一测试规范](../testing.md)选择定向、快速和全量；不将安装依赖、全量回归和发行预演机械绑定每次修改。

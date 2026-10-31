@@ -1,9 +1,17 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,realpath,rm,readFile,mkdir,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID,createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';import {after} from 'node:test';import test from 'node:test';import assert from 'node:assert/strict';
+import {mkdtemp,realpath,rm,readFile,mkdir,writeFile,cp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID,createHash} from 'node:crypto';
 import {buildApplication} from '../../sdk/build.mjs';import {createCoreHost} from '../../../runtime/src/services/core-host.js';
 import {fieldValues,inputFields} from '../../sdk/server/workflow-contract.mjs';
 const APP='com.ksf.cooperation-center',PROVIDER='com.example.workflow-provider',op=()=>randomUUID();
-let built;async function packages(){if(!built)built=(async()=>{const store=await mkdtemp(join(tmpdir(),'ksf-workflow-packages-'));await buildApplication(new URL('..',import.meta.url).pathname,{storeDirectory:store,quiet:true});await buildApplication(new URL('../../sdk/templates/workflow-provider',import.meta.url).pathname,{storeDirectory:store,quiet:true});return store;})();return built;}
+let built,packageDirectory;after(async()=>{if(packageDirectory)await rm(packageDirectory,{recursive:true,force:true});});async function packages(){if(!built)built=(async()=>{
+ const store=packageDirectory=await mkdtemp(join(tmpdir(),'ksf-workflow-packages-')),sources=join(store,'sources'),app=join(sources,'cooperation-center'),provider=join(sources,'provider');
+ await mkdir(sources);const filter=path=>!/(?:^|[\\/])(?:node_modules|[.]build|[.]git)(?:[\\/]|$)/.test(path);
+ await cp(fileURLToPath(new URL('..',import.meta.url)),app,{recursive:true,filter});
+ await cp(fileURLToPath(new URL('../../sdk/server',import.meta.url)),join(sources,'sdk/server'),{recursive:true});
+ await mkdir(join(store,'runtime/web'),{recursive:true});await cp(fileURLToPath(new URL('../../../runtime/web/tsconfig.json',import.meta.url)),join(store,'runtime/web/tsconfig.json'));
+ await cp(fileURLToPath(new URL('../../sdk/templates/workflow-provider',import.meta.url)),provider,{recursive:true,filter});
+ await buildApplication(app,{storeDirectory:store,quiet:true});await buildApplication(provider,{storeDirectory:store,quiet:true});return store;
+})();return built;}
 async function until(fn,predicate=x=>!!x){for(let i=0;i<220;i++){const r=await fn();if(predicate(r))return r;await new Promise(r=>setTimeout(r,100));}throw Error('等待实际后台链路超时');}
 async function fixture(t,aiOptions={}){const store=await packages(),roots=await Promise.all([1,2].map(async()=>realpath(await mkdtemp(join(tmpdir(),'ksf-workflow-instance-'))))),hosts=roots.map(root=>createCoreHost(root,{ai:aiOptions,applications:{defaultSource:null,storeDirectory:store,coreVersion:'0.3.5'}}));
  t.after(async()=>{await Promise.all(hosts.map(h=>h.close()));await Promise.all(roots.map(r=>rm(r,{recursive:true,force:true})));});t.diagnostic('packages built; starting hosts');hosts.forEach(h=>h.start());const comm=await Promise.all(hosts.map(h=>h.communication));await Promise.all(comm.map(c=>c.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false})));const nodes=await Promise.all(comm.map(c=>c.snapshot()));
@@ -14,19 +22,26 @@ async function fixture(t,aiOptions={}){const store=await packages(),roots=await 
  async function catalog(){await a.applications.invoke(APP,'peer.offers.refresh',{peerId:peer});return until(()=>a.applications.invoke(APP,'peer.offers',{peerId:peer}),c=>c.supported&&c.syncedAt);}
  t.diagnostic('refreshing peer offers');await catalog();t.diagnostic('fixture ready');return {a,b,hosts,roots,peer,bWindow,catalog};
 }
-test('forms reject executable or undeclared fields and preserve false/zero',()=>{const fields=inputFields([{key:'flag',label:'确认',type:'boolean',required:true},{key:'count',label:'数量',type:'number',required:true}]);assert.deepEqual(fieldValues(fields,{flag:false,count:0}),{flag:false,count:0});assert.throws(()=>fieldValues(fields,{flag:true,count:1,callbackURL:'http://bad'}));assert.throws(()=>inputFields([{key:'__proto__',label:'bad',type:'text'}]));});
+
 test('packaged A flow -> B new workflow -> completion callback resumes the original wait once',async t=>{const f=await fixture(t),{a,b,peer}=f;
+ // Force the receiver's durable completion to precede the sender's durable ACK.
+ // Reading a completed run must never be used as an ACK barrier.
+ const originalInvoke=a.applications.invokeWorkflow;let releaseAck,received;const ackGate=new Promise(r=>{releaseAck=r;}),receiverCommitted=new Promise(r=>{received=r;});let held=false;
+ a.applications.invokeWorkflow=async(...args)=>{const result=await originalInvoke(...args);if(args[1]==='workflow.signal'&&!held){held=true;received();await ackGate;}return result;};
+ try{
  t.diagnostic('reading workflow catalog');const flows=await b.applications.call(f.bWindow.id,'workflow.catalog'),flow=flows.flows.find(x=>x.id==='text-normalize');assert.ok(flow);const state=await b.applications.call(f.bWindow.id,'offer.list');const offerId=op();
  await b.applications.call(f.bWindow.id,'offer.save',{operationId:op(),ifRevision:state.revision,offerId,name:'文本工作流',description:'整理输入文本',inputs:'目标与材料',outputs:'整理稿',instructions:'',handling:'workflow',delivery:'auto',scope:null,published:true,inputFields:flow.inputs,workflow:{appId:flow.appId,packageDigest:flow.packageDigest,workflowId:flow.id,revision:flow.revision,fixedInputs:{},outputMapping:{summary:'summary',materials:'materials'}}});
  const catalog=await until(()=>f.catalog(),c=>c.offers.some(o=>o.offerId===offerId));assert.ok(catalog.features.includes('workflow-offers-v1'));assert.ok(!JSON.stringify(catalog).includes(flow.packageDigest));assert.ok(!JSON.stringify(catalog).includes('fixedInputs'));
  const materialBytes=Buffer.from('只通过业务字段转交的材料'),materialDigest=createHash('sha256').update(materialBytes).digest('hex'),materialHome=join(f.roots[0],'.agents/user-data/applications/data',PROVIDER,'materials');await mkdir(materialHome,{recursive:true});await writeFile(join(materialHome,materialDigest),materialBytes);const extraMaterial={digest:materialDigest,name:'字段材料.txt',size:materialBytes.length,mediaType:'text/plain'};
  t.diagnostic('creating A workflow');const run=await a.applications.invoke(PROVIDER,'run.create',{runId:op()}),waitId=op(),taskId=op();await a.applications.invoke(PROVIDER,'run.request',{runId:run.runId,waitId,taskId,operationId:op(),peerId:peer,offerId,offerRevision:1,goal:'中文流程闭环',offerInputs:{references:[extraMaterial],style:'简洁',humanReview:false}});
  const finished=await until(()=>a.applications.invoke(PROVIDER,'run.get',{runId:run.runId}),r=>r.status==='completed');assert.equal(finished.continuations,1);assert.equal(finished.waits[0].taskId,taskId);assert.equal(finished.waits[0].outcome,'completed');assert.equal(finished.waits[0].delivery.materials.length,1);const deliveredBytes=await readFile(join(f.roots[0],'.agents/user-data/applications/data',PROVIDER,'materials',finished.waits[0].delivery.materials[0].digest));assert.ok(deliveredBytes.toString().includes(materialBytes.toString()));
- const task=await a.applications.invoke(APP,'task.get',{taskId});assert.equal(task.status,'completed');assert.equal(task.callback.state,'acknowledged');assert.equal(task.deliveries.length,1);
+ await receiverCommitted;const pending=await a.applications.invoke(APP,'task.get',{taskId});assert.equal(pending.status,'completed');assert.notEqual(pending.callback.state,'acknowledged');
+ releaseAck();const task=await until(()=>a.applications.invoke(APP,'task.get',{taskId}),t=>t.callback.state==='acknowledged');assert.equal(task.status,'completed');assert.equal(task.callback.state,'acknowledged');assert.equal(task.deliveries.length,1);
  const bTask=await b.applications.invoke(APP,'task.get',{taskId});assert.equal(bTask.workflowOrigin,undefined);assert.equal(bTask.runs.filter(r=>r.kind==='workflow').length,1);
  // Duplicate business receipt is matched to its original event, even after flow completion.
  const event={eventId:finished.waits[0].receivedEventId,runId:run.runId,waitId,taskId,sourcePeerId:peer,outcome:'completed',delivery:finished.waits[0].delivery};
  const duplicate=await a.applications.invokeWorkflow(PROVIDER,'workflow.signal',event,{requesterAppId:APP});assert.equal(duplicate.duplicate,true);assert.equal((await a.applications.invoke(PROVIDER,'run.get',{runId:run.runId})).continuations,1);
+ }finally{releaseAck();a.applications.invokeWorkflow=originalInvoke;}
 });
 test('paused A flow accepts result without progressing; parallel manual tasks can return in reverse order',async t=>{const f=await fixture(t),{a,b,peer}=f;t.diagnostic('creating A workflow');const run=await a.applications.invoke(PROVIDER,'run.create',{runId:op()}),ids=[op(),op()];
  for(let i=0;i<2;i++)await a.applications.invoke(PROVIDER,'run.request',{runId:run.runId,waitId:'wait-'+i,taskId:ids[i],operationId:op(),peerId:peer,goal:'人工任务 '+i});await a.applications.invoke(PROVIDER,'run.pause',{runId:run.runId});

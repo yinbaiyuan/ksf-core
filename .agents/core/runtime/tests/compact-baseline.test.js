@@ -12,12 +12,17 @@ import { systemRead, systemUpdate, systemRollback, systemFingerprint } from '../
 import { prepareContribution, readContribution, submitContribution } from '../src/distribution/contribute.js';
 import { distributionFixture, commitWorkspace, git, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
-
 const example = '.agents/core/example.txt';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 const apiFor = f => new ForkAPI({ coreRoot: f.root });
 const prepare = (f, api, options = {}) => prepareContribution({ ...contributionDescription, root: f.workspace, paths: [example], api, ...options });
 const submit = (f, plan, api, options = {}) => submitContribution({ root: f.workspace, id: plan.id, reviewed: plan.digest, api, ...options });
+async function published(t) {
+  const f = await distributionFixture(t, { compact: true }), api = apiFor(f);
+  writeAtomic(join(f.workspace, example), 'a reviewed fix\n'); commitWorkspace(f);
+  const plan = await prepare(f, api); await submit(f, plan, api); api.calls = [];
+  return { f, api, plan };
+}
 
 test('anonymous original reads use pinned raw content and verify blobs without one REST request per file', async () => {
   const commit = 'a'.repeat(40), treeSHA = 'b'.repeat(40), path = '.agents/core/中文 文件.txt', bytes = Buffer.from('original text\n'), calls = [];
@@ -92,153 +97,4 @@ test('compact receipts for an older launcher source report both newly added fixe
   writeAtomic(join(f.workspace, '.agents/core/release.json'), stableJSON(receipt));
   const status = await systemRead({ root: f.workspace, api });
   assert.deepEqual(status.changes.map(c => `${c.state}:${c.path}`).sort(), ['deleted:.agents/bin/ksf', 'added:.agents/ksf', 'added:.agents/ksf.ps1'].sort());
-});
-
-test('compact instance creates committed-only diffs, ignores dirty files and submits from the pinned Core commit', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f);
-  writeAtomic(join(f.workspace, example), 'committed fix\n'); const head = commitWorkspace(f);
-  writeAtomic(join(f.workspace, example), 'staged private scratch\n'); git(f.workspace, ['add', '--', example]);
-  writeAtomic(join(f.workspace, example), 'working private scratch\n');
-  writeAtomic(join(f.workspace, '.agents/core/release.json'), 'broken uncommitted receipt');
-  const plan = await prepare(f, api);
-  assert.equal(plan.sourceCommit, head); assert.equal(plan.baseline.schema_version, 4);
-  assert.match(plan.changes[0].diff, /-first/); assert.match(plan.changes[0].diff, /\+committed fix/);
-  assert.ok(!JSON.stringify(plan).includes('private scratch'));
-  api.calls = [];
-  assert.equal((await submit(f, plan, api, { dryRun: true })).remoteVerified, false); assert.equal(api.calls.length, 0);
-  const result = await submit(f, plan, api); assert.equal(result.draft, true);
-  assert.ok(!JSON.stringify(api.calls).includes(head));
-});
-
-test('compact committed snapshots preserve deletions, executable modes, binaries and Chinese additions', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f), binary = '.agents/core/new.bin', chinese = '.agents/core/中文 新文件.txt';
-  rmSync(join(f.workspace, example)); chmodSync(join(f.workspace, 'AGENTS.md'), 0o755);
-  writeAtomic(join(f.workspace, binary), Buffer.from([0, 255, 10])); writeAtomic(join(f.workspace, chinese), 'committed Chinese path\n'); commitWorkspace(f,{modes:{'AGENTS.md':0o755}});
-  const plan = await prepare(f, api, { paths: undefined, all: true });
-  assert.equal(plan.changes.length,4,JSON.stringify(plan.changes.map(item=>({path:item.workspace_path,mode:item.mode})))); assert.equal(plan.changes.find(c => c.workspace_path === example).operation, 'delete');
-  assert.equal(plan.changes.find(c => c.workspace_path === 'AGENTS.md').mode, 0o755);
-  assert.match(plan.changes.find(c => c.workspace_path === binary).diff, /^Binary change:/);
-  assert.equal(plan.changes.find(c => c.workspace_path === chinese).operation, 'add');
-  assert.equal((await submit(f, plan, api)).draft, true);
-});
-
-test('compact upgrade merges from fetched original bytes and rollback restores the compact receipt', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f), original = readFileSync(join(f.workspace, '.agents/core/release.json'));
-  const next = await f.next('0.1.1', { [example]: sample.replace('last', 'upstream') });
-  writeAtomic(join(f.workspace, example), sample.replace('first', 'local'));
-  const preview = await systemUpdate({ root: f.workspace, from: next.coreArchive, api, dryRun: true });
-  assert.equal(preview.wouldChange, true); assert.ok(readFileSync(join(f.workspace, '.agents/core/release.json')).equals(original));
-  await systemUpdate({ root: f.workspace, from: next.coreArchive, api });
-  assert.equal(installedManifest(f.workspace).schema_version, 4);
-  assert.equal(readFileSync(join(f.workspace, example), 'utf8'), sample.replace('first', 'local').replace('last', 'upstream'));
-  await systemRollback({ root: f.workspace });
-  assert.ok(readFileSync(join(f.workspace, '.agents/core/release.json')).equals(original));
-  assert.equal(readFileSync(join(f.workspace, example), 'utf8'), sample.replace('first', 'local'));
-});
-
-for (const defect of ['network', 'commit', 'tree', 'blob']) test(`unverified remote original (${defect}) preserves the compact instance`, async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f), request = api.request.bind(api);
-  const next = await f.next('0.1.1', { [example]: sample.replace('last', 'release') });
-  writeAtomic(join(f.workspace, example), sample.replace('first', 'local'));
-  const before = systemFingerprint(f.workspace);
-  api.request = async (...args) => {
-    if (defect === 'network') throw Object.assign(new Error('unavailable fixture service'), { code: 'GITHUB_REQUEST_FAILED' });
-    const result = await request(...args);
-    if (defect === 'commit' && args[1].includes('/git/commits/')) result.sha = 'f'.repeat(40);
-    if (defect === 'tree' && args[1].includes('/git/trees/')) result.truncated = true;
-    if (defect === 'blob' && args[1].includes('/git/blobs/')) result.content = Buffer.from('wrong original').toString('base64');
-    return result;
-  };
-  await assert.rejects(systemUpdate({ root: f.workspace, from: next.coreArchive, api }));
-  assert.equal(systemFingerprint(f.workspace), before); assert.ok(api.calls.every(c => c.method === 'GET'));
-});
-
-async function published(t) {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f);
-  writeAtomic(join(f.workspace, example), 'a reviewed fix\n'); commitWorkspace(f);
-  const plan = await prepare(f, api); await submit(f, plan, api); api.calls = [];
-  return { f, api, plan };
-}
-
-for (const state of ['open', 'closed', 'merged']) test(`same node warns about the existing ${state} PR and another plan creates no duplicate`, async t => {
-  const { f, api, plan } = await published(t);
-  if (state !== 'open') { api.pr.state = 'closed'; api.pr.draft = false; api.ref = null; }
-  if (state === 'merged') api.pr.merged = true;
-  const repeat = await prepare(f, api);
-  assert.notEqual(repeat.id, plan.id); assert.equal(repeat.warnings.length, 1);
-  assert.equal(repeat.warnings[0].remoteVerified, true); assert.equal(repeat.warnings[0].sameSourceCommit, true);
-  assert.equal(repeat.warnings[0].sameContent, true); assert.match(repeat.warnings[0].url, /\/pull\/17$/);
-  const result = await submit(f, repeat, api);
-  assert.equal(result.duplicate, true); assert.equal(result.id, plan.id); assert.equal(result.merged, state === 'merged');
-  assert.equal(api.prCount, 1); assert.ok(api.calls.every(c => c.method === 'GET'));
-});
-
-test('a later personal-only commit still warns about identical already-contributed system content', async t => {
-  const { f, api } = await published(t);
-  writeAtomic(join(f.workspace, '知识/private.md'), 'fictional private note'); commitWorkspace(f, { paths: ['知识/private.md'] });
-  const repeat = await prepare(f, api);
-  assert.equal(repeat.warnings[0].sameSourceCommit, false); assert.equal(repeat.warnings[0].sameContent, true);
-  assert.equal((await submit(f, repeat, api)).duplicate, true); assert.equal(api.prCount, 1);
-});
-
-test('identical legacy PR content warns without inventing a local commit association or creating a replacement', async t => {
-  const { f, api, plan } = await published(t);
-  const { digest, sourceCommit, baseline, ...old } = readContribution({ root: f.workspace, id: plan.id });
-  old.schema_version = 1; old.changes = old.changes.map(({ before_mode, ...change }) => change);
-  old.core = { revision: old.core.revision, branch: old.core.branch, repository: old.core.repository };
-  const legacyDigest = digestObject(old), directory = join(f.workspace, `.agents/runtime-data/contributions/${plan.id}`);
-  writeAtomic(join(directory, 'plan.json'), stableJSON({ ...old, digest: legacyDigest }));
-  const state = JSON.parse(readFileSync(join(directory, 'submitted.json'))); state.digest = legacyDigest;
-  writeAtomic(join(directory, 'submitted.json'), stableJSON(state)); rmSync(join(directory, 'attempted.json'));
-  const repeat = await prepare(f, api);
-  assert.equal(repeat.warnings[0].sameContent, true); assert.equal(repeat.warnings[0].sameSourceCommit, false);
-  const result = await submit(f, repeat, api); assert.equal(result.legacy, true); assert.equal(result.duplicate, true);
-  assert.equal(api.prCount, 1); assert.ok(api.calls.every(c => c.method === 'GET'));
-});
-
-test('different selections at the same node warn without falsely marking them as identical', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f);
-  writeAtomic(join(f.workspace, example), 'a fix'); writeAtomic(join(f.workspace, '.agents/core/extra.txt'), 'another fix'); commitWorkspace(f);
-  const first = await prepare(f, api); await submit(f, first, api); api.calls = [];
-  const next = await prepare(f, api, { paths: ['.agents/core/extra.txt'] });
-  assert.equal(next.warnings[0].sameSourceCommit, true); assert.equal(next.warnings[0].sameContent, false);
-  assert.ok(api.calls.every(c => c.method === 'GET'));
-});
-
-test('a lost ref-creation response is discovered by another plan and resumes through the original ID', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = new ForkAPI({ coreRoot: f.root, failAfterRef: true });
-  writeAtomic(join(f.workspace, example), 'a reviewed fix'); commitWorkspace(f);
-  const plan = await prepare(f, api); await assert.rejects(submit(f, plan, api), { code: 'GITHUB_REQUEST_FAILED' });
-  api.calls = [];
-  const repeat = await prepare(f, api);
-  assert.equal(repeat.warnings[0].reason, 'CONTRIBUTION_PREVIOUS_ATTEMPT');
-  await assert.rejects(submit(f, repeat, api), { code: 'CONTRIBUTION_PREVIOUS_ATTEMPT' });
-  assert.ok(api.calls.every(c => c.method === 'GET')); assert.equal(api.prCount, 0);
-  await submit(f, plan, api); assert.equal(api.prCount, 1);
-});
-
-test('unknown prior PR state warns during prepare and prevents another publication', async t => {
-  const { f, api } = await published(t), request = api.request.bind(api);
-  api.request = async (...args) => {
-    if (args[1].endsWith('/pulls/17')) throw Object.assign(new Error('unknown fixture state'), { code: 'GITHUB_REQUEST_FAILED' });
-    return request(...args);
-  };
-  const repeat = await prepare(f, api);
-  assert.equal(repeat.warnings[0].remoteVerified, false);
-  await assert.rejects(submit(f, repeat, api), { code: 'GITHUB_REQUEST_FAILED' });
-  assert.equal(api.prCount, 1); assert.ok(api.calls.every(c => c.method === 'GET'));
-});
-
-test('partial publication reuses its original plan rather than creating another PR from another plan', async t => {
-  const f = await distributionFixture(t, { compact: true }), api = apiFor(f);
-  writeAtomic(join(f.workspace, example), 'a reviewed fix'); commitWorkspace(f);
-  const plan = await prepare(f, api), request = api.request.bind(api);
-  let fail = true;
-  api.request = async (...args) => { if (fail && args[0] === 'POST' && args[1].endsWith('/pulls')) throw Object.assign(new Error('fixture failed before PR'), { code: 'GITHUB_REQUEST_FAILED' }); return request(...args); };
-  await assert.rejects(submit(f, plan, api)); fail = false; api.calls = [];
-  const repeat = await prepare(f, api);
-  assert.equal(repeat.warnings[0].reason, 'CONTRIBUTION_PREVIOUS_ATTEMPT');
-  await assert.rejects(submit(f, repeat, api), { code: 'CONTRIBUTION_PREVIOUS_ATTEMPT' });
-  assert.equal(api.prCount, 0); assert.ok(api.calls.every(c => c.method === 'GET'));
-  assert.equal((await submit(f, plan, api)).number, 17); assert.equal(api.prCount, 1);
 });

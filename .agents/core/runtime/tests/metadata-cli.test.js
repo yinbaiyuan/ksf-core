@@ -132,7 +132,7 @@ test('CLI loaded from another cwd resolves target and --from against its own KSF
 });
 
 test('new operations leave old CLI error protocol intact', () => {
-  const result = spawnSync(process.execPath, [join(runtime, 'src/cli.js'), 'test', '--json'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [join(runtime, 'src/cli.js'), 'hello', '--unsupported', '--json'], { encoding: 'utf8' });
   assert.equal(result.status, 2);assert.equal(result.stdout, '');assert.equal(JSON.parse(result.stderr).error.code, 'INVALID_ARGUMENTS');
 });
 

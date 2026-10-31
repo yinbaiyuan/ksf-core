@@ -2,7 +2,7 @@
 
 ## 自动检查
 
-运行npm ci、npm run typecheck、npm run check、npm run build。check的error阻断交付；warning是需要人工复核的直连模型、凭据或全局CSS线索，不是沙箱或完整安全扫描。打包器额外检查包容量、静态依赖与资源。原生二进制需验证target和实际运行，不以文件存在证明兼容。
+遵循[统一测试规范](../testing.md)。首次准备、锁文件变化或环境失效时运行 npm ci；按本次输入变化执行必要的 typecheck、check 和 build。第一方应用使用 `ksf test --component app:<应用ID>`，风险变更显式补齐 `--suite full`。check的error阻断交付；warning是需要人工复核的直连模型、凭据或全局CSS线索，不是沙箱或完整安全扫描。打包器额外检查包容量、静态依赖与资源。原生二进制需验证target和实际运行，不以文件存在证明兼容。
 
 对业务规则编写有意义测试：幂等、并发、结果采用、迁移、重启。不要只测试实现函数被调用或制造与业务无关的测试数量。
 

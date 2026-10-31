@@ -31,14 +31,14 @@ export async function prepareContribution({ root, paths, all = false, title, bod
   if (typeof title !== 'string' || !title.trim() || title.length > 200 || /[\r\n]/.test(title) || typeof body !== 'string' || body.length > 60000) fail('CONTRIBUTION_INVALID', 'Invalid contribution title or description.');
   const commitMessage = contributionCommitMessage(title, body);
   const prDescription = requirePRDescription(title, prBody);
-  const source = committedSource(root), { manifest: receipt, baseline } = contributionBaseline(source);
   if (paths?.some(path => !eligible(path))) fail('CONTRIBUTION_PATH_INVALID', 'Contributions may select only system source files.');
+  const source = committedSource(root), { manifest: receipt, baseline } = contributionBaseline(source);
   const manifest = await resolveBaseline(receipt, { api, fetcher });
   const selected = all ? [...new Set([...Object.keys(manifest.files), ...source.entries.keys()])].filter(eligible) : [...new Set(paths)];
   if (selected.some(path => !eligible(path))) fail('CONTRIBUTION_PATH_INVALID', 'Contributions may select only system files; generated manifests, private directories and Git data are excluded.');
   const changes = [], destinations = new Map();
-  for (const path of selected.sort()) {
-    const original = manifest.files[path], file = source.read(path), bytes = file?.bytes ?? null, mode = file?.mode ?? null;
+  for (const batch of source.readBatches(selected.sort())) for (const [path, file] of batch) {
+    const original = manifest.files[path], bytes = file?.bytes ?? null, mode = file?.mode ?? null;
     const checksum = bytes === null ? null : sha256(bytes);
     if (matchesBaseline(file, original ?? null)) continue;
     const sourcePath = original?.source_path ?? path;

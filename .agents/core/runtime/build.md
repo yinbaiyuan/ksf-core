@@ -83,7 +83,7 @@ All package checks happen locally; no network access is involved in this build.
 1. Put the selected official Node.js archive into `runtime/packages/`.
 2. Update `.agents/core/build.json` with the deliberate version/path and trusted
    official archive SHA256. There is no handwritten executable SHA256 field.
-3. Run `.agents/ksf build`, then `.agents/ksf test` and
+3. Run `.agents/ksf build`, then `.agents/ksf test --suite full` and
    `.agents/ksf runtime verify` before distributing the changed release.
 
 Build preparation may install the newly selected runtime before manifest

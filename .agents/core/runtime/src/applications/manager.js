@@ -59,7 +59,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
   let accepting=true;const draining=new Set();
   const policyPath=join(root,'.agents/runtime-data/applications/policy.json');
   const runtimePolicy=async()=>{const value=await readJSON(policyPath,{schemaVersion:1,stopped:[],manual:[]});assert(value.schemaVersion===1&&['stopped','manual'].every(key=>Array.isArray(value[key])&&value[key].every(validId)),'APP_RUNTIME_POLICY_INVALID','设备应用运行策略损坏，请保留 policy.json 并检查。');return value;};
-  const assertActive=async id=>{assert(accepting&&!draining.has(id),'APP_BUSY','后台正在停止接收新调用。',409);assert(!(await runtimePolicy()).stopped.includes(id),'APP_RUNTIME_STOPPED','应用后台已由用户停止，请先执行 app runtime start。',409);};
+  const assertActive=async id=>{assert(accepting&&!draining.has(id),'APP_BUSY','后台正在停止接收新调用。',409);const policy=await runtimePolicy();assert(accepting&&!draining.has(id),'APP_BUSY','后台正在停止接收新调用。',409);assert(!policy.stopped.includes(id),'APP_RUNTIME_STOPPED','应用后台已由用户停止，请先执行 app runtime start。',409);};
   const backgroundPath=join(home,'background'),backgroundLocks=createCoordinator(),restartCounts=new Map();
   async function backgroundHolds(){const applications={};for(const name of await readdir(backgroundPath).catch(e=>{if(e.code==='ENOENT')return [];throw e;}))if(/^[a-z][a-z0-9.-]{1,79}\.json$/.test(name)){const value=await readJSON(join(backgroundPath,name));assert(value.schemaVersion===1&&value.holds&&typeof value.holds==='object'&&!Array.isArray(value.holds),'APP_BACKGROUND_INVALID','持久运行需求损坏，请保留原件。');applications[name.slice(0,-5)]=value.holds;}return {schemaVersion:1,applications};}
   const holdCount=async appId=>Object.keys((await backgroundHolds()).applications[appId]??{}).length;
@@ -431,7 +431,12 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
       if(runtimes.get(runtime.key)===runtime)runtimes.delete(runtime.key);await rm(join(runtimeHome,`${runtime.id}.json`),{force:true});
     })();return runtime.stopping;
   }
-  async function idleRuntime(runtime){if(runtime.phase==='ready'&&!storage.pending(runtime.appId)&&!runtime.manual&&!runtime.background&&!runtime.persistent&&!runtime.clients.size&&!runtime.jobs.size&&!runtime.calls.size&&!runtime.closed)await stopRuntime(runtime);}
+  async function idleRuntime(runtime){
+    // A launch has reserved its instance before startup and policy revalidation
+    // finish. That reservation pins the backend until the client lease attaches.
+    const preparing=[...instances.values()].some(instance=>instance.preparing&&!instance.closed&&instance.appId===runtime.appId&&instance.release.digest===runtime.release.digest);
+    if(!preparing&&runtime.phase==='ready'&&!storage.pending(runtime.appId)&&!runtime.manual&&!runtime.background&&!runtime.persistent&&!runtime.clients.size&&!runtime.jobs.size&&!runtime.calls.size&&!runtime.closed)await stopRuntime(runtime);
+  }
   async function startBackground(){try{return await startBackgroundInternal();}catch(error){backgroundErrors=[{code:error.code??'APP_START_FAILED',message:'后台协调失败，请检查应用诊断并重试。'}];throw error;}}
   async function startBackgroundInternal(){
     assert(!disposed,'APP_HOST_CLOSED','应用宿主已停止。',503);
@@ -477,10 +482,11 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
       instances.set(id,instance);
       return {instance,pending:app.active.manifest.backend?managedStart(appId,app.active,['cli','message'].includes(surface.reason)?surface.reason:kind):null};
     });
+    let selectedRuntime;
     try{
-      if(pending){const runtime=await pending;await assertActive(appId);assert(!instance.closed&&!disposed,'APP_PROCESS_EXITED','应用启动期间租约已关闭。',410);runtime.clients.add(instance.id);instance.runtime=runtime;}
+      if(pending){const runtime=selectedRuntime=await pending;await assertActive(appId);assert(!instance.closed&&!disposed&&!runtime.closed,'APP_PROCESS_EXITED','应用启动期间租约已关闭。',410);runtime.clients.add(instance.id);instance.runtime=runtime;}
       instance.preparing=false;return {id:instance.id,appId,version:instance.release.manifest.version,digest};
-    }catch(error){await stopInstance(instance.id);if(!disposed)await mutate(state=>settlePending(state,appId));throw error;}
+    }catch(error){await stopInstance(instance.id);if(selectedRuntime&&!instance.runtime)await idleRuntime(selectedRuntime);if(!disposed)await mutate(state=>settlePending(state,appId));throw error;}
   }
   async function call(id,method,params,{maxBytes=1024*1024,messageType='call',waitForCompletion=false}={}){
     assert(uuid(id)&&typeof method==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,79}$/.test(method),'APP_CALL_INVALID','应用调用参数无效。');

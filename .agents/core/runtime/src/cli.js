@@ -1,7 +1,5 @@
 import { fileURLToPath } from 'node:url';
 import { hello } from './services/hello.js';
-import { spawnSync } from 'node:child_process';
-import { readdirSync } from 'node:fs';
 import { types } from './objects/schema.js';
 const args = process.argv.slice(2);
 const [command, ...options] = args;
@@ -20,7 +18,7 @@ const runtimeInfo = () => ({
 if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command))) {
   const objectCommands = Object.keys(types).map(type =>
     `  ${`ksf ${type} --help`.padEnd(27)}Manage ${type} objects\n`).join('');
-  process.stdout.write('KSF CLI\n\nUsage:\n  ksf hello                   Print a greeting\n  ksf hello --json            Return a greeting and runtime details as JSON\n  ksf runtime verify          Fully verify the bundled and installed runtime\n  ksf runtime verify --json   Return verification details as JSON\n  ksf build                   Generate manifest from build inputs and artifacts\n  ksf build --json            Return generated manifest details as JSON\n  ksf test                    Run JavaScript tests with the bundled Node.js\n  ksf context --help          Get capability context for the Agent\n  ksf project --help          Manage project root cards and directories\n  ksf metadata --help         Manage Markdown YAML frontmatter\n' + objectCommands + '  ksf --help                  Show this help\n');
+  process.stdout.write('KSF CLI\n\nUsage:\n  ksf hello                   Print a greeting\n  ksf hello --json            Return a greeting and runtime details as JSON\n  ksf runtime verify          Fully verify the bundled and installed runtime\n  ksf runtime verify --json   Return verification details as JSON\n  ksf build                   Generate manifest from build inputs and artifacts\n  ksf build --json            Return generated manifest details as JSON\n  ksf test                    Run quick tests; --suite full for complete verification\n  ksf context --help          Get capability context for the Agent\n  ksf project --help          Manage project root cards and directories\n  ksf metadata --help         Manage Markdown YAML frontmatter\n' + objectCommands + '  ksf --help                  Show this help\n');
   process.stdout.write('  ksf repository --help       Manage independent local project repositories\n');
   process.stdout.write('  ksf commit-message --help   Check commit messages or print the template\n');
   process.stdout.write('  ksf pr-description --help   Check PR descriptions or print the template\n');
@@ -145,24 +143,10 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
     process.stderr.write(options.includes('--json') ? `${JSON.stringify(error)}\n` : `${error.error.code}: ${error.error.message}\n`);
     process.exitCode = 1;
   }
-} else if (command === 'test' && options.length === 0) {
-  const testEnv = { ...process.env };
-  // This child is an independent runner, including when ksf is called from a test.
-  delete testEnv.NODE_TEST_CONTEXT;
-  // Package-native dependencies may ship tests for a different runner. Fixture
-  // programs (including opt-in live acceptance) must never be auto-discovered.
-  const testFiles = ['tests', 'web/tests'].flatMap(directory => {
-    try {
-      return readdirSync(new URL(`../${directory}/`, import.meta.url)).sort()
-        .filter(name => /\.test\.(?:[cm]?js|ts)$/.test(name)).map(name => `${directory}/${name}`);
-    } catch (error) { if (error.code === 'ENOENT') return []; throw error; }
-  });
-  if (!testFiles.length) throw new Error('No owned JavaScript test suites found.');
-  const result = spawnSync(process.execPath, ['--test', ...testFiles], {
-    cwd: fileURLToPath(new URL('../', import.meta.url)), stdio: 'inherit', env: testEnv,
-  });
-  if (result.error) process.stderr.write(`Cannot start JavaScript tests: ${result.error.message}\n`);
-  process.exitCode = result.status ?? 1;
+} else if (command === 'test') {
+  const { runTestCommand } = await import('./commands/test.js');
+  const result = await runTestCommand(options, currentRoot);
+  process.stdout.write(result.stdout); process.exitCode = result.exitCode;
 } else if (command === 'hello' && options.length <= 1 && options.every(option => option === '--json')) {
   const result = {
     ok: true,

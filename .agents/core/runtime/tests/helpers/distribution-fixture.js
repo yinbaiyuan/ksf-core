@@ -2,6 +2,7 @@ import {platform,launcherInvocation,removePathSync as rmSync} from '../../src/pl
 export const fixtureTarget=platform.name==='win32'?'win32-x64':'darwin-arm64';
 import {gitBinary,nullDevice,writeNodeExecutable,storedZip} from './platform.js';
 import assert from 'node:assert/strict';
+import { after } from 'node:test';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync, readdirSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
@@ -14,15 +15,18 @@ import { sha256, stableJSON, writeAtomic, fileMode } from '../../src/distributio
 import { developmentPath } from '../../src/distribution/paths.js';
 
 export const repository = fileURLToPath(new URL('../../../../../', import.meta.url));
+const gitTiming = { ms: 0, calls: 0 };
 export const contributionDescription = {
   title: 'fix(core): 修正选定系统文件的示例行为',
   body: '原因：\n选定系统文件与预期行为不符。\n\n变更：\n- 修正选定系统文件的示例行为。\n\n验证：\n- 未执行：这里只构造隔离的贡献测试数据，不代表真实系统验证。\n',
   prBody: '## 背景与目的\n选定系统文件与预期行为不符，需恢复约定行为。\n\n## 主要变更\n- 修正示例行为，并保留当前贡献边界。\n\n## 验证结果\n- 未执行：这里只构造隔离贡献数据，不代表真实系统验证。\n\n## 影响与兼容\n本例不更换 CLI 或数据格式；实际兼容性由测试场景核对。\n',
 };
 export function git(root, args) {
+  const began = performance.now();
   const result = spawnSync(gitBinary, ['-C', root, ...args], { encoding: 'utf8', env: {
     ...process.env, GIT_CONFIG_GLOBAL: nullDevice, GIT_CONFIG_SYSTEM: nullDevice, GIT_TERMINAL_PROMPT: '0',
   } });
+  gitTiming.ms += performance.now() - began; gitTiming.calls++;
   assert.equal(result.status, 0, result.stderr); return result.stdout.trim();
 }
 export function commitWorkspace(f, { paths = ['.agents/core', 'AGENTS.md', '.agents/ksf', '.agents/ksf.ps1'], message = 'Fictional local system checkpoint', modes={} } = {}) {
@@ -40,7 +44,7 @@ export function commitWorkspace(f, { paths = ['.agents/core', 'AGENTS.md', '.age
   git(f.workspace, ['commit', '-m', message]);
   return git(f.workspace, ['rev-parse', 'HEAD']);
 }
-export async function distributionFixture(t, { legacyEntry = false, sourceRoot = repository, compact = false } = {}) {
+async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false } = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
@@ -117,6 +121,32 @@ export async function distributionFixture(t, { legacyEntry = false, sourceRoot =
     }
     writeAtomic(join(workspace, '.agents/core/release.json'), stableJSON(manifest));
   }
+  return { directory, root, workspace, first, build, originals, legacyEntry };
+}
+
+const seeds = new Map(), seedCleanup = [];
+after(() => { for (const cleanup of seedCleanup.splice(0)) cleanup(); });
+export async function distributionFixture(t, options = {}) {
+  const began = performance.now(), priorGit = {...gitTiming}; let packageMs = 0, cleanupMs = 0;
+  let base;
+  if (options.legacyEntry || options.sourceRoot && options.sourceRoot !== repository) base = await createFixtureBase(t, options);
+  else {
+    const key = !!options.compact;
+    if (!seeds.has(key)) seeds.set(key, createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
+    const seed = await seeds.get(key), directory = mkdtempSync(join(tmpdir(), 'ksf isolated fixture '));
+    t.after(() => {const start=performance.now();rmSync(directory, { recursive: true, force: true });cleanupMs=performance.now()-start;});
+    const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');
+    // Seeds are never mutated. Copies are independent, including Git objects;
+    // mutable fixtures must not share writable hardlinks with another scenario.
+    cpSync(seed.root, root, { recursive: true });
+    cpSync(seed.workspace, workspace, { recursive: true });
+    cpSync(seed.first.output, output, { recursive: true });
+    base = { directory, root, workspace, first: { ...structuredClone(seed.first), output, template: join(output, 'ksf-workspace') }, build: structuredClone(seed.build), originals: new Map(), legacyEntry: false };
+  }
+  const { directory, root, workspace, first, build, originals } = base;
+  const fixtureMs = performance.now()-began;
+  t.after(() => t.diagnostic(JSON.stringify({phase:'distribution-fixture',fixtureMs:Math.round(fixtureMs),gitMs:Math.round(gitTiming.ms-priorGit.ms),gitCalls:gitTiming.calls-priorGit.calls,packageMs:Math.round(packageMs),assertionAndOtherMs:Math.round(Math.max(0,performance.now()-began-fixtureMs-packageMs-cleanupMs)),cleanupMs:Math.round(cleanupMs)})));
+  let legacyEntry = base.legacyEntry;
   const save = (path, value) => writeAtomic(join(root, path), value, existsSync(join(root, path)) ? fileMode(join(root, path)) : 0o644);
   const next = async (version = '0.1.1', changes = {}) => {
     if (legacyEntry) {
@@ -130,14 +160,16 @@ export async function distributionFixture(t, { legacyEntry = false, sourceRoot =
       if (bytes === null) rmSync(join(root, path)); else save(path, bytes);
     }
     git(root, ['add', '.agents', 'AGENTS.md']); git(root, ['commit', '-m', `Fictional Core ${version}`]);
+    const packStarted=performance.now();
     const result = await buildRelease({ root, platform:fixtureTarget, output: join(directory, `release-${version}`) });
+    packageMs+=performance.now()-packStarted;
     const index = JSON.parse(readFileSync(join(result.output, 'ksf-core-release.json'), 'utf8'));
     for (const item of Object.values(index.platforms[fixtureTarget])) item.url = pathToFileURL(join(result.output, item.name)).href;
     const source = join(directory, `feed-${version}.json`); writeAtomic(source, stableJSON(index));
     return { ...result, source, coreArchive: join(result.output, index.platforms[fixtureTarget].core.name), feed: index };
   };
   const launch = (args, options = {}) => { const invocation=launcherInvocation(workspace,args); return spawnSync(invocation.executable, invocation.args, {
-    cwd: tmpdir(), encoding: 'utf8', timeout: 20000,
+    cwd: tmpdir(), encoding: 'utf8', timeout: options.timeoutMs ?? 20000,
     env: { ...process.env, PATH: '', KSF_SKIP_AUTO_UPDATE: '1', ...options.env },
   }); };
   return { directory, root, workspace, first, next, save, launch, build };

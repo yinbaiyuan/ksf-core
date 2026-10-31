@@ -2,6 +2,9 @@
 param([string] $Root = ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))))
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+$ProgressPreference='SilentlyContinue'
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+$OutputEncoding=[Text.UTF8Encoding]::new($false)
 $checks=0
 function Assert-Check($Condition,[string]$Message){if(-not $Condition){throw "Bootstrap check failed: $Message"};$script:checks++}
 function PS-Quote([string]$Value){return "'"+$Value.Replace("'","''")+"'"}

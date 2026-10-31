@@ -6,28 +6,21 @@ import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 
-test('CI installs both application toolchains before running Core tests and uses the owned test entry', t => {
+test('CI prepares locked toolchains once per platform and restores them before full shards', t => {
   const directory = fileURLToPath(new URL('../../../../.github/workflows/', import.meta.url));
-  if (!existsSync(directory)) { t.skip('Installed Core packages do not include repository workflows.'); return; }
-  let suites = 0;
-  for (const name of readdirSync(directory).filter(name => /\.ya?ml$/.test(name))) {
-    const workflow = YAML.parse(readFileSync(join(directory, name), 'utf8'));
-    for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
-      const steps = job.steps ?? [];
-      const suite = steps.findIndex(step => /(?:\bksf(?:\.ps1)?\s+test\b|src\/cli\.js\s+test\b|node\s+--test\b)/.test(step.run ?? ''));
-      if (suite < 0) continue;
-      suites++;
-      for (const part of ['web', 'sdk']) {
-        const path = part === 'web' ? '.agents/core/runtime/web' : '.agents/core/applications/sdk';
-        const install = steps.findIndex(step => step['working-directory'] === path && /\bnpm\s+ci\b/.test(step.run ?? ''));
-        assert.ok(install >= 0 && install < suite, `${name}/${jobName}: install ${part} dependencies before the Core suite`);
-      }
-      const build = steps.findIndex(step => step['working-directory'] === '.agents/core/runtime/web' && /\bnpm\s+run\s+build\b/.test(step.run ?? ''));
-      assert.ok(build >= 0 && build < suite, `${name}/${jobName}: build verified frontend assets before server tests`);
-      assert.doesNotMatch(steps[suite].run, /node\s+--test\b/, `${name}/${jobName}: use the owned suite selector, not recursive vendor discovery`);
-    }
+  if (!existsSync(directory)) { t.skip('Installed packages exclude workflows.'); return; }
+  const verification = YAML.parse(readFileSync(join(directory, 'verification.yml'), 'utf8'));
+  const setup = verification.jobs.platform.steps, full = verification.jobs.full.steps;
+  for (const part of ['applications/sdk', 'applications/projects', 'runtime/web']) {
+    assert.ok(setup.some(s => s['working-directory'] === '.agents/core/'+part && /npm ci/.test(s.run ?? '')));
   }
-  assert.ok(suites > 0, 'At least one repository workflow must execute Core tests.');
+  assert.ok(setup.findIndex(s => /npm run build/.test(s.run ?? '')) < setup.findIndex(s => /test --suite quick/.test(s.run ?? '')));
+  assert.ok(full.findIndex(s => /tar -xf prepared.tar/.test(s.run ?? '')) < full.findIndex(s => /test --suite full --shard/.test(s.run ?? '')));
+  assert.ok(!full.some(s => /npm (?:test|ci)|release build|npm run build/.test(s.run ?? '')));
+  for (const step of [...setup,...full]) assert.ok(!step.env?.NODE_OPTIONS);
+  const check = YAML.parse(readFileSync(join(directory, 'check.yml'), 'utf8'));
+  assert.equal(check.jobs.required.if, 'always()');assert.deepEqual(check.jobs.required.needs, ['plan','verification']);
+  assert.ok(!check.on.pull_request.paths && !check.on.push.paths);
 });
 
 test('CI verifies the shipped runtime through a launcher without forging bootstrap proof', t => {
@@ -70,5 +63,5 @@ test('CI Node environment flags can start the bundled runtime before selecting t
       }
     }
   }
-  assert.ok(checked > 0);
+  assert.equal(checked, 0, "Test selection must use explicit CLI flags, never NODE_OPTIONS.");
 });

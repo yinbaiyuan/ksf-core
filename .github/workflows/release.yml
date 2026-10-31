@@ -16,23 +16,52 @@ on:
         required: false
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: ksf-release
   cancel-in-progress: false
 jobs:
-  windows-launcher:
-    if: github.repository == 'yinbaiyuan/ksf-core'
-    runs-on: windows-latest
-    timeout-minutes: 5
+  find-proof:
+    if: github.repository == 'yinbaiyuan/ksf-core' && inputs.operation != 'template-only'
+    runs-on: macos-15
+    outputs:
+      valid: ${{ steps.verify.outputs.valid }}
     steps:
       - uses: actions/checkout@v7.0.1
+      - name: Prepare bundled Node
+        run: |
+          .agents/ksf build --json > /dev/null
+          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
+          dirname "$ksf_node" >> "$GITHUB_PATH"
+      - id: find
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .agents/core/runtime/src/testing/ci.js find-proof
+      - uses: actions/download-artifact@v8.0.2
+        if: steps.find.outputs.candidate != ''
+        continue-on-error: true
         with:
-          persist-credentials: false
-      - name: Verify launcher with Windows PowerShell 5.1 (no Node)
-        shell: powershell
-        run: ./.agents/core/runtime/tests/launcher-windows.ps1
+          artifact-ids: ${{ steps.find.outputs.candidate }}
+          run-id: ${{ steps.find.outputs.run }}
+          github-token: ${{ github.token }}
+          path: trusted-proof
+      - id: verify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KSF_PROOF_RUN: ${{ steps.find.outputs.run }}
+        run: node .agents/core/runtime/src/testing/ci.js verify-proof trusted-proof/proof.json "$KSF_PROOF_RUN"
+  verification:
+    needs: find-proof
+    if: needs.find-proof.outputs.valid != 'true' && inputs.operation != 'template-only'
+    uses: ./.github/workflows/verification.yml
+    with:
+      full: true
   prepare:
-    needs: windows-launcher
+    needs: [find-proof, verification]
+    if: >-
+      ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' &&
+          (inputs.operation == 'template-only' || needs.find-proof.outputs.valid == 'true' ||
+           needs.verification.result == 'success') }}
     runs-on: macos-15
     timeout-minutes: 90
     outputs:
@@ -78,19 +107,10 @@ jobs:
         if: inputs.operation != 'template-only'
         working-directory: .agents/core/runtime/web
         run: npm ci
-      - name: SDK tests
-        if: inputs.operation != 'template-only'
-        working-directory: .agents/core/applications/sdk
-        run: npm test
-      - name: Build frontend before server tests
+      - name: Build frontend for the final artifact
         if: inputs.operation != 'template-only'
         working-directory: .agents/core/runtime/web
         run: npm run build
-      - name: Regression tests
-        if: inputs.operation != 'template-only'
-        env:
-          NODE_OPTIONS: --test-reporter=tap
-        run: .agents/ksf test
       - name: Build once or recover the exact published bundle
         id: bundle
         env:

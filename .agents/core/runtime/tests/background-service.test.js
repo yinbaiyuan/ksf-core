@@ -14,6 +14,9 @@ import {encodePackage,checksum,validateManifest,OFFICIAL_APPLICATIONS} from '../
 import {createCommunicationService} from '../src/communication/service.js';
 import {randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
+import fsPromises from 'node:fs/promises';
+import {syncBuiltinESMExports} from 'node:module';
+import {AsyncLocalStorage} from 'node:async_hooks';
 
 const cleanups=new Map();
 const cleanup=(root,action)=>cleanups.get(root).push(action);
@@ -111,6 +114,21 @@ test('pure headless on-demand app receives full SDK v1 and exits after leases dr
   const {manager,digest}=await application(t);const instance=await manager.launch('com.example.headless',digest,{kind:'service'});
   const result=await manager.call(instance.id,'read');assert.equal(result.sdk,1);assert.equal(result.background,true);assert.equal(result.messages,true);
   await manager.release(instance.id);assert.equal((await manager.runtimeSnapshot()).applications[0].runtimes.length,0);
+});
+for(const cancel of [false,true])test(`a pending backend lease survives idle handoff${cancel?' and cleans up when quiesced':''}`,async t=>{
+  const {root,manager,digest}=await application(t),appId='com.example.headless',policy=join(root,'.agents/runtime-data/applications/policy.json');
+  await mkdir(join(root,'.agents/runtime-data/applications'),{recursive:true});await writeFile(policy,JSON.stringify({schemaVersion:1,stopped:[],manual:[]}));
+  const first=await manager.launch(appId,digest,{kind:'service'}),pid=(await manager.call(first.id,'read')).pid;
+  const context=new AsyncLocalStorage(),attempt={},entered=Promise.withResolvers(),proceed=Promise.withResolvers(),original=fsPromises.readFile;let reads=0;
+  fsPromises.readFile=async(path,...args)=>{if(path===policy&&context.getStore()===attempt&&++reads===2){entered.resolve();await proceed.promise;}return original(path,...args);};syncBuiltinESMExports();
+  const pending=context.run(attempt,()=>manager.launch(appId,digest,{kind:'service'})).then(value=>({value}),error=>({error}));
+  const deadline=setTimeout(()=>entered.reject(new Error('Post-start lease validation did not reach the controlled read')),10000);
+  try{
+    await entered.promise;clearTimeout(deadline);await manager.release(first.id);if(cancel)await manager.quiesce();proceed.resolve();
+    const result=await pending;
+    if(cancel){assert.equal(result.error?.code,'APP_BUSY');assert.equal((await manager.runtimeSnapshot()).applications[0].runtimes.length,0);}
+    else{assert.equal(result.error,undefined);assert.equal((await manager.call(result.value.id,'read')).pid,pid);await manager.release(result.value.id);assert.equal((await manager.runtimeSnapshot()).applications[0].runtimes.length,0);}
+  }finally{clearTimeout(deadline);proceed.resolve();await pending;fsPromises.readFile=original;syncBuiltinESMExports();context.disable();}
 });
 test('resident app starts without a surface; explicit stop blocks reactivation until start',async t=>{
   const {manager,digest}=await application(t,'resident');await manager.startBackground();assert.equal((await manager.runtimeSnapshot()).applications[0].state,'running');

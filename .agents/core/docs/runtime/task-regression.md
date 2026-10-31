@@ -31,7 +31,7 @@
 现有程序入口：
 
 ```sh
-.agents/ksf test
+.agents/ksf test --suite full
 .agents/ksf build --json
 .agents/ksf runtime verify --json
 ```
@@ -43,3 +43,5 @@
 虚构项目、原始调用日志和故障注入留在 `.agents/runtime-data/verification/<本次标识>/` 或临时目录。真实任务的当前状态放项目检查点，验收结论沿项目入口保存；同一证据只保存一份主件，其他位置引用。日志写清源码状态、测试命令与时间；旧记录不作为新一轮已执行证据。
 
 本次结果由任务对应的项目记录持有。该案例集本身没有预填“已通过”状态，长期业务效果、跨宿主一致性和独立会话仍以各次实际结果为准。返回[最小运行闭环](minimal-runtime.md)。
+
+当前开发选测和验证阶段遵循[统一测试规范](../testing.md)，历史验收范围保留当时性质。
