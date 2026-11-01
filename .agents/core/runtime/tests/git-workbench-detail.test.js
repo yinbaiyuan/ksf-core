@@ -8,17 +8,29 @@ import { createCoordinator } from '../src/services/workbench-common.js';
 import { createWorkspaceFiles } from '../src/services/workspace-files.js';
 import { createWorkbenchGit, createPersistedWorkbenchGit, runGit } from '../src/services/workbench-git.js';
 import { createApplicationStorage } from '../src/services/application-storage.js';
-async function fixture(t) {
- const root=await realpath(await mkdtemp(join(tmpdir(),'ksf-git-detail-'))); t.after(()=>rm(root,{recursive:true,force:true}));
+async function fixture(t,options={}) {
+ const root=await realpath(await mkdtemp(join(tmpdir(),'ksf-git-detail-'))); t.after(async()=>{await git.close();await rm(root,{recursive:true,force:true});});
  const path=join(root,'repositories/demo'); await mkdir(path,{recursive:true}); const run=args=>runGit(path,args);
  await run(['init','-b','main']);await run(['config','core.autocrlf','false']);await run(['config','user.name','测试作者']);await run(['config','user.email','test@example.invalid']);await run(['config','commit.gpgsign','false']);
- const coordinator=createCoordinator(),git=createWorkbenchGit(root,createWorkspaceFiles(root,coordinator),coordinator);
+ const coordinator=createCoordinator(),git=createWorkbenchGit(root,createWorkspaceFiles(root,coordinator),coordinator,options);
  const save=async(name,text)=>writeFile(join(path,name),text), commit=async(message)=>{await run(['add','--','.']);await run(['commit','-m',message]);return (await run(['rev-parse','HEAD'])).stdout.trim();};
  await save('说明.md','first\n');const first=await commit('initial [literal]');await git.scan();const repo=(await git.list()).repositories.find(r=>r.path==='repositories/demo');
  const op=async(action,input={})=>{const state=await git.status(repo.id),item=await git.start({repo:repo.id,action,version:state.version,requestId:crypto.randomUUID(),...input});while(['queued','running'].includes(item.status))await new Promise(r=>setTimeout(r,5));return item;};
  const must=async(action,input)=>{const item=await op(action,input);assert.equal(item.status,'completed',JSON.stringify(item.error));return item;};
  return {root,path,run,save,commit,first,git,repo,op,must};
 }
+test('closing Git waits for the final operation receipt after its status becomes completed',async t=>{
+ let release,arrived;
+ const gate=new Promise(r=>{release=r;}),writing=new Promise(r=>{arrived=r;});
+ t.after(()=>release());
+ const f=await fixture(t,{persist:async ledger=>{if(ledger.some(item=>item.operation.status==='completed')){arrived();await gate;}}}),{git,repo}=f;
+ await f.save('说明.md','changed\n');const state=await git.status(repo.id);
+ const operation=await git.start({repo:repo.id,action:'stage',version:state.version,requestId:crypto.randomUUID(),paths:['说明.md']});
+ await writing;assert.equal(operation.status,'completed');
+ let closed=false;const closing=git.close().then(()=>{closed=true;});
+ await new Promise(r=>setTimeout(r,30));assert.equal(closed,false);
+ release();await closing;assert.equal(closed,true);
+});
 test('instance Git operations preserve legacy receipts without invalidating their own repository version',async t=>{
  const root=await realpath(await mkdtemp(join(tmpdir(),'ksf-git-ledger-')));t.after(()=>rm(root,{recursive:true,force:true}));
  const run=args=>runGit(root,args),caller={appId:'com.ksf.git'},storage=createApplicationStorage(root);
