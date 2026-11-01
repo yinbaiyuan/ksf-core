@@ -69,6 +69,23 @@ export function splitHunks(patch) {
   }
   return chunks;
 }
+export async function createPersistedWorkbenchGit(root, files, coordinator, storage) {
+  const caller = {appId: 'com.ksf.git'}, name = 'operations.json', scope = {scope: 'runtime'};
+  const current = await storage.read(caller, name, scope);
+  const record = current.exists ? current : await storage.read(caller, name);
+  let ledger = [];
+  if (record.exists) {
+    try { ledger = JSON.parse(record.text); }
+    catch { throw problem('APP_DATA_INVALID', 'Git 操作记录无效，请保留原件。'); }
+    assert(Array.isArray(ledger), 'APP_DATA_INVALID', 'Git 操作记录无效，请保留原件。');
+    // Preserve the old user-data record, but never mutate the repository while
+    // recording an operation: its own receipt must not invalidate the Git CAS.
+    if (!current.exists) await storage.write(caller, name, record.text, {...scope, ifMatch: null});
+  }
+  return createWorkbenchGit(root, files, coordinator, {
+    ledger, persist: value => storage.write(caller, name, JSON.stringify(value), scope),
+  });
+}
 export function createWorkbenchGit(root, files, coordinator, { command = runGit, now = Date.now, ledger = [], persist = async () => {} } = {}) {
   root = files.root;
   const repositories = new Map(), snapshots = new Map(), operations = new Map(), requests = new Map(), summaries = new Map();

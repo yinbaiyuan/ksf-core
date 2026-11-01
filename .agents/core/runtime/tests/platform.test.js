@@ -32,6 +32,9 @@ test('CLI compatibility includes only explicitly validated platform/version comb
   assert.equal(supportedCodexVersion('codex-cli 0.165.0-alpha.1.2','win32'),true);
   assert.equal(supportedCodexVersion('codex-cli 0.165.0-alpha.1.2','darwin'),false);
   assert.equal(supportedCodexVersion('codex-cli 0.165.0-alpha.1.3','win32'),false);
+  assert.equal(supportedCodexVersion('codex-cli 0.166.0-alpha.5.1','win32'),true);
+  assert.equal(supportedCodexVersion('codex-cli 0.166.0-alpha.5.1','darwin'),false);
+  assert.equal(supportedCodexVersion('codex-cli 0.166.0-alpha.5.2','win32'),false);
   assert.equal(supportedCodexVersion('codex-cli 0.130.0','win32'),false);
 });
 test('case-insensitive Windows environment selection retains Path and SystemRoot',()=>{
