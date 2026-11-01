@@ -60,7 +60,7 @@ KSF 是 **Knowledge · Skills · Flywheel（知识、技能、飞轮）** 的缩
 
 从一项真实任务开始，再开一轮对话继续它，就能检查 KSF 是否接住了你的工作。
 
-需要 GitHub 账户、本机 Git，以及已安装并登录的 Codex、WorkBuddy 等支持本地文件与终端工具的 Agent 客户端。当前公开的 `main` 模板和 v0.3.5 工作区包面向 **macOS ARM64**；其他平台以 [Releases](https://github.com/yinbaiyuan/ksf-core/releases) 实际提供的匹配包为准。
+需要 GitHub 账户、本机 Git，以及已安装并登录的 Codex、WorkBuddy 等支持本地文件与终端工具的 Agent 客户端。官方模板使用 `core-main`，个人实例初始化后使用 `main`；支持 **macOS ARM64** 与 **Windows x64**，发行包按本机平台从 [Releases](https://github.com/yinbaiyuan/ksf-core/releases) 选择。
 
 ### 1. 从 ksf-core 创建自己的仓库
 
@@ -108,7 +108,7 @@ macOS：
 ./.agents/ksf open --json
 ```
 
-Windows PowerShell（取得匹配的 Windows 工作区包后）：
+Windows PowerShell：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/ksf.ps1 open --json
