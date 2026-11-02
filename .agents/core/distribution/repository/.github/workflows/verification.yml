@@ -16,7 +16,7 @@ env:
 jobs:
   plan:
     if: github.repository == 'yinbaiyuan/ksf-core'
-    runs-on: macos-15
+    runs-on: ubuntu-24.04
     outputs:
       full: ${{ steps.plan.outputs.full }}
       has_native: ${{ steps.plan.outputs.has_native }}
@@ -31,7 +31,7 @@ jobs:
       - name: Prepare pinned plan runtime
         run: |
           .agents/ksf build --json > /dev/null
-          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           dirname "$ksf_node" >> "$GITHUB_PATH"
       - name: Install locked coverage-audit parser
         working-directory: .agents/core/applications/sdk
@@ -218,7 +218,7 @@ jobs:
   coverage:
     if: always() && github.repository == 'yinbaiyuan/ksf-core'
     needs: [plan, platform, tests, linux-core]
-    runs-on: macos-15
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -236,7 +236,7 @@ jobs:
       - name: Verify exact shared and native coverage
         run: |
           .agents/ksf build --json > /dev/null
-          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           "$ksf_node" .agents/core/runtime/src/testing/ci.js aggregate-plan reports verification-plan.json proof.json
       - name: Require every applicable job
         if: always()

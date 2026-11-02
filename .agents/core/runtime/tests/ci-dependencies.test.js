@@ -31,6 +31,8 @@ test('CI prepares locked toolchains once per platform and restores them before f
   assert.equal(check.jobs.required.if, "always() && github.repository == 'yinbaiyuan/ksf-core'");assert.equal(check.jobs.required.needs, 'verification');
   assert.deepEqual(verification.jobs.coverage.needs, ['plan','platform','tests','linux-core']);
   assert.ok(!check.on.pull_request.paths && !check.on.push.paths);
+  for(const id of ['plan','coverage'])assert.equal(verification.jobs[id]['runs-on'],'ubuntu-24.04','Pure orchestration must not queue for a native Mac runner.');
+  assert.equal(check.jobs.required['runs-on'],'ubuntu-24.04');
   for (const job of Object.values(verification.jobs)) for (const step of job.steps ?? []) {
     if (!step.uses?.startsWith('actions/upload-artifact@')) continue;
     assert.equal(step.with.overwrite,true,'A rerun must replace the group receipt, not conflict with its prior upload.');

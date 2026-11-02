@@ -45,6 +45,7 @@ test('an additive platform wait must retain every original executable assertion'
   const added=scenarios(root,path,"test('crash',async()=>{await stopped();assert.equal(unknown,true);assert.notEqual(next,old);assert.equal(count,1);assert.equal(state,'stopped');});")[0];
   assert.notEqual(original.hash,added.hash);assert.equal(preservesAssertions(original.assertions,added.assertions),true);
   assert.equal(preservesAssertions(original.assertions,added.assertions.slice(1)),false);
+  assert.equal(preservesAssertions([original.assertions[0],original.assertions[0]],[original.assertions[0]]),false);
   assert.equal(preservesAssertions([],added.assertions),false);
 });
 

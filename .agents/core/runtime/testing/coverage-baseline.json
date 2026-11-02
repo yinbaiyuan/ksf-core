@@ -974,7 +974,15 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "772c9b23ab59d52d96ab66ed924f552accbe2e5d392bf152fac92705ef38e21c",
+        "reason": "Mac native failure 41429749126: the application marker precedes host ready and startup accounting. Drain existing startup without triggering it; remove the old marker before verifying enable so old content cannot satisfy the second assertion. Keep both original marker assertions and all native platforms.",
+        "originalAssertions": [
+          "9ba20f7ab1fbb22b1a3e88c0c539c5fdbc1f7c070b118b43a75354b81d7d3a60",
+          "9ba20f7ab1fbb22b1a3e88c0c539c5fdbc1f7c070b118b43a75354b81d7d3a60"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-background.test.js",
