@@ -174,7 +174,9 @@ test('seed copies keep files and Git histories independent and mutation changes 
   writeFileSync(join(root,'one/business.txt'),'changed');writeFileSync(join(root,'one/.git/objects/original'),'new history');
   assert.equal(readFileSync(join(root,'two/business.txt'),'utf8'),'original');assert.equal(readFileSync(join(root,'two/.git/objects/original'),'utf8'),'git object');assert.equal(fixtureDigest(seed),digest);
   writeFileSync(join(seed,'business.txt'),'tampered');assert.notEqual(fixtureDigest(seed),digest);
-  assert.equal(testEnvironment({KSF_TEST_DISTRIBUTION_SEEDS:'/previous-run'}).KSF_TEST_DISTRIBUTION_SEEDS,undefined);
+  const inherited={KSF_TEST_DISTRIBUTION_SEEDS:'/previous-run',KSF_TEST_BASE:'outer-ci-commit',CI:'true'},child=testEnvironment(inherited);
+  assert.equal(child.KSF_TEST_DISTRIBUTION_SEEDS,undefined);assert.equal(child.KSF_TEST_BASE,undefined);
+  assert.equal(inherited.KSF_TEST_BASE,'outer-ci-commit');assert.equal(child.CI,'true');
 });
 test('failed seed preparation records incomplete scope and cleans its owned directory',async t=>{
   const f=fixture(t),helper=join(f.root,f.runtime,'tests/helpers');mkdirSync(helper);

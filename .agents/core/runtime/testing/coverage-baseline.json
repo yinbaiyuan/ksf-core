@@ -9190,7 +9190,15 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "e43546d6d071238e46cc1ebbec0b058b3d15bba1edf2b3b9516a9406a434d8f3",
+        "reason": "Separate cold fixture startup and restart from the unchanged 6000 ms shutdown deadline. Preserve the unfinished socket, both idempotent closes and the original same-port live-health assertion; an explicit rejecting deadline prevents timeout from continuing into a late replacement server.",
+        "originalAssertions": [
+          "7ffb12baff3435855beec105edc5ae6302091e14f90a4078d80815526b39f122",
+          "e0723e3ef6216a537562adc3035ea1ac0eb2da02909b50e3dd24e40b9a50e8bb"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web.test.js",

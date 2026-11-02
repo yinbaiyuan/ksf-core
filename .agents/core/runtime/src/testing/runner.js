@@ -14,6 +14,9 @@ export function testEnvironment(input = process.env) {
   // Never inherit a parent runner's selection, debugger, coverage or preload.
   // NODE_OPTIONS is executable configuration; callers pass test options here.
   delete env.NODE_OPTIONS; delete env.NODE_V8_COVERAGE; delete env.KSF_TEST_REUSE; delete env.KSF_TEST_DISTRIBUTION_SEEDS;
+  // The outer frozen plan owns its comparison base. Child tests create their
+  // own Git repositories and must never compare them with the CI checkout.
+  delete env.KSF_TEST_BASE;
   env.PATH = [dirname(process.execPath), ...(process.platform === 'win32' ? [dirname(platform.tool('tar'))] : []), env.PATH ?? env.Path ?? ''].join(process.platform === 'win32' ? ';' : ':');
   if (process.platform === 'win32') { env.Path = env.PATH; }
   return env;

@@ -166,10 +166,11 @@ test('Web reports occupied and invalid ports, preserving the running server', as
   assert.equal((await call(instance, '/api/health')).status, 200);
 });
 
-test('Web closes unfinished connections within a bounded shutdown and releases its port', { timeout: 6_000 }, async t => {
+test('Web closes unfinished connections within a bounded shutdown and releases its port', async t => {
   let replacement;
   t.after(() => replacement?.close());
 
+  const preparationStarted = performance.now();
   const instance = await running(t);
   const accepted = once(instance.server, 'connection');
   const socket = connect(instance.port, instance.host);
@@ -180,9 +181,23 @@ test('Web closes unfinished connections within a bounded shutdown and releases i
   const received = once(connection, 'data');
   socket.write('GET / HTTP/1.1\r\n');
   await received;
-  await instance.close();
-  await instance.close();
+  t.diagnostic(`Web fixture preparation: ${Math.round(performance.now() - preparationStarted)} ms`);
+  // Cold startup/restart is fixture preparation. The same six-second bound
+  // applies to shutdown, including its second idempotent close.
+  let deadline;
+  const shutdownStarted = performance.now();
+  try {
+    await Promise.race([
+      (async () => { await instance.close(); await instance.close(); })(),
+      new Promise((_, reject) => { deadline = setTimeout(() => reject(new Error('Web shutdown exceeded 6000 ms.')), 6_000); }),
+    ]);
+  } finally {
+    clearTimeout(deadline);
+    t.diagnostic(`Web shutdown: ${Math.round(performance.now() - shutdownStarted)} ms (limit 6000 ms)`);
+  }
+  const restartStarted = performance.now();
   replacement = await startWebServer({ root:routingFixture(t).root,port: instance.port });
+  t.diagnostic(`Web fixture restart: ${Math.round(performance.now() - restartStarted)} ms`);
 
   assert.equal((await call(replacement, '/api/health')).status, 200);
 });
