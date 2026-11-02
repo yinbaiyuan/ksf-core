@@ -139,3 +139,7 @@ Web `GET /api/task-projects` 从历史主项目聚合项目目录，返回 key�
 采集策略在目标事实保存前判断，排除轮次不登记目标／绑定，后续明确排除也移除该轮事实；其他允许轮次已明确保存的同一目标证据继续有效。routing.enabled 关闭时不接受新目标事实，即使旧回执尚在等待采集；原有记录保留。失败不阻断正文采集，冲突事件保留技术证据并标记缺口，不伪造绑定成功。
 
 目标目录附加 lifecycle、aliases、目标版本和来源现状。aliases 只来自明确绑定；旧物理键无独立历史主归属时可定位稳定身份，有独立历史时保留原上下文，不迁移旧档案。历史节点保留当时待创建状态与路径；currentBinding 只是后续绑定信息，查询不把它改写成过去已经存在。能力版本更新不增加归属目标，绑定落成不增加目标切换。
+
+## 收件箱与人设目标
+
+ownership 和 relatedTargets 现支持 inbox、persona。inbox 的 path 为 `@收件箱` 或其下明确文件/目录；persona 的 path 为 `USER.md` 或 `BOT.md`。两者沿用 planned/targetId/targetBindings 的同类绑定和版本规则，不增加能力对象类型。基础人设加载不自动上报 persona 归属。

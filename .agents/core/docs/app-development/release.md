@@ -4,7 +4,7 @@
 
 KSF 固定启用[公共默认应用源](https://yinbaiyuan.github.io/ksf-apps/index.json)，由 [ksf-apps 仓库](https://github.com/yinbaiyuan/ksf-apps)通过 GitHub Pages 发布。此源不能通过界面或公共 API 改名、改地址、停用或移除；服务端返回 `APP_SOURCE_LOCKED`（403）。这是宿主配置规则，不是操作系统级文件保护。
 
-Core 自带应用统一由固定的 KSF 公用应用源（ksf-apps）接管升级；随包目录仅是同一来源的内部离线资源，不再列独立来源。旧 builtin 安装来源自动备份并迁至 ksf-apps，保留安装身份、启用状态和数据，自定义来源保留。断网时显示已验证缓存或随包基线及上次检查时间，明确最新版本尚未确认。同 ID、版本、平台的远程文件与离线文件摘要必须一致，冲突时停止安装。Core 升级保留较新且兼容的应用，不自动降级。应用贡献见仓库的 CONTRIBUTING.md；线上接管以发布后回读和真实升级为准。
+Core 自带应用由Core随包和固定公用应用源（ksf-apps）双渠道升级，保持同一来源身份和安装记录。Core更新会更新较旧的随包应用，保留较新兼容版本、用户设置和卸载意图；商店可独立更新。旧builtin来源迁移、断网缓存和同版本摘要冲突保护继续保留。完整版本选择、SDK API、旧更新器桥接及回退规则见[SDK兼容与双渠道升级](sdk-compatibility.md)。应用贡献见仓库的CONTRIBUTING.md；本地准备不代表线上已发布。
 
 用户可在应用商店直接导入 `.ksfapp`，无需索引或联网。手动安装与应用源安装共用包校验、不可变版本、数据目录、任务租约和延迟切换；操作方式见[快速开始](quickstart.md#分享应用包并手动安装)。手动来源不检查远程更新，升级由用户导入新版包；源安装与手动安装之间不自动换源。离线包只能与本机已知兼容版本比较，不能据此确认开发者全球最新版本。
 
@@ -48,6 +48,6 @@ CLI 实现、命令描述、文档及依赖同包交付和切换；既有执行�
 
 ## 初始兼容契约与迁移
 
-清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1、SDK工具包=1.0.0。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
+清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1；SDK工具包和API语义版本遵循[兼容契约](sdk-compatibility.md)。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
 
 构建依赖未包含在 SDK 通用许可证中的应用，应在应用根准备 `THIRD_PARTY_NOTICES.txt`；构建器会将其附加到随包的许可证说明。KSF项目的构建脚本从锁定依赖收集 marked、DOMPurify 与 YAML 许可证，缺失时拒绝构建。该文件不是运行入口。

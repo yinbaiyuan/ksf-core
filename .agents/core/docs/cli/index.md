@@ -29,6 +29,7 @@
 | user-data | 系统设置、本地身份、能力源关联及对象配置／必要状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
 | context | 返回固定运行入口及能力发现上下文 | [context](context.md) |
+| ability-manager | [身份迁移](context.md#固定上下文与游离基本功查询) | 旧能力管理身份与当前状态的显式迁移 |
 | incubate | 首次设置、预检提交、恢复与明确跳过 | [incubation](incubation.md) |
 | project | 项目根卡与目录的基础管理 | [project](project.md) |
 | repository | 本地独立 Git 工程创建、项目关联与检查 | [repository](repository.md) |

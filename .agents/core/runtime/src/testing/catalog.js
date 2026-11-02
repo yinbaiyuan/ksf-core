@@ -7,6 +7,9 @@ export const catalogPath = '.agents/core/runtime/testing/catalog.json';
 export const fail = (code, message, details = {}) => { throw Object.assign(new Error(message), { code, ...details }); };
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const slash = value => value.replaceAll('\\', '/');
+// These outputs are rebuilt/verified from owned sources. Keep them in declared
+// execution fingerprints, but exclude them from source identity and selection.
+export const rebuiltArtifact = path => path === '.agents/core/manifest.yaml' || path.startsWith('.agents/core/runtime/web/dist/');
 export function safePath(root, path) {
   const full = resolve(root, path), rel = slash(relative(root, full));
   if (!rel || rel.startsWith('../') || rel === '..' || rel.split('/').includes('.git')) fail('TEST_PATH_INVALID', 'Test paths must stay inside this KSF root.', { target: path });
@@ -27,7 +30,11 @@ export function loadCatalog(root) {
   let catalog;
   try { catalog = JSON.parse(readFileSync(join(root, catalogPath), 'utf8')); }
   catch (error) { fail('TEST_CATALOG_INVALID', `Cannot read the owned test catalog: ${error.message}`); }
-  if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.tests) || !catalog.components || !Array.isArray(catalog.risks)) fail('TEST_CATALOG_INVALID', 'Unsupported test catalog.');
+  if (![1, 2].includes(catalog.schemaVersion) || !Array.isArray(catalog.tests) || !catalog.components || !Array.isArray(catalog.risks)) fail('TEST_CATALOG_INVALID', 'Unsupported test catalog.');
+  if (catalog.schemaVersion === 2) for (const rule of catalog.risks) {
+    if (!rule || !Array.isArray(rule.paths) || !rule.paths.length || !Array.isArray(rule.components) || !rule.components.length || rule.components.some(id => !Object.hasOwn(catalog.components,id)) || typeof rule.reason !== 'string' || !rule.reason) fail('TEST_CATALOG_INVALID', 'Risk rules must name owned components and explain their required coverage.');
+    for (const path of rule.paths) safePath(root,path);
+  }
   const ids = new Set(), files = new Set(), discovered = new Set();
   for (const [id, component] of Object.entries(catalog.components)) {
     if (!component.directory || !Array.isArray(component.testRoots)) fail('TEST_CATALOG_INVALID', `Invalid component ${id}.`);
@@ -37,12 +44,21 @@ export function loadCatalog(root) {
   for (const item of catalog.tests) {
     if (!item.id || ids.has(item.id) || files.has(item.path) || !catalog.components[item.owner] || !['quick', 'full'].includes(item.suite) || !Array.isArray(item.inputs) || !Array.isArray(item.covers) || item.covers.some(id => !catalog.components[id]) || !Array.isArray(item.platforms) || !item.platforms.length || !Number.isInteger(item.timeoutMs) || item.timeoutMs < 1) fail('TEST_CATALOG_INVALID', `Invalid or duplicate test declaration: ${item.id ?? item.path}.`);
     if (item.isolation !== undefined && !['shared', 'exclusive'].includes(item.isolation)) fail('TEST_CATALOG_INVALID', `Unknown test resource policy: ${item.id}.`);
+    if (catalog.schemaVersion === 2) {
+      const v = item.verification;
+      if (!v || !['shared', 'native'].includes(v.lane) || !['logic', 'contract', 'integration'].includes(v.kind) || !v.reason || v.kind === 'logic' && v.lane !== 'shared' || v.kind === 'contract' && v.lane !== 'native' || !Array.isArray(item.selectionInputs)) fail('TEST_CATALOG_INVALID', `A reviewed verification and selection policy is required: ${item.id}.`);
+      if (item.platforms.some(p => !['darwin','win32','linux'].includes(p)) || new Set(item.platforms).size !== item.platforms.length || v.lane === 'shared' && !item.platforms.includes('darwin')) fail('TEST_CATALOG_INVALID', `Test has no supported CI obligation or shared baseline host: ${item.id}.`);
+      if (v.nativeContracts !== undefined && !Array.isArray(v.nativeContracts) || v.lane === 'shared' && v.kind === 'integration' && !v.nativeContracts?.length) fail('TEST_CATALOG_INVALID', `Shared integration requires explicit native boundary coverage: ${item.id}.`);
+      for (const input of item.selectionInputs) safePath(root, input);
+      if (item.fixtures !== undefined && (!Array.isArray(item.fixtures) || item.fixtures.some(name => name !== 'distribution'))) fail('TEST_CATALOG_INVALID', `Unknown run fixture: ${item.id}.`);
+    }
     ids.add(item.id); files.add(item.path);
     const { full } = safePath(root, item.path);
     if (!existsSync(full) || !lstatSync(full).isFile()) fail('TEST_CATALOG_STALE', 'A registered test file is missing.', { target: item.path });
     if (!discovered.has(item.path)) fail('TEST_CATALOG_INVALID', 'A registered file is outside owned test roots.', { target: item.path });
     for (const input of item.inputs) safePath(root, input);
   }
+  for (const item of catalog.tests) for (const id of item.verification?.nativeContracts ?? []) if (!catalog.tests.some(t => t.id === id && t.verification?.lane === 'native')) fail('TEST_CATALOG_INVALID', `Missing native contract ${id} for ${item.id}.`);
   for (const path of discovered) if (!files.has(path)) fail('TEST_UNREGISTERED', 'A first-party test has no declaration. Register its coverage and profile.', { target: path });
   for (const [id, component] of Object.entries(catalog.components)) if (!catalog.tests.some(t => t.owner === id || t.covers.includes(id)) && !component.noTestsReason) fail('TEST_CATALOG_INVALID', `Component ${id} must declare tests, delegated coverage, or an explicit no-test reason.`);
   return { ...catalog, digest: sha256(JSON.stringify(catalog)) };

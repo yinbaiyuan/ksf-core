@@ -83,18 +83,26 @@ CLI 适配在 `runtime/src/commands/context.js`，组合服务在 `runtime/src/s
 ### 首次 context 命令验证（2026-10-15，macOS ARM64）
 
 - 当时通过随包入口执行 `ksf test`，123 项全部通过，其中 context 新增 13 项；没有跳过或失败。四类能力模型调整后的回归见[对象验证记录](objects-validation.md)。
-- 真实执行文本命令，并从其他工作目录执行 JSON 命令，均退出 0、complete=true。该次验证返回 1 个固定入口协同、2 个搭档，其中入口搭档为 protected；普通下游候选为 ksf对象设计师。
-- 路由走查采用模拟输入“完善一个搭档的职责与基本功配置”。实际取得上述摘要，排除固定入口后没有普通协同，依据摘要选择对象设计师；实际通过 `partner read partner.ksf.object-designer --part all --json` 读取正文，再按其精确声明读取 `competency.ksf.partner-design@0.1.0`，两次均退出 0、errors 为空。确认该任务属于搭档设计责任，下一步应取得目标搭档与实际问题，再按方法处理。
+- 真实执行文本命令，并从其他工作目录执行 JSON 命令，均退出 0、complete=true。该次验证返回 1 个固定入口协同、2 个搭档，其中入口搭档为 protected；普通下游候选为 ksf能力管理搭档。
+- 路由走查采用模拟输入“完善一个搭档的职责与基本功配置”。实际取得上述摘要，排除固定入口后没有普通协同，依据摘要选择能力管理搭档；实际通过 `partner read partner.ksf.ability-manager --part all --json` 读取正文，再按其精确声明读取 `competency.ksf.partner-design@0.1.0`，两次均退出 0、errors 为空。确认该任务属于搭档设计责任，下一步应取得目标搭档与实际问题，再按方法处理。
 - 这是当前 Agent 的路由走查，使用了真实程序和正文读取；没有执行新的搭档设计任务，也没有独立会话、多 Agent 或长期效果验证。
 
 后续 context 操作按真实需求另行设计；当前不提供项目、知识或任务状态的组装接口。[最小运行闭环](../runtime/minimal-runtime.md)中的项目发现与根卡读取使用 [project CLI](project.md)，资料和知识仍按基本功按需读取，不是新增的 context 程序接口。
 
 返回[命令索引](index.md)。
 
-2026-10-16 重构后，当前完整发现为 1 个固定入口协同和 3 个搭档：runtime 固定保护，maintainer 与对象设计师为普通候选。真实 CLI 已核对 complete=true、errors=[]；维护角色可发现和派生，固定入口仍从下游候选排除。
+2026-10-16 重构后，当前完整发现为 1 个固定入口协同和 3 个搭档：runtime 固定保护，maintainer 与能力管理搭档为普通候选。真实 CLI 已核对 complete=true、errors=[]；维护角色可发现和派生，固定入口仍从下游候选排除。
 
 ## 能力源过滤
 
 默认聚合个人、全部已关联源和系统的有效协同/搭档。--source <源ID> 则聚合个人、指定源和系统，保留个人优先与固定入口。每项新增 source，源对象还含 source_root 和实际绝对 path；description 仍原样提供。多源同 ID 歧义返回 SOURCE_AMBIGUOUS 和候选，按明确源重新发现，不按配置顺序猜测。详情见[能力源协议](../sources.md)。
 
 未初始化的 Core 模板或原始更新包优先返回 mode=instance-setup，固定定义引导显式 instance init。入口本身只读本地状态，不联网查版本；成功初始化后重新取入口，再进入 incubation/runtime。正式 Core 源仓库依据自身 Git 根与官方 origin 识别，不在官方源上创建个人资料。
+
+## 固定上下文与游离基本功查询
+
+`context entry --json` 保留原 `data.entry` 的所选入口、原文、版本与 SHA-256。正常模式新增 `data.context={protocol,complete,items,errors}`。items 稳定顺序为 user、bot、runtime、ability-route、project-route；每项含 key/source/path/state/version/sha256。用户文本和两项路由含完整 content；runtime 使用 contentRef="entry.content" 引用原入口，正文在响应中仅出现一次。用户文件缺失为 missing，读取失败/超限为 unavailable 并返回错误与退出 1，不静默截断。初始化/孵化仍只提供其所选入口。
+
+`context orphan-competencies [--source <源ID>] --json` 返回 `{complete,objects}` 与顶层 errors。候选为当前有效、未被任何有效搭档通过正式引用直接或间接关联的基本功，排除固定入口方法与匹配支持本身。每项含完整 description、精确来源、版本、路径和 definition_digest。查询只读、实时计算，没有持久候选索引；来源歧义或依赖损坏为不完整结果，退出 1。程序不判断语义适配，不动态改变引用。
+
+`ability-manager migrate --dry-run --json` 预览旧对象设计师身份的当前设置、聊天状态和项目预设迁移；`--apply` 执行并保存原件备份。冲突保留双方，用户派生对象及外部来源需要单独核对，不伪造上游基线。历史回执、原始聊天和旧证据保留，读取投影显示当前身份关联。

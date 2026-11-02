@@ -2,7 +2,7 @@
 
 [统一配置中心](configuration-center.md)提供系统设置与全部可用能力的独立配置管理，不展示应用列表。应用业务设置由应用拥有；工作台顶部的活动应用菜单提供关于、可选设置和退出入口，SDK 仅注册打开设置的动作，不声明业务配置字段。桌面分组、卡片配置和外观由实例保存，旧浏览器偏好按版本显式迁移，原件保留。
 
-开发入口统一为[应用开发者手册](app-development/README.md)，AI 开发者先读 [AI-START](app-development/AI-START.md)。当前实现统一使用 `@ksf/sdk@1.0.0`、`schemaVersion:1`、`sdkVersion:1`；新 v1 重新定义完整应用契约，不加载旧结构，不提供历史版本分支或兼容类型。Core、SDK、应用业务版本与业务数据版本分别管理。
+开发入口统一为[应用开发者手册](app-development/README.md)，AI 开发者先读 [AI-START](app-development/AI-START.md)。当前实现统一使用 `@ksf/sdk@1.1.0`、`schemaVersion:1`、`sdkVersion:1`；新 v1 重新定义完整应用契约，不加载旧结构，不提供历史版本分支或兼容类型。Core、SDK、应用业务版本与业务数据版本分别管理；[SDK API兼容与双渠道升级](app-development/sdk-compatibility.md)定义实际运行范围和配套更新。
 
 应用是唯一安装单元，可提供窗口、卡片及后端，也可只有后端。界面入口与后台策略分别声明：没有后端的应用只加载界面；`on-demand` 后端由界面、CLI 或授权消息启动，租约、调用和任务排空后退出；`resident` 后端随主服务启动并要求后台权限；没有界面的后端作为纯后台应用管理。同一应用版本共享后台，各窗口保留独立实例上下文。任务租约、持久保活及显式停止策略见[后端与数据](app-development/backend-data.md)。
 

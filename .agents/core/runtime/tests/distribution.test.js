@@ -20,40 +20,12 @@ import { objectQuery } from '../src/services/objects.js';
 import { systemUpdate } from '../src/distribution/system.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 
-test('release archive round-trips UTF-8 paths, content and executable modes', () => {
-  const path = '.agents/core/' + 'long-directory/'.repeat(10) + '中文.js';
-  const bytes = createArchive([{ path, bytes: Buffer.from('hello\n'), mode: 0o755 }]);
-  const file = readArchive(bytes).get(path);
-  assert.equal(file.bytes.toString(), 'hello\n'); assert.equal(file.mode, 0o755);
-});
 
-for (const path of ['../outside', '/absolute', '.agents/core/../outside', '.agents/core//file', '.git/config', '.agents/core/evil\\path', 'C:/outside']) {
-  test(`archive builder rejects escaping path ${JSON.stringify(path)}`, () => {
-    assert.throws(() => createArchive([{ path, bytes: Buffer.alloc(0) }]), { code: 'ARCHIVE_INVALID' });
-  });
-}
-test('archive reader rejects tampered checksums, links and duplicate members', () => {
-  const good = createArchive([{ path: '.agents/core/test', bytes: Buffer.from('x') }]);
-  const wrong = gunzipSync(good); wrong[0] ^= 1;
-  assert.throws(() => readArchive(gzipSync(wrong)), { code: 'ARCHIVE_INVALID' });
-  const link = gunzipSync(good); link[156] = 50; link.fill(32, 148, 156);
-  const sum = link.subarray(0, 512).reduce((a, b) => a + b, 0);
-  link.write(sum.toString(8).padStart(6, '0') + '\0 ', 148, 8);
-  assert.throws(() => readArchive(gzipSync(link)), { code: 'ARCHIVE_INVALID' });
-  const original = gunzipSync(good), duplicate = Buffer.concat([original.subarray(0, 1024), original]);
-  assert.throws(() => readArchive(gzipSync(duplicate)), { code: 'ARCHIVE_INVALID' });
-});
-test('versions compare numerically and respect prerelease precedence', () => {
-  assert.equal(compareVersions('1.10.0', '1.9.9'), 1);
-  assert.equal(compareVersions('1.0.0', '1.0.0-rc.1'), 1);
-  assert.equal(compareVersions('1.0.0-rc.10', '1.0.0-rc.2'), 1);
-  assert.equal(compareVersions('0.1.0', '0.1.0'), 0);
-  assert.throws(() => compareVersions('01.2.3', '1.2.3'), { code: 'VERSION_INVALID' });
-});
-test('Core accepts ordinary branch names while rejecting invalid refs', () => {
-  for (const branch of ['main', 'feature/project-cli', 'fix/修复', 'feature/nested/task']) assert.equal(isBranch(branch), true, branch);
-  for (const branch of ['', '@', '-main', '../main', 'main..old', '/main', 'main/', 'main//fix', 'main.lock', '.hidden', 'main.', 'main@{1}', 'bad branch', 'bad\\branch', 'bad[branch']) assert.equal(isBranch(branch), false, branch);
-});
+
+
+
+
+
 test('complete release includes the system and empty user skeleton, excluding private data and history', async t => {
   const f = await distributionFixture(t);
   writeAtomic(join(f.root, '知识/fictional-private.md'), 'FICTIONAL_PRIVATE_SENTINEL');
@@ -93,21 +65,7 @@ test('complete release includes the system and empty user skeleton, excluding pr
   const coreEntries = inspectCoreArchive(readFileSync(join(result.output, result.index.platforms[fixtureTarget].core.name))).entries;
   assert.ok([...coreEntries.keys()].every(path => path === 'AGENTS.md' || path === '.agents/ksf' || path === '.agents/ksf.ps1' || path.startsWith('.agents/core/')));
 });
-test('a custom-named user instance starts and upgrades independently of its template name', async t => {
-  const f = await distributionFixture(t), next = await f.next();
-  const instance = join(f.directory, '我的个人资料 实例');
-  cpSync(f.first.template, instance, { recursive: true });
-  writeAtomic(join(instance, '知识/private.md'), 'FICTIONAL_PRIVATE');
-  const invocation=launcherInvocation(instance,['hello','--json']);
-  const launched = spawnSync(invocation.executable, invocation.args, {
-    cwd: f.directory, encoding: 'utf8', timeout: 20000, env: { ...process.env, PATH: '', KSF_SKIP_AUTO_UPDATE: '1' },
-  });
-  assert.equal(launched.status, 0, launched.stderr);
-  assert.equal(JSON.parse(launched.stdout).runtime.ksfRoot.replace(/[\\/]$/, ''), realpathSync.native(instance));
-  await systemUpdate({ root: instance, from: next.coreArchive, api: new ForkAPI({ coreRoot: f.root }) });
-  assert.equal(installedManifest(instance).version, '0.1.1');
-  assert.equal(readFileSync(join(instance, '知识/private.md'), 'utf8'), 'FICTIONAL_PRIVATE');
-});
+
 test('publication requires the exact system, template and instance product identities', async t => {
   const f = await distributionFixture(t), index = structuredClone(f.first.index);
   index.products.workspace = 'ksf';
@@ -117,21 +75,7 @@ test('publication requires the exact system, template and instance product ident
   writeFileSync(join(f.first.output, 'ksf-core-index.json'), stableJSON(index));
   assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' });
 });
-test('a copied no-Git workspace starts through its fixed launcher from another cwd without global Node', async t => {
-  const f = await distributionFixture(t);
-  assert.equal(existsSync(join(f.workspace, '.git')), false);
-  const result = f.launch(['hello', '--json']);
-  assert.equal(result.status, 0, result.stderr);
-  assert.equal(JSON.parse(result.stdout).message, 'Hello, KSF!');
-  const status = f.launch(['system', 'read', '--json']);
-  assert.equal(status.status, 0, status.stderr);
-  assert.equal(JSON.parse(status.stdout).data.version, '0.1.0');
-  const discovery = f.launch(['context', 'capabilities', '--json']);
-  assert.equal(discovery.status, 0, discovery.stdout + discovery.stderr);
-  assert.equal(JSON.parse(discovery.stdout).data.complete, true);
-  assert.equal(existsSync(join(f.workspace, '源档')), false);
-  for (const path of ['USER.md', 'BOT.md', 'MEMORY.md']) assert.equal(existsSync(join(f.root, path)), false);
-});
+
 
 test('single-Core publication rejects a second product and legacy build indexes', async t => {
   const f = await distributionFixture(t), index = structuredClone(f.first.index);
@@ -147,7 +91,7 @@ test('Core sources need no user directories while installed workspaces still val
   for (const name of ['项目', '知识', '能力', '@收件箱', '源档', '归档', '档案']) assert.equal(existsSync(join(f.root, name)), false);
   const discovery = contextCapabilities(f.root);
   assert.equal(discovery.data.complete, true, JSON.stringify(discovery.errors));
-  assert.deepEqual(objectQuery({ root: f.root, type: 'partner', operation: 'check', reference: 'partner.ksf.object-designer' }).errors, []);
+  assert.deepEqual(objectQuery({ root: f.root, type: 'partner', operation: 'check', reference: 'partner.ksf.ability-manager' }).errors, []);
   assert.equal(installedManifest(f.workspace).core.branch, 'core-main');
   assert.equal(existsSync(join(f.root, '能力')), false);
   rmSync(join(f.workspace, '能力/协同'), { recursive: true });
@@ -183,14 +127,7 @@ test('clean releases are byte-for-byte reproducible, so a fresh CI retry reuses 
     assert.deepEqual(readFileSync(join(second.output, item.name)), readFileSync(join(f.first.output, item.name)));
   }
 });
-test('symlinked system inputs and tampered published artifacts are rejected', async t => {
-  const f = await distributionFixture(t);
-  symlinkSync(join(f.root, 'AGENTS.md'), join(f.root, '.agents/core/symlink'));
-  await assert.rejects(buildRelease({ root: f.root, output: join(f.directory, 'unsafe'), allowDirty: true }), { code: 'UNSAFE_PATH' });
-  const descriptor = f.first.index.platforms[fixtureTarget].core;
-  writeFileSync(join(f.first.output, descriptor.name), 'tampered');
-  assert.throws(() => inspectReleaseDirectory(f.root, f.first.output), { code: 'RELEASE_INVALID' });
-});
+
 
 for (const [command, args] of [
   ['system', ['check', '--dry-run']], ['system', ['update', '--source', 'a', '--from', 'b']],

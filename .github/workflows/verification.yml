@@ -1,23 +1,62 @@
-name: Native test verification
+name: Shared and native verification
 on:
   workflow_call:
     inputs:
       full:
         type: boolean
         required: true
+      base:
+        type: string
+        default: ''
 permissions:
   contents: read
+env:
+  KSF_SKIP_AUTO_UPDATE: '1'
+  KSF_TEST_BASE: ${{ inputs.base }}
 jobs:
-  platform:
+  plan:
     if: github.repository == 'yinbaiyuan/ksf-core'
+    runs-on: ubuntu-24.04
+    outputs:
+      full: ${{ steps.plan.outputs.full }}
+      has_native: ${{ steps.plan.outputs.has_native }}
+      has_linux: ${{ steps.plan.outputs.has_linux }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      preparations: ${{ steps.plan.outputs.preparations }}
+      linux: ${{ steps.plan.outputs.linux }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Prepare pinned plan runtime
+        run: |
+          .agents/ksf build --json > /dev/null
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
+          dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Install locked coverage-audit parser
+        working-directory: .agents/core/applications/sdk
+        run: npm ci --ignore-scripts
+      - id: plan
+        env:
+          KSF_MANUAL_FULL: ${{ inputs.full }}
+        run: node .agents/core/runtime/src/testing/ci.js plan "$KSF_TEST_BASE"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          overwrite: true
+          name: verification-plan
+          path: |
+            verification-plan.json
+            coverage-audit.json
+          if-no-files-found: error
+  platform:
+    name: Prepare ${{ matrix.prepared }}
+    if: needs.plan.outputs.has_native == 'true'
+    needs: plan
     strategy:
       fail-fast: false
-      matrix:
-        os: [macos-15, windows-2025]
+      matrix: ${{ fromJSON(needs.plan.outputs.preparations) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    env:
-      KSF_SKIP_AUTO_UPDATE: '1'
     defaults:
       run:
         shell: bash
@@ -57,73 +96,54 @@ jobs:
       - name: Build frontend before server tests
         working-directory: .agents/core/runtime/web
         run: npm run build
-      - name: Quick verification
-        id: quick
-        if: '!inputs.full'
-        run: node .agents/core/runtime/src/testing/ci.js run ${{ runner.os }}.report.json --suite quick
-      - name: Freeze prepared toolchains for full shards
-        if: inputs.full
+      - name: Freeze prepared toolchains
         run: tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist
       - uses: actions/upload-artifact@v7.0.2
-        if: inputs.full
         with:
           overwrite: true
-          name: prepared-${{ runner.os }}
+          name: prepared-${{ matrix.prepared }}
           path: prepared.tar
           retention-days: 1
-      - uses: actions/upload-artifact@v7.0.2
-        if: always() && steps.quick.outcome != 'skipped'
-        with:
-          overwrite: true
-          name: quick-${{ runner.os }}
-          path: '*.report.json'
-          if-no-files-found: error
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
           overwrite: true
-          name: failure-platform-${{ runner.os }}
-          path: .agents/runtime-data/tests/
-  full:
-    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
-    needs: platform
+          name: failure-platform-${{ matrix.prepared }}-attempt-${{ github.run_attempt }}
+          include-hidden-files: true
+          path: |
+            *.report.json
+            .agents/runtime-data/tests/
+  tests:
+    name: ${{ matrix.id }} (${{ matrix.profile }})
+    if: needs.plan.outputs.has_native == 'true'
+    needs: [plan, platform]
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - {os: macos-15, platform: macOS, shard: 1/2, id: mac-1}
-          - {os: macos-15, platform: macOS, shard: 2/2, id: mac-2}
-          # Heavy lifecycle files run alone within a machine. Spread them over
-          # machines instead of doubling Git/archive load on one Windows host.
-          - {os: windows-2025, platform: Windows, shard: 1/8, id: win-1}
-          - {os: windows-2025, platform: Windows, shard: 2/8, id: win-2}
-          - {os: windows-2025, platform: Windows, shard: 3/8, id: win-3}
-          - {os: windows-2025, platform: Windows, shard: 4/8, id: win-4}
-          - {os: windows-2025, platform: Windows, shard: 5/8, id: win-5}
-          - {os: windows-2025, platform: Windows, shard: 6/8, id: win-6}
-          - {os: windows-2025, platform: Windows, shard: 7/8, id: win-7}
-          - {os: windows-2025, platform: Windows, shard: 8/8, id: win-8}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    env:
-      KSF_SKIP_AUTO_UPDATE: '1'
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@v8.0.2
         with:
-          name: prepared-${{ matrix.platform }}
+          name: verification-plan
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: prepared-${{ matrix.prepared }}
       - name: Restore platform toolchains
         run: tar -xf prepared.tar
-      - name: Prepare shard runtime on macOS
+      - name: Prepare group runtime on macOS
         if: runner.os == 'macOS'
         run: |
           .agents/ksf build --json > /dev/null
           ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
           dirname "$ksf_node" >> "$GITHUB_PATH"
-      - name: Prepare shard runtime on Windows
+      - name: Prepare group runtime on Windows
         if: runner.os == 'Windows'
         shell: powershell
         run: |
@@ -134,53 +154,112 @@ jobs:
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Restore declared local SDK links
         run: node .agents/core/runtime/src/testing/ci.js restore-links
-      - name: Full deterministic shard
+      - name: Exact planned group
         id: tests
-        run: node .agents/core/runtime/src/testing/ci.js run ${{ matrix.id }}.report.json --suite full --shard ${{ matrix.shard }}
+        run: node .agents/core/runtime/src/testing/ci.js run-group verification-plan.json "${{ matrix.id }}" "${{ matrix.id }}.report.json"
       - uses: actions/upload-artifact@v7.0.2
         if: always() && steps.tests.outcome != 'skipped'
         with:
           overwrite: true
-          name: full-${{ matrix.id }}
+          name: group-${{ matrix.id }}
           path: '*.report.json'
           if-no-files-found: error
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
           overwrite: true
-          name: failure-${{ matrix.id }}
-          path: .agents/runtime-data/tests/
-  coverage:
-    if: always() && github.repository == 'yinbaiyuan/ksf-core'
-    needs: [platform, full]
-    runs-on: macos-15
+          name: failure-${{ matrix.id }}-attempt-${{ github.run_attempt }}
+          include-hidden-files: true
+          path: |
+            *.report.json
+            .agents/runtime-data/tests/
+  linux-core:
+    name: ${{ matrix.id }} (native Linux Core)
+    if: needs.plan.outputs.has_linux == 'true'
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.linux) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: verification-plan
+      - name: Verify Linux bundled runtime and build inputs
+        run: |
+          .agents/ksf build --json > /dev/null
+          .agents/ksf runtime verify --json
+          .agents/ksf context entry --json > /dev/null
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
+          dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Exact planned Linux core group
+        id: tests
+        run: node .agents/core/runtime/src/testing/ci.js run-group verification-plan.json "${{ matrix.id }}" "${{ matrix.id }}.report.json"
+      - uses: actions/upload-artifact@v7.0.2
+        if: always() && steps.tests.outcome != 'skipped'
+        with:
+          overwrite: true
+          name: group-${{ matrix.id }}
+          path: '*.report.json'
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          overwrite: true
+          name: failure-${{ matrix.id }}-attempt-${{ github.run_attempt }}
+          include-hidden-files: true
+          path: |
+            *.report.json
+            .agents/runtime-data/tests/
+  coverage:
+    if: always() && github.repository == 'yinbaiyuan/ksf-core'
+    needs: [plan, platform, tests, linux-core]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Preserve incomplete-plan diagnostics
+        run: echo '{"schemaVersion":2,"complete":false,"error":"Plan or report download incomplete"}' > coverage.json
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: verification-plan
       - uses: actions/download-artifact@v8.0.2
         continue-on-error: true
         with:
-          pattern: ${{ inputs.full && 'full-*' || 'quick-*' }}
+          pattern: group-*
           path: reports
-      - name: Verify exact platform coverage
+      - name: Verify exact shared and native coverage
         run: |
           .agents/ksf build --json > /dev/null
-          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
-          "$ksf_node" .agents/core/runtime/src/testing/ci.js aggregate reports ${{ inputs.full && 'full' || 'quick' }} proof.json
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
+          "$ksf_node" .agents/core/runtime/src/testing/ci.js aggregate-plan reports verification-plan.json proof.json
       - name: Require every applicable job
         if: always()
         env:
-          PLATFORM_RESULT: ${{ needs.platform.result }}
-          FULL_RESULT: ${{ needs.full.result }}
-          FULL: ${{ inputs.full }}
-        run: test "$PLATFORM_RESULT" = success && { test "$FULL" != true || test "$FULL_RESULT" = success; }
+          PLAN: ${{ needs.plan.result }}
+          PLATFORM: ${{ needs.platform.result }}
+          TESTS: ${{ needs.tests.result }}
+          LINUX: ${{ needs.linux-core.result }}
+          HAS_NATIVE: ${{ needs.plan.outputs.has_native }}
+          HAS_LINUX: ${{ needs.plan.outputs.has_linux }}
+        run: |
+          test "$PLAN" = success
+          if [ "$HAS_NATIVE" = true ]; then test "$PLATFORM" = success && test "$TESTS" = success; fi
+          if [ "$HAS_LINUX" = true ]; then test "$LINUX" = success; fi
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
+          overwrite: true
           name: coverage-${{ github.sha }}
           path: coverage.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7.0.2
-        if: inputs.full
+        if: success() && needs.plan.outputs.full == 'true'
         with:
           overwrite: true
           name: suite-proof-${{ github.sha }}

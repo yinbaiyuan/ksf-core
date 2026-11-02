@@ -2,7 +2,7 @@ import {lstat,readFile,readdir} from 'node:fs/promises';
 import {readFileSync} from 'node:fs';
 import {join,resolve,relative} from 'node:path';
 import {assert,problem} from './services/workbench-common.js';
-import {validateManifest,assertCompatible,validVersion} from './applications/protocol.js';
+import {validateManifest,assertCompatible,validVersion,validateSDKCompatibility} from './applications/protocol.js';
 
 const currentContract=JSON.parse(readFileSync(new URL('../../data-compatibility.json',import.meta.url),'utf8'));
 async function ordinary(root,path){
@@ -17,12 +17,13 @@ async function json(root,path){
 }
 function contract(value){
   assert(value?.schemaVersion===1&&Array.isArray(value.sdkVersions)&&value.sdkVersions.every(Number.isSafeInteger)&&Array.isArray(value.formats),'CORE_DATA_CONTRACT_INVALID','目标 Core 缺少有效的数据兼容契约。');
+  validateSDKCompatibility(value.sdkCompatibility??{version:'1.0.0',minCompatibleVersion:'1.0.0'});
   const ids=new Set();
   for(const entry of value.formats){assert(typeof entry.id==='string'&&!ids.has(entry.id)&&typeof entry.versionField==='string'&&Array.isArray(entry.versions)&&entry.versions.length>0,'CORE_DATA_CONTRACT_INVALID','目标 Core 数据格式声明无效。');ids.add(entry.id);}
   return value;
 }
 /** Executes no candidate code and mutates no store. Locators are owned by this Core. */
-export async function inspectCoreDataCompatibility(root,targetCore,{applicationState}={}){
+export async function inspectCoreDataCompatibility(root,targetCore,{applicationState,environment={}}={}){
   root=resolve(root);targetCore=resolve(targetCore);
   let target;try{target=contract(await json(targetCore,join(targetCore,'data-compatibility.json')));}catch(error){if(error.code==='ENOENT')throw problem('CORE_DATA_CONTRACT_INVALID','目标 Core 缺少数据兼容契约，无法安全切换。',409);throw error;}
   const build=await json(targetCore,join(targetCore,'build.json'));assert(validVersion(build.version),'CORE_DATA_CONTRACT_INVALID','目标 Core 版本无效。');
@@ -58,14 +59,14 @@ export async function inspectCoreDataCompatibility(root,targetCore,{applicationS
       for(const release of [app.active,app.pending].filter(Boolean))try{
         validateManifest(release.manifest);
         assert(target.sdkVersions.includes(release.manifest.sdkVersion),'APP_SDK_INCOMPATIBLE','目标 Core 不支持已安装应用协议。');
-        assertCompatible(release.manifest,{coreVersion:build.version});
+        assertCompatible(release.manifest,{coreVersion:build.version,sdkCompatibility:target.sdkCompatibility??{version:'1.0.0',minCompatibleVersion:'1.0.0'},...environment});
       }catch(e){errors.push({appId,code:e.code??'APP_CORE_INCOMPATIBLE',message:e.message});}
     }
   }catch(e){if(e.code!=='ENOENT')gap(e,index);}
   return {compatible:errors.length===0,targetVersion:build.version,filesChecked,errors};
 }
-export async function assertCoreDataCompatibility(root,targetCore){
-  const result=await inspectCoreDataCompatibility(root,targetCore);
+export async function assertCoreDataCompatibility(root,targetCore,options){
+  const result=await inspectCoreDataCompatibility(root,targetCore,options);
   if(!result.compatible)throw problem('CORE_DATA_INCOMPATIBLE','目标 Core 与当前持久数据或应用要求不兼容；原件已保留。',409,result);
   return result;
 }

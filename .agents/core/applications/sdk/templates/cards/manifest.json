@@ -41,7 +41,7 @@
     "entry": "backend/index.mjs",
     "lifecycle": "on-demand"
   },
-  "minCoreVersion": "0.3.2",
+  "minCoreVersion": "0.5.3",
   "dataStores": [
     {
       "name": "state.json",

@@ -231,7 +231,7 @@ project、context、metadata 与四类对象的业务成功与失败 JSON 都进
 
 ```sh
 .agents/ksf cooperation list --json
-.agents/ksf partner read partner.ksf.object-designer --part all --json
+.agents/ksf partner read partner.ksf.ability-manager --part all --json
 .agents/ksf competency check competency.ksf.partner-design --json
 ```
 

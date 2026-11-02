@@ -11,7 +11,7 @@ import { contextCapabilities } from '../src/services/context.js';
 
 const repository = fileURLToPath(new URL('../../../../', import.meta.url));
 const runtimeReference = readFileSync(join(repository, 'AGENTS.md'), 'utf8').match(/partner\.ksf\.runtime@\d+\.\d+\.\d+/)[0];
-const runtimeNames = ['project-route', 'asset-maintenance'];
+const runtimeNames = ['ability-route', 'project-route'];
 const userFolders = ['项目', '知识', '@收件箱', '档案', ...Object.values(types).map(type => type.user)];
 
 function fixture(t) {
@@ -46,7 +46,7 @@ test('shipped definitions resolve the minimal runtime in a fresh root with empty
   }
   const entry = f.query('partner', 'read', runtimeReference);
   assert.deepEqual(entry.errors, []);
-  assert.deepEqual(entry.data.references.map(row => row.id), ['ability-route', 'project-route', 'asset-maintenance'].map(name => 'competency.ksf.' + name));
+  assert.deepEqual(entry.data.references.map(row => row.id), ['ability-route', 'project-route'].map(name => 'competency.ksf.' + name));
   for (const ref of entry.data.references) {
     const read = f.query('competency', 'read', ref.reference);
     assert.deepEqual(read.errors, []);

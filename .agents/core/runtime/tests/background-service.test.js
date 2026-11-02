@@ -23,7 +23,8 @@ const cleanup=(root,action)=>cleanups.get(root).push(action);
 async function temporary(t){const root=await mkdtemp(join(tmpdir(),'ksf-background-'));cleanups.set(root,[]);t.after(async()=>{for(const action of cleanups.get(root).reverse())await action();cleanups.delete(root);await rm(root,{recursive:true,force:true,maxRetries:6,retryDelay:100});});return root;}
 async function availablePort(){const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;await new Promise(r=>server.close(r));return port;}
 test('frontend failure cannot prevent health, local control and application CLI metadata',async t=>{
-  const root=await temporary(t),server=await startWebServer({root,port:0,capture:false,webDirectory:join(root,'missing-ui')});cleanup(root,()=>server.close());
+  const root=await temporary(t),storeDirectory=join(root,'empty-store');await mkdir(storeDirectory);await writeFile(join(storeDirectory,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));
+  const server=await startWebServer({root,port:0,capture:false,webDirectory:join(root,'missing-ui'),applications:{storeDirectory,defaultSource:null}});cleanup(root,()=>server.close());
   const response=await fetch(server.url);assert.equal(response.status,503);assert.equal((await response.json()).error.code,'WEB_FRONTEND_UNAVAILABLE');
   const health=await (await fetch(new URL('/api/health',server.url))).json();assert.equal(health.service,'ksf-core');assert.equal(health.frontend.state,'unavailable');
   assert.deepEqual(await controlRequest(root,'/api/local/apps',{operation:'list'}),[]);
@@ -153,6 +154,11 @@ test('host death marks the accepted request unknown and restart never replays it
   const path=join(root,'.agents/user-data/applications/data/com.example.headless/executions'),deadline=Date.now()+7000;let count;
   while(Date.now()<deadline){count=await readFile(path,'utf8').catch(()=>null);if(count)break;await new Promise(r=>setTimeout(r,20));}assert.equal(count,'1');process.kill(host.pid,'SIGKILL');
   const outcome=await pending;assert.equal(outcome.error?.data?.outcomeUnknown,true);
+  // A broken request socket can settle before SIGCHLD has reaped the host.
+  // Restart only after the service identity has actually reached stopped.
+  const stoppedDeadline=Date.now()+5000;let stopped;
+  do{stopped=await serviceStatus(root);if(stopped.state==='stopped')break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<stoppedDeadline);
+  assert.equal(stopped.state,'stopped',JSON.stringify(stopped));
   const ready=await ensureService(root,{port});assert.notEqual(ready.pid,host.pid);assert.equal(await readFile(path,'utf8'),'1');
 });
 

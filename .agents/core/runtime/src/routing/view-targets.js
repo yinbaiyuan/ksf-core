@@ -5,7 +5,7 @@ export function ownershipOf(route       )            {
     ? { state: 'bound', target: { kind: 'project', ...route.project.primary } } : { state: route.project.state });
 }
 export function relatedOf(route       )           { return route.relatedTargets ?? route.references.map(p => ({ kind: 'project', ...p })); }
-export const targetTypeNames = { project: '项目', knowledge: '知识单元', ability: '能力目标', archive: '档案' };
+export const targetTypeNames = { project: '项目', knowledge: '知识单元', ability: '能力目标', archive: '档案', inbox: '收件箱', persona: '人设' };
 export function targetKey(target        ) { return target.targetId ? `target:${target.targetId}` : target.kind === 'project' ? `${target.scope}:${target.name}` : target.kind === 'ability' ? `ability:${target.source}:${target.id}` : `${target.kind}:${target.path}`; }
 export function targetLabel(target        ) { return `${target.name}${target.kind === 'project' && target.scope === 'archived' ? '（已归档）' : ''}`; }
 export function ownershipLabel(ownership           ) { return ownership.target ? targetLabel(ownership.target) : ownership.state === 'none' ? '无归属' : '待确定'; }

@@ -59,6 +59,17 @@ function readConfig(root) {
       fail('BUILD_CONFIG_INVALID', `Invalid archive path or trusted SHA256 for ${target}.`);
     }
   }
+  const sdkPackage=join(root,'.agents/core/applications/sdk/package.json'),sdkContract=join(root,'.agents/core/data-compatibility.json');
+  if(existsSync(sdkPackage)&&existsSync(sdkContract)){
+    const sdk=JSON.parse(readFileSync(sdkPackage)),compatibility=JSON.parse(readFileSync(sdkContract)).sdkCompatibility;
+    if(compatibility){
+      if(sdk.version!==compatibility.version||!exactVersion.test(compatibility.minCompatibleVersion))fail('SDK_CONTRACT_MISMATCH','SDK package and host compatibility declaration differ.');
+      for(const path of ['applications/sdk/server/protocol.js','applications/sdk/src/index.ts','runtime/src/applications/protocol.js']){
+        const source=readFileSync(join(root,'.agents/core',path),'utf8'),api=source.match(/SDK_API_VERSION\s*=\s*['"]([^'"]+)/)?.[1],floor=source.match(/SDK_COMPATIBILITY\s*=[^;]*minCompatibleVersion:\s*['"]([^'"]+)/)?.[1];
+        if(api!==sdk.version||floor!==compatibility.minCompatibleVersion)fail('SDK_CONTRACT_MISMATCH',`SDK API range differs from host declaration: ${path}`);
+      }
+    }
+  }
   return { config, bytes };
 }
 

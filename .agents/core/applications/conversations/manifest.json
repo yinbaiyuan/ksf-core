@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.ksf.conversations",
   "name": "KSF飞轮",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "汇聚工作记录、回顾结果与改进建议，推动项目、知识和能力持续积累。",
   "author": "KSF",
   "icon": "flywheel",
@@ -47,7 +47,7 @@
     "ai",
     "codex-conversations"
   ],
-  "minCoreVersion": "0.5.2",
+  "minCoreVersion": "0.5.3",
   "dataStores": [],
   "cli": {
     "contractVersion": 1,
@@ -107,5 +107,7 @@
         "description": "读取带来源与版本的改进处理草稿，不启动执行"
       }
     ]
-  }
+  },
+  "sdkApiVersion": "1.1.0",
+  "builtWithSdkVersion": "1.1.0"
 }

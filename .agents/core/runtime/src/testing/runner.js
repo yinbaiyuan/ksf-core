@@ -5,6 +5,7 @@ import { tmpdir, homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { platform, removePathSync } from '../platform/index.js';
 import { inputFingerprints, fail } from './catalog.js';
+import { fixtureDigest } from './fixtures.js';
 import { retainRuntimeArtifacts } from '../distribution/retention.js';
 
 export function testEnvironment(input = process.env) {
@@ -12,7 +13,10 @@ export function testEnvironment(input = process.env) {
   delete env.NODE_TEST_CONTEXT;
   // Never inherit a parent runner's selection, debugger, coverage or preload.
   // NODE_OPTIONS is executable configuration; callers pass test options here.
-  delete env.NODE_OPTIONS; delete env.NODE_V8_COVERAGE; delete env.KSF_TEST_REUSE;
+  delete env.NODE_OPTIONS; delete env.NODE_V8_COVERAGE; delete env.KSF_TEST_REUSE; delete env.KSF_TEST_DISTRIBUTION_SEEDS;
+  // The outer frozen plan owns its comparison base. Child tests create their
+  // own Git repositories and must never compare them with the CI checkout.
+  delete env.KSF_TEST_BASE;
   env.PATH = [dirname(process.execPath), ...(process.platform === 'win32' ? [dirname(platform.tool('tar'))] : []), env.PATH ?? env.Path ?? ''].join(process.platform === 'win32' ? ';' : ':');
   if (process.platform === 'win32') { env.Path = env.PATH; }
   return env;
@@ -65,6 +69,33 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   };
   const onSignal = () => { cancelled = true; for (const child of active) stop(child); };
   process.on('SIGINT', onSignal); process.on('SIGTERM', onSignal);
+  let fixturePreparation = null, fixtureError, seedPath, seedDirectory;
+  async function prepareFixtures() {
+    const consumers = plan.tests.filter(t => t.fixtures?.includes('distribution'));
+    if (!consumers.length || cancelled) return;
+    seedDirectory = join(temporaryDirectory, 'seeds'); mkdirSync(seedDirectory);
+    seedPath = join(seedDirectory, 'manifest.json');
+    const began = performance.now(), log = join(directory, 'fixture-preparation.log');
+    progress('[PREPARE] run-owned distribution seeds');
+    await new Promise((resolve, reject) => {
+      const child = spawn(process.execPath, [join(root, '.agents/core/runtime/tests/helpers/prepare-distribution.mjs'), seedPath], {
+        cwd: root, env: {...testEnvironment(), TMPDIR:seedDirectory, TMP:seedDirectory, TEMP:seedDirectory},
+        detached:platform.detachedChildren, windowsHide:true, stdio:['ignore','pipe','pipe'],
+      });
+      const chunks = []; active.add(child); let timedOut = false;
+      const timer = setTimeout(() => {timedOut = true; stop(child);}, 180000);
+      child.stdout.on('data', b => chunks.push(b)); child.stderr.on('data', b => chunks.push(b));
+      child.once('error', error => chunks.push(Buffer.from(error.message)));
+      child.once('close', code => {
+        clearTimeout(timer); active.delete(child); try {writeFileSync(log, Buffer.concat(chunks));} catch(error) {reject(error);return;}
+        if (cancelled || timedOut || code !== 0) reject(Object.assign(new Error('Run fixture preparation failed; inspect '+log), {code:'TEST_FIXTURE_PREPARATION_FAILED'}));
+        else resolve();
+      });
+    });
+    fixturePreparation = {kind:'distribution', consumerFiles:consumers.length, coldSeeds:1, receiptVariants:2,
+      durationMs:Math.round(performance.now()-began), digest:fixtureDigest(seedDirectory), log};
+    progress('[PREPARED] distribution seeds ('+fixturePreparation.durationMs+' ms; '+consumers.length+' consumers)');
+  }
   async function runOne(item, index) {
     const key = before[item.id], previous = readJSON(join(cache, `${key}.json`));
     if (plan.options.reuse && item.cacheable && previous?.schemaVersion === 1 && previous.key === key && previous.result?.status === 'passed' && previous.result.path === item.path) {
@@ -76,7 +107,7 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
     return await new Promise(resolve => {
       const executable = item.kind === 'powershell' ? 'powershell.exe' : process.execPath;
       const args = item.kind === 'powershell' ? ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', join(root, item.path)] : ['--test', '--test-concurrency=1', '--test-reporter=' + new URL('./reporter.js', import.meta.url).href, join(root, item.path)];
-      child = spawn(executable, args, { cwd: join(root, plan.catalog.components[item.owner].directory), env: {...testEnvironment(), TMPDIR: temporary, TMP: temporary, TEMP: temporary}, detached: platform.detachedChildren, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      child = spawn(executable, args, { cwd: join(root, plan.catalog.components[item.owner].directory), env: {...testEnvironment(), ...(seedPath ? {KSF_TEST_DISTRIBUTION_SEEDS:seedPath} : {}), TMPDIR: temporary, TMP: temporary, TEMP: temporary}, detached: platform.detachedChildren, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
       active.add(child); progress(`[RUN] ${item.path}`);
       const consume = line => {
         if (!line) return;
@@ -107,18 +138,21 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
     });
   }
   try {
+    await prepareFixtures();
     const schedule = plan.tests.map((item,index)=>({...item,index})).sort((a,b)=>(b.seconds?.[process.platform]??1)-(a.seconds?.[process.platform]??1)||a.path.localeCompare(b.path));
     const parallel = plan.execution.maxParallelFiles;
     await scheduleTests(schedule, parallel, async item => { results[item.index] = await runOne(item, item.index); }, () => cancelled);
-  } finally { process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); for (const child of active) stop(child); }
+  } catch (error) { fixtureError = {code:error.code ?? 'TEST_EXECUTION_FAILED',message:error.message}; progress(error.message); } finally { process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); for (const child of active) stop(child); }
   for (let i = 0; i < results.length; i++) if (!results[i]) results[i] = { id: plan.tests[i].id, path: plan.tests[i].path, owner: plan.tests[i].owner, status: 'not-executed', durationMs: 0 };
   const after = inputFingerprints(root, plan.catalog, plan.tests), changed = plan.tests.filter(item => before[item.id] !== after[item.id]).map(item => item.path);
+  try {if (fixturePreparation && fixtureDigest(seedDirectory) !== fixturePreparation.digest) fixtureError = {code:'TEST_FIXTURE_CHANGED',message:'A test changed the run-owned immutable fixture seed.'};}
+  catch(error) {fixtureError = {code:'TEST_FIXTURE_CHANGED',message:error.message};}
   let cleanupError;
   try { removePathSync(temporaryDirectory, { recursive: true, force: true }); } catch(error) { cleanupError={code:error.code,message:error.message};progress('Owned temporary directory retained: '+temporaryDirectory); }
-  const ok = !cancelled && !changed.length && !cleanupError && results.every(result => ['passed', 'reused'].includes(result.status));
+  const ok = !cancelled && !changed.length && !cleanupError && !fixtureError && results.every(result => ['passed', 'reused'].includes(result.status));
   if (ok) for (let i = 0; i < results.length; i++) if (plan.tests[i].cacheable && results[i].status === 'passed') writeJSON(join(cache, `${before[plan.tests[i].id]}.json`), { schemaVersion: 1, key: before[plan.tests[i].id], runId, result: results[i] });
-  const result = { schemaVersion: 1, runId, startedAt, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - start), status: ok ? plan.tests.length ? 'passed' : plan.status : cancelled ? 'cancelled' : changed.length ? 'inputs-changed' : 'failed', complete: ok, platform: process.platform, architecture: process.arch, nodeVersion: process.version, catalogDigest: plan.catalog.digest, suite: plan.suite, scope: plan.scope, component: plan.component, shard: plan.options.shard ?? null, selectedFiles: plan.selectedFiles, assignedFiles: plan.tests.map(t => t.path), requiredFullComponents: plan.requiredFullComponents, excludedPlatform: plan.excludedPlatform, inputFingerprints: before, changedInputs: changed, results, summary: { executed: results.filter(r => !['reused', 'not-executed'].includes(r.status)).length, reused: results.filter(r => r.status === 'reused').length, failed: results.filter(r => !['passed', 'reused'].includes(r.status)).length, platformNotApplicable: plan.excludedPlatform.length }, reportPath: join(directory, 'report.json') };
-  result.execution=plan.execution;result.gaps=plan.gaps; result.temporaryDirectory = temporaryDirectory; result.cleanupError=cleanupError??null;
+  const result = { schemaVersion: 1, runId, startedAt, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - start), status: ok ? plan.tests.length ? 'passed' : plan.status : cancelled ? 'cancelled' : changed.length ? 'inputs-changed' : 'failed', complete: ok, platform: process.platform, architecture: process.arch, nodeVersion: process.version, catalogDigest: plan.catalog.digest, suite: plan.suite, profile: plan.profile, scope: plan.scope, component: plan.component, shard: plan.options.shard ?? null, selectedFiles: plan.selectedFiles, assignedFiles: plan.tests.map(t => t.path), requiredFullComponents: plan.requiredFullComponents, excludedPlatform: plan.excludedPlatform, inputFingerprints: before, changedInputs: changed, results, summary: { executed: results.filter(r => !['reused', 'not-executed'].includes(r.status)).length, reused: results.filter(r => r.status === 'reused').length, failed: results.filter(r => !['passed', 'reused'].includes(r.status)).length, platformNotApplicable: plan.excludedPlatform.length }, reportPath: join(directory, 'report.json') };
+  result.fixturePreparation=fixturePreparation; result.fixtureError=fixtureError??null; result.execution=plan.execution;result.gaps=plan.gaps; result.temporaryDirectory = temporaryDirectory; result.cleanupError=cleanupError??null;
   writeJSON(result.reportPath, result);
   const retained = retainRuntimeArtifacts(root, 'tests', { keepRunId: runId });
   for (const error of retained.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);

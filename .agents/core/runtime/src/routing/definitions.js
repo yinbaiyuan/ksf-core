@@ -36,8 +36,9 @@ export function resolveExistingTarget(context, input) {
       source: item.source, userRevision: item.user_revision, path: item.path, definitionDigest: row.digest, lifecycle: 'existing' };
   }
   const path = managedPath(context.root, input.path), entry = lstatSync(path);
-  if (!entry.isFile() && !entry.isDirectory()) fail('ROUTE_ARCHIVE_INVALID', 'Archive target must be an ordinary file or directory.');
-  return { kind: 'archive', path: input.path, name: posix.basename(input.path), entryType: entry.isDirectory() ? 'directory' : 'file', lifecycle: 'existing' };
+  if (!['archive','inbox','persona'].includes(input.kind)) fail('ROUTE_TARGET_INVALID', 'Unsupported target kind.');
+  if (!entry.isFile() && !entry.isDirectory() || input.kind === 'persona' && !entry.isFile()) fail('ROUTE_TARGET_INVALID', 'Target must be an ordinary file or directory; persona requires a file.');
+  return { kind: input.kind, path: input.path, name: posix.basename(input.path), entryType: entry.isDirectory() ? 'directory' : 'file', lifecycle: 'existing' };
 }
 export function verifyTargetSnapshot(context, target) {
   const actual = resolveExistingTarget(context, targetLocator(target));
@@ -104,7 +105,7 @@ export function decorateRecord(context, document) {
       const locator = targetLocator(value, true);
       if (locator.kind === 'ability') locator.ref = currentObjectId(locator.ref);
       const actual = resolveExistingTarget(context, locator);
-      return { ...value, ...binding, ...(value.kind === 'ability' && actual.id !== value.id ? { currentIdentity: { id: actual.id, ref: actual.ref, path: actual.path } } : {}), freshness: actual.path === value.path && (value.kind !== 'archive' || actual.entryType === value.entryType) && (value.kind !== 'ability' || actual.definitionDigest === value.definitionDigest && actual.version === value.version) ? 'current' : 'changed' };
+      return { ...value, ...binding, ...(value.kind === 'ability' && actual.id !== value.id ? { currentIdentity: { id: actual.id, ref: actual.ref, path: actual.path } } : {}), freshness: actual.path === value.path && (!['archive','inbox','persona'].includes(value.kind) || actual.entryType === value.entryType) && (value.kind !== 'ability' || actual.definitionDigest === value.definitionDigest && actual.version === value.version) ? 'current' : 'changed' };
     } catch (error) { return { ...value, ...binding, freshness: 'unavailable', error: { code: error.code ?? 'TARGET_READ_FAILED', message: 'Recorded target entry is unavailable.' } }; }
   };
   const current = document.current;

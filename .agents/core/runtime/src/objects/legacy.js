@@ -2,7 +2,8 @@
 // explicit migration. Current object inputs always use the current schema.
 export function currentObjectId(id) {
   return typeof id === 'string' ? id.replace(/^workflow\./, 'cooperation.')
-    .replace(/^competency\.ksf\.workflow-design$/, 'competency.ksf.cooperation-design') : id;
+    .replace(/^competency\.ksf\.workflow-design$/, 'competency.ksf.cooperation-design')
+    .replace(/^partner\.ksf\.object-designer$/, 'partner.ksf.ability-manager') : id;
 }
 
 export function currentTargetKey(key) {
@@ -20,5 +21,7 @@ export function currentObjectPath(path) {
     .replace(/(^|\/)workflow\.md$/g, '$1cooperation.md')
     .replace(/(^|\/)workflow\./g, '$1cooperation.')
     .replace(/(^|\/)workflow-design(?=\/|$)/g, '$1cooperation-design')
-    .replace(/competency\.ksf\.workflow-design/g, 'competency.ksf.cooperation-design');
+    .replace(/competency\.ksf\.workflow-design/g, 'competency.ksf.cooperation-design')
+    .replace(/(^|\/)ksf-object-designer(?=\/|$)/g, '$1ability-manager')
+    .replace(/partner\.ksf\.object-designer/g, 'partner.ksf.ability-manager');
 }
