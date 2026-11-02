@@ -21,7 +21,7 @@ jobs:
     if: github.repository == 'yinbaiyuan/ksf-core'
     uses: ./.github/workflows/verification.yml
     with:
-      full: ${{ github.event_name == 'push' || inputs.full == true || (github.event_name != 'pull_request' && !github.event.before) || github.event.before == '0000000000000000000000000000000000000000' }}
+      full: ${{ github.event_name != 'pull_request' && (github.event_name == 'push' || inputs.full == true || !github.event.before) }}
       base: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
   required:
     if: always() && github.repository == 'yinbaiyuan/ksf-core'
