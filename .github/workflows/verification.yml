@@ -49,6 +49,7 @@ jobs:
             coverage-audit.json
           if-no-files-found: error
   platform:
+    name: Prepare ${{ matrix.prepared }}
     if: needs.plan.outputs.has_native == 'true'
     needs: plan
     strategy:
@@ -113,6 +114,7 @@ jobs:
             *.report.json
             .agents/runtime-data/tests/
   tests:
+    name: ${{ matrix.id }} (${{ matrix.profile }})
     if: needs.plan.outputs.has_native == 'true'
     needs: [plan, platform]
     strategy:
@@ -172,6 +174,7 @@ jobs:
             *.report.json
             .agents/runtime-data/tests/
   linux-core:
+    name: ${{ matrix.id }} (native Linux Core)
     if: needs.plan.outputs.has_linux == 'true'
     needs: plan
     strategy:

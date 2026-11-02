@@ -11,6 +11,8 @@ import {validateLayeredCoverage,aggregateLayeredReports} from '../src/testing/ci
 import {sourceIdentity,validateProof} from '../src/testing/ci.js';
 import {fixtureDigest} from '../src/testing/fixtures.js';
 import {testEnvironment,executeTestPlan} from '../src/testing/runner.js';
+import {scenarios,preservesAssertions} from '../src/testing/coverage-audit.js';
+import {fileURLToPath} from 'node:url';
 import {gitBinary,nullDevice} from './helpers/platform.js';
 
 function fixture(t) {
@@ -36,6 +38,15 @@ const reportsFor=(plan)=>plan.groups.map(g=>({schemaVersion:2,groupId:g.id,planD
   platform:g.platform,architecture:g.architecture,nodeVersion:'v'+plan.runtime.version,sourceDigest:plan.sourceDigest,catalogDigest:plan.catalogDigest,runtime:plan.runtime,
   complete:true,status:'passed',suite:'full',scope:'files',component:null,commandExitCode:0,changedInputs:[],summary:{executed:g.files.length,reused:0,failed:0},
   selectedFiles:g.files,assignedFiles:g.files,results:g.files.map(path=>({path,status:'passed'}))}));
+
+test('an additive platform wait must retain every original executable assertion',()=>{
+  const root=fileURLToPath(new URL('../../../../',import.meta.url)),path='coverage-amendment.test.js';
+  const original=scenarios(root,path,"test('crash',()=>{assert.equal(unknown,true);assert.notEqual(next,old);assert.equal(count,1);});")[0];
+  const added=scenarios(root,path,"test('crash',async()=>{await stopped();assert.equal(unknown,true);assert.notEqual(next,old);assert.equal(count,1);assert.equal(state,'stopped');});")[0];
+  assert.notEqual(original.hash,added.hash);assert.equal(preservesAssertions(original.assertions,added.assertions),true);
+  assert.equal(preservesAssertions(original.assertions,added.assertions.slice(1)),false);
+  assert.equal(preservesAssertions([],added.assertions),false);
+});
 
 test('reviewed lanes reject missing declarations and a native label on pure logic',t=>{
   const f=fixture(t);assert.equal(loadCatalog(f.root).schemaVersion,2);

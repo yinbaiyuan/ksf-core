@@ -2126,7 +2126,17 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "32b1247f290ea2c1e6bad865db0f99869b5a1071573ffef85f662f69653167ff",
+        "reason": "Ubuntu 22/24 native failure 41426302535: socket closure can precede host identity termination. Add an explicit stopped-phase assertion before restart; keep all original outcome-unknown, new-PID and no-replay assertions and native platforms.",
+        "originalAssertions": [
+          "fce2310e96961d046f2889a2a68847cbe5fb96eaeb01b007ad6e0817250847eb",
+          "60a6b20dc2ed44201047e2104535c2774ba4704880a2c7379f02b8828f2a6af9",
+          "81e2bfbfdf46756cb54e889129daa068385edc556d69b36ac0db93ccbfb00d2f",
+          "5c5500d504efae63a88fc7cbab5e309241ce767a82b2fc41285152fd2d0ff026"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/background-service.test.js",

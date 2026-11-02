@@ -10099,7 +10099,12 @@
         ".gitattributes",
         "README.md"
       ],
-      "requirements": [],
+      "requirements": [
+        {
+          "name": "rolldown/utils",
+          "component": "sdk"
+        }
+      ],
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2.99,
