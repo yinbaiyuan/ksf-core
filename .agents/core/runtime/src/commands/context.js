@@ -3,11 +3,13 @@ import { validSourceId } from '../sources/schema.js';
 import { invalid, MetadataError } from '../metadata/errors.js';
 import { contextCapabilities } from '../services/context.js';
 import { contextEntry } from '../services/entry-context.js';
+import { orphanCompetencies } from '../services/orphan-competencies.js';
 
 export function contextHelp(operation) {
   return `KSF context${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
     '  ksf context capabilities [--json] [--source <source-id>]\n' +
     '  ksf context entry [--json]\n\n' +
+    '  ksf context orphan-competencies [--source <source-id>] [--json]\n\n' +
     'entry returns the complete fixed Core entry selected by instance incubation state.\n' +
     'It never initializes state, starts the backend or opens a browser.\n' +
     'Return all effective cooperation and partner discovery descriptions, cooperations first.\n' +
@@ -20,7 +22,7 @@ export function contextHelp(operation) {
 function parseArgs(args) {
   if (!args.length || (args.length === 1 && ['--help', '-h'].includes(args[0]))) return { help: true };
   const [operation, ...options] = args;
-  if (!['capabilities','entry'].includes(operation)) invalid('Expected context capabilities or entry.');
+  if (!['capabilities','entry','orphan-competencies'].includes(operation)) invalid('Expected context capabilities, entry or orphan-competencies.');
   if (options.length === 1 && ['--help', '-h'].includes(options[0])) return { operation, help: true };
   const parsed = { operation };
   parseOptions(options, { result: parsed, options: optionSpecs(operation === 'entry' ? ['json'] : ['json', 'source']), invalid, target() { invalid('Context does not accept targets.'); } });
@@ -29,7 +31,12 @@ function parseArgs(args) {
 }
 
 function render(result) {
-  if (result.operation === 'entry') return result.ok ? `# KSF ${result.data.mode}\nSource: ${result.data.entry.path}\nVersion: ${result.data.entry.version}\nSHA256: ${result.data.entry.sha256}\n\n${result.data.entry.content}\n` : result.errors.map(error=>`${error.code}: ${error.message}`).join('\n')+'\n';
+  if (result.operation === 'entry') {
+    const d=result.data;
+    const content=d?.context ? d.context.items.map(i=>`## ${i.key}\nSource: ${i.path}\nState: ${i.state}\nSHA256: ${i.sha256}\n\n${i.contentRef ? d.entry.content : i.content ?? ''}`).join('\n\n') : d?.entry.content ?? '';
+    return `# KSF ${d?.mode ?? 'unavailable'}\n\n${content}\n${result.errors.map(e=>`${e.code}: ${e.message}`).join('\n')}\n`;
+  }
+  if (result.operation === 'orphan-competencies') return `# Orphan competencies\nComplete: ${result.data?.complete ?? false}\n` + (result.data?.objects ?? []).map(o=>`\n${o.id}@${o.version} (${o.source})\n${o.path}\n${o.description}\n`).join('') + result.errors.map(e=>`${e.code}: ${e.message}\n`).join('');
   const lines = ['# KSF Capabilities'];
   if (result.data) {
     lines.push(`Complete: ${result.data.complete ? 'yes' : 'no'}`);
@@ -55,13 +62,15 @@ function render(result) {
 }
 
 export function runContextCommand(args, root) {
-  const result = { ok: false, command: 'context', operation: ['capabilities','entry'].includes(args[0]) ? args[0] : null,
+  const result = { ok: false, command: 'context', operation: ['capabilities','entry','orphan-competencies'].includes(args[0]) ? args[0] : null,
     data: null, errors: [] };
   let exitCode;
   try {
     const parsed = parseArgs(args);
     if (parsed.help) return { stdout: contextHelp(parsed.operation), exitCode: 0 };
-    const response = parsed.operation === 'entry' ? {data:contextEntry(root),errors:[]} : contextCapabilities(root, { source: parsed.source });
+    let response;
+    if (parsed.operation === 'entry') { const data=contextEntry(root); response={data,errors:data.context?.errors ?? []}; }
+    else response = parsed.operation === 'orphan-competencies' ? orphanCompetencies(root,{source:parsed.source}) : contextCapabilities(root, { source: parsed.source });
     result.data = response.data;
     result.errors = response.errors;
     result.ok = result.data.complete && result.errors.length === 0;

@@ -1,10 +1,10 @@
-# KSF 应用 SDK 1.0.0 开发版
+# KSF 应用 SDK 1.1.0 开发版
 
-全新宿主协议为 SDK v1；schemaVersion 与 sdkVersion 均为 1，全部应用按新清单重建，尚未正式发行。完整开发规范与AI开发入口统一在[应用开发者手册](../../docs/app-development/README.md)，请先读[AI-START](../../docs/app-development/AI-START.md)。
+SDK API 1.1.0兼容API 1.0.0，工具包与宿主范围必须一致，见[兼容契约](../../docs/app-development/sdk-compatibility.md)。宿主协议仍为 SDK v1；schemaVersion 与 sdkVersion 均为 1，全部应用按新清单重建，尚未正式发行。完整开发规范与AI开发入口统一在[应用开发者手册](../../docs/app-development/README.md)，请先读[AI-START](../../docs/app-development/AI-START.md)。
 
 本目录提供公共类型、React适配、文件/AI客户端、JSON持久化、五个模板及ksf-app create/check/build。普通应用的模型执行统一经过宿主AI服务；应用不保存模型密钥或自行启动模型CLI。
 
-应用 ID 必须是 `com.<发布者>.<应用名>` 三段式，如 `com.yinbaiyuan.camp-tasks`；后两段使用小写字母开头的小写字母、数字及段内连字符，总长不超过80。卡片短 ID 独立校验。新模板要求 Core 0.3.2；清单/运行协议仍为1，SDK仍为1.0.0。既有安装的身份迁移须使用配套工具，不能直接改包内manifest或移动单一数据目录，见[发布与迁移](../../docs/app-development/release.md)。
+应用 ID 必须是 `com.<发布者>.<应用名>` 三段式，如 `com.yinbaiyuan.camp-tasks`；后两段使用小写字母开头的小写字母、数字及段内连字符，总长不超过80。卡片短 ID 独立校验。新模板要求Core 0.5.3；清单/运行协议仍为1，当前SDK工具包和API版本为1.1.0。既有安装的身份迁移须使用配套工具，不能直接改包内manifest或移动单一数据目录，见[发布与迁移](../../docs/app-development/release.md)。
 
 ```sh
 npm ci --ignore-scripts

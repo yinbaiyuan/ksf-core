@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.ksf.terminal",
   "name": "终端",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "在工作台中使用本机 Shell。支持持续会话、交互程序、Ctrl-C、中文输入和窗口缩放。",
   "author": "KSF",
   "icon": "terminal",
@@ -32,6 +32,8 @@
       "height": 320
     }
   },
-  "minCoreVersion": "0.3.2",
-  "dataStores": []
+  "minCoreVersion": "0.5.3",
+  "dataStores": [],
+  "sdkApiVersion": "1.1.0",
+  "builtWithSdkVersion": "1.1.0"
 }

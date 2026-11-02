@@ -1,5 +1,5 @@
 #!/bin/sh
-# Launcher protocol 1. Recovery must work without Core or its runtime.
+# Launcher protocol 1. KSF_APPLICATIONS_RECOVERY. No Core/runtime is needed.
 set -eu
 PATH=${PATH:-/usr/bin:/bin}
 export PATH
@@ -60,6 +60,25 @@ ksf_recover() (
         ksf_launcher_fail RECOVERY_CONFLICT "Concurrent edit at $ksf_file; files and transaction were preserved."
       fi
     done
+    if [ -f "$ksf_transaction/applications-intent" ]; then
+      for ksf_path in .agents/user-data .agents/user-data/applications .agents/user-data/applications/state.json; do ksf_guard_path "$KSF_ROOT/$ksf_path"; done
+      ksf_app_live="$KSF_ROOT/.agents/user-data/applications/state.json"
+      ksf_app_old="$ksf_transaction/old-applications.json"
+      ksf_app_new="$ksf_transaction/new-applications.json"
+      [ -f "$ksf_app_new" ] || ksf_launcher_fail JOURNAL_INVALID 'Missing application index snapshot.'
+      if [ ! -f "$ksf_app_old" ]; then
+        [ -f "$ksf_transaction/old-applications-missing" ] || ksf_launcher_fail JOURNAL_INVALID 'Missing old application index identity.'
+        [ ! -e "$ksf_app_live" ] || cmp -s "$ksf_app_live" "$ksf_app_new" || ksf_launcher_fail RECOVERY_CONFLICT 'Application index changed outside this transaction.'
+      else
+        cmp -s "$ksf_app_live" "$ksf_app_old" || cmp -s "$ksf_app_live" "$ksf_app_new" || ksf_launcher_fail RECOVERY_CONFLICT 'Application index changed outside this transaction.'
+      fi
+      if [ -f "$ksf_app_old" ]; then
+        ksf_temporary=$(mktemp "$ksf_app_live.recover.XXXXXXXX")
+        cp -p "$ksf_app_old" "$ksf_temporary"
+        mv "$ksf_temporary" "$ksf_app_live"
+        ksf_temporary=''
+      else rm -f "$ksf_app_live"; fi
+    fi
     if [ -d "$ksf_transaction/old-core" ]; then
       if [ -e "$KSF_ROOT/.agents/core" ]; then
         [ ! -e "$ksf_transaction/failed-core" ] || ksf_launcher_fail RECOVERY_CONFLICT 'Both live and failed Core exist.'

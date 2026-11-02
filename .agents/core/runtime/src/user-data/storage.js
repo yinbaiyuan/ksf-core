@@ -1,3 +1,4 @@
+import {managedFilePath} from '../shared/managed-path.js';
 import { replaceFileSync as renameSync } from '../platform/index.js';
 import { recordDefinition, objectDataDirectory, validateObjectDocument } from './records.js';
 import { assertNoCooperationMigration } from '../migrations/guard.js';
@@ -10,29 +11,10 @@ import { userDataRoot, namespaces, encode, fail } from './schema.js';
 
 const maximum = 1024 * 1024;
 
-export function safePath(root, relative, { createParents = false } = {}) {
-  let current = resolve(root);
-  const parts = relative.split('/');
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (!part || part === '.' || part === '..' || /[\\:\x00-\x1f]/.test(part)) fail('USER_DATA_PATH_INVALID', 'Invalid managed path.');
-    current = join(current, part);
-    let stat;
-    try { stat = lstatSync(current); }
-    catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-      if (createParents && i < parts.length - 1) {
-        try { mkdirSync(current); } catch (created) { if (created.code !== 'EEXIST') throw created; }
-        stat = lstatSync(current);
-      }
-      else continue;
-    }
-    if (stat.isSymbolicLink() || (i < parts.length - 1 ? !stat.isDirectory() : !stat.isDirectory() && !stat.isFile())) {
-      fail('USER_DATA_PATH_INVALID', 'System user-data paths must use ordinary files and directories.', { target: relative });
-    }
-  }
-  return current;
+export function safePath(root, relative, options = {}) {
+  return managedFilePath(root, relative, {...options, invalid(message, details) { fail('USER_DATA_PATH_INVALID', message, details); }});
 }
+
 const identity = (a, b) => sameIdentity(a, b, ['dev', 'ino', 'size', 'mtimeMs', 'ctimeMs', 'mode']);
 export function snapshot(root, namespace, objectId) {
   const store = recordDefinition(namespace, objectId);

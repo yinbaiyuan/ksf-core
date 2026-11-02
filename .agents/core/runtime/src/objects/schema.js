@@ -12,7 +12,6 @@ export const protectedPaths = {
   'partner.ksf.runtime': '.agents/core/abilities/partners/ksf-runtime/partner.md',
   'competency.ksf.ability-route': '.agents/core/abilities/competencies/ability-route/competency.md',
   'competency.ksf.project-route': '.agents/core/abilities/competencies/project-route/competency.md',
-  'competency.ksf.asset-maintenance': '.agents/core/abilities/competencies/asset-maintenance/competency.md',
 };
 export const versionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 export const statuses = new Set(['draft', 'active', 'archived']);
@@ -28,7 +27,7 @@ export function validId(id, type) {
 export function parseReference(reference, type, { exact = false } = {}) {
   if (typeof reference !== 'string') fail('OBJECT_REFERENCE_INVALID', 'Expected an object ID or ID@version.', { exitCode: 2 });
   const replacement = currentReference(reference);
-  if (replacement !== reference) fail('OBJECT_RENAMED', 'Workflow abilities are now Cooperation. Use the new identity; migrate existing data with ksf cooperation migrate --apply.', { replacement, exitCode: 2 });
+  if (replacement !== reference) fail('OBJECT_RENAMED', reference.split('@')[0] === 'partner.ksf.object-designer' ? 'Use partner.ksf.ability-manager; migrate current state with ksf ability-manager migrate --apply.' : 'Workflow abilities are now Cooperation. Use the new identity; migrate existing data with ksf cooperation migrate --apply.', { replacement, exitCode: 2 });
   const parts = reference.split('@');
   if (parts.length > 2 || !validId(parts[0], type) || (exact && parts.length !== 2) ||
       (parts.length === 2 && !versionPattern.test(parts[1]))) {
@@ -48,7 +47,7 @@ export function validateObject(metadata, { type, source, path }) {
   for (const field of ['id', 'name', 'status', 'description', 'version']) {
     if (typeof metadata[field] !== 'string' || !metadata[field].trim()) issue(field, 'Required object field must be a nonempty string.');
   }
-  if (typeof metadata.id === 'string' && currentReference(metadata.id) !== metadata.id) issue('id', `Use ${currentReference(metadata.id)}; migrate existing data with ksf cooperation migrate --apply.`, 'OBJECT_RENAMED');
+  if (typeof metadata.id === 'string' && currentReference(metadata.id) !== metadata.id) issue('id', `Use ${currentReference(metadata.id)}; migrate existing data with ksf ${metadata.id === 'partner.ksf.object-designer' ? 'ability-manager' : 'cooperation'} migrate --apply.`, 'OBJECT_RENAMED');
   else if (!validId(metadata.id, type)) issue('id', 'ID must match the storage type and use three safe path segments.');
   if (!statuses.has(metadata.status)) issue('status', 'Expected draft, active or archived.');
   if (!versionPattern.test(metadata.version ?? '')) issue('version', 'Expected an exact x.y.z version.');

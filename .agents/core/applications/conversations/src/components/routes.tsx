@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Archive, ArrowRight, ArrowUpRight, BookOpen, Box, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileText, GitBranch, Layers3, Link2, Sparkles, TriangleAlert } from 'lucide-react';
+import { Inbox, UserRound, Archive, ArrowRight, ArrowUpRight, BookOpen, Box, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileText, GitBranch, Layers3, Link2, Sparkles, TriangleAlert } from 'lucide-react';
 import type { Ability, Ownership, Project, Target, Route, RouteEvent } from '../types';
 import { abilityType, agentNames, changed, date, projectName, sourceName, stageNames, timeline, typeNames } from '../model';
 import { Button } from '@ksf/sdk/components/ui/button';
@@ -7,9 +7,9 @@ import { eventTime, routeEvolution, type EvolutionNode, type RouteChange } from 
 import { ownershipOf, relatedOf, targetIdentity, targetKey, targetTypeNames } from '../targets';
 export type Detail = { kind: 'target'; target: Target; label: string; reason: string; at?: string } | { kind: 'ability'; ability: Ability; reason: string; at?: string } | { kind: 'project'; project: Project; label: string; reason: string; at?: string } | { kind: 'event'; event: RouteEvent; changes: string[] } | { kind: 'arrangement'; event: RouteEvent } | { kind: 'reports'; events: RouteEvent[] };
 export function markOrigin(element: HTMLElement) { element.closest('[data-window-id]')?.querySelector('[data-detail-origin]')?.removeAttribute('data-detail-origin'); element.setAttribute('data-detail-origin', 'true'); }
-const targetIcon = (target: Target) => ({ project: BriefcaseBusiness, knowledge: BookOpen, ability: Compass, archive: Archive })[target.kind];
-const targetKinds = ['project', 'knowledge', 'ability', 'archive'] as const;
-const relatedLabel = { project: '关联项目', knowledge: '关联知识', ability: '关联能力', archive: '关联档案' };
+const targetIcon = (target: Target) => ({ project: BriefcaseBusiness, knowledge: BookOpen, ability: Compass, archive: Archive, inbox: Inbox, persona: UserRound })[target.kind];
+const targetKinds = ['project', 'knowledge', 'ability', 'archive', 'inbox', 'persona'] as const;
+const relatedLabel = { project: '关联项目', knowledge: '关联知识', ability: '关联能力', archive: '关联档案', inbox: '关联收件', persona: '关联人设' };
 const icons = { cooperation: GitBranch, partner: Sparkles, competency: Compass, 'data-package': Box };
 export function Freshness({ item, context = false }: { item: { freshness?: string; effectiveChanged?: boolean }; context?: boolean }) {
   return changed(item) ? <span className="warning-label"><TriangleAlert size={12} />{context ? item.freshness === 'unavailable' ? '来源现状：不可用' : '来源现状：已变化' : item.freshness === 'unavailable' ? '来源不可用' : '来源已变化'}</span> : null;

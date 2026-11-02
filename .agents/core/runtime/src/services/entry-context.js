@@ -3,6 +3,7 @@ import {readUserData} from './user-data.js';
 import {readConfigFile} from '../configuration/storage.js';
 import {parseFrontmatter} from '../metadata/frontmatter.js';
 import {incubationError} from '../incubation/schema.js';
+import {collaborationContext} from './collaboration-context.js';
 
 export function incubationState(root) {
   const state = readUserData({root, namespace:'incubation'});
@@ -16,7 +17,10 @@ export function contextEntry(root) {
   if (source.state === 'missing') throw incubationError('ENTRY_DEFINITION_MISSING',`入口定义不可读：${path}。请核对当前实例的完整 Core。`);
   const parsed = parseFrontmatter(Buffer.from(source.document),path);
   if (typeof parsed.values.version !== 'string' || !source.document.trim()) throw incubationError('ENTRY_DEFINITION_INVALID','Core 入口定义缺少版本或正文。');
-  return {complete:true, mode, stateVersion:{schemaVersion:state.schemaVersion,revision:state.revision,etag:state.etag},
+  if (mode === 'runtime' && (parsed.values.id !== 'partner.ksf.runtime' || parsed.values.status !== 'active')) throw incubationError('ENTRY_DEFINITION_INVALID','正常入口身份或状态无效，请保留原件并核对当前 Core。');
+  const entry = {source:'system',path,version:parsed.values.version,sha256:source.etag,content:source.document};
+  const context = mode === 'runtime' ? collaborationContext(root, entry) : null;
+  return {complete:context?.complete ?? true, mode, stateVersion:{schemaVersion:state.schemaVersion,revision:state.revision,etag:state.etag},
     incubation:{state:state.state,status:state.values.status??null,...(mode==='incubation'?{draft:state.values.draft??{},operation:state.values.operation??null}:{})},
-    entry:{source:'system',path,version:parsed.values.version,sha256:source.etag,content:source.document}};
+    entry, ...(context ? {context} : {})};
 }

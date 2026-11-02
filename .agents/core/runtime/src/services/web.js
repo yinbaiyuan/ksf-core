@@ -25,7 +25,7 @@ async function startHTTPServer({ port = WEB_PORT, listenFD, root = fileURLToPath
   if (listenFD !== undefined && (!Number.isSafeInteger(listenFD) || listenFD < 3)) {
     throw failure('INVALID_ARGUMENTS', 'Expected an inherited listener descriptor of at least 3.');
   }
-  let assets,frontend={state:'unchecked'};
+  let assets,frontend={state:'unchecked'},startupComplete=false;
   const loadAssets=()=>{if(!assets&&frontend.state!=='unavailable')try{assets=verifyWebBuild(webDirectory??fileURLToPath(new URL('../../web/',import.meta.url)));frontend={state:'ready'};}catch(error){frontend={state:'unavailable',code:error.code??'WEB_BUILD_UNAVAILABLE'};}return assets;};
   const identity=processIdentity();
   const startedAt = new Date().toISOString();
@@ -68,6 +68,7 @@ async function startHTTPServer({ port = WEB_PORT, listenFD, root = fileURLToPath
     } catch {
       reject(400, 'WEB_REQUEST_INVALID', 'Invalid request URL.'); return;
     }
+    if(!startupComplete){reject(503,'SERVICE_STARTING','Core 与配套应用正在准备，请稍后重试。');return;}
     if (await workbench.handle(request, url, send, response)) return;
     if (!['GET', 'HEAD'].includes(request.method)) {
       reject(405, 'WEB_METHOD_NOT_ALLOWED', 'Use GET or HEAD.', { Allow: 'GET, HEAD' }); return;
@@ -149,7 +150,7 @@ async function startHTTPServer({ port = WEB_PORT, listenFD, root = fileURLToPath
   }
   const actualPort = bound.port;
   address = { host: WEB_HOST, port: actualPort, url: `http://${WEB_HOST}${actualPort === 80 ? '' : `:${actualPort}`}/` };
-  try{await workbench.publishControl(address.url,identity);workbench.start();}catch(error){await new Promise(resolve=>server.close(resolve));await workbench.close();throw error;}
+  try{await workbench.publishControl(address.url,identity);await workbench.start();startupComplete=true;}catch(error){await new Promise(resolve=>server.close(resolve));await workbench.close();throw error;}
   let syncing = false, stopped = false;
   const catchUp = async () => {
     if (syncing || stopped || !capture) return;

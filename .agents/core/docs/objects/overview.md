@@ -62,7 +62,7 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 
 这是一组分类判断，不是要求为每项需求建立整套对象。同一输入可以有多个归属，也可以仅更新一个既有对象；重要缺口会改变归属时，先澄清。
 
-设计时的承载判断由 [ksf 对象设计师](../../abilities/partners/ksf-object-designer/partner.md)负责。运行时由 [ability-route](../../abilities/competencies/ability-route/competency.md)选择已有对象，两者不能互相替代。
+设计时的承载判断由 [ksf 能力管理搭档](../../abilities/partners/ability-manager/partner.md)负责。运行时由 [ability-route](../../abilities/competencies/ability-route/competency.md)选择已有对象，两者不能互相替代。
 
 ## 运行时怎样读取
 

@@ -126,6 +126,7 @@ test('real CLI starts a managed backend without frontend assets and round-trips 
  for(const name of ['build.json','data-compatibility.json'])cpSync(join(core,name),join(f.root,'.agents/core',name));cpSync(join(core,'runtime/package.json'),join(f.root,'.agents/core/runtime/package.json'));
  cpSync(join(core,'applications/sdk/src/shared'),join(f.root,'.agents/core/applications/sdk/src/shared'),{recursive:true});cpSync(join(core,'applications/sdk/package.json'),join(f.root,'.agents/core/applications/sdk/package.json'));
  f.put('.agents/core/applications/sdk/server/workflow-contract.mjs',readFileSync(join(core,'applications/sdk/server/workflow-contract.mjs')));
+ f.put('.agents/core/applications/store/index.json',JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));
  const values={items:[{id:'headless',kind:'api',enabled:true,concurrency:1,protocolId:'openai-responses-v1',baseURL:'https://example.invalid/v1',credentialRef:'env:FIXTURE_ONLY'}]};
  try{
   const result=spawnSync(process.execPath,[join(f.root,'.agents/core/runtime/src/cli.js'),'config','write','ai.connections','--data',JSON.stringify(values),'--if-match','missing','--json'],{encoding:'utf8',timeout:45000});

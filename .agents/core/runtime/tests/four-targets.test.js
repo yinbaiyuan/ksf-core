@@ -45,7 +45,7 @@ test('ability targets pin actual source and definition without becoming adopted 
   const firstKey=targetKey(a.ownership.target), path=f.add();writeFileSync(path,readFileSync(path,'utf8').replace('version: 0.1.0','version: 0.2.0'));
   const b=resolveReport(definitionContext(f.root),targetReport({kind:'ability',ref:'partner.test.method',source:'user'}));assert.equal(targetKey(b.ownership.target),firstKey);assert.equal(b.ownership.target.version,'0.2.0');
   for(const [path,type] of [['档案/企业/示例企业','directory'],['档案/企业/示例企业/合同.pdf','file']])assert.equal(resolveReport(definitionContext(f.root),targetReport({kind:'archive',path})).ownership.target.entryType,type);
-  for(const target of [{kind:'inbox',path:'@收件箱/a.md'},{kind:'system',name:'ksf-core'},{kind:'archive',path:'档案/../USER.md'},{kind:'archive',path:'/tmp/a'}])assert.throws(()=>validateReport(targetReport(target)));
+  for(const target of [{kind:'inbox',path:'@收件箱/../a.md'},{kind:'system',name:'ksf-core'},{kind:'archive',path:'档案/../USER.md'},{kind:'archive',path:'/tmp/a'}])assert.throws(()=>validateReport(targetReport(target)));
   symlinkSync(join(f.root,'档案/企业/示例企业'),join(f.root,'档案/链接'));assert.throws(()=>resolveReport(definitionContext(f.root),targetReport({kind:'archive',path:'档案/链接/合同.pdf'})),{code:'ROUTE_PATH_INVALID'});
 });
 test('same-name ability targets remain separate by actual source and missing sources never fall back', t=>{

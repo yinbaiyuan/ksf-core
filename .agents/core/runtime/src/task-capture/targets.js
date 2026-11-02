@@ -26,7 +26,7 @@ export function targetRelation(turn, key, history = turnTargets(turn)) {
   const match = history.entries.find(e => e.key === key), last = history.sequence.at(-1);
   const kind = match?.role ?? (turn.policy === 'exclude' ? 'excluded' : !turn.routes.length ? 'unreported'
     : last?.key === 'state:none' ? 'none' : last?.key === 'state:unresolved' ? 'unresolved' : 'other');
-  const label = { primary: ({ project: '本项目', knowledge: '本知识单元', ability: '本能力', archive: '本档案' }[match?.target?.kind] ?? '本目标'), related: '仅关联', other: `其他归属${last?.target ? ` · ${last.label}` : ''}`, none: '无归属', unresolved: '待确定', unreported: '未上报', excluded: '未记录' }[kind] ?? '待确定';
+  const label = { primary: ({ project: '本项目', knowledge: '本知识单元', ability: '本能力', archive: '本档案', inbox: '本收件', persona: '本人设' }[match?.target?.kind] ?? '本目标'), related: '仅关联', other: `其他归属${last?.target ? ` · ${last.label}` : ''}`, none: '无归属', unresolved: '待确定', unreported: '未上报', excluded: '未记录' }[kind] ?? '待确定';
   return { kind, label, matches: !!match };
 }
 export function targetContext(all, key) {

@@ -62,6 +62,6 @@ KSF 内当前项目入口位于 `项目/`，项目档案入口位于固定 `档�
 
 需要暂停、交接或长期继续的任务，在已授权范围内按[任务检查点](../runtime/task-checkpoints.md)保存到 `任务/<任务名>.md`；根卡只保留任务链接，工程正文继续留在工程。检查点保存当前步骤、采用定义、有效决定、授权来源、产物入口和下一步，不自动生成完整聊天或复制项目事实。恢复时核对现行文件和外部动作，未保存的信息保持未知。
 
-归属与已有工程事实由 [project-route](../../abilities/competencies/project-route/competency.md)准备；建立及新工程安排、推进/恢复、验收/归档分别由三项项目基本功持有，已授权写入采用 [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md) 的通用保障。[project CLI](../cli/project.md)已提供 list/read/write/remove/check；项目正文与资料也可用宿主工具作已授权的局部编辑，通用 metadata CLI 仍可管理元数据。项目归属的语义判断由 Agent 完成，没有持久化自动绑定服务，项目不套用能力对象的 ID、版本与派生制度。
+归属与已有工程事实由 [project-route](../../abilities/competencies/project-route/competency.md)准备；建立及新工程安排、推进/恢复、验收/归档分别由三项项目基本功持有，各领域基本功直接持有其已授权写入与检查步骤。[project CLI](../cli/project.md)已提供 list/read/write/remove/check；项目正文与资料也可用宿主工具作已授权的局部编辑，通用 metadata CLI 仍可管理元数据。项目归属的语义判断由 Agent 完成，没有持久化自动绑定服务，项目不套用能力对象的 ID、版本与派生制度。
 
 返回[对象综述](overview.md)。相关对象：[协同](cooperation.md)、[知识](knowledge.md)、[基本功](competency.md)。

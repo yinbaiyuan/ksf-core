@@ -1,6 +1,6 @@
 export interface Issue { code: string; message?: string; taskId?: string }
 export interface Project { name: string; scope: 'current' | 'archived'; path: string; freshness?: string }
-export type TargetKind = 'project' | 'knowledge' | 'ability' | 'archive';
+export type TargetKind = 'project' | 'knowledge' | 'ability' | 'archive' | 'inbox' | 'persona';
 export interface Target { kind: TargetKind; name: string; path?: string; scope?: 'current' | 'archived'; freshness?: string;
   lifecycle?: 'planned' | 'existing'; targetId?: string; targetVersion?: number; currentBinding?: Target;
   id?: string; ref?: string; source?: string; version?: string; definitionDigest?: string; userRevision?: number | null; entryType?: 'file' | 'directory' }

@@ -2,7 +2,7 @@
 id: "competency.ksf.system-release"
 name: "系统发行"
 description: "从唯一 Core 稳定来源构建或发起正式发行，核对 core-main、精确版本与双平台证明，只发布 Core 包和索引，处理冻结产物重试与对账。"
-version: 0.2.0
+version: 0.2.1
 status: active
 references: []
 ---
@@ -29,3 +29,7 @@ references: []
 正例：已合入 core-main 的版本通过双平台证据后只发布 Core。反例：打包个人实例、使用个人历史替代内核、把模拟 API 当真实发行。边界例：资产上传响应未知时核对并复用同一资产。
 
 技术协议由[发行说明](../../../docs/distribution.md)与[release CLI](../../../docs/cli/release.md)持有，平台验收按实际证据报告。
+
+## 冻结产物与完成回执
+
+本地包、正式发行和实例安装分别返回实际路径/链接、版本、Core SHA、产物摘要与验证范围；未达到请求阶段时明确剩余条件。重试只复用同一冻结产物，来源或摘要变动先重审。发行数据由现有程序和平台回执持有，本项不增加私人设置。
