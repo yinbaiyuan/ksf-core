@@ -16,6 +16,7 @@ import { createWorkspaceFiles } from './workspace-files.js';
 import {createTaskActivitySource} from './task-activity.js';
 import {createTaskReviewSource} from './task-review.js';
 import { createApplicationManager } from '../applications/manager.js';
+import {reconcileCoreApplications} from '../applications/core-upgrade.js';
 import { MAX_PACKAGE } from '../applications/protocol.js';
 import { createWorkbenchAI } from './ai-tasks.js';
 import { createCodexConversations, CONVERSATION_METHODS } from './codex-conversations.js';
@@ -45,12 +46,13 @@ export function createCoreHost(root,options={}) {
   const configuration=createConfigurationService(files.root,{ai,communication:communicationReady,service:options.service});
   const monitor=createRuntimeMonitor({applications,ai,conversations:codexConversations,service:options.service,...options.monitor});
   control=createLocalControl(files.root,{applications,communication:communicationReady,service:options.service,configuration});
-  function start(){if(started||closed)return;started=true;communicationStart=createCommunicationService(files.root,{applications});communicationStart.then(resolveCommunication,rejectCommunication);backgroundReady=applications.startBackground().catch(()=>{});if(existsSync(join(files.root,'.agents/user-data/ai')))void ai.start().catch(()=>{});}
+  let startPromise;
+  function start(){return startPromise??=(async()=>{if(started||closed)return;await reconcileCoreApplications(files.root,join(files.root,'.agents/core'));await applications.ensureDefaults();if(closed)return;started=true;communicationStart=createCommunicationService(files.root,{applications});communicationStart.then(resolveCommunication,rejectCommunication);backgroundReady=applications.startBackground().catch(()=>{});if(existsSync(join(files.root,'.agents/user-data/ai')))void ai.start().catch(()=>{});})();}
   const git=Object.fromEntries(['list','owner','status','diff','history','commit','tree','refs','conflict','stashDetail','start','operation','settings','invalidate'].map(method=>[method,(...params)=>method==='invalidate'?applications.notify('com.ksf.git',method,params):applications.invoke('com.ksf.git',method,params)]));
   async function quiesce({force=false,controlOffset=0}={}){
     assert(!draining,'SERVICE_STOPPING','后台已在停止。',409);draining=true;const deadline=Date.now()+10000;
     try{const communication=await communicationReady.catch(()=>null);communication?.pauseDispatch();await ai.pauseDispatch();await applications.quiesce({force});while(!force&&(ai.runtimeStatus().active>0||(communication?.runtimeStatus().active??0)>0||control.pendingCount()>controlOffset)&&Date.now()<deadline)await new Promise(r=>setTimeout(r,50));assert(force||(ai.runtimeStatus().active===0&&(communication?.runtimeStatus().active??0)===0&&control.pendingCount()<=controlOffset),'APP_BUSY','仍有 AI 或通信工作在执行，请稍后重试或显式强制停止。',409);}
     catch(error){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});throw error;}
   }
-  return {start,resume(){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});},quiesce,draining:()=>draining,files,activity,applications,ai,codexConversations,monitor,communication:communicationReady,control,configuration,git,backgroundReady,async close(){closed=true;monitor.close();if(!started)rejectCommunication(problem('SERVICE_STOPPED','主服务未激活。',503));await backgroundReady;await control.drain();await applications.close();if(gitReady)await (await gitReady).close();await (await communicationReady.catch(()=>null))?.close();await control.close();await ai.close();await codexConversations.close();}};
+  return {start,resume(){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});},quiesce,draining:()=>draining,files,activity,applications,ai,codexConversations,monitor,communication:communicationReady,control,configuration,git,backgroundReady,async close(){closed=true;await startPromise?.catch(()=>{});monitor.close();if(!started)rejectCommunication(problem('SERVICE_STOPPED','主服务未激活。',503));await backgroundReady;await control.drain();await applications.close();if(gitReady)await (await gitReady).close();await (await communicationReady.catch(()=>null))?.close();await control.close();await ai.close();await codexConversations.close();}};
 }

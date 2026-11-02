@@ -8,7 +8,7 @@ import {existsSync} from 'node:fs';
 import { readFile, writeFile, mkdir, rm, readdir, cp, lstat } from 'node:fs/promises';
 import {packApplication} from './server/pack.mjs';
 import {atomicWrite,withStoreLock} from './server/publication.mjs';
-import {validateManifest} from './server/protocol.js';
+import {validateManifest,stampSDKManifest,SDK_API_VERSION} from './server/protocol.js';
 import {loadStoreListing} from './server/listing.mjs';
 const sdkRoot=dirname(fileURLToPath(import.meta.url));
 function toolchain(root,{frontend=true}={}){
@@ -23,7 +23,8 @@ async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntri
   root=resolve(root);const checked=await checkApplication(root);if(!checked.ok)throw Object.assign(Error('应用源码检查失败。'),{code:'APP_SOURCE_CHECK_FAILED',diagnostics:checked.diagnostics});const productionOnly={name:'ksf-production-only',load(id){const rel=relative(root,id.split('?')[0]);if(!id.includes('node_modules')&&isTestSource(id))throw Object.assign(Error('生产包不能加载测试装置：'+rel),{code:'APP_TEST_IMPORT'});}};const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));validateManifest(manifest);const frontend=!!manifest.window||!!manifest.cards?.length,tools=toolchain(root,{frontend}),{rolldown}=await import(pathToFileURL(tools.rolldown).href),out=join(root,'.build');let build,react;if(frontend){({build}=await import(pathToFileURL(tools.vite).href));react=(await import(pathToFileURL(tools.react).href)).default;}
   await rm(out,{recursive:true,force:true});await mkdir(join(out,'frontend'),{recursive:true});
   const sdkPackage=JSON.parse(await readFile(join(sdkRoot,'package.json'),'utf8')),appPackage=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
-  validateManifest(manifest);
+  if(sdkPackage.version!==SDK_API_VERSION)throw Error('SDK 工具包版本与 API 契约不一致。');
+  Object.assign(manifest,stampSDKManifest(manifest));validateManifest(manifest);
   const storeListing=await loadStoreListing(root);
   const names=new Set([...Object.keys(sdkPackage.peerDependencies??{}),...Object.keys(appPackage.dependencies??{})]);
   const alias=[{find:'@ksf/sdk',replacement:join(sdkRoot,'src')}];

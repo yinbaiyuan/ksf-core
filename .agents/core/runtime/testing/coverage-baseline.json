@@ -200,7 +200,15 @@
       "path": ".agents/core/applications/cooperation-center/tests/workflows.test.mjs",
       "hash": "587c7cc91baab6c9b5a688fffda3071f55c3f1642b1ebf690846316152426a9b",
       "title": "'lost callback acknowledgement survives A host restart without advancing the original wait twice'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "c74b27bc60e5bbb2dc284bd51bec432f0f2102debc7cdfb3ae8476be287273a4",
+        "originalAssertions": [
+          "ca1cbb2f8001f07fdc3f76330d1ee2de2e1d1bbe72ed3f5e573aa45cb423595d",
+          "c991630251d0dfc85520f099272e43629296a3eba7ad9d1b23f4ed150d399719"
+        ],
+        "reason": "SDK 1.1 packages require Core 0.5.3 or newer; fixture hosts now use their actual current Core declaration rather than the obsolete 0.3.5 override. Callback restart assertions are unchanged."
+      }
     },
     {
       "path": ".agents/core/applications/cooperation-center/tests/workflows.test.mjs",
@@ -1934,7 +1942,22 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "22510d8380cdfd1beede33c6fd74809732b83ef6d1cd9bb22f2121728f1376b2",
+        "originalAssertions": [
+          "ce9bf415028c6716fb8a50b341c6e48d61a046ef571299912834ceacc28d53b7",
+          "f9efd8857ae5397022e941559bb1a37d567b875dc2778dc4d2f8cb97bdf2ac17",
+          "33e49529d8c4e64aa3ee1b0446042fcaa6b387f17e1ed624905fa7f2f753d00d",
+          "304ee14350e78caa6a073e11b847e8105ef6cbc1c1c2c2c6db68a91c39071ff5",
+          "67c588424b8cca9905965535d5c99a35d841cdc2105e4e441eca5aa9a10a4fe8",
+          "c27666e71ed3510271d15fdcc137d49e9f151bd2b7caa7209ecea03495e1e018",
+          "4fdd096f80de0010e92e28d36ff76a6c6252eb44bfb0ca0e15826ad7bfad253b",
+          "4c45096a465b6c3e0085dad69c78e6d5a83d9677dc8b20ecdbc4e369aa9a613c",
+          "2ccc9d7fc78e23a220c5c6ea71846163f954cf4e37beff8fa92dcb9733c06096"
+        ],
+        "reason": "Use an explicitly empty fixture registry so the frontend-unavailable health/control scenario does not reconcile unrelated bundled applications. All nine original assertions remain."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/background-service.test.js",
@@ -3556,7 +3579,19 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "70adf0b2cb0f55b154002441a303a482c00f6695de8b66d7fd65216013695846",
+        "originalAssertions": [
+          "01526029b97f617194132f891709831e12142f74b3558c4c7a74bef819087618",
+          "06e60671d5a342c40506af4e60e1bf864473c24c321c9daff11c977eab59fd95",
+          "46576d4695971ea0952846cfa677eb69926c4a6bfcf0e648205e6da51f0396e5",
+          "c27666e71ed3510271d15fdcc137d49e9f151bd2b7caa7209ecea03495e1e018",
+          "887020ac72c2ce69ed8e6cac081f34fb04312c7f2dffc7d927c766b2afbd993f",
+          "cb6ab2292818ecd7dea48f3225924edaef367b3de3b5f84bf18f9ef4c43c6402"
+        ],
+        "reason": "Provide an empty application registry in the isolated managed-backend fixture; the six AI configuration and cold-start assertions remain unchanged."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/configuration.test.js",
@@ -4461,7 +4496,28 @@
       "path": ".agents/core/runtime/tests/distribution.test.js",
       "hash": "a220886bec8367ccae0538213dfd4bb8cf5eb08b0c7815f0e2cbf22c8a15cf13",
       "title": "'Core sources need no user directories while installed workspaces still validate their user scopes'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "ef762080e3bd7f13d6fedd04e8735de5b0f4a73e13385f7008864ab886bd7f78",
+        "reason": "The shipped object-designer role is migrated to ability-manager. Check the renamed shipped role and retain all source/user-scope and receipt assertions.",
+        "originalAssertions": [
+          "68e77da347fe4026bf6afeb0be215fcb5415bb0de8cb3062e2a0a5eabbfbeb74",
+          "416cc8366c708c97a39fcccfbd9155b150bf1eb85371bab48738e08b7ea422d5",
+          "706819a15d280c6ff7dca97a4dc59cf351063346c5e0eee57e215c3532dee151",
+          "40202f9d9fda53ebc0ae9c0f6f1ce5b45fb7a81b4bf93a65f3498684d0e02b63",
+          "f2552513b438a5608e55ec70bf2238280c7d7068a2284511c64a1492b79cb703",
+          "9c90b8c0de3fce7978ee8de3f39dbb3d525ffd91af32addcaeea9a9556239e09",
+          "44b357822331b6f5f321f1040e0ca8743eb8f61e7c070cd76544d4e60520169d"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "706819a15d280c6ff7dca97a4dc59cf351063346c5e0eee57e215c3532dee151",
+            "after": [
+              "edd6a77a971c3a92f58b0a3df2d13272ca69614c4cfb38ec993253cc5cf96c32"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/distribution.test.js",
@@ -4876,7 +4932,22 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "37ff20dff17dbd46e1fab75d2be71ed0e7c4b29e3e12cadfdb2b3e2477c06009",
+        "reason": "Inbox is now a supported ownership kind. Keep the rejection test using inbox path traversal; positive inbox/persona persistence is covered by runtime-management-refactor.",
+        "originalAssertions": [
+          "f3c377a6da078ba446e1fda20e432ba03fae0dd5cba9871c6c5822c1e65e4908",
+          "76b0de941cb9a518dced3b9b4df87463909738ef9ac4e5720861dfa9aa335148",
+          "9c88ba64363f6a8957ae6fe7828d892fc752332ee9c37408c91128aa924d2c46",
+          "22cd82403d983a7309aa72f387fcbc4a939452eb236f548d068a1325bd25666a",
+          "25852b0d39b89ca5d6d5520901a5390a93bb9c1ae20ea861e0c5a70bd4d0dbca",
+          "5a9f83b09e340929384ec8acaf48a6daf70e59aeb5ba0cf6bdcdffa84255e7cd",
+          "8c35d41ea97a2ab7f53b0f808a833266f8fec111d8b7d1d12aa8eab671533f07",
+          "2cec524f0dde1eb04a94adacab500b89ef5db8ea60f187ff8cc3e923cd2df3fe"
+        ],
+        "assertionUpdates": []
+      }
     },
     {
       "path": ".agents/core/runtime/tests/four-targets.test.js",
@@ -5988,7 +6059,33 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "7a857348b7b2cebcf443f22f1c311f75f9c407c3bd8a0bf62725dbfa6b101339",
+        "reason": "The runtime has exactly the protected ability-route/project-route entry dependencies; asset-maintenance is retired in favor of domain management. Keep closure and fresh-instance assertions.",
+        "originalAssertions": [
+          "442e5c8d9f763a0a1edf0e7d98772a477d96f5ed64617e4c6129e717a8501db1",
+          "b35d79e5decb3bb6777d80b12afcb0ba1056fdbb22db04bf07b9256845c0e590",
+          "108ddbf421e16712b3f44c2b2a54e3527b31abd5eea1b67902616293cdb35d50",
+          "016f5c1a4046c6dbda3bf40fe300692876e95a6e838ab95031060f8d9274ce12",
+          "5590dd8a45c13db473e1caee888ece5b930848795937c2c2a9044793f37edcb0",
+          "98098d7852cf01dcf8386c0981882d1162a9005cf42107eb06f6115fd860c1c3",
+          "876c17f0576262860c796d42aeed5a2c0c24ddcc90864558f467f756e375b93c",
+          "d04e00c79a6fc568f16826326c8715bc32b6d90b47118a412342fe2f0bbb88b0",
+          "b5e68a063ba784d6b3884c6e41a6640833f96876838c043b1a367ae97217f71f",
+          "69f8fa40b656c42d6e1019c4aca225b96c252a783e226ab153089ac38f0bdbe2",
+          "69d419b915bd70a50eb69c6de9bc8fd6fdae19defc1b2a5a13a45eefcaf38191",
+          "2fcc69e4e5715013f57e3c62f1ddb195a0f12db6fbb157faede0119155b966ae"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "016f5c1a4046c6dbda3bf40fe300692876e95a6e838ab95031060f8d9274ce12",
+            "after": [
+              "50d578c49327bbb9e34d35be1a917e70d8a2648d16b7235690e76baa9c00f97e"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
@@ -8872,7 +8969,23 @@
       "path": ".agents/core/runtime/tests/web-about.test.js",
       "hash": "97ca6807a50ea94a3360a7e8a3a527ca83ddc43052086c632b5acd6bdd5c1d5c",
       "title": "'about reads the executing Core build version instead of an installation receipt or frontend package'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "99b360464f09b40dcdf4e53a62f38a1a8893a7d58acbd981c276db8c4c706096",
+        "reason": "About metadata distinguishes running candidate from installed receipt and declares the SDK API range while retaining the executing Core version.",
+        "originalAssertions": [
+          "2a8379d6422e7d51338e8cc6fb6d7caa2370f69f869466b41bce409721e816c2"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "2a8379d6422e7d51338e8cc6fb6d7caa2370f69f869466b41bce409721e816c2",
+            "after": [
+              "9876ae23260eff8ccb1a72987c9b7eea33fbd160dd4ec7edb4fc0c9e75a6f591",
+              "ac7bbc141eaa1067c4677b5b36e96c0e212fa93a7ddae5f647702e696d789918"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web-about.test.js",
@@ -9006,7 +9119,33 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "1734dc1080c5a4c7ce62aa331fd178e3278a7616d8402718c4bf8663408ad05e",
+        "reason": "The guarded about endpoint adds SDK range and installed/candidate metadata. Preserve all request guards and explicitly allowlist response fields.",
+        "originalAssertions": [
+          "cb93ca50506404667bc996eada9a5174387c77c20b3077a97c49968efd3df03a",
+          "9378e48de248b80eb4d64d27dd19e3759b58743e4b84a3f5656a7c3af17bc066",
+          "0aae5f134aabe15cf0ff6859fa5dcb58491498e89aab79bf986073c5ce42c5eb",
+          "c25059b8f3b819989a8a7c1a847fd44e5ec3ea72da03481f535f8b25ebde1ba2",
+          "db28418cc68a6fd30ac85f3cce86f7951ff59da993c8bdcbc826783018bef97d",
+          "378a5e991646450bd665098a482f0ac7fd31927350a33fb2e38c4f7b28ca99bd",
+          "c3448a4795474dbd6b424d85bc15f7c6725d03fbd9b57c442cad899f05744c52",
+          "075a57a7fa7f8959f1e603c879ac3436b00fea3a7cf767b76e2b8567fc0b27bb"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "9378e48de248b80eb4d64d27dd19e3759b58743e4b84a3f5656a7c3af17bc066",
+            "after": [
+              "9ce9e9e831e6c9daa089d6ea5ade4b8800646c8445e604eed39978cdc3b52769",
+              "c31ec1c28c15f2db9de00b4a5c48e8f856cb796af07b07e264b31e02550247bd",
+              "13fd386e786aaef35a225cf000bdd0970ad455c32a2bcc89268a2a1024dfcbc2",
+              "53b52dfcfe4138e7365d300a7ef20850e37e4a7732de15f4f9df77abc0df2c44",
+              "e4efe5bc9498d81e99f3ca3494842ed1314f6bfed9b0352bdaa0e872966d7f0d"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web.test.js",

@@ -23,7 +23,8 @@ const cleanup=(root,action)=>cleanups.get(root).push(action);
 async function temporary(t){const root=await mkdtemp(join(tmpdir(),'ksf-background-'));cleanups.set(root,[]);t.after(async()=>{for(const action of cleanups.get(root).reverse())await action();cleanups.delete(root);await rm(root,{recursive:true,force:true,maxRetries:6,retryDelay:100});});return root;}
 async function availablePort(){const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;await new Promise(r=>server.close(r));return port;}
 test('frontend failure cannot prevent health, local control and application CLI metadata',async t=>{
-  const root=await temporary(t),server=await startWebServer({root,port:0,capture:false,webDirectory:join(root,'missing-ui')});cleanup(root,()=>server.close());
+  const root=await temporary(t),storeDirectory=join(root,'empty-store');await mkdir(storeDirectory);await writeFile(join(storeDirectory,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));
+  const server=await startWebServer({root,port:0,capture:false,webDirectory:join(root,'missing-ui'),applications:{storeDirectory,defaultSource:null}});cleanup(root,()=>server.close());
   const response=await fetch(server.url);assert.equal(response.status,503);assert.equal((await response.json()).error.code,'WEB_FRONTEND_UNAVAILABLE');
   const health=await (await fetch(new URL('/api/health',server.url))).json();assert.equal(health.service,'ksf-core');assert.equal(health.frontend.state,'unavailable');
   assert.deepEqual(await controlRequest(root,'/api/local/apps',{operation:'list'}),[]);

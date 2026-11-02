@@ -13,6 +13,8 @@ import { digestObject, isSHA, sha256, stableJSON } from '../shared/hash.js';
 import { fail } from './errors.js';
 import { installedManifest, validateManifest, releaseReceipt, validateProducts } from './manifests.js';
 import {assertCoreDataCompatibility} from '../data-compatibility.js';
+import {planCoreApplications,stageApplicationPackages,assertApplicationBaseline,applicationStatePath,targetSDK,lockApplicationState} from '../applications/core-upgrade.js';
+import {liveIdentity} from '../services/service-lock.js';
 import { checkSourceCompatibility } from '../sources/compatibility.js';
 import { isRepository, isRevision } from './git-values.js';
 import { developmentPath } from './paths.js';
@@ -39,11 +41,14 @@ export function systemFingerprint(root) {
 export async function systemRead({ root, api, fetcher }) {
   const receipt = installedManifest(root, true), config = configuration(root, { user: true });
   const backups = backupRecords(root);
+  const sdkCompatibility=existsSync(join(root,'.agents/core/data-compatibility.json'))?targetSDK(join(root,'.agents/core')):null;
+  const runningCoreVersion=readJSON(root,'.agents/core/build.json',true)?.version??null;
+  const candidate=!!runningCoreVersion&&receipt?.version!==runningCoreVersion;
   if (!receipt) return { mode: 'development', installed: false, coreRepository: config.core_repository,
-    releaseSource: config.release_source, automaticUpdates: false, backups: [] };
+    releaseSource: config.release_source, sdkCompatibility,runningCoreVersion,candidate, automaticUpdates: false, backups: [] };
   if ([4, 5].includes(receipt.schema_version) && receipt.development) return { mode: 'workspace', installed: true,
     version: receipt.version, platform: receipt.platform, core: receipt.core, developmentPackage: true,
-    releaseSource: config.release_source, automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds,
+    releaseSource: config.release_source, sdkCompatibility,runningCoreVersion,candidate, automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds,
     requestTimeoutSeconds: config.request_timeout_seconds, changes: null, baselineVerified: false,
     baselineStatus: 'development-package', backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
   const manifest = await resolveBaseline(receipt, { api, fetcher });
@@ -58,7 +63,7 @@ export async function systemRead({ root, api, fetcher }) {
   }
   return { mode: 'workspace', installed: true, version: manifest.version, platform: manifest.platform,
     core: manifest.core, developmentPackage: manifest.development === true, releaseSource: config.release_source,
-    automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds, requestTimeoutSeconds: config.request_timeout_seconds, changes, backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
+    sdkCompatibility,runningCoreVersion,candidate, automaticUpdates: false, checkIntervalSeconds: config.check_interval_seconds, requestTimeoutSeconds: config.request_timeout_seconds, changes, backups: backups.map(b => ({ id: b.id, from: b.from, to: b.to, operation: b.operation })) };
 }
 export function validateIndex(index, manifest) {
   if (!index || ![1, 2].includes(index.schema_version) || !isRepository(index.core_repository) || !isRevision(index.core_revision) ||
@@ -155,6 +160,9 @@ function verifyCandidate(candidate, changedPaths = []) {
     const checked = spawnSync(join(candidate, binaries[0]), ['--check', checkedPath(candidate, path)], { encoding: 'utf8', timeout: 10000 });
     if (checked.status !== 0) fail('CANDIDATE_INVALID', `Updated JavaScript does not parse: ${path}.`, { stderr: checked.stderr?.slice(0, 4000) });
   }
+  const probe=spawnSync(join(candidate,binaries[0]),['-p','JSON.stringify({nodeAbi:process.versions.modules,platform:process.platform,arch:process.arch})'],{encoding:'utf8',timeout:10000});
+  if(probe.status!==0)fail('CANDIDATE_INVALID','Cannot inspect the target runtime ABI.');
+  return parseJSON(probe.stdout,'target runtime environment');
 }
 function ownerStart() {
   try { return platform.processStart(process.pid); }
@@ -178,6 +186,7 @@ function restoreCandidate(root, transaction) {
     const live = checkedPath(root, path), old = checkedPath(transaction, `old-root/${path}`), next = checkedPath(transaction, `new-root/${path}`);
     if (!same(live, old) && !same(live, next)) fail('RECOVERY_CONFLICT', `Concurrent edit at ${path}; files and transaction were preserved.`);
   }
+  restoreApplicationIndex(root,transaction);
   if (existsSync(join(transaction, 'old-core'))) {
     if (existsSync(join(root, '.agents/core'))) renameSync(join(root, '.agents/core'), join(transaction, 'failed-core'));
     renameSync(join(transaction, 'old-core'), join(root, '.agents/core'));
@@ -187,8 +196,26 @@ function restoreCandidate(root, transaction) {
     if (!same(live, old)) writeAtomic(live, readFileSync(old), fileMode(old));
   }
 }
-function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault } = {}) {
+function restoreApplicationIndex(root,transaction){
+  if(!existsSync(join(transaction,'applications-intent')))return;
+  const live=readRegular(root,applicationStatePath,true),old=readRegular(transaction,'old-applications.json',true),next=readRegular(transaction,'new-applications.json');
+  if(old===null&&!existsSync(join(transaction,'old-applications-missing')))fail('JOURNAL_INVALID','Missing application index identity.');
+  if(live!==null&&!(old&&live.equals(old))&&!live.equals(next))fail('RECOVERY_CONFLICT','Application index changed outside this transaction; preserve the journal.');
+  if(live===null&&old!==null)fail('RECOVERY_CONFLICT','Application index was removed outside this transaction.');
+  if(old===null)rmSync(checkedPath(root,applicationStatePath),{force:true});else writeAtomic(checkedPath(root,applicationStatePath),old,0o600);
+}
+function assertServiceStopped(root){
+  const owner=readJSON(root,'.agents/runtime-data/web/control.json',true);
+  const lock=readJSON(root,'.agents/runtime-data/service/host.lock',true);
+  if(liveIdentity(owner)||liveIdentity(lock))fail('SERVICE_RUNNING','Stop and drain the current service before switching Core or applications.');
+}
+function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault,applicationPlan } = {}) {
+  assertServiceStopped(root);
+  if(applicationPlan?.changed)for(const path of ['.agents/ksf','.agents/ksf.ps1'])if(!readRegular(candidate,path).includes(Buffer.from('KSF_APPLICATIONS_RECOVERY')))fail('CANDIDATE_INVALID','Target launchers cannot recover the application index.');
+  if(applicationPlan){assertApplicationBaseline(root,applicationPlan);stageApplicationPackages(root,applicationPlan);}
   checkSourceCompatibility(root, candidate);
+  const unlockApplications=applicationPlan?.changed?lockApplicationState(root):()=>{};
+  try{
   const system = checkedPath(root, '.agents/runtime-data/system'); mkdirSync(system, { recursive: true });
   const transaction = checkedPath(root, '.agents/runtime-data/system/transaction');
   if (existsSync(transaction)) fail('UPDATE_BUSY', 'Another update transaction exists; use .agents/ksf to recover it.');
@@ -213,6 +240,12 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
     }
     const after = systemFingerprint(candidate);
     writeJSON(join(transaction, 'meta.json'), { from, to, operation, afterFingerprint: after, createdAt: new Date().toISOString() });
+    if(applicationPlan?.changed){
+      if(applicationPlan.before!==null)writeAtomic(join(transaction,'old-applications.json'),applicationPlan.before,0o600);
+      else writeAtomic(join(transaction,'old-applications-missing'),'1\n');
+      writeAtomic(join(transaction,'new-applications.json'),applicationPlan.after,0o600);
+      writeJSON(join(transaction,'applications.json'),applicationPlan.record);
+    }
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed after the update preview.');
     fault?.('prepared', transaction);
     renameSync(checkedPath(root, '.agents/core'), join(transaction, 'old-core'));
@@ -226,6 +259,13 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
       fault?.(`root-installed:${path}`, transaction);
     }
     fault?.('roots-installed', transaction);
+    if(applicationPlan?.changed){
+      assertApplicationBaseline(root,applicationPlan);
+      writeAtomic(join(transaction,'applications-intent'),'1\n');
+      fault?.('applications-intent',transaction);
+      writeAtomic(checkedPath(root,applicationStatePath),applicationPlan.after,0o600);
+      fault?.('applications-installed',transaction);
+    }
     writeAtomic(join(transaction, 'committed'), id + '\n'); committed = true;
     fault?.('committed', transaction);
     const backups = checkedPath(root, '.agents/runtime-data/system/backups'); mkdirSync(backups, { recursive: true });
@@ -241,6 +281,7 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
     }
     throw error;
   }
+  }finally{unlockApplications();}
 }
 export async function systemUpdate({ root, source, from, dryRun = false, fetcher, fault, api }) {
   const receipt = installedManifest(root), config = configuration(root, { user: true }), before = systemFingerprint(root);
@@ -273,12 +314,14 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
       else writeAtomic(target, file.bytes, file.mode);
     }
     writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(releaseReceipt(incoming)));
-    verifyCandidate(staging, plan.changes.map(c => c.path));
+    const environment=verifyCandidate(staging, plan.changes.map(c => c.path));
     checkSourceCompatibility(root, staging);
-    await assertCoreDataCompatibility(root,join(staging,'.agents/core'));
+    const applicationPlan=await planCoreApplications(root,join(staging,'.agents/core'),{environment});
+    result.applications=applicationPlan.entries;result.sdkCompatibility=targetSDK(join(staging,'.agents/core'));
+    await assertCoreDataCompatibility(root,join(staging,'.agents/core'),{applicationState:applicationPlan.state,environment});
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed during update validation.');
     if (dryRun) return { ...result, wouldChange: true };
-    return { ...result, ...commitCandidate(root, staging, { before, from: current.version, to: incoming.version, fault }) };
+    return { ...result, ...commitCandidate(root, staging, { before, from: current.version, to: incoming.version, fault,applicationPlan }) };
   } finally { rmSync(staging, { recursive: true, force: true }); }
 }
 export async function systemRollback({ root, dryRun = false, fault }) {
@@ -296,11 +339,17 @@ export async function systemRollback({ root, dryRun = false, fault }) {
       const source = existsSync(old) ? old : checkedPath(root, path);
       writeAtomic(join(staging, path), readFileSync(source), fileMode(source));
     }
-    verifyCandidate(staging);
+    // A recovery-capable launcher is a backward-compatible safety envelope for
+    // legacy Core. Never replace it with a reader that ignores app journals.
+    const applicationsRecord=readJSON(root,`.agents/runtime-data/system/backups/${latest.id}/applications.json`,true);
+    let recoveryLauncherRetained=false;
+    if(applicationsRecord)for(const path of ['.agents/ksf','.agents/ksf.ps1'])if(!readRegular(staging,path).includes(Buffer.from('KSF_APPLICATIONS_RECOVERY'))){writeAtomic(join(staging,path),readRegular(root,path),modeOf(root,path));recoveryLauncherRetained=true;}
+    const environment=verifyCandidate(staging);
     checkSourceCompatibility(root, staging);
-    await assertCoreDataCompatibility(root,join(staging,'.agents/core'));
-    if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun };
-    return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault }), dryRun };
+    const applicationPlan=await planCoreApplications(root,join(staging,'.agents/core'),{rollbackRecord:applicationsRecord??{changes:{}},environment});
+    await assertCoreDataCompatibility(root,join(staging,'.agents/core'),{applicationState:applicationPlan.state,environment});
+    if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
+    return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault,applicationPlan }), dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
   } finally { rmSync(staging, { recursive: true, force: true }); }
 }
 export async function systemSync({ root, now = Date.now(), fetcher }) {

@@ -10222,6 +10222,301 @@
         ".agents/core/runtime/src/communication/identity.js",
         ".agents/core/runtime/src/communication/service.js"
       ]
+    },
+    {
+      "id": "core:application-sdk-compatibility",
+      "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/data-compatibility.json"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "SDK semantic ranges, immutable legacy manifests and build stamping are pure protocol checks."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/applications/sdk/server/protocol.js",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/data-compatibility.json",
+        ".agents/core/build.json"
+      ]
+    },
+    {
+      "id": "core:core-application-plan",
+      "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/data-compatibility.json"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
+      "verification": {
+        "lane": "shared",
+        "kind": "integration",
+        "reason": "Bounded synthetic stores verify host-target planning and install intent; process recovery and actual switching are checked separately.",
+        "nativeContracts": [
+          "core:core-application-recovery",
+          "core:system-update-applications"
+        ]
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/core-upgrade.js",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/data-compatibility.json",
+        ".agents/core/applications/store"
+      ]
+    },
+    {
+      "id": "core:runtime-management-refactor",
+      "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/src/routing",
+        ".agents/core/runtime/src/chat-state",
+        ".agents/core/runtime/src/user-data",
+        ".agents/core/runtime/src/migrations",
+        ".agents/core/runtime/src/shared/material-files.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1.4,
+        "win32": 3
+      },
+      "timingBasis": "Local macOS targeted run, Windows estimate; no Windows execution claimed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real migration, symlink refusal, binary copy/move and persisted target identity exercise filesystem and ownership contracts on both supported hosts."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/services/entry-context.js",
+        ".agents/core/runtime/src/services/collaboration-context.js",
+        ".agents/core/runtime/src/services/orphan-competencies.js",
+        ".agents/core/runtime/src/migrations/ability-manager.js",
+        ".agents/core/runtime/src/shared/material-files.js",
+        ".agents/core/runtime/src/routing",
+        ".agents/core/runtime/src/user-data",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "core:system-update-applications",
+      "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk",
+        "web"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 120,
+        "win32": 300
+      },
+      "timingBasis": "Conservative estimate for real archive/HTTP/Core+app rollback and process-kill recovery.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real CLI archives, HTTP store, process death, fixed launcher recovery, data migration and rollback must execute on Mac and Windows."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/data-compatibility.json",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".agents/core/runtime/tests/helpers/distribution-fixture.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:core-application-recovery",
+      "path": ".agents/core/runtime/tests/core-application-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/data-compatibility.json"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real SIGKILL at each bridge persistence stage, idempotent restart and concurrent-index protection require native processes and filesystem semantics."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/core-upgrade.js",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/data-compatibility.json",
+        ".agents/core/applications/store"
+      ]
     }
   ],
   "timingBaseline": {

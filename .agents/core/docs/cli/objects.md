@@ -43,7 +43,6 @@ draft 保存后立即影响默认读取和依赖解析；首次派生默认就�
 | `partner.ksf.runtime` | `.agents/core/abilities/partners/ksf-runtime/partner.md` |
 | `competency.ksf.ability-route` | `.agents/core/abilities/competencies/ability-route/competency.md` |
 | `competency.ksf.project-route` | `.agents/core/abilities/competencies/project-route/competency.md` |
-| `competency.ksf.asset-maintenance` | `.agents/core/abilities/competencies/asset-maintenance/competency.md` |
 
 list 是对象管理清单，包含固定定义并标注 protected；路由从中排除固定入口链。list --source all 展示全部来源实际有效定义和 effective 标记；无效项通过 errors 报告，不能冒充可调用对象。部分失败仍返回可核实项，complete=false、ok=false、退出 1；不完整集合不能证明“全库无匹配”。
 
@@ -70,9 +69,9 @@ metadata 或 body 可以省略，省略部分保持原样；metadata 顶层合�
 系统与用户同 ID 以状态自动接管，无需另存运行时选择表：
 
 ```sh
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"archived"}}' --json
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"active"}}' --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"status":"archived"}}' --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"status":"active"}}' --json
 ```
 
 上例预览不会实际派生；之后的实际 write 才创建或修改用户定义。派生时完整保存入口、程序、模板、二进制资源和空目录；原始快照与来源摘要位于用户目录 .upstream/，入口内受管 upstream 映射记录 id/version；丢失基线时不能被当成用户原创继续更新。不支持的目录项导致整个操作失败，不能静默漏文件。

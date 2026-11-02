@@ -19,7 +19,7 @@ export function taskHelp() {
     `sync input: {transcriptPath}; without --from, discovers this workspace's Codex transcripts.\n` +
     `declare is read-only: {turnId,eventId,policy:capture|exclude|pause|resume,reason,report?,targetBindings?,identity?}.\n` +
     `report uses the existing route report schema; exact sources and digests are verified.\n` +
-    `ownership/relatedTargets support project, knowledge, ability and archive entries; do not mix with legacy project/references.\n` +
+    `ownership/relatedTargets support project, knowledge, ability, archive, inbox and persona entries; do not mix with legacy project/references.\n` +
     `Planned target: {kind,lifecycle:"planned",name}; reuse {kind,targetId}. Bind with targetBindings:[{targetId,ifMatch,target}].\n` +
     `--target filters historical primary ownership only; related targets never create chat membership.\n` +
     `Enabled capture archives ordinary post-activation dialogue without requiring a route report.\n` +

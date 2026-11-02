@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.ksf.markdown",
   "name": "KSF文档",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "浏览、编辑和预览 KSF 文件，保留自动保存、恢复草稿和版本冲突处理。",
   "author": "KSF",
   "icon": "documents",
@@ -28,6 +28,8 @@
   "permissions": [
     "filesystem"
   ],
-  "minCoreVersion": "0.3.2",
-  "dataStores": []
+  "minCoreVersion": "0.5.3",
+  "dataStores": [],
+  "sdkApiVersion": "1.1.0",
+  "builtWithSdkVersion": "1.1.0"
 }

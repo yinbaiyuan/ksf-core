@@ -15,7 +15,9 @@ test('about reads the executing Core build version instead of an installation re
   writeFileSync(file, JSON.stringify({ schema_version: 1, name: 'ksf-core', version: '1.2.3-dev.4' }));
   writeFileSync(join(file, '../release.json'), JSON.stringify({ version: '0.9.0' }));
   writeFileSync(join(file, '../package.json'), JSON.stringify({ version: '0.1.0' }));
-  assert.deepEqual(readWorkbenchAbout(file), { ok: true, productName: 'KSF 工作台', coreVersion: '1.2.3-dev.4' });
+  assert.deepEqual(readWorkbenchAbout(file), { ok: true, productName: 'KSF 工作台', coreVersion: '1.2.3-dev.4',installedVersion:'0.9.0',candidate:true });
+  writeFileSync(join(file,'../data-compatibility.json'),JSON.stringify({sdkCompatibility:{version:'1.1.0',minCompatibleVersion:'1.0.0'}}));
+  assert.deepEqual(readWorkbenchAbout(file).sdkCompatibility,{version:'1.1.0',minCompatibleVersion:'1.0.0'});
 });
 test('missing metadata returns a bounded error without exposing local paths', t => {
   const file = fixture(t);

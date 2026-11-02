@@ -11,7 +11,7 @@ import {validateLayeredCoverage,aggregateLayeredReports} from '../src/testing/ci
 import {sourceIdentity,validateProof} from '../src/testing/ci.js';
 import {fixtureDigest} from '../src/testing/fixtures.js';
 import {testEnvironment,executeTestPlan} from '../src/testing/runner.js';
-import {scenarios,preservesAssertions} from '../src/testing/coverage-audit.js';
+import {scenarios,preservesAssertions,contractAssertions} from '../src/testing/coverage-audit.js';
 import {fileURLToPath} from 'node:url';
 import {gitBinary,nullDevice} from './helpers/platform.js';
 
@@ -47,6 +47,18 @@ test('an additive platform wait must retain every original executable assertion'
   assert.equal(preservesAssertions(original.assertions,added.assertions.slice(1)),false);
   assert.equal(preservesAssertions([original.assertions[0],original.assertions[0]],[original.assertions[0]]),false);
   assert.equal(preservesAssertions([],added.assertions),false);
+});
+
+test('reviewed contract changes name replacement assertions and retain every unaffected assertion',()=>{
+  const root=fileURLToPath(new URL('../../../../',import.meta.url)),path='contract-update.test.js';
+  const before=scenarios(root,path,"test('metadata',()=>{assert.deepEqual(info,{version:1});assert.equal(guard,true);});")[0];
+  const after=scenarios(root,path,"test('metadata',()=>{assert.equal(info.version,1);assert.equal(info.sdk,2);assert.equal(guard,true);});")[0];
+  const update={hash:after.hash,reason:'The metadata contract adds an SDK field.',originalAssertions:before.assertions,assertionUpdates:[{before:before.assertions[0],after:after.assertions.slice(0,2)}]};
+  assert.equal(preservesAssertions(contractAssertions(update),after.assertions),true);
+  assert.equal(preservesAssertions(contractAssertions(update),after.assertions.slice(0,2)),false);
+  assert.equal(preservesAssertions(contractAssertions({...update,assertionUpdates:[]}),after.assertions),false);
+  assert.throws(()=>contractAssertions({...update,assertionUpdates:[{before:before.assertions[0],after:[]}]}),{code:'TEST_COVERAGE_REDUCED'});
+  assert.throws(()=>contractAssertions({...update,assertionUpdates:[{before:'0'.repeat(64),after:after.assertions}]}),{code:'TEST_COVERAGE_REDUCED'});
 });
 
 test('reviewed lanes reject missing declarations and a native label on pure logic',t=>{

@@ -91,7 +91,7 @@ test('Core sources need no user directories while installed workspaces still val
   for (const name of ['项目', '知识', '能力', '@收件箱', '源档', '归档', '档案']) assert.equal(existsSync(join(f.root, name)), false);
   const discovery = contextCapabilities(f.root);
   assert.equal(discovery.data.complete, true, JSON.stringify(discovery.errors));
-  assert.deepEqual(objectQuery({ root: f.root, type: 'partner', operation: 'check', reference: 'partner.ksf.object-designer' }).errors, []);
+  assert.deepEqual(objectQuery({ root: f.root, type: 'partner', operation: 'check', reference: 'partner.ksf.ability-manager' }).errors, []);
   assert.equal(installedManifest(f.workspace).core.branch, 'core-main');
   assert.equal(existsSync(join(f.root, '能力')), false);
   rmSync(join(f.workspace, '能力/协同'), { recursive: true });

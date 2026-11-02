@@ -118,7 +118,7 @@ export function listTaskTargets({ root }) {
       targets.set(e.key, row);
     }
   }
-  const rank = { project: 0, knowledge: 1, ability: 2, archive: 3, state: 4 };
+  const rank = { project: 0, knowledge: 1, ability: 2, archive: 3, inbox: 4, persona: 5, state: 6 };
   for (const row of targets.values()) {
     const current = row.target?.targetId ? (context.registry ??= targetRegistry(root)).records.get(row.target.targetId) : null;
     if (current && current.targetVersion > row.target.targetVersion) { row.target = decorate(root, { summary: '', status: 'working', ownership: { state: 'bound', target: current }, project: { state: 'none' }, references: [], relatedTargets: [], abilities: [] }, context).ownership.target; row.label = row.target.name; }
