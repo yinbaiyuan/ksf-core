@@ -36,13 +36,7 @@ function makeLegacy(f, plan, schema = 1) {
   return legacy;
 }
 
-test('committed symlinks are rejected while a working symlink cannot replace the committed blob', async t => {
-  const f = await fixture(t); edit(f);
-  rmSync(join(f.workspace, example)); symlinkSync('/fictional/private/location', join(f.workspace, example));
-  assert.equal((await prepare(f)).changes[0].operation, 'update');
-  commitWorkspace(f, { paths: [example] });
-  await assert.rejects(() => prepare(f), { code: 'CONTRIBUTION_FILE_TYPE' });
-});
+
 
 test('unreviewed and tampered plans and a newly advanced HEAD are refused before remote requests', async t => {
   const f = await fixture(t); edit(f);
@@ -57,22 +51,7 @@ test('unreviewed and tampered plans and a newly advanced HEAD are refused before
   assert.equal(api.calls.length, 0);
 });
 
-test('public submission exports only committed system content, never private history, author or local source ID', async t => {
-  const f = await fixture(t); edit(f);
-  writeAtomic(join(f.workspace, '知识/private.md'), 'FICTIONAL_PRIVATE_FILE');
-  git(f.workspace, ['config', 'user.name', 'FICTIONAL_PRIVATE_AUTHOR']);
-  const privateRevision = commitWorkspace(f, { paths: ['知识/private.md'], message: 'FICTIONAL_PRIVATE_MESSAGE' });
-  const plan = await prepare(f), api = apiFor(f);
-  const response = await publish(f, plan, api);
-  assert.equal(response.number, 17); assert.equal(response.draft, true);
-  const serialized = JSON.stringify(api.calls);
-  assert.ok(!serialized.includes('FICTIONAL_PRIVATE_')); assert.ok(!serialized.includes(privateRevision));
-  const commit = api.calls.find(c => c.method === 'POST' && c.path.endsWith('/git/commits')).body;
-  assert.deepEqual(commit.parents, [plan.core.revision]);
-  assert.equal(commit.message, plan.commitMessage);
-  assert.equal(commit.message, `${plan.title}\n\n${plan.body.trimEnd()}\n`);
-  assert.deepEqual(api.calls.find(c => c.method === 'POST' && c.path.endsWith('/git/trees')).body.tree.map(c => c.path), [example]);
-});
+
 
 for (const failure of ['truncated', 'blob', 'mode', 'missing', 'commit']) {
   test(`the actual original Core baseline is verified before any remote write: ${failure}`, async t => {

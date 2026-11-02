@@ -7,6 +7,9 @@ import {fileURLToPath} from 'node:url';
 import {loadCatalog,sha256,fail} from './catalog.js';
 import {createTestPlan,parseTestOptions} from './planner.js';
 import {gitExecutable} from '../platform/index.js';
+import {createVerificationPlan,validateVerificationPlan} from './ci-plan.js';
+import {aggregateLayeredReports} from './ci-coverage.js';
+import {auditCoverage} from './coverage-audit.js';
 import {runTestCommand} from '../commands/test.js';
 
 // Persist the outcome before returning its nonzero exit status. Shell `-e`
@@ -48,15 +51,16 @@ export function restorePreparedLinks(root){
 }
 
 export function sourceIdentity(root){
- const git=spawnSync(gitExecutable,['-C',root,'ls-files','-z','--','.agents/core','.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.github','.gitignore','.gitattributes'],{encoding:'utf8',maxBuffer:32*1024*1024});
+ const git=spawnSync(gitExecutable,['-C',root,'ls-files','--cached','--others','--exclude-standard','-z','--','.agents/core','.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.github','.gitignore','.gitattributes'],{encoding:'utf8',maxBuffer:32*1024*1024});
  if(git.status!==0)fail('TEST_PROOF_INVALID','Cannot enumerate the final source.');
- const files=git.stdout.split('\0').filter(p=>p&&p!=='.agents/core/manifest.yaml'&&!p.startsWith('.agents/core/runtime/web/dist/')).sort();
+ const files=[...new Set(git.stdout.split('\0'))].filter(p=>p&&p!=='.agents/core/manifest.yaml'&&!p.startsWith('.agents/core/runtime/web/dist/')).sort();
  // Generated manifests and web outputs are independently built and verified.
  const sourceDigest=sha256(JSON.stringify(files.map(p=>[p,sha256(readFileSync(join(root,p)))])));
  const build=JSON.parse(readFileSync(join(root,'.agents/core/build.json'),'utf8'));
  return {sourceDigest,catalogDigest:loadCatalog(root).digest,runtime:build.runtime};
 }
 export function validateCoverage(root, reports, {full=true}={}){
+ if(loadCatalog(root).schemaVersion===2)fail('TEST_PROOF_INVALID','Layered coverage requires its frozen CI plan.');
  const identity=sourceIdentity(root),platforms=['darwin','win32'];
  if(reports.some(r=>!r||!platforms.includes(r.platform)))fail('TEST_PROOF_INVALID','Unexpected or malformed CI platform report.');
  for(const platform of platforms){
@@ -97,7 +101,8 @@ export function aggregateReports(root,reports,{full=true,proofPath,summaryPath})
 export function trustedRun(run,repo,sha){return run?.conclusion==='success'&&run.head_sha===sha&&run.head_branch==='core-main'&&run.head_repository?.full_name===repo&&run.path==='.github/workflows/check.yml'&&['push','workflow_dispatch'].includes(run.event);}
 export function validateProof(root,proof,run){
  const identity=sourceIdentity(root),repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA;
- if(!trustedRun(run,repo,sha)||proof.schemaVersion!==1||!proof.full||proof.commit!==sha||proof.repository!==repo||String(proof.runId)!==String(run.id)||String(proof.runAttempt)!==String(run.run_attempt)||JSON.stringify(proof.platforms)!==JSON.stringify(['darwin','win32'])||proof.sourceDigest!==identity.sourceDigest||proof.catalogDigest!==identity.catalogDigest||JSON.stringify(proof.runtime)!==JSON.stringify(identity.runtime))fail('TEST_PROOF_INVALID','The trusted CI receipt does not match this final source and native runtimes.');
+ const expected=createVerificationPlan(root,{full:true},identity);
+ if(!trustedRun(run,repo,sha)||proof.schemaVersion!==2||!proof.full||proof.policy!==expected.policy||proof.planDigest!==expected.digest||JSON.stringify(proof.groups)!==JSON.stringify(expected.groups)||proof.commit!==sha||proof.repository!==repo||String(proof.runId)!==String(run.id)||String(proof.runAttempt)!==String(run.run_attempt)||JSON.stringify(proof.platforms)!==JSON.stringify(['darwin','win32'])||proof.sourceDigest!==identity.sourceDigest||proof.catalogDigest!==identity.catalogDigest||JSON.stringify(proof.runtime)!==JSON.stringify(identity.runtime))fail('TEST_PROOF_INVALID','The trusted layered CI receipt does not match this final source and native runtimes.');
  return true;
 }
 async function findProof(root){
@@ -126,8 +131,25 @@ function reportsIn(directory){
 async function main(){
  const root=process.cwd(),[command,...args]=process.argv.slice(2);
  if(command==='plan'){
-  const plan=createTestPlan(root,parseTestOptions(args.length?['--changed','--base',args[0]]:[]));
-  appendFileSync(process.env.GITHUB_OUTPUT,`full=${process.env.KSF_MANUAL_FULL==='true'||plan.requiredFullComponents.length>0}\n`);
+  const full=process.env.KSF_MANUAL_FULL==='true',plan=createVerificationPlan(root,{full,base:args[0]||undefined},sourceIdentity(root));
+  const audit=auditCoverage(root); writeFileSync('coverage-audit.json',JSON.stringify(audit,null,2)+'\n');
+  writeFileSync('verification-plan.json',JSON.stringify(plan,null,2)+'\n');
+  const matrix=plan.groups.filter(g=>g.prepared),linux=plan.groups.filter(g=>!g.prepared);
+  const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared}])).values()];
+  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'macos-15'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'macos-15',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
+ }else if(command==='run-group'){
+  const [planPath,id,reportPath]=args;
+  try{
+   const plan=validateVerificationPlan(root,JSON.parse(readFileSync(planPath,'utf8')),sourceIdentity(root)),group=plan.groups.find(g=>g.id===id);
+   if(!group||group.platform!==process.platform||group.architecture!==process.arch)fail('TEST_CI_PLAN_INVALID','CI group requires its real native target.');
+   const exit=await runVerification(root,['--suite','full','--profile',group.profile,'--files',...group.files],reportPath);
+   const report=JSON.parse(readFileSync(reportPath,'utf8'));writeFileSync(reportPath,JSON.stringify({...report,groupId:id,planDigest:plan.digest},null,2)+'\n');process.exitCode=exit;
+  }catch(error){writeFileSync(reportPath,JSON.stringify({schemaVersion:2,groupId:id,complete:false,status:'failed',platform:process.platform,results:[],errors:[{code:error.code??'TEST_EXECUTION_FAILED',message:error.message}]},null,2)+'\n');process.exitCode=1;}
+ }else if(command==='aggregate-plan'){
+  const plan=JSON.parse(readFileSync(args[1],'utf8'));
+  aggregateLayeredReports(root,reportsIn(args[0]),plan,sourceIdentity(root),{proofPath:args[2],summaryPath:args[3]??'coverage.json'});
+ }else if(command==='audit'){
+  process.stdout.write(JSON.stringify(auditCoverage(root),null,2)+'\n');
  }else if(command==='restore-links'){
   if(process.env.GITHUB_ACTIONS!=='true')fail('TEST_CI_PREPARATION_INVALID','Prepared dependency repair is restricted to CI preparation.');
   restorePreparedLinks(root);

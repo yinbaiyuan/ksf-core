@@ -44,7 +44,17 @@ export function commitWorkspace(f, { paths = ['.agents/core', 'AGENTS.md', '.age
   git(f.workspace, ['commit', '-m', message]);
   return git(f.workspace, ['rev-parse', 'HEAD']);
 }
-async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false } = {}) {
+export function embedReceiptBaseline(workspace, first) {
+    const { manifest, entries } = inspectCoreArchive(readFileSync(join(first.output, first.index.platforms[fixtureTarget].core.name)));
+    delete manifest.instance_initialization;
+    for (const [path, record] of Object.entries(manifest.files)) {
+      const bytes = entries.get(path).bytes;
+      if (!bytes.includes(0) && Buffer.from(bytes.toString('utf8')).equals(bytes) && path !== '.agents/core/manifest.yaml') record.baseline = bytes.toString('base64');
+    }
+    writeAtomic(join(workspace, '.agents/core/release.json'), stableJSON(manifest));
+}
+
+export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false } = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
@@ -111,21 +121,23 @@ async function createFixtureBase(t, { legacyEntry = false, sourceRoot = reposito
   git(root, ['add', '.agents', 'AGENTS.md', '.gitignore']); git(root,['update-index','--chmod=+x','.agents/ksf']); git(root, ['commit', '-m', 'Fictional clean Core source']);
   const first = await buildRelease({ root, platform:fixtureTarget, output: join(directory, 'release-0.1.0') });
   const workspace = join(directory, 'ksf'); cpSync(first.template, workspace, { recursive: true });
-  if (!compact) {
-    // Existing suites exercise upgrades from the former schema-3 installation.
-    // New compact-receipt suites opt in explicitly and use a read-only fake API.
-    const { manifest, entries } = inspectCoreArchive(readFileSync(join(first.output, first.index.platforms[fixtureTarget].core.name)));
-    delete manifest.instance_initialization;
-    for (const [path, record] of Object.entries(manifest.files)) {
-      const bytes = entries.get(path).bytes;
-      if (!bytes.includes(0) && Buffer.from(bytes.toString('utf8')).equals(bytes) && path !== '.agents/core/manifest.yaml') record.baseline = bytes.toString('base64');
-    }
-    writeAtomic(join(workspace, '.agents/core/release.json'), stableJSON(manifest));
-  }
+  if (!compact) embedReceiptBaseline(workspace, first);
   return { directory, root, workspace, first, build, originals, legacyEntry };
 }
 
 const seeds = new Map(), seedCleanup = [];
+function runSeed(compact) {
+  const path = process.env.KSF_TEST_DISTRIBUTION_SEEDS;
+  if (!path) return null;
+  const manifest = JSON.parse(readFileSync(path, 'utf8'));
+  assert.equal(manifest.schemaVersion, 1);
+  assert.equal(manifest.platform, process.platform);
+  assert.equal(manifest.node, process.execPath);
+  assert.equal(manifest.repository, repository);
+  const seed = manifest.seeds[String(compact)];
+  assert.ok(seed && existsSync(seed.root) && existsSync(seed.workspace) && existsSync(seed.first.output), 'Run seed is incomplete; do not silently rebuild or reuse another run.');
+  return seed;
+}
 after(() => { for (const cleanup of seedCleanup.splice(0)) cleanup(); });
 export async function distributionFixture(t, options = {}) {
   const began = performance.now(), priorGit = {...gitTiming}; let packageMs = 0, cleanupMs = 0;
@@ -133,7 +145,7 @@ export async function distributionFixture(t, options = {}) {
   if (options.legacyEntry || options.sourceRoot && options.sourceRoot !== repository) base = await createFixtureBase(t, options);
   else {
     const key = !!options.compact;
-    if (!seeds.has(key)) seeds.set(key, createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
+    if (!seeds.has(key)) seeds.set(key, runSeed(key) ?? createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
     const seed = await seeds.get(key), directory = mkdtempSync(join(tmpdir(), 'ksf isolated fixture '));
     t.after(() => {const start=performance.now();rmSync(directory, { recursive: true, force: true });cleanupMs=performance.now()-start;});
     const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');

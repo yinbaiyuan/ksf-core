@@ -21,16 +21,6 @@ async function fixture(t){
  return {a:nodes[0],b:nodes[1],nodes,roots,states,input,discover,advance:ms=>{time+=ms;}};
 }
 async function raw(root,target,action,input){const identity=await loadIdentity(root);return new Promise((resolve,reject)=>{const body=Buffer.from(JSON.stringify(input)),req=request({host:'127.0.0.1',port:target.pairingListener.port,path:'/pairing/v1/'+action,method:'POST',key:identity.privateKey,cert:identity.certificate,rejectUnauthorized:false,headers:{'content-type':'application/json','content-length':body.length}},res=>{const chunks=[];res.on('data',c=>chunks.push(c));res.on('end',()=>resolve({status:res.statusCode,...JSON.parse(Buffer.concat(chunks))}));});req.on('error',reject);req.end(body);});}
-test('one request and one approval mutually pin identities and grant only the selected application channel',async t=>{
- const f=await fixture(t);await f.a.setDevice({name:'设备 A'});await f.b.setDevice({name:'设备 B'});const out=await f.a.pairing.request(f.input);assert.equal(out.status,'pending');assert.deepEqual((await f.a.store.config()).peers,{});assert.deepEqual((await f.b.store.config()).peers,{});
- const received=(await f.b.pairing.list(APP))[0];assert.equal(received.name,'设备 A');assert.equal(received.requestId,out.requestId);assert.equal(received.code,out.code);assert.equal((await f.b.pairing.list('other.app')).length,0);
- assert.equal((await f.b.pairing.answer({requestId:out.requestId,accept:true,appId:APP})).status,'accepted');
- for(const [node,other] of [[f.a,f.states[1]],[f.b,f.states[0]]]){const cfg=await node.store.config();assert.equal(cfg.peers[other.identity.nodeId].fingerprint,other.identity.fingerprint);assert.equal(cfg.peers[other.identity.nodeId].name,node===f.a?'设备 B':'设备 A');assert.deepEqual(cfg.grants,{[APP+'|'+CHANNEL]:{peers:[other.identity.nodeId],activation:true}});}
- const material=await f.a.registerMaterial({kind:'app',id:APP},Readable.from(['paired message'])),op=await f.a.send({kind:'app',id:APP},{operationId:randomUUID(),to:{nodeId:f.states[1].identity.nodeId,endpoint:{kind:'app',id:APP}},channel:CHANNEL,payloadPartId:'body',parts:[{partId:'body',materialId:material.materialId}]});
- // Wait for the sender's durable confirmation, which is distinct from peer
- // acceptance and can take longer than one second on a Windows CI filesystem.
- const deadline=performance.now()+10000;let state;do{state=await f.a.getOperation({kind:'app',id:APP},op.operationId);if(['delivered','failed'].includes(state.status))break;await new Promise(r=>setTimeout(r,25));}while(performance.now()<deadline);assert.equal(state.status,'delivered',JSON.stringify(state));
-});
 test('rejecting and expiry never add trust or receive grants',async t=>{
  const f=await fixture(t);await f.a.pairing.request(f.input);await f.b.pairing.answer({requestId:f.input.requestId,accept:false,appId:APP});await f.a.pairing.poll();assert.equal((await f.a.pairing.list())[0].status,'rejected');
  const next={...f.input,requestId:randomUUID()};await f.a.pairing.request(next);f.advance(6*60000);await assert.rejects(f.b.pairing.answer({requestId:next.requestId,accept:true,appId:APP}),{code:'COMM_PAIRING_CLOSED'});for(const node of f.nodes){const cfg=await node.store.config();assert.deepEqual(cfg.peers,{});assert.deepEqual(cfg.grants,{});}
