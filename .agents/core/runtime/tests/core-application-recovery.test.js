@@ -3,8 +3,15 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {reconcileCoreApplications,applicationStatePath} from '../src/applications/core-upgrade.js';
+import {reconcileCoreApplications,applicationStatePath,stageApplicationPackages,verifyInstalledRelease} from '../src/applications/core-upgrade.js';
 import {release,fixture,seed,baseline,assertKilled} from './helpers/core-application-fixture.js';
+test('installed package verification keeps canonical member paths and rejects backslash entries',t=>{
+  const f=fixture(t),item=release('1.0.0');stageApplicationPackages(f.root,{packages:[item]});
+  assert.doesNotThrow(()=>verifyInstalledRelease(f.root,item.release));
+  const record=join(f.root,'.agents/user-data/applications/packages',item.release.manifest.id,item.release.digest,'release.json');
+  const info=JSON.parse(readFileSync(record));info.files['backend\\index.mjs']=info.files['backend/index.mjs'];writeFileSync(record,JSON.stringify(info));
+  assert.throws(()=>verifyInstalledRelease(f.root,item.release),{code:'APP_PACKAGE_INTEGRITY'});
+});
 for(const point of ['core-reconcile.json','state.json','core-baseline.json'])test('bridge real SIGKILL recovery at '+point,async t=>{
  const f=fixture(t),marker=join(f.root,'fault-reached'),old=release('1.0.0'),next=release('1.1.0',{api:'1.1.0'});seed(f,old);baseline(f,next);
  const moduleURL=new URL('../src/applications/core-upgrade.js',import.meta.url).href;
