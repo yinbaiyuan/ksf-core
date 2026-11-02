@@ -4,7 +4,7 @@ import {readFileSync,readdirSync,writeFileSync,appendFileSync,existsSync,lstatSy
 import {join,resolve,dirname} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {loadCatalog,sha256,fail} from './catalog.js';
+import {loadCatalog,sha256,fail,rebuiltArtifact} from './catalog.js';
 import {createTestPlan,parseTestOptions} from './planner.js';
 import {gitExecutable} from '../platform/index.js';
 import {createVerificationPlan,validateVerificationPlan} from './ci-plan.js';
@@ -53,7 +53,7 @@ export function restorePreparedLinks(root){
 export function sourceIdentity(root){
  const git=spawnSync(gitExecutable,['-C',root,'ls-files','--cached','--others','--exclude-standard','-z','--','.agents/core','.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.github','.gitignore','.gitattributes'],{encoding:'utf8',maxBuffer:32*1024*1024});
  if(git.status!==0)fail('TEST_PROOF_INVALID','Cannot enumerate the final source.');
- const files=[...new Set(git.stdout.split('\0'))].filter(p=>p&&p!=='.agents/core/manifest.yaml'&&!p.startsWith('.agents/core/runtime/web/dist/')).sort();
+ const files=[...new Set(git.stdout.split('\0'))].filter(p=>p&&!rebuiltArtifact(p)).sort();
  // Generated manifests and web outputs are independently built and verified.
  const sourceDigest=sha256(JSON.stringify(files.map(p=>[p,sha256(readFileSync(join(root,p)))])));
  const build=JSON.parse(readFileSync(join(root,'.agents/core/build.json'),'utf8'));

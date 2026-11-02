@@ -90,6 +90,23 @@ test('pure changes run once; native changes retain each target; unknown inputs f
   assert.equal(createTestPlan(f.root,parseTestOptions(['--suite','full','--profile','shared'])).tests.length,1);
   assert.throws(()=>parseTestOptions(['--profile','windows']),{code:'INVALID_ARGUMENTS'});
 });
+test('generated build outputs neither widen source selection nor invalidate its frozen plan',t=>{
+  const f=fixture(t),manifest='.agents/core/manifest.yaml',dist=f.runtime+'/web/dist';
+  writeFileSync(join(f.root,f.catalog.tests[0].path),"import '../src/logic.js'; // source change\n");
+  mkdirSync(join(f.root,dist),{recursive:true});writeFileSync(join(f.root,manifest),'generated: first\n');writeFileSync(join(f.root,dist,'index-first.js'),'first build');
+  const plan=makePlan(f,false);assert.deepEqual(plan.selectedIds,['logic']);
+  assert.deepEqual(plan.changes,[f.catalog.tests[0].path]);
+  writeFileSync(join(f.root,manifest),'generated: second\n');rmSync(join(f.root,dist,'index-first.js'));writeFileSync(join(f.root,dist,'index-second.js'),'second platform build');
+  assert.deepEqual(validateVerificationPlan(f.root,plan,sourceIdentity(f.root)),plan);
+  const generated=createTestPlan(f.root,parseTestOptions(['--suite','full','--changed']),{changes:{paths:[manifest,dist+'/index-second.js']}});
+  assert.deepEqual(generated.tests,[]);
+  writeFileSync(join(f.root,f.catalog.tests[1].path),"import '../src/adapter.js';const asset='../web/dist/index-second.js';\n");
+  writeFileSync(join(f.root,dist,'index-second.js'),"import '../../src/logic.js';\n");
+  const sourceOnly=createTestPlan(f.root,parseTestOptions(['--suite','full','--changed']),{changes:{paths:[f.runtime+'/src/logic.js']}});
+  assert.deepEqual(sourceOnly.tests.map(t=>t.id),['logic']);
+  writeFileSync(join(f.root,f.runtime,'web/dist-source.js'),'export const owned=true;\n');
+  assert.deepEqual(createTestPlan(f.root,parseTestOptions(['--suite','full','--changed'])).requiredFullComponents,['core']);
+});
 test('selection follows current transitive imports and read-file literals without a stale generated graph',t=>{
   const f=fixture(t);writeFileSync(join(f.root,f.runtime,'src/logic.js'),'export const value=2;\n');
   assert.deepEqual(makePlan(f,false).selectedIds,['logic']);

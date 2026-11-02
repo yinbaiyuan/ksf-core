@@ -1,6 +1,6 @@
 import {readFileSync, existsSync, statSync} from 'node:fs';
 import {join, dirname, resolve, relative} from 'node:path';
-import { matchesInput, walk, slash } from './catalog.js';
+import { matchesInput, walk, slash, rebuiltArtifact } from './catalog.js';
 
 // Literal dependencies only widen candidates. Reviewed selectionInputs and
 // risk rules establish mapped ownership; incidental strings/comments must not
@@ -12,7 +12,7 @@ export function dependencyInputs(root, paths) {
   function references(path) {
     if (edges.has(path)) return edges.get(path);
     const found = new Set(); edges.set(path,found);
-    if (!existsSync(join(root,path)) || !/\.[cm]?[jt]sx?$/.test(path)) return found;
+    if (rebuiltArtifact(path) || !existsSync(join(root,path)) || !/\.[cm]?[jt]sx?$/.test(path)) return found;
     const text = readFileSync(join(root,path),'utf8');
     for (const match of text.matchAll(/(['"`])((?:\.\.?\/|@ksf\/sdk(?:\/|(?=['"`])))(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*)\1/g)) {
       let spec = match[2].replace(/\\(?:u\{([\da-f]+)\}|u([\da-f]{4})|x([\da-f]{2})|(\r?\n)|([\s\S]))/gi,
@@ -49,6 +49,7 @@ export function selectChangedTests(root, catalog, paths) {
   const ids = new Set(), full = new Set(), reasons = [];
   const graph = dependencyInputs(root,catalog.tests.map(t=>t.path));
   for (const path of paths) {
+    if (rebuiltArtifact(path)) continue;
     const ownTest = catalog.tests.find(t => t.path === path);
     if (ownTest) { ids.add(ownTest.id); reasons.push({path, reason: 'Changed registered test.'}); continue; }
     let known = false;

@@ -3,7 +3,7 @@ import { relative, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { gitExecutable } from '../platform/index.js';
-import { fail, loadCatalog, matchesInput, safePath, slash, missingRequirements } from './catalog.js';
+import { fail, loadCatalog, matchesInput, safePath, slash, missingRequirements, rebuiltArtifact } from './catalog.js';
 
 import { selectChangedTests } from './selection.js';
 
@@ -49,7 +49,7 @@ export function changedPaths(root, base) {
   const records = git(['diff', '--name-status', '-z', '--find-renames', comparison, '--']).split('\0').filter(Boolean), paths = [];
   for (let i = 0; i < records.length;) { const status = records[i++]; paths.push(records[i++]); if (/^[RC]/.test(status)) paths.push(records[i++]); }
   paths.push(...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean));
-  return { base: comparison, head, paths: [...new Set(paths.filter(Boolean).map(slash))].sort() };
+  return { base: comparison, head, paths: [...new Set(paths.filter(Boolean).map(slash).filter(path=>!rebuiltArtifact(path)))].sort() };
 }
 export function assignShards(tests, count, platform = process.platform) {
   const bins = Array.from({ length: count }, () => ({ seconds: 0, files: [] }));

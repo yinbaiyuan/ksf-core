@@ -1,4 +1,4 @@
-import {loadCatalog, sha256, fail} from './catalog.js';
+import {loadCatalog, sha256, fail, rebuiltArtifact} from './catalog.js';
 import {changedPaths, assignShards} from './planner.js';
 import {selectChangedTests} from './selection.js';
 
@@ -16,7 +16,7 @@ export function createVerificationPlan(root, {full = false, base, changes} = {},
   const catalog = loadCatalog(root);
   if (catalog.schemaVersion !== 2) fail('TEST_CI_PLAN_INVALID', 'Layered CI requires a reviewed schema-2 catalog.');
   const diff = full ? null : changes ?? changedPaths(root, base);
-  if (diff) diff.paths = diff.paths.filter(p => /^(?:\.agents\/core\/|\.github\/)/.test(p) || ['.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.gitignore','.gitattributes'].includes(p));
+  if (diff) diff.paths = diff.paths.filter(p => !rebuiltArtifact(p) && (/^(?:\.agents\/core\/|\.github\/)/.test(p) || ['.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.gitignore','.gitattributes'].includes(p)));
   const selection = full ? null : selectChangedTests(root, catalog, diff.paths);
   const selected = catalog.tests.filter(t => full || selection.ids.includes(t.id));
   const groups = [];

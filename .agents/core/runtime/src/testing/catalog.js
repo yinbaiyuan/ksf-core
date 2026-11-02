@@ -7,6 +7,9 @@ export const catalogPath = '.agents/core/runtime/testing/catalog.json';
 export const fail = (code, message, details = {}) => { throw Object.assign(new Error(message), { code, ...details }); };
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const slash = value => value.replaceAll('\\', '/');
+// These outputs are rebuilt/verified from owned sources. Keep them in declared
+// execution fingerprints, but exclude them from source identity and selection.
+export const rebuiltArtifact = path => path === '.agents/core/manifest.yaml' || path.startsWith('.agents/core/runtime/web/dist/');
 export function safePath(root, path) {
   const full = resolve(root, path), rel = slash(relative(root, full));
   if (!rel || rel.startsWith('../') || rel === '..' || rel.split('/').includes('.git')) fail('TEST_PATH_INVALID', 'Test paths must stay inside this KSF root.', { target: path });
