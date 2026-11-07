@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {open,rename,rm,lstat,mkdir,readFile} from 'node:fs/promises';
 import {join,relative,dirname,resolve} from 'node:path';
 import {replaceFile,syncDirectory,retryFileRead} from '../platform/index.js';
+import {readFileSnapshot,sameIdentity} from './files.js';
 export {replaceFile,syncDirectory};
 const invalidData=message=>{throw Object.assign(new Error(message),{code:'DURABLE_DATA_INVALID',status:400});};
 export async function safeDirectory(root,path,{invalid=invalidData}={}){
@@ -14,3 +15,13 @@ export async function atomicJSON(path,value){
 }
 // Windows readers and file scanners can transiently deny replacement. Never delete the old record.
 export async function readJSON(path,fallback,{invalid=invalidData}={}){try{return await retryFileRead(async()=>{const stat=await lstat(path);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>8*1024*1024)invalid('持久记录不是有效普通文件。');return JSON.parse(await readFile(path,'utf8'));});}catch(e){if(e.code==='ENOENT'&&fallback!==undefined)return structuredClone(fallback);if(e instanceof SyntaxError)invalid('持久记录损坏，请保留原件。');throw e;}}
+
+// Small records published synchronously must finish and close each read before
+// yielding: a Windows sharing retry cannot release another async reader's fd.
+export async function readJSONSnapshot(path,fallback,{invalid=invalidData}={}){
+ try{return await retryFileRead(()=>{
+  const valid=stat=>{if(!stat.isFile()||stat.isSymbolicLink()||stat.size>8*1024*1024)invalid('持久记录不是有效普通文件。');};
+  const {bytes}=readFileSnapshot(path,{validateEntry:valid,validateOpen(entry,opened){valid(opened);if(!sameIdentity(entry,opened,['dev','ino']))invalid('持久记录读取时发生变化。');},validateRead(before,after,bytes){if(!sameIdentity(before,after)||bytes.length!==after.size)invalid('持久记录读取时发生变化。');}});
+  return JSON.parse(bytes.toString('utf8'));
+ });}catch(e){if(e.code==='ENOENT'&&fallback!==undefined)return structuredClone(fallback);if(e instanceof SyntaxError)invalid('持久记录损坏，请保留原件。');throw e;}
+}

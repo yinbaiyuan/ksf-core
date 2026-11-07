@@ -7873,6 +7873,36 @@
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured."
+    },
+    {
+      "id": "core:communication-config",
+      "path": ".agents/core/runtime/tests/communication-config.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/communication",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2,
+        "linux": 1
+      },
+      "timingBasis": "Conservative estimate for configuration snapshot regression; native timings not yet measured."
     }
   ],
   "timingBaseline": {
