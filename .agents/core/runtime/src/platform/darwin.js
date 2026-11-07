@@ -12,7 +12,10 @@ export const darwin = {
   hostsPath: () => '/etc/hosts',
   tool: name => `/usr/bin/${name}`,
   launcher: (root, args) => ({ executable: '/bin/sh', args: [join(root, '.agents/ksf'), ...args] }),
-  hookCommand: root => `'${join(root, '.agents/ksf').replaceAll("'", "'\\''")}' task hook`,
+  hookCommand(root,kind='task') {
+    if(!['task','context'].includes(kind))throw new Error('Unsupported KSF Hook command.');
+    return `'${join(root, '.agents/ksf').replaceAll("'", "'\\''")}' ${kind} hook`;
+  },
   desktopEndpoint: home => join(home, 'ipc/ipc.sock'),
   desktopCandidates: () => [
     '/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex',

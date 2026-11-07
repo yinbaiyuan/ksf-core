@@ -9,10 +9,14 @@ import {installedManifest} from '../src/distribution/manifests.js';
 import {writeAtomic,readRegular} from '../src/distribution/files.js';
 import {template} from './helpers/instance-fixture.js';
 test('independent Core template verifies its original tree, uses main, and enters incubation', async t => {
-  const f = await template(t);
+  const ignored='.agents/runtime-data/template-only.txt',untracked='.agents/core/template-only.txt';
+  const f = await template(t,{beforeCopy(f){
+    for(const path of [ignored,untracked])writeAtomic(join(f.root,path),'Synthetic local file outside the recorded source');
+  }});
+  for(const path of [ignored,untracked])assert.equal(existsSync(join(f.instance,path)),false);
   assert.equal(needsInstanceInitialization(f.instance),true);
   assert.equal(contextEntry(f.instance).mode,'instance-setup');
-  let preview; try { preview = await initializeInstance({root:f.instance,api:f.api,dryRun:true}); } catch (error) { t.diagnostic(JSON.stringify(error.data)); throw error; }
+  let preview; try { preview = await initializeInstance({root:f.instance,api:f.api,dryRun:true}); } catch (error) { t.diagnostic(JSON.stringify(error.data??{code:error.code,message:error.message})); throw error; }
   assert.equal(preview.wouldChange,true); assert.equal(existsSync(join(f.instance,'USER.md')),false);
   writeAtomic(join(f.instance,'USER.md'),'My existing private preferences');
   const remote = 'https://github.com/example/my-private-ksf.git';git(f.instance,['remote','add','origin',remote]);

@@ -37,3 +37,5 @@
 - 单文件原子写入和CAS不构成任意跨文件或跨设备事务。
 
 格式兼容以[Core声明](../runtime/data-compatibility.md)与应用dataStores为准。可执行恢复步骤见[备份迁移](../operations/backup-migration.md)，具体运行目录见[本机运行数据](../system/runtime-data.md)。
+
+工作上下文复用会话 shared.json 的 `ksf.currentWork` 保存唯一当前绑定；`.agents/runtime-data/context/<chatId>.json` 仅保存有效清单和已读指纹缓存，可换代重建。项目进度、证据和检查点仍留在业务主件，读取确认不改变参与计数或对话归档。

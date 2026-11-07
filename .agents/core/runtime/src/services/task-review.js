@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { setImmediate } from 'node:timers/promises';
 import { taskIds, turns, readTurn, readJSON, taskPath, config } from '../task-capture/storage.js';
-import { ownedTargets } from '../task-capture/targets.js';
+import { ownedTargets, workTargets } from '../task-capture/targets.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail = (code, message) => { throw Object.assign(new Error(message), { code }); };
@@ -10,20 +10,21 @@ const visible = turn => (turn.messages ?? []).filter(m => ['user', 'assistant'].
 const at = (message, turn) => Number.isFinite(Date.parse(message.at)) ? new Date(message.at).toISOString() : turn.startedAt;
 const text = message => (message.content ?? []).filter(b => ['text', 'input_text', 'output_text'].includes(b.type)).map(b => b.text ?? '').join('\n');
 const omittedTypes = message => [...new Set((message.content ?? []).filter(b => !['text', 'input_text', 'output_text'].includes(b.type)).map(b => b.type))];
-function summary(turn) {
+function summary(turn, includeWorkTargets = false) {
   const messages = allowed(turn) ? visible(turn) : [];
   return { taskId: turn.taskId, turnId: turn.turnId, revision: turn.revision,
     digest: hash([turn.revision, turn.policy, turn.status, turn.routes, messages]),
     allowed: allowed(turn), startedAt: turn.startedAt, updatedAt: turn.updatedAt, status: turn.status,
     issues: allowed(turn) ? turn.issues : [], route: allowed(turn) ? turn.routes.at(-1)?.snapshot ?? null : null,
     targets: allowed(turn) ? ownedTargets(turn) : [],
+    ...(includeWorkTargets && allowed(turn) ? { workTargets: workTargets(turn) } : {}),
     messages: messages.map(m => ({ id: m.id, at: at(m, turn), role: m.role, phase: m.phase, timeKnown: Number.isFinite(Date.parse(m.at)), omittedContentTypes: omittedTypes(m) })),
   };
 }
 
 /** Public, read-only evidence boundary. No raw host transcript or automatic route inference. */
 export function createTaskReviewSource(root) {
-  async function sources({ startAt, endAt, taskId, limit = 50, offset = 0 } = {}) {
+  async function sources({ startAt, endAt, taskId, limit = 50, offset = 0, includeWorkTargets = false } = {}) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100 || !Number.isSafeInteger(offset) || offset < 0) fail('INVALID_ARGUMENTS', '分页需要 limit 1–100 和非负 offset。');
     if (taskId !== undefined && !/^[a-f0-9]{64}$/.test(taskId)) fail('INVALID_ARGUMENTS', '聊天编号无效。');
     if ((startAt !== undefined || endAt !== undefined) && (!Number.isFinite(Date.parse(startAt)) || !Number.isFinite(Date.parse(endAt)) || Date.parse(startAt) >= Date.parse(endAt))) fail('INVALID_ARGUMENTS', '需要有效的起止时间。');
@@ -32,7 +33,7 @@ export function createTaskReviewSource(root) {
       const taskErrors = [];
       try {
         const all = turns(root, id, { onError(error, turnId) { taskErrors.push({ taskId: id, turnId, code: error.code ?? 'TASK_REVIEW_READ_FAILED', message: '部分证据无法读取，原件已保留。' }); } });
-        const summaries = all.map(summary), admitted = summaries.filter(t => t.allowed);
+        const summaries = all.map(turn => summary(turn, includeWorkTargets === true)), admitted = summaries.filter(t => t.allowed);
         if (!admitted.length) { errors.push(...taskErrors); continue; }
         let stored;
         try { stored = readJSON(root, `${taskPath(id)}/task.json`); } catch (error) { taskErrors.push({ taskId: id, code: error.code ?? 'TASK_REVIEW_READ_FAILED', message: '聊天摘要无法读取。' }); }

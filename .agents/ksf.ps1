@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# Launcher protocol 1. This file contains no Node.js installation logic.
+# Launcher protocol 1. KSF_APPLICATIONS_RECOVERY. No Node installation logic.
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = 'Stop'
@@ -103,6 +103,27 @@ begin {
                         if (-not (Test-KsfSameFile $ksfLive $ksfOld) -and -not (Test-KsfSameFile $ksfLive $ksfNew)) {
                             Stop-KsfLauncher 'RECOVERY_CONFLICT' "Concurrent edit at $ksfFile; files and transaction were preserved."
                         }
+                    }
+                    if ([IO.File]::Exists((Join-Path $ksfTransaction 'applications-intent'))) {
+                        foreach ($ksfPart in @('.agents/user-data', '.agents/user-data/applications', '.agents/user-data/applications/state.json')) { Assert-KsfPath (Join-Path $env:KSF_ROOT $ksfPart) }
+                        $ksfAppLive = Join-Path $env:KSF_ROOT '.agents/user-data/applications/state.json'
+                        $ksfAppOld = Join-Path $ksfTransaction 'old-applications.json'
+                        $ksfAppNew = Join-Path $ksfTransaction 'new-applications.json'
+                        if (-not [IO.File]::Exists($ksfAppNew)) { Stop-KsfLauncher 'JOURNAL_INVALID' 'Missing application index snapshot.' }
+                        if ([IO.File]::Exists($ksfAppOld)) {
+                            if (-not (Test-KsfSameFile $ksfAppLive $ksfAppOld) -and -not (Test-KsfSameFile $ksfAppLive $ksfAppNew)) { Stop-KsfLauncher 'RECOVERY_CONFLICT' 'Application index changed outside this transaction.' }
+                        } else {
+                            if (-not [IO.File]::Exists((Join-Path $ksfTransaction 'old-applications-missing'))) { Stop-KsfLauncher 'JOURNAL_INVALID' 'Missing old application index identity.' }
+                            if ([IO.File]::Exists($ksfAppLive) -and -not (Test-KsfSameFile $ksfAppLive $ksfAppNew)) { Stop-KsfLauncher 'RECOVERY_CONFLICT' 'Application index changed outside this transaction.' }
+                        }
+                        if ([IO.File]::Exists($ksfAppOld)) {
+                            $ksfAppTemporary = $ksfAppLive + '.recover.' + [Guid]::NewGuid().ToString('N')
+                            try {
+                                [IO.File]::Copy($ksfAppOld, $ksfAppTemporary, $false)
+                                if ([IO.File]::Exists($ksfAppLive)) { Invoke-KsfFilesystemChange { [IO.File]::Replace($ksfAppTemporary, $ksfAppLive, [NullString]::Value) } }
+                                else { Invoke-KsfFilesystemChange { [IO.File]::Move($ksfAppTemporary, $ksfAppLive) } }
+                            } finally { if ([IO.File]::Exists($ksfAppTemporary)) { [IO.File]::Delete($ksfAppTemporary) } }
+                        } elseif ([IO.File]::Exists($ksfAppLive)) { [IO.File]::Delete($ksfAppLive) }
                     }
                     $ksfOldCore = Join-Path $ksfTransaction 'old-core'
                     $ksfLiveCore = Join-Path $env:KSF_ROOT '.agents/core'

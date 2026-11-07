@@ -62,7 +62,9 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 
 这是一组分类判断，不是要求为每项需求建立整套对象。同一输入可以有多个归属，也可以仅更新一个既有对象；重要缺口会改变归属时，先澄清。
 
-设计时的承载判断由 [ksf 对象设计师](../../abilities/partners/ksf-object-designer/partner.md)负责。运行时由 [ability-route](../../abilities/competencies/ability-route/competency.md)选择已有对象，两者不能互相替代。
+设计时的承载判断由 [ksf 能力管理搭档](../../abilities/partners/ability-manager/partner.md)负责。运行时由 [ability-route](../../abilities/competencies/ability-route/competency.md)选择已有对象，两者不能互相替代。
+
+协同、搭档和基本功分别具有完整的[元能力设计体系](meta-design.md)，专业方法、样例和题库由各能力包负责；能力诊断提供通用工艺，能力维护处理实际变更。
 
 ## 运行时怎样读取
 
@@ -72,7 +74,7 @@ KSF 用不同对象分别承载认知、具体工作和可复用能力。划分�
 
 [根 AGENTS.md](../../../../AGENTS.md)是特殊入口协同，连接系统搭档与任务路由。这个入口约定不扩大普通业务协同的边界，也不要求把每个请求包装成业务协同。
 
-四类对象的列举、按部分读取、用户写入、完整目录派生、删除和本地引用检查已实现；context capabilities 已组合协同与搭档的完整有效发现信息。项目基础管理已有 [project CLI](../cli/project.md)，项目筛选、知识读取及资产维护的语义判断由 ksf-runtime 的三项运行基本功承接；尚无专用知识管理命令，见[最小运行闭环](../runtime/minimal-runtime.md)。实际程序接口以 [CLI 说明](../cli/overview.md)为准，能力路由行为以 ability-route 为准。
+四类对象的列举、按部分读取、用户写入、完整目录派生、删除和本地引用检查已实现；context capabilities已组合协同与搭档的完整有效发现信息。项目基础管理已有[project CLI](../cli/project.md)。Runtime组织目标和当前绑定，人设路由处理基础设定，项目/能力路由按需准备事实与选择承接；能力、项目、知识、档案、收件箱和人设分别由相应管理搭档及专业方法负责，没有通用资产维护中枢。尚无专用知识管理命令。完整连接见[Runtime与上下文机制](../runtime/work-context.md)，实际程序接口以[CLI说明](../cli/overview.md)为准。
 
 ## 文档与实现的分工
 

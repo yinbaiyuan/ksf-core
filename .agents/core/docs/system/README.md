@@ -36,7 +36,7 @@ Windows x64 已接入固定入口、PowerShell bootstrap、随包 Node ZIP 和�
 
 | 位置 | 持有内容 | 生命周期与归属 |
 | --- | --- | --- |
-| 根 `USER.md`、`BOT.md` | 用户长期设定与 Agent 协作方式 | 用户内容，由 runtime 完整读取；不属于 Core 或对象 user-data，升级回滚不补写、不覆盖 |
+| 根 `USER.md`、`BOT.md` | 用户长期设定与 Agent 协作方式 | 用户内容，由人设路由完整读取并交 runtime 采用；不属于 Core 或对象 user-data，升级回滚不补写、不覆盖 |
 | 根 `AGENTS.md` | Agent 运行入口 | 系统管理，发行与升级按基线处理 |
 | `.agents/ksf`、`.agents/ksf.ps1` | 原生启动、恢复与 Core 转交 | 位于 Core 外，保持小而稳定；变化时仍可随发行更新 |
 | `.agents/core/abilities/` | 系统协同、搭档、基本功和数据包 | 随 Core 发行；业务定义规则见对象文档 |
@@ -50,7 +50,7 @@ Windows x64 已接入固定入口、PowerShell bootstrap、随包 Node ZIP 和�
 
 Core 源码与用户实例采用不同的忽略规则。Core 忽略真实用户数据；用户模板允许正式个人内容及 user-data 入库，排除 runtime-data 和相应临时文件。Git 忽略规则不等于网盘同步规则，也不能清除已经提交的历史内容。
 
-Agent 的整体调度、项目与能力路由返回、能力约定的资料读取、无项目/能力/资料缺口及局部重规划见[核心运行、项目与能力路由协作](../runtime/routing.md)。这是 Agent 采用的运行约定，不是新增语义调度服务。
+Agent的整体流程、四项首读基础、按需路由、当前工作绑定、增量正文、切换恢复及专业保存见[Runtime与上下文完整机制](../runtime/work-context.md)，对象连接见[核心运行、项目与能力路由协作](../runtime/routing.md)。这是Agent采用的运行约定，不是新增语义调度服务。
 
 项目的最小继续信息按[任务检查点约定](../runtime/task-checkpoints.md)保存在项目材料中，属于可备份的用户内容。独立主服务承载应用、AI和通信，对话采集由已授权Hooks及服务执行；未保存或未采集的信息仍依赖宿主会话。完整聊天归档也不等于项目检查点或自动恢复所有上下文。
 

@@ -1,8 +1,8 @@
 import { useContextMenu, copyText } from '@ksf/sdk/components/ui/context-menu';
 import { WindowToolbar } from '@ksf/sdk/window-toolbar';
 import { memo, useEffect, useMemo, useRef, useState, useTransition, type CSSProperties } from 'react';
-import { Activity, Archive, ArrowLeft, ArrowUp, ArrowDown, PanelLeftClose, PanelLeftOpen, X, ArrowUpRight, BookOpen, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileClock, GitBranch, Inbox, Layers3, Menu, MessageSquare, RefreshCw, Search, Settings2, TriangleAlert } from 'lucide-react';
-import type { Capture, Issue, RouteEvent, RouteRecord, Task, TaskDetail, TaskList, TaskTarget, TaskTargets, Turn, TurnSummary } from './types';
+import { UserRound, Activity, Archive, ArrowLeft, ArrowUp, ArrowDown, PanelLeftClose, PanelLeftOpen, X, ArrowUpRight, BookOpen, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileClock, GitBranch, Inbox, Layers3, Menu, MessageSquare, RefreshCw, Search, Settings2, TriangleAlert } from 'lucide-react';
+import type { Capture, Issue, RouteEvent, RouteRecord, Task, TaskDetail, TaskList, TaskTarget, TaskTargets, Turn, TurnSummary, TurnTiming } from './types';
 import { useRemote } from './api';
 import { agentNames, captureNames, date, projectName } from './model';
 import { Button } from '@ksf/sdk/components/ui/button';
@@ -11,7 +11,7 @@ import { SectionSwitcher } from './components/section-switcher';
 import { useWindowContext, useWindowState, readingPositions } from '@ksf/sdk/window-context';
 import { useMaterialStyle } from '@ksf/sdk/components/material-provider';
 import { Sheet } from '@ksf/sdk/components/ui/sheet';
-import { ChangeTimeline, DetailContent, markOrigin, RouteOverview, RouteEvolution, type Detail } from './components/routes';
+import { ChangeTimeline, DetailContent, markOrigin, RouteOverview, RouteEvolution, WorkRouteHistory, type Detail } from './components/routes';
 import { RequestContent, ResultContent } from './components/conversation';
 import { partitionMessages, sectionTarget, type SectionId } from './conversation-model';
 import { routeSignature } from './route-evolution';
@@ -27,6 +27,22 @@ function ErrorNotice({ error, retry }: { error: string | null; retry: () => void
 function Empty({ title, description, loading = false }: { title: string; description: string; loading?: boolean }) {
   return <div className="blank-state"><Inbox size={32} className={loading ? 'loading-mark' : ''} /><h2>{title}</h2><p>{description}</p></div>;
 }
+const timingFormat = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit',
+  minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, hour12: false,
+});
+function TurnTimes({ timing }: { timing: TurnTiming }) {
+  function time(value: string | null) {
+    return value && Number.isFinite(Date.parse(value))
+      ? <time dateTime={value}>{timingFormat.format(Date.parse(value))}</time>
+      : '—';
+  }
+  return <div className="round-timing" aria-label="本轮时间">
+    <span>发送 {time(timing.userSentAt)}</span>
+    <span>最终回复 {time(timing.assistantRepliedAt)}</span>
+    <span>耗时 {timing.durationMs === null ? '—' : `${(timing.durationMs / 1000).toFixed(3)} 秒`}</span>
+  </div>;
+}
 export function Diagnostics({ capture, errors }: { capture?: Capture; errors: Issue[] }) {
   return <><div className="detail-type"><Activity size={16} />本地采集</div><h3 className="detail-name">采集与服务诊断</h3><dl className="definition-list">
     <div><dt>任务归档</dt><dd>{capture?.enabled ? '已启用' : '未启用'}</dd></div><div><dt>项目 Hooks</dt><dd>{capture?.hookConfigured ? '已配置' : '未配置'}<small>是否已获宿主信任，以 Codex 审核结果为准。</small></dd></div><div><dt>启用时间</dt><dd>{date(capture?.activatedAt, true)}</dd></div>
@@ -37,7 +53,11 @@ function ChatBranch({ target, selected, q, choose, matches }: { target: TaskTarg
   useEffect(() => setPages(1), [q]);
   const list = useRemote<TaskList>((!matches || pages > 1) ? `/api/tasks?target=${enc(target.key)}&q=${enc(q)}` : null, pages, 'records');
   const data = list.data ?? matches;
-  return <div className="chat-branch"><ErrorNotice error={list.error} retry={list.refresh} />{data?.records.map(task => <button key={task.taskId} {...contextMenu.bind(()=>[{id:'view',label:'查看聊天',onAction:()=>choose(task)},{id:'title',label:'复制聊天标题',onAction:()=>copyText(task.title)},{id:'link',label:'复制聊天链接',onAction:()=>copyText(`${location.origin}/?app=conversations&target=${enc(target.key)}&task=${enc(task.taskId)}`)}],'聊天操作')} className={`chat-item${selected === task.taskId ? ' selected' : ''}`} title={task.title} aria-label={`${task.title} · ${task.targetContext?.turnCount ?? 0} 个相关轮次 · ${date(task.targetContext?.latestReported?.reportedAt)}`} aria-current={selected === task.taskId ? 'page' : undefined} onClick={() => choose(task)}>{selected === task.taskId && <GlassSurface variant="selection" profile="chat" />}<MessageSquare size={13} /><span><strong><Highlight text={task.title} query={q} /></strong><small>{q && !titleMatches(task, q) ? '历史记录匹配 · ' : ''}{task.targetContext?.turnCount} 个相关轮次 · {date(task.targetContext?.latestReported?.reportedAt)}</small></span></button>)}
+  return <div className="chat-branch"><ErrorNotice error={list.error} retry={list.refresh} />{data?.records.map(task => {
+    const context = task.targetContext;
+    const hint = context?.arrangementTurnId && !context.turnCount ? '按工作安排收录' : `${context?.turnCount ?? 0} 个相关轮次 · ${date(context?.latestReported?.reportedAt)}`;
+    return <button key={task.taskId} {...contextMenu.bind(()=>[{id:'view',label:'查看聊天',onAction:()=>choose(task)},{id:'title',label:'复制聊天标题',onAction:()=>copyText(task.title)},{id:'link',label:'复制聊天链接',onAction:()=>copyText(`${location.origin}/?app=conversations&target=${enc(target.key)}&task=${enc(task.taskId)}`)}],'聊天操作')} className={`chat-item${selected === task.taskId ? ' selected' : ''}`} title={task.title} aria-label={`${task.title} · ${hint}`} aria-current={selected === task.taskId ? 'page' : undefined} onClick={() => choose(task)}>{selected === task.taskId && <GlassSurface variant="selection" profile="chat" />}<MessageSquare size={13} /><span><strong><Highlight text={task.title} query={q} /></strong><small>{q && !titleMatches(task, q) ? '历史记录匹配 · ' : ''}{hint}</small></span></button>;
+  })}
     {!data && <p className="sidebar-hint">正在读取聊天…</p>}{data && !data.records.length && <p className="sidebar-hint">没有匹配的聊天。</p>}{data?.nextOffset != null && <Button size="sm" onClick={() => setPages(p => p + 1)}>更多聊天<ChevronDown size={13} /></Button>}{contextMenu.menu}</div>;
 }
 export const ConversationApp = memo(function ConversationApp({ search, navigate, onDiagnostics }: { search: URLSearchParams; navigate: Navigate; onDiagnostics: () => void }) {
@@ -88,10 +108,10 @@ export const ConversationApp = memo(function ConversationApp({ search, navigate,
   function chooseTarget(key: string) { setTargetIntent(key); navigate({ target: key, project: null, turn: null, tab: null, section: null, view: null }); }
   function chooseChat(task: Task, key: string) { setTargetIntent(null); navigate({ target: key, project: null, task: task.taskId, turn: null, tab: null, section: null, view: null }); setDrawer(null); }
   const sidebar = <><div className="sidebar-brand"><span className="brand-mark"><Layers3 size={19} /></span><strong>KSF<span>工作台</span></strong><span className="local-label">本地</span></div><div className="sidebar-tools"><div className="sidebar-section-title"><span><Layers3 size={15} />归属</span><span>{catalog.data?.targets.length ?? '—'}</span></div><label className="search-field"><Search size={15} /><input aria-label="搜索归属与聊天" placeholder="搜索聊天与历史记录" value={draft} onChange={e => setDraft(e.target.value)} maxLength={200} />{draft && <button aria-label="清空搜索" onClick={() => { setDraft(''); setQ(''); }}><X size={14} /></button>}</label>{q && <p className="search-summary" role="status">{targetSearch.loading ? '正在搜索全部归属…' : `${searchCount} 处聊天匹配`}</p>}</div>
-    <nav className="project-tree" aria-label="归属与聊天">{(['project', 'knowledge', 'ability', 'archive', 'state'] as const).map(kind => {
+    <nav className="project-tree" aria-label="归属与聊天">{(['project', 'knowledge', 'ability', 'archive', 'inbox', 'persona', 'state'] as const).map(kind => {
       const items = catalog.data?.targets.filter(p => p.kind === kind && (!q || (targetSearch.groups.get(p.key)?.total ?? 0) > 0)) ?? [];
-      return items.length ? <div className="target-group" key={kind}><h2 className="target-group-heading">{{ project: '项目', knowledge: '知识', ability: '能力', archive: '档案', state: '其他' }[kind]}</h2>{items.map(p => {
-        const open = q ? !searchClosed.has(p.key) : opened.has(p.key), Icon = p.kind === 'knowledge' ? BookOpen : p.kind === 'project' ? BriefcaseBusiness : p.kind === 'ability' ? Compass : p.kind === 'archive' ? Archive : Inbox;
+      return items.length ? <div className="target-group" key={kind}><h2 className="target-group-heading">{{ project: '项目', knowledge: '知识', ability: '能力', archive: '档案', inbox: '收件箱', persona: '人设', state: '其他' }[kind]}</h2>{items.map(p => {
+        const open = q ? !searchClosed.has(p.key) : opened.has(p.key), Icon = p.kind === 'knowledge' ? BookOpen : p.kind === 'project' ? BriefcaseBusiness : p.kind === 'ability' ? Compass : p.kind === 'archive' ? Archive : p.kind === 'persona' ? UserRound : Inbox;
         return <div key={p.key} className="project-branch"><div className={`project-tree-row${target === p.key ? ' active' : ''}`}><button className="project-toggle" aria-label={`${open ? '收起' : '展开'}归属 ${p.label}`} aria-expanded={open} onClick={() => (q ? setSearchClosed : setOpened)(old => { const next = new Set(old); if (next.has(p.key)) next.delete(p.key); else next.add(p.key); return next; })}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button><button className="project-choice" title={p.target?.path ?? p.label} onClick={() => chooseTarget(p.key)} aria-current={target === p.key ? 'true' : undefined}><Icon size={14} /><strong><Highlight text={p.label} query={q} /></strong>{p.lifecycle === 'planned' && <small className="target-lifecycle">待创建</small>}<span className="count">{q ? targetSearch.groups.get(p.key)?.total : p.chatCount}</span></button></div>{open && <ChatBranch target={p} selected={target === p.key ? taskId : null} q={q} matches={q ? targetSearch.groups.get(p.key) : undefined} choose={task => chooseChat(task, p.key)} />}</div>;
       })}</div> : null;
     })}{q && !targetSearch.loading && !searchCount && <p className="sidebar-hint">没有找到“{q}”。试试其他关键词，或清空搜索。</p>}{targetSearch.errors.map(error => <p className="sidebar-hint" role="alert" key={error}>{error}<Button size="sm" onClick={() => { setQ(''); setTimeout(() => setQ(draft.trim()), 0); }}>重试搜索</Button></p>)}{catalog.data && !catalog.data.targets.length && <p className="sidebar-hint">暂无归属记录。四类目标会在明确上报主归属后出现。</p>}</nav>
@@ -129,13 +149,13 @@ function TargetWorkspace({ target, label, taskId, turnId, oldTab, section, navig
   useEffect(() => { if (main.data?.total) setPages(p => Math.max(p, Math.ceil(main.data!.total / 30))); }, [main.data?.total]);
   useEffect(() => {
     if (!first.data) return;
-    if (!taskId || (autoChoose && context && !context.turnCount)) {
+    if (!taskId || (autoChoose && context && !context.turnCount && !context.arrangementTurnId)) {
       const next = first.data.records[0]?.taskId ?? null;
       if (next !== taskId) navigate({ task: next, turn: null }, true);
       selectionReady();
-    } else if (autoChoose && context?.turnCount) selectionReady();
+    } else if (autoChoose && (context?.turnCount || context?.arrangementTurnId)) selectionReady();
   }, [first.data, taskId, autoChoose, context, navigate]);
-  const selected = turnId ?? context?.latestTurnId ?? task?.latestReported?.turnId ?? task?.lastTurn.turnId ?? null;
+  const selected = turnId ?? context?.latestTurnId ?? context?.arrangementTurnId ?? task?.lastTurn.turnId ?? null;
   const [switching, startSwitch] = useTransition(), localSelection = useRef(false);
   useEffect(() => { if (!turnId && selected) navigate({ turn: selected }, true); }, [turnId, selected, navigate]);
   const body = useRemote<{ turn: Turn }>(taskId && selected ? `/api/tasks/${enc(taskId)}/turns/${enc(selected)}?target=${enc(target)}` : null);
@@ -236,12 +256,17 @@ function TargetWorkspace({ target, label, taskId, turnId, oldTab, section, navig
   const older = index >= 0 ? main.data?.turns[index + 1] : null, newer = index > 0 ? main.data?.turns[index - 1] : null;
   const roundList = <><div className="round-list-heading"><h2>轮次</h2><span title="此聊天的完整轮次">{main.data?.total ?? '—'} 轮</span><Button size="icon" aria-label="收起轮次栏，专注阅读" onClick={() => { toggleFocus(); requestAnimationFrame(() => instance.root?.current?.querySelector<HTMLButtonElement>('.reader-actions button')?.focus()); }}><GlassSurface variant="button" /><PanelLeftClose size={15} /></Button></div><label className="search-field round-search"><Search size={14} /><input aria-label="筛选聊天内全部轮次" placeholder="筛选此聊天的轮次" value={roundQuery} onChange={e => setRoundQuery(e.target.value)} />{roundQuery && <button aria-label="清空轮次筛选" onClick={() => setRoundQuery('')}><X size={13} /></button>}</label>{roundQuery && <p className="round-filter-status" role="status">{allLoaded ? `${visibleTurns.length} / ${main.data?.total} 轮` : '正在读取全部轮次摘要…'}</p>}<div className="round-list" aria-label="完整轮次列表">{visibleTurns.map(t => {
     const title = roundTitle(t);
-    const label = `第 ${t.turnNumber} 轮 · ${title} · ${date(t.startedAt)} · ${t.targetRelation?.label ?? '未上报'}${t.targetHistory?.switched ? ' · 本轮切换' : ''}`;
+    const label = `第 ${t.turnNumber} 轮 · ${title} · ${date(t.startedAt)} · ${t.targetRelation?.label ?? (t.routeFacts ? '对话轮次' : '未上报')}${t.targetHistory?.switched ? ' · 本轮切换' : ''}`;
     return <button key={t.turnId} className={`round-item${selected === t.turnId ? ' selected' : ''}`} title={label} aria-label={label} aria-current={selected === t.turnId ? 'page' : undefined} onClick={() => selectTurn(t.turnId)}>{selected === t.turnId && <GlassSurface variant="selection" profile="round" />}<span className="round-item-title"><strong title={`第 ${t.turnNumber} 轮`}>{String(t.turnNumber ?? '—').padStart(2, '0')}</strong><span className="round-item-summary"><Highlight text={title} query={roundQuery.trim()} /></span></span><span className="round-item-meta"><time>{date(t.startedAt)}</time><span className={`relation relation-${t.targetRelation?.kind}`}>{t.targetRelation?.label}</span>{t.targetHistory?.switched && <span className="switch-label">切换</span>}</span></button>;
   })}{roundQuery && allLoaded && !visibleTurns.length && <p className="round-list-caption">没有匹配轮次，清空筛选可查看全部。</p>}{main.data?.nextOffset != null && <p className="round-list-caption" role="status">{main.error ? '摘要读取未完成，请重试。' : '正在读取完整轮次摘要…'}</p>}</div>{main.error && <p className="round-list-caption warning-label">部分轮次读取失败，请查看详情提示。</p>}</>;
 
-  let shownDetail = detail;
   const excluded = turn?.policy === 'exclude' || summary?.policy === 'exclude';
+  const mayShowFacts = !excluded && turn?.policy !== 'pending' && summary?.policy !== 'pending';
+  const shownDetail = mayShowFacts ? detail : null;
+  const facts = mayShowFacts ? turn?.routeFacts ?? summary?.routeFacts : undefined;
+  const timing = mayShowFacts ? turn?.timing ?? summary?.timing : undefined;
+  const ordinary = !!(turn?.routeFacts ?? summary?.routeFacts);
+  const hasWorkRoute = mayShowFacts && !!(facts?.workChanges.length || facts?.abilityIds.length || facts?.startingProject || turn?.openingWorkArrangement || turn?.currentWorkProject);
   const events = excluded ? [] : turn?.routes ?? [], last = events.at(-1), route = last?.snapshot;
   const messages = useMemo(() => partitionMessages(excluded ? [] : turn?.messages ?? []), [excluded, turn?.messages]);
   const errors = [...new Set([main.error, body.error, first.error].filter((e): e is string => !!e))];
@@ -249,29 +274,32 @@ function TargetWorkspace({ target, label, taskId, turnId, oldTab, section, navig
   const archiveStatus = turn?.status ?? summary?.status;
   const archiveLabel = archiveStatus ? captureNames[archiveStatus] ?? archiveStatus : body.error ? '读取失败' : '读取中';
   const sectionReadState = excluded ? '未记录' : !turn ? body.error ? '读取失败' : '读取中' : null;
-  const latestUnreported = task && task.lastTurn.policy !== 'exclude' && task.lastTurn.routeCount === 0 && selected !== task.lastTurn.turnId;
+  const latestUnreported = task && !task.lastTurn.routingFactsAvailable && task.lastTurn.policy !== 'exclude' && task.lastTurn.routeCount === 0 && selected !== task.lastTurn.turnId;
   const routeUpdate = newReport && task?.latestReported?.turnId !== selected ? task?.latestReported : null;
   const turnUpdate = (newTurn || latestUnreported) && task?.lastTurn.turnId !== selected ? task?.lastTurn : null;
   function openDetail(value: Detail) { beforeDrawer(); setTurnsOpen(false); setDetail(value); }
   if (!taskId) return <><ErrorNotice error={first.error} retry={first.refresh} /><Empty loading={first.loading} title={first.loading ? '正在读取聊天' : '暂无相关聊天'} description={`“${label}”下尚无可读取的聊天。`} /></>;
   return <div className={`chat-workspace${focus ? ' focus-reading' : ''}`}><aside className="round-sidebar">{roundList}<PaneResize name="轮次栏" value={roundWidth} {...roundLimits} onChange={resizeRounds} /></aside><Sheet open={turnsOpen} onOpenChange={setTurnsOpen} title="聊天轮次" side="left"><div className="mobile-rounds">{roundList}</div></Sheet><section className="round-workspace" aria-busy={switching}><GlassSurface profile="reader" />
-    <div className="detail-context"><div className="detail-context-copy"><div className="reading-meta"><span>第 {turn?.turnNumber ?? summary?.turnNumber ?? '—'} 轮</span><time>{date(turn?.startedAt ?? summary?.startedAt)}</time><span className={`capture-state capture-${archiveStatus}`}>归档：{archiveLabel}</span></div><h1>{turn || summary ? route?.summary?.trim() || roundTitle(summary ?? turn) : '正在读取轮次…'}</h1><p className="chat-original-title" title={task?.title}><MessageSquare size={12} />{task?.title ?? '正在读取聊天…'}</p></div><div className="reader-actions"><Button className="round-menu" size="icon" aria-label="打开聊天轮次" onClick={() => setTurnsOpen(true)}><GlassSurface variant="button" /><Menu size={16} /></Button><Button className="focus-toggle" size="icon" aria-label={focus ? '展开轮次栏' : '收起轮次栏，专注阅读'} onClick={toggleFocus}><GlassSurface variant="button" />{focus ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</Button><Button size="icon" aria-label="刷新当前聊天" onClick={refresh}><GlassSurface variant="button" /><RefreshCw size={15} /></Button></div></div>
-    <nav className="round-section-nav" aria-label="本轮章节"><SectionSwitcher active={activeSection}>{(['request', 'route', 'result'] as SectionId[]).map(id => <button key={id} aria-current={activeSection === id ? 'location' : undefined} disabled={excluded || !turn} onClick={() => { navigate({ section: id, tab: null }); jumpToSection(id); }}>{({ request: '请求', route: '路由', result: '结果' })[id]}<small>{sectionReadState ?? (id === 'result' ? messages.result.length ? '已有答复' : '尚未归档' : id === 'request' ? messages.request.length ? '已归档' : '尚未归档' : events.length ? `${events.length} 次上报` : '未上报')}</small></button>)}</SectionSwitcher><button className={`record-info-link${issueCount ? ' has-issues' : ''}`} onClick={showRecordInfo}>记录信息{issueCount > 0 && <><TriangleAlert size={12} />{issueCount}</>}</button></nav>
+    <div className="detail-context"><div className="detail-context-copy"><div className="reading-meta"><span>第 {turn?.turnNumber ?? summary?.turnNumber ?? '—'} 轮</span><time>{date(turn?.startedAt ?? summary?.startedAt)}</time><span className={`capture-state capture-${archiveStatus}`}>归档：{archiveLabel}</span></div><h1>{turn || summary ? route?.summary?.trim() || roundTitle(summary ?? turn) : '正在读取轮次…'}</h1><p className="chat-original-title" title={task?.title}><MessageSquare size={12} />{task?.title ?? '正在读取聊天…'}</p>{timing && <TurnTimes timing={timing} />}{mayShowFacts && task?.workArrangement?.project && <div className="reading-meta">最近归档的工作安排 · {task.workArrangement.project.name}</div>}</div><div className="reader-actions"><Button className="round-menu" size="icon" aria-label="打开聊天轮次" onClick={() => setTurnsOpen(true)}><GlassSurface variant="button" /><Menu size={16} /></Button><Button className="focus-toggle" size="icon" aria-label={focus ? '展开轮次栏' : '收起轮次栏，专注阅读'} onClick={toggleFocus}><GlassSurface variant="button" />{focus ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</Button><Button size="icon" aria-label="刷新当前聊天" onClick={refresh}><GlassSurface variant="button" /><RefreshCw size={15} /></Button></div></div>
+    {task?.lineage && <div className="turn-updates"><GitBranch size={13} /><span>本聊天仅记录分叉后新增轮次</span><Button size="sm" disabled={!task.lineage.available} onClick={() => navigate({ task: task.lineage!.parentTaskId, target: null, project: null, turn: null, tab: null, section: null })}>{task.lineage.available ? '查看父聊天历史' : '父历史未归档或不可用'}<ArrowUpRight size={13} /></Button></div>}
+    <nav className="round-section-nav" aria-label="本轮章节"><SectionSwitcher active={activeSection}>{(['request', 'route', 'result'] as SectionId[]).map(id => <button key={id} aria-current={activeSection === id ? 'location' : undefined} disabled={excluded || !turn} onClick={() => { navigate({ section: id, tab: null }); jumpToSection(id); }}>{({ request: '请求', route: '路由', result: '结果' })[id]}<small>{sectionReadState ?? (id === 'result' ? messages.result.length ? '已有答复' : '尚未归档' : id === 'request' ? messages.request.length ? '已归档' : '尚未归档' : events.length ? `${events.length} 次上报` : hasWorkRoute ? '已有记录' : ordinary ? '无单轮归属' : '未上报')}</small></button>)}</SectionSwitcher><button className={`record-info-link${issueCount ? ' has-issues' : ''}`} onClick={showRecordInfo}>记录信息{issueCount > 0 && <><TriangleAlert size={12} />{issueCount}</>}</button></nav>
     <div className="round-stepper"><Button size="sm" aria-label="上一轮" disabled={!older} onClick={() => older && selectTurn(older.turnId)}><ArrowUp size={13} />上一轮</Button><span aria-live="polite">{switching ? '正在切换…' : `${turn?.turnNumber ?? summary?.turnNumber ?? '—'} / ${main.data?.total ?? '—'}`}</span><Button size="sm" aria-label="下一轮" disabled={!newer} onClick={() => newer && selectTurn(newer.turnId)}>下一轮<ArrowDown size={13} /></Button></div>
-    {(routeUpdate || turnUpdate) && <div className="turn-updates" role="status"><CircleDot size={13} /><span>聊天有更新</span><div>{routeUpdate && <Button size="sm" onClick={() => selectTurn(routeUpdate.turnId)}>查看第 {routeUpdate.turnNumber} 轮路由</Button>}{turnUpdate && turnUpdate.turnId !== routeUpdate?.turnId && <Button size="sm" onClick={() => selectTurn(turnUpdate.turnId)}>查看最新第 {turnUpdate.turnNumber ?? task?.turnCount} 轮{turnUpdate.policy === 'exclude' ? ' · 未记录' : !turnUpdate.routeCount ? ' · 未上报' : ''}</Button>}</div></div>}
+    {(routeUpdate || turnUpdate) && <div className="turn-updates" role="status"><CircleDot size={13} /><span>聊天有更新</span><div>{routeUpdate && <Button size="sm" onClick={() => selectTurn(routeUpdate.turnId)}>查看第 {routeUpdate.turnNumber} 轮路由</Button>}{turnUpdate && turnUpdate.turnId !== routeUpdate?.turnId && <Button size="sm" onClick={() => selectTurn(turnUpdate.turnId)}>查看最新第 {turnUpdate.turnNumber ?? task?.turnCount} 轮{turnUpdate.policy === 'exclude' ? ' · 未记录' : !turnUpdate.routeCount && !turnUpdate.routingFactsAvailable ? ' · 未上报' : ''}</Button>}</div></div>}
     <div className="round-scroll" key={`${instance.id}:${taskId}:${selected}`} ref={scroll} onScroll={trackSection}><div className="turn-document">
       {excluded ? <div className="blank-state"><FileClock size={26} /><h2>本轮明确排除采集</h2><p>仅保留无正文占位。</p></div> : turn ? <>
         <section className="turn-section request-section" data-section="request" aria-labelledby={`${instance.id}-request-heading`}><h2 id={`${instance.id}-request-heading`} tabIndex={-1}>请求</h2><RequestContent messages={messages.request} /></section>
         <section className="turn-section route-section-main" data-section="route" aria-labelledby={`${instance.id}-route-heading-main`}><h2 id={`${instance.id}-route-heading-main`} tabIndex={-1}>路由</h2>
-          {relation && !['primary', 'unreported', 'excluded'].includes(relation.kind) && <p className="route-context"><span className={`relation relation-${relation.kind}`}>{relation.label}</span><span>当前浏览：{label}</span></p>}
+          {relation && !['primary', 'dialogue', 'unreported', 'excluded'].includes(relation.kind) && <p className="route-context"><span className={`relation relation-${relation.kind}`}>{relation.label}</span><span>当前浏览：{label}</span></p>}
           {route && <p className="route-summary">{route.summary}</p>}
-          <RouteEvolution events={events} onDetail={openDetail} />
+          {(events.length > 0 || !ordinary && !hasWorkRoute) && <RouteEvolution events={events} onDetail={openDetail} />}
+          {hasWorkRoute && <WorkRouteHistory turn={turn} onDetail={openDetail} />}
+          {ordinary && !events.length && !hasWorkRoute && <p className="section-empty">本轮无单独指定的归属。</p>}
         </section>
         <section className="turn-section result-section" data-section="result" aria-labelledby={`${instance.id}-result-heading`}><h2 id={`${instance.id}-result-heading`} tabIndex={-1}>结果</h2><ResultContent messages={messages.result} process={messages.process} /></section>
       </> : <p className="section-empty">{body.error ? '本轮读取失败，请查看记录信息并重试。' : '正在读取本轮…'}</p>}
       <details className="record-information"><summary><FileClock size={13} />记录信息{issueCount > 0 && <span className="warning-label"><TriangleAlert size={12} />{issueCount} 项读取或采集提示</span>}<ChevronDown size={13} /></summary><dl className="definition-list"><div><dt>对话归档状态</dt><dd>{archiveLabel}</dd></div>{last && <><div><dt>Agent 最近上报状态</dt><dd>{agentNames[last.snapshot.status] ?? last.snapshot.status}</dd></div><div><dt>最近上报时间</dt><dd>{date(last.at, true)}</dd></div></>}<div><dt>最终答复</dt><dd>{sectionReadState ?? (messages.result.length ? `已归档 ${messages.result.length} 条` : '尚未归档')}</dd></div><div><dt>聊天轮次</dt><dd>{task?.turnCount ?? '—'} 轮 · 当前归属相关 {context?.turnCount ?? '—'} 轮</dd></div><div><dt>当前归属最近上报</dt><dd>{date(context?.latestReported?.reportedAt)}</dd></div></dl><p className="detail-note">对话归档、Agent 最近上报和最终答复分别记录，不表示宿主实时运行状态。</p>{events.length > 0 && <Button size="sm" variant="outline" onClick={e => { markOrigin(e.currentTarget); openDetail({ kind: 'reports', events }); }}>原始上报数据<FileClock size={13} /></Button>}{errors.map(error => <p className="record-error" key={error}>读取失败：{error}</p>)}{turn?.issues.map((issue, i) => <p className="record-error" key={i}>{issue.code}{issue.message ? `：${issue.message}` : ''}</p>)}{issueCount > 0 && <Button size="sm" variant="outline" onClick={refresh}>重新读取</Button>}</details>
     </div></div>
-  </section><Sheet open={!!shownDetail} onOpenChange={open => { if (!open) setDetail(null); }} title={shownDetail?.kind === 'ability' ? '能力详情' : shownDetail?.kind === 'target' ? '归属详情' : shownDetail?.kind === 'project' ? '项目详情' : shownDetail?.kind === 'arrangement' ? '当时完整安排' : shownDetail?.kind === 'reports' ? '原始上报数据' : '路由变化'}>{shownDetail && <DetailContent detail={shownDetail} />}</Sheet></div>;
+  </section><Sheet open={!!shownDetail} onOpenChange={open => { if (!open) setDetail(null); }} title={shownDetail?.kind === 'ability' ? '能力详情' : shownDetail?.kind === 'target' ? '归属详情' : shownDetail?.kind === 'project' ? '项目详情' : shownDetail?.kind === 'arrangement' ? '当时完整安排' : shownDetail?.kind === 'work-arrangement' ? '工作安排详情' : shownDetail?.kind === 'reports' ? '原始上报数据' : '路由变化'}>{shownDetail && <DetailContent detail={shownDetail} />}</Sheet></div>;
 }
 function LegacyRoutes({ search, navigate }: { search: URLSearchParams; navigate: (values: Record<string, string | null>, replace?: boolean) => void }) {
   const [offset, setOffset] = useState(0), [detail, setDetail] = useState<Detail | null>(null);

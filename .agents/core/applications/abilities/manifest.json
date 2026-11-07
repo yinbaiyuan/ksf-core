@@ -3,11 +3,11 @@
   "sdkVersion": 1,
   "id": "com.ksf.abilities",
   "name": "KSF能力",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "发现、读取、维护和检查现有能力定义，保留有效来源、精确引用与用户派生。",
   "author": "KSF",
   "icon": "abilities",
-  "minCoreVersion": "0.5.2",
+  "minCoreVersion": "0.5.3",
   "permissions": [
     "filesystem"
   ],
@@ -29,5 +29,7 @@
     "runtime": "node",
     "entry": "backend/index.mjs",
     "lifecycle": "on-demand"
-  }
+  },
+  "sdkApiVersion": "1.1.0",
+  "builtWithSdkVersion": "1.1.0"
 }

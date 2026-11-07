@@ -48,7 +48,7 @@ export function useContextMenu() {
     const buttons=[...root.current!.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')],index=buttons.indexOf(document.activeElement as HTMLButtonElement);
     const next=event.key==='ArrowDown'?(index+1)%buttons.length:event.key==='ArrowUp'?(index-1+buttons.length)%buttons.length:event.key==='Home'?0:event.key==='End'?buttons.length-1:-1;
     if(next>=0){event.preventDefault();buttons[next]?.focus();}
-  }}>{open.actions.map(action=><button key={action.id} type="button" role="menuitem" disabled={action.disabled} className={`${action.danger?'is-danger':''} ${action.separator?'has-separator':''}`} onClick={()=>{
+  }}>{open.actions.map(action=><button key={action.id} type="button" role="menuitem" disabled={action.disabled} className={`${action.danger?'is-danger':''} ${action.separator?'has-separator':''}`} onMouseEnter={event=>event.currentTarget.focus()} onClick={()=>{
     close(true);try{Promise.resolve(action.onAction()).catch(error=>setFeedback((error as Error).message));}catch(error){setFeedback((error as Error).message);}
   }}>{action.label}</button>)}</div>,open.owner.closest('[data-overlay-owner]')??context.overlayHost??document.body)}{feedback&&createPortal(<div className={`ksf-sdk-surface ${scope} app-context-feedback`} style={context.overlayHost?{bottom:16,maxWidth:'calc(100% - 24px)'}:undefined} role="status">{feedback}</div>,context.overlayHost??document.body)}</>;
   return {bind,menu};

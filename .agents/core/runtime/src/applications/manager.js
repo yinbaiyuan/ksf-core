@@ -15,7 +15,7 @@ import { assert, problem, createCoordinator } from '../services/workbench-common
 import { DEFAULT_APPLICATION_SOURCE, withDefaultApplicationSource, migrateApplicationOrigins } from './default-source.js';
 import {createRegistryResolver} from './registry.js';
 import {LEGACY_APPLICATION_IDS} from './identities.js';
-import { assertCompatible, validateManifest, validId, validPath, checksum, decodePackage, MAX_PACKAGE, compareVersions, sameManifest, DEFAULT_APPLICATIONS, isOfficialApplicationId,validateStoreListing,groupStoreApplications,storeMediaPath,storeImageType,MAX_STORE_IMAGE,readCLIDocument } from './protocol.js';
+import { assertCompatible, validateManifest, validId, validPath, checksum, decodePackage, MAX_PACKAGE, compareVersions, sameManifest, DEFAULT_APPLICATIONS, SDK_COMPATIBILITY, applicationSDKVersion, isOfficialApplicationId,validateStoreListing,groupStoreApplications,storeMediaPath,storeImageType,MAX_STORE_IMAGE,readCLIDocument } from './protocol.js';
 
 const bundledStore = fileURLToPath(new URL('../../../applications/store/', import.meta.url));
 const hostPath = fileURLToPath(new URL('./host.js', import.meta.url));
@@ -39,7 +39,7 @@ async function boundedFetch(url, limit, fetcher) {
   return Buffer.concat(chunks);
 }
 // Config and immutable installed packages belong to the workspace, outside Core updates.
-export function createApplicationManager(root, { storeDirectory = bundledStore, fetcher = fetch, services = {}, locks = createCoordinator(), callTimeoutMs = 20000, now = Date.now, defaultSource = DEFAULT_APPLICATION_SOURCE, coreVersion=JSON.parse(readFileSync(new URL('../../../build.json',import.meta.url),'utf8')).version, prepareTimeoutMs=30000, activationTimeoutMs=10000, storageOptions={} } = {}) {
+export function createApplicationManager(root, { storeDirectory = bundledStore, fetcher = fetch, services = {}, locks = createCoordinator(), callTimeoutMs = 20000, now = Date.now, defaultSource = DEFAULT_APPLICATION_SOURCE, sdkCompatibility=SDK_COMPATIBILITY, coreVersion=JSON.parse(readFileSync(new URL('../../../build.json',import.meta.url),'utf8')).version, prepareTimeoutMs=30000, activationTimeoutMs=10000, storageOptions={} } = {}) {
   const home = join(root, '.agents/user-data/applications'), statePath = join(home, 'state.json');
   const terminal=createWorkbenchTerminal(root),storage=createApplicationStorage(root,storageOptions);
   services={...services,terminal,storage};
@@ -53,7 +53,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
   const runtimeFinalizers=new Set();
   const taskHistory=[];
   const finishJob=(runtime,id,patch={})=>{const job=runtime.jobs.get(id);if(!job)return;runtime.jobs.delete(id);taskHistory.unshift({...job,...patch,status:patch.status??'succeeded',finishedAt:new Date().toISOString()});taskHistory.splice(100);};
-  const parked=new Map(),compatible=manifest=>assertCompatible(manifest,{coreVersion});
+  const parked=new Map(),compatible=manifest=>assertCompatible(manifest,{coreVersion,sdkCompatibility});
   const dataCaller=release=>({appId:release.manifest.id,dataStores:release.manifest.dataStores,releaseDigest:release.digest});
   const dataCheck=async(release,{allowMigration=false}={})=>{compatible(release.manifest);const result=await storage.inspectAll(dataCaller(release));if(!allowMigration||!result.canPrepare)storage.checkReady(result);return result;};
   let accepting=true;const draining=new Set();
@@ -134,7 +134,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     // If Core stopped while an upgrade waited, no old application instance survives it.
     if (Object.entries(state.installed).some(([id, app]) => app.pending)) await mutate(async next => { for (const id of Object.keys(next.installed)) try{await settlePending(next, id);}catch(error){backgroundErrors.push({appId:id,code:error.code??'APP_DATA_INVALID',message:error.message});} });
     const current = await readState();
-    return { revision: current.revision, sources: current.sources, installed: Object.entries(current.installed).map(([id, item]) => ({ id, ...item, installationId:item.installationId??`legacy:${id}`, running: running(id).length, assetBase: `/app-assets/${id}/${item.active.digest}/` })), instances: [...instances.values()].map(item => ({ id: item.id, appId: item.appId, digest: item.release.digest, status: item.closed ? 'stopped' : 'running', kind:item.kind, pageId:item.pageId, error: item.error ?? null })) };
+    return { sdkCompatibility, coreVersion, revision: current.revision, sources: current.sources, installed: Object.entries(current.installed).map(([id, item]) => ({ id, ...item, installationId:item.installationId??`legacy:${id}`, running: running(id).length, assetBase: `/app-assets/${id}/${item.active.digest}/` })), instances: [...instances.values()].map(item => ({ id: item.id, appId: item.appId, digest: item.release.digest, status: item.closed ? 'stopped' : 'running', kind:item.kind, pageId:item.pageId, error: item.error ?? null })) };
   }
   const canonicalSource=defaultSource??DEFAULT_APPLICATION_SOURCE;
   const sourceFreshness=new Map();
@@ -167,8 +167,8 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     for (const item of apps) { const key = `${item.source.id}:${item.manifest.id}:${item.manifest.version}`, previous = variants.get(key); if (!previous || previous.incompatibility && !item.incompatibility || !previous.incompatibility && !item.incompatibility && (Number(!!item.manifest.target)*2+Number(!!item.manifest.nodeAbi))>(Number(!!previous.manifest.target)*2+Number(!!previous.manifest.nodeAbi))) variants.set(key, item); }
     const hasLegacyCooperation=Object.keys(state.installed).some(id=>['yinbaiyuan.lan-messenger','com.yinbaiyuan.lan-messenger'].includes(id));
     const selected = [...variants.values()].map(e=>hasLegacyCooperation&&e.manifest.id==='com.ksf.cooperation-center'?{...e,incompatibility:'需先通过配套迁移接续旧内网通信的消息与配对。'}:e); selected.sort((a, b) => a.manifest.name.localeCompare(b.manifest.name) || compareVersions(b.manifest.version, a.manifest.version));
-    const applications=groupStoreApplications(selected,state.sources,state.installed,errors).map(app=>({...app,directory:sourceFreshness.get(app.display.source.id)??null,latestPublishedVersion:sourceFreshness.get(app.display.source.id)?.latestConfirmed?app.latestPublishedVersion:null})).map(app=>state.installed[app.appId]?.active.source.id==='local-import'?{...app,candidate:null,latestPublishedVersion:null,unavailableReason:null}:app);
-    return { apps: selected, applications,errors, directories:Object.fromEntries(sourceFreshness) };
+    const applications=groupStoreApplications(selected,state.sources,state.installed,errors).map(app=>({...app,directory:sourceFreshness.get(app.display.source.id)??null,latestPublishedVersion:sourceFreshness.get(app.display.source.id)?.latestConfirmed?(selected.filter(e=>e.manifest.id===app.appId&&e.source.id===app.display.source.id&&e.publicationKnown!==false).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version))[0]?.manifest.version??null):null})).map(app=>state.installed[app.appId]?.active.source.id==='local-import'?{...app,candidate:null,latestPublishedVersion:null,unavailableReason:null}:app);
+    return { sdkCompatibility,coreVersion,apps: selected, applications,errors, directories:Object.fromEntries(sourceFreshness) };
   }
   async function saveSource(input) {
     assert(input.id !== canonicalSource.id, 'APP_SOURCE_LOCKED', 'KSF 公用应用源不可编辑或停用。', 403);
@@ -371,6 +371,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
         if(message.service==='storage')assert(['read','write','inspect','migrate'].includes(message.method),'APP_SERVICE_UNKNOWN','未知存储方法。');
         if(message.service==='assets')assert(runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明资产访问所需的 filesystem 权限。',403);
         if(message.service==='capabilities')assert(message.method==='read'&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明能力读取所需的 filesystem 权限。',403);
+        if(message.service==='work-context')assert(['read','bind','current','accept','reset'].includes(message.method)&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','工作上下文需要 filesystem 权限及显式会话身份。',403);
         if(message.service==='tasks'&&message.method!=='activity')assert(runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明证据读取所需的 filesystem 权限。',403);
         if(message.service==='projects')assert(runtime.release.manifest.permissions.includes('filesystem')||runtime.release.manifest.permissions.includes('projects.read')&&['list','read'].includes(message.method),'APP_PERMISSION_REQUIRED','此应用没有声明 filesystem 权限。',403);
         if(message.service==='git')assert(runtime.release.manifest.permissions.includes('shell')&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明 Git 所需权限。',403);
@@ -528,7 +529,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     const client=[...instances.values()].find(item=>item.appId===appId&&!item.closed&&item.runtime&&!item.runtime.closed);
     if(client)return call(client.id,method,params,{maxBytes:30*1024*1024});
   }
-  async function listApplications(){const state=await readState();return Object.entries(state.installed).map(([id,app])=>({id,name:app.active.manifest.name,description:app.active.manifest.description,version:app.active.manifest.version,sdkVersion:app.active.manifest.sdkVersion,enabled:app.enabled,hasCLI:!!app.active.manifest.cli}));}
+  async function listApplications(){const state=await readState();return Object.entries(state.installed).map(([id,app])=>({id,name:app.active.manifest.name,description:app.active.manifest.description,version:app.active.manifest.version,sdkVersion:app.active.manifest.sdkVersion,sdkApiVersion:applicationSDKVersion(app.active.manifest),builtWithSdkVersion:app.active.manifest.builtWithSdkVersion??null,enabled:app.enabled,hasCLI:!!app.active.manifest.cli}));}
   async function cliDocs(appId,{path,expectedPackageDigest}={}){
     appId=await resolveApplicationId(appId);
     const app=(await readState()).installed[appId],release=app?.active;assert(release?.manifest.cli,'APP_CLI_UNAVAILABLE','应用未安装或未提供 CLI。',404);assert(!expectedPackageDigest||expectedPackageDigest===release.digest,'APP_RELEASE_CHANGED','应用版本已变化，请重新读取文档。',409);

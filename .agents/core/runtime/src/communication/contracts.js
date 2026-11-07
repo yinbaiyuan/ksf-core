@@ -1,5 +1,5 @@
 import {createHash,timingSafeEqual} from 'node:crypto';
-import {safeDirectory as ensureDirectory,readJSON as readDurableJSON} from '../shared/durable-json.js';
+import {safeDirectory as ensureDirectory,readJSON as readDurableJSON,readJSONSnapshot as readDurableJSONSnapshot} from '../shared/durable-json.js';
 import {networkInterfaces} from 'node:os';
 export const error=(code,message,status=400,data)=>Object.assign(new Error(message),{code,status,data});
 export const ensure=(condition,code,message,status=400)=>{if(!condition)throw error(code,message,status);};
@@ -14,6 +14,7 @@ export const serialize=e=>({code:e.code??'COMMUNICATION_FAILED',message:e.messag
 export {atomicJSON,syncDirectory,replaceFile} from '../shared/durable-json.js';
 export const safeDirectory=(root,path)=>ensureDirectory(root,path,{invalid:message=>{throw error('COMM_PATH_INVALID',message);}});
 export const readJSON=(path,fallback)=>readDurableJSON(path,fallback,{invalid:message=>{throw error('COMM_STORAGE_INVALID',message);}});
+export const readJSONSnapshot=(path,fallback)=>readDurableJSONSnapshot(path,fallback,{invalid:message=>{throw error('COMM_STORAGE_INVALID',message);}});
 export const DEFAULTS=Object.freeze({enabled:false,host:'',port:0,discovery:true,maxMessageBytes:1024**3,maxParts:32,maxManifestBytes:128*1024,maxStorageBytes:8*1024**3,maxTransfers:4,maxPeerTransfers:2,connectTimeoutMs:3000,controlTimeoutMs:10000,idleTimeoutMs:30000,operationTimeoutMs:15*60*1000,temporaryTTL:30*60*1000});
 export function validateCommunicationConfiguration(value){
  const addresses=Object.values(networkInterfaces()).flat().filter(Boolean).map(item=>item.address);

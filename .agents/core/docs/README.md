@@ -11,7 +11,7 @@ KSF 以人为主体，把认知与资产、可复用的 AI 能力、实际工作
 | 理解 KSF | [总论与立字模型](handbook/overview.md) | 理解价值、组成、责任和飞轮 |
 | 使用 KSF | [首次使用](handbook/getting-started.md)、[第一项工作](handbook/first-task.md) | 配置必要信息，产出并接续工作 |
 | 开发应用与能力 | [能力体系](handbook/abilities.md)、[应用开发者手册](app-development/README.md) | 设计能力、按SDK契约开发和交付应用 |
-| 理解系统机制 | [完整调用链](handbook/architecture.md)、[系统架构](system/README.md) | 理解Agent、CLI、进程、状态和数据的连接 |
+| 理解系统机制 | [完整调用链](handbook/architecture.md)、[Runtime 与上下文完整机制](runtime/work-context.md)、[系统架构](system/README.md) | 理解Agent、CLI、进程、状态和数据的连接 |
 | 维护与排障 | [日常维护](operations/daily.md)、[故障处理](operations/troubleshooting.md) | 核对运行状态，管理升级及恢复现场 |
 
 ## 常用入口
@@ -19,6 +19,9 @@ KSF 以人为主体，把认知与资产、可复用的 AI 能力、实际工作
 - [身份和配置](handbook/identity-configuration.md)：用户、实例、设备分别是谁。
 - [认知与资产](handbook/assets.md)：内容放在哪里，如何保留来源。
 - [任务推进与恢复](handbook/task-execution.md)：一项请求怎样成为可核验结果。
+- [项目文档架构与治理指南](project-management/document-architecture.md)：后续项目治理的核心设计基线，说明项目、里程碑、任务、编号上下文与两级复盘。
+- [Runtime 与上下文完整机制](runtime/work-context.md)：入口、按需路由、工作绑定、增量正文、切换恢复及专业结果保存。
+- [三套元能力设计体系](objects/meta-design.md)：专业方法、责任角色、跨责任合作的完整设计包，以及诊断和维护的分工。
 - [工作台与应用](handbook/workbench.md)：窗口、卡片、后台和安装更新。
 - [AI三条交互路径](handbook/ai.md)、[跨实例协作](handbook/collaboration.md)。
 - [术语](reference/glossary.md)、[数据地图](reference/data-map.md)、[CLI索引](cli/index.md)。

@@ -5,10 +5,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // identity. Only system definitions participate; user overrides stay in place.
 export async function validateSystemDefinitions(root) {
   const source = relative => pathToFileURL(join(root, '.agents/core/runtime/src', relative)).href;
-  const [{ catalog, problems, resolveObject }, { protectedPaths }] = await Promise.all([
+  const [{ catalog, problems, resolveObject }, schema] = await Promise.all([
     import(source('objects/catalog.js')), import(source('objects/schema.js')),
   ]);
+  const { protectedPaths } = schema;
+  const parseDependencyReference = schema.parseDependencyReference ?? (reference => schema.parseReference(reference, undefined, { exact: true }));
   const c = catalog(root, { linked: false }), errors = problems(c, { source: 'system' });
+  let candidateDependencyResolver;
   for (const id of Object.keys(protectedPaths)) {
     try {
       const row = resolveObject(c, { id }, 'system');
@@ -17,7 +20,15 @@ export async function validateSystemDefinitions(root) {
   }
   for (const row of c.rows.filter(row => row.source === 'system' && !row.errors.length)) {
     for (const reference of row.metadata.references ?? []) {
-      const [id, version] = reference.split('@');
+      const parsed = parseDependencyReference(reference);
+      // Instance files need not exist in a portable Core candidate.
+      if (parsed.kind === 'file') {
+        candidateDependencyResolver ??= (await import(source('objects/references.js'))).resolveDependency;
+        try { candidateDependencyResolver(c,row,reference); }
+        catch(error) { errors.push({id:row.id,reference,code:error.code}); }
+        continue;
+      }
+      const { id, version } = parsed;
       try {
         const target = resolveObject(c, { id, version }, 'system');
         if (target.metadata.status === 'archived') errors.push({ id: row.id, reference, code: 'SYSTEM_REFERENCE_ARCHIVED' });

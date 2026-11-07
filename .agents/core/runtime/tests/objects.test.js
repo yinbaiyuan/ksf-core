@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import YAML from '../src/vendor/yaml/dist/index.js';
-import { types, protectedPaths, parseReference, validateObject } from '../src/objects/schema.js';
+import { types, protectedPaths, parseReference, parseDependencyReference, validateObject } from '../src/objects/schema.js';
 import { catalog, resolveObject, problems } from '../src/objects/catalog.js';
 import { withObjectLock } from '../src/objects/storage.js';
 import { objectQuery, objectMutation } from '../src/services/objects.js';
@@ -28,6 +28,91 @@ function fixture(t) {
   };
   return { root, query, mutate, add };
 }
+
+test('dependency prefixes are exact metadata syntax, not object selectors or YAML comments', () => {
+  const id = 'competency.test.method';
+  for (const [prefix, expansion] of [['', 'none'], ['+', 'shallow'], ['#', 'recursive']]) {
+    const reference = prefix + id + '@0.1.0';
+    assert.deepEqual(parseDependencyReference(reference), { id, version: '0.1.0', prefix, expansion });
+    assert.equal(YAML.parse('references:\n  - ' + JSON.stringify(reference)).references[0], reference);
+    if (prefix) assert.throws(() => parseReference(reference), { code: 'OBJECT_REFERENCE_INVALID' });
+  }
+  for (const value of ['++', '##', '+#', '#+', '!', ' +', '+ '].map(p => p + id + '@0.1.0')
+    .concat([id, id + '@0.1.0+', id + '@0.1.0#', '#' + id + '@latest', '#skill.test.old@0.1.0'])) {
+    assert.throws(() => parseDependencyReference(value), { code: 'OBJECT_REFERENCE_INVALID' }, value);
+  }
+  assert.equal(YAML.parse('references:\n  - #' + id + '@0.1.0').references[0], null);
+});
+
+test('mixed prefixes expand definitions in depth-first order and preserve parent/part contracts', t => {
+  const f = fixture(t), a = 'partner.test.a', b = 'cooperation.test.b', c = 'competency.test.c',
+    d = 'partner.test.d', e = 'data-package.test.e', g = 'data-package.test.g', ignored = 'competency.test.ignored';
+  const add = (id, references = []) => f.add(id.split('.')[0], 'user', id, { references }, id + '\n[resource](not-loaded.md)\n');
+  const original = add(a, ['#' + b + '@0.1.0']);
+  add(b, ['+' + c + '@0.1.0', '#' + d + '@0.1.0', e + '@0.1.0']);
+  add(c, ['#' + ignored + '@0.1.0']); add(d, ['+' + g + '@0.1.0']); add(e); add(g); add(ignored);
+  const before = readFileSync(original.path), read = f.query('partner', 'read', a);
+  assert.deepEqual(read.errors, []);
+  assert.deepEqual(read.data.expanded.map(x => x.object.id), [b, c, d, g]);
+  assert.equal(read.data.object.body, a + '\n[resource](not-loaded.md)\n');
+  assert.equal(read.data.references[0].version, '0.1.0');
+  assert.equal(read.data.references[0].expansion, 'recursive');
+  assert.deepEqual(readFileSync(original.path), before);
+  for (const item of read.data.expanded) {
+    assert.ok(item.object.metadata); assert.match(item.object.definition_digest, /^[a-f0-9]{64}$/);
+    assert.ok(item.object.body.includes(item.object.id));
+  }
+  assert.deepEqual(f.query('competency', 'read', c).data.expanded.map(x => x.object.id), [ignored]);
+  const body = f.query('partner', 'read', a, { part: 'body' }).data;
+  assert.ok(!Object.hasOwn(body.object, 'metadata'));
+  assert.ok(body.expanded.every(x => !Object.hasOwn(x.object, 'metadata') && typeof x.object.body === 'string'));
+  for (const result of [f.query('partner', 'read', a, { part: 'metadata' }), f.query('partner', 'check', a), f.query('partner', 'list')]) {
+    assert.ok(!Object.hasOwn(result.data, 'expanded'));
+  }
+});
+
+test('recursive traversal upgrades shallow reads, terminates cycles and never repeats a definition', t => {
+  const f = fixture(t), ids = ['a', 'b', 'c', 'd'].map(n => 'competency.test.' + n);
+  const [a, b, c, d] = ids, ref = id => id + '@0.1.0';
+  f.add('competency', 'user', a, { references: ['+' + ref(b), '#' + ref(d), '#' + ref(a)] });
+  f.add('competency', 'user', b, { references: ['#' + ref(c)] });
+  f.add('competency', 'user', c, { references: ['#' + ref(b)] });
+  f.add('competency', 'user', d, { references: ['#' + ref(b), '#' + ref(a)] });
+  const result = f.query('competency', 'read', a);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.data.expanded.map(x => x.object.id), [b, d, c]);
+  assert.equal(result.data.expanded[0].reference, '+' + ref(b));
+});
+
+test('shallow reads stop at the target, recursive failures preserve acquired content and valid siblings', t => {
+  const f = fixture(t), a = 'partner.test.a', b = 'competency.test.b', good = 'competency.test.good', missing = 'competency.test.missing';
+  const ref = id => id + '@0.1.0';
+  f.add('competency', 'user', b, { references: ['#' + ref(missing)] }, 'ACQUIRED_B\n');
+  f.add('competency', 'user', good, {}, 'GOOD\n');
+  f.add('partner', 'user', a, { references: ['+' + ref(b)] }, 'PARENT\n');
+  assert.deepEqual(f.query('partner', 'read', a).errors, []);
+  f.add('partner', 'user', a, { references: ['#' + ref(b), '+' + ref(good)] }, 'PARENT\n');
+  const failed = f.query('partner', 'read', a);
+  assert.equal(failed.data.object.body, 'PARENT\n');
+  assert.deepEqual(failed.data.expanded.map(x => x.object.body), ['ACQUIRED_B\n', 'GOOD\n']);
+  assert.equal(failed.errors[0].code, 'OBJECT_NOT_FOUND'); assert.equal(failed.errors[0].id, missing);
+  f.add('partner', 'user', a, { references: ['+' + good + '@9.0.0'] });
+  const version = f.query('partner', 'read', a);
+  assert.equal(version.errors[0].code, 'OBJECT_VERSION_MISMATCH'); assert.deepEqual(version.data.expanded, []);
+});
+
+for (const type of Object.keys(types)) test(`${type}: prefixes preserve effective binding and dependency protection`, t => {
+  const f = fixture(t), target = 'competency.test.target', owner = type + '.test.owner';
+  f.add('competency', 'system', target, {}, 'SYSTEM\n');
+  f.add('competency', 'user', target, {}, 'USER\n');
+  f.add(type, 'user', owner, { references: ['+' + target + '@0.1.0'] });
+  assert.equal(f.query(type, 'read', owner).data.expanded[0].object.body, 'USER\n');
+  // Removing the only eligible exact version must still be blocked for +/#.
+  f.mutate('competency', 'write', target, { input: { metadata: { version: '0.2.0' } } });
+  f.mutate(type, 'write', owner, { input: { metadata: { references: ['#' + target + '@0.2.0'] } } });
+  assert.throws(() => f.mutate('competency', 'remove', target), { code: 'OBJECT_DEPENDENTS_BLOCKED' });
+  assert.equal(f.query(type, 'check', owner).data.valid, true);
+});
 
 test('capability scopes and exact references accept only the four supported types', t => {
   const f = fixture(t);
@@ -346,4 +431,100 @@ test('remove reports absent user objects without touching unsupported system-onl
   symlinkSync(s.path, join(s.folder, 'symbolic-resource.md'));
   for (const dryRun of [false, true]) assert.throws(() => f.mutate('partner', 'remove', s.id, { dryRun }), { code: 'OBJECT_NOT_FOUND' });
   assert.equal(existsSync(s.path), true);
+});
+
+test('explicit file paths share load markers without becoming object selectors or versioned IDs', () => {
+  for (const path of ['./rules.md','../资料/规则.md','/USER.md','./notes@draft.md']) for(const [prefix,expansion] of [['','none'],['+','shallow'],['#','recursive']]) {
+    assert.deepEqual(parseDependencyReference(prefix+path),{kind:'file',path,prefix,expansion});
+    assert.equal(YAML.parse('references: ['+JSON.stringify(prefix+path)+']').references[0],prefix+path);
+    assert.throws(()=>parseReference(prefix+path),{code:'OBJECT_REFERENCE_INVALID'});
+  }
+  for(const path of ['USER.md','+USER.md','++/USER.md','+#./x.md','# +/x.md','/','//server/file.md','./folder/','./a\\b.md','./x:y.md','./x\0.md','C:/USER.md']) {
+    assert.throws(()=>parseDependencyReference(path),{code:'OBJECT_REFERENCE_INVALID'},path);
+  }
+});
+
+test('file recursion uses each declaring directory, preserves complete raw text and only follows metadata markers',t=>{
+  const f=fixture(t),owner=f.add('partner','user','partner.test.files',{references:['#./notes/start.md','+/BOT.md']});
+  const put=(path,content)=>{mkdirSync(dirname(path),{recursive:true});writeFileSync(path,content);};
+  const start='\uFEFF---\r\nreferences: ["+./leaf.md", "#../more.md", "../never.md"]\r\n---\r\nSTART\r\n[ignored](absent.md)\r\n';
+  put(join(owner.folder,'notes/start.md'),start);
+  put(join(owner.folder,'notes/leaf.md'),'---\nreferences: ["#/not-loaded.md"]\n---\nLEAF\n');
+  put(join(owner.folder,'more.md'),'---\nreferences: ["+/USER.md"]\n---\nMORE\n');
+  put(join(f.root,'USER.md'),'USER_COMPLETE\n');put(join(f.root,'BOT.md'),'BOT_COMPLETE\n');
+  const read=f.query('partner','read',owner.id);assert.deepEqual(read.errors,[]);
+  assert.deepEqual(read.data.expanded.map(x=>x.file.content),[start,'---\nreferences: ["#/not-loaded.md"]\n---\nLEAF\n','---\nreferences: ["+/USER.md"]\n---\nMORE\n','USER_COMPLETE\n','BOT_COMPLETE\n']);
+  assert.ok(read.data.expanded.every(x=>x.kind==='file'&&x.file.state==='present'&&/^[a-f0-9]{64}$/.test(x.file.sha256)));
+  assert.equal(read.data.expanded[0].reference,'#./notes/start.md');
+  assert.deepEqual(f.query('partner','read',owner.id,{part:'body'}).data.expanded,read.data.expanded);
+  for(const result of [f.query('partner','read',owner.id,{part:'metadata'}),f.query('partner','check',owner.id),f.query('partner','list')])assert.equal(result.data.expanded,undefined);
+  assert.equal(readFileSync(join(owner.folder,'notes/start.md'),'utf8'),start);
+});
+
+test('mixed file and ability graphs upgrade shallow file reads and terminate cycles',t=>{
+  const f=fixture(t),owner=f.add('partner','user','partner.test.mixed',{references:['+/shared.md','#competency.test.child@0.1.0']});
+  f.add('competency','user','competency.test.child',{references:['#/shared.md','#'+owner.id+'@0.1.0']},'CHILD\n');
+  writeFileSync(join(f.root,'shared.md'),'---\nreferences: ["#competency.test.child@0.1.0", "#/shared.md", "+/leaf.md"]\n---\nSHARED\n');
+  writeFileSync(join(f.root,'leaf.md'),'LEAF\n');
+  const result=f.query('partner','read',owner.id);assert.deepEqual(result.errors,[]);
+  assert.deepEqual(result.data.expanded.map(x=>x.kind==='file'?x.file.path:x.object.id),['shared.md','competency.test.child','leaf.md']);
+  assert.equal(result.data.expanded[0].reference,'+/shared.md');
+  assert.equal(result.data.expanded.filter(x=>x.kind==='file'&&x.file.path==='shared.md').length,1);
+});
+
+test('file locators report missing state and retain valid siblings on content failures without truncation',t=>{
+  const f=fixture(t),owner=f.add('partner','user','partner.test.file-errors',{references:['+/missing.md','+/bad.md','+/good.md']});
+  writeFileSync(join(f.root,'bad.md'),Buffer.from([0xff]));writeFileSync(join(f.root,'good.md'),'GOOD_COMPLETE\n');
+  const metadata=f.query('partner','read',owner.id,{part:'metadata'});assert.deepEqual(metadata.errors,[]);
+  const failed=f.query('partner','read',owner.id);assert.equal(failed.data.expanded[0].file.state,'missing');assert.equal(failed.data.expanded[0].file.content,null);
+  assert.equal(failed.data.expanded[1].file.state,'unavailable');assert.equal(failed.data.expanded[2].file.content,'GOOD_COMPLETE\n');assert.equal(failed.errors[0].code,'FILE_REFERENCE_ENCODING_INVALID');
+  writeFileSync(join(f.root,'bad.md'),Buffer.alloc(1024*1024+1,120));assert.equal(f.query('partner','read',owner.id).errors[0].code,'FILE_REFERENCE_TOO_LARGE');
+  writeFileSync(join(f.root,'bad.md'),Buffer.from([65,0,66]));assert.equal(f.query('partner','read',owner.id).errors[0].code,'FILE_REFERENCE_UNSUPPORTED');
+  writeFileSync(join(f.root,'bad.md'),'---\nreferences: not-a-list\n---\nRAW_COMPLETE\n');
+  assert.deepEqual(f.query('partner','read',owner.id).errors,[]);
+  f.mutate('partner','write',owner.id,{input:{metadata:{references:['#/bad.md','+/good.md']}}});
+  const malformed=f.query('partner','read',owner.id);assert.equal(malformed.errors[0].code,'FILE_REFERENCE_METADATA_INVALID');assert.match(malformed.data.expanded[0].file.content,/RAW_COMPLETE/);assert.equal(malformed.data.expanded[1].file.content,'GOOD_COMPLETE\n');
+});
+
+test('file references use the logical KSF root and reject escaping or symlink paths',t=>{
+  const f=fixture(t),owner=f.add('partner','user','partner.test.boundaries',{references:['+/USER.md','+/nested/../USER.md']});
+  writeFileSync(join(f.root,'USER.md'),'LOCAL_ONLY');
+  const read=f.query('partner','read',owner.id);assert.deepEqual(read.errors,[]);assert.equal(read.data.expanded.length,1);assert.equal(read.data.expanded[0].file.content,'LOCAL_ONLY');
+  const external=realpathSync(mkdtempSync(join(tmpdir(),'ksf-file-external-')));t.after(()=>rmSync(external,{recursive:true,force:true}));
+  const secret=join(external,'private.md');writeFileSync(secret,'OUTSIDE_SENTINEL');
+  // A host absolute string is still rooted below KSF, never treated as that host file.
+  const logical=secret.replaceAll('\\','/');
+  if(logical.startsWith('/')){
+    f.mutate('partner','write',owner.id,{input:{metadata:{references:['+'+logical]}}});
+    const value=f.query('partner','read',owner.id);assert.equal(value.data.expanded[0].file.state,'missing');assert.ok(!JSON.stringify(value).includes('OUTSIDE_SENTINEL'));
+  }
+  for(const path of ['/../outside.md','../../../../outside.md']){
+    assert.throws(()=>f.mutate('partner','write',owner.id,{input:{metadata:{references:['+'+path]}}}),{code:'OBJECT_DEPENDENCY_INVALID'});
+  }
+  f.mutate('partner','write',owner.id,{input:{metadata:{references:['+/link.md']}}});
+  try{symlinkSync(secret,join(f.root,'link.md'));}catch(error){if(platform.name==='win32'&&['EPERM','EACCES'].includes(error.code))return;throw error;}
+  const linked=f.query('partner','read',owner.id);assert.equal(linked.errors[0].code,'FILE_REFERENCE_PATH_INVALID');assert.equal(linked.data.expanded[0].file.state,'unavailable');
+});
+
+test('derivation rebases external file locators in entry and resource metadata while retaining internal paths',t=>{
+  const f=fixture(t),id='competency.test.derived-files';
+  const original=f.add('competency','system',id,{references:['#./resources/local.md','+../shared.md','+/USER.md']});
+  const shared=join(dirname(original.folder),'shared.md');writeFileSync(shared,'CORE_SHARED\n');
+  mkdirSync(join(original.folder,'resources'));writeFileSync(join(original.folder,'resources/local.md'),'---\nreferences: ["+../../shared.md"]\n---\nLOCAL\n');
+  writeFileSync(join(original.folder,'bibliography.md'),'---\nreferences: ["https://example.invalid/paper"]\n---\nCitation data\n');
+  writeFileSync(join(f.root,'USER.md'),'INSTANCE_USER\n');
+  const before=readFileSync(original.path);const result=f.mutate('competency','write',id,{input:{}});assert.equal(result.data.derived,true);
+  const read=f.query('competency','read',id);assert.deepEqual(read.errors,[]);
+  assert.equal(read.data.object.source,'user');assert.equal(read.data.object.metadata.references[0],'#./resources/local.md');
+  assert.equal(readFileSync(join(f.root,read.data.object.directory,'bibliography.md'),'utf8'),readFileSync(join(original.folder,'bibliography.md'),'utf8'));
+  assert.ok(read.data.object.metadata.references[1].startsWith('+../'));
+  assert.deepEqual(read.data.expanded.filter(x=>x.kind==='file').map(x=>x.file.content).slice(-2),['CORE_SHARED\n','INSTANCE_USER\n']);
+  assert.equal(read.data.expanded.filter(x=>x.kind==='file'&&x.file.content==='CORE_SHARED\n').length,1);
+  assert.deepEqual(readFileSync(original.path),before);
+});
+
+test('file expansion honors the shared protected file policy',t=>{
+  const f=fixture(t),owner=f.add('partner','user','partner.test.protected-files',{references:['+/.env','+/.agents/runtime-data/private.txt','+/allowed.md']});
+  mkdirSync(join(f.root,'.agents/runtime-data'),{recursive:true});writeFileSync(join(f.root,'.env'),'PROTECTED_ENV_SENTINEL');writeFileSync(join(f.root,'.agents/runtime-data/private.txt'),'PROTECTED_RUNTIME_SENTINEL');writeFileSync(join(f.root,'allowed.md'),'ALLOWED');
+  const result=f.query('partner','read',owner.id);assert.equal(result.errors.length,2);assert.ok(result.errors.every(e=>e.code==='FILE_REFERENCE_PROTECTED'));assert.equal(result.data.expanded[2].file.content,'ALLOWED');assert.ok(!JSON.stringify(result).includes('PROTECTED_ENV_SENTINEL'));assert.ok(!JSON.stringify(result).includes('PROTECTED_RUNTIME_SENTINEL'));
 });

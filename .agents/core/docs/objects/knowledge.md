@@ -75,6 +75,6 @@
 
 实例组织维护约定的发现入口与导航入口为 `知识/knowledge.md`，新模板默认提供，旧实例缺失也能正常工作；它链接的规则负责保存单元、分类关联、来源、保存合并、复用和纠错，按 [Core 设计方法](../content-design.md)从真实样例逐步确定，不强制统一模型。导航部分对整个知识目录做分层结构化概览：简述各分区承载什么内容，链接到下一级目录或主题综述，便于 Agent 按任务逐层深入。每层只概述当前目录及直接下级主题，不递归枚举全库文件，不展开业务知识正文或具体方法论步骤。子目录可使用 `knowledge.md` 或复用现有主题综述，不强制每个目录新建入口。[模板](../templates/knowledge-index.md)仅供授权后裁剪，不自动创建真实内容。知识模型和目录自由组织，不强制 Y 模型或批量迁移，根导航不替代根协作设定文件。常规业务只按本次指定、必要项目事实或采用能力的明确约定读取相关原文；用户明确查阅或整理知识时可沿导航或限定范围检索。调度及异常见[项目与能力路由协作](../runtime/routing.md)。
 
-知识记录、归位与修订由 [knowledge-organize](../../abilities/competencies/knowledge-organize/competency.md) 按实例规则准备专业安排；不同知识单元可以声明不同入口名，例如 cognition.md 或已有主题综述，不要求统一框架。资料读取由承接能力遵循[公共约定](../runtime/materials.md)，按本次指定、项目事实或自身明确约定的范围取得和核对原文；已授权维护由 [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md)处理。当前由 Agent 使用文件检索、现有 metadata CLI 与宿主编辑工具执行，没有专用知识管理命令或全库语义索引。Core 随包提供[公共组织约定与可选认知框架](../templates/knowledge-index.md)，新实例可直接采用；已有实例只按明确要求合并差异，不自动迁移，其他类型保留各自框架。认知模板定义结构与人发起记录的归位约定，不自动沉淀或代替人采纳认识。
+知识记录、归位与修订由 [knowledge-organize](../../abilities/competencies/knowledge-organize/competency.md) 按实例规则准备专业安排；不同知识单元可以声明不同入口名，例如 cognition.md 或已有主题综述，不要求统一框架。资料读取由承接能力遵循[公共约定](../runtime/materials.md)，按本次指定、项目事实或自身明确约定的范围取得和核对原文；已授权维护由知识组织直接处理。当前由 Agent 使用文件检索、现有 metadata CLI 与宿主编辑工具执行，没有专用知识管理命令或全库语义索引。Core 随包提供[公共组织约定与可选认知框架](../templates/knowledge-index.md)，新实例可直接采用；已有实例只按明确要求合并差异，不自动迁移，其他类型保留各自框架。认知模板定义结构与人发起记录的归位约定，不自动沉淀或代替人采纳认识。
 
 返回[对象综述](overview.md)。相关对象：[基本功](competency.md)、[数据包](data-package.md)、[项目](project.md)。

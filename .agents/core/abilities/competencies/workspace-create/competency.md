@@ -2,7 +2,7 @@
 id: "competency.ksf.workspace-create"
 name: "创建用户实例"
 description: "从唯一 KSF Core 模板或经过校验的 Core 发行包创建个人实例，验证精确来源、初始化 main、保留个人内容并进入孵化。"
-version: 0.2.2
+version: 0.2.3
 status: active
 references: []
 ---
@@ -32,3 +32,7 @@ references: []
 正例：从 Core 模板创建独立私有实例，验证后进入 main 和孵化。反例：复制已有个人 KSF，或把分支名当来源校验。边界例：目标非空、旧模板查找不到、已有 main 均保留实际冲突。
 
 协议见[发行说明](../../../docs/distribution.md)及[实例初始化](../../../docs/cli/instance.md)。
+
+## 首次上下文验收
+
+正常模式核对 context.complete 及 USER/BOT、runtime、两项路由的来源与全文；初始化/孵化模式遵循其当前入口。缺失用户内容与读取失败分别保留，不用旧实例资料填补。交付能继续首项工作的入口及未决；已创建目标不重复初始化。本项无额外持久字段。

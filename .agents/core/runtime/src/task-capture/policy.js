@@ -8,19 +8,25 @@ export function hasCaptureRestriction(messages) {
     typeof block.text === 'string' && (chinese.test(block.text.replace(/\s+/g, '')) || english.test(block.text))));
 }
 
-export function capturePolicy({ old, messages, declarations, paused = false, held = false }) {
+export function capturePolicy({ old, messages, declarations, paused = false, held = false, evidence }) {
   const input = [...messages, ...(old?.messages ?? [])];
-  const capturePolicyHeld = !declarations.length && Boolean(old?.capturePolicyHeld || hasCaptureRestriction(input));
+  const acknowledged = new Set(evidence?.coverage.flatMap(item => item.keys) ?? []);
+  const capturePolicyHeld = evidence?.inputs.length
+    ? evidence.inputs.some(item => item.restricted && !acknowledged.has(item.key))
+    : !declarations.length && Boolean(old?.capturePolicyHeld || hasCaptureRestriction(input));
   let chatPaused = paused, chatPolicyHeld = held || capturePolicyHeld;
   let policy = input.some(m => m.role === 'user') || old?.policy === 'capture' ? 'capture' : 'pending';
   for (const declaration of declarations) {
     if (declaration.policy === 'pause') { policy = 'exclude'; chatPaused = true; }
-    else if (declaration.policy === 'resume') { chatPaused = false; chatPolicyHeld = false; policy = 'capture'; }
+    else if (declaration.policy === 'resume' && !capturePolicyHeld) { chatPaused = false; chatPolicyHeld = false; policy = 'capture'; }
     else if (declaration.policy === 'exclude') policy = 'exclude';
     else if (!chatPaused && !chatPolicyHeld) policy = 'capture';
   }
   // Only explicit signed exclusions become irreversible body-free tombstones.
   const explicitExcluded = Boolean(old?.explicitExcluded || declarations.some(d => d.policy === 'exclude' || d.policy === 'pause'));
+  // A declaration may be flushed before the user's native message. Do not
+  // publish an answer until some actual user input has been verified.
+  if (!input.some(message => message.role === 'user') && !evidence?.inputs.length) policy = 'pending';
   if (chatPolicyHeld) policy = 'pending';
   if (explicitExcluded || chatPaused) policy = 'exclude';
   return { policy, chatPaused, explicitExcluded, capturePolicyHeld, chatPolicyHeld };

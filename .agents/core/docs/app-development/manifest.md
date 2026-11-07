@@ -57,6 +57,7 @@
 | 字段 | 约束/默认 |
 | --- | --- |
 | schemaVersion/sdkVersion | schemaVersion 与 sdkVersion 均为 1；SDK 包从 1.0.0 起步，使用完整新契约 |
+| sdkApiVersion/builtWithSdkVersion | 可选完整三段版本；旧包缺省按API 1.0.0解释。新构建自动写入实际SDK版本，首版两者须相同；新包Core下限至少0.5.3。范围匹配见[SDK兼容](sdk-compatibility.md) |
 | minCoreVersion | 必填明确三段版本号，如0.3.0；不是范围表达式。商店、离线导入、启动和回退共用检查 |
 | dataStores | 必填数组；无受管数据填[]。每项name/scope/schemaVersion/migrateFrom均必填，scope为user或runtime，schemaVersion为正整数；migrateFrom只列不同的较低正整数来源。最多64项，范围加文件名唯一 |
 | id | 必须为 `com.<发布者命名空间>.<应用名>`，恰好三段、首段固定 `com`、总长≤80；后两段以小写字母开头，仅小写字母、数字及段内连字符，连字符不能连续或结尾。例 `com.yinbaiyuan.camp-tasks`。`com.ksf.app-store` 为宿主保留，不可用于安装包 |

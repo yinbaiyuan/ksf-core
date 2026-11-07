@@ -24,7 +24,7 @@
       "height": 320
     }
   },
-  "minCoreVersion": "0.3.2",
+  "minCoreVersion": "0.5.3",
   "dataStores": [
     {
       "name": "state.json",

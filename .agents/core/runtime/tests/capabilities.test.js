@@ -32,6 +32,22 @@ test('capability read rejects paths, other object types, unknown input and broke
   await writeFile(join(f.root,'.agents/core/abilities/competencies/review/competency.md'),'invalid');
   assert.throws(()=>f.service.read({ref:'competency.example.review'}),{code:'CAPABILITY_UNAVAILABLE'});
 });
+test('capability service preserves expanded definitions and exposes partial content on recursive failure',async t=>{
+  const f=await fixture(t),owner='competency.example.review',child='competency.example.child';
+  const ownerFile=join(f.root,'.agents/core/abilities/competencies/review/competency.md');
+  const folder=join(f.root,'.agents/core/abilities/competencies/child');await mkdir(folder);
+  const childFile=join(folder,'competency.md');
+  await writeFile(childFile,'---\nid: '+child+'\nname: child\ndescription: child\nversion: 0.1.0\nstatus: active\nreferences: []\n---\nCHILD_MAIN_TEXT\n');
+  await writeFile(ownerFile,(await readFile(ownerFile,'utf8')).replace('references: []','references: ["#'+child+'@0.1.0"]'));
+  const value=f.service.read({ref:owner});
+  assert.equal(value.body,'Original method\n');assert.equal(value.expanded[0].object.body,'CHILD_MAIN_TEXT\n');
+  assert.equal(value.expanded[0].reference,'#'+child+'@0.1.0');
+  await writeFile(childFile,(await readFile(childFile,'utf8')).replace('references: []','references: ["+competency.example.missing@0.1.0"]'));
+  assert.throws(()=>f.service.read({ref:owner}),error=>{
+    assert.equal(error.code,'CAPABILITY_UNAVAILABLE');assert.equal(error.data.data.expanded[0].object.body,'CHILD_MAIN_TEXT\n');
+    assert.equal(error.data.errors[0].code,'OBJECT_NOT_FOUND');return true;
+  });
+});
 test('application service bridge requires filesystem permission and exposes only read',async t=>{
   const f=await fixture(t),store=join(f.root,'store');await mkdir(store);
   const file=text=>{const bytes=Buffer.from(text);return{content:bytes.toString('base64'),sha256:checksum(bytes),mode:0o644};};

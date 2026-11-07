@@ -86,7 +86,7 @@ test('enabled capture saves dialogue without declarations; delayed final flush a
   f.append({ type: 'compacted', payload: { message: '隐藏压缩内容', replacement_history: [{ role: 'user', content: '不能当作新原话' }] } });
   f.message('final', 'assistant', '后来刷盘的答复', 'final_answer');
   await f.sync(); assert.equal(f.read('new').status, 'completed'); assert.equal(f.read('new').messages.length, 2);
-  assert.ok(f.read('new').issues.some(i => i.code === 'TASK_ROUTE_UNREPORTED'));
+  assert.ok(!f.read('new').issues.some(i => i.code === 'TASK_ROUTE_UNREPORTED'));
   // Source shrink/rewrite never deletes archived messages.
   const rows = readFileSync(f.path, 'utf8').trim().split('\n'); writeFileSync(f.path, rows.slice(0, 2).join('\n') + '\n');
   await f.sync(); assert.equal(f.read('new').messages.length, 2);
@@ -319,7 +319,7 @@ test('latestReported remains native-turn-bound when the newest turn is unreporte
 });
 
 test('multiple reports at the same timestamp retain the final declared arrangement', async t => {
-  const f = fixture(t); f.start('one');
+  const f = fixture(t); f.start('one'); f.message('u', 'user', '明确的工作请求');
   f.output(f.receipt('one', 'first')); f.output(f.receipt('one', 'last', 'capture', { report: f.report({ status: 'completed' }) })); await f.sync();
   const path = join(f.root, turnPath(f.id, 'one')), turn = JSON.parse(readFileSync(path));
   for (const event of turn.routes) event.at = '2026-01-02T00:00:03Z'; writeFileSync(path, JSON.stringify(turn));
@@ -343,7 +343,7 @@ test('native internal workers are skipped while user-created chat forks remain c
   const fork = join(f.home, 'sessions/rollout-fork.jsonl'), env = { ...f.env, CODEX_THREAD_ID: 'user-fork' };
   const receipt = declareTask({ root: f.root, env, input: { turnId: 'fork-turn', eventId: 'policy', policy: 'capture', reason: '用户创建的普通聊天分支' } });
   writeFileSync(fork, [
-    { type: 'session_meta', payload: { id: env.CODEX_THREAD_ID, cwd: f.root, parent_thread_id: f.env.CODEX_THREAD_ID, source: 'desktop' } },
+    { type: 'session_meta', payload: { id: env.CODEX_THREAD_ID, cwd: f.root, parent_thread_id: f.env.CODEX_THREAD_ID, source: 'desktop', timestamp: '2026-01-01T12:00:00Z' } },
     { type: 'event_msg', timestamp: '2026-01-02T00:00:00Z', payload: { type: 'task_started', turn_id: 'fork-turn' } },
     { type: 'response_item', timestamp: '2026-01-02T00:00:01Z', payload: { type: 'message', id: 'fork-input', role: 'user', content: [{ type: 'input_text', text: '真实用户的聊天分支' }] } },
     { type: 'response_item', payload: { type: 'function_call_output', output: JSON.stringify(receipt) } },

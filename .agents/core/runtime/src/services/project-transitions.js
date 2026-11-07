@@ -21,7 +21,7 @@ function save(path, value) {
 }
 
 // Never traverse links, repositories or special resources during a transition.
-function inventory(folder, ignore = new Set()) {
+export function inventory(folder, ignore = new Set()) {
   const entries = [];
   const visit = (path, name = '') => {
     if (ignore.has(name)) return;

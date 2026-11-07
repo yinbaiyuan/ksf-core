@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "https://github.com/YTruman/better-skill.git",
+    "commit": "f5a82c68eb1d9489b2e3aac3eb46fc8383cd7a93",
+    "version": "1.1.0",
+    "acquiredDate": "2026-11-01",
+    "timezone": "Asia/Shanghai",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2026 YTruman(楚门)"
+  },
+  "snapshot": {
+    "directory": "upstream",
+    "scope": "Every tracked file at the pinned Git commit; Git metadata is not included.",
+    "fileCount": 23,
+    "totalBytes": 3768860,
+    "files": [
+      {
+        "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+        "bytes": 420,
+        "sha256": "66f367405977b257772c68ae7644b04f464394470d338d9d9d53fa6d7ff57c63"
+      },
+      {
+        "path": ".github/ISSUE_TEMPLATE/skill-audit-request.md",
+        "bytes": 641,
+        "sha256": "c89d8aa65ec0ab26fd207a0fc031057aba57c53871b8d36e1a46b72ba8ac3e88"
+      },
+      {
+        "path": ".gitignore",
+        "bytes": 41,
+        "sha256": "ec1c70d8b6c6a5fe642183baf3aa59c947a0eeadbb0093843736d220284ae0eb"
+      },
+      {
+        "path": "CHANGELOG.md",
+        "bytes": 1476,
+        "sha256": "64f8cfd0f3d397a57c3406e12a6cc87c9490b599b6f413b859fa65d10ed07e59"
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "bytes": 1181,
+        "sha256": "01e71c466239bbbea42ad8576983f990796d32475d00d5310ddda15a2f2ce6f4"
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1072,
+        "sha256": "4ea7f88a00315b753554071654d67704ac240f04df37c1a857967a3539b11d7d"
+      },
+      {
+        "path": "MANIFEST.json",
+        "bytes": 3952,
+        "sha256": "71a6e13f15690525c0939ab8fb0d82f9db85512a68b8a3ad2365edae04bc640d"
+      },
+      {
+        "path": "README.en.md",
+        "bytes": 8896,
+        "sha256": "d77490b63eecc90dcd814e63116b6f2ce98a179adb780e090ac1e3d72076a052"
+      },
+      {
+        "path": "README.md",
+        "bytes": 8025,
+        "sha256": "27d50b9abd2b074e7adf4b3ddc59872e2ca68f14f6d54b27440a5259244155b1"
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 9190,
+        "sha256": "6ed6822a87f41a2f89b02da00cbb62c36374007f72096c6eefc66554af99e4cb"
+      },
+      {
+        "path": "assets/architecture.html",
+        "bytes": 21756,
+        "sha256": "d4457aee0039692e827c4fdcfedc84b8b8d5d317738089c307cff387bb54368e"
+      },
+      {
+        "path": "assets/architecture.png",
+        "bytes": 2000133,
+        "sha256": "9bd7452ed4a64c498b6114a12d68a2a38b9af88f6d78f6da19e01083b7b77340"
+      },
+      {
+        "path": "assets/banner.png",
+        "bytes": 1068525,
+        "sha256": "c5f40339e19db5005ec317c799b43f304e8a3f85821ee9995eff3264ee27663a"
+      },
+      {
+        "path": "assets/checkup-findings.png",
+        "bytes": 484232,
+        "sha256": "3c2b17db791c78b9bb1cbc454a3331f771aa054eb9b612d0dacede6a059cebed"
+      },
+      {
+        "path": "assets/scoring-chart.png",
+        "bytes": 110143,
+        "sha256": "b68c9ece7abe9a690fdc8cd21d26aab9ee74ada93227bdedd18597b2181c441c"
+      },
+      {
+        "path": "examples/perfect-audit-report.md",
+        "bytes": 4911,
+        "sha256": "faee15b98527732dca08dec6bae588be1e59064c9ea03632cf955d577dd770a8"
+      },
+      {
+        "path": "references/checklist.md",
+        "bytes": 10163,
+        "sha256": "c9bf139935d11eb8035b937f93c31bee88f5a16027b3a44383322d2a3e2b055f"
+      },
+      {
+        "path": "references/eval-loop.md",
+        "bytes": 5634,
+        "sha256": "17d0b3f6cb17590b4cf3e867c6994c89ede6a184bb8a34274224103f5c9f3ff1"
+      },
+      {
+        "path": "references/metrics.md",
+        "bytes": 5518,
+        "sha256": "5d1e4669946093f73a24b99de3e9f6bc3ccea1779771961aa44b018c74cf337f"
+      },
+      {
+        "path": "references/paradigms.md",
+        "bytes": 4481,
+        "sha256": "927d06d04945da92c81ce4e754820fe77f6f97d9d08b06fc1ceed81feb8d72a2"
+      },
+      {
+        "path": "references/principles.md",
+        "bytes": 4207,
+        "sha256": "e2a29a0221e3d733983458c3c6b6bf8c1b59afef81a1e5dc42246820aab8bb92"
+      },
+      {
+        "path": "references/provenance.md",
+        "bytes": 6037,
+        "sha256": "37850d357bb51552a9dbe24daa0c676b44247966820cf34054b448af94a8473e"
+      },
+      {
+        "path": "references/templates.md",
+        "bytes": 8226,
+        "sha256": "c24046d832c6727f5b390c21ca13aa8509860f5f2752634863e7035d0916f3ff"
+      }
+    ]
+  },
+  "verification": {
+    "snapshotMatchesGitHead": true,
+    "upstreamManifestEntries": 22,
+    "upstreamManifestMismatches": []
+  },
+  "adaptation": {
+    "objectId": "competency.ksf.ability-diagnosis",
+    "version": "1.1.0",
+    "entry": "../competency.md",
+    "contract": "../references/ksf-adaptation.md",
+    "sourceEntry": "upstream/SKILL.md",
+    "preservedMetadata": [
+      "description"
+    ],
+    "versionFrom": "upstream/MANIFEST.json",
+    "addedMetadata": [
+      "id",
+      "version",
+      "status",
+      "references"
+    ],
+    "prependedBody": "> KSF 接入：本文件对应原仓库的 `SKILL.md`；原文资源路径以 [资料/upstream/](资料/upstream/) 为根目录，裸文件名位于其中的 `references/`。对象格式与运行接入见 [KSF 接入说明](references/ksf-adaptation.md)。\n\n",
+    "sourceBodyEdits": [
+      {
+        "from": "# Better Skill · Skill 工艺定版标准（技能医生）",
+        "to": "# 能力诊断",
+        "reason": "用户指定 KSF 显示名称"
+      }
+    ],
+    "sourceBodyPreservedVerbatim": false,
+    "resources": "Upstream resource paths resolve relative to 资料/upstream/; bare reference filenames resolve inside its references/ directory.",
+    "renamedMetadata": {
+      "name": {
+        "from": "better-skill",
+        "to": "能力诊断"
+      }
+    },
+    "sourceBodyPreservedExceptListedEdits": true,
+    "source": "system"
+  }
+}

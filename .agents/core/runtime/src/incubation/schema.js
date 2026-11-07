@@ -7,9 +7,9 @@ function keys(value, allowed) { if (!object(value) || Object.keys(value).some(ke
 export const validVersion = value => value === 'missing' || typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 function label(value, maximum) { if (typeof value !== 'string' || !value.trim() || [...value].length > maximum || /[\p{Cc}\p{Cf}]/u.test(value)) fail('名称需要有效的可见字符。'); }
 export function validateIncubationDraft(value) {
-  keys(value, ['userLabel','instanceName','deviceName','autostart','userText','userEtag','openWorkbench','deferService','captureEnabled']);
+  keys(value, ['userLabel','instanceName','deviceName','autostart','userText','userEtag','openWorkbench','deferService','captureEnabled','deferHooks']);
   for (const key of ['userLabel','instanceName','deviceName']) if (value[key] !== undefined) label(value[key], key === 'userLabel' ? 100 : 64);
-  for (const key of ['autostart','openWorkbench','deferService','captureEnabled']) if (value[key] !== undefined && typeof value[key] !== 'boolean') fail(`${key} 需要布尔值。`);
+  for (const key of ['autostart','openWorkbench','deferService','captureEnabled','deferHooks']) if (value[key] !== undefined && typeof value[key] !== 'boolean') fail(`${key} 需要布尔值。`);
   if (value.userText !== undefined && (typeof value.userText !== 'string' || Buffer.byteLength(value.userText) > 256 * 1024 || !validVersion(value.userEtag))) fail('USER 原文需要不超过 256 KiB，并提供 userEtag。');
   if (value.userEtag !== undefined && !validVersion(value.userEtag)) fail('userEtag 无效。');
 }
