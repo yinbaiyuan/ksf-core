@@ -1,4 +1,5 @@
-import { protectedPaths, fail } from './schema.js';
+import { protectedPaths, fail, parseDependencyReference } from './schema.js';
+import { fileReferenceLocation } from './file-locations.js';
 
 export function problems(c, { type, source } = {}) {
   const match = r => (!type || !r.type || r.type === type) && (!source || source === 'effective' || source === 'all' || r.source === source || r.source === '@registry');
@@ -35,24 +36,37 @@ export function resolveObject(c, { id, version }, source = 'effective') {
   fail(version && present ? 'OBJECT_VERSION_MISMATCH' : 'OBJECT_NOT_FOUND', version ? 'No eligible object matches the requested version.' : 'Object is not available in the requested source.', { id, ...(version ? { version } : {}) });
 }
 
+export function resolveDependency(c, row, reference) {
+  const parsed = parseDependencyReference(reference), { id, version } = parsed;
+  if (parsed.kind === 'file') return { ...parsed, target: fileReferenceLocation(c, row, parsed) };
+  let target;
+  if (row.sourceRoot) {
+    // Repository dependencies bind to this repository or Core, never to
+    // another repository or a reader's private overrides.
+    if (!Object.hasOwn(protectedPaths, id)) {
+      try { target = resolveObject(c, { id, version }, row.source); }
+      catch (error) { if (!['OBJECT_NOT_FOUND', 'OBJECT_VERSION_MISMATCH'].includes(error.code)) throw error; }
+    }
+    if (target?.metadata.status === 'archived') target = undefined;
+    target ??= resolveObject(c, { id, version }, 'system');
+    if (target.metadata.status === 'archived') fail('OBJECT_NOT_FOUND', 'Archived dependencies are not active.', { id });
+  } else target = resolveObject(c, { id, version });
+  return { ...parsed, target };
+}
+
 export function referenceResults(c, row) {
   return (row.metadata.references ?? []).map(reference => {
-    const [id, version] = reference.split('@');
+    let id;
     try {
-      let target;
-      if (row.sourceRoot) {
-        // Repository dependencies bind to this repository or Core, never to
-        // another repository or a reader's private overrides.
-        if (!Object.hasOwn(protectedPaths, id)) {
-          try { target = resolveObject(c, { id, version }, row.source); }
-          catch (error) { if (!['OBJECT_NOT_FOUND', 'OBJECT_VERSION_MISMATCH'].includes(error.code)) throw error; }
-        }
-        if (target?.metadata.status === 'archived') target = undefined;
-        target ??= resolveObject(c, { id, version }, 'system');
-        if (target.metadata.status === 'archived') fail('OBJECT_NOT_FOUND', 'Archived dependencies are not active.', { id });
-      } else target = resolveObject(c, { id, version });
-      return { reference, id, version, source: target.source, path: target.path, ...(target.sourceRoot ? { source_root: target.sourceRoot } : {}), user_revision: target.metadata.user_revision ?? null };
+      const resolved = resolveDependency(c, row, reference), { version, target, expansion } = resolved;
+      if (resolved.kind === 'file') return {reference,kind:'file',source:target.source,path:target.path,
+        ...(target.sourceRoot?{source_root:target.sourceRoot}:{}),...(expansion!=='none'?{expansion}:{})};
+      id = resolved.id;
+      return { reference, id, version, source: target.source, path: target.path, ...(target.sourceRoot ? { source_root: target.sourceRoot } : {}), user_revision: target.metadata.user_revision ?? null,
+        ...(expansion !== 'none' ? { expansion } : {}) };
     } catch (error) {
+      try { const parsed = parseDependencyReference(reference); if (parsed.kind === 'file') return {reference,kind:'file',error:{code:error.code,message:error.message,target:row.path,...error.details}}; } catch { /* invalid declarations keep the established error form */ }
+      id ??= typeof reference === 'string' ? reference.replace(/^[+#]/, '').split('@')[0] : undefined;
       return { reference, error: { code: error.code, message: error.message, target: row.path, id } };
     }
   });

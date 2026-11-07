@@ -52,6 +52,8 @@
 
 ## 存储与实现边界
 
+后续项目治理以[项目文档架构与治理指南](../project-management/document-architecture.md)为核心设计基线。新格式读写和显式迁移见[治理协议](../project-management/governance.md)；下文中的旧任务检查点继续作为兼容与历史来源。
+
 KSF 内当前项目入口位于 `项目/`，项目档案入口位于固定 `档案/项目/`。实际工作文件可以位于外部 Git 仓库或其他工作区；项目保存足以理解和继续工作的上下文与引用，不要求把代码、附件和成果全部复制回来。
 
 新建实际工程的默认位置为用户根下的 `repositories/<工程名>/`，容器由父 KSF Git 忽略，工程各自独立管理 Git。已有工程原位关联；项目与工程可以多对多，不强制同名。根卡可选 `repositories` 路径列表由 [repository CLI](../cli/repository.md) 创建关联与核实；项目内路径相对根卡保存。只需目标与讨论时可以没有工程目录，实际代码、产品文档和成果正文留在工作区。
@@ -62,6 +64,6 @@ KSF 内当前项目入口位于 `项目/`，项目档案入口位于固定 `档�
 
 需要暂停、交接或长期继续的任务，在已授权范围内按[任务检查点](../runtime/task-checkpoints.md)保存到 `任务/<任务名>.md`；根卡只保留任务链接，工程正文继续留在工程。检查点保存当前步骤、采用定义、有效决定、授权来源、产物入口和下一步，不自动生成完整聊天或复制项目事实。恢复时核对现行文件和外部动作，未保存的信息保持未知。
 
-归属与已有工程事实由 [project-route](../../abilities/competencies/project-route/competency.md)准备；建立及新工程安排、推进/恢复、验收/归档分别由三项项目基本功持有，已授权写入采用 [asset-maintenance](../../abilities/competencies/asset-maintenance/competency.md) 的通用保障。[project CLI](../cli/project.md)已提供 list/read/write/remove/check；项目正文与资料也可用宿主工具作已授权的局部编辑，通用 metadata CLI 仍可管理元数据。项目归属的语义判断由 Agent 完成，没有持久化自动绑定服务，项目不套用能力对象的 ID、版本与派生制度。
+归属与已有工程事实由[project-route](../../abilities/competencies/project-route/competency.md)按需准备；建立及新工程安排、推进/恢复、验收/归档分别由三项项目基本功持有，各领域基本功直接持有其已授权写入与检查步骤。[project CLI](../cli/project.md)已提供list/read/write/remove/check；项目正文与资料也可用宿主工具作已授权的局部编辑，通用metadata CLI仍可管理元数据。项目归属由Agent判断，Runtime可通过[当前工作绑定](../runtime/work-context.md#5-当前工作绑定怎么维护)保存已确定安排；程序不自动匹配归属，绑定也不代替项目记录。项目不套用能力对象的ID、版本与派生制度。
 
 返回[对象综述](overview.md)。相关对象：[协同](cooperation.md)、[知识](knowledge.md)、[基本功](competency.md)。

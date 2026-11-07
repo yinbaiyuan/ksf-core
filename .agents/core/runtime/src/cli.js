@@ -106,9 +106,13 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   const result = runProjectCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
+} else if (command === 'ability-manager') {
+  const {runAbilityManagerCommand} = await import('./commands/ability-manager.js');
+  const result=runAbilityManagerCommand(options,currentRoot);
+  process.stdout.write(result.stdout);process.exitCode=result.exitCode;
 } else if (command === 'context') {
   const { runContextCommand } = await import('./commands/context.js');
-  const result = runContextCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
+  const result = await runContextCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
 } else if (command === 'cooperation') {

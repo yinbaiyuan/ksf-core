@@ -88,7 +88,11 @@ export function withProjectLock(root, action, { allowPending = false, recoverSta
     unlinkSync(lock);
   }
   if (!allowPending) assertNoPending(root);
-  return withExclusiveLock(lock, { pid: process.pid }, () => { assertNoCooperationMigration(root); return action(); }, {
+  return withExclusiveLock(lock, { pid: process.pid }, () => {
+    assertNoCooperationMigration(root);
+    if (!allowPending) assertNoPending(root);
+    return action();
+  }, {
     onLocked() { fail('PROJECT_LOCKED', 'Project write lock exists; inspect its owner before retrying.', { target: lock }); },
     onReplaced() { process.stderr.write('PROJECT_LOCK_CLEANUP: Replaced lock left untouched.\n'); },
     onCleanup() { process.stderr.write('PROJECT_LOCK_CLEANUP: Inspect remaining write lock.\n'); },

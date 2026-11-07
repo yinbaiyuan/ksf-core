@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { Archive, ArrowRight, ArrowUpRight, BookOpen, Box, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileText, GitBranch, Layers3, Link2, Sparkles, TriangleAlert } from 'lucide-react';
-import type { Ability, Ownership, Project, Target, Route, RouteEvent } from '../types';
+import { Inbox, UserRound, Archive, ArrowRight, ArrowUpRight, BookOpen, Box, BriefcaseBusiness, ChevronDown, ChevronRight, CircleDot, Compass, FileText, GitBranch, Layers3, Link2, Sparkles, TriangleAlert } from 'lucide-react';
+import type { Ability, Ownership, Project, Target, Route, RouteEvent, Turn, WorkAbility, WorkChange } from '../types';
 import { abilityType, agentNames, changed, date, projectName, sourceName, stageNames, timeline, typeNames } from '../model';
 import { Button } from '@ksf/sdk/components/ui/button';
 import { eventTime, routeEvolution, type EvolutionNode, type RouteChange } from '../route-evolution';
 import { ownershipOf, relatedOf, targetIdentity, targetKey, targetTypeNames } from '../targets';
-export type Detail = { kind: 'target'; target: Target; label: string; reason: string; at?: string } | { kind: 'ability'; ability: Ability; reason: string; at?: string } | { kind: 'project'; project: Project; label: string; reason: string; at?: string } | { kind: 'event'; event: RouteEvent; changes: string[] } | { kind: 'arrangement'; event: RouteEvent } | { kind: 'reports'; events: RouteEvent[] };
+interface WorkEvidence {
+  heading: string;
+  project?: Target | null;
+  projectLabel?: string;
+  change?: WorkChange;
+  abilityIds: string[];
+}
+export type Detail = { kind: 'target'; target: Target; label: string; reason: string; at?: string } | { kind: 'ability'; ability: Ability; reason: string; at?: string } | { kind: 'project'; project: Project; label: string; reason: string; at?: string } | { kind: 'event'; event: RouteEvent; changes: string[] } | { kind: 'arrangement'; event: RouteEvent } | { kind: 'work-arrangement'; evidence: WorkEvidence } | { kind: 'reports'; events: RouteEvent[] };
 export function markOrigin(element: HTMLElement) { element.closest('[data-window-id]')?.querySelector('[data-detail-origin]')?.removeAttribute('data-detail-origin'); element.setAttribute('data-detail-origin', 'true'); }
-const targetIcon = (target: Target) => ({ project: BriefcaseBusiness, knowledge: BookOpen, ability: Compass, archive: Archive })[target.kind];
-const targetKinds = ['project', 'knowledge', 'ability', 'archive'] as const;
-const relatedLabel = { project: '关联项目', knowledge: '关联知识', ability: '关联能力', archive: '关联档案' };
+const targetIcon = (target: Target) => ({ project: BriefcaseBusiness, knowledge: BookOpen, ability: Compass, archive: Archive, inbox: Inbox, persona: UserRound })[target.kind];
+const targetKinds = ['project', 'knowledge', 'ability', 'archive', 'inbox', 'persona'] as const;
+const relatedLabel = { project: '关联项目', knowledge: '关联知识', ability: '关联能力', archive: '关联档案', inbox: '关联收件', persona: '关联人设' };
 const icons = { cooperation: GitBranch, partner: Sparkles, competency: Compass, 'data-package': Box };
 export function Freshness({ item, context = false }: { item: { freshness?: string; effectiveChanged?: boolean }; context?: boolean }) {
   return changed(item) ? <span className="warning-label"><TriangleAlert size={12} />{context ? item.freshness === 'unavailable' ? '来源现状：不可用' : '来源现状：已变化' : item.freshness === 'unavailable' ? '来源不可用' : '来源已变化'}</span> : null;
@@ -63,6 +70,15 @@ export function ChangeTimeline({ events, onDetail }: { events: RouteEvent[]; onD
 function DefinitionList({ entries }: { entries: [string, string | undefined][] }) { return <dl className="definition-list">{entries.map(([label, value]) => value ? <div key={label}><dt>{label}</dt><dd>{value}</dd></div> : null)}</dl>; }
 export function DetailContent({ detail }: { detail: Detail }) {
   if (detail.kind === 'arrangement') return <><div className="detail-type"><GitBranch size={16} />当时完整安排</div><h3 className="detail-name">{detail.event.snapshot.summary}</h3><p className="arrangement-time">记录时间 {eventTime(detail.event.at, true)}</p><SnapshotFacts event={detail.event} /><h4>当时安排说明</h4><p className="detail-reason">{detail.event.reason || '未提供说明。'}</p></>;
+  if (detail.kind === 'work-arrangement') {
+    const { evidence } = detail, change = evidence.change;
+    return <><div className="detail-type"><GitBranch size={16} />{workDetailLabel(evidence)}</div><h3 className="detail-name">{evidence.heading}</h3>
+      {change && <p className="arrangement-time">{change.turnNumber ? `第 ${change.turnNumber} 轮生效 · ` : ''}{eventTime(change.at, true)}</p>}
+      <WorkFacts evidence={evidence} />
+      {change?.arrangement === undefined && <p className="detail-note">此轮归档仅保留以上路由依据。</p>}
+      {change?.arrangement && <p className="detail-note">采用记录按轮登记，能力版本和来源来自当时保存的安排。</p>}
+    </>;
+  }
   if (detail.kind === 'reports') return <><div className="detail-type"><FileText size={16} />技术信息</div><h3 className="detail-name">原始上报数据</h3><p className="detail-note">此处保留原始事件，包括 Agent 声明状态；不表示宿主实时运行状态。</p><ol className="raw-reports">{detail.events.map(event => <li key={event.eventId}><h4>{eventTime(event.at, true)} · {agentNames[event.snapshot.status] ?? event.snapshot.status}</h4><pre>{JSON.stringify(event, null, 2)}</pre></li>)}</ol></>;
   if (detail.kind === 'ability') {
     const a = detail.ability;
@@ -74,7 +90,7 @@ export function DetailContent({ detail }: { detail: Detail }) {
   }
   if (detail.kind === 'target') {
     const target = detail.target, Icon = targetIcon(target);
-    return <><div className="detail-type"><Icon size={16} />{detail.label} · {targetTypeNames[target.kind]}</div><h3 className="detail-name">{target.name}</h3><Freshness item={target} /><DefinitionList entries={[
+    return <><div className="detail-type"><Icon size={16} />{detail.label} · {targetTypeNames[target.kind]}</div><h3 className="detail-name">{target.displayName ?? target.name}</h3><Freshness item={target} /><DefinitionList entries={[
       ['范围', target.lifecycle === 'planned' ? '待创建目标' : target.kind === 'project' ? target.scope === 'archived' ? '已归档项目' : '当前项目' : targetTypeNames[target.kind]], ['版本', target.kind === 'ability' && target.version ? `v${target.version}` : undefined], ['来源', target.source ? sourceName(target.source) : undefined], ['记录时间', detail.at ? eventTime(detail.at, true) : undefined],
     ]} />{target.lifecycle === 'planned' && <p className="detail-note">当时只确认了目标，尚未建立对应资产。</p>}{target.kind === 'knowledge' && <p className="detail-note">归属记录本轮的主要目标，不表示知识正文已经更新。</p>}{target.kind === 'ability' && <p className="detail-note">这是本轮正在设计或维护的能力；本轮采用的能力另行记录。</p>}{target.currentBinding && <details className="technical"><summary>后续绑定信息<ChevronDown size={14} /></summary><p className="detail-note">后续已建立并绑定目标；此处保留原节点当时的状态。</p><Freshness item={target.currentBinding} /><DefinitionList entries={[["目标", target.currentBinding.name], ["定位", target.currentBinding.path], ["版本", target.currentBinding.version]]} /></details>}<h4>当时安排说明</h4><p className="detail-reason">{detail.reason || 'Agent 未提供说明。'}</p><details className="technical"><summary>技术信息<ChevronDown size={14} /></summary><DefinitionList entries={[[target.kind === 'knowledge' ? '知识入口' : '记录路径', target.path], ['精确引用', target.ref], ['定义摘要', target.definitionDigest], ['归属标识', targetKey(target)], ['身份版本', target.targetVersion ? String(target.targetVersion) : undefined]]} /></details></>;
   }
@@ -138,5 +154,66 @@ export function RouteEvolution({ events, onDetail }: { events: RouteEvent[]; onD
     <div className="evolution-heading"><h3>{nodes.length === 1 ? '已确认安排' : node.title}</h3><time dateTime={Number.isFinite(Date.parse(node.event.at)) ? node.event.at : undefined} title={eventTime(node.event.at, true)}>{eventTime(node.event.at)}</time>{nodes.length > 1 && index === nodes.length - 1 && <span className="last-arrangement">末次安排</span>}</div>
     {index === 0 ? <SnapshotFacts event={node.event} onDetail={onDetail} /> : <div className="evolution-changes">{node.changes.map((change, i) => <EvolutionChange key={i} change={change} node={node} onDetail={onDetail} />)}</div>}
     <Button className="arrangement-link" size="sm" onClick={e => { markOrigin(e.currentTarget); onDetail({ kind: 'arrangement', event: node.event }); }}>查看当时完整安排<ArrowUpRight size={12} /></Button>
+  </li>)}</ol>;
+}
+
+const workDetailLabel = (evidence: WorkEvidence) => evidence.change?.arrangement !== undefined ? '查看当时完整安排' : '查看本轮路由依据';
+
+function WorkFacts({ evidence, onDetail }: { evidence: WorkEvidence; onDetail?: (d: Detail) => void }) {
+  const { project, change, abilityIds } = evidence, arrangement = change?.arrangement;
+  const at = change?.at, reason = '来自本轮路由依据。';
+  const arranged = new Map<string, WorkAbility>();
+  for (const ability of [arrangement?.executor, ...arrangement?.methods ?? []]) {
+    if (ability) arranged.set(`${ability.ref}:${ability.source}`, ability);
+  }
+  const byId = new Map<string, number>();
+  for (const ability of arranged.values()) byId.set(ability.id, (byId.get(ability.id) ?? 0) + 1);
+  const rows = [
+    ...[...arranged.entries()].map(([key, ability]) => ({ key, id: ability.id, ability, adopted: byId.get(ability.id) === 1 && abilityIds.includes(ability.id) })),
+    ...abilityIds.filter(id => byId.get(id) !== 1).map(id => ({ key: id, id, ability: null, adopted: true })),
+  ];
+  const group = (id: string) => id.startsWith('data-package.') ? 'data-package' : id.split('.')[0];
+  function projectValue(target: Target, label: string) {
+    const name = <><BriefcaseBusiness size={13} /><strong>{target.displayName ?? target.name}{target.scope === 'archived' ? '（已归档）' : target.lifecycle === 'planned' ? '（待创建）' : ''}</strong></>;
+    return onDetail ? <button className="route-value-link" title={target.path ?? target.name} onClick={e => {
+      markOrigin(e.currentTarget); onDetail({ kind: 'target', target, label, reason, at });
+    }}>{name}<ChevronRight size={12} /></button> : <span className="route-value-static">{name}{target.path && <small>{target.path}</small>}</span>;
+  }
+  return <dl className="route-facts snapshot-facts">
+    {project !== undefined && <div><dt>{evidence.projectLabel ?? '工作项目'}</dt><dd>{project ? projectValue(project, '工作项目') : change && change.projectChanged !== false ? '退出项目工作安排' : '无工作项目'}</dd></div>}
+    {arrangement?.relatedProjects.length ? <div><dt>关联项目</dt><dd>{arrangement.relatedProjects.map(related => <span key={targetIdentity(related)}>{projectValue(related, '关联项目')}</span>)}</dd></div> : null}
+    {rows.length > 0 && <div><dt>能力安排</dt><dd><div className="route-ability-groups">
+      {['cooperation', 'partner', 'competency', 'data-package', 'other'].map(type => {
+        const items = rows.filter(item => type === 'other' ? !['cooperation', 'partner', 'competency', 'data-package'].includes(group(item.id)) : group(item.id) === type);
+        return items.length ? <div className="route-ability-group" key={type}><span className="route-type-label">{typeNames[type] ?? '能力'}</span><div>{items.map(({ key, id, ability, adopted }) => <div className="snapshot-ability" key={key}>
+          {ability && onDetail ? <button className="route-value-link ability-value" onClick={e => {
+            markOrigin(e.currentTarget); onDetail({ kind: 'ability', ability: { ...ability, stage: 'selected', fixed: false }, reason, at });
+          }}><strong>{ability.name}</strong><ChevronRight size={12} /></button> : <span className="route-value-static"><strong>{ability?.name ?? id}</strong>{ability && <small>v{ability.version} · {sourceName(ability.source)}</small>}</span>}
+          {ability && <span className="stage stage-selected">已安排</span>}{adopted && <span className="stage stage-adopted">本轮已采用</span>}
+        </div>)}</div></div> : null;
+      })}
+    </div></dd></div>}
+  </dl>;
+}
+
+export function WorkRouteHistory({ turn, onDetail }: { turn: Turn; onDetail: (d: Detail) => void }) {
+  if (turn.policy !== 'capture') return null;
+  const facts = turn.routeFacts, opening = turn.openingWorkArrangement;
+  const project = facts?.startingProject ?? turn.currentWorkProject;
+  const changes = facts?.workChanges ?? [], abilityIds = facts?.abilityIds ?? [];
+  const cards: WorkEvidence[] = [];
+  if (opening || project) cards.push({ heading: '沿用安排', change: opening, abilityIds: [],
+    project: opening ? opening.project : { kind: 'project', ...project! },
+    ...(!opening && !facts?.startingProject ? { projectLabel: '会话当前工作项目' } : {}) });
+  for (const change of changes) cards.push({ heading: '本轮变更', change: { ...change, turnNumber: turn.turnNumber }, project: change.project, abilityIds: [] });
+  if (!cards.length && abilityIds.length) cards.push({ heading: '本轮采用记录', abilityIds: [] });
+  if (!cards.length) return null;
+  cards[cards.length - 1].abilityIds = abilityIds;
+  return <ol className="route-evolution" aria-label="本轮工作安排">{cards.map((evidence, index) => <li className="evolution-node" key={evidence.change ? `work-${evidence.change.revision}` : `partial-${index}`}>
+    <div className="evolution-heading"><h3>{evidence.heading}</h3>{evidence.change && <time dateTime={evidence.change.at} title={eventTime(evidence.change.at, true)}>{eventTime(evidence.change.at)}</time>}</div>
+    <WorkFacts evidence={evidence} onDetail={onDetail} />
+    <Button className="arrangement-link" size="sm" onClick={e => {
+      markOrigin(e.currentTarget); onDetail({ kind: 'work-arrangement', evidence: { ...evidence, abilityIds } });
+    }}>{workDetailLabel(evidence)}<ArrowUpRight size={12} /></Button>
   </li>)}</ol>;
 }

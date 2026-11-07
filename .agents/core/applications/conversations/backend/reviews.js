@@ -338,16 +338,28 @@ export function createReviews(context, { now = Date.now, timerMs = 2000, userDB,
   async function chatList({ target = '', q = '', state = 'active', limit = 30, offset = 0 } = {}) {
     check(['active', 'archived', 'all'].includes(state) && Number.isSafeInteger(limit) && limit > 0 && limit <= 10000 && Number.isSafeInteger(offset) && offset >= 0 && typeof q === 'string', '聊天筛选无效。');
     await reconcileChats();
-    const snapshot = await sources(), records = [];
+    const snapshot = await sources({ includeWorkTargets: true }), records = [];
+    const query = q.toLocaleLowerCase();
     for (const chat of snapshot.chats) {
       const turns = snapshot.records.filter(t => t.taskId === chat.taskId), match = turns.filter(t => !target || t.targets?.some(e => e.key === target) || targetFromRoute(t.route) === target);
-      if (!match.length || q && !JSON.stringify([chat.title, ...turns.map(t => t.route)]).toLocaleLowerCase().includes(q.toLocaleLowerCase())) continue;
       const current = user.get('chat', chat.taskId)?.state ?? 'active'; if (state !== 'all' && state !== current) continue;
+      const arrangements = new Map();
+      for (const turn of turns) for (const entry of turn.workTargets ?? []) arrangements.set(entry.key, { entry, turnId: turn.turnId });
+      if (!match.length && !arrangements.has(target)) continue;
+      if (query && !JSON.stringify([chat.title, ...turns.map(t => t.route), ...[...arrangements.values()].map(({ entry }) => entry.label)]).toLocaleLowerCase().includes(query)) continue;
+      const ownershipTargets = new Map(turns.flatMap(t => t.targets ?? []).map(entry => [entry.key, entry]));
+      const directoryTargets = new Map([...arrangements.values()].map(({ entry }) => [entry.key, entry]));
+      for (const [key, entry] of ownershipTargets) directoryTargets.set(key, entry);
+      const contextFor = (key, related) => {
+        const last = related.at(-1), arrangementTurnId = arrangements.get(key)?.turnId;
+        return { key, turnCount: related.length, latestTurnId: last?.turnId ?? null,
+          latestReported: last ? { reportedAt: last.updatedAt } : null, ...(arrangementTurnId ? { arrangementTurnId } : {}) };
+      };
       records.push({ taskId: chat.taskId, title: chat.title, state: current, updatedAt: turns.at(-1)?.updatedAt, createdAt: turns[0]?.startedAt, turnCount: chat.turns.length,
-        ownershipTargets: [...new Map(turns.flatMap(t => t.targets ?? []).map(e => [e.key, e])).values()],
-        targetContexts: Object.fromEntries([...new Set(turns.flatMap(t => (t.targets ?? []).map(e => e.key)))].map(key => { const related = turns.filter(t => t.targets?.some(e => e.key === key)); return [key, { key, turnCount: related.length, latestTurnId: related.at(-1)?.turnId, latestReported: { reportedAt: related.at(-1)?.updatedAt } }]; })),
+        ownershipTargets: [...ownershipTargets.values()], directoryTargets: [...directoryTargets.values()],
+        targetContexts: Object.fromEntries([...directoryTargets.keys()].map(key => [key, contextFor(key, turns.filter(t => t.targets?.some(e => e.key === key)))])),
         lastTurn: turns.at(-1), latestReported: match.at(-1)?.route ? { turnId: match.at(-1).turnId, route: match.at(-1).route } : null,
-        targetContext: target ? { turnCount: match.length, latestTurnId: match.at(-1)?.turnId, latestReported: { reportedAt: match.at(-1)?.updatedAt } } : undefined });
+        targetContext: target ? contextFor(target, match) : undefined });
     }
     records.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
     return { records: records.slice(offset, offset + limit), total: records.length, nextOffset: offset + limit < records.length ? offset + limit : null, capture: snapshot.capture, errors: snapshot.errors };
@@ -359,7 +371,7 @@ export function createReviews(context, { now = Date.now, timerMs = 2000, userDB,
   }
   async function catalog(params) {
     const list = await allChatRecords(params), targets = new Map();
-    for (const record of list.records) for (const entry of record.ownershipTargets) {
+    for (const record of list.records) for (const entry of record.directoryTargets) {
       const previous = targets.get(entry.key) ?? { key: entry.key, kind: entry.target?.kind ?? 'state', label: entry.label, target: entry.target, chatCount: 0, turnCount: 0, aliases: [], lifecycle: entry.target?.lifecycle ?? null };
       previous.chatCount++; previous.turnCount += record.targetContexts[entry.key]?.turnCount ?? 0; targets.set(entry.key, previous);
     }
@@ -449,7 +461,7 @@ export function createReviews(context, { now = Date.now, timerMs = 2000, userDB,
     if (method === 'chats.targets') return catalog(params);
     if (method === 'chats.search') {
       const list = await allChatRecords(params), groups = {};
-      for (const record of list.records) for (const entry of record.ownershipTargets) {
+      for (const record of list.records) for (const entry of record.directoryTargets) {
         const group = groups[entry.key] ??= { ...list, records: [], total: 0, nextOffset: null };
         group.records.push({ ...record, targetContext: record.targetContexts[entry.key] }); group.total++;
       }

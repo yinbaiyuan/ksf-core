@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "同时核对引导动作、用户选择、实际产物和退出；不是只验章节。",
+  "cases": [
+    {
+      "id": "project-definition-1",
+      "scenario": "模糊目标",
+      "input": "帮我把这件事做得更好",
+      "expected": "给有理由的候选，问关键问题；不能直接宣称目标已确认",
+      "method_specific": "明确受益者、问题和主要目标，能够解释为何做。"
+    },
+    {
+      "id": "project-definition-2",
+      "scenario": "明确目标",
+      "input": "沿已确认的目标和标准继续",
+      "expected": "复用决定，直接进入当前缺口，不从头问答",
+      "method_specific": "基线和目标之间的差距清楚，关键缺口有补证去向。"
+    },
+    {
+      "id": "project-definition-3",
+      "scenario": "简单项目",
+      "input": "一个人完成一个具体交付",
+      "expected": "保持共同结构，允许短内容和一个里程碑",
+      "method_specific": "范围、约束及完成条件可核对，用户关键取舍已明确。"
+    },
+    {
+      "id": "project-definition-4",
+      "scenario": "复杂协作",
+      "input": "子项目递归且存在跨阶段依赖",
+      "expected": "明确归属与硬依赖、阶段结果和责任",
+      "method_specific": "管理强度、理由和重评触发明确；未知风险有相称控制。"
+    },
+    {
+      "id": "project-definition-5",
+      "scenario": "负面研究",
+      "input": "实验推翻了预设假设",
+      "expected": "按研究完成条件检查，不要求正面结论",
+      "method_specific": "总体做法有依据，高风险假设有验证安排。"
+    },
+    {
+      "id": "project-definition-6",
+      "scenario": "变更与暂停",
+      "input": "插入新需求然后暂停，之后继续",
+      "expected": "解释影响和取舍，保留当前步骤及恢复条件",
+      "method_specific": "方案已有可信入口；缺口与下一步清楚，交拆计划继续。"
+    },
+    {
+      "id": "project-definition-7",
+      "scenario": "来源变化",
+      "input": "旧证据已被修订",
+      "expected": "核对差异与适用范围，保留历史，不盲信旧验收",
+      "method_specific": "方案已有可信入口；缺口与下一步清楚，交拆计划继续。"
+    },
+    {
+      "id": "project-definition-8",
+      "scenario": "权限边界",
+      "input": "只要求分析，不要写入",
+      "expected": "在对话给出候选，不保存文件或调用写入",
+      "method_specific": "方案已有可信入口；缺口与下一步清楚，交拆计划继续。"
+    },
+    {
+      "id": "project-definition-unified-status",
+      "scenario": "统一状态与受阻",
+      "input": "已开始的任务等设备到货，另一个任务是否现在就能启动？",
+      "expected": "保留active并记录blocker、责任与解阻动作；受阻不释放在制名额，可开始依据条件和容量计算。"
+    },
+    {
+      "id": "project-definition-acceptance-resume",
+      "scenario": "待验收试用与暂停恢复",
+      "input": "里程碑已经提交验收，需要启动一次真实试用，随后暂停再继续。",
+      "expected": "明确acceptance用途，在父级review下按准入检查启动；暂停保存原环节与原因，恢复核对输入且不重问已确认信息。"
+    },
+    {
+      "id": "project-definition-definition-ownership",
+      "scenario": "说明文档缺失",
+      "input": "core/docs未提供，继续按已确认规则治理这个项目。",
+      "expected": "从能力包读取方法和正式模板，程序模型取得字段与校验；不以docs作为业务定义或运行依赖。"
+    },
+    {
+      "id": "project-definition-letter-stages",
+      "scenario": "字母阶段由用户定义",
+      "input": "A准备已经清楚；B试验和C实现部分交叉，最后验收。",
+      "expected": "仅定义实际需要的task_stages；复用已确认结论，允许B/C独立工作交叉，不由字母推断硬依赖或增加状态。"
+    },
+    {
+      "id": "project-definition-stage-insertion",
+      "scenario": "阶段中追加及验收返工",
+      "input": "C已开始，B遗漏一项；验收又发现问题。",
+      "expected": "B组按现存最大号追加，取消号不复用，旧号不重排；明确返工依赖与状态，继续同一Z任务，最终结论仍在本层复盘。"
+    },
+    {
+      "id": "project-definition-renumber-recovery",
+      "scenario": "旧链接接续与冲突",
+      "input": "聊天中的旧T路径在迁移后失效，且本窗口还有旧草稿。",
+      "expected": "按公共位置解析找到稳定ID原件；不重建同名任务，不覆盖旧草稿，需合并确认；改号用预览基线与操作日志，中断有条件恢复。"
+    }
+  ]
+}

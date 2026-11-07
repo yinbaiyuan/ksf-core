@@ -43,13 +43,18 @@ draft 保存后立即影响默认读取和依赖解析；首次派生默认就�
 | `partner.ksf.runtime` | `.agents/core/abilities/partners/ksf-runtime/partner.md` |
 | `competency.ksf.ability-route` | `.agents/core/abilities/competencies/ability-route/competency.md` |
 | `competency.ksf.project-route` | `.agents/core/abilities/competencies/project-route/competency.md` |
-| `competency.ksf.asset-maintenance` | `.agents/core/abilities/competencies/asset-maintenance/competency.md` |
 
 list 是对象管理清单，包含固定定义并标注 protected；路由从中排除固定入口链。list --source all 展示全部来源实际有效定义和 effective 标记；无效项通过 errors 报告，不能冒充可调用对象。部分失败仍返回可核实项，complete=false、ok=false、退出 1；不完整集合不能证明“全库无匹配”。
 
 ## 读取与检查
 
-read 返回入口选定部分：metadata 只包含 metadata 映射；body 只包含正文；all 两者都有。三种模式都保留 id/source/path/directory/version/user_revision/protected 定位信息及 definition_digest（入口文件原始字节的 SHA-256），未选择字段不输出。摘要供[路由上报](route.md)核对，不代表已读全部资源或已采用方法。不展开任何参考资料、模板、基线或程序；read 返回 references 的解析定位，不加载引用正文。
+read 返回入口选定部分：metadata只含元数据，body只含正文，all两者都有；三种模式保留原定位字段与definition_digest。能力引用按精确版本和来源解析，文件定位在references中标记kind=file及规范化路径。只有all/body按 `+` / `#` 展开，不改父正文或原引用字符串。
+
+`data.expanded` 的能力项保持 `{reference,object}`，object遵循同一part；文件项为 `{reference,kind:"file",file}`，file含source/path、可选source_root、state、sha256及完整content。文件content始终是完整原文，包括frontmatter与换行，不拆成能力正文，不携带伪造的能力ID或版本。调用方先判断kind，不能对所有项直接读取object.body。
+
+文件定位示例为 `+./references/rules.md`、`#../shared/context.md`、`+/USER.md`。相对路径基于引用所在文件目录；`/`基于当前KSF根。能力ID引用的来源与版本绑定不变，普通CLI定位参数不接受前缀或路径。metadata、list和check不读取被引用文件全文；check验证定位语法和根边界。
+
+`+`只带出当前主文或文件，`#`继续沿目标元数据references及各自标记递归；无标记不展开。按声明顺序深度优先、分别记录返回和遍历状态，先 `+` 后 `#` 仍会继续遍历。missing为正常的明确缺失状态，内容/摘要为null；unavailable与编码、超限、链接等错误使ok=false、退出1，保留其他已取得内容。成功处理声明不等于所有业务资料齐全，必须核对文件状态及当前方法要求。正文链接不自动跟踪，也不自动登记采用或执行。详见[元数据规范](../对象元数据规范.md#依赖与读取)。
 
 check 检查公共字段、类型与存储位置、同区重复身份、声明精确依赖的本地解析，以及所选用户派生基线的完整性。返回 valid、checkedPaths 与 references。检查不评价专业质量、不自动修复，也不证明基本功中的操作或支持程序已被执行。
 
@@ -70,9 +75,9 @@ metadata 或 body 可以省略，省略部分保持原样；metadata 顶层合�
 系统与用户同 ID 以状态自动接管，无需另存运行时选择表：
 
 ```sh
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"archived"}}' --json
-.agents/ksf partner write partner.ksf.object-designer --data '{"metadata":{"status":"active"}}' --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"description":"我的对象设计协作方式"}}' --dry-run --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"status":"archived"}}' --json
+.agents/ksf partner write partner.ksf.ability-manager --data '{"metadata":{"status":"active"}}' --json
 ```
 
 上例预览不会实际派生；之后的实际 write 才创建或修改用户定义。派生时完整保存入口、程序、模板、二进制资源和空目录；原始快照与来源摘要位于用户目录 .upstream/，入口内受管 upstream 映射记录 id/version；丢失基线时不能被当成用户原创继续更新。不支持的目录项导致整个操作失败，不能静默漏文件。
@@ -98,7 +103,7 @@ remove 物理删除整个用户目录，包括所有附件和基线。没有用�
 | 操作 | data 核心字段 |
 | --- | --- |
 | list | complete、scopes、objects；各摘要包含身份、name/description/status、来源、版本、修订、入口与目录、protected/effective |
-| read | object（定位与选定内容）、references（引用及实际绑定或错误） |
+| read | object（定位与选定内容）、references（引用及实际绑定或错误）、可选 expanded（能力主文或文件原文） |
 | check | id、valid、可解析时的 object 摘要、checkedPaths、references |
 | write | id/source/path/directory、dryRun/changed/created/derived、version/user_revision |
 | remove | id/source/directory、dryRun/changed/removedFromCatalog |

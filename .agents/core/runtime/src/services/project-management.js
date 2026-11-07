@@ -100,6 +100,7 @@ export function projectPlanProjection(plan) {
 function readState(root,name,scope) {
   validateName(name);if(!['current','archived'].includes(scope))fail('INVALID_ARGUMENTS','项目范围应为 current 或 archived。');
   const project=load(root,name,{scope}),readOnly=scope==='archived'||project.parsed.values.status==='archived',target=join(project.folder,FILE),directory=portable(relative(root,project.folder)),path=directory+'/'+FILE;
+  if(project.parsed.values.governance_schema!==undefined)fail('PROJECT_MODEL_MIGRATED','此项目已采用Markdown治理原件；请使用 project governance read/check/apply。旧JSON仅供历史查阅。');
   if(!stat(target)){project.guard();return {project,target,directory,data:{state:'missing',readOnly,path,etag:'missing',revision:0,updatedAt:null,plan:emptyProjectPlan(),warnings:[],projection:projectPlanProjection(emptyProjectPlan())}};}
   if(stat(target)?.size>MAX)fail('PROJECT_PLAN_TOO_LARGE','项目管理文件超过 1 MB。');
   const snapshot=readSnapshot(target);if(snapshot.bytes.length>MAX)fail('PROJECT_PLAN_TOO_LARGE','项目管理文件超过 1 MB。');

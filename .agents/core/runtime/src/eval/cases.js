@@ -6,12 +6,12 @@ const cooperation = 'cooperation.demo.delivery';
 const spec = (id, title, prompt, criteria, extra = {}) => ({
   id, title, material: 'fictional', turns: [{ prompt }], critical: false,
   expected: { criteria, requiredReads: [], requiredReadGroups: [], forbiddenReads: [], allowedWrites: [], forbiddenText: [],
-    requiresDiscovery: ['A01', 'A02', 'A03', 'D01', 'D02', 'D03', 'D04', 'T01', 'T02', 'T03', 'C01', 'C02', 'C03'].includes(id), ...extra.expected },
+    requiresDiscovery: ['A03', 'D01', 'D03'].includes(id), ...extra.expected },
   ...Object.fromEntries(Object.entries(extra).filter(([key]) => key !== 'expected')),
 });
 
 export const suite = {
-  schemaVersion: 1, id: 'routing', version: '2.0.0', timeoutMs: 15 * 60 * 1000,
+  schemaVersion: 1, id: 'routing', version: '2.1.0', timeoutMs: 15 * 60 * 1000,
   dimensions: ['project', 'ability', 'materials', 'adoption', 'boundary'],
   cases: [
     spec('P01', '无项目', '临时问个小问题：17 加 25 是多少？直接告诉我就好。',

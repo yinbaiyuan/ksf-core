@@ -366,6 +366,28 @@ test('publication validation rejects empty bodies, absolute local links and inva
   assert.equal(existsSync(join(path, types.competency.user, id)), false);
 });
 
+test('prefixes stay source-bound through recursion and survive publication version remapping', t => {
+  const f = fixture(t), path = f.source('methods'), owner = 'partner.author.expansion', method = 'competency.author.expansion', leaf = 'data-package.author.leaf';
+  f.add(path, leaf, {}, 'SOURCE_LEAF\n');
+  f.add(path, method, { references: ['+' + leaf + '@0.1.0'] }, 'SOURCE_METHOD\n');
+  f.add(path, owner, { references: ['#' + method + '@0.1.0'] });
+  f.run('link', { target: path });
+  f.add('user', method, {}, 'PRIVATE_OVERRIDE\n'); f.add('user', leaf, {}, 'PRIVATE_LEAF\n');
+  const bound = f.query('partner', owner, 'methods');
+  assert.deepEqual(bound.errors, []); assert.deepEqual(bound.data.expanded.map(x => x.object.body), ['SOURCE_METHOD\n', 'SOURCE_LEAF\n']);
+  assert.ok(bound.data.expanded.every(x => x.object.source === 'methods'));
+  const publication = f.source('publication'); f.run('link', { target: publication });
+  const sourceFile = f.add('user', 'partner.author.publish', { references: ['#' + method + '@0.1.0', '+' + leaf + '@0.1.0'] });
+  const versions = { [method]: '0.2.0', [leaf]: '0.2.0', 'partner.author.publish': '0.2.0' };
+  const exported = f.run('export', { target: 'publication', reference: 'partner.author.publish', versions });
+  assert.deepEqual(exported.errors, []);
+  const published = f.query('partner', 'partner.author.publish@0.2.0', 'publication');
+  assert.deepEqual(published.errors, []);
+  assert.deepEqual(published.data.object.metadata.references, ['#' + method + '@0.2.0', '+' + leaf + '@0.2.0']);
+  assert.ok(readFileSync(sourceFile, 'utf8').includes('@0.1.0'));
+  assert.equal(f.run('check', { target: 'publication' }).data.valid, true);
+});
+
 test('export resolves protected Core references and skips archived personal dependency copies', t => {
   const f = fixture(t), path = f.source('methods'), owner = 'partner.author.owner', method = 'competency.author.method';
   const fixed = 'competency.ksf.ability-route', file = join(f.root, protectedPaths[fixed]);
@@ -460,4 +482,48 @@ test('Markdown export accepts CRLF clone content without changing its published 
   const bytes=readFileSync(file,'utf8').replaceAll('\n','\r\n');writeFileSync(file,bytes);
   assert.equal(f.run('export',{target:'methods',reference:id}).data.changed,false);
   assert.equal(readFileSync(file,'utf8'),bytes);
+});
+
+test('linked file references keep their source directory while root paths use the consuming KSF',t=>{
+  const f=fixture(t),provider=f.source('file-methods'),owner='partner.author.files',support='competency.author.support';
+  const entry=f.add(provider,owner,{references:['#./notes.md','+/USER.md']},'OWNER\n',{
+    'notes.md':'---\nreferences: ["+./leaf.md", "+competency.author.support@0.1.0"]\n---\nSOURCE_NOTE\n',
+    'leaf.md':'SOURCE_LEAF\n',
+  });
+  f.add(provider,support,{},'SOURCE_SUPPORT\n');f.add('user',support,{},'PRIVATE_OVERRIDE\n');
+  writeFileSync(join(f.root,'USER.md'),'CONSUMER_USER\n');writeFileSync(join(provider,'USER.md'),'PROVIDER_USER_MUST_NOT_LOAD\n');
+  f.run('link',{target:provider});const read=f.query('partner',owner);
+  assert.deepEqual(read.errors,[]);
+  assert.deepEqual(read.data.expanded.map(x=>x.kind==='file'?x.file.content:x.object.body),['---\nreferences: ["+./leaf.md", "+competency.author.support@0.1.0"]\n---\nSOURCE_NOTE\n','SOURCE_LEAF\n','SOURCE_SUPPORT\n','CONSUMER_USER\n']);
+  assert.equal(read.data.expanded[0].file.path,join(dirname(entry),'notes.md').replaceAll('\\','/'));
+  assert.equal(read.data.expanded[0].file.source_root,provider);
+  assert.equal(read.data.expanded[2].object.source,'file-methods');
+  assert.equal(read.data.expanded[3].file.source,'instance');assert.equal(read.data.expanded[3].file.path,'USER.md');
+});
+
+test('export preserves root file declarations without reading profiles and remaps owned file metadata references',t=>{
+  const f=fixture(t),provider=f.source('file-publication'),owner='partner.pub.files',support='competency.pub.support';
+  const entry=f.add('user',owner,{references:['#./guide.md','+/USER.md','+/BOT.md','#'+support+'@0.1.0']},'OWNER\n',{
+    'guide.md':'---\nreferences: ["+competency.pub.support@0.1.0", "+./assets/more.md"]\n---\nGUIDE\n',
+    'assets/more.md':'MORE\n',
+    'bibliography.md':'---\nreferences: ["https://example.invalid/paper"]\n---\nCitation data\n',
+  });
+  f.add('user',support,{},'SUPPORT\n');writeFileSync(join(f.root,'USER.md'),Buffer.from([0xff]));writeFileSync(join(f.root,'BOT.md'),'REAL_PRIVATE_PROFILE_MUST_NOT_PUBLISH');
+  f.run('link',{target:provider});
+  const result=f.run('export',{target:'file-publication',reference:owner,versions:{[owner]:'0.2.0',[support]:'0.3.0'},dryRun:false});
+  assert.equal(result.data.changed,true);
+  const published=join(provider,types.partner.user,owner,'partner.md'),values=YAML.parse(readFileSync(published,'utf8').split('---')[1]);
+  assert.deepEqual(values.references,['#./guide.md','+/USER.md','+/BOT.md','#'+support+'@0.3.0']);
+  const guide=readFileSync(join(dirname(published),'guide.md'),'utf8');assert.match(guide,/\+competency.pub.support@0\.3\.0/);assert.match(guide,/\+\.\/assets\/more\.md/);
+  assert.equal(readFileSync(join(dirname(published),'assets/more.md'),'utf8'),'MORE\n');
+  assert.equal(readFileSync(join(dirname(published),'bibliography.md'),'utf8'),readFileSync(join(dirname(entry),'bibliography.md'),'utf8'));
+  assert.equal(existsSync(join(provider,'USER.md')),false);assert.equal(existsSync(join(provider,'BOT.md')),false);
+  assert.ok(!guide.includes('REAL_PRIVATE_PROFILE'));assert.equal(readFileSync(entry,'utf8').includes('@0.3.0'),false);
+});
+
+test('export rejects a relative file outside the selected object without copying it',t=>{
+  const f=fixture(t),provider=f.source('file-scope'),owner='partner.pub.external';
+  const entry=f.add('user',owner,{references:['+../outside.md']});writeFileSync(join(dirname(dirname(entry)),'outside.md'),'EXTERNAL_NOT_SELECTED');
+  f.run('link',{target:provider});throws(()=>f.run('export',{target:'file-scope',reference:owner,dryRun:true}),'SOURCE_RESOURCE_EXTERNAL');
+  assert.equal(existsSync(join(provider,types.partner.user,owner)),false);
 });

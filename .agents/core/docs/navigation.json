@@ -34,6 +34,7 @@
         ".agents/core/docs/handbook/assets.md",
         ".agents/core/docs/handbook/abilities.md",
         ".agents/core/docs/handbook/task-execution.md",
+        ".agents/core/docs/project-management/document-architecture.md",
         ".agents/core/docs/handbook/workbench.md",
         ".agents/core/docs/handbook/ai.md",
         ".agents/core/docs/handbook/collaboration.md",
@@ -41,7 +42,8 @@
         ".agents/core/docs/handbook/documentation-reader.md"
       ],
       "prefixes": [
-        ".agents/core/docs/handbook/"
+        ".agents/core/docs/handbook/",
+        ".agents/core/docs/project-management/"
       ]
     },
     {
@@ -70,6 +72,7 @@
       "description": "调用链、Agent运行、AI与通信的边界",
       "pages": [
         ".agents/core/docs/handbook/architecture.md",
+        ".agents/core/docs/runtime/work-context.md",
         ".agents/core/docs/system/README.md",
         ".agents/core/docs/runtime/routing.md",
         ".agents/core/docs/reference/data-map.md"

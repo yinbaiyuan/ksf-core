@@ -1,7 +1,8 @@
 export interface Issue { code: string; message?: string; taskId?: string }
 export interface Project { name: string; scope: 'current' | 'archived'; path: string; freshness?: string }
-export type TargetKind = 'project' | 'knowledge' | 'ability' | 'archive';
+export type TargetKind = 'project' | 'knowledge' | 'ability' | 'archive' | 'inbox' | 'persona';
 export interface Target { kind: TargetKind; name: string; path?: string; scope?: 'current' | 'archived'; freshness?: string;
+  displayName?: string;
   lifecycle?: 'planned' | 'existing'; targetId?: string; targetVersion?: number; currentBinding?: Target;
   id?: string; ref?: string; source?: string; version?: string; definitionDigest?: string; userRevision?: number | null; entryType?: 'file' | 'directory' }
 
@@ -9,11 +10,16 @@ export interface Ownership { state: string; target?: Target }
 export interface Ability { id: string; ref: string; name: string; version: string; source: string; path: string; definitionDigest: string; stage: string; fixed: boolean; freshness?: string; effectiveChanged?: boolean; userRevision?: number }
 export interface Route { ownership?: Ownership; relatedTargets?: Target[]; summary: string; status: string; project: { state: string; primary?: Project }; references: Project[]; abilities: Ability[] }
 export interface RouteEvent { eventId: string; roundId: string; at: string; reason: string; snapshot: Route }
-export interface TurnSummary { targetHistory?: TargetHistory; targetRelation?: ProjectRelation; projectHistory?: ProjectHistory; projectRelation?: ProjectRelation; turnId: string; roundId: string | null; turnNumber?: number; startedAt: string; updatedAt: string; status: string; policy: string; routeCount: number; messageCount: number; preview: string; issues: Issue[]; route?: Route | null }
-export interface Task { targetContext?: TargetContext; projectContext?: ProjectContext; taskId: string; title: string; updatedAt: string; createdAt: string; turnCount: number; lastTurn: TurnSummary; latestReported: { turnId: string; roundId: string; turnNumber: number; eventId: string; reportedAt: string; route: Route } | null }
+export interface TurnTiming { userSentAt: string | null; assistantRepliedAt: string | null; durationMs: number | null }
+export type WorkAbility = Pick<Ability, 'id' | 'ref' | 'name' | 'version' | 'source' | 'path' | 'definitionDigest'>;
+export interface WorkArrangement { relatedProjects: Target[]; executor: WorkAbility | null; methods: WorkAbility[] }
+export interface WorkChange { turnId: string; revision: number; at: string; project: Target | null; projectChanged?: boolean; arrangement?: WorkArrangement | null; turnNumber?: number }
+export interface RouteFacts { workChanges: WorkChange[]; abilityIds: string[]; startingProject?: Pick<Project, 'name' | 'scope'>; startingArrangementRevision?: number }
+export interface TurnSummary { timing?: TurnTiming; routeFacts?: RouteFacts; routingFactsAvailable?: boolean; targetHistory?: TargetHistory; targetRelation?: ProjectRelation; projectHistory?: ProjectHistory; projectRelation?: ProjectRelation; turnId: string; roundId: string | null; turnNumber?: number; startedAt: string; updatedAt: string; status: string; policy: string; routeCount: number; messageCount: number; preview: string; issues: Issue[]; route?: Route | null }
+export interface Task { workArrangement?: WorkChange; lineage?: { parentTaskId: string; createdAt: string; available: boolean }; targetContext?: TargetContext; projectContext?: ProjectContext; taskId: string; title: string; updatedAt: string; createdAt: string; turnCount: number; lastTurn: TurnSummary; latestReported: { turnId: string; roundId: string; turnNumber: number; eventId: string; reportedAt: string; route: Route } | null }
 export interface ContentBlock { type: string; text?: string; [key: string]: unknown }
 export interface Message { id: string; role: string; phase: string; at: string; content: ContentBlock[]; revisions: { content: ContentBlock[]; at: string; phase: string }[] }
-export interface Turn extends TurnSummary { revision: number; messages: Message[]; routes: RouteEvent[]; completedAt: string | null }
+export interface Turn extends TurnSummary { revision: number; messages: Message[]; routes: RouteEvent[]; completedAt: string | null; currentWorkProject?: Pick<Project, 'name' | 'scope'>; openingWorkArrangement?: WorkChange }
 export interface Capture { enabled: boolean; activatedAt: string | null; hookConfigured: boolean; lastSync?: { at?: string; errors?: Issue[]; [key: string]: unknown } }
 export interface TaskList { records: Task[]; total: number; unfilteredTotal: number; nextOffset: number | null; projects: { value: string; label: string }[]; capture: Capture; errors: Issue[] }
 export interface TaskDetail { targetContext?: TargetContext; projectContext?: ProjectContext; errors?: Issue[]; state: string; task: Task; turns: TurnSummary[]; total: number; nextOffset: number | null }
@@ -27,7 +33,7 @@ export interface TaskProjects { projects: TaskProject[]; totalChats: number; cap
 
 export interface TargetEntry { key: string; role: string; label: string; target?: Target }
 export interface TargetHistory { entries: TargetEntry[]; sequence: { key: string; label: string; target?: Target }[]; switched: boolean }
-export interface TargetContext { key: string; turnCount: number; relatedTurnCount: number; latestTurnId: string | null; latestReported: Task['latestReported'] }
+export interface TargetContext { arrangementTurnId?: string; key: string; turnCount: number; relatedTurnCount: number; latestTurnId: string | null; latestReported: Task['latestReported'] }
 export interface TaskTarget { aliases?: string[]; key: string; kind: TargetKind | 'state'; lifecycle?: 'planned' | 'existing' | null; label: string; target: Target | null; chatCount: number; turnCount: number; lastReportedAt: string | null }
 export interface TaskTargets { targets: TaskTarget[]; totalChats: number; capture: Capture; errors: Issue[] }
 

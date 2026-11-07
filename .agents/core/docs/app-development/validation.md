@@ -56,4 +56,4 @@ SDK/协议类型、运行时、打包/安装检查与开发模板一致后再报
 
 ## 初始兼容契约与迁移
 
-清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1、SDK工具包=1.0.0。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
+清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1；SDK工具包和API语义版本遵循[兼容契约](sdk-compatibility.md)。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。

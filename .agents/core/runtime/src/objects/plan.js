@@ -1,9 +1,10 @@
-import { join, relative } from 'node:path';
+import { join, relative, dirname, isAbsolute, sep } from 'node:path';
 import { validateInput, equalValues } from '../metadata/input.js';
 import { parseFrontmatter, createFrontmatter, encodeFrontmatter, setField } from '../metadata/frontmatter.js';
 import { portable } from '../shared/paths.js';
-import { types, validateObject, fail } from './schema.js';
-import { problems, referenceResults, resolveObject } from './references.js';
+import { types, validateObject, fail, parseDependencyReference } from './schema.js';
+import {fileReferenceLocation} from './file-locations.js';
+import { problems, referenceResults, resolveDependency } from './references.js';
 import { rebaseMarkdown } from './markdown.js';
 
 export function validateObjectInput(value) {
@@ -34,9 +35,8 @@ function guardReferences(before, after, changedRow) {
     if (!owner || owner.metadata?.status === 'archived') continue;
     for (const reference of row.metadata.references ?? []) {
       if (!(owner.metadata.references ?? []).includes(reference)) continue;
-      const [id, version] = reference.split('@');
-      try { resolveObject(before, { id, version }); } catch { continue; }
-      try { resolveObject(after, { id, version }); }
+      try { resolveDependency(before, row, reference); } catch { continue; }
+      try { resolveDependency(after, owner, reference); }
       catch { fail('OBJECT_DEPENDENTS_BLOCKED', 'Change would break an existing exact reference.', { id: owner.id, reference }); }
     }
   }
@@ -85,6 +85,19 @@ export function planObjectChange(state, { input = {}, dryRun = false } = {}) {
   if ((origin || derived) && Object.hasOwn(input.metadata ?? {}, 'version') && input.metadata.version !== base.metadata.version) fail('OBJECT_BASE_VERSION_IMMUTABLE', 'A derived object retains its system baseline version.');
   const current = existing?.metadata ?? (system ? { ...system.metadata, status: 'draft' } : { id });
   const candidate = { ...current, ...(input.metadata ?? {}), id, ...(derived ? { upstream: { id, version: system.metadata.version } } : {}) };
+  function derivedReference(value,oldFile,newFile) {
+    const ref=parseDependencyReference(value);
+    if(ref.kind!=='file'||ref.path.startsWith('/'))return value;
+    const location=fileReferenceLocation(c,{...base,path:oldFile},ref);
+    const internal=relative(sourceDirectory,location.target);
+    if(internal!=='..'&&!internal.startsWith('..'+sep)&&!isAbsolute(internal))return value;
+    let path=portable(relative(dirname(newFile),location.target));
+    if(!path.startsWith('../')&&!path.startsWith('./'))path='./'+path;
+    return ref.prefix+path;
+  }
+  if(derived && !Object.hasOwn(input.metadata??{},'references') && candidate.references) {
+    candidate.references=candidate.references.map(value=>derivedReference(value,join(sourceDirectory,types[type].entry),join(directory,types[type].entry)));
+  }
   const originalBody = base?.parsed.body.toString('utf8') ?? '';
   const body = input.body ?? originalBody;
   const changed = !existing || !equalValues(candidate, current) || body !== originalBody;
@@ -101,7 +114,21 @@ export function planObjectChange(state, { input = {}, dryRun = false } = {}) {
   if (!changed) return { result, changed: false };
   // Plan the complete derived directory even for previews; unsupported assets
   // must not fail only after the caller switches off --dry-run.
-  const derivedFiles = derived ? tree.files.map(f => ({ ...f, bytes: f.path.toLowerCase().endsWith('.md') ? rebaseMarkdown(f.bytes, join(sourceDirectory, f.path), join(directory, f.path), sourceDirectory) : f.bytes })) : null;
+  const derivedFiles = derived ? tree.files.map(f => {
+    const oldFile=join(sourceDirectory,f.path),newFile=join(directory,f.path);
+    let bytes=f.path.toLowerCase().endsWith('.md')?rebaseMarkdown(f.bytes,oldFile,newFile,sourceDirectory):f.bytes;
+    if(/^(?:\uFEFF)?---(?:\r?\n|$)/.test(bytes.subarray(0,16).toString('utf8'))&&!bytes.includes(0)&&Buffer.from(bytes.toString('utf8')).equals(bytes)) {
+      const parsed=parseFrontmatter(bytes,f.path);
+      const references=parsed.values.references;
+      // Ordinary resource metadata may use references for bibliography data.
+      const declarative=Array.isArray(references)&&references.every(value=>{try{parseDependencyReference(value);return true;}catch{return false;}});
+      if(declarative) {
+        const refs=parsed.values.references.map(value=>derivedReference(value,oldFile,newFile));
+        if(!equalValues(refs,parsed.values.references)){parsed.doc.set('references',refs);bytes=encodeFrontmatter(parsed);}
+      }
+    }
+    return {...f,bytes};
+  }) : null;
   if (derived && [...tree.directories, ...tree.files].some(d => d.path === '.upstream')) fail('OBJECT_BASELINE_INVALID', 'System object contains the reserved .upstream name.');
   const originalEntry = base ? (derived ? derivedFiles.find(f => f.path === types[type].entry).bytes : base.snapshot.bytes) : null;
   const actualBody = derived && !Object.hasOwn(input, 'body') ? parseFrontmatter(originalEntry, path).body.toString('utf8') : body;

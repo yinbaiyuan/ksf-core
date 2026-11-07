@@ -1,6 +1,6 @@
 // Query projections only: archived declarations remain the source of truth.
 import { ownershipOf, relatedOf } from '../routing/targets.js';
-export const virtualProjects = { 'state:none': '无项目', 'state:unresolved': '待确定', unreported: '未上报', 'state:excluded': '未记录' };
+export const virtualProjects = { 'state:none': '无项目', 'state:unresolved': '待确定', 'state:dialogue': '对话轮次', unreported: '未上报', 'state:excluded': '未记录' };
 export const projectKey = p => `${p.scope}:${p.name}`;
 export const projectLabel = p => p.name + (p.scope === 'archived' ? '（已归档）' : '');
 function primary(snapshot) {
@@ -17,7 +17,10 @@ export function turnProjects(turn) {
     if (!old || role === 'primary') entries.set(key, { key, role, label, ...(project ? { project } : {}) });
   };
   if (turn.policy === 'exclude') add('state:excluded', 'excluded', '未记录');
-  else if (!turn.routes.length) add('unreported', 'unreported', '未上报');
+  else if (!turn.routes.length) {
+    if (turn.routeFacts) add('state:dialogue', 'dialogue', virtualProjects['state:dialogue']);
+    else add('unreported', 'unreported', '未上报');
+  }
   else for (const event of turn.routes) {
     const p = primary(event.snapshot);
     if (p) {
@@ -33,9 +36,9 @@ export const ownedProjects = turn => turnProjects(turn).entries.filter(entry => 
 export function turnRelation(turn, key, history = turnProjects(turn)) {
   const match = history.entries.find(e => e.key === key);
   const last = history.sequence.at(-1);
-  const kind = match?.role ?? (turn.policy === 'exclude' ? 'excluded' : !turn.routes.length ? 'unreported'
+  const kind = match?.role ?? (turn.policy === 'exclude' ? 'excluded' : !turn.routes.length ? (turn.routeFacts ? 'dialogue' : 'unreported')
     : last?.key === 'state:none' ? 'none' : last?.key === 'state:unresolved' ? 'unresolved' : 'other');
-  const label = { primary: '本项目', reference: '仅引用', other: `其他项目${last?.project ? ` · ${last.label}` : ''}`, none: '无项目', unresolved: '待确定', unreported: '未上报', excluded: '未记录' }[kind] ?? '待确定';
+  const label = { primary: '本项目', reference: '仅引用', other: `其他项目${last?.project ? ` · ${last.label}` : ''}`, none: '无项目', unresolved: '待确定', dialogue: '对话轮次', unreported: '未上报', excluded: '未记录' }[kind] ?? '待确定';
   return { kind, label, matches: !!match };
 }
 export function projectContext(all, key) {

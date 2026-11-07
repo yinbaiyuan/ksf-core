@@ -5,7 +5,10 @@ import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { setImmediate } from 'node:timers/promises';
 import { createWorkStats, workPeriods } from '../src/services/work-stats.js';
-import { PROTOCOL, ARCHIVE, turnPath } from '../src/task-capture/storage.js';
+import { createTaskActivitySource } from '../src/services/task-activity.js';
+import { bindCurrentWork } from '../src/services/work-context.js';
+import { runTaskCommand } from '../src/commands/tasks.js';
+import { PROTOCOL, ARCHIVE, CAPTURE, turnPath } from '../src/task-capture/storage.js';
 import { projectProjection } from '../src/routing/targets.js';
 import { startWebServer } from '../src/services/web.js';
 
@@ -43,6 +46,82 @@ test('work periods use calendar midnight and Monday in IANA zones, including DST
   for (const value of ['', '../bad', 'not/a-zone']) assert.throws(() => workPeriods(Date.now(), value), error => error.code === 'INVALID_ARGUMENTS');
 });
 
+test('project activity counts local dates and explicit relations once, while preserving capture exclusions', async t => {
+  const f = fixture(t);
+  const target = project('本项目');
+  const related = route(project('别的项目'), 0, [target]);
+  const primary = route(target, 1);
+  f.save(`${CAPTURE}/config.json`, { protocol: PROTOCOL, activatedAt: '2026-09-01T00:00:00Z', enabled: false });
+  const answered = (userAt, answerAt, extra = {}) => ({
+    messages: [
+      { id: 'user', role: 'user', at: userAt, content: [{ type: 'input_text', text: '测试' }], revisions: [] },
+      { id: 'final', role: 'assistant', phase: 'final_answer', sourceAt: answerAt,
+        content: [{ type: 'output_text', text: '最终回答' }], revisions: [] }
+    ], ...extra
+  });
+  f.put('a', 'before-window', '2026-09-28T15:59:59Z', [primary], answered('2026-09-28T16:00:01Z', '2026-09-28T16:00:04Z'));
+  f.put('a', 'first-day', '2026-09-28T16:00:00Z', [related]);
+  f.put('a', 'before-midnight', '2026-10-27T15:59:59Z', [related, primary, related], answered('2026-10-27T15:59:59.500Z', '2026-10-27T16:00:08.500Z', {
+    completedAt: '2026-10-27T16:00:10Z', updatedAt: '2026-10-28T02:00:00Z'
+  }));
+  f.put('a', 'at-midnight', '2026-10-27T16:00:00Z', [primary], answered('2026-10-27T16:00:01Z', '2026-10-27T15:59:59Z'));
+  f.put('a', 'text-only', '2026-10-28T01:00:00Z', []);
+  f.put('a', 'other-project', '2026-10-28T01:00:00Z', [route(project('本项目-子项目'))], answered('2026-10-28T01:00:00Z', '2026-10-28T01:10:00Z'));
+  f.put('a', 'archived-scope', '2026-10-28T01:00:00Z', [route({ ...target, scope: 'archived', path: '档案/项目/本项目/project.md' })]);
+  f.put('a', 'future', '2026-10-28T06:00:00Z', [primary]);
+  f.put('b', 'held', undefined, [primary], answered('2026-10-28T01:00:00Z', '2026-10-28T01:10:00Z', { capturePolicyHeld: true }));
+  f.put('b', 'excluded', undefined, [], { policy: 'exclude', status: 'excluded', messages: [] });
+  f.put('b', 'broken', undefined, [primary]);
+  writeFileSync(join(f.root, turnPath(ids.b, 'broken')), '{');
+  const source = createTaskActivitySource(f.root, { now: () => Date.parse('2026-10-28T04:00:00Z') });
+  const result = await source.readProject({ name: '本项目', scope: 'current', timeZone: 'Asia/Shanghai' });
+  assert.equal(result.days.length, 30);
+  assert.deepEqual(result.days[0], { date: '2026-09-29', count: 1 });
+  assert.deepEqual(result.days.slice(-2), [{ date: '2026-10-27', count: 1 }, { date: '2026-10-28', count: 1 }]);
+  assert.equal(result.total, 3);
+  assert.deepEqual(result.duration, { totalMs: 12_000, measuredTurns: 2, unmeasuredTurns: 2 });
+  assert.equal(result.captureEnabled, false);
+  assert.equal(result.partial, true);
+  assert.deepEqual(Object.keys(result).sort(), ['captureEnabled','days','duration','partial','timeZone','total']);
+  assert.equal((await source.read()).activity.some(row => Object.hasOwn(row, 'projectKeys') || Object.hasOwn(row, 'answeredAt')), false);
+  await assert.rejects(source.readProject({ name: '本项目', scope: 'current', timeZone: 'invalid' }), { code: 'INVALID_ARGUMENTS' });
+});
+
+test('project cards use archived work arrangements without turning them into chat ownership', async t => {
+  const f = fixture(t), target = project('日用子项目'), other = project('另一个项目');
+  const arrangement = { relatedProjects: [project('仅关联')], executor: null, methods: [] };
+  const facts = extra => ({ routeFacts: { abilityIds: [], workChanges: [], ...extra } });
+  const opening = (turnId, revision, at, selected = target) => ({ turnId, revision, at,
+    project: selected, projectChanged: true, arrangement });
+  const answered = at => ({ messages: [
+    { id: 'u', role: 'user', at, content: [{ type: 'input_text', text: '已收到' }], revisions: [] },
+    { id: 'a', role: 'assistant', phase: 'final_answer', sourceAt: new Date(Date.parse(at) + 6_000).toISOString(),
+      content: [{ type: 'output_text', text: '已交付' }], revisions: [] },
+  ] });
+  const at = '2026-10-28T01:00:00Z';
+  f.put('a', 'a-open', at, [], { ...facts({ workChanges: [opening('a-open', 1, at), opening('a-open', 2, at)] }), ...answered(at) });
+  f.put('a', 'b-continue', '2026-10-28T02:00:00Z', [], { ...facts({ startingArrangementRevision: 2 }), ...answered('2026-10-28T02:00:00Z') });
+  f.put('a', 'c-start', '2026-10-28T03:00:00Z', [], facts({ startingProject: { name: target.name, scope: target.scope } }));
+  f.put('a', 'd-explicit', '2026-10-28T04:00:00Z', [route(other)], facts({ startingArrangementRevision: 2 }));
+  f.put('b', 'foreign-pointer', '2026-10-28T03:00:00Z', [], facts({ startingArrangementRevision: 2 }));
+  f.put('b', 'held', at, [], { ...facts({ workChanges: [opening('held', 3, at)] }), capturePolicyHeld: true });
+  f.put('b', 'private-pointer', '2026-10-28T03:00:00Z', [], facts({ startingArrangementRevision: 3 }));
+  f.put('c', 'no-evidence', '2026-10-28T03:00:00Z', [], facts({ abilityIds: ['partner.test.one'] }));
+
+  const source = createTaskActivitySource(f.root, { now: () => Date.parse('2026-10-28T05:00:00Z') });
+  const readProject = name => source.readProject({ name, scope: 'current', timeZone: 'Asia/Shanghai' });
+  const result = await readProject(target.name);
+  assert.equal(result.total, 3);
+  assert.equal(result.days.at(-1).count, 3);
+  assert.deepEqual(result.duration, { totalMs: 12_000, measuredTurns: 2, unmeasuredTurns: 1 });
+  assert.equal(result.partial, false);
+  assert.equal((await readProject(other.name)).total, 1);
+  assert.equal((await readProject('仅关联')).total, 0);
+  const { activity } = await source.read();
+  assert.deepEqual(activity.find(row => row.turnId === 'b-continue').primaryTargets, []);
+  assert.equal(activity.some(row => ['arrangements', 'openingRevision', 'startingProject'].some(key => Object.hasOwn(row, key))), false);
+});
+
 test('counts active chats and native turns, primary history and stable identities without leaking bodies or adopted abilities', async t => {
   const f = fixture(t), at = Date.parse('2026-10-28T12:00:00+08:00');
   f.put('a', 'old', '2026-10-25T23:59:59+08:00', [route(project('旧项目'))]);
@@ -66,6 +145,58 @@ test('counts active chats and native turns, primary history and stable identitie
   assert.equal(stats.activity.filter(row => row.turnId === 'monday')[0].primaryTargets.length, 2);
   assert.doesNotMatch(JSON.stringify(stats), /正文|工具证据|仅采用能力|仅关联/);
   assert.ok(stats.activity.every(row => row.startedAt.endsWith('Z')));
+});
+
+test('task CLI counts and pages the same captured turns by work project and ability participation', async t => {
+  const f = fixture(t), name = 'CLI 项目', objectId = 'partner.test.one';
+  const target = project(name), adopted = { ...ability(objectId), stage: 'adopted' };
+  const use = (project, abilityIds = [objectId]) => ({ routeFacts: {
+    startingProject: { name: project.name, scope: project.scope }, workChanges: [], abilityIds,
+  } });
+  const env = { CODEX_THREAD_ID: 'project-query-test' };
+  const run = async (...args) => {
+    const result = await runTaskCommand([...args, '--json'], f.root, { env });
+    return { ...JSON.parse(result.stdout), exitCode: result.exitCode };
+  };
+  assert.equal((await run('stats')).errors[0].code, 'TASK_CURRENT_PROJECT_REQUIRED');
+  mkdirSync(dirname(join(f.root, target.path)), { recursive: true });
+  writeFileSync(join(f.root, target.path), '---\nname: CLI 项目\nstatus: active\n---\n# CLI 项目\n');
+  bindCurrentWork({ root: f.root, env, ifMatch: 'missing', current: {
+    schemaVersion: 1, goal: '统计验证', status: 'active', ownership: { state: 'bound', target: { kind: 'project', name, scope: 'current' } },
+    executor: null, methods: [], files: [], taskRef: null,
+  } });
+  const legacy = route(target);
+  legacy.snapshot.abilities = [adopted];
+  const reviewed = route(ability(objectId));
+  reviewed.snapshot.abilities = [{ ...adopted, stage: 'read' }];
+  f.put('a', 'project-only', '2026-10-28T01:00:00Z', [], use(target, []));
+  f.put('a', 'adopted', '2026-10-28T02:00:00Z', [legacy]);
+  f.put('a', 'both-sources', '2026-10-28T03:00:00Z', [legacy], use(target));
+  f.put('b', 'ability-only', '2026-10-28T04:00:00Z', [], use(project('另一个项目')));
+  f.put('b', 'reviewed', '2026-10-28T05:00:00Z', [reviewed]);
+  f.put('c', 'held', '2026-10-28T06:00:00Z', [], { ...use(target), chatPolicyHeld: true });
+
+  const byProject = await run('stats', '--time-zone', 'Asia/Shanghai');
+  assert.equal(byProject.exitCode, 0);
+  assert.equal(byProject.data.turnCount, 3);
+  assert.equal(byProject.data.chatCount, 1);
+  assert.equal((await run('stats', '--ability', objectId)).data.turnCount, 3);
+  const both = await run('stats', '--current-project', '--ability', objectId);
+  assert.equal(both.data.turnCount, 2);
+
+  const selectors = ['--project', `current:${name}`, '--ability', objectId];
+  const summary = await run('turns', ...selectors, '--limit', '1');
+  assert.equal(summary.data.total, 2);
+  assert.equal(summary.data.nextOffset, 1);
+  assert.equal(summary.data.turns[0].turnId, 'both-sources');
+  assert.doesNotMatch(JSON.stringify(summary), /正文不能进入|回答正文|"messages"/);
+  const full = await run('turns', ...selectors, '--offset', '1', '--with-messages');
+  assert.equal(full.exitCode, 0);
+  assert.equal(full.data.nextOffset, null);
+  assert.equal(full.data.turns[0].turnId, 'adopted');
+  assert.equal(full.data.turns[0].turn.messages.length, 2);
+  assert.equal(full.data.turns[0].turn.routes.length, 1);
+  assert.equal((await run('stats', '--ability', `${objectId}@0.1.0`)).exitCode, 2);
 });
 
 test('incremental cache reads changed files only, shares concurrent computation and never writes archive data', async t => {

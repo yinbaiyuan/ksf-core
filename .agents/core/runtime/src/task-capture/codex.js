@@ -3,10 +3,20 @@ import { createReadStream, lstatSync, readdirSync, readFileSync, openSync, readS
 import { join, resolve } from 'node:path';
 import { isToken, fail, encode } from '../routing/schema.js';
 import { sha256 } from '../shared/hash.js';
+import { hasCaptureRestriction } from './policy.js';
+import { inputKey, inputScope } from './input-scope.js';
 
 const nativeTime = (value, fallback) => typeof value === 'number' && Number.isFinite(value)
   ? new Date(value < 100_000_000_000 ? value * 1000 : value).toISOString()
   : typeof value === 'string' && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : fallback;
+
+export const nativeStartedAt = row => nativeTime(row.timestamp, nativeTime(row.payload?.started_at));
+export function nativeSessionBaseline(meta, activatedAt) {
+  const activated = Date.parse(activatedAt), created = Date.parse(meta.timestamp);
+  if (!Number.isFinite(activated) || meta.parent_thread_id && !Number.isFinite(created))
+    fail('TASK_SOURCE_UNSUPPORTED', 'A fork needs a reliable native creation boundary; inherited turns were not imported.');
+  return new Date(Math.max(activated, Number.isFinite(created) ? created : activated)).toISOString();
+}
 
 export function sourceMeta(path) {
   const stat = lstatSync(path);
@@ -23,10 +33,14 @@ export function sourceMeta(path) {
     const bytes = Buffer.concat(chunks); end = bytes.indexOf(10);
     if (end < 0) fail('TASK_SOURCE_UNSUPPORTED', 'Missing supported session metadata.');
     let row;
-    try { row = JSON.parse(bytes.subarray(0, end).toString('utf8')); }
+    try { row = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes.subarray(0, end))); }
     catch { fail('TASK_SOURCE_UNSUPPORTED', 'Invalid or unknown Codex transcript metadata.'); }
     if (row.type !== 'session_meta' || !row.payload?.id) fail('TASK_SOURCE_UNSUPPORTED', 'Unknown Codex transcript metadata.');
-    return { meta: row.payload, stat };
+    const meta = row.payload;
+    const parentIds = [meta.parent_thread_id, meta.forked_from_id].filter(id => id != null);
+    if (parentIds.some(id => !isToken(id) || id !== parentIds[0] || id === meta.id))
+      fail('TASK_SOURCE_IDENTITY', 'Invalid or conflicting native fork identity.');
+    return { meta: parentIds.length ? { ...meta, parent_thread_id: parentIds[0] } : meta, stat };
   } finally { closeSync(fd); }
 }
 export function belongsToRoot(meta, root) {
@@ -86,12 +100,14 @@ async function* sourceLines(stream, start) {
     let begin = 0, end;
     while ((end = pending.indexOf(10, begin)) >= 0) {
       const bytes = pending.subarray(begin, end);
-      yield { line: bytes.toString('utf8').replace(/\r$/, ''), offset: position, end: position + end - begin + 1, complete: true };
+      let line, encodingError = false;
+      try { line = new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/\r$/, ''); } catch { encodingError = true; }
+      yield { line, encodingError, offset: position, end: position + end - begin + 1, complete: true };
       position += end - begin + 1; begin = end + 1;
     }
     pending = pending.subarray(begin);
   }
-  if (pending.length) yield { line: pending.toString('utf8'), offset: position, end: position, complete: false };
+  if (pending.length) yield { offset: position, end: position, complete: false };
 }
 // Metadata-only reconciliation for chat counters. Never retain message bodies,
 // tool outputs or pre-activation native turns in the chat-state store.
@@ -100,6 +116,7 @@ export async function nativeTurnState(path, activatedAt) {
   try {
     for await (const entry of sourceLines(stream, 0)) {
       if (!entry.complete) { partial = true; continue; } // Hooks may supply a boundary before its final flush.
+      if (entry.encodingError) fail('CHAT_SOURCE_PARTIAL', 'Native transcript has invalid UTF-8; counting is unconfirmed.');
       let row;
       try { row = JSON.parse(entry.line); } catch { fail('CHAT_SOURCE_PARTIAL', 'Native transcript contains an unreadable record; counting is unconfirmed.'); }
       if (row.type === 'turn_context' && current && row.payload?.turn_id !== current.turnId) current.state = 'unconfirmed';
@@ -107,7 +124,7 @@ export async function nativeTurnState(path, activatedAt) {
       // Desktop started_at may be whole seconds while the envelope timestamp
       // and session creation include milliseconds. Preserve that precision so
       // a real first turn does not appear to precede its own thread creation.
-      const p = row.payload ?? {}, at = nativeTime(row.timestamp, nativeTime(p.started_at));
+      const p = row.payload ?? {}, at = nativeStartedAt(row);
       if (['task_complete','turn_aborted','task_interrupted'].includes(p?.type)) {
         if (current && (!p.turn_id || p.turn_id === current.turnId)) current.state = p.type === 'task_complete' ? 'completed' : 'interrupted';
         continue;
@@ -121,7 +138,7 @@ export async function nativeTurnState(path, activatedAt) {
   return { turnIds: [...ids], current, partial };
 }
 export async function nativeTurnsSince(path, activatedAt) { return (await nativeTurnState(path, activatedAt)).turnIds; }
-export const TRANSCRIPT_ADAPTER_VERSION = 1;
+export const TRANSCRIPT_ADAPTER_VERSION = 3;
 export async function parseTranscript(path, activatedAt, startOffset = 0, { allowDelegatedInput = false } = {}) {
   const result = { turns: new Map(), issues: [], bytes: startOffset, nextOffset: startOffset };
   const stream = createReadStream(path, { start: startOffset });
@@ -129,19 +146,25 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
   const get = id => result.turns.get(id);
   try {
     for await (const entry of sourceLines(stream, startOffset)) {
-      const { line, offset, end, complete } = entry;
+      const { line, offset, end, complete, encodingError } = entry;
       lineNumber++; order = offset; result.bytes = end;
-      if (!complete) { result.issues.push({ code: 'TASK_SOURCE_PARTIAL', line: lineNumber }); continue; }
+      if (!complete) { result.issues.push({ code: 'TASK_SOURCE_PARTIAL', scope: 'source', offset, retryable: true }); continue; }
       result.nextOffset = end;
       let row;
-      try { row = JSON.parse(line); } catch { result.issues.push({ code: 'TASK_SOURCE_PARTIAL', line: lineNumber }); continue; }
+      try { if (encodingError) throw new Error(); row = JSON.parse(line); }
+      catch {
+        const issue = { code: encodingError ? 'TASK_SOURCE_ENCODING' : 'TASK_SOURCE_PARTIAL', scope: active && get(active) ? 'turn' : 'source', offset };
+        result.issues.push(issue); get(active)?.issues.push(issue);
+        active = null; // An unreadable record could contain a native boundary.
+        continue;
+      }
       const p = row.payload ?? {}, at = row.timestamp, event = row.type === 'event_msg';
       if (event && p.type === 'task_started') {
         active = p.turn_id;
-        const start = nativeTime(p.started_at, at);
+        const start = nativeStartedAt(row);
         if (!isToken(active) || !Number.isFinite(Date.parse(start))) fail('TASK_SOURCE_UNSUPPORTED', 'Unknown native turn boundary format.');
         if (isToken(active) && Number.isFinite(Date.parse(start)) && Date.parse(start) > Date.parse(activatedAt) && !get(active))
-          result.turns.set(active, { turnId: active, startedAt: start, startOffset: offset, messages: [], outputs: [], questions: new Map(), complete: false, interrupted: false, issues: [],
+          result.turns.set(active, { turnId: active, startedAt: start, startOffset: offset, messages: [], inputs: [], outputs: [], questions: new Map(), complete: false, interrupted: false, issues: [],
             delegatedInput: allowDelegatedInput && p.turn_attribution?.turn_trigger === 'app_tool_create_thread' });
         continue;
       }
@@ -149,6 +172,13 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
       const native = p.internal_chat_message_metadata_passthrough?.turn_id ?? row.metadata?.retained_source?.id?.turn_id ?? p.turn_id ?? active;
       const turn = get(native);
       if (!turn) continue; // No reliable new native boundary: never import a historical body.
+      const addMessage = message => {
+        turn.messages.push(message);
+        if (message.role === 'user') {
+          const key = inputKey(message);
+          if (!turn.inputs.some(input => input.key === key)) turn.inputs.push({ key, restricted: hasCaptureRestriction([message]), sourceAt: message.sourceAt });
+        }
+      };
       if (event && p.type === 'task_complete') { turn.complete = true; turn.completedAt = nativeTime(p.completed_at, at); continue; }
       if (event && ['turn_aborted', 'task_interrupted'].includes(p.type)) { turn.interrupted = true; continue; }
       if (row.type !== 'response_item') continue;
@@ -159,7 +189,7 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
         if (!id) { turn.issues.push({ code: 'TASK_MESSAGE_ID_MISSING', line: lineNumber }); continue; }
         const message = { id, role: p.role, phase: p.phase ?? (p.role === 'user' ? 'input' : 'unknown'),
           at: nativeTime(p.internal_chat_message_metadata_passthrough?.create_time, at), sourceAt: at, order: ++order, content };
-        turn.messages.push(message);
+        addMessage(message);
       } else if (['function_call', 'custom_tool_call'].includes(p.type)) {
         if (/^(?:.*[._])?request_user_input(?:_async)?$/.test(p.name ?? '')) {
           try { turn.questions.set(p.call_id, { name: p.name, questions: JSON.parse(p.arguments ?? p.input).questions, at, order: ++order }); } catch { turn.issues.push({ code: 'TASK_QUESTION_INVALID' }); }
@@ -169,12 +199,12 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
         // create_thread output. Other tool results and quoted wrappers stay data.
         if (turn.delegatedInput && p.type === 'function_call_output' && p.namespace === 'codex_app' && p.name === 'create_thread' && typeof p.output === 'string') {
           const match = /^\s*<codex_delegation>\s*<source_thread_id>([^<]+)<\/source_thread_id>\s*<input>([\s\S]*)<\/input>\s*<\/codex_delegation>\s*$/.exec(p.output);
-          if (match && isToken(match[1]) && match[2].trim() && p.id) turn.messages.push({ id:p.id, role:'user', phase:'delegated_input',
+          if (match && isToken(match[1]) && match[2].trim() && p.id) addMessage({ id:p.id, role:'user', phase:'delegated_input',
             at:nativeTime(p.internal_chat_message_metadata_passthrough?.create_time,at), sourceAt:at, order:++order,
             origin:{kind:'codex-app-create-thread',sourceThreadId:match[1]}, content:[{type:'input_text',text:match[2]}] });
         }
         const encoded = typeof p.output === 'string' ? p.output : JSON.stringify(p.output) ?? '';
-        if (encoded.includes('KSF_TASK_RECEIPT:')) turn.outputs.push({ output: p.output, at, order: ++order });
+        if (encoded.includes('KSF_TASK_RECEIPT:')) turn.outputs.push({ output: p.output, at, order: ++order, inputs: structuredClone(turn.inputs) });
         const question = turn.questions.get(p.call_id);
         if (question) {
           let answer;
@@ -182,7 +212,7 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
           // Async acknowledgements are not human answers; their later user message is authoritative.
           turn.messages.push({ id: `question:${p.call_id}`, role: 'assistant', phase: 'question', at: question.at, order: question.order,
             content: [{ type: 'text', text: JSON.stringify({ questions: question.questions }, null, 2) }] });
-          if (answer && (answer.answers || answer.responses)) turn.messages.push({ id: `answer:${p.call_id}`, role: 'user', phase: 'answer', at, order,
+          if (answer && (answer.answers || answer.responses)) addMessage({ id: `answer:${p.call_id}`, role: 'user', phase: 'answer', at, sourceAt: at, order,
             content: [{ type: 'text', text: JSON.stringify(answer.answers ?? answer.responses, null, 2) }] });
         }
       }
@@ -200,7 +230,7 @@ export async function parseTranscript(path, activatedAt, startOffset = 0, { allo
       }
     }
     turn.messages = [...unique.values()].sort((a, b) => a.order - b.order);
-    turn.issues.push(...result.issues);
+    turn.inputScope = inputScope(turn.inputs);
     if (!turn.messages.some(m => m.role === 'user')) turn.issues.push({ code: 'TASK_USER_MESSAGE_MISSING' });
   }
   return result;

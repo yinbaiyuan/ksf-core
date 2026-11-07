@@ -42,6 +42,30 @@ test('文件预览限制在所选项目且拒绝路径越界、符号链接和�
   await writeFile(join(root,'项目/示例/大.md'),'x'.repeat(2*1024*1024+1));await assert.rejects(app.call('file',{...params,path:'项目/示例/大.md'}),/2 MB/);
 });
 
+test('项目上下文列出项目根目录的原件，排除里程碑分支并按需展开普通目录',async t=>{
+  const {root,app,params,p}=await fixture(t);
+  const base=p.directory;
+  p.metadata.milestones=[{path:base+'/M1-已登记/milestone.md'}];
+  for(const dir of ['M1-已登记/任务','M2-未登记','M3-普通资料','里程碑','资料/里程碑','node_modules']){
+    await mkdir(join(root,base,dir),{recursive:true});
+  }
+  for(const file of ['project.md','灵感闪现.md','.DS_Store','.env','M2-未登记/milestone.md','资料/里程碑/记录.txt']){
+    await writeFile(join(root,base,file),'原件');
+  }
+  await symlink(join(root,'项目/其他'),join(root,base,'链接'));
+  const list=path=>app.call('project-context-list',{...params,path});
+  const {entries}=await list();
+  assert.deepEqual(new Set(entries.map(entry=>entry.name)),new Set(['M3-普通资料','资料','任务','project.md','灵感闪现.md']));
+  assert.deepEqual((await list(base+'/资料')).entries,[{name:'里程碑',path:base+'/资料/里程碑',kind:'directory'}]);
+  const [entry]=(await list(base+'/资料/里程碑')).entries;
+  assert.deepEqual(entry,{name:'记录.txt',path:base+'/资料/里程碑/记录.txt',kind:'file'});
+  assert.equal((await app.call('file',{...params,path:entry.path,raw:true})).body,'原件');
+  await assert.rejects(list(base+'/M1-已登记/任务'),/从里程碑入口查看/);
+  await assert.rejects(list(base+'/里程碑'),/从里程碑入口查看/);
+  await assert.rejects(list(base+'/../其他'),/该项目/);
+  await assert.rejects(list(base+'/链接'),/符号链接/);
+});
+
 test('聊天查询使用明确项目归属与分页参数，返回项目内的默认轮次',async t=>{
   const {app,calls,params}=await fixture(t);const result=await app.call('chats',{...params,offset:20});
   assert.deepEqual(calls.at(-1),['task','list','--target','current:示例','--limit','20','--offset','20']);assert.equal(result.records[0].turnId,'native-1');assert.equal(result.records[0].summary,'明确记录的进展');assert.equal(result.total,23);
@@ -53,6 +77,24 @@ test('显示设置重开保留，串行保存不会留下半文件，关闭后�
   await Promise.all([app.call('preferences.save',{selected:'current:示例',tab:'overview'}),app.call('preferences.save',{selected:'current:示例',tab:'tasks'})]);
   const reopened=createBackend({workspace:root,dataDirectory:join(root,'.app-data')});assert.equal((await reopened.call('preferences.read')).tab,'tasks');await reopened.dispose();
   await app.dispose();await assert.rejects(app.call('list'),/已关闭/);
+});
+
+test('固定项目是按范围区分的持久设置，独立更新不会覆盖其他窗口的固定项',async t=>{
+  const {app,root,params}=await fixture(t);
+  await app.call('preferences.save',{selected:'current:示例',tab:'tasks'});
+  await Promise.all([
+    app.call('preferences.pin',{...params,pinned:true}),
+    app.call('preferences.pin',{...params,scope:'archived',pinned:true})
+  ]);
+  await app.call('preferences.pin',{...params,pinned:true});
+  await app.call('preferences.save',{selected:'current:示例',tab:'plan'});
+  const reopened=createBackend({workspace:root,dataDirectory:join(root,'.app-data')});
+  t.after(()=>reopened.dispose());
+  assert.deepEqual(await reopened.call('preferences.read'),{
+    schemaVersion:1,selected:'current:示例',tab:'plan',pinnedProjects:['current:示例','archived:示例']
+  });
+  await reopened.call('preferences.pin',{...params,pinned:false});
+  assert.deepEqual((await reopened.call('preferences.read')).pinnedProjects,['archived:示例']);
 });
 
 test('Markdown 元数据和章节解析不把代码块标题当作真实章节',()=>{

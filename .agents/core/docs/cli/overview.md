@@ -15,7 +15,7 @@ updated: 2026-10-27
 
 KSF CLI 当前提供启动准备、运行检查、manifest 构建、JavaScript 测试、项目基础管理、独立工程仓库管理、能力源直接关联与分享、Markdown 元数据、四类能力对象管理与能力上下文组织能力。本文件作为 CLI 能力总入口，记录可执行命令、输入输出、文件影响和实现范围。新增命令或改变行为时，在这里同步更新，再链接到对应的实现说明。
 
-项目筛选、知识读取及已授权资产维护由 ksf-runtime 的三项运行基本功组织，使用 project 等现有 CLI 与宿主文件工具，见[最小运行闭环](../runtime/minimal-runtime.md)。项目 CLI 不代替 Agent 的归属判断，也不提供自动项目绑定、知识语义索引或跨文件事务服务；运行基本功纳入固定系统对象保护。
+Runtime组织当前目标与工作绑定，人设路由提供基础设定，项目与能力路由按需准备事实和承接安排；六类管理职责由相应搭档及专业方法承接，使用project等现有CLI与宿主文件工具，见[完整运行机制](../runtime/work-context.md)。项目CLI不代替Agent的归属判断，context bind保存Agent已确定的安排；程序不提供知识语义索引或通用跨文件事务。固定入口、Runtime及能力/项目路由受系统对象保护，固定保护不等于全文预载。
 
 KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js 当前为 `24.21.0`。当前随包目标为 **macOS ARM64 与 Windows x64**，共用业务CLI，原生入口、进程与文件适配分别验证；其他架构与Linux没有完整发行验收结论。支持与实测范围见[平台边界](../runtime/platforms.md)。
 
@@ -45,7 +45,7 @@ KSF 系统版本以 [manifest.yaml](../../manifest.yaml) 为准，随包 Node.js
 | `hello` | 输出 `Hello, KSF!`，检查调用链是否可用 | 是，`hello --json` | 无 |
 | `web` | 前台启动任务路由工作台、只读接口与健康接口，随包 Node 提供预构建前端 | 是，`web --json` 输出一次就绪结果 | 已启用时补采对话档案；请求只读；停止后释放端口 |
 | `route start/write/read/list` | 按原生宿主会话保存 Agent 明确报告的项目与能力安排，查询来源变化 | 是 | 仅 start/write 写入本地 routing/v1；开关关闭或 no-save 时跳过 |
-| `task list/read/sync/status/hooks/declare/hook` | Codex 聊天任务归档、只读声明、Hooks 与补采 | 是 | 查询与 declare 只读；hooks 配置并建立未来基线；sync/hook 保存原件与游标，见 [task](task.md) |
+| `task list/read/stats/turns/sync/status/hooks/declare/hook` | Codex 聊天任务归档、轮次统计、只读声明、Hooks 与补采 | 是 | 查询与 declare 只读；hooks 配置并建立未来基线；sync/hook 保存原件与游标，见 [task](task.md) |
 | `chat hooks/read/context/use/write/remove/restart` | 当前聊天轮次、能力参与轮次、动态变量与有界自动状态注入 | 是 | hooks 建未来基线，原生 Hook 登记聊天计数并只读注入状态；read/context 只读，采用及修改仍显式执行，见 [chat](chat.md) |
 | `runtime verify` | 完整验证随包压缩包及已安装 Node；损坏时可重新准备 | 是，`runtime verify --json` | 可能更新安装记录或修复运行时 |
 | `build` | 校验构建输入和各平台包，生成 manifest | 是，`build --json` | 原子替换 `.agents/core/manifest.yaml` |
@@ -231,7 +231,7 @@ project、context、metadata 与四类对象的业务成功与失败 JSON 都进
 
 ```sh
 .agents/ksf cooperation list --json
-.agents/ksf partner read partner.ksf.object-designer --part all --json
+.agents/ksf partner read partner.ksf.ability-manager --part all --json
 .agents/ksf competency check competency.ksf.partner-design --json
 ```
 

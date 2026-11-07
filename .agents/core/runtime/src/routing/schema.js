@@ -31,10 +31,10 @@ export function validateProject(value) {
   keys(value, ['name', 'scope'], 'project target');
   if (!text(value.name, 200) || /[\\/]/.test(value.name) || ['.', '..'].includes(value.name) || !['current', 'archived'].includes(value.scope)) invalid('Project target needs a name and current/archived scope.');
 }
-export const targetKinds = ['project', 'knowledge', 'ability', 'archive'];
+export const targetKinds = ['project', 'knowledge', 'ability', 'archive', 'inbox', 'persona'];
 const relativePath = (value, prefix) => text(value, 2048) && value.startsWith(prefix + '/') && value.split('/').every(p => p && p !== '.' && p !== '..' && !/[\\:\x00-\x1f]/.test(p));
 export function validateTarget(value) {
-  if (!plain(value) || !targetKinds.includes(value.kind)) invalid('Target kind must be project, knowledge, ability or archive.');
+  if (!plain(value) || !targetKinds.includes(value.kind)) invalid('Target kind must be project, knowledge, ability, archive, inbox or persona.');
   if (value.targetId !== undefined) {
     keys(value, ['kind', 'targetId'], 'target identity');
     if (!isKey(value.targetId)) invalid('Supply a valid stable targetId.');
@@ -49,6 +49,12 @@ export function validateTarget(value) {
   } else if (value.kind === 'ability') {
     keys(value, ['kind', 'ref', 'source'], 'ability target'); parseReference(value.ref);
     if (!['effective', 'user', 'system'].includes(value.source) && !validSourceId(value.source)) invalid('Ability target needs an explicit source.');
+  } else if (value.kind === 'inbox') {
+    keys(value, ['kind', 'path'], 'inbox target');
+    if (value.path !== '@收件箱' && !relativePath(value.path, '@收件箱')) invalid('Inbox target needs an exact file or directory under @收件箱/.');
+  } else if (value.kind === 'persona') {
+    keys(value, ['kind', 'path'], 'persona target');
+    if (!['USER.md', 'BOT.md'].includes(value.path)) invalid('Persona target must identify USER.md or BOT.md.');
   } else {
     keys(value, ['kind', 'path'], 'archive target');
     if (!relativePath(value.path, '档案')) invalid('Archive target needs an exact file or directory under 档案/.');
@@ -71,7 +77,7 @@ export function validateStoredTarget(t) {
   }
   if (!text(t.path, 2048)) invalid('Stored target needs its historical path.');
   if (t.kind === 'project') validateProject({ name: t.name, scope: t.scope });
-  else if (t.kind === 'knowledge' || t.kind === 'archive') validateTarget({ kind: t.kind, path: t.path });
+  else if (['knowledge','archive','inbox','persona'].includes(t.kind)) validateTarget({ kind: t.kind, path: t.path });
   else {
     if (!['user', 'system', 'effective'].includes(t.source) && !validSourceId(t.source)) invalid('Invalid historical ability source.');
     const ref = parseStoredReference(t.ref);

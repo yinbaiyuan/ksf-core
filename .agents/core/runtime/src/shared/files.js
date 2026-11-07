@@ -23,6 +23,18 @@ export function readFileSnapshot(target, { entry = lstatSync(target), noFollow =
 
 export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, onCleanup } = {}) {
   let fd, owned;
+  const release = () => {
+    if (fd !== undefined) closeSync(fd);
+    if (!owned) return;
+    try {
+      const current = lstatSync(path);
+      if (owned.dev === current.dev && owned.ino === current.ino) unlinkSync(path);
+      else onReplaced?.();
+    } catch (error) {
+      if (error.code !== 'ENOENT') { if (onCleanup) onCleanup(error); else throw error; }
+    }
+  };
+  let result;
   try {
     try { fd = openSync(path, 'wx', 0o600); }
     catch (error) { if (error.code === 'EEXIST') onLocked?.(); throw error; }
@@ -31,17 +43,14 @@ export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, o
     // Exclusivity belongs to the atomically created name. Retaining its file
     // handle is unnecessary and blocks parent-directory publication on Windows.
     closeSync(fd); fd = undefined;
-    return action({ lock: path });
-  } finally {
-    if (fd !== undefined) closeSync(fd);
-    if (owned) {
-      try {
-        const current = lstatSync(path);
-        if (owned.dev === current.dev && owned.ino === current.ino) unlinkSync(path);
-        else onReplaced?.();
-      } catch (error) { if (error.code !== 'ENOENT') { if (onCleanup) onCleanup(error); else throw error; } }
-    }
+    result = action({ lock: path });
+  } catch (error) {
+    release();
+    throw error;
   }
+  if (result instanceof Promise) return result.finally(release);
+  release();
+  return result;
 }
 
 export function writeDurably(path, bytes, { mode = 0o600, exclusive = true } = {}) {

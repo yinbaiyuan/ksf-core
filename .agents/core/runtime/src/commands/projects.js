@@ -4,12 +4,14 @@ import { MetadataError, invalid } from '../metadata/errors.js';
 import { readInputFile } from '../services/metadata.js';
 import { project, errorItem } from '../services/projects.js';
 import { runProjectManagementCommand } from './project-management.js';
+import {runProjectGovernanceCommand} from './project-governance.js';
 
 const supported = {
   list: ['scope', 'json', 'help'], read: ['scope', 'part', 'json', 'help'],
   write: ['scope', 'data', 'from', 'dry-run', 'json', 'help'],
   remove: ['scope', 'dry-run', 'json', 'help'], check: ['scope', 'json', 'help'],
-  archive: ['reason', 'dry-run', 'json', 'help'], restore: ['status', 'dry-run', 'json', 'help'], recover: ['dry-run', 'json', 'help'],
+  archive: ['reason', 'data', 'from', 'dry-run', 'json', 'help'], restore: ['status', 'data', 'from', 'dry-run', 'json', 'help'], recover: ['dry-run', 'json', 'help'],
+  locate: ['source','digest','json','help'],
 };
 const usages = {
   list: 'list [--scope current|archived|all] [--json]',
@@ -17,14 +19,15 @@ const usages = {
   write: 'write <name> [--scope current|archived] (--data <JSON> | --from <file>) [--dry-run] [--json]',
   remove: 'remove <name> [--scope current|archived] [--dry-run] [--json]',
   check: 'check [name] [--scope current|archived|all] [--json]',
-  archive: 'archive <name> --reason <text> [--dry-run] [--json]',
-  restore: 'restore <name> [--status <text>] [--dry-run] [--json]',
+  archive: 'archive <name> [--reason <text>] [--from <file>|--data <JSON>] [--dry-run] [--json]',
+  restore: 'restore <name> [--status <text>] [--from <file>|--data <JSON>] [--dry-run] [--json]',
+  locate: 'locate <path> [--source <document-path>] [--digest <sha256>] [--json]',
   recover: 'recover <operation-id> [--dry-run] [--json]',
 };
 
 export function projectHelp(operation) {
   return `KSF project${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
-    (operation ? [usages[operation]] : [...Object.values(usages), 'management read|check|write <name> [--help]']).map(usage => `  ksf project ${usage}`).join('\n') + '\n\n' +
+    (operation ? [usages[operation]] : [...Object.values(usages), 'management read|check|write <name> [--help]', 'governance read|check|apply|migrate|create-task|renumber|reorganize|context-list|recover <target> [--help]']).map(usage => `  ksf project ${usage}`).join('\n') + '\n\n' +
     'Targets are directory names under 项目/ (current) or 档案/项目/ (archived). Default scope: current.\n' +
     'read defaults to all; list returns root-card summaries without bodies.\n' +
     'write accepts {"metadata": {...}, "body": "..."}; creation requires body.\n' +
@@ -57,7 +60,8 @@ export function parseProjectArgs(args) {
   if (operation === 'list' && parsed.name !== undefined) invalid('Project list does not accept a target.');
   if (!['list', 'check'].includes(operation) && parsed.name === undefined) invalid('A project name is required.');
   if (parsed.scope !== undefined && (!['current', 'archived', 'all'].includes(parsed.scope) || (parsed.scope === 'all' && (!['list', 'check'].includes(operation) || parsed.name !== undefined)))) invalid('Invalid project scope.');
-  if (operation === 'archive' && !parsed.reason?.trim()) invalid('Archive requires a nonempty --reason.');
+  if (operation === 'archive' && !parsed.reason?.trim()&&parsed.from===undefined&&parsed.data===undefined) invalid('Archive requires --reason or a transition request.');
+  if(parsed.from!==undefined&&parsed.data!==undefined)invalid('Use at most one --from or --data.');
   if (parsed.status !== undefined && !parsed.status.trim()) invalid('--status must be nonempty.');
   if (parsed.part !== undefined && !['metadata', 'body', 'all'].includes(parsed.part)) invalid('--part must be metadata, body or all.');
   if (operation === 'write' && seen.has('data') === seen.has('from')) invalid('Specify exactly one of --data or --from.');
@@ -91,13 +95,13 @@ function render(result) {
 
 export function runProjectCommand(args, root) {
   if (args[0] === 'management') return runProjectManagementCommand(args.slice(1), root);
+  if (args[0] === 'governance') return runProjectGovernanceCommand(args.slice(1), root);
   const result = { ok: false, command: 'project', operation: Object.hasOwn(supported, args[0]) ? args[0] : null, data: null, errors: [] };
   let exitCode;
   try {
     const parsed = parseProjectArgs(args);
     if (parsed.help) return { stdout: projectHelp(parsed.operation), exitCode: 0 };
-    const data = parsed.operation === 'write'
-      ? parsed.from !== undefined ? readInputFile(root, parsed.from) : parseInput(parsed.data) : undefined;
+    const data = parsed.from!==undefined ? readInputFile(root,parsed.from) : parsed.data!==undefined ? parseInput(parsed.data) : undefined;
     const response = project({ ...parsed, data, root });
     result.data = response.data; result.errors = response.errors;
     result.ok = result.errors.length === 0;

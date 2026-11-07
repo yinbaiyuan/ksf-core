@@ -4,21 +4,14 @@ import { join, resolve, relative, dirname, basename, sep, isAbsolute, posix } fr
 import { randomUUID } from 'node:crypto';
 import { digest, assert, problem } from './workbench-common.js';
 
-const SKIP = new Set(['.git', 'node_modules', '.DS_Store', '.cache', '.next', '.venv', '__pycache__', 'dist', 'target', 'build']);
-const PRIVATE = /^(?:\.env(?:\..*)?|\.git-credentials|\.?netrc|_netrc|\.npmrc|\.pypirc|\.ssh|\.aws|\.gnupg|\.azure|\.kube|\.docker|\.?credentials(?:\..*)?|auth\.json|id_(?:rsa|ed25519|ecdsa)(?:\.pub)?|identity\.key|.*\.(?:pem|p12|pfx|key))$/i;
-export function filePolicy(path) {
-  const parts = path.split('/');
-  if (parts.some(p => p.toLowerCase() === '.git' || PRIVATE.test(p)) || /^\.agents\/runtime-data(?:\/|$)/i.test(path)) return 'blocked';
-  if (/^档案\/对话\/(?:Codex|[^/]+\/turns)(?:\/|$)/i.test(path)) return 'readonly';
-  if (parts.some(p => SKIP.has(p))) return 'readonly';
-  if (/^\.agents(?:\/|$)/i.test(path) || ['agents.md', 'readme.md', '.gitignore'].includes(path.toLowerCase()) || path.toLowerCase().startsWith('.github/')) return 'system';
-  return 'editable';
-}
+import {workspaceFileSkip as SKIP,filePolicy} from '../shared/file-policy.js';
+export {filePolicy};
 
 // Root navigation only: keep this ordered list as the single place to add entries.
 const ROOT_ENTRIES = ['.agents', '@收件箱', '档案', '能力', '项目', '知识', 'repositories', 'AGENTS.md', 'BOT.md', 'README.md', 'USER.md'];
 const ROOT_ORDER = new Map(ROOT_ENTRIES.map((name, index) => [name, index]));
 const TEXT_LIMIT = 8 * 1024 * 1024;
+export const workspaceFileStamp = stat => digest(JSON.stringify([stat.dev,stat.ino,stat.birthtimeMs,stat.mtimeMs,stat.size]));
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== '..' && !rel.startsWith('..' + sep); };
 export function createWorkspaceFiles(root, coordinator) {
   root = realpathSync(root);
@@ -55,7 +48,7 @@ export function createWorkspaceFiles(root, coordinator) {
       catch { throw problem('WORKSPACE_BINARY', '此文件不是 UTF-8 文本，可查看图片或在本机打开。', 415); }
       assert(!text.includes('\0'), 'WORKSPACE_BINARY', '此文件是二进制文件。', 415);
       const policy = filePolicy(item.path);
-      return { path: item.path, text, version: digest(bytes), size: bytes.length, modifiedAt: after.mtime.toISOString(), policy, writable: policy === 'editable' || (policy === 'system' && unlocked.has(item.path)), stat: after };
+      return { path: item.path, text, version: digest(bytes), stamp: workspaceFileStamp(after), size: bytes.length, modifiedAt: after.mtime.toISOString(), policy, writable: policy === 'editable' || (policy === 'system' && unlocked.has(item.path)), stat: after };
     } finally { await handle.close(); }
   }
   function editable(path) { const policy = filePolicy(path); assert(policy === 'editable' || (policy === 'system' && unlocked.has(path)), 'WORKSPACE_READONLY', '文件只读；系统源码可按文件解锁。', 403); }
@@ -114,7 +107,12 @@ export function createWorkspaceFiles(root, coordinator) {
     };
     return alreadyLocked ? publish() : coordinator.run(await lockKey(path), publish);
   }
-  async function move({ path, destination, version }) {
+  async function moveVersion(path) {
+    const item = await locate(path);
+    assert(item.stat.isDirectory() || item.stat.isFile(), 'WORKSPACE_MOVE_INVALID', '请选择普通文件或目录。');
+    return item.stat.isDirectory() ? directoryVersion(path) : workspaceFileStamp(item.stat);
+  }
+  async function move({ path, destination, version }, statVersion = false) {
     // A workspace-level queue additionally serializes cross-repository moves.
     return coordinator.runMany([await lockKey(path), await lockKey(destination)], async () => {
       const source = await locate(path), target = await locate(destination, { missing: true });
@@ -149,10 +147,15 @@ export function createWorkspaceFiles(root, coordinator) {
         }
         return { path: target.path, previousPath: source.path, kind: 'directory' };
       }
-      assert(typeof version === 'string' && (await snapshot(path)).version === version, 'WORKSPACE_CONFLICT', '移动前文件已变化。', 409);
+      const currentVersion = async () => statVersion ? workspaceFileStamp((await locate(path)).stat) : (await snapshot(path)).version;
+      assert(typeof version === 'string' && await currentVersion() === version, 'WORKSPACE_CONFLICT', '移动前文件已变化。', 409);
       // Hard link provides exclusive publication, unlike rename which overwrites.
       await fs.link(source.target, target.target);
-      try { const latest = await snapshot(path); assert(latest.version === version && latest.stat.ino === source.stat.ino, 'WORKSPACE_CONFLICT', '移动时原文件已变化。', 409); await fs.unlink(source.target); } catch (error) { await fs.unlink(target.target); throw error; }
+      try {
+        const {stat:latest} = await locate(path);
+        assert(await currentVersion() === version && latest.ino === source.stat.ino && latest.dev === source.stat.dev, 'WORKSPACE_CONFLICT', '移动时原文件已变化。', 409);
+        await fs.unlink(source.target);
+      } catch (error) { await fs.unlink(target.target); throw error; }
       return { path: target.path, previousPath: source.path };
     });
   }
@@ -204,7 +207,7 @@ export function createWorkspaceFiles(root, coordinator) {
     return { path: imagePath, relativePath: posix.relative(posix.dirname(file.path), imagePath) };
     });
   }
-  return { root, instanceId: digest(root), locate, lockKey, tree, read, save, saveUnlocked: input => save(input, true), create, createUnlocked: input => create(input, true), move, search, media, upload,
+  return { root, instanceId: digest(root), locate, lockKey, tree, read, save, saveUnlocked: input => save(input, true), create, createUnlocked: input => create(input, true), move, moveVersion, moveEntry: input => move(input, true), search, media, upload,
     async unlock({ path }) { const item = await locate(path); assert(item.stat.isFile() && filePolicy(item.path) === 'system', 'WORKSPACE_UNLOCK_INVALID', '只有普通系统源码文件可以解锁。', 403); unlocked.add(item.path); return read(item.path); },
   };
 }

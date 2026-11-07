@@ -5,6 +5,10 @@ import { assert } from '../services/workbench-common.js';
 
 export const SDK_VERSION = 1;
 export const SUPPORTED_SDK_VERSIONS = [1];
+// Protocol generation and public API releases are deliberately independent.
+export const SDK_API_VERSION = '1.1.0';
+export const SDK_API_MIN_CORE_VERSION = '0.5.3';
+export const SDK_COMPATIBILITY = Object.freeze({version: SDK_API_VERSION, minCompatibleVersion: '1.0.0'});
 export const DEFAULT_APPLICATIONS = ['com.ksf.conversations', 'com.ksf.markdown', 'com.ksf.git', 'com.ksf.projects', 'com.ksf.knowledge', 'com.ksf.abilities', 'com.ksf.documentation','com.ksf.activity-monitor','com.ksf.cooperation-center'];
 export const OFFICIAL_APPLICATIONS = [...DEFAULT_APPLICATIONS,'com.ksf.terminal'];
 export const isOfficialApplicationId = id => typeof id==='string'&&id.startsWith('com.ksf.');
@@ -29,6 +33,22 @@ export const validId = value => typeof value === 'string' && /^[a-z][a-z0-9.-]{1
 export const validApplicationId = value => typeof value === 'string' && value.length <= 80 && /^com\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && value !== 'com.ksf.app-store';
 export const validVersion = value => typeof value === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value) && value.split('.').every(part => Number.isSafeInteger(Number(part)));
 export const compareVersions = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
+export function validateSDKCompatibility(value) {
+  assert(value && validVersion(value.version) && validVersion(value.minCompatibleVersion) &&
+    value.version.split('.')[0] === value.minCompatibleVersion.split('.')[0] &&
+    compareVersions(value.minCompatibleVersion, value.version) <= 0,
+    'APP_SDK_CONTRACT_INVALID', '宿主 SDK API 兼容范围无效。');
+  return value;
+}
+export const applicationSDKVersion = manifest => manifest.sdkApiVersion ?? '1.0.0';
+export function stampSDKManifest(manifest) {
+  assert(manifest.sdkApiVersion === undefined || manifest.sdkApiVersion === SDK_API_VERSION,
+    'APP_SDK_BUILD_MISMATCH', '应用 SDK API 目标必须与实际构建工具包版本一致。');
+  assert(manifest.builtWithSdkVersion === undefined || manifest.builtWithSdkVersion === SDK_API_VERSION,
+    'APP_SDK_BUILD_MISMATCH', '不能伪造构建 SDK 版本。');
+  return {...manifest, sdkApiVersion: SDK_API_VERSION, builtWithSdkVersion: SDK_API_VERSION,
+    minCoreVersion: compareVersions(manifest.minCoreVersion, SDK_API_MIN_CORE_VERSION) < 0 ? SDK_API_MIN_CORE_VERSION : manifest.minCoreVersion};
+}
 export const MAX_STORE_IMAGE = 8 * 1024 * 1024;
 export const storeMediaPath = value => typeof value === 'string' && /^media\/[a-f0-9]{64}\.(png|jpg|webp)$/.test(value);
 export function storeImageType(bytes) {
@@ -65,6 +85,12 @@ export function validateManifest(value) {
   assert(typeof value.name === 'string' && value.name.length > 0 && value.name.length <= 80 && typeof value.description === 'string' && value.description.length <= 2000, 'APP_MANIFEST_INVALID', '应用名称或说明无效。');
   assert(value.sdkVersion === 1, 'APP_MANIFEST_INVALID', '应用 SDK 版本声明无效。');
   assert(validVersion(value.minCoreVersion), 'APP_MANIFEST_INVALID', '应用必须声明明确的 minCoreVersion。');
+  if (value.sdkApiVersion !== undefined || value.builtWithSdkVersion !== undefined) {
+    assert(validVersion(value.sdkApiVersion) && value.builtWithSdkVersion === value.sdkApiVersion,
+      'APP_MANIFEST_INVALID', 'SDK API 与实际构建版本必须是相同的完整版本。');
+    assert(compareVersions(value.minCoreVersion, SDK_API_MIN_CORE_VERSION) >= 0,
+      'APP_MANIFEST_INVALID', '新版 SDK 应用要求 minCoreVersion 至少为 0.5.3。');
+  }
   assert(Array.isArray(value.dataStores) && value.dataStores.length <= 64, 'APP_MANIFEST_INVALID', '应用必须声明 dataStores，无受管数据时使用空数组。');
   const stores = new Set();
   for (const store of value.dataStores) {
@@ -113,9 +139,13 @@ export function validateManifest(value) {
   assert(value.nodeAbi === undefined || typeof value.nodeAbi === 'string' && /^\d+$/.test(value.nodeAbi), 'APP_MANIFEST_INVALID', '应用 Node ABI 声明无效。');
   return value;
 }
-export function assertCompatible(manifest, {coreVersion, platform = process.platform, arch = process.arch, nodeAbi = process.versions.modules} = {}) {
+export function assertCompatible(manifest, {coreVersion, sdkCompatibility = SDK_COMPATIBILITY, platform = process.platform, arch = process.arch, nodeAbi = process.versions.modules} = {}) {
   validateManifest(manifest);
   assert(manifest.schemaVersion===1&&manifest.sdkVersion===1, 'APP_SDK_INCOMPATIBLE', '此应用需要不同版本的 KSF 应用 SDK。');
+  validateSDKCompatibility(sdkCompatibility);
+  const api = applicationSDKVersion(manifest);
+  assert(compareVersions(api, sdkCompatibility.minCompatibleVersion) >= 0 && compareVersions(api, sdkCompatibility.version) <= 0,
+    'APP_SDK_INCOMPATIBLE', `应用需要 SDK API ${api}，宿主支持 ${sdkCompatibility.minCompatibleVersion} 至 ${sdkCompatibility.version}；请更新 Core 或选择兼容应用版本。`, 409);
   assert(validVersion(coreVersion), 'APP_HOST_VERSION_REQUIRED', '兼容检查需要实际 Core 版本。');
   assert(compareVersions(coreVersion, manifest.minCoreVersion) >= 0, 'APP_CORE_INCOMPATIBLE', `应用需要 Core ${manifest.minCoreVersion} 或更新版本，当前为 ${coreVersion}。`, 409);
   assert(!manifest.target || manifest.target === `${platform}-${arch}`, 'APP_PLATFORM_UNSUPPORTED', `此应用包不支持当前平台 ${platform}-${arch}。`);

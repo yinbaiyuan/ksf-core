@@ -207,3 +207,15 @@ read 返回 state/path/etag/revision/updatedAt/plan/warnings/projection；projec
 损坏/未来格式、符号链接、越界、本地证据不可读取、归档项目写入明确失败。HTTP(S) 证据仅校验 URL 结构，不联网证明内容；本地证据限定当前 KSF 内普通文件，不开放运行数据或身份。文件上限 1 MiB，每类条目最多 500 项。
 
 应用 SDK 的公共 `projects` 服务提供 `managementRead`、`managementCheck`、`managementWrite`，参数同服务的 `{name,scope,data?,dryRun?}`，返回 `{data,errors}`；宿主固定当前 workspace，不接受调用方切换根。后端调用通过 `context.services.call('projects','managementRead',[{name,scope}])`，需 filesystem 权限。应用不导入 Core 内部模块。
+
+## Markdown治理项目
+
+根卡包含governance_schema时，使用[project governance](../project-management/governance.md)的read/check/apply/migrate/reorganize/recover。它与旧management分别识别原件；旧管理接口对已迁移项目拒绝读写冻结JSON。project check一并核对治理关联。治理业务正文和状态通过apply条件写入，project write仅继续维护routing、repositories、topics、description。reorganize在明确授权下保留持续项目身份、封存旧阶段材料并建立新计划，先预演再执行，支持条件恢复。归档/恢复沿原入口同步重定位结构化引用并保留业务状态，不递归归档子项目。
+
+## schema2项目的条件归档与恢复
+
+以下解释新版治理项目入口；行为以[公共事务原件](../../runtime/src/projects/governance/lifecycle.js)和[验收能力过程](../../abilities/competencies/project-acceptance/references/archive.md)为准。
+
+`project archive/restore <name> --from request.json --dry-run --json`预览显式项目清单、阻止项、引用影响及ifMatch。请求包含targets（id、path）、reason和actor；实际提交同一请求并补充operationId与返回的ifMatch，去掉--dry-run。新格式restore不使用--status，恢复后按正常流程判断推进。
+
+`project locate <path> [--source <document-path>] [--digest <sha256>] --json`查询旧入口的实际位置；指定digest时核对可用的原版本，缺失或多义明确报错。原始正文不批量改写。上述新增入口不自动转换旧格式。

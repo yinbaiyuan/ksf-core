@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "purpose": "搭档设计专业案例",
+  "cases": [
+    {
+      "id": "partner-create",
+      "mode": "create",
+      "input": "建设交付方案搭档：将给定需求、已有技术选项和报价组织成可审查方案，用户会继续修订。报价专业支持为 competency.example.quote-check@0.1.0（完整定义见基本功设计包样例，评估时提供）。其余无额外专有系统，也没有长期设置需求。",
+      "criteria": [
+        {
+          "id": "responsibility",
+          "expect": "使命和整体方案结果清楚，有完整搭档定义。"
+        },
+        {
+          "id": "support",
+          "expect": "报价作为条件调用的方法，不复制算法或虚构专有系统。"
+        },
+        {
+          "id": "closure",
+          "expect": "检查需求、范围、依据和报价一致性，不以报价核对替代整体可用。"
+        },
+        {
+          "id": "state",
+          "expect": "工作原稿留任务，无默认个人数据。"
+        }
+      ]
+    },
+    {
+      "id": "partner-refactor",
+      "mode": "refactor",
+      "input": "重构角色：顶级全能售前，先问十题，每轮重问目标，调用未提供的报价系统并自动保存偏好。用户材料已经齐全，只新增“安装也要包含”，但安装计价未给。沿用创建题给定的方法支持。",
+      "criteria": [
+        {
+          "id": "no-restart",
+          "expect": "复用已有材料，仅更新安装相关内容及一致性。"
+        },
+        {
+          "id": "honest-support",
+          "expect": "使用给定方法，不声称未提供系统可用。"
+        },
+        {
+          "id": "unknown",
+          "expect": "安装价格明确待补，不擅自算免费。"
+        },
+        {
+          "id": "whole-definition",
+          "expect": "交付完整修订稿及失败原因，不仅加一句禁止重问。"
+        }
+      ]
+    },
+    {
+      "id": "partner-boundary",
+      "mode": "boundary",
+      "input": "现有交付方案搭档已经承担同一责任，只需新增一个可用的报价核对工具。用户询问要不要新建一个高级售前搭档。",
+      "criteria": [
+        {
+          "id": "reuse",
+          "expect": "优先完善原搭档的支持或基本功，不因新工具建新责任。"
+        },
+        {
+          "id": "why",
+          "expect": "依据责任与成功标准未变说明理由。"
+        },
+        {
+          "id": "handoff",
+          "expect": "明确需要专业方法变化则交基本功设计，配置操作交维护。"
+        }
+      ]
+    }
+  ]
+}

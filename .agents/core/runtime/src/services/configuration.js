@@ -14,6 +14,8 @@ import {captureStatus,configureCapture} from './tasks.js';
 import {chatConfig} from './chat.js';
 import {atomicJSON,safeDirectory,readJSON} from '../shared/durable-json.js';
 import {sha256} from '../shared/hash.js';
+import {incubationHooks} from '../incubation/hooks.js';
+import {platformCapabilities,requirePlatformCapability} from '../platform/index.js';
 
 const own=(object,key)=>Object.prototype.hasOwnProperty.call(object,key);
 const pick=(object,keys)=>Object.fromEntries(keys.filter(key=>own(object,key)).map(key=>[key,object[key]]));
@@ -29,6 +31,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
     return {domains:configurationDomains.map(item=>structuredClone(item)),abilities,complete:errors.length===0,errors};
   }
   function defaults(d){
+    if(d.id==='service'&&!platformCapabilities.loginStartup)return {autostart:false};
     if(d.id==='program'){const core=readConfigFile(root,'.agents/core/distribution.json').document;return {...d.defaults,updates:core?pick(core,['check_interval_seconds','request_timeout_seconds']):d.defaults.updates};}
     if(d.id==='communication')return pick(communicationDefaults,d.fields.map(f=>f.name));
     if(d.id==='device')return {name:hostname()};
@@ -52,7 +55,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
     }else if(d.id==='communication'){
       if(document && (document.schemaVersion!==1||!Number.isSafeInteger(document.revision)))throw configError('COMM_STORAGE_INVALID','通信配置格式未知，请保留原件。');
       values=document?pick(document,d.fields.map(f=>f.name)):{};
-    }else if(d.id==='service'){const policy=readServicePolicy(root);return policy.then(value=>({...raw,values:document?{autostart:value.autostart}:{},extra:{port:value.port}}));}
+    }else if(d.id==='service'){const policy=readServicePolicy(root);return policy.then(value=>({...raw,values:document?{autostart:value.autostart}:{},extra:{port:value.port,capabilities:platformCapabilities}}));}
     else if(d.id==='capture'){const status=captureStatus({root});values=document?{enabled:status.enabled}:{};return {...raw,values,extra:{...status,trackingEnabled:chatConfig(root)?.enabled??false}};}
     else if(d.id==='device'){
       if(document && (document.schemaVersion!==1||deviceName(document.name)!==document.name))throw configError('COMM_DEVICE_PROFILE_INVALID','本机名称配置无效，请保留原件。');
@@ -72,7 +75,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
       else if(d.owner==='ai'&&ai){effective=saved;if(application.state!=='failed')application={state:'new-task'};}
       else if(d.id==='service'&&service&&prior?.etag===stored.etag&&application.state==='immediate')effective=saved;
     }
-    return {id,label:d.label,owner:d.owner,scope:d.scope,description:d.description,fields:d.fields,capabilities:d.capabilities,path:stored.path,state:stored.state,etag:stored.etag,revision:stored.revision??stored.document?.revision??null,defaults:base,values:stored.values,effective,application,...(stored.extra?{details:stored.extra}:{}),...(id==='incubation'?{details:{root}}:{})};
+    return {id,label:d.label,owner:d.owner,scope:d.scope,description:d.description,fields:d.fields,capabilities:d.capabilities,path:stored.path,state:stored.state,etag:stored.etag,revision:stored.revision??stored.document?.revision??null,defaults:base,values:stored.values,effective,application,...(stored.extra?{details:stored.extra}:{}),...(id==='incubation'?{details:{root,hooks:incubationHooks(root,stored.values)}}:{})};
   }
   function validate(d,values){
     if(!values||typeof values!=='object'||Array.isArray(values))throw configError('CONFIG_INVALID','配置需要 JSON 对象。');
@@ -87,7 +90,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
       if(new Set(values.items.map(item=>item.id)).size!==values.items.length)throw configError('AI_REQUEST_INVALID','配置标识重复。');
     }else if(d.id==='communication')validateCommunicationConfiguration(values);
     else if(d.id==='device')deviceName(values.name);
-    else if(d.id==='service'){if(values.autostart!==null&&typeof values.autostart!=='boolean')throw configError('CONFIG_INVALID','登录启动需要布尔值。');}
+    else if(d.id==='service'){if(values.autostart!==null&&typeof values.autostart!=='boolean')throw configError('CONFIG_INVALID','登录启动需要布尔值。');if(values.autostart===true)requirePlatformCapability('loginStartup');}
     else if(d.id==='capture'&&typeof values.enabled!=='boolean')throw configError('CONFIG_INVALID','正文采集开关需要布尔值。');
   }
   async function check(id,input={}){

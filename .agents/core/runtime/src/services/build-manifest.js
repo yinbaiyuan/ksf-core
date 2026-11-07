@@ -13,6 +13,8 @@ import { platform, gitExecutable, replaceFileSync } from '../platform/index.js';
 import { supportedTargets, runtimePackage } from '../platform/catalog.js';
 import { zipMembers } from '../platform/zip.js';
 import { portable } from '../shared/paths.js';
+import {installedManifest} from '../distribution/manifests.js';
+import {runtimeLayoutPath,isPlatformRuntimeLayout,assertCanonicalRuntimePackages} from '../platform/runtime-bundle.js';
 
 const digest = data => createHash('sha256').update(data).digest('hex');
 const exactVersion = /^\d+\.\d+\.\d+$/;
@@ -55,6 +57,17 @@ function readConfig(root) {
     if (typeof item.archive_path !== 'string' || !/^\.agents\/core\/runtime\/packages\/[A-Za-z0-9_.-]+\.(?:tar\.gz|zip)$/.test(item.archive_path) ||
         item.archive_path.includes('..') || typeof item.archive_sha256 !== 'string' || !sha.test(item.archive_sha256)) {
       fail('BUILD_CONFIG_INVALID', `Invalid archive path or trusted SHA256 for ${target}.`);
+    }
+  }
+  const sdkPackage=join(root,'.agents/core/applications/sdk/package.json'),sdkContract=join(root,'.agents/core/data-compatibility.json');
+  if(existsSync(sdkPackage)&&existsSync(sdkContract)){
+    const sdk=JSON.parse(readFileSync(sdkPackage)),compatibility=JSON.parse(readFileSync(sdkContract)).sdkCompatibility;
+    if(compatibility){
+      if(sdk.version!==compatibility.version||!exactVersion.test(compatibility.minCompatibleVersion))fail('SDK_CONTRACT_MISMATCH','SDK package and host compatibility declaration differ.');
+      for(const path of ['applications/sdk/server/protocol.js','applications/sdk/src/index.ts','runtime/src/applications/protocol.js']){
+        const source=readFileSync(join(root,'.agents/core',path),'utf8'),api=source.match(/SDK_API_VERSION\s*=\s*['"]([^'"]+)/)?.[1],floor=source.match(/SDK_COMPATIBILITY\s*=[^;]*minCompatibleVersion:\s*['"]([^'"]+)/)?.[1];
+        if(api!==sdk.version||floor!==compatibility.minCompatibleVersion)fail('SDK_CONTRACT_MISMATCH',`SDK API range differs from host declaration: ${path}`);
+      }
     }
   }
   return { config, bytes };
@@ -137,13 +150,21 @@ function yaml(value, depth = 0) {
   }).join('');
 }
 
-export async function buildManifest(directory, { sourceRoot, builtAt } = {}) {
+export async function buildManifest(directory, { sourceRoot, builtAt, target:selectedTarget } = {}) {
   const root = realpathSync(directory);
   verifyWebBuild(join(root, '.agents/core/runtime/web'), { optional: true });
   const { config, bytes } = readConfig(root);
+  const layout=join(root,runtimeLayoutPath);
+  if(existsSync(layout)){
+    if(lstatSync(layout).isSymbolicLink()||!isPlatformRuntimeLayout(readFileSync(layout)))fail('BUILD_CONFIG_INVALID','Unknown runtime bundle layout.');
+    assertCanonicalRuntimePackages(config);
+    const receipt=installedManifest(root,true);
+    selectedTarget??=receipt&&receipt.schema_version!==5?receipt.platform:undefined;
+  }else if(selectedTarget!==undefined)fail('BUILD_CONFIG_INVALID','A target-specific build requires the source runtime layout policy.');
+  if(selectedTarget!==undefined&&!config.runtime.packages[selectedTarget])fail('BUILD_CONFIG_INVALID','The runtime target is not declared by build.json.');
   const packages = {};
   const fingerprints = new Map();
-  for (const target of Object.keys(config.runtime.packages).sort()) {
+  for (const target of (selectedTarget===undefined?Object.keys(config.runtime.packages):[selectedTarget]).sort()) {
     const input = config.runtime.packages[target];
     const path = join(root, input.archive_path);
     if (!existsSync(path) || !lstatSync(path).isFile()) fail('ARCHIVE_MISSING', `Missing regular archive for ${target}.`);

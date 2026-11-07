@@ -457,5 +457,9 @@
       ],
       "recursive": false
     }
-  ]
+  ],
+  "sdkCompatibility": {
+    "version": "1.1.0",
+    "minCompatibleVersion": "1.0.0"
+  }
 }

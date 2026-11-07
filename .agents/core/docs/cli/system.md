@@ -39,11 +39,11 @@ read/check 不写业务目标。schema 4/5 实例的 read 会联网读取固定 
 
 ## 输出与错误
 
-JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失败 1、参数错误 2。update 提供 current/latest、changed、changes、conflicts 和 backup。UPDATE_CONFLICT 时 data 保留冲突内容。sync 的 quiet 提示写 stderr，不混入业务 stdout；失败不宣称现有系统必然可用。
+JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失败 1、参数错误 2。update 提供 current/latest、changed、changes、conflicts、backup、逐应用applications计划和目标sdkCompatibility。回退同样报告应用计划；向旧Core回退保留兼容恢复入口时返回recoveryLauncherRetained。UPDATE_CONFLICT 时 data 保留冲突内容。sync 的 quiet 提示写 stderr，不混入业务 stdout；失败不宣称现有系统必然可用。
 
 错误包括 BASELINE_UNVERIFIED、BASELINE_MISMATCH、DOWNLOAD_FAILED、RELEASE_NOT_FOUND、CHECKSUM_MISMATCH、RELEASE_INVALID、RELEASE_REPLACED、VERSION_NOT_NEWER、UPDATE_CONFLICT、CANDIDATE_INVALID、SYSTEM_CHANGED、UPDATE_BUSY、BACKUP_MISSING、ROLLBACK_LOCAL_CHANGES。
 
-升级只管理系统文件和本机事务，不写个人目录、Git 配置或忽略规则。固定启动器先按协议 1 恢复中断，再交给 Core 准备运行时；不撤销活跃事务。启动和普通命令不检查更新或安装。sync 仅显式调用时使用间隔缓存，失败也记录；read 的 automaticUpdates 固定为 false。KSF_SKIP_AUTO_UPDATE 是无作用兼容项。显式操作按实际结果退出。
+升级管理系统文件、本机事务和配套应用安装指针；不覆盖业务正文、业务数据、Git配置或忽略规则。实际切换前须正常停止主服务，运行中只允许预览。固定启动器先按协议 1 恢复中断，再交给 Core 准备运行时；不撤销活跃事务。启动和普通命令不检查更新或安装。sync 仅显式调用时使用间隔缓存，失败也记录；read 的 automaticUpdates 固定为 false。KSF_SKIP_AUTO_UPDATE 是无作用兼容项。显式操作按实际结果退出。
 
 入口独立恢复可调用 `ksf launcher recover`，不需要 Core 或 Node。协议、并发改动保护与 Windows 范围见[启动入口](../../runtime/launcher.md)。
 
@@ -56,3 +56,5 @@ JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失�
 本命令只管理已识别的切换／正式备份及统一测试材料，保留最近可用回退。范围、源码归属与任务结束处理见[运行数据与源码保留](../runtime/runtime-data.md)。业务状态及未知历史目录需另外核对，不根据日期批量删除。
 
 check 另返回 installedPlatform、platform 与 platformSwitch。旧模板或跨设备复制保留了其他平台的发行凭据时，新索引按本机平台选包；同版本且完整 Core SHA 相同，允许显式 update 完成平台标记校正，保留原始来源与个人数据。旧客户端由兼容索引先升级程序，再重新检查并完成本机平台校正。
+
+目标平台精简发行包只携带自身 Node。把此类实例复制到另一系统后，需要先取得目标系统对应的 Core 包并保留个人资料；不能依赖缺失的目标运行时执行上述检查。旧多平台包的标记校正兼容路径继续保留。

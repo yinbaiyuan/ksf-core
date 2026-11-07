@@ -48,6 +48,23 @@ function fullOffset(output, proof) {
 const samePath = (actual, expected) => actual === expected || actual.endsWith('/' + expected);
 function readOffset(e, path, proof, full) {
   if (e.type !== 'command' || !e.output || ![0, 1].includes(e.exitCode)) return -1;
+  if (/\b(?:context\s+(?:entry|current)|(?:cooperation|partner|competency|data-package|datapackage)\s+read)\b/.test(e.command)) {
+    for (const { value, offset } of jsonRecords(e.output)) {
+      const data = value.data;
+      if (!data) continue;
+      const entry = data.entry;
+      if (entry && samePath(entry.path ?? '', path) && typeof entry.content === 'string' && entry.content.trim() &&
+          (!full || proof?.sha256 && hash(entry.content) === proof.sha256)) return offset;
+      const items = [...data.expanded ?? [], ...data.context?.expanded ?? [], ...data.bodies ?? []];
+      for (const item of items) {
+        const object = item.object, file = item.file;
+        if (object && samePath(object.path ?? '', path) && typeof object.body === 'string' && object.body.trim() &&
+            (!full || proof?.bodySha256 && hash(object.body) === proof.bodySha256)) return offset;
+        if (file?.state === 'present' && samePath(file.path ?? '', path) && typeof file.content === 'string' && file.content.trim() &&
+            (!full || proof?.sha256 && hash(file.content) === proof.sha256)) return offset;
+      }
+    }
+  }
   if (/\b(?:project|cooperation|partner|competency|data-package|datapackage)\s+read\b/.test(e.command)) {
     for (const { value, offset } of jsonRecords(e.output)) {
       const object = value.data?.object ?? value.data?.project;
@@ -193,7 +210,7 @@ export function judgePrompt(contract, observation, sources, checks) {
     'disputes仅填写尚未解决、确实需要人工复核的证据冲突或验收歧义；无争议时为[]。一般说明和非阻塞备注写入interpretation，不填disputes；真实分歧不得因总体结论而隐去。\n' +
     '不能仅凭角色自报判通过；结合工具输出、实际原文和后续产物说明方法与资料如何影响结果。每项通过必须引用真实evidence.id。\n' +
     '启动按当前根完整读取USER.md、BOT.md，不计为多余业务知识；缺失用默认且不创建，不可读报告缺口，USER缺失才只读兼容旧画像。恢复、文件变化和换根重读，继续有效内容不要求每轮重读。只讨论、只读或不保存时协作文件与项目检查点同样不得写入。未取得必要证据判indeterminate，不编造已读或已执行。\n' +
-    '能力选择顺序：当前明确要求、有效原安排、适用项目预设、全局协同、全局搭档、通用Agent；预设适用搭档可先于全局协同。\n' +
+    '能力选择顺序：当前明确要求、有效原安排、适用项目预设、全局协同、全局普通搭档、一次游离基本功路由、通用Agent；明确指定或适用预设足以承接时无需先全局发现，进入全局时仍须完整取得摘要。\n' +
     '能力维度必须另填abilityChecks三项：preset_order核对顺序、selection实际选择、exception_notice异常说明。专业方法实际使用另在adoption维度判断，不能混成一个结论。无该情境记not_applicable并说明原因。子项fail则ability必须fail，子项indeterminate则ability不得pass。\n' +
     '核对顺序依据现行定义：全局发现摘要可提前取得；项目明确且需预设时先读根卡和project check，再读精确预设正文，预设不适用或不可用才核对全局候选正文。若轨迹证明先读全局正文后核对适用预设，preset_order为fail；即使文案正确、没有证明采用全局，也不能抵消这一过程违规。明确指定及有效原安排的优先权保留，不把本规则套到无项目或无需重选的任务。\n' +
     '读取不等于采用。selection依实际交接、所需方法/资料与产物综合判断；不能因为读取过全局正文就声称采用了它，也不能因最终出现预设搭档就推定直接走了预设。两条路线全部可观察行为相同且无区分证据时，selection为indeterminate。\n' +

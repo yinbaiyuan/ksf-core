@@ -62,7 +62,9 @@ test('Web automatically exposes input and final answer for a turn without any Ag
   t.after(() => server?.close());
 
   const f = source(t, { withReport: false });
-  f.append({ type: 'response_item', timestamp: '2026-01-02T00:00:03Z', payload: { type: 'message', id: 'answer', role: 'assistant', phase: 'final_answer', content: [{ type: 'output_text', text: '没有路由也有最终答复' }] } });
+  f.append({ type: 'response_item', timestamp: '2026-01-02T00:00:01.300Z', payload: { type: 'message', id: 'progress', role: 'assistant', phase: 'commentary', content: [{ type: 'output_text', text: '处理中' }] } });
+  f.append({ type: 'response_item', timestamp: '2026-01-02T00:00:01.700Z', payload: { type: 'message', id: 'extra', role: 'user', content: [{ type: 'input_text', text: '同轮补充' }] } });
+  f.append({ type: 'response_item', timestamp: '2026-01-02T00:00:03.240Z', payload: { type: 'message', id: 'answer', role: 'assistant', phase: 'final_answer', internal_chat_message_metadata_passthrough: { create_time: '2026-01-02T00:00:01.900Z' }, content: [{ type: 'output_text', text: '没有路由也有最终答复' }] } });
   server = await startWebServer({ root: f.root, port: 0, captureEnv: f.env });
   const path = `/api/tasks/${f.taskId}/turns/turn-one`;
   let turn;
@@ -74,10 +76,16 @@ test('Web automatically exposes input and final answer for a turn without any Ag
   }
   assert.ok(turn, 'Web startup catch-up should publish the unreported turn');
   assert.equal(turn.status, 'completed'); assert.equal(turn.policy, 'capture'); assert.equal(turn.routes.length, 0); assert.equal(turn.declarations.length, 0);
-  assert.deepEqual(turn.messages.map(m => [m.id, m.phase]), [['user-one','input'], ['answer','final_answer']]);
-  assert.ok(turn.issues.some(i => i.code === 'TASK_ROUTE_UNREPORTED'));
+  assert.deepEqual(turn.messages.map(m => [m.id, m.phase]), [['user-one','input'], ['progress','commentary'], ['extra','input'], ['answer','final_answer']]);
+  const timing = { userSentAt: '2026-01-02T00:00:01.000Z', assistantRepliedAt: '2026-01-02T00:00:03.240Z', durationMs: 2240 };
+  assert.deepEqual(turn.timing, timing);
+  assert.deepEqual(JSON.parse((await call(server, path + '?messages=0')).body).data.turn.timing, timing);
+  assert.deepEqual(JSON.parse((await call(server, `/api/tasks/${f.taskId}`)).body).data.turns[0].timing, timing);
+  assert.deepEqual(turn.routeFacts, { workChanges: [], abilityIds: [] });
+  assert.ok(!turn.issues.some(i => i.code === 'TASK_ROUTE_UNREPORTED'));
   const list = JSON.parse((await call(server, '/api/tasks')).body).data.records[0];
-  assert.equal(list.latestReported, null); assert.equal(list.lastTurn.messageCount, 2); assert.equal(list.lastTurn.route, null);
+  assert.equal(list.latestReported, null); assert.equal(list.lastTurn.messageCount, 4); assert.equal(list.lastTurn.route, null);
+  assert.deepEqual(list.lastTurn.timing, timing);
   await server.close(); server = await startWebServer({ root: f.root, port: 0, captureEnv: f.env });
   assert.deepEqual(JSON.parse((await call(server, path)).body).data.turn.messages, turn.messages);
 });

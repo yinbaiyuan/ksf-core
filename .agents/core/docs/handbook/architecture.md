@@ -33,6 +33,8 @@ flowchart LR
 
 AGENTS → context entry（首次孵化或正常runtime）→ 按需项目事实与能力选择 → 正文/依赖/资料 → 已授权执行 → 结果核对与保存。语义判断由Agent完成，CLI负责列举、读取和结构核验。读取搭档不创建独立Agent，Cooperation也不是程序DAG。
 
+正常首次完整提供Runtime、人设路由、USER/BOT四项基础内容；能力与项目路由在需要时读取。跨轮安排由唯一工作绑定保存，current按绑定与临时extras返回正文增量，Agent读完后accept；压缩换代后重新取得当前所需原文。完整流程、状态所有权及项目成果保存见[Runtime与上下文完整机制](../runtime/work-context.md)。
+
 项目、知识、能力、档案表达内容用途，程序配置及本机状态另外保存。能力源直接读取已关联Git工作树，个人覆盖、精确引用与固定保护由对象解析负责。
 
 ## 5. 状态与并发
