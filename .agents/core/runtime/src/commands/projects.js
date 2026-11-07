@@ -61,7 +61,7 @@ export function parseProjectArgs(args) {
   if (!['list', 'check'].includes(operation) && parsed.name === undefined) invalid('A project name is required.');
   if (parsed.scope !== undefined && (!['current', 'archived', 'all'].includes(parsed.scope) || (parsed.scope === 'all' && (!['list', 'check'].includes(operation) || parsed.name !== undefined)))) invalid('Invalid project scope.');
   if (operation === 'archive' && !parsed.reason?.trim()&&parsed.from===undefined&&parsed.data===undefined) invalid('Archive requires --reason or a transition request.');
-  if(parsed.from!==undefined&&parsed.data!==undefined)invalid('Use at most one --from or --data.');
+  if(operation!=='write'&&parsed.from!==undefined&&parsed.data!==undefined)invalid('Use at most one --from or --data.');
   if (parsed.status !== undefined && !parsed.status.trim()) invalid('--status must be nonempty.');
   if (parsed.part !== undefined && !['metadata', 'body', 'all'].includes(parsed.part)) invalid('--part must be metadata, body or all.');
   if (operation === 'write' && seen.has('data') === seen.has('from')) invalid('Specify exactly one of --data or --from.');

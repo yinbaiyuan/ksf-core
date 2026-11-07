@@ -1,5 +1,5 @@
 import {readFileSync,existsSync,mkdirSync,readdirSync,mkdtempSync,renameSync,rmSync,openSync,closeSync,writeFileSync} from 'node:fs';
-import {join,dirname,relative} from 'node:path';
+import {join,dirname} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {assert} from '../services/workbench-common.js';
 import {writeAtomic,readRegular,checkedPath} from '../distribution/files.js';
@@ -32,17 +32,18 @@ export function readApplicationState(root){
 export function targetSDK(targetCore){
   return validateSDKCompatibility(json(join(targetCore,'data-compatibility.json')).sdkCompatibility??{version:'1.0.0',minCompatibleVersion:'1.0.0'});
 }
-function releasePath(root,release){
+function releaseLocation(root,release){
   validateManifest(release.manifest);
   assert(/^[a-f0-9]{64}$/.test(release.digest),'APP_PACKAGE_INTEGRITY','应用摘要无效。');
-  return checkedPath(root,`.agents/user-data/applications/packages/${release.manifest.id}/${release.digest}`);
+  const path=`.agents/user-data/applications/packages/${release.manifest.id}/${release.digest}`;
+  return {path,directory:checkedPath(root,path)};
 }
 export function verifyInstalledRelease(root,release){
-  const base=releasePath(root,release),info=json(join(base,'release.json'));
+  const {path:packagePath,directory}=releaseLocation(root,release),info=json(join(directory,'release.json'));
   assert(info.release.digest===release.digest&&sameManifest(info.release.manifest,release.manifest),'APP_PACKAGE_INTEGRITY','已安装应用声明与原包不一致。');
   for(const [path,file] of Object.entries(info.files)){
     assert(validPath(path),'APP_PACKAGE_INTEGRITY','应用文件路径无效。');
-    const data=readRegular(root,`${relative(root,base)}/${path}`);
+    const data=readRegular(root,`${packagePath}/${path}`);
     assert(checksum(data)===file.sha256,'APP_PACKAGE_INTEGRITY',`应用文件摘要不一致：${path}`);
   }
 }
@@ -57,7 +58,7 @@ function immutableHistory(root,manifest,digest){
 export function stageApplicationPackages(root,plan){
   for(const item of plan.packages){
     const {release,archive}=item,decoded=decodePackage(archive);immutableHistory(root,release.manifest,release.digest);
-    const target=releasePath(root,release);
+    const target=releaseLocation(root,release).directory;
     if(existsSync(target)){verifyInstalledRelease(root,release);continue;}
     // Unreferenced immutable files are safe to retain after interruption. The
     // installation pointer is published only by the owning transaction.
