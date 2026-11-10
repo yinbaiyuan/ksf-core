@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       full:
-        description: Run all deterministic native tests
+        description: Run complete shared and native verification
         type: boolean
         default: true
 permissions:
@@ -17,63 +17,17 @@ concurrency:
   group: verify-core-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  plan:
-    if: github.repository == 'yinbaiyuan/ksf-core'
-    runs-on: macos-15
-    outputs:
-      full: ${{ steps.plan.outputs.full }}
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          fetch-depth: 0
-      - id: plan
-        env:
-          KSF_MANUAL_FULL: ${{ inputs.full || false }}
-          KSF_TEST_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          .agents/ksf build --json > /dev/null
-          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
-          if [ -n "$KSF_TEST_BASE" ] && [ "$KSF_TEST_BASE" != 0000000000000000000000000000000000000000 ]; then
-            "$ksf_node" .agents/core/runtime/src/testing/ci.js plan "$KSF_TEST_BASE"
-          else
-            KSF_MANUAL_FULL=true "$ksf_node" .agents/core/runtime/src/testing/ci.js plan
-          fi
   verification:
-    needs: plan
+    if: github.repository == 'yinbaiyuan/ksf-core'
     uses: ./.github/workflows/verification.yml
     with:
-      full: ${{ needs.plan.outputs.full == 'true' }}
-  linux-core:
-    if: github.repository == 'yinbaiyuan/ksf-core'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v7.0.1
-      - name: Verify Linux bundled runtime and build inputs
-        run: |
-          .agents/ksf build --json > /dev/null
-          .agents/ksf runtime verify --json
-          .agents/ksf context entry --json > /dev/null
-      - name: Run Linux core coverage
-        run: .agents/ksf test --suite full --component core --json > linux-core-report.json
-      - uses: actions/upload-artifact@v7.0.2
-        if: always()
-        with:
-          name: linux-core-${{ matrix.os }}
-          include-hidden-files: true
-          path: |
-            linux-core-report.json
-            .agents/runtime-data/tests/
+      full: ${{ github.event_name != 'pull_request' && (github.event_name == 'push' || inputs.full == true || !github.event.before) }}
+      base: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
   required:
     if: always() && github.repository == 'yinbaiyuan/ksf-core'
-    needs: [plan, verification, linux-core]
-    runs-on: macos-15
+    needs: verification
+    runs-on: ubuntu-24.04
     steps:
       - env:
-          PLAN: ${{ needs.plan.result }}
           VERIFICATION: ${{ needs.verification.result }}
-          LINUX_CORE: ${{ needs.linux-core.result }}
-        run: test "$PLAN" = success && test "$VERIFICATION" = success && test "$LINUX_CORE" = success
+        run: test "$VERIFICATION" = success

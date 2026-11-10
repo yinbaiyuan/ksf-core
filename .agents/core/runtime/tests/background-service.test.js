@@ -154,6 +154,11 @@ test('host death marks the accepted request unknown and restart never replays it
   const path=join(root,'.agents/user-data/applications/data/com.example.headless/executions'),deadline=Date.now()+7000;let count;
   while(Date.now()<deadline){count=await readFile(path,'utf8').catch(()=>null);if(count)break;await new Promise(r=>setTimeout(r,20));}assert.equal(count,'1');process.kill(host.pid,'SIGKILL');
   const outcome=await pending;assert.equal(outcome.error?.data?.outcomeUnknown,true);
+  // A broken request socket can settle before SIGCHLD has reaped the host.
+  // Restart only after the service identity has actually reached stopped.
+  const stoppedDeadline=Date.now()+5000;let stopped;
+  do{stopped=await serviceStatus(root);if(stopped.state==='stopped')break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<stoppedDeadline);
+  assert.equal(stopped.state,'stopped',JSON.stringify(stopped));
   const ready=await ensureService(root,{port});assert.notEqual(ready.pid,host.pid);assert.equal(await readFile(path,'utf8'),'1');
 });
 

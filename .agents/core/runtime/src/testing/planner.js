@@ -3,13 +3,15 @@ import { relative, resolve } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { gitExecutable } from '../platform/index.js';
-import { fail, loadCatalog, matchesInput, safePath, slash, missingRequirements } from './catalog.js';
+import { fail, loadCatalog, matchesInput, safePath, slash, missingRequirements, rebuiltArtifact } from './catalog.js';
+
+import { selectChangedTests } from './selection.js';
 
 export function parseTestOptions(args) {
   const options = { suite: 'quick' }, seen = new Set();
   for (let i = 0; i < args.length; i++) {
     const key = args[i];
-    if (!['--suite', '--component', '--changed', '--base', '--files', '--plan', '--json', '--reuse', '--shard', '--help', '-h'].includes(key) || seen.has(key)) fail('INVALID_ARGUMENTS', `Unknown or repeated test option: ${key}.`, { exitCode: 2 });
+    if (!['--suite', '--profile', '--component', '--changed', '--base', '--files', '--plan', '--json', '--reuse', '--shard', '--help', '-h'].includes(key) || seen.has(key)) fail('INVALID_ARGUMENTS', `Unknown or repeated test option: ${key}.`, { exitCode: 2 });
     seen.add(key);
     const name = key.slice(2);
     if (['--changed', '--plan', '--json', '--reuse'].includes(key)) options[name] = true;
@@ -24,6 +26,7 @@ export function parseTestOptions(args) {
     }
   }
   const ci = process.env.CI && !/^(?:false|0)$/i.test(process.env.CI) || process.env.GITHUB_ACTIONS === 'true';
+  if (options.profile && !['all', 'shared', 'native'].includes(options.profile)) fail('INVALID_ARGUMENTS', 'Unknown verification profile.', { exitCode: 2 });
   if (options.help && args.length !== 1 || !['quick', 'full'].includes(options.suite) || options.base && !options.changed || options.files && (options.changed || options.component) || options.reuse && (options.suite !== 'quick' || ci)) fail('INVALID_ARGUMENTS', 'Invalid test option combination. See ksf test --help.', { exitCode: 2 });
   if (options.shard) {
     const m = /^(\d+)\/(\d+)$/.exec(options.shard);
@@ -46,7 +49,7 @@ export function changedPaths(root, base) {
   const records = git(['diff', '--name-status', '-z', '--find-renames', comparison, '--']).split('\0').filter(Boolean), paths = [];
   for (let i = 0; i < records.length;) { const status = records[i++]; paths.push(records[i++]); if (/^[RC]/.test(status)) paths.push(records[i++]); }
   paths.push(...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean));
-  return { base: comparison, head, paths: [...new Set(paths.filter(Boolean).map(slash))].sort() };
+  return { base: comparison, head, paths: [...new Set(paths.filter(Boolean).map(slash).filter(path=>!rebuiltArtifact(path)))].sort() };
 }
 export function assignShards(tests, count, platform = process.platform) {
   const bins = Array.from({ length: count }, () => ({ seconds: 0, files: [] }));
@@ -68,7 +71,11 @@ export function createTestPlan(root, options, { platform = process.platform, cha
     tests = tests.filter(t => paths.includes(t.path));
     if (options.suite === 'quick' && tests.some(t => t.suite === 'full')) fail('INVALID_ARGUMENTS', 'A selected file requires --suite full.', { exitCode: 2 });
   }
-  if (diff) {
+  if (diff && catalog.schemaVersion === 2) {
+    const selection = selectChangedTests(root, catalog, diff.paths);
+    tests = tests.filter(t => selection.ids.includes(t.id));
+    reasons = selection.reasons; requiredFullComponents = selection.requiredFullComponents;
+  } else if (diff) {
     const affected = new Set(), matched = new Set();
     for (const path of diff.paths) {
       let known = false;
@@ -88,11 +95,12 @@ export function createTestPlan(root, options, { platform = process.platform, cha
     if (options.component) requiredFullComponents = requiredFullComponents.filter(c => c === options.component);
   }
   if (options.suite === 'quick') tests = tests.filter(t => t.suite === 'quick');
+  if (options.profile && options.profile !== 'all') tests = tests.filter(t => (t.verification?.lane ?? 'native') === options.profile);
   const excludedPlatform = tests.filter(t => !t.platforms.includes(platform));
   tests = tests.filter(t => t.platforms.includes(platform));
   const selected = tests;
   if (options.shard) { const [index, count] = options.shard.split('/').map(Number); tests = assignShards(tests, count, platform)[index - 1]; }
   const gaps=Object.entries(catalog.components).filter(([id,c])=>c.coverageNotes&&(!options.component||id===options.component)).map(([component,c])=>({component,message:c.coverageNotes}));
   const execution={maxParallelFiles:Math.max(1,Math.min(options.suite==='quick'?4:2,availableParallelism())),exclusiveFiles:tests.filter(t=>t.isolation==='exclusive').map(t=>t.path)};
-  return { catalog, options, execution, suite: options.suite, scope: options.files ? 'files' : options.changed ? 'changed' : options.component ? 'component' : 'all', component: options.component ?? null, platform, changes: diff, reasons, gaps, requiredFullComponents: [...new Set(requiredFullComponents)].sort(), selectedFiles: selected.map(t => t.path), tests, excludedPlatform: excludedPlatform.map(t => ({ path: t.path, platforms: t.platforms })), missingDependencies: missingRequirements(root, catalog, tests), status: tests.length ? 'ready' : options.shard && selected.length ? 'empty-shard' : 'not-applicable' };
+  return { catalog, options, execution, suite: options.suite, profile: options.profile ?? 'all', scope: options.files ? 'files' : options.changed ? 'changed' : options.component ? 'component' : 'all', component: options.component ?? null, platform, changes: diff, reasons, gaps, requiredFullComponents: [...new Set(requiredFullComponents)].sort(), selectedFiles: selected.map(t => t.path), tests, excludedPlatform: excludedPlatform.map(t => ({ path: t.path, platforms: t.platforms })), missingDependencies: missingRequirements(root, catalog, tests), status: tests.length ? 'ready' : options.shard && selected.length ? 'empty-shard' : 'not-applicable' };
 }

@@ -11,7 +11,10 @@ test('official workflows use core-main, native platform evidence and one Core pu
   const text = name => readFileSync(join(directory, name), 'utf8');
   const check = YAML.parse(text('check.yml')), release = YAML.parse(text('release.yml')), verification = YAML.parse(text('verification.yml'));
   assert.deepEqual(check.on.push.branches, ['core-main']); assert.deepEqual(check.on.pull_request.branches, ['core-main']);
-  assert.deepEqual(verification.jobs.platform.strategy.matrix.os, ['macos-15','windows-2025']);
+  assert.equal(verification.jobs.platform.strategy.matrix, '${{ fromJSON(needs.plan.outputs.preparations) }}');
+  assert.equal(verification.jobs.tests.strategy.matrix, '${{ fromJSON(needs.plan.outputs.matrix) }}');
+  assert.ok(verification.jobs.plan.steps.some(s=>/ci.js plan/.test(s.run??'')));
+  assert.equal(check.jobs.required.needs,'verification');
   for (const name of ['check.yml','release.yml','verification.yml']) {
     assert.ok(text(name).includes("github.repository == 'yinbaiyuan/ksf-core'"));
     assert.ok(!/ksf-workspace|KSF_TEMPLATE_APP|create-github-app-token|release template|release mirror|release-only/.test(text(name)));

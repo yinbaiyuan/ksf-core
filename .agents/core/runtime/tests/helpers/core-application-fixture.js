@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {planCoreApplications,stageApplicationPackages,writeApplicationPlan,applicationStatePath,reconcileCoreApplications} from '../../src/applications/core-upgrade.js';
+import {encodePackage,checksum} from '../../src/applications/protocol.js';
+const origin={id:'ksf-apps',name:'KSF 公用应用源',url:'https://yinbaiyuan.github.io/ksf-apps/index.json'};
+export function release(version,{api,nodeAbi,id='com.ksf.projects'}={}){const code=Buffer.from('export function activate(){return{}}'),manifest={schemaVersion:1,sdkVersion:1,minCoreVersion:api?'0.5.3':'0.1.0',...(api?{sdkApiVersion:api,builtWithSdkVersion:api}:{}),...(nodeAbi?{nodeAbi}:{}),id,name:'fixture',description:'test',version,dataStores:[],permissions:[],backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'}},archive=encodePackage(manifest,{'backend/index.mjs':{content:code.toString('base64'),sha256:checksum(code),mode:420}});return {archive,release:{manifest,digest:checksum(archive),source:origin}};}
+export function fixture(t){const root=mkdtempSync(join(tmpdir(),'ksf-app-plan-')),target=join(root,'candidate'),store=join(target,'applications/store');mkdirSync(store,{recursive:true});writeFileSync(join(target,'build.json'),JSON.stringify({version:'0.5.3'}));writeFileSync(join(target,'data-compatibility.json'),JSON.stringify({sdkCompatibility:{version:'1.1.0',minCompatibleVersion:'1.0.0'}}));t.after(()=>rmSync(root,{recursive:true,force:true}));return{root,target,store};}
+export function seed(f,item,extra={}){stageApplicationPackages(f.root,{packages:[item]});const state={schemaVersion:1,revision:1,sources:[{...origin,enabled:true}],defaults:['com.ksf.projects'],installed:{'com.ksf.projects':{installationId:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',enabled:false,active:item.release,previous:null,pending:null,...extra}}};mkdirSync(join(f.root,'.agents/user-data/applications'),{recursive:true});writeFileSync(join(f.root,applicationStatePath),JSON.stringify(state));return state;}
+export function baseline(f,item){writeFileSync(join(f.store,'fixture.ksfapp'),item.archive);writeFileSync(join(f.store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[{manifest:item.release.manifest,package:{url:'fixture.ksfapp',sha256:item.release.digest,size:item.archive.length}}]}));}
+
+export function assertKilled(result){assert.equal(result.error,undefined);if(process.platform==='win32')assert.equal(result.status,1,result.stderr);else assert.equal(result.signal,'SIGKILL',result.stderr);}
