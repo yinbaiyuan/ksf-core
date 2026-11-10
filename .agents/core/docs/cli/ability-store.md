@@ -37,3 +37,18 @@ HTTP目录按前缀分片和字符索引按需读取，详情及版本历史按�
 Core 升级与回退会检查安装机制支持和精确依赖。安装、Git 贡献、公开发行及真实任务效果验收分别核对。
 
 实现与验证见运行时的 `services/ability-store.js`、`ability-store/storage.js` 和 `tests/ability-store.test.js`。
+
+## 导入与打包
+
+能力商店工具栏的“导入能力包”接受 `.ksfability` 文件。一包可包含多个能力、同源递归依赖和相对资源；先展示整包计划，确认后原子安装。能力源无需预先添加，来源身份保存在安装记录中。已有个人版本继续优先，低于本机版本、跨源同 ID 或不完整精确依赖会阻止导入。
+
+作者工程保留 `ksf-source.yaml` v2。以结构化输入打包多个能力：
+
+```sh
+ksf ability-store pack --data '{"path":"/repo","ids":["partner.author.one","partner.author.two"],"output":"/share/team.ksfability"}' --json
+ksf ability-store preview --data '{"action":"import","packagePath":"/share/team.ksfability"}' --json
+```
+
+再执行 `ability-store import`，同样传入 `packagePath`，并携带预览返回的 `planDigest`、`version`（作为 `ifMatch`）及唯一 `operationId`。API 的 `/api/ability-store/preview` 与 `/api/ability-store/import` 接收 base64 `package`，不读取浏览器提交的本机路径。单包压缩大小最多20MiB，展开JSON最多32MiB，资源总大小最多24MiB。
+
+HTTP分发与手动导入使用同一 `ksf-ability-package-v1`：`sourceId`、`objects[]` 和带路径、权限、大小、SHA-256及内容的 `files[]`。一项能力也使用数组；对象声明须与包内正文身份、版本和定义摘要一致。

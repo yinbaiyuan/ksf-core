@@ -13,9 +13,9 @@ export async function httpRelease(root,source,id,version){const client=abilityHT
 export async function prepareHTTP(root,state,input){const source=state.sources.find(s=>s.id===input.sourceId);if(source?.kind!=='http'||!['install','update'].includes(input.action))return state;
  if(!source.enabled)throw fault('ABILITY_STORE_SOURCE_DISABLED','请先启用此能力源。');
  const client=abilityHTTP(root,source),directory=await client.open({refresh:true}),selected=new Map(),requested=input.ids??[input.id],runtime=catalog(root);
- const visit=async(id,version)=>{if(selected.has(id)){if(version&&selected.get(id).object.version!==version)throw fault('ABILITY_STORE_DEPENDENCY_CONFLICT','依赖要求不同版本：'+id);return;}
+ const visit=async(id,version)=>{if(selected.has(id)){if(version&&selected.get(id).objects.find(o=>o.id===id).version!==version)throw fault('ABILITY_STORE_DEPENDENCY_CONFLICT','依赖要求不同版本：'+id);return;}
   const release=await httpRelease(root,source,id,version),value=decodeAbilityPackage(await client.binary(release.package));validateAbilityPackage(value,{sourceId:source.id,id,version:release.version});selected.set(id,value);
-  for(const d of value.object.dependencies){if(d.source===source.id)await visit(d.id,d.version);else if(d.source!=='system'||!runtime.rows.some(r=>r.source==='system'&&r.id===d.id&&r.metadata.version===d.version))throw fault('ABILITY_STORE_DEPENDENCY_MISSING','Core精确依赖不可用：'+d.id+'@'+d.version);}
+  for(const d of value.objects.find(o=>o.id===id).dependencies){if(d.source===source.id)await visit(d.id,d.version);else if(d.source!=='system'||!runtime.rows.some(r=>r.source==='system'&&r.id===d.id&&r.metadata.version===d.version))throw fault('ABILITY_STORE_DEPENDENCY_MISSING','Core精确依赖不可用：'+d.id+'@'+d.version);}
  };
  for(const id of requested)await visit(id);
  // Reverse dependents are the installed set, never the entire remote directory.

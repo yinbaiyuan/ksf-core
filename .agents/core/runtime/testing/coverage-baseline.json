@@ -412,7 +412,49 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "reason": "用户要求素材与程序归于统一包，固定store/目录；保留栅格资源、路径检查、不可变版本和原子发布断言，改验新版本整体摘要变化及程序字节保全。",
+        "hash": "16bc35c9dd0e58de2b0721cb8c43cc77a79cb15326c9a952715671a5e0421e11",
+        "originalAssertions": [
+          "ab40f72afd6625cb82f38d823a562c6e95dad2b24d19191adc05d91ca0c04928",
+          "b9ec0c6f1f08454750170475ea1035c666479a18132f2a5ce092e4ab7a6feccf",
+          "b06c56920056de1be525eeb0ddaa3f5d9603ac91a17e83529999300e76ca47d0",
+          "b128dcbedb4a26b8bb03e9b78a5f5b7474592b4e92581ebd5618d5a44e425c80",
+          "3f7423bb4777c5ef4f778419de949e5a8392c2628e2478863893008ff53e23d4",
+          "2856b3441aebcffab7d4a092b155b229525cd93c603e52dfd5de9bf70ed0e37e"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "ab40f72afd6625cb82f38d823a562c6e95dad2b24d19191adc05d91ca0c04928",
+            "after": [
+              "812146a1899d532db40b2816690c35f85cafa8186d459fd825228a01756c201b"
+            ]
+          },
+          {
+            "before": "b06c56920056de1be525eeb0ddaa3f5d9603ac91a17e83529999300e76ca47d0",
+            "after": [
+              "2e6af6eafbea14ecf18aaac254de9e1064d0bbeb3a65b1c40a39b6ca6de74a3c"
+            ]
+          },
+          {
+            "before": "b128dcbedb4a26b8bb03e9b78a5f5b7474592b4e92581ebd5618d5a44e425c80",
+            "after": [
+              "752145e240ef85dea1201cea591a1f99f0e868efed2bddd4cd82acca3fbf4c0e"
+            ]
+          },
+          {
+            "before": "2856b3441aebcffab7d4a092b155b229525cd93c603e52dfd5de9bf70ed0e37e",
+            "after": [
+              "f8ea3d7d33f3b7f11116cfebe8492e387bc73b1e93c980e7c4f6ddb66209ede2",
+              "cc26fbb58a2f0ed757b1d3b8d9818ba84b2308624469817ed73d2e68cf3b5df0",
+              "40a37cfb8270d7eb75d486ac023560aaf4627625a6061baeedb8613d00476230",
+              "05138dacc7b37e81e925c1425f4a11596181f0f77fe0dafebe07eb4fd8a17911",
+              "e8570b679ab5dc1c6f416e3b40dc3b76e1e5c877e5865c99ecbaae865df5363a"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/applications/sdk/tests/build.test.mjs",
@@ -421,7 +463,30 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "reason": "用户明确取消旧格式兼容和独立素材发布；替代断言要求listing-only拒绝，原包及目录摘要保全。",
+        "hash": "48c4e2c6ffbb286a970c58b551b111437494e99730537541f3a9684a40c71d4e",
+        "originalAssertions": [
+          "bf520303ad60e6334b2b4756541b1f0ed58360d9ca5f70d2a6a634a0321a42e5",
+          "9ed373c0af69ef4b4fcff85934e015996209ae6af348b718db60472ba1b54325"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "bf520303ad60e6334b2b4756541b1f0ed58360d9ca5f70d2a6a634a0321a42e5",
+            "after": [
+              "31ad4414f9dfddb2bd888a5c9841e6e5b28548a2624298296c1a4f5854d62386"
+            ]
+          },
+          {
+            "before": "9ed373c0af69ef4b4fcff85934e015996209ae6af348b718db60472ba1b54325",
+            "after": [
+              "9bce2ae708bb491cdbf04ea6603716d6c3c55aca353e5560bc50442a81c50da2",
+              "2856b3441aebcffab7d4a092b155b229525cd93c603e52dfd5de9bf70ed0e37e"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/applications/sdk/tests/build.test.mjs",
@@ -1677,7 +1742,17 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "0541aa2714ed9a62c7c6e531d306f106a9ff91243037963089d3126ef8cf6936",
+        "reason": "采用分片目录定向预览和统一包内素材的真实夹具；原平台、来源绑定、PTY、摘要、HTTP和资源读取断言保留。",
+        "originalAssertions": [
+          "9aa5245e5b2106e6254acf2d7bbb386997bd121e18025094d9761bcb6361b2de",
+          "8dc0a84cc40d1e636a19ff2b7035b704a6328d3a8bf364e399ca06e58c81a71e",
+          "374eb17e6e51453033cfe34a1c3d322ad7ed9c676ff74eebbe0e225c69714cf2",
+          "416fd366730bb3df1571d2f6657ab703cce91b1cdddf6c1c4eb0a9189730c888"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-store.test.js",
@@ -1695,7 +1770,21 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "751fa5a0d49cbacea036300291eecab19661d244a88798dc018e1fb10297c667",
+        "reason": "采用分片目录定向预览和统一包内素材的真实夹具；原平台、来源绑定、PTY、摘要、HTTP和资源读取断言保留。",
+        "originalAssertions": [
+          "965d53c0c64032dd24f8f7828711b846bd9c31330f402e6deffc41abfe6db0c8",
+          "95700f79d454416a962414c1c959159edbdf931455b6218ca7d476fcf8d0d633",
+          "d91031a3b90f2bb1b52cdbc8e70531f4662bbbb03442032cb48728b017384830",
+          "3c49445641f6bdd3cbde7c704ef0d0fee138c42a7f861b63c060bfcbe8051e48",
+          "0269372cd34900e77985ed910af1d25622f58ac1a35abe35f6cba1f38ed0f11c",
+          "098e06f3c837017f7e6d1dd90527d9be87e13f00a4504ed6ee9b6e73b597b9e7",
+          "b375441882e6c86629900aae8480588ca95eb2f9b8ea92932a527516d72fb08e",
+          "95472abf5ee3bf188c8595a2f3fa5550f85edc83c5decbee7be633cb95673e4e"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-store.test.js",
@@ -1704,7 +1793,18 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "b2dceb1fdce8215d8e51240391617ad8af880a799dc1573d56fcbba970a50755",
+        "reason": "采用分片目录定向预览和统一包内素材的真实夹具；原平台、来源绑定、PTY、摘要、HTTP和资源读取断言保留。",
+        "originalAssertions": [
+          "8eda8ba215baf36620f79299f1bdeff111d78cfe84af6ab92b24746648ebbdec",
+          "6e96934f215993b0837a0b7c983874623b3966540369bfb61d37370dad8186c2",
+          "802c885fe0c2613f60c21f99e2bc63e9103473032c475cbb71325ad6a8e25919",
+          "5c1ae59576dfad1f8615ad4e7c51d56070900478703448b7cb384bd4c021cb5a",
+          "52ac4b15002aa932b3bf73f1ee8f9803ecad2f5f32e1162e0986c41f9167a696"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-workflow-lightweight.test.js",
@@ -1788,7 +1888,25 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "6a89ad090b25a617edf5418b21bbc4a487c79dd94beb62bb57b62044d1132521",
+        "reason": "目录返回分页摘要，发布记录由定向预览读取；将原全量apps来源断言替换为摘要applications的同来源断言，其余安装、停用、移除和保留检查不变。",
+        "originalAssertions": [
+          "6349378bca82964fd845d8323a5ff760bf9beab4fccc3d46137f93eb593d4a4b",
+          "8bf5ca311ee0b2854548929d3a5c3e975a31d3d3c230c67c8b778f95662e28b4",
+          "2004a4ab8ce02d261aeecde907882ebe5ff867458858ed8ef1b315b771818999",
+          "06194eaa96bd6c7fc04ecf4a466e91324086942cd0bf367bd62808c9013c949d"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "6349378bca82964fd845d8323a5ff760bf9beab4fccc3d46137f93eb593d4a4b",
+            "after": [
+              "794946e8f825bd0b36eb3c76d6c786fde94928091e5acd25bef26c379281a711"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/applications.test.js",
@@ -1869,7 +1987,17 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "1da04d87334e978c1bcd7528b509138e98b825cce817877612528aa03485ac70",
+        "reason": "采用分片目录定向预览和统一包内素材的真实夹具；原平台、来源绑定、PTY、摘要、HTTP和资源读取断言保留。",
+        "originalAssertions": [
+          "f4026ed1c3ae623f46710bafe67f8eba4df036188e1a54bba54ae0fa9472a63b",
+          "3d9a7cc9e10b1d2497112d9dc95944515778fbc88581ca60fb660084c5dff53f",
+          "e35e6b3a6a3acbb0fbf38003aca7378fdf2b0dc37d059a9366225660d766e9ce",
+          "c49bc8ec64cf84d036e6869aea11d723ec4bd2f341bcd4ac50350fd52b189af5"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/applications.test.js",

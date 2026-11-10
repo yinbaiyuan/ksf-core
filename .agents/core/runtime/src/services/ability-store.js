@@ -1,6 +1,7 @@
 import {abilityHTTP,inspectHTTP,prepareHTTP} from '../ability-store/http.js';
+import {decodeAbilityPackage,encodeAbilityPackage,validateAbilityPackage,MAX_ABILITY_PACKAGE} from '../ability-store/package.js';
 import {DEFAULT_ABILITY_SOURCE} from '../ability-store/default-source.js';
-import {existsSync,readFileSync,mkdirSync,rmSync,renameSync,lstatSync} from 'node:fs';
+import {existsSync,readFileSync,mkdirSync,rmSync,renameSync,lstatSync,cpSync,writeFileSync} from 'node:fs';
 import {join,relative,resolve,dirname,isAbsolute,sep} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
@@ -23,7 +24,7 @@ const portable=value=>value.split(sep).join('/');
 const packageOf=(state,id)=>Object.hasOwn(state.installed,id)?state.installed[id]:undefined;
 const err=e=>({code:e.code??'ABILITY_STORE_FAILED',message:e.message});
 const requireSource=(s,id)=>{const source=s.sources.find(x=>x.id===id);if(!source)fail('ABILITY_STORE_SOURCE_MISSING','能力源不存在，请重新添加。');return source;};
-const checkedSource=(root,source)=>{const checked=source.kind==='http'?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
+const checkedSource=(root,source)=>{const checked=['http','package'].includes(source.kind)?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
 function git(path,args,{timeout=120000}={}){
  return new Promise((accept,reject)=>{
   const env={...process.env,GIT_TERMINAL_PROMPT:'0',GIT_OPTIONAL_LOCKS:'0',GIT_NO_REPLACE_OBJECTS:'1',GIT_SSH_COMMAND:'ssh -oBatchMode=yes'};
@@ -131,7 +132,32 @@ function plan(root,state,input){
 }
 const publicPlan=p=>({action:p.action,sourceId:p.sourceId,planDigest:p.planDigest,objects:p.objects.map(({_row,_catalog,...o})=>o),roots:p.roots,group:p.group??[],removed:p.removed??[],personalPath:p.personalPath});
 async function preparedPlan(root,state,input){const prepared=await prepareHTTP(root,state,input),source=prepared.sources.find(s=>s.id===input.sourceId),temporary=prepared!==state&&source?.kind==='http'?source.path:null;try{const result=plan(root,prepared,input);if(temporary){for(const object of result.objects){delete object.directory;delete object.path;delete object.source_root;}result.dispose=()=>rmSync(temporary,{recursive:true,force:true});}return result;}catch(e){if(temporary)rmSync(temporary,{recursive:true,force:true});throw e;}}
-export function previewAbilityStore(root,input){const record=readStore(root);if(record.state.sources.find(s=>s.id===input.sourceId)?.kind==='http'&&['install','update'].includes(input.action))return preparedPlan(root,record.state,input).then(p=>{try{return {version:record.version,...publicPlan(p)};}finally{p.dispose?.();}});return {version:record.version,...publicPlan(plan(root,record.state,input))};}
+function importPlan(root,state,input){
+ if(typeof input.package!=='string'||input.package.length>Math.ceil(MAX_ABILITY_PACKAGE/3)*4)fail('ABILITY_PACKAGE_INVALID','请选择有效能力包（最大20MiB）。');
+ const bytes=Buffer.from(input.package,'base64'),packet=validateAbilityPackage(decodeAbilityPackage(bytes)),sourceId=packet.sourceId,installed=packageOf(state,sourceId);
+ for(const object of packet.objects){const old=installed?.objects.find(o=>o.id===object.id);if(old&&compareVersion(object.version,old.version)<0)fail('ABILITY_STORE_VERSION_CONFLICT','能力包版本低于本机版本：'+object.id,{installed:old.version,packaged:object.version});}
+ const path=join(root,'.agents/runtime-data/ability-store/previews',randomUUID());mkdirSync(path,{recursive:true});
+ try{
+  if(installed)cpSync(packageRoot(root,sourceId,installed.generation),path,{recursive:true});
+  for(const f of packet.files){const target=join(path,f.path);safeDirectory(root,portable(relative(root,dirname(target))),{create:true});if(existsSync(target)&&lstatSync(target).isSymbolicLink())fail('ABILITY_PACKAGE_INVALID','能力包资源不能经过符号链接。');writeFileSync(target,Buffer.from(f.content,'base64'),{mode:f.mode});}
+  const configured=state.sources.find(s=>s.id===sourceId),name=configured?.name??installed?.origin.name??packet.sourceName??sourceId;
+  writeFileSync(join(path,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:sourceId,name}));
+  const prepared=structuredClone(state);prepared.sources=prepared.sources.filter(s=>s.id!==sourceId);prepared.sources.push({id:sourceId,name,kind:'package',path,enabled:true});
+  const p=plan(root,prepared,{action:'install',sourceId,ids:packet.objects.map(o=>o.id)});
+  p.action='import';p.planDigest=hash(['import',sha256(bytes),p.planDigest]);p.origin=installed?.origin??(configured?{id:sourceId,name,kind:configured.kind,location:configured.location,commit:null,dirty:false}:{id:sourceId,name,kind:'package',commit:null,dirty:false});delete p.source;
+  for(const object of p.objects){delete object.directory;delete object.path;delete object.source_root;}
+  p.dispose=()=>rmSync(path,{recursive:true,force:true});return p;
+ }catch(e){rmSync(path,{recursive:true,force:true});throw e;}
+}
+export function previewAbilityStore(root,input){const record=readStore(root);if(input.action==='import'){const p=importPlan(root,record.state,input);try{return {version:record.version,...publicPlan(p)};}finally{p.dispose();}}
+ if(record.state.sources.find(s=>s.id===input.sourceId)?.kind==='http'&&['install','update'].includes(input.action))return preparedPlan(root,record.state,input).then(p=>{try{return {version:record.version,...publicPlan(p)};}finally{p.dispose?.();}});return {version:record.version,...publicPlan(plan(root,record.state,input))};}
+/** Export selected abilities, recursive same-source dependencies and relative resources. */
+export function packAbilityStore(root,input){
+ if(typeof input.path!=='string'||typeof input.output!=='string'||!Array.isArray(input.ids)||!input.ids.length)fail('INVALID_ARGUMENTS','打包需要源目录path、能力ids和输出文件output。');
+ const path=resolve(root,input.path),checked=inspectSource(root,path);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});const sourceId=checked.data.id,c=checked.catalog,selected=new Map();
+ const visit=(id,version)=>{const row=resolveObject(c,{id,...(version?{version}:{})},sourceId);if(selected.has(id)){if(selected.get(id).version!==row.metadata.version)fail('ABILITY_STORE_DEPENDENCY_CONFLICT','能力包依赖版本冲突。');return;}const o=descriptor(c,row);selected.set(id,o);for(const d of o.dependencies)if(d.source===sourceId)visit(d.id,d.version);else if(d.source!=='system')fail('ABILITY_STORE_DEPENDENCY_MISSING','能力包只支持同源或Core依赖。');};input.ids.forEach(id=>visit(id));
+ const resources=collectFiles([...selected.values()]),objects=[...selected.values()].map(({_row,_catalog,path,directory,source_root,...o})=>o),packet={protocol:'ksf-ability-package-v1',sourceId,sourceName:checked.data.name,objects,files:[...resources.files].map(([path,f])=>({path,content:f.bytes.toString('base64'),size:f.bytes.length,sha256:f.digest,mode:f.mode}))};validateAbilityPackage(packet);const bytes=encodeAbilityPackage(packet);if(bytes.length>MAX_ABILITY_PACKAGE)fail('ABILITY_PACKAGE_INVALID','能力包超过20MiB。');const output=resolve(root,input.output);mkdirSync(dirname(output),{recursive:true});writeFileSync(output,bytes,{flag:'wx'});return {path:output,sourceId,objects:objects.map(o=>({id:o.id,version:o.version})),size:bytes.length,sha256:sha256(bytes)};
+}
 
 function publishGeneration(root,p){
  const generation=randomUUID(),path=packageRoot(root,p.sourceId,generation);safeDirectory(root,portable(relative(root,path)),{create:true});
@@ -200,12 +226,12 @@ export async function mutateAbilityStore(root,operation,input={},hooks={}){
     }if(source.kind==='http')await abilityHTTP(root,source).open({refresh:true});else checkedSource(root,source);source.checkedAt=new Date().toISOString();delete source.refreshError;
    }catch(e){source.refreshError=err(e);source.checkedAt=new Date().toISOString();result={source,error:source.refreshError};}}
    result??={source,repositoryPreserved:true};
-  }else if(['install','update','uninstall','migrate','copy'].includes(operation)){
+  }else if(['install','update','uninstall','migrate','copy','import'].includes(operation)){
    let p;
    // Reconcile a personal-directory publication interrupted before its receipt.
    const personal=validId(input.id)?join(root,types[input.id.split('.')[0]].user,input.id,'.ksf-store-origin.json'):null;
    if(operation==='copy'&&personal&&existsSync(personal)&&JSON.parse(readFileSync(personal)).operationId===input.operationId){result={id:input.id,source:'user',path:portable(relative(root,dirname(personal)))+'/'+types[input.id.split('.')[0]].entry};}
-   else{p=await preparedPlan(root,state,{...input,action:operation});try{if(input.planDigest!==p.planDigest)fail('ABILITY_STORE_PREVIEW_CHANGED','安装计划已变化，请重新预览。');hooks.beforePublish?.();
+   else{p=operation==='import'?importPlan(root,state,input):await preparedPlan(root,state,{...input,action:operation});try{if(input.planDigest!==p.planDigest)fail('ABILITY_STORE_PREVIEW_CHANGED','安装计划已变化，请重新预览。');hooks.beforePublish?.();
     if(operation==='copy')result=copyPersonal(root,state,p,input.operationId);
     else{if(p.source)p.origin=p.source.kind==='http'?{id:p.source.id,name:p.source.name,kind:'http',location:p.source.location,catalogRevision:p.source.catalogRevision,commit:null,dirty:false}:{...p.origin,...await origin(root,p.source)};const installed=publishGeneration(root,p);state.installed[p.sourceId]=installed;if(operation==='migrate'){if(!state.sources.some(s=>s.id===p.sourceId))state.sources.push(p.source);state.adopted=[...new Set([...state.adopted,p.sourceId])];}result={...publicPlan(p),generation:installed.generation};}
     }finally{p.dispose?.();}
