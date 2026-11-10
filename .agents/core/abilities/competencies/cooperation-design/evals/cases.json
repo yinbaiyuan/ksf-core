@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "purpose": "协同设计专业案例",
+  "cases": [
+    {
+      "id": "cooperation-create",
+      "mode": "create",
+      "input": "设计交付方案与核验协同。需要独立的方案原稿和核验意见，当前交付为审查稿，允许明确列未决。给定完整制作搭档、核验搭档及报价方法，见三个能力包完整样例。方案制作负责原稿，核验需要需求、方案版本和专业核对结果；不要求真实多Agent或发布。",
+      "criteria": [
+        {
+          "id": "necessity",
+          "expect": "说明两个独立成果和必要依赖，给完整协同定义。"
+        },
+        {
+          "id": "handoff",
+          "expect": "交接有版本、依据、未决及接手条件。"
+        },
+        {
+          "id": "repair",
+          "expect": "核验意见交制作修订，维护归属明确。"
+        },
+        {
+          "id": "overall",
+          "expect": "审查稿与可实施标准分开，整体检查版本和未决。"
+        }
+      ]
+    },
+    {
+      "id": "cooperation-refactor",
+      "mode": "refactor",
+      "input": "旧流程让制作与核验覆盖同一方案，反复讨论直到满意，节点结束就完成。现在需求由不含安装改为包含安装，报价条件尚缺，设备参数没有变化。要求可实施交付。支持与创建题相同。",
+      "criteria": [
+        {
+          "id": "ownership",
+          "expect": "唯一方案维护方，核验返回问题而非覆盖。"
+        },
+        {
+          "id": "propagation",
+          "expect": "新版范围影响报价和核验，无关设备参数保留。"
+        },
+        {
+          "id": "exit",
+          "expect": "无新证据重复争议交明确协调责任，关键未知阻止可实施完成。"
+        },
+        {
+          "id": "whole-definition",
+          "expect": "完整修订定义和具体影响，不仅补一句沟通。"
+        }
+      ]
+    },
+    {
+      "id": "cooperation-boundary",
+      "mode": "boundary",
+      "input": "同一个方案搭档完成读取、分类、改写、检查四步，只是材料较多。没有独立服务责任或独立核验要求，是否建四个搭档和一个协同？",
+      "criteria": [
+        {
+          "id": "no-cooperation",
+          "expect": "拒绝按步骤机械建协同和角色。"
+        },
+        {
+          "id": "placement",
+          "expect": "保留为该搭档工作过程及必要基本功。"
+        },
+        {
+          "id": "changed-condition",
+          "expect": "说明将来出现独立责任和必要交接时才重新评估。"
+        }
+      ]
+    }
+  ]
+}

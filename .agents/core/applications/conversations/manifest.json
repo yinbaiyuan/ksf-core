@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.ksf.conversations",
   "name": "KSF飞轮",
-  "version": "0.3.5",
+  "version": "0.3.11",
   "description": "汇聚工作记录、回顾结果与改进建议，推动项目、知识和能力持续积累。",
   "author": "KSF",
   "icon": "flywheel",

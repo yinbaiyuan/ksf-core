@@ -4,7 +4,8 @@ import { randomUUID } from 'node:crypto';
 import { withExclusiveLock } from '../shared/files.js';
 import { catalog, fingerprint, summary } from '../objects/catalog.js';
 import { resolveObject, referenceResults, problems } from '../objects/references.js';
-import { types, parseReference, protectedPaths, validateObject, validId, versionPattern } from '../objects/schema.js';
+import { types, parseReference, parseDependencyReference, protectedPaths, validateObject, validId, versionPattern } from '../objects/schema.js';
+import {fileReferenceLocation} from '../objects/file-locations.js';
 import { parseFrontmatter, encodeFrontmatter } from '../metadata/frontmatter.js';
 import { readTree, copyTree } from '../objects/storage.js';
 import { rebaseMarkdown } from '../objects/markdown.js';
@@ -57,7 +58,9 @@ export function exportObjects({ root, sourceId, reference, versions = {}, dryRun
       if (invalid.length) sourceFailure('SOURCE_EXPORT_INVALID', 'Personal object validation failed.', { id: row.id, errors: invalid });
       selected.set(row.id, row);
       for (const value of row.metadata.references ?? []) {
-        const ref = parseReference(value), local = personal(ref);
+        const ref = parseDependencyReference(value);
+        if (ref.kind === 'file') continue;
+        const local = personal(ref);
         if (local && local.metadata.status !== 'archived') { visit(local); continue; }
         let satisfied = false;
         for (const provider of [sourceId, 'system']) {
@@ -80,13 +83,23 @@ export function exportObjects({ root, sourceId, reference, versions = {}, dryRun
       const existing = c.rows.find(item => item.source === sourceId && item.id === row.id);
       return { row, sourceDirectory, tree, target: existing?.directory ?? join(destination, types[row.type].user, row.id) };
     });
+    function publicationReference(value,row,sourceFile,targetFile) {
+      const ref=parseDependencyReference(value);
+      if(ref.kind!=='file') return Object.hasOwn(versions,ref.id)&&selected.get(ref.id)?.metadata.version===ref.version ? ref.prefix+ref.id+'@'+versions[ref.id] : value;
+      // Instance-root declarations remain portable; never read or package them.
+      if(ref.path.startsWith('/'))return value;
+      const location=fileReferenceLocation(c,{...row,path:sourceFile},ref);
+      const owner=plans.find(item=>within(item.sourceDirectory,location.target));
+      if(!owner)sourceFailure('SOURCE_RESOURCE_EXTERNAL','Relative file reference is outside the selected contribution; package it explicitly.',{id:row.id,reference:value});
+      const mapped=join(owner.target,relative(owner.sourceDirectory,location.target));
+      let path=relative(dirname(targetFile),mapped).split('\\').join('/');
+      if(!path.startsWith('../')&&!path.startsWith('./'))path='./'+path;
+      return ref.prefix+path;
+    }
     for (const plan of plans) {
       const metadata = { ...plan.row.metadata }; delete metadata.user_revision; delete metadata.upstream;
       if (Object.hasOwn(versions, plan.row.id)) metadata.version = versions[plan.row.id];
-      if (metadata.references) metadata.references = metadata.references.map(value => {
-        const ref = parseReference(value);
-        return Object.hasOwn(versions, ref.id) && selected.get(ref.id)?.metadata.version === ref.version ? ref.id + '@' + versions[ref.id] : value;
-      });
+      if (metadata.references) metadata.references = metadata.references.map(value => publicationReference(value,plan.row,join(plan.sourceDirectory,types[plan.row.type].entry),join(plan.target,types[plan.row.type].entry)));
       const mapped = plan.tree.files.map(file => {
         let bytes = file.bytes;
         if (file.path.toLowerCase().endsWith('.md')) bytes = rebaseMarkdown(bytes, join(plan.sourceDirectory, file.path), join(plan.target, file.path), plan.sourceDirectory, {
@@ -96,12 +109,18 @@ export function exportObjects({ root, sourceId, reference, versions = {}, dryRun
             return join(owner.target, relative(owner.sourceDirectory, path));
           },
         });
-        if (file.path === types[plan.row.type].entry) {
-          const parsed = parseFrontmatter(bytes, file.path);
-          parsed.doc.delete('user_revision'); parsed.doc.delete('upstream');
-          parsed.doc.set('version', metadata.version);
-          if (metadata.references) parsed.doc.set('references', metadata.references);
-          bytes = encodeFrontmatter(parsed);
+        const entry=file.path===types[plan.row.type].entry;
+        if(entry || /^(?:\uFEFF)?---(?:\r?\n|$)/.test(bytes.subarray(0,16).toString('utf8'))&&!bytes.includes(0)&&Buffer.from(bytes.toString('utf8')).equals(bytes)) {
+          const parsed=parseFrontmatter(bytes,file.path);let changed=false;
+          if(entry){parsed.doc.delete('user_revision');parsed.doc.delete('upstream');parsed.doc.set('version',metadata.version);changed=true;}
+          const references=parsed.values.references;
+          const declarative=Array.isArray(references)&&references.every(value=>{try{parseDependencyReference(value);return true;}catch{return false;}});
+          if(entry&&Object.hasOwn(parsed.values,'references')||declarative) {
+            if(!Array.isArray(references))sourceFailure('SOURCE_RESOURCE_INVALID','File references must be an array.',{id:plan.row.id,target:file.path});
+            const refs=parsed.values.references.map(value=>publicationReference(value,plan.row,join(plan.sourceDirectory,file.path),join(plan.target,file.path)));
+            if(JSON.stringify(refs)!==JSON.stringify(parsed.values.references)){parsed.doc.set('references',refs);changed=true;}
+          }
+          if(changed)bytes=encodeFrontmatter(parsed);
         }
         return { ...file, bytes, mode: file.mode & 0o111 ? 0o755 : 0o644 };
       });

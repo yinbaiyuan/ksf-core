@@ -1,6 +1,8 @@
 # 项目检查点格式说明
 
-检查点是项目中的普通 Markdown，默认位置为 `项目/<项目名>/任务/<任务名>.md`，根卡链接指向该记录。保存条件、内容要求、恢复判断、失败处理与实际步骤由 [项目推进控制](../../abilities/competencies/project-control/competency.md#项目恢复暂停与检查点)持有；本文仅解释格式。
+新格式项目在里程碑内使用任务目录及task.md，见[治理协议](../project-management/governance.md)与[任务模板](../project-management/templates/task.md)。本文说明尚未迁移项目的兼容检查点。
+
+旧检查点是项目中的普通 Markdown，默认位置为 `项目/<项目名>/任务/<任务名>.md`，根卡链接指向该记录。保存条件、内容要求、恢复判断、失败处理与实际步骤由 [项目推进控制](../../abilities/competencies/project-control/competency.md#项目恢复暂停与检查点)持有；本文仅解释格式。
 
 管理主件保存现行项目安排，检查点保存具体执行的恢复信息，聊天保留来源原文。它不是第五类能力对象，也不是采集器自动生成的业务记录。
 

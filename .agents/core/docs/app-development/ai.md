@@ -139,6 +139,10 @@ AI 请求可用 `executionGrant:{id,revision,taskId,contentDigest,phase}` 引用
 
 应用可用 `createCapabilitiesClient`（`@ksf/sdk/capabilities`）读取 `{ref:'competency.ksf.work-review'}`，冻结本次有效 ref、source、user_revision 和 definition_digest；需要 filesystem 权限。该服务只读解析能力，不创建对话、不记录采用、不扩大执行权限。用户派生定义仍按 KSF 有效来源规则优先。
 
+能力元数据 references 可使用 `+ID@version` 直接附带目标主文，或 `#ID@version` 按内部引用标记递归；同样支持 `./`、`../` 相对文件路径和以 `/` 开头的 KSF 根路径。`createCapabilitiesClient.read` 的定义结果以可选 `expanded` 保留已加载内容；`createAssetsClient.readObject` 则在 `data.expanded` 返回相同列表。SDK 的 `ExpandedDefinition` 是联合类型：能力项保留 `{reference,object}`，文件项为 `{reference,kind:'file',file}`，file 提供来源、path、state、sha256 和完整 content。消费方先判断 kind，再选择 file.content 或 object.body；missing/unavailable 不能当作已取得全文。组装上下文时完整传递展开项及来源和摘要，不能只取父 body，也不能把展开当作已登记采用。
+
+无标记引用和元数据读取保持原行为；不展开正文链接。Runtime 通过 `#` 人设路由继续带出其声明的 USER/BOT 文件，能力和项目路由仍单层展开。关联源相对文件随实际定义目录解析，`/` 路径始终使用消费方 KSF 根。必要时由人设路由要求配置补读，通用读取服务不执行业务步骤。读取不代表打包，能力导出不复制实例基础卡。
+
 KSF飞轮的 Desktop 回顾在每个 extract / reduce / synthesis 步骤明确传入能力引用与阶段。Desktop Agent 通过本实例固定 CLI 读取和核对正文，按正常入口记录 chat use 和 task declare；方法维护在基本功，输出 Schema、来源引用校验、恢复、报告和用户审阅仍由应用负责。请求、缓存和结果回执包含能力版本及摘要，能力变化不复用旧方法的提取缓存。
 
 业务结果不能仅凭模型自报“采用能力”生效。应用核对 read 返回的 ksf.hookState、chat 当前 turnId 与参与记录，以及同轮 routeTurnId 和 adopted 声明的 ref/source/userRevision/definitionDigest。记录尚未到达时等待，超时转原请求核对，不重新发送、不退回其他路径。旧已保存请求按原协议完成，不伪造能力采用记录。此接入要求配套 Core；旧版本缺少只读能力服务时显示不可用。

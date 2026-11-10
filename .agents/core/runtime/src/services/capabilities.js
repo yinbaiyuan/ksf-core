@@ -10,7 +10,8 @@ export function createCapabilities(root) {
     if (!checked.data.valid || checked.errors.length) throw problem('CAPABILITY_UNAVAILABLE', checked.errors[0]?.message ?? '基本功当前不可读取。', 409);
     const result = objectQuery({ ...query, operation: 'read' });
     const before = checked.data.object, after = result.data.object;
-    assert(!result.errors.length && ['source','version','user_revision','path'].every(k => before[k] === after[k]), 'CAPABILITY_CHANGED', '能力定义读取期间变化，请重新核对。', 409);
-    return result.data.object;
+    if (result.errors.length) throw problem('CAPABILITY_UNAVAILABLE', result.errors[0].message, 409, result);
+    assert(['source','version','user_revision','path'].every(k => before[k] === after[k]), 'CAPABILITY_CHANGED', '能力定义读取期间变化，请重新核对。', 409);
+    return { ...result.data.object, ...(result.data.expanded ? { expanded: result.data.expanded } : {}) };
   } };
 }

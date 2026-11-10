@@ -4671,7 +4671,29 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "originalAssertions": [
+          "9b889971a904672eaaa3ebc146ec5d1de0cc11a6a4966daaff676db6b158553c",
+          "2d6ff9018da64187d56f985d166bc498ca0a0c25a6b039120f17609ef17612fe",
+          "a97ffff19d5b4d0397209c5b406a9e29104f51db019dfc95830322f3afcf49ca",
+          "b257da23a0806faf23c5bb255f0aa2e11f4f014a9931e28f5c13fd1f0c1b80a0",
+          "239afe61147b1af6350a7ccb44688d7230dd235b7a8a22a8a417b0641d998c26",
+          "2bc69455defaf3a2b1b2ffe1d26c0c5fe00952dcf8f51bf085a9508ea4247649",
+          "5be9a2e3ed512fb78853055e8d6d4f89f862c02cefe93ee49e4cef9b185c12dd",
+          "96d1e30a43ef2a11ffbacd56a70513d4950783c4b6cfd877cfa63e9325a87d45"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "9b889971a904672eaaa3ebc146ec5d1de0cc11a6a4966daaff676db6b158553c",
+            "after": [
+              "b2a5fa237f83b937bfbb982588b2ee32d189619624638aa26cfb9aa763aeea93"
+            ]
+          }
+        ],
+        "hash": "05151605d0d04d7c312fd595423686f8479d14f3c5a87cdb1e4d30fcb489919f",
+        "reason": "Mainline routing evaluation suite 2.1.0 supersedes 2.0.0; retain case counts, dimensions and calibration assertions."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/eval.test.js",
@@ -5472,7 +5494,18 @@
       "path": ".agents/core/runtime/tests/incubation.test.js",
       "hash": "43ffd24385c70ea55b326ed00998a4e6ef0744fadc9468b78872b42936a0d7b4",
       "title": "'real CLI entry and incubation preview run with empty PATH outside the instance root'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "c9bfe9673be4f7118896de96fbfff7f50d16818ab15ba4d78abc9ab700d45a46",
+        "reason": "Mainline adds hook inspection after preview; preserve all prior CLI and read-only assertions.",
+        "originalAssertions": [
+          "cfe0483e2fc65dff36d60b119abc137468b9e0fcc249be7ed1ae9fa7f24deafa",
+          "27ad583d8f1f97550409861ff0db2c16a83e9ce6d159ad1771ff243c78c278d1",
+          "83db0dafc8625ba19d9208c9384107de09436042f971db2c55b6325164d789b6",
+          "eac44b599268bbc59205ba6818a94f47954ec1dfe3c8886f8d8356f8143e0fc5",
+          "b0ef460f4b5fc91ab7c60d73fb9b3046ffb9a0d4a358749e5aef37b747c0a7b5"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/incubation.test.js",
@@ -5683,7 +5716,44 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "originalAssertions": [
+          "a1ac91c4cef5d1f1ecca728122a8680a8fe926fe2dd7e38b6c66a3370674d553",
+          "b8d226d38e941c4962df991e7669bc8fdcb2f326e9f0db6f20207c0a26552aad",
+          "3eb3b2a6ded90c836cf6afe409b1a8fdc2aee4ef45ab3dde797d1261c013c027",
+          "3603c770e01c025ff5797fd2200c028da57886926c4de05d3cecce2d125e397d",
+          "4343a247d68d87835568b88e84d59906e1bacdc99cae0c6e7d4589c96ecc25af",
+          "ff60ba472ee08a0cafc73428ca67bc146a246b1b395daa39c86e22a5e96db621",
+          "f58a5a889026072dbd893d0dffe1e7ec9d66746535220b04bd89d014f4ccab39",
+          "285418f9aa4b5b65c4ea9da17478676f67b9ec79e4d184a595597c0495079244",
+          "54935ddac0f855ed7208a94090608d7c767dff29eb6be5ed857b4746e59f6096",
+          "487a9ac5bd6e818929d30f3018e0a1d0bd2c699b0f30e0aa215f04730a482c6f",
+          "8415e916786b41e662d7691e50e963f9fffbb716c066fedbd1ef2ea609e22fff",
+          "ab72d34c2767804bc0706ae725b7b7dc28cca55b5b0d6a935fa62c94ada4b3f7",
+          "7f6d446da1ea323f74c49e81b57bef5f949bc360fec7e305e2988cb96de2cdb0",
+          "4c303cde3b01e133352d86ba9073ae68ad6b95e99ff23f2034e9d2c689344df2",
+          "fc45cea5e20980b18150aff944ddc647159e963345b258cb290e0723889904d7",
+          "b8d226d38e941c4962df991e7669bc8fdcb2f326e9f0db6f20207c0a26552aad",
+          "76aa9bcbc908c9c2f29ee12baad961ce234d89cb10ccd040cb6ccc0a9f24e30f",
+          "6c7e8993b0e555ca3dcfccc7fee5cc1ae8a1f4a708beac633dc3df0d6e0c5730",
+          "16bcdb6085c8753332a529643385bc7e32fee400ec8d51ecc263032c77c72259",
+          "17b35de05dbd744856bccc209756a9267f4141c3da49fdb92cd803109029a2dd",
+          "a07989d42748cdc8da1c50a2fc0b7419711e843672680d8b18d28f1193b71be6",
+          "cf0d7d85059e1c5f1911a9120373fc5e7019ce68a62fb9b5163d3bc850df226c"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "54935ddac0f855ed7208a94090608d7c767dff29eb6be5ed857b4746e59f6096",
+            "after": [
+              "bf4214a0751592830325ed4053a5be61518ff1bb0545b8addad035e90871b5f2",
+              "ad0e6b9370167ae10d2fb5b6087366490179ddcf87bd762bf668125f41b2d78d"
+            ]
+          }
+        ],
+        "hash": "adc920f03c8692750893e30ab9f314d81028b569c970c78e112829526eb3b7a4",
+        "reason": "Mainline resolves on-demand routes by explicit ID, version and source; keep validity checks and add exact-reference assertion."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/lifecycle.test.js",
@@ -6061,8 +6131,8 @@
         "linux"
       ],
       "contractUpdate": {
-        "hash": "7a857348b7b2cebcf443f22f1c311f75f9c407c3bd8a0bf62725dbfa6b101339",
-        "reason": "The runtime has exactly the protected ability-route/project-route entry dependencies; asset-maintenance is retired in favor of domain management. Keep closure and fresh-instance assertions.",
+        "hash": "71fc1855136d14117b2de9e74b29ba96791553afd0b20e3abf601b6c757ca00f",
+        "reason": "The runtime has exactly the protected ability-route/project-route entry dependencies; asset-maintenance is retired in favor of domain management. Keep closure and fresh-instance assertions. Mainline runtime 2.0 expands persona-route and exact marked references while ability/project routes remain protected; preserve fresh-root and no-user-write assertions.",
         "originalAssertions": [
           "442e5c8d9f763a0a1edf0e7d98772a477d96f5ed64617e4c6129e717a8501db1",
           "b35d79e5decb3bb6777d80b12afcb0ba1056fdbb22db04bf07b9256845c0e590",
@@ -6081,7 +6151,9 @@
           {
             "before": "016f5c1a4046c6dbda3bf40fe300692876e95a6e838ab95031060f8d9274ce12",
             "after": [
-              "50d578c49327bbb9e34d35be1a917e70d8a2648d16b7235690e76baa9c00f97e"
+              "a81b000f2d2144e622b5d379080ca973685e033590592c347939e30d69a8a5cf",
+              "17e1bf1bb4565f7822d578ca82cabbb469df1e7bc5e6b90795be76d9c88f4f99",
+              "288575dc77aaabb93aeb6ab03d92438a0ddc839c8d6a66e935ba2b3edc9ceb33"
             ]
           }
         ]
@@ -6095,7 +6167,18 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "97a18f51bca96e4b4abd3b1127cef4b4fb7d979d818193fc767a28639ab828db",
+        "reason": "Mainline runtime 2.0 expands persona-route and exact marked references while ability/project routes remain protected; preserve fresh-root and no-user-write assertions.",
+        "originalAssertions": [
+          "3e53f8a0f66d643c875c435565ca82756d6540aef23b68ce4171b694283190d0",
+          "8e3e18947d7570e87a11a182b955919d0f94f88803ddd8443ccf5978d95e3c9c",
+          "36d3ae9fabd9d09ea9b34da6763992aeb52bf31db208bcb3b5f6caf2a8211394",
+          "2152dc1b2c9308f31cd403036bd6fbc1690bfdf54dab8b4b87680a9c34b3efbf",
+          "b5e68a063ba784d6b3884c6e41a6640833f96876838c043b1a367ae97217f71f"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
@@ -6115,7 +6198,19 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
@@ -6125,7 +6220,19 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
@@ -6145,7 +6252,28 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "contractUpdate": {
+        "originalAssertions": [
+          "01526029b97f617194132f891709831e12142f74b3558c4c7a74bef819087618",
+          "c84876734ceccc5ff4a20642e953dbd249a9e8bae87b54efb4db3b1986a77452",
+          "ea739599f398f10639e956847a2d71b796ab1af1f4fb4ff5d02c537275e59969",
+          "657b8bf74ecefce37b270245501541053d9cbe2fe67cb1edf32de9fb557dbe47",
+          "69f8fa40b656c42d6e1019c4aca225b96c252a783e226ab153089ac38f0bdbe2",
+          "69d419b915bd70a50eb69c6de9bc8fd6fdae19defc1b2a5a13a45eefcaf38191",
+          "2fcc69e4e5715013f57e3c62f1ddb195a0f12db6fbb157faede0119155b966ae"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "657b8bf74ecefce37b270245501541053d9cbe2fe67cb1edf32de9fb557dbe47",
+            "after": [
+              "156f33f651014be0d915416b47c58c3bf7e91b459b7df422409ed3aaf2d5f0f0"
+            ]
+          }
+        ],
+        "hash": "3ebcf207529e384641e02d2c9f47fd3e353c9069df82b0fd3b7626ea87e5d0c7",
+        "reason": "Mainline runtime 2.0 expands persona-route and exact marked references while ability/project routes remain protected; preserve fresh-root and no-user-write assertions."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/mutation-plans.test.js",
@@ -6630,7 +6758,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6639,7 +6779,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6648,7 +6800,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6657,7 +6821,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6666,7 +6842,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6675,7 +6863,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6684,7 +6884,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6693,7 +6905,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6702,7 +6926,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6711,7 +6947,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6720,7 +6968,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6729,7 +6989,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6738,7 +7010,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6747,7 +7031,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6756,7 +7052,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6765,7 +7073,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6774,7 +7094,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6783,7 +7115,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6792,7 +7136,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6801,7 +7157,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6810,7 +7178,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6819,7 +7199,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6828,7 +7220,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6837,7 +7241,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6846,7 +7262,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6855,7 +7283,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6864,7 +7304,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-intake.test.js",
@@ -6873,7 +7325,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "retiredBy": {
+        "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+        "reason": "PR24 already retired project-intake and its saved-plan/receipt import API. Preserve that mainline decision; current project planning derivation and explicit absence of the old capability are asserted by the pinned native guard.",
+        "removedPaths": [
+          ".agents/core/runtime/src/services/project-intake.js",
+          ".agents/core/abilities/competencies/project-intake/competency.md"
+        ],
+        "guard": {
+          "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+          "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6"
+        }
+      }
     },
     {
       "path": ".agents/core/runtime/tests/project-routing.test.js",
@@ -8344,7 +8808,44 @@
       "path": ".agents/core/runtime/tests/tasks-web.test.js",
       "hash": "156ae07bf39aeb50469871a5c5fecea46705bc2c39b902062f25d66ced0e0939",
       "title": "'Web automatically exposes input and final answer for a turn without any Agent declaration or route'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "originalAssertions": [
+          "839dc9258319b04b3c144dd4dc3ad3df66df34b2dbc15fda859fc31df1e5c82c",
+          "d5cca5f7e90133acb6abd850adce5eb83047cc1b453d90259e55b76bcefc61a1",
+          "7dca7f4ab1e8c15e80a79cb1b5b3bea576d8f6b5e96f624d193b585043109e4b",
+          "5ce72893e7d8e539a77a818a6e1d95bee81314dbe13e0fd637d6e5c6a2fd5afc",
+          "f61c4d530d36a1143862a373493cd3256abfae48e9388288a4734cfac8e93bbb",
+          "325a1b2ae1286f7cc93a418571aad8ae10713694f7436cecfc5dfe1045624c9c",
+          "c05e54864c347aa48fdd19037107486d12578af7f09cce944cdfe450d77fcd41",
+          "df89813c455afe4b9d578de0fcc6c3f3ce036b04913ef3754972fad49ea15e71",
+          "35e9e233da434cd6e2d7133b9aa1a51c71f7068516885ff4c4d94b8cd7b15eca",
+          "738b860263c3546f7bd4778f36f2cf6e898f26893e7e8063a69696816a4d5fd7",
+          "9e83fb3b3e37d4dc2334e66353383b79a05bca3f20c6c944a86ae984acbdb6ac"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "325a1b2ae1286f7cc93a418571aad8ae10713694f7436cecfc5dfe1045624c9c",
+            "after": [
+              "afb680b521d6553f6a822b23d50aaea5ec414929c9a806873799ab3d518a9956"
+            ]
+          },
+          {
+            "before": "c05e54864c347aa48fdd19037107486d12578af7f09cce944cdfe450d77fcd41",
+            "after": [
+              "ff495b190ee0d32cd415a3c8aaf7a6f963d20cb5ddcaae49b59d503f327b369d"
+            ]
+          },
+          {
+            "before": "35e9e233da434cd6e2d7133b9aa1a51c71f7068516885ff4c4d94b8cd7b15eca",
+            "after": [
+              "c66335fbbbb7f002bc8138a401ed6985d2399c73a8ecea3e41d3283d87875f82"
+            ]
+          }
+        ],
+        "hash": "48105509395c26425da436c662fcd371bfaed6a74034336d8af0c3dcec995cff",
+        "reason": "Mainline archives ordinary dialogue without TASK_ROUTE_UNREPORTED, includes commentary and same-turn extra input, and exposes verified timing; preserve archive and restart assertions."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/tasks-web.test.js",
@@ -8392,7 +8893,31 @@
       "path": ".agents/core/runtime/tests/tasks.test.js",
       "hash": "a337ce71863dc7771470c21fcdcfdc657558cf60697ebc50d40c4bfa3596b158",
       "title": "'enabled capture saves dialogue without declarations; delayed final flush and compaction recover losslessly'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "originalAssertions": [
+          "9dbd9fcba2ff6b677dba94740b79365460a843b232ea60df5e258b1931d75ed0",
+          "8930659aaca1bc773bd2e6d7813d015844d912ebb32c1f6decc99e7f60c001c9",
+          "415cf08c8be0be32b3747c7483b8bc6be9b33c673937653b79536aec604afd62",
+          "c1b9cb6b1603b87b177eaec994e1254c549efffef963b6115b32b4bc0d6034b4",
+          "20e054b9a311317846dbfe49a596feb43e5d522bcffd387c50dc0aeacbc732ea",
+          "9dbd9fcba2ff6b677dba94740b79365460a843b232ea60df5e258b1931d75ed0",
+          "de3771981df639e62dba350d046c1a7c17ee060e9b10254d1b2029b234727e88",
+          "85fd5fcc83d4e04e4900ce5038fce238806b37218409835d245e4254eae3be98",
+          "25ac33a05aec9745418ce02d31c18fe742a731d1b700dff42b965161dac37a80",
+          "85fd5fcc83d4e04e4900ce5038fce238806b37218409835d245e4254eae3be98"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "25ac33a05aec9745418ce02d31c18fe742a731d1b700dff42b965161dac37a80",
+            "after": [
+              "a9a6578aa441c2163c1a34f6aed8c85b281093b5e518f881927d6cc6ee8f028b"
+            ]
+          }
+        ],
+        "hash": "c809432e9334b1ddf63b931a4129b266eacdf89d661a30b81c14ee315cc56078",
+        "reason": "Mainline ordinary dialogue capture no longer requires declarations; explicit user input and source timestamps are part of valid report/fork fixtures. Preserve capture, replay and fork boundaries."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/tasks.test.js",
@@ -8500,13 +9025,35 @@
       "path": ".agents/core/runtime/tests/tasks.test.js",
       "hash": "c4a129b80dbc7c8321c59c98e2d704692e55f6eaf01cb22f59c1121e7eb4462b",
       "title": "'multiple reports at the same timestamp retain the final declared arrangement'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "ec9b803eeb6fbb02e6df477d2a80f0967f0840000ace9cd08bea78bfea7561b1",
+        "reason": "Mainline ordinary dialogue capture no longer requires declarations; explicit user input and source timestamps are part of valid report/fork fixtures. Preserve capture, replay and fork boundaries.",
+        "originalAssertions": [
+          "1e42ae23c73db5c436db36aefd38864976653e3288f4e888d7246d1f1a68b067",
+          "6075fd3deadadf85fb523c6dd699a1c4c0ad90f917a419730152799d498d92ad"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/tasks.test.js",
       "hash": "62ff2e7988b8de302a9cf4e3a558882f4a7668b88cff2195ed340018320800ab",
       "title": "'native internal workers are skipped while user-created chat forks remain capturable'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "8d0d41c803e4b5e3f18698ed6a4fab99ee57d7eceac83d78023c52cd8ac2c5df",
+        "reason": "Mainline ordinary dialogue capture no longer requires declarations; explicit user input and source timestamps are part of valid report/fork fixtures. Preserve capture, replay and fork boundaries.",
+        "originalAssertions": [
+          "3657dcebffa245e58bfabb7e9141fe42b8a35c89bbe754e05571b07b92976e7f",
+          "4b046ed5fb6bb778ca764a962fd50b1ea711fb90ba2f8915c2ab2d1e8725bb7a",
+          "bea286ccf6960ef6dabe63b95e2906c67f0e6632cbfd9c91aaf842044ec210b6",
+          "e0efcf5c3fa1f737592e1a529409687f23888c8841546c5b6b8176c6fc7eb7d7",
+          "4b046ed5fb6bb778ca764a962fd50b1ea711fb90ba2f8915c2ab2d1e8725bb7a",
+          "3657dcebffa245e58bfabb7e9141fe42b8a35c89bbe754e05571b07b92976e7f",
+          "6f0b360863b9296d8a745b70e30ac1bfd3d2d997b59cb124f6486d19d6de61f7",
+          "34bd9577b59703ebf9700267ddd15bdba98b499b120d9a466c007ea91df7e8b4"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/instance-initialization.test.js",
@@ -8515,7 +9062,28 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "c4c75048e3e4631a58028cb88fac7a758c23e0d26e3448a098b77946cae69010",
+        "reason": "Mainline template copies only Git-recorded files; added ignored/untracked sentinel assertions preserve all original initialization checks.",
+        "originalAssertions": [
+          "6a4824c3f4d4d309a71bdae736f69a4865fb27ae8b2eb40a4199865122c41c7b",
+          "d59f4a7937cf9222f9cbda391ece7765e41e019304d72690026dc187510a1cd9",
+          "74e2a45fac41523e5c21c1fe056ca81492ae6201ed278034480eeef7eff97bce",
+          "dc879b54b409b5f9d639c847a5eae8ca784fead685b593ba08b8ff38552703ea",
+          "f37a6786feb402923cc591f78960a9a4345c13771a4f57173df0b74c259e4124",
+          "0412aa7a70c96c88a0f1ba292b933cdca89a0146e532e009a37191c0095c5a1c",
+          "ae9f49ae0b348b10759c724e0e8900e00dbe3a9feb066a1988ad05d20ec1e715",
+          "cc0f22ef07fdad9d5280406b06216a4bf682c223890e849c71667a4913cbc0c1",
+          "8bc7143d01fb910debdea8c522a463799367382b65b2a1a54185d63b180cc4a8",
+          "afda659c2870e6ba47e33c78960ce70b4445a87429b34bf511220a8ca41f6c5f",
+          "602210190a3042c0409e71f84bea121d6a31819ff41ab690ca7d0c3a388c16fe",
+          "7c79c26b0f0a33a5629af07b79889c43081911ed6a93b591bb3924033768b538",
+          "586069cddc897550bd6c527e1f8a1b9cec633bd812b19fe7ae04345062ca9e65",
+          "bc3fdba996e0e43b4bf95e865c25aea08d42e6049c92af3b31ddd3363d8c28f3",
+          "5839f6ac429eb6442afe6a4fc8df57846b374fef49d10f2c6cc858d58355b3d8"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/instance-initialization.test.js",
@@ -10525,5 +11093,2209 @@
         "linux"
       ]
     }
-  ]
+  ],
+  "mainline": {
+    "commit": "66adf356c07c9b0eefbce5302b7cc8cd72ced396",
+    "reason": "Append only the mainline scenarios not already covered by the original ledger and its reviewed updates; preserve the original 1399 entries and hashes.",
+    "scenarios": [
+      {
+        "path": ".agents/core/applications/projects/tests/backend.test.mjs",
+        "hash": "f6e86cc2613435a047142a99a38b692d08d80ec55fdff96823f2f905c7df9a82",
+        "title": "'项目上下文列出项目根目录的原件，排除里程碑分支并按需展开普通目录'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/backend.test.mjs",
+        "hash": "3e387b3a44ac32cf17796a84d0daef65fb18381635e9104fd0e1384d241d1953",
+        "title": "'固定项目是按范围区分的持久设置，独立更新不会覆盖其他窗口的固定项'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/install.test.mjs",
+        "hash": "7b8355eda541729d936dcb33c1cfab499d45bdc81ebb4c9a92cb3a4336b68d9f",
+        "title": "'matching packaged app opens migrated Markdown projects after upgrade and preserves legacy access'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-background.test.js",
+        "hash": "9b527d7cb31f54963c3dead5aa8f40ca6b33e4e4aa03ee8b6d7e20fdc88ee566",
+        "title": "'installed background reconciles without a later HTTP request'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ],
+        "amendment": {
+          "hash": "772c9b23ab59d52d96ab66ed924f552accbe2e5d392bf152fac92705ef38e21c",
+          "reason": "Retain mainline assertions while applying the PR23 process/readiness preparation and assertion additions.",
+          "originalAssertions": [
+            "9ba20f7ab1fbb22b1a3e88c0c539c5fdbc1f7c070b118b43a75354b81d7d3a60",
+            "9ba20f7ab1fbb22b1a3e88c0c539c5fdbc1f7c070b118b43a75354b81d7d3a60"
+          ]
+        }
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
+        "hash": "e48bf9ea59610a2f8b19bce102ed8ac1e7fd20472b0164f759b31be8d261ebed",
+        "title": "'newer local Core baseline is not mislabeled as an online published version'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
+        "hash": "721899239c2e92e95b10a56d58fa64c02e279d044e7e9c897018c9ce99372a82",
+        "title": "'SDK API range includes both bounds and rejects future and retired APIs'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
+        "hash": "2335f6e38bc1748ba9aa6e49dce2e8a72a3b74da41c0ca91d81a0e097833904b",
+        "title": "'legacy packages remain byte-identical and retain their Core floor'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
+        "hash": "a3a8f261b004efa0a42c1b4a3aa911a238b5c579ea62d87941747a12c5431f8d",
+        "title": "'builder stamps actual SDK and protects old hosts without mutating source'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
+        "hash": "e91047da332a65bd39969f087cb886cd7d6b3332a63576de39ccacd525644618",
+        "title": "'target host contract wins over the checker own SDK version'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/background-service.test.js",
+        "hash": "e8f3f993340ed5baa9c15ef3e1da6e05550195d0cafece6d33452b6e8c97662d",
+        "title": "'host death marks the accepted request unknown and restart never replays it'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ],
+        "amendment": {
+          "hash": "32b1247f290ea2c1e6bad865db0f99869b5a1071573ffef85f662f69653167ff",
+          "reason": "Retain mainline assertions while applying the PR23 process/readiness preparation and assertion additions.",
+          "originalAssertions": [
+            "fce2310e96961d046f2889a2a68847cbe5fb96eaeb01b007ad6e0817250847eb",
+            "60a6b20dc2ed44201047e2104535c2774ba4704880a2c7379f02b8828f2a6af9",
+            "81e2bfbfdf46756cb54e889129daa068385edc556d69b36ac0db93ccbfb00d2f",
+            "5c5500d504efae63a88fc7cbab5e309241ce767a82b2fc41285152fd2d0ff026"
+          ]
+        }
+      },
+      {
+        "path": ".agents/core/runtime/tests/build.test.js",
+        "hash": "fce0b331f44e7700464df1eca2b6d066af5dbb2dfa40798161516b7868a93d9d",
+        "title": "'build blocks SDK contract drift: '+changed",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/capabilities.test.js",
+        "hash": "723bbc086ef89f1b7e6bef5ff2b1514b8347de122ae684272a5b72bf52d46ee1",
+        "title": "'capability service preserves expanded definitions and exposes partial content on recursive failure'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "e8688e74ad9b12f0a86ca2bd3bcc3880850fcd3a107f9907bbacb443691f5d5a",
+        "title": "'binding reuses shared scope without native turns or participation; reads remain nonmutating'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "d7d42f21d6bf672efc54b1168addf410f93c14195cc34ee30d1b91fca6ab058c",
+        "title": "'complete consumption enables zero-body reuse, preserving exact USER/BOT'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "b12efc910362ad298c4f87c3de7783717570bec01deb399a0eb5d3de71aba4d8",
+        "title": "'switch retires only old uses, keeps shared dependencies and reuses previously read content'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "266c80caf69b8af21b7e515709af61be999445bd2546ee05cd32998ab1aa8852",
+        "title": "'changed file or definition sends only the changed main text and invalidates stale delivery'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "fbdeca403572895003a66f4f9d783f4be4dec57b79ebe3a0c03e6907c77b3dd0",
+        "title": "'project root and selected checkpoint enter context, unrelated files stay unloaded'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "ee4b4808366ef9828f5583636e5f3949550cd09af9cdbc9573cebef384b68c45",
+        "title": "'missing required capability preserves partial output and cannot advance cache'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "0a741bd5bb3a571c93a025d0b5730a413f80b7af7429df6a7b304a76389a505c",
+        "title": "'source/version binding and file policy reject implicit replacement or protected files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "acac0e7c09c419e00c7362b18acbea4c96392bedef6c2a8a606d55f60971ee90",
+        "title": "'ability ownership and related targets pin resolved versions/sources without replacing planned identities'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "99c2168b59b5d4a7fd1f3270a3524b846ee06b2b44eaf3d059cd67ded0f8ca22",
+        "title": "'compaction reset rejects delayed confirmations including empty-cache ABA and preserves binding/counters'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "2ac7694600ba08f78c5ed6b1c1b9628e2699bd83b4540c912ef7471fde3119fe",
+        "title": "'binding change rejects a delayed acknowledgment; corrupt disposable cache can recover'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "4dabdab713b0d8c64a64b399e9671c42bfec560a98c6583c463f5f07be5d32ef",
+        "title": "'base entry acknowledgment does not retire work and avoids startup duplicate bodies'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "0612d878ff014039c03fdb361c88b545789c704abc7ace850809393a1464cf68",
+        "title": "'turn-local support never changes primary binding and clear retires current work'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "5aefbd1e0a4569008bbf40f630a9ef1313dfbc7062442ab60008187898f6dc87",
+        "title": "'native Hook is small and body-free; SessionStart restores without fake turns; installation preserves other hooks'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "33e7887e05449747756fe45248d61103f8414e1c00ef187f49f7277553384440",
+        "title": "'CLI bind/current/accept preserve the same body and receipt contracts'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "8dde6fe55eb034395bead5ee904ae316dc74fd5a4aabfaa3d7af57c08280ca95",
+        "title": "'CLI extras use the shared incremental service without modifying the binding; invalid JSON cannot reset the cache'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "1cdb251359d6d5795d9174f4dbb90663adf030c5e9b28788f160f249436b96d1",
+        "title": "'work partners and stage methods survive switching and the compact Hook while common dependencies stay active'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "7ce03390ab2a4fc227419f052acb4f9ca267c137f767daca7d71c5a8a400aad8",
+        "title": "'read-only body and manifest calls do not alter an acknowledged binding, cache or participation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "1957620d9fa4d8e8ab4425e2722e227d031f4f79dd6741fcc0e4b89e9bb84a41",
+        "title": "'multiple roots upgrade recursive traversal while deduplicating body content and cycles'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "92a183bda1a677ad06cba49e3bcdbdc7903e45b0d843b22901422e71761c0364",
+        "title": "'corrupt business binding stays an error; SDK cannot inject fabricated entry content'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "9714f8da1bb73d82a6e50452f9806b6f698892e38b40b0eff7672b276e40a1fb",
+        "title": "'archive invalidates cached execution across chats without rewriting either binding; restore retains paused state'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-context.test.js",
+        "hash": "0aec3ef015bac3120288878ec473405c7d57c09225046d442c314895bfd3c58f",
+        "title": "'old taskRef resolves numbered task after migration without rewriting another chat binding'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/conversation-review.test.js",
+        "hash": "ce2d7dd54e0dcb035645e71edff7e1ef82f02dc5aae6760cf171c77fd0978cac",
+        "title": "'the chat directory and search include an arranged project without assigning ordinary turns to it'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "2ce2a941837a03dff5b7716728e5d942d8fbf7dd75ffae8f2109c430eb466048",
+        "title": "'offline Core plan updates old apps while preserving install identity and disabled state'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "ce9874f73ecca076ef632d20ee87b439988b2eb31d1add9ce8103b7ca8d333c0",
+        "title": "'newer compatible pending version beats Core baseline and rollback preserves later store upgrade'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "eb75e4231367a89740990575ea52e36fa7623d8f5a6c41e2a0c5d66ce34c9fce",
+        "title": "'Core respects uninstallation and refuses concurrent state changes'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "f44616246435fa2faf3c0fe7b1ec90ccda486fdb0d98d97d939ca09aac318f34",
+        "title": "'legacy-updater bridge runs once and never reverses a later explicit app rollback'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "7f0c48a3488756f385c4ef57b0f8255241be64afac0291076792a9981d59f4fc",
+        "title": "'candidate runtime ABI wins over the checker runtime when selecting native packages'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "b75384b794f7ca580930a61886b87bcb3717e1e8506c50bafcec1f0fe0b8a40a",
+        "title": "'installed package verification keeps canonical member paths and rejects backslash entries'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "fe68507abb8160a3fb433b2bce6108ebec51ed443849de744d5f1c313715d172",
+        "title": "'bridge real SIGKILL recovery at '+point",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "6e6967e44d14386c7787a2f1684c1d4c064b7bf80725f4c614e269e06f77bd61",
+        "title": "'blocked previews retain per-application plans and identify incompatible independent apps'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/core-application-plan.test.js",
+        "hash": "a85fe3e682913188cc3a3ca638274a65add5b1983603610f95af8bbf97f5df40",
+        "title": "'interrupted bridge refuses concurrent index changes without overwriting user choices'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/eval.test.js",
+        "hash": "7bed2bf82c54648f6fa4ebafeb43a787bc3ffea35be2a4a0f564a67a4bee1ba4",
+        "title": "'lightweight explicit/preset paths do not require a redundant global discovery'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/eval.test.js",
+        "hash": "3a1d1b1e79c50e918964ef2bfe442db2cc25ef00292e4c451566ff423a2e619c",
+        "title": "'entry/current body evidence is recognized while manifests, receipts and truncated text are not'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "808f1a871a01b92adebbe2d017c23222ce6b395cae6275e927b6ccf2ac67bb1f",
+        "title": "'finish prepares context hooks with capture off, preserves other handlers, and never claims host trust'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "702b2389f066c24a3152c7fedce504d4180bd8b425c941405ad5eee3da28bf98",
+        "title": "'hook status distinguishes missing, partial and unreadable config without mutation or invented approval'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "108c9db48f8094e5c28c8b798273bfdc008be84ba1049475416533d3435764a5",
+        "title": "'explicit hook deferral survives completion and resumes with CAS without repeating setup or changing capture'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "1d393489e5fb807f06edb9291ee199c2cd9fef64264fe81fcad0e29c4f021bdd",
+        "title": "'hook decisions do not initialize legacy state or accept trust/activation claims'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "5664537f8a2a198f0e30261008b9aa4413f7b7e32b17e19548a2f1e1905a690e",
+        "title": "'hook inspection rejects another root or additional shell commands even when the handler looks similar'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/incubation.test.js",
+        "hash": "37c536fc2ee8cfd79e4c9f256d3d2e1750bb78838adfa68ec8bdc0ef4390f447",
+        "title": "'hook CLI supports readonly inspection and explicit defer/resume, rejecting ambiguous or unversioned writes'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/minimal-runtime.test.js",
+        "hash": "2d08c4f793d1d278cda10c126a217f80c65b2c1fdfd35bf07373d906ae154fc6",
+        "title": "'project planning remains an ordinary derivable competency after import retirement'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "e818939c91c0402490c4465b4592b70877adb2c28d829913b40030dd4477f1ec",
+        "title": "'dependency prefixes are exact metadata syntax, not object selectors or YAML comments'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "2a93c453b424d894de5a1f5523486bafa010ee34605c91e40d27ee57871c3978",
+        "title": "'mixed prefixes expand definitions in depth-first order and preserve parent/part contracts'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "a78b1569ec2f56f10e66d08e7b6f30478e21228a4ee854d00ff256a6213779a7",
+        "title": "'recursive traversal upgrades shallow reads, terminates cycles and never repeats a definition'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "2e65aa3779139c19f026fff4ff2baf9ed3ee60f867e9ee084defa08f6616f8db",
+        "title": "'shallow reads stop at the target, recursive failures preserve acquired content and valid siblings'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "11605ae67b24be0ef026651bc6b3637c2a223b3fd362a1886f9158265ca6dd18",
+        "title": "`${type}: prefixes preserve effective binding and dependency protection`",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "8c3e7f282a43029269a5064edd760d85c0bc2b6b8ade769e93a8d3c2d60e4765",
+        "title": "'explicit file paths share load markers without becoming object selectors or versioned IDs'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "bba133138dade61506845744ca035b04e8d4130825de93f336a5e30201da8dd4",
+        "title": "'file recursion uses each declaring directory, preserves complete raw text and only follows metadata markers'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "9f66156eb7cd0d7efcbec4a74af421a8a382cd70dc49f00fbab93f1b5e3fbd8a",
+        "title": "'mixed file and ability graphs upgrade shallow file reads and terminate cycles'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "b6953ae6804369d8e9491d327c19f5584a5d66e7a3d263f8f5a6ff8e8b8c02ba",
+        "title": "'file locators report missing state and retain valid siblings on content failures without truncation'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "00c65be743caacdda958e460ca15188b15faf4d6074197036d273654cf1e4a06",
+        "title": "'file references use the logical KSF root and reject escaping or symlink paths'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "0fb82c61731095b6c33abeae2ce65ee6498160387ee48d82f7f1520ee0bbb6a1",
+        "title": "'derivation rebases external file locators in entry and resource metadata while retaining internal paths'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects.test.js",
+        "hash": "20ec199beed31ad66a6cd5c355978b38692c9bf7acd3f3601d65936d68f8ebaa",
+        "title": "'file expansion honors the shared protected file policy'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/objects-cli.test.js",
+        "hash": "1e41c167fe68572e3945734dbe8f116f494c80f3e76c14525a3bea5d0143ddd3",
+        "title": "'CLI emits expanded main text for body/all and keeps partial output when recursion fails'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/platform.test.js",
+        "hash": "726c93388a3495ece33e5db794267cd74ca53d08ed1ae3fc7a668aa573a902e7",
+        "title": "'context hooks are generated before Windows encoding and stay distinct from task hooks'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "6e6cf9a2dac0a13e35e2ced974b1f0f8590085cfd20564cadae933fe31124d13",
+        "title": "'shipped Core contains exactly 35 valid objects, four protected entries and closed references'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "4f6f5e2c4a853600c6f2dd2e46173ef92c77b01f4ccd76c24393cdf2f06913b4",
+        "title": "'candidate validation supports legacy schema exports and uses the candidate expansion parser when present'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "aeab4bcbff62c60b18f0f4120bad1d85d4e830e03bf6affc8a0d7b7d165e13ab",
+        "title": "'normal entry returns the root only and never independently loads profiles or route definitions'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "52a4772b65ec41e62d129e56dffac9ab579ef55673e606064f8481ab742cf271",
+        "title": "'shipped Runtime loads persona files and retains exact route dependencies without preloading their texts'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "82d46ab1f7d1e8702e00e3fdc3d1149ddcc0492ff2f2e83ece88179e6406cafb",
+        "title": "'shipped routes load on demand, reuse acknowledgments and retire only temporary purposes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "361011a7496b1873da219a7f4c6e428036336058a3ed15e628d039763b70d261",
+        "title": "'compact Hook restores selected work without finished routes and restores a route still needed as a method'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "e1346bcfb1a9ce78548dc1f8344576fdb8ffd4a4e5859019c0f7d0fa68d8b9e5",
+        "title": "'entry respects shallow route boundaries even when the route internally marks another competency'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "16392d86ccb18e2b77c955aa43d009ceb7e24697bd0f6551d8bdfae1151b8787",
+        "title": "'entry JSON and text include marked main texts once, while fixed definitions stay raw and protected'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "7cc0f68e890665d3e93f0a05afb26f34ba3d7a4c3de453af110d2a8276c1831b",
+        "title": "'fixed entry checks exact versions after removing the loading prefix'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "33825f75c9f05604721b26f7e44d8fbfd232a847e9e6579f8cd2b71b8af2e79d",
+        "title": "'load prefixes do not alter dependency reachability or orphan classification'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "b1ab5152f9d307b78db51d1ec2bfe24b2db31b05dbdd4fa6c95a882cdc15679f",
+        "title": "'file references do not infer capability ownership from their contents'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "09e8b44ad94fe4f13360891c8c24ebce763e116580deaf0f6cd30dc6d99aed26",
+        "title": "'persona configuration reads distinguish missing, failed and complete content without changing entry or files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "d5a4cfd21e3eda0489fe19905f29fee6a75afe564ff2d7f6716d8d7e1c835746",
+        "title": "'entry detects a root changed during generic context assembly and retains the original root'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "6abaeabae122e5f295378889caa56403af906cb6f29282bc42e96201c7f18d3c",
+        "title": "'incubation does not expose or depend on normal profiles and routes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "bec97ec27fb308c8675f88991456c7b7600ea4f8a46eec0cc7c426e966695a0a",
+        "title": "'orphan graph follows transitive exact bindings and ignores archived or shadowed partners and ordinary text'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "8ccd7e700d0fa2c2aed2f79e8b9707b457cb37dc623e2b4f4653961f403da4a6",
+        "title": "'graph errors stay incomplete, broken candidates are excluded, cycles terminate, dynamic use never consumes pool'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "e9720f8c4a5547f7c84ff1a19f3f6b45950b54f20a5a84eb7ffd2aff1e2ec736",
+        "title": "'linked source ambiguity is explicit and source dependencies never bind to private overrides'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "f6b84eab1c9a005389e2007f0e1f99c7b8222ac9a443c0f18e28fa5ca1e2917f",
+        "title": "'manager migration preserves values, run identity, historical originals, supports preview and no-op repeat'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "206b8f09b46a91768be81136ca5cd9e792e32622e0a85eeb5fd5dc43701eb98d",
+        "title": "'migration conflicts and derived definitions preserve both identities and original baselines'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "38ba08da6609f97363d06c1cd2b26c277df287e2423ebd1c62833df52e7f558c",
+        "title": "'manager migration detects prefixed legacy references without rewriting custom definitions'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "a9d965e44f11b4bff99b68a84ed2dc1b671c7141ffa7593318126515fa328c50",
+        "title": "'binary copy/move checks baselines, keeps originals on conflict, refuses links and supports dry-run'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "c4665f9271de3002ff669798f3307b69ebc52914bfa0c35a1a6741d7cf02fd65",
+        "title": "'inbox and persona target identities are validated, resolved and retained as distinct kinds'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "d450235950259ae295c6b4d23836afb6246bf4a658eff71d176f4faf95adf6a7",
+        "title": "'entry rejects wrong fixed identities and exact route version mismatches'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
+        "hash": "fad2c036aab34e5c8111458b1dea758035ca010cb8852d17ea969d07300402dd",
+        "title": "'inbox and persona persist through the shared route store with distinct ownership and unchanged history'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/sources.test.js",
+        "hash": "ff27f3d8a3e08e5d5387dd5edd782fba0a4182d03bd556e4360275970ffb539d",
+        "title": "'prefixes stay source-bound through recursion and survive publication version remapping'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/sources.test.js",
+        "hash": "064a60cc6d846b5bf088eb81df4369c3e2ec5cf3d8364c30ee00a5fe7573bc7a",
+        "title": "'linked file references keep their source directory while root paths use the consuming KSF'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/sources.test.js",
+        "hash": "02b054f00c591cfdebd3198579f3532516a160d58f54690f72e6ae44cd8d44b6",
+        "title": "'export preserves root file declarations without reading profiles and remaps owned file metadata references'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/sources.test.js",
+        "hash": "e8442a19b00f1ed2b5e19c6ce7a4862215a8e14083aa1cee4cf0ea6067aa8b33",
+        "title": "'export rejects a relative file outside the selected object without copying it'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+        "hash": "046ac790339852323ece96b3eda99cd3cf24e3307e9d77521e34c8f2afded40b",
+        "title": "'Core and real HTTP store share one installation; app rollback then Core rollback preserve business files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+        "hash": "6c7a76759c21292e7f871fdb0e34ee715661b01832fcb6a492a6ac24d80210a7",
+        "title": "'fixed launcher recovers Core and app pointers after process kill at '+point",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+        "hash": "02852535b28e784c9223ca803cf654eb6ac4b52870e766b7ceda619b741de814",
+        "title": "'migrated business data blocks both rollback paths without restoring stale data'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+        "hash": "624d2f489d70de692972849d7afaaadfdca8de1c87af56388ac386b452a8b5f6",
+        "title": "'live service blocks actual Core and application switching'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/system-update-applications.test.js",
+        "hash": "5dc9d70bda6fe6c0a1311aaeb27d92f8da090a2d5d499a270eb864b62cc76e9d",
+        "title": "'native recovery preserves concurrent application index edits and the Core journal'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-stats.test.js",
+        "hash": "3d88779ac432f895b68ec9d51ef1536a7c7d5587e866a67c1c9ba0287f72030d",
+        "title": "'project activity counts local dates and explicit relations once, while preserving capture exclusions'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-stats.test.js",
+        "hash": "7271e074a38bde2cf271438d997e64e50abb8400f95855c2d9367dc93dc6c833",
+        "title": "'project cards use archived work arrangements without turning them into chat ownership'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/work-stats.test.js",
+        "hash": "032b58e37ad50a7cd11a3e3b5af6033d47483f766753a798a09bcf2cf7dac9d7",
+        "title": "'task CLI counts and pages the same captured turns by work project and ability participation'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
+        "hash": "d8dff21906fc7a1d9bf02359d953fa997263f21268b2dd0aac983f0ad85517cd",
+        "title": "'work context keeps native identity and does not auto-confirm received bodies'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
+        "hash": "7d2ea00799c0ce671b72e23bf7d46fdb4385c873d0d9af3d69db2d389c23d65c",
+        "title": "'capability and asset clients retain expanded main text returned by the host'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/sdk/tests/capabilities.test.ts",
+        "hash": "412bc47dc2afe3767cd40d945338977b903e9d8bdb1c6c9c2827c592d8daec70",
+        "title": "'SDK retains file content and missing states alongside ability definitions'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "f960c275123c9df32ae944b2a3d6be7a3bc0a895b720fde2eed00b394eb65396",
+        "title": "'Core diagnosis keeps the pinned upstream bytes and the entire method except its requested title'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "d5f55e9a8ff5721923f883ab3620a074277486b9d1e019a04d54228448a29b06",
+        "title": "'three design packages resolve their resources independently and do not eagerly expand diagnosis'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "2b1511034ae8b2f199a96e250cd8f4465b627349c66dfb9307068ccb3bbfbd2d",
+        "title": "'manager expands only diagnosis and retired identities are absent from the effective graph'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "c98b751334d5e39f63adca7f1231f6097746ec33b328a3fb78fc8f614691b8e8",
+        "title": "'native derivation preserves source bytes and rebases resource links to the same targets'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "0bfd84c7c9e2e08ae264f356283e04335f40423b86f7ff9571a84d8eeea2ff9d",
+        "title": "'selected manager, design and method resource switch incrementally and restore after compact'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+        "hash": "fae919ed3d42ec09e2174cab2ded5a6f012e8115efb5bddfa92aaecf2d128a03",
+        "title": "'complete creation examples form a resolvable isolated graph without registering example objects in Core'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "e949ab07ca28c4c0f4b839ed40cad59f64699f64630ef35d0e3ff7b4bb425737",
+        "title": "'a scoped early capture cannot cover a later same-turn recording restriction'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "e2e7d12cf768b26c8cb019979174d4d242168b873e365cfdba31e3adfd897229",
+        "title": "'legacy receipt replay never extends its original input coverage, including after source shrink'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "66be3cce7f4993fc34c1408bf078b1f7c7a46149f2cc3749561522183fce03a7",
+        "title": "'a valid fresh scope clarifies quoted restrictions; invalid scope keeps the hold'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "ba2141c9c565998a202e4244ac5d330ae9dc48395cf8ebe6304e5861d515eb32",
+        "title": "'a declaration flushed before native user input never publishes the answer early'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "a5b5af9fae711e3829930792b06d3d9075d8975c1fd88e35ae2c67cdd672b271",
+        "title": "'a cold legacy replay cannot use its later output position to acknowledge newer restrictions'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "b0173c9501eb913691955cabcc013535ab44bc2e0176c877579e54c9a4ef68b0",
+        "title": "'editing an existing message creates a new input version requiring fresh policy coverage'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "5561ef0dedd67cc951e25322a05cbacfbfecf75107cd34d8dc135041c5f6bd91",
+        "title": "'task input verifies native identity and returns its scope without writing files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "fdb94b18366899303a1e575e2ca84fc308d9af666a3b5128bc0e12023f385f59",
+        "title": "'archive and native counters preserve millisecond precision at the activation boundary'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "ee283057caa2a7d06f871950d9adcbf8903d44fd8eeaa3d5f9214a6b285ee92e",
+        "title": "'forks archive only new child turns and expose a verified local parent relation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "1efa4b261b1eac0adb26028584575aa149944a806f60bb3f6748f15f930f0e6a",
+        "title": "'missing parent archive remains unavailable and is never imported by a relationship query'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "a0adeea1114bbbabdd2c49ef87982d576c03e24489c04888a2e50f5e1664cd54",
+        "title": "'a changed fork origin cannot rewrite its existing archive or import another lineage'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "d637a4a90ae1257fad38cf31951415176f4ed3e7336ec72761e606e34f764170",
+        "title": "'unknown fork creation boundary does not import inherited history'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "99a7d9973600d02d1faf01acfba0d8697a311db0aaf687ba25e84812f450bb8f",
+        "title": "'an unflushed final line never marks completed historical turns partial'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "efc519a9a1c60b8143c85807559a12107d2177e1e09c5e68047f3ba9159e3ef2",
+        "title": "'invalid UTF-8 is explicit and local; later healthy turns still complete'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "c9fc51b4b793d54a63819fba420eba48984c472896ed234371be2dc24f97b4fd",
+        "title": "'unreadable native boundary never attaches following messages to the previous turn'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+        "hash": "135f2e6a422ac38460d7f91a3475c903d4645f6fd66b729e2277f7951b044d28",
+        "title": "'UTF-8 across stream chunks and CRLF preserve complete original Unicode'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "36a55efd4f65cae5fb04dcac2f37a88ffa5163f697d94df9f68cc036a1678d97",
+        "title": "'R1 binding and temporary loading never register capability participation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "eb4240000a11f7119fc658870b8d4203903b54ccdc94d76d29934e69204fd1dc",
+        "title": "'R2 an explicitly continued arrangement archives without rerunning the routers'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "b733863416c41d621dc14ba511035ee188c6cae3af043fc3d1aa2a94ada0a89f",
+        "title": "'R3 unreported dialogue is archived without borrowing the binding or previous route'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "2aa5e98708a539a6475cba06b674186a1504f60b48f5aa2e1a02c4b1c109292a",
+        "title": "'R4 retiring current work never rewrites the historical archive'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "c4f7b0883d7c4058d77f0cb26b1fadeab8234c2a17de1d35c2179e1fd73f01ed",
+        "title": "'R5 reference projects do not establish primary chat membership'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "813e16f8bcf1094fd658e40e3b7e74c5fd84f0b610e69a7ae140c981079d4c4e",
+        "title": "'R6 a reviewed capability is a target, not an automatically adopted execution method'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "561ebf488fb56f18ac13901ecfe55864646e8a26bc95d330c47f0e0c2aad9744",
+        "title": "'binding and use reach the exact archive turn with no route declaration for continuing, asking or switching'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "f5702f3bc1d7a6bf45e8c04ff3ac268e1597b985f46ea27cefdb448b7066f1ef",
+        "title": "'a later restriction removes earlier automatic route facts and their pending work change'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "a43bb8667c937770cf8481ec4e3f1f21e3d40d5fd76584e603cee95df8a85b40",
+        "title": "'a prompt Hook can stage an arrangement before the native user message is flushed'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "b2848ebe7365abf7762915ee4bc5fc02bfa7b3b0a004b5254bcccc8ebb687565",
+        "title": "'work arrangement versions track only routing changes and resolve a turn against its own history'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "e7e06dee5261ab1e869a9807e5456cbb5fb9c5bd9e407b155a3d14641eff88cb",
+        "title": "'route details show a verified work project without assigning ordinary turns to it'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+        "hash": "f5dae66d88b40c28d133707e673078dc9221178e06ebe90f6f9093004ad33eba",
+        "title": "`a fork reads its own facts and links its verified parent (${parentField})`",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "94812c8ca17dcf04410f5b3175f0114de89d2dccc1f63f016b299a80defa09cb",
+        "title": "'flat layout discovers all three context levels and lists one directory at a time through CLI'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "135beccbbb71dd9da523c827fc1c599188d101e7ea5db5ad5191d364c89244dc",
+        "title": "'flat layout diagnoses indexed old paths and rejects ambiguous or unowned writes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "ace643f1fc79951a7a07988d6515fb13ab6a4d9a2ae47bf050b2445c7384df2c",
+        "title": "'read/check and preview never create project business or runtime files; apply preserves body-only edits'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "f6802c70d4166ea302b2935c9b365ee6c9c7170433230bf67da23921c484d503",
+        "title": "'CAS, duplicate operations and later manual changes are preserved'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "8302a7bd6fa7641e1a20fe3cbeedab767f937ac3123d69e592d3be6c1a33a759",
+        "title": "'task completion requires current evidence; negative research outcome may pass without closing milestone'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "2a75787b7547e7a00459e0ecd9e23d203a12c3a32bcabefde3a8d0ddc34d865f",
+        "title": "'milestone and project reviews have their own outcomes and evidence; no automatic close or aggregate deliverable'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "af385e2b79a587f158dd40c4ee7d362f2f120838dd80b24af9e3b46b8a25edf8",
+        "title": "'failed or cancelled review may be complete but cannot mark subject completed'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "c1cfb5694b8f6a9c03b0fddb7ad4653ada532f661336016ce8c89dd6a0319776",
+        "title": "'parent links update both ends; self/ancestor cycles, wrong IDs and one-sided edits fail'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "2fdc04036a76d183b74ef6523bc06cc4d22c6f016b6505e3ef7d42963f98a4b6",
+        "title": "'unknown formats, malformed metadata, traversal and symlink targets do not mutate originals'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "edae1af9b0e148f6647cb34fc58ddbbda919e406699f12c70671a1315650bc2b",
+        "title": "'explicit dependencies, capacity and pause/block triggers constrain readiness'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "ab7313e1f8e38af052017f72d6d2ee264b36499001daf5f17b91739cbc5536e1",
+        "title": "'legacy management refuses migrated documents and CLI calls the same public governance service'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "3ef4f0c25ffd08857220025a084cb59469aa9651196b68109ca27d0088500d29",
+        "title": "'recursive project ownership has no fixed depth and ancestor cycles are rejected'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "112410db17b82a4a8dddefa44886f39b090d6c54d222b5728e6f83d273e125e4",
+        "title": "'guidance resumes its saved step; inspiration stays manual and tasks do not create empty context sets'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "b490d8fef44f0871a3d2fdf292ae12f087d93546b9e0ef7444d381f04863932e",
+        "title": "'corrupted collections and unsafe context URLs produce diagnostics rather than overwrites or fallback'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "96c7f757dfcb70d351d9df220d88d924f9894781b8ae42ea738de501799084d8",
+        "title": "'readiness needs completion criteria and direct execution checks blockers and capacity without counting itself twice'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "766cfda9a8b6f9c6d6916855663f8184884f98731866d62a1634add9113d68d2",
+        "title": "'cross-project milestone prerequisites gate child starts, stale evidence and impossible completion cycles'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "ad9c3b82888fd022bc66519664eb37ac6e2f2182034bb654abc0a2e6dbf2c97e",
+        "title": "'malformed milestone prerequisites retain readable project diagnostics'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "6f3f8ff9f733e8708b39474789f23390a5dea94d8d10f4217dfaac9d6d64a3aa",
+        "title": "'inspiration preserves arbitrary human Markdown bytes without interpreting YAML or creating tasks'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "212e190d71cfd65d79755100a9fdbba29012c92314ee7a14403591eed3f45bb9",
+        "title": "'schema2 has one six-state set and rejects legacy state values without mutation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "167f50acf9e2b2f605c58674f19ddc5bb3f2ce13fb554ab44cd8447cc99e1f6e",
+        "title": "'active and review work retain capacity while blocked; explicit pause frees capacity and resumes the saved step'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "8ec527674d621e7a2d29811320793d61419d5d0e5069631877ed03aea09dc82a",
+        "title": "'review stages admit acceptance and evidence tasks but reject new delivery work'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "bf115260ddc9762095637f04237e277550efba958183a4feb424866b2f85cb0b",
+        "title": "'paused ancestor projects prevent new work without falsifying child statuses'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "6853a3a1a3246e00312bcd007762484c79666f8ac119321fd306563b6938dcea",
+        "title": "'completion, rework and cancellation preserve evidence and require deliberate reopening'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "d6662d244b35047e0deee144e190e569f18dccb7cea5f52058f8029c16ea9afb",
+        "title": "'schema1 stays readable and read-only; reviewed migration requires explicit blocked mapping and keeps source bytes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance.test.js",
+        "hash": "0ac527ace36981abff07768ad8cf4195e7d3e6afa7383411d4c56d2931145449",
+        "title": "'business definitions and templates are owned outside docs, and the lifecycle runs with no docs directory'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "f6793a57191fe6c686587c22853fbc7df05afbc4061f0f1b9d6824346309d1ab",
+        "title": "'numbered project and milestone bytes survive interrupted writes and archive round trips'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "c655c42d55cef9dab93f5e32755ca4de287ddb932fbb84260736f0e8b229aba8",
+        "title": "'reorganization previews without writing, preserves all original bytes and identity, and replays safely'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "c770627ad31842aee3b7e6e45e0b5af1cfd1acc903e29916051cbd6d3618c38e",
+        "title": "'reorganization faults at preparation, movement, publication and reference updates are conditionally recoverable'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "32c8639434713c86ac66ff76ad7e07f2bbbfa678970eead58e2bc5cf533b692f",
+        "title": "'reorganization recovery retains new business files and refuses overwriting concurrent original changes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "10777efb09d6b521d4c94dc74578c479e0f4aeb2d7afcac750e697cb2d7ab907",
+        "title": "'reorganization rejects stale baselines, escaped archive targets and project identity replacement before mutation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "efe7d2a705f29cbd40128beef02ee9dd50d48a9c7d0fde2170eba226db882e6a",
+        "title": "'reorganization keeps material symlinks as opaque links without following external targets'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "ca6abd6bdfe4143f514c0b90ccd30d07eafb5cce4f78a271f32910a360b52406",
+        "title": "'reorganization recovery rejects tampered journals and additions to the historical snapshot'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "0a564cd879dcc827e4f4085da8847a71f15ee4fdab99535d30c6ff2cd005981b",
+        "title": "'interrupted multi-file writes block reads and conditional recovery restores every original'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "911e979136ef2f74f829d217b68fa57f44fe4eaaffa32a684325e36ef579847e",
+        "title": "'recovery refuses subsequent user edits without overwriting any file'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "dadd0d68fabcdb5a8bcd9ec606e178593889061170f1cbfe458edf4e8e3e329d",
+        "title": "'migration preview is read-only, reviewed mapping activates documents, old sources remain byte-identical'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "9195d41d74c9427c5f149ed4a52f35f088a6beb58def59ff544dfa21a37549a3",
+        "title": "'changed migration source invalidates the approval digest'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "e458cbcad46442214a6d9e38b28b5b753de6564b4a98978dc2f34aca851acbc9",
+        "title": "'archive/restore preserve paused state, bytes and evidence; preview is nonmutating and replay is conditional'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "a44e20d6a5c5ce70e0fc7580f4bf2176cb6e1d8b42287e98309fcb9423f7b09a",
+        "title": "'in-progress archive, missing closure and stale previews are rejected without moving files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "23041cf0aadf59204de7a54e6c66ce2457f6718a47dc166b52361b874f778abb",
+        "title": "'explicit parent-child batch preserves both links and rejects an omitted unfinished child'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "13f3479670a289e8daf31a864bdc2ff81e1fc8d175217bda3fc53e746a9abf6a",
+        "title": "'completed archive pins relocated Markdown evidence; real later edits still invalidate acceptance'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "a30eab5f96e6f97266fe41675f9b366a974f1f69465a3e26da08a24e38f92975",
+        "title": "'cancelled closure can archive without fabricating passed criteria'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "76174934026c46990acf466f220988236703abf48308051becdb7c7bd261bf7d",
+        "title": "'interrupted archive at every publication phase rolls back exact bytes and protects later edits'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+        "hash": "ac4afd5ad7c3a6958b04515f65c280c829ee718becc4faaecd4be5c259b40173",
+        "title": "'restoring only a child never bypasses an archived ancestor execution guard'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "2d06a1658b3fab1d6b7a6b5616644c6b37878e26cad607142d6458d5b97dad63",
+        "title": "'the application backend computes acceptance baselines with the public governance canonical rules'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "ed454a3c192a2f90dfca50e5bce1653d38238aa50e8046e08b7efb8fec84fdd5",
+        "title": "'new app reads only indexed task documents and lazily exposes context through the common service'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "d0b1a74e40e66ff831f67382d5b6b3233c30421a452d33904f8d6247fed528d7",
+        "title": "'stale application draft receives a conflict and the current file stays untouched'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "3ab107e4df9b2f0bf712b8930b9c940debde9f6eb27e0a3fdb05e8aed726b017",
+        "title": "'document three-way merge preserves independent changes and asks about overlaps and deletion'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "84534149f7d740d4e6965857d7ee82ee286d1ebc5f93a483a52cc80154665f88",
+        "title": "'frontend review basis uses the same canonical digest as the public service'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "8ee3a2e255eba782daa78fdd6737a2eb0e5e30197dbafd37bd4cc2d278858d99",
+        "title": "'inspiration reads and saves independent notes on all three levels with conflict and ownership checks'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "2c3bb5998a2d554ece8175f4e152ec1dd8b4dacfebe9744e3566c328b30cf5e4",
+        "title": "'hierarchy keeps recursive project ownership and separates task progress from milestone acceptance'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "c06812a87b263c3c9ee9a89b2ec6bb48e446bca1b64bf0741a61a79d4ac5cab7",
+        "title": "'note reconciliation preserves both competing texts and UTF-8 encoding'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "67799d5233a38a61728468ad54c528aef11d68c8e3e2eddaed46665508253b90",
+        "title": "'project progress averages milestone ratios and distinguishes valid acceptance, stale results and cancellations'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "81929595b3841d398ac861d7768c0eb3e61e883bd797f1cb5d2374052cc424ad",
+        "title": "'acceptance evidence stays discoverable without loading its contents and unsafe web links are excluded'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "f61b40b9812c27d411470ea9a9e5527fbb4c2e541a9b0ca349aaa7a811f707aa",
+        "title": "'project results open only the referenced evidence version, including outside-project evidence, without widening ordinary file access'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "89cfc8fadc54550ee3e59401c03527a4e1cceaf7f9323662e84079f8856568f1",
+        "title": "'fixed evidence keeps image and download bytes, respects restricted paths, and does not reread an empty snapshot'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "d59682e4d84ae619bd2061bb4246e38bcfdee6e533f7881c749a3798a1255ede",
+        "title": "'archive preview/apply/restore use the same service and retain draft conflicts and old entry resolution'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "e4dad37a920d156e82578d2044ef9a26f3819e5d94e1f4d6df7c6769a298b906",
+        "title": "'letter task groups sort naturally, expose definitions and preserve ordinary state and readiness'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "be48062536410d66bda0914a0df0cd5133419c447e088afda0d0c010356d639b",
+        "title": "'app resolves old task entry after numbered migration and stale drafts do not recreate a duplicate'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+        "hash": "deb7fd0fad91c125243479ed5724bfd9bd47d7cbef447b146ed2b917550a6c25",
+        "title": "'project cards keep verified relations and indexed work when the layout is invalid'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "ac01cf73477646f75f5afeee7bf722c573545a673fbf550eeb6f7f5a2d692eb5",
+        "title": "'numbering preview writes nothing; commit preserves ID, state, body, context bytes and old links'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "6f6d0d6814265f1dee9c7ed4ea9da96436e4e056e0c8e51472ca47224c71465e",
+        "title": "'numbering preserves verification and invalidates genuinely changed evidence'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "3e8a79efd9d06c037ad866fc2ea20d7726d1595ffb45bc897848acb4ed1e6010",
+        "title": "'duplicate, missing, zero, lowercase or undefined stage mappings reject before mutation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "d3487d6a74d7b017b1baf6b9accafecc175ad7c565cb7812bbc3a4f77abbdcdd",
+        "title": "'task codes remain unique and match folders; stable IDs cannot be edited'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "af8eb82ead24c3d641f5c60f65f3baa08e09398b97d3681f4f20b794c1823c41",
+        "title": "'letters impose no implicit dependency; Z follows ordinary status/type readiness'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "eb8ae5cdb427469e420be5a9ecb23136ba2c4657c35f08108f871553ef44234a",
+        "title": "'new-stage paths support raw numbered contexts and ignore numbering gaps or cancelled tasks'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "ccfb42268b5b65c9f105d8b44ff4689b892e9aab909c708501606a85f5f0d7c0",
+        "title": "'stale previews and destination collisions preserve all existing files'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "1fd98b718b2154c44520770638f0ee0738814a74b3a89c5b0436cac94be1da5b",
+        "title": "'interrupted renumbering recovers exact bytes at every publication boundary'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "50213425de7fdb6f9b7032f42e23df37be32bfce00d3f09c576a07ce541af386",
+        "title": "'recovery refuses later user edits or additions and keeps both locations intact'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+        "hash": "945e7e14288bb5be66a0d3514b9da462c7f44e62d622844581c347729303327a",
+        "title": "'renumbering and archive/restore compose old source links and history evidence'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "e9a22c81422eb4c7d615abc13b6867a43c96dbc9265c7d46e700e7aad2b20b52",
+        "title": "'new letter task preview is read-only; commit creates task.md and its personal note with both ownership/index links'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "b95c0ce10c5618112c6ed2662b4788504a2e57bb560a3cca1a51183b5112586c",
+        "title": "'cancelled numbers, detached/deleted directories and later renumbering never lower the allocation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "a36587c259ea333c7a63b4ef16f2beb61c59ec558195f662e13fe2b617be1d5e",
+        "title": "'unindexed occupied directory numbers are skipped without overwriting their contents'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "e78133a00dba5e251c86389f646c58236372b95d0143abdcd7b161d579bd2b08",
+        "title": "'M10 context packages coexist with M10 task and cannot be taken over by auto creation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "0b9e7dc81006b0f1f1aec266c14a8026c20de1da1d1b161a29252d6b76ff167e",
+        "title": "'two previews may propose the same code; append commits allocate fresh codes and preserve body edits'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "a9f3eb3f5ec42d3a44c75923774436dc58ee54b46e03648fd7ef8e009c8bd008",
+        "title": "'operation replay returns the same current stable ID after progress changes; changed requests cannot reuse it'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "e0eb8c86baaaa089cc01fb155719c3ef87ecca01dc6fc0c1d21a805c45a98284",
+        "title": "'changed stage meaning rejects the old preview; caller cannot inject IDs, codes, paths or active status'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "ed674e363736eb367478bf0a3e96c99c29b77dfbaac2bb65a95d2291ce66200f",
+        "title": "'new endpoint does not adapt old JSON, old T milestones or archived projects'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "8ce78ead20a0b448fbd8308950a6ac76c6ea660a228fff9a5ddc5a7cf050e1b8",
+        "title": "'interrupted creation uses common recovery and restores task, index and counter at each boundary'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "5cab67b6320c608698fcc95628b944fd185f8e3a3a3bb319e4a5cb6add2e23b3",
+        "title": "'later edits are preserved during recovery and no duplicate is created after a rolled back operation'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "3bef66ce531fcb2a2dd0770828791080a10944131c408a39276c4d45f8232a79",
+        "title": "'CLI create-task previews and writes through the same service with explicit from-file input'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "270456099faec1f7eb4fe9683a95450a19fbbe334c50baf5f7c93b1c58cf3b56",
+        "title": "'six concurrent CLI processes allocate distinct codes and retain every index entry'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "90749fedfefd6b846cb77d6a5d4c3b60ccf044baa80170645e5682f81fa14576",
+        "title": "'concurrent retries of one CLI operation produce exactly one task'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "0a354ffac2093049643d1cd0384d8a543702c29af2148419c1854feac98dbd98",
+        "title": "'new task index remains naturally grouped and no sibling stage is implicitly started'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-task-create.test.js",
+        "hash": "50c356c9662c3a04aae5fcf5c997ac43aee2c1c2035be59ec62581627f32f6fe",
+        "title": "'an occupied folder appearing after allocation is preserved and rejected before publication'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "b013baaee586ef84b793e4d5fc6536bd11ee407b7829e48d899c0f0dc6be55e6",
+        "title": "'initial baseline, nested external writes, read receipts, and move identity survive restart'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "bece15f19caf5a02c4cb702d3076b0114fe00e4eed26b286108b5a34f8a98e5c",
+        "title": "'deletion receipts survive restart, never hide restored files and remain opt-in for older clients'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "fb47203b06911eccece205c489bead01d0ab15da72b7980eace00e0ad2838ff1",
+        "title": "'external file revisions remain distinct from new files and require a receipt for the current revision'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "adada62e30a1688c16f5781e3c7151ff87941640b1c85305fdf862ea7dee20e9",
+        "title": "'safe creation, byte-exact save, conflicting updates, move and project boundaries'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "98e514e01459170b52c7f2b5aacd12f32d5dbda7691978cd46666a234c1328f9",
+        "title": "'review sessions snapshot unopened text, retain changes after reading and saving, and confirm only the displayed version'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "4f30d0780f722f3d5b9ce28a58ecd28e860faa591f4622b8ce0c9abe8baa22f2",
+        "title": "'new application sessions establish fresh baselines and recognized moves preserve the earlier original'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "88eaf24d86e4d2a2ead89a24b1808303b80f8fd259a5863466dcef556a1a9a87",
+        "title": "'registered milestone and task roots expose only their own context and reject forged object scopes'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "0536adb06d59534fc03e22dfaabb17334ac7324ef17cbcf48b88f954cb2604c7",
+        "title": "'object-scoped creation, exact saves and moves retain CAS, numbered paths, references and project boundaries'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "2cc6fc0fd6a0dd0fc5761a72c9853205afc9cfbf76425f2d136c6fc5fe4f99a9",
+        "title": "'milestone and task changes use independent review baselines and current-version M and D receipts'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/project-context-files.test.js",
+        "hash": "b3062eff215b5ce700f7934b5987c8b2773439491fdad5d3d12c1ce1dbf5473f",
+        "title": "'archived milestone and task contexts stay readable with all mutation paths disabled'",
+        "nativePlatforms": [
+          "darwin",
+          "win32"
+        ]
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "c206a9e4109b55d96e6356a3d29d71293993fe7f861df50e04fa9183a15faa22",
+        "title": "'pointer down the hierarchy moves content up; moving back up exposes earlier rows'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "72df3b1c0751a1c1a2f1434c6b1e7df36fb30cc935606a53d80a050f13a68c1a",
+        "title": "'entering a clickable row and pressing do not move another row underneath the click'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "1b8af36ebae84cb30e5fe7331dc81923a3568a46ac24b49ab1f27cebf6510af9",
+        "title": "'menu, touch and navigation header preserve the current scroll position'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "5feb4808c2b36f0a23269f85c2330f0d6e128ce0925a53435eabdce92fa5ce94",
+        "title": "'entering another clickable row during browsing keeps that target stable until vertical movement resumes'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "81b0d7e1918b616f56044bcf45e0db4828acc26f13a17bba461b06fbadfc3d1c",
+        "title": "'short hierarchy leans opposite the pointer and clears on reset and dispose'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "e6cccb028002f3db97b77a77126b8e797581f4f72c0bb398cd791e62ae775def",
+        "title": "'reduced motion suppresses decorative panning'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "2e29f3409a8153682b93ae8b0c73a82986a535210b583086ed0d4d6e32b2a409",
+        "title": "'leaving a long hierarchy returns to selection; wheel and reset cancel that return'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+        "hash": "cd5312e482fd5d66166b8b82fbf5bf2bb8d43ff6c9a12103d14126990475d312",
+        "title": "'file list reuses pointer panning while protecting file clicks, toolbar, forms and portal menus'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "197b65e2c6f6467a789f6cde8e159b57ec0ce96121f3badd6843fb3173a6bbc9",
+        "title": "'existing YAML, free text, links and CRLF survive outline additions and later round trips'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "3fff8875a5c39e259b35821d0be183ec18ca171edfcf4520c1e839f4b5803842",
+        "title": "'malformed or unsupported outline blocks are rejected without silently dropping content'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "58f343ee6d92324322fa17bfd61834d3fc2178187efcb16c8a81018b6e65cb94",
+        "title": "'indent moves a complete branch under its previous sibling and never loses descendant text'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "2ba8c59b7783abdaf0b4972f26e5d82ae540b648d569d2bb67bd3857caca7d18",
+        "title": "'outdenting a middle branch preserves later children of the original parent'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "8e7fe5c2c45b85bd6f75c448c6cefe8fdad69daf4e4afbab7e85263a135f232e",
+        "title": "'Enter splits a row after its subtree and multiline paste retains both text halves'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "4d3e04c5804fcfc7e0249e8484b5d24bad442fdd4a788f36b3467e3003bfb4c5",
+        "title": "'removing a row promotes its children rather than deleting their content'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "042b70c0a0fa8e0f739fca9c17d1b11a0d49febb5238ba6437352c1f023b8c74",
+        "title": "'deep hierarchy has no arbitrary level cap and completing a parent does not complete descendants'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "2503fbf8d87fe535f8443e2d59b9480d2a87807a157e6d1537038b1e650022e9",
+        "title": "'collapse only affects visible rows and does not change data or completion'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+        "hash": "df742f436561829fb8304efc1617391660c13bc651f070534b41837aa05387f1",
+        "title": "'checkbox-like text, unicode and literal HTML remain plain text in the saved Markdown'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "966dd09689b3a5760115167742e227fcb28ae87753fbf4cdb6cbcd662f4038a7",
+        "title": "'project brief fingerprints use the exact Core AI canonical JSON digest'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "d609cff562e88ad9cb2e1be85ea60d371342e643cfcf5d118bc034f66f4d7155",
+        "title": "'missing profiles and missing managed service leave the base view readable and never invent a brief'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "eaacd63cf5ab8ea31d242a48d8cd0a1f002c76196dd69ca468b5e097761348e7",
+        "title": "'only a verified successful Agent response becomes the report and it remains stable when reread'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "6483e5a36eaa99ff3c375c92ad9118ac89a0bfa5fe770c7629a7e782508ac102",
+        "title": "'failed and malformed generations preserve the previous successful report'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "0bbd43c7d1c28e6188f684f00a005d073d5ff026dbc2e5c4e0a2cd515542ee26",
+        "title": "'wrong-request receipts and wrong result hashes never become Agent briefs'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "17d749b6f36ba99a00051efdc18a95d573bb384a01465e59caef6ddf9b299113",
+        "title": "'same-project concurrent requests converge on one run and retries retain the immutable operation'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "5ed1fddd09afede6957b0f25c4c66a37c66dccd7acb41e0d7c993047592b60eb",
+        "title": "'different projects keep separate runs and selected project inputs'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "267da0f77e9e844106d1fcf0a8c0e83a75b7fc802eccfc4c6237c53c9ccefa4f",
+        "title": "'lost submission responses reconcile the original immutable AI task instead of duplicating it'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "10048d6734f115f9e16ac6b6ef709ebc2fcafb3140196f5fab3a0fa9ec30077d",
+        "title": "'latest tail paragraphs survive bounded input and unopened source changes mark the report stale'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "bc48f89d50e2d9a16a50a2a9668532d5af9040f58f36233e72efcf92b8c2575a",
+        "title": "'context scope is bounded and refuses private, external, symlink and oversized materials'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+        "hash": "2ed8c9dc54429ccd45ecab79e15811c816d71fdc3d4c079966b57eca70b14430",
+        "title": "'a stale poll cannot overwrite a newer report adopted by another backend'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/context-scopes.test.mjs",
+        "hash": "31815f3c71bec82c0c0ee77efaa3a0ec5c37bb53a40f6b6c63ecfff206d74aa0",
+        "title": "'context inherits only the registered current object and its milestone/project ancestors'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/context-scopes.test.mjs",
+        "hash": "8f1e07a240ed675e0bd57de3526901c12ba1c05232a3f2aa50f4e2175a34558c",
+        "title": "'missing or mismatched ownership does not infer an ancestor from directory nesting'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/context-scopes.test.mjs",
+        "hash": "9d45cd7e2cd47aa2c03fb615ba46166780911f897d0c655328ba63d0cf021e45",
+        "title": "'operations resolve to the deepest displayed scope, keeping identical filenames separate'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+        "hash": "a70eee9928993933441ef4d28cea2f32064cd421e28b5d7fa8f4d1a8b9a29fc2",
+        "title": "'project status reasons are requested for pauses, cancellation and reopening while normal progress stays compact'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+        "hash": "bd6d2a7877d859141286c7751a2a1eec9b8c452461953b7629ad519c3150fd57",
+        "title": "'project read model separates recorded focus, actual in-flight work, commitment and reproducible readiness'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+        "hash": "4bed595b544ac2c90569512343183ea52c4ad40fd24d2698430e1a051129a2f3",
+        "title": "'result read model groups file versions while preserving source, condition, review outcome and evidence provenance'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+        "hash": "23c22dcc9225212be1139eeb13583a85623249032131b788b3ae0b37e56c8bfc",
+        "title": "'project parent edits use the existing atomic relation operation, preserve both sides, and reject a stale graph'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+        "hash": "e849e65df7ec6488667d5a4ba8a561e59e266da1ad156dd75705fc28baf62ad8",
+        "title": "'project materials and results retain source attribution, deduplicate evidence, and exclude other projects and invalid review subjects'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/context-outline.test.mjs",
+        "hash": "05edb23c24b001ef68a282ae799ac075e6202f3bdca6a85eb83d9215d681cabd",
+        "title": "'outline uses Markdown headings, skips metadata and fenced samples, and preserves distinct source lines'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/detail-autosave.test.mjs",
+        "hash": "5809a4579990c058944a13de621c1229bff04d84fb38cb7fc191dee09edbfbab",
+        "title": "'editing a mounted criterion or verification result again after autosave still updates the current draft'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/applications/projects/tests/detail-autosave.test.mjs",
+        "hash": "ac667cc20429732cfe71327c9ad3d854cde25313cfb9a57f2bc317422ec1f1ee",
+        "title": "'a save reply advances the baseline without overwriting edits made while the request was running'",
+        "nativePlatforms": []
+      },
+      {
+        "path": ".agents/core/runtime/tests/communication-config.test.js",
+        "hash": "572d09692f49b93f7aa25cfb18c443ac8593097a5a11b81a3f70dc1172455801",
+        "title": "'configuration updates do not wait on readers whose handle release needs the event loop'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/communication-config.test.js",
+        "hash": "fa53d879c3fa26b568cf09deafa058affa71f73664316a881049d7044732fd62",
+        "title": "'parallel configuration snapshots and writes preserve complete revisions'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/communication-config.test.js",
+        "hash": "34c8b7badd62d927639743be90a7653d16de6a18e7ec457bb2f45c3ac1459ae4",
+        "title": "'configuration reads keep missing defaults independent and reject malformed records'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      },
+      {
+        "path": ".agents/core/runtime/tests/communication-config.test.js",
+        "hash": "f8a20887ce9f3016982ad40fb6365dfe16ff761951138bf3aae6cd3c5791ca81",
+        "title": "'configuration snapshots preserve oversized records and reject symbolic links'",
+        "nativePlatforms": [
+          "darwin",
+          "win32",
+          "linux"
+        ]
+      }
+    ]
+  }
 }

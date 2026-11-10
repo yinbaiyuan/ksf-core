@@ -13,6 +13,9 @@ import { readSnapshot, withWriteLock, publishFile } from '../metadata/files.js';
 import { directory, stat, validName, validateName, guardPaths, load, withProjectLock, assertNoPending } from '../projects/storage.js';
 import { projectTransition, recoverProjectTransition } from './project-transitions.js';
 import { checkRouting } from '../projects/routing.js';
+import {governanceTransition,recoverGovernanceTransition} from '../projects/governance/transitions.js';
+import {locateProjectResource} from '../projects/governance/locations.js';
+import {readGovernance,governanceJournal,recoverGovernance} from '../projects/governance/store.js';
 
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
@@ -66,8 +69,9 @@ function list(root, check = false, projectScope = 'current') {
 
 function checkProject(root, name, parsed, scope = 'current') {
   const result = checkRouting({ root, name, values: parsed.values, scope });
-  return { data: { name, scope, path: portable(relative(root, locations(root, name, scope).target)), valid: result.errors.length === 0,
-    state: parsed.state, ...(result.routing ? { routing: result.routing } : {}) }, errors: result.errors };
+  const governance=parsed.values.governance_schema!==undefined?readGovernance(root,name,scope):null,errors=[...result.errors,...(governance?.errors??[])];
+  return { data: { name, scope, path: portable(relative(root, locations(root, name, scope).target)), valid: errors.length === 0,
+    state: parsed.state, ...(result.routing ? { routing: result.routing } : {}),...(governance?{governance:{valid:governance.valid,warnings:governance.warnings}}:{}) }, errors };
 }
 
 export function errorItem(error, target) {
@@ -134,13 +138,20 @@ export function updateProjectMetadata({ root, name, scope = 'current', dryRun = 
   return dryRun ? execute() : withProjectLock(root, execute);
 }
 
-export function project({ root, operation, name, scope = 'current', part = 'all', data, reason, status, dryRun = false }, hooks = {}) {
+export function project({ root, operation, name, scope = 'current', part = 'all', data, reason, status, source, digest, dryRun = false }, hooks = {}) {
+  if(operation==='locate'){const {bytes,...location}=locateProjectResource(root,{path:name,source,digest,metadataOnly:!digest&&!data?.read,...(data?.read?{maxBytes:2*1024*1024}:{})});if(data?.read)location.contentBase64=bytes.toString('base64');return {data:location,errors:[]};}
   if (typeof root !== 'string' || !['list', 'read', 'write', 'remove', 'check', 'archive', 'restore', 'recover'].includes(operation) ||
       !['metadata', 'body', 'all'].includes(part) || typeof dryRun !== 'boolean') invalid('Invalid project service request.');
   if (!['current', 'archived', 'all'].includes(scope) || (scope === 'all' && !['list', 'check'].includes(operation))) invalid('Invalid project scope.');
-  if (['archive', 'restore', 'recover'].includes(operation)) return operation === 'recover'
-    ? recoverProjectTransition({ root, operationId: name, dryRun }, hooks)
-    : projectTransition({ root, operation, name, reason, status, dryRun }, hooks);
+  if (['archive', 'restore', 'recover'].includes(operation)) {
+    if(operation==='recover'){
+      if(typeof name==='string'&&/^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/.test(name)&&stat(governanceJournal.path(root,name))){const record=governanceJournal.read(governanceJournal.path(root,name));return {data:record.kind==='governance-transition'?recoverGovernanceTransition(root,name,{dryRun}):recoverGovernance(root,name,{dryRun}),errors:[]};}
+      return recoverProjectTransition({root,operationId:name,dryRun},hooks);
+    }
+    const source=load(root,name,{optional:true,scope:operation==='archive'?'current':'archived'}),target=load(root,name,{optional:true,scope:operation==='archive'?'archived':'current'});
+    if(source.parsed?.values.governance_schema!==undefined||target.parsed?.values.governance_schema!==undefined)return governanceTransition({root,operation,name,reason,status,data,dryRun},hooks);
+    return projectTransition({root,operation,name,reason,status,dryRun},hooks);
+  }
   if (name !== undefined) validateName(name);
   if (operation === 'list' && name !== undefined) invalid('Project list does not accept a target.');
   if (!['list', 'check'].includes(operation) && name === undefined) invalid('A project name is required.');
@@ -158,6 +169,7 @@ export function project({ root, operation, name, scope = 'current', part = 'all'
   if (operation === 'write') {
     validateWrite(data, { scope });
     const before = load(root, name, { optional: true, scope });
+    if(before.parsed?.values.governance_schema!==undefined&&(data.body!==undefined||Object.keys(data.metadata??{}).some(k=>!['routing','repositories','topics','description'].includes(k))))fail('PROJECT_MODEL_MIGRATED','新格式项目的业务修改请使用 project governance apply；工程关联及能力预设保留原公共接口。');
     if (!before.snapshot && (scope === 'archived' || stat(locations(root, name, 'archived').folder))) fail('PROJECT_ARCHIVED_EXISTS', 'Restore the existing archived project before creating a current project.', { target: before.target });
     if (!before.snapshot && !Object.hasOwn(data, 'body')) invalid('Creating a project requires body in the write input.');
     // Validate serialization before creating directories or acquiring a lock.

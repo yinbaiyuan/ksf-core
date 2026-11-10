@@ -36,9 +36,29 @@ export function parseReference(reference, type, { exact = false } = {}) {
   return { id: parts[0], version: parts[1] };
 }
 
+// Expansion belongs to a dependency declaration, never to an object selector.
+export function parseDependencyReference(reference) {
+  const prefix = typeof reference === 'string' && ['+', '#'].includes(reference[0]) ? reference[0] : '';
+  const value = prefix ? reference.slice(1) : reference;
+  let parsed;
+  if (typeof value === 'string' && /^(?:\/|\.\.?\/)/.test(value)) {
+    if (value.length > 4096 || value === '/' || value.endsWith('/') || value.startsWith('//') || /[\\:\x00-\x1f\x7f]/.test(value)) {
+      fail('OBJECT_REFERENCE_INVALID', 'Expected a portable file path starting with ./, ../ or /.', { exitCode: 2 });
+    }
+    parsed = { kind: 'file', path: value };
+  } else parsed = parseReference(value, undefined, { exact: true });
+  return { ...parsed, prefix, expansion: prefix === '#' ? 'recursive' : prefix === '+' ? 'shallow' : 'none' };
+}
+
 export function parseStoredReference(reference) {
   const parsed = parseReference(currentReference(reference));
   return { id: reference.split('@')[0], version: parsed.version };
+}
+
+export function parseStoredDependencyReference(reference) {
+  const parsed = parseDependencyReference(currentReference(reference));
+  if (parsed.kind === 'file') return parsed;
+  return { ...parsed, id: reference.slice(parsed.prefix.length).split('@')[0] };
 }
 
 export function validateObject(metadata, { type, source, path }) {
@@ -60,10 +80,10 @@ export function validateObject(metadata, { type, source, path }) {
         Object.keys(u).length !== 2 || u.id !== metadata.id || u.version !== metadata.version) issue('upstream', 'Managed upstream identity must match the derived object ID and version.');
   }
   if (Object.hasOwn(metadata, 'references')) {
-    if (!Array.isArray(metadata.references)) issue('references', 'References must be an array of ID@version strings.');
+    if (!Array.isArray(metadata.references)) issue('references', 'References must be an array of exact ability IDs or explicit file paths, optionally prefixed with + or #.');
     else for (const reference of metadata.references) {
-      try { parseReference(reference, undefined, { exact: true }); }
-      catch (error) { issue('references', error.code === 'OBJECT_RENAMED' ? error.message : 'Each reference must contain a valid ID and exact version.', error.code === 'OBJECT_RENAMED' ? error.code : 'OBJECT_REFERENCE_INVALID'); }
+      try { parseDependencyReference(reference); }
+      catch (error) { issue('references', error.code === 'OBJECT_RENAMED' ? error.message : 'Each reference must be exact ID@version or a ./, ../, / file path, optionally prefixed with one + or #.', error.code === 'OBJECT_RENAMED' ? error.code : 'OBJECT_REFERENCE_INVALID'); }
     }
   }
   const fixed = protectedPaths[metadata.id];

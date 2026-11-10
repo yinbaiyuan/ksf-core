@@ -14,6 +14,9 @@
 .agents/ksf incubate finish --if-match <etag> --dry-run --json
 .agents/ksf incubate finish --if-match <同一etag> --json
 .agents/ksf incubate skip --if-match <etag> --json
+.agents/ksf incubate hooks --json
+.agents/ksf incubate hooks --defer --if-match <etag> --json
+.agents/ksf incubate hooks --resume --if-match <etag> --json
 ```
 
 Windows 使用当前根 `.agents/ksf.ps1` 的同名命令。所有修改必须携带 read/write 返回的版本；失败后先 read 对账再继续。read 与所有 dry-run 不写孵化数据、不启动后台、不安装 Hooks、不打开页面。旧实例不能由 write/finish 自动重新初始化。
@@ -28,6 +31,14 @@ write 的 JSON 为草稿字段对象，支持部分提供：
 
 可选 openWorkbench:false 只抑制这次打开。deferService:true 表示用户明确接受登录启动应用失败后稍后处理，不能用它跳过必要数据保存。captureEnabled 仅用于用户主动指定；未指定时保留已有显式选择，新实例默认启用，不加入新手问卷。
 
+deferHooks:true 仅在用户明确选择稍后审查Hook时保存，不改变四项设置或记录开关。设置完成后仍可使用 hooks --defer / --resume 修改这一选择，必须携带最新etag；支持 --dry-run，使用孵化锁及版本检查，保留原草稿、操作ID和completed/skipped状态。缺失孵化记录的旧实例不由该操作自动创建记录。`hooks` 不带修改选项时只读；不接受 --if-match 或 --dry-run。
+
+## Hook 审查与生效核对
+
+read、finish和hooks查询返回 `hooks`：`configuration`列出本实例应有的两项工作上下文和四项任务接续命令及安装情况，`state`区分not_installed、partial、unavailable、review_pending、deferred；旧实例/跳过状态为not_required。`review`提供CLI `/hooks`、Codex桌面Review hooks / Settings → Hooks及官方说明入口；其state始终unknown，因为KSF不读取宿主信任数据库。`verification.state=unverified`提供真实新输入的核对要求，不能用本地安装报告冒称已获批准或自动投递已生效。
+
+正常finish幂等安装所需Hook并保留其他处理器；即使采集显式关闭也安装上下文/接续命令，但不改变采集开关。读取和dry-run不安装。completed只表示基础设置完成；Agent必须按[固定流程](../runtime/incubation.md#hook-审查与接通)在恢复原任务前提醒用户审查、核对宿主批准与真实新消息自动投递，或按用户明确暂缓保存接续。快速上手持续提供审查入口及暂缓状态；它不自称能够读取宿主信任或替用户审批。
+
 用户称呼保存到 USER 普通 Markdown，保留其他正文、BOM 与换行。多个常用称呼有歧义时返回 INCUBATION_USER_AMBIGUOUS；Agent 可提供基于最新原文的 userText（最多 256 KiB）和 userEtag，同一次 write 时核验版本。自称来自 instance.name，不向 BOT 复制名字，已有明确自定义不被覆盖。
 
 ## 提交、冲突与恢复
@@ -40,7 +51,7 @@ write 保存草稿及配置基线，尚不应用四项设置。finish 先校验�
 
 skip 只补缺失实例名“我的 KSF”、落实新实例记录默认值并标记 skipped，保留既有设置，不新增登录启动、不写 USER、不打开工作台。不恢复此前 finish 尚未完成的步骤。
 
-完成后工作台默认打开一次：先持久记录 requested，再调用操作系统。opened 表示打开请求已由操作系统接受；failed/requested 不自动再次打开，避免结果未知时重复弹窗，可从回执 URL 手动进入。关闭页面不停止后台，登录启动也不打开页面。completed/skipped 重复提交只返回现有结果。
+完成后工作台默认打开一次：先持久记录 requested，再调用操作系统。opened 表示打开请求已由操作系统接受；failed/requested 不自动再次打开，避免结果未知时重复弹窗，可从回执 URL 手动进入。关闭页面不停止后台，登录启动也不打开页面。completed 重复 finish 保留已有完成和工作台回执，并幂等核对所需 Hook；skipped 重复提交只返回现有结果。
 
 完成或跳过后，Agent 必须重取 context entry，采用返回的正常 runtime 后恢复原始任务。
 

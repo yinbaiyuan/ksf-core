@@ -3,7 +3,10 @@ import { existsSync, lstatSync, readdirSync, unlinkSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { managedPath } from '../routing/storage.js';
 import { withExclusiveLock, withTemporaryFile, readFileSnapshot, sameIdentity } from '../shared/files.js';
-import { encode, fail, isKey, isToken, validateStoredTargets, validateTargetFacts } from '../routing/schema.js';
+import { encode, fail, isKey, isToken, validateProject, validateStoredTargets, validateTargetFacts } from '../routing/schema.js';
+import { validatePolicyEvidence } from './input-scope.js';
+import { validWorkChange } from '../chat-state/storage.js';
+import { validId } from '../objects/schema.js';
 
 export const CAPTURE = '.agents/runtime-data/task-capture';
 export const ARCHIVE = '档案/对话/Codex';
@@ -51,6 +54,8 @@ export function turnPath(taskId, turnId) {
 }
 export function readTurn(root, taskId, turnId) {
   const value = readJSON(root, turnPath(taskId, turnId));
+  if (value) validatePolicyEvidence(value.policyEvidence);
+  if (value?.lineage && (!isKey(value.lineage.parentTaskId) || value.lineage.parentTaskId === taskId || !Number.isFinite(Date.parse(value.lineage.createdAt)))) fail('TASK_DATA_INVALID', 'Invalid fork origin; preserve the original.');
   if (value && (value.protocol !== PROTOCOL || value.taskId !== taskId || value.turnId !== turnId ||
       !Array.isArray(value.messages) || !Array.isArray(value.routes) || !Array.isArray(value.declarations) ||
       !Array.isArray(value.issues) || !Number.isSafeInteger(value.revision))) fail('TASK_DATA_INVALID', 'Unsupported or damaged turn archive; preserve the original.');
@@ -61,6 +66,20 @@ export function readTurn(root, taskId, turnId) {
       value.routes.some(r => !r || !r.snapshot || !Array.isArray(r.snapshot.abilities) || !Array.isArray(r.snapshot.references) || !r.snapshot.project) ||
       (value.policy !== 'capture' && (value.messages.length || value.routes.length)))) fail('TASK_DATA_INVALID', 'Invalid archived turn fields; preserve the original.');
   if (value) { try { validateTargetFacts(value.targetFacts); } catch { fail('TASK_DATA_INVALID', 'Invalid target facts; preserve the original.'); } }
+  if (value?.routeFacts !== undefined) {
+    const facts = value.routeFacts;
+    if (!facts || !Array.isArray(facts.workChanges) || !Array.isArray(facts.abilityIds) ||
+        facts.workChanges.some(change => !validWorkChange(change) || change.turnId !== turnId) ||
+        facts.abilityIds.some(id => !validId(id)) ||
+        (facts.startingArrangementRevision !== undefined && (!Number.isSafeInteger(facts.startingArrangementRevision) || facts.startingArrangementRevision < 1)) ||
+        value.policy !== 'capture' && (facts.workChanges.length || facts.abilityIds.length || facts.startingProject !== undefined || facts.startingArrangementRevision !== undefined)) {
+      fail('TASK_DATA_INVALID', 'Invalid route facts; preserve the original.');
+    }
+    if (facts.startingProject !== undefined) {
+      try { validateProject(facts.startingProject); }
+      catch { fail('TASK_DATA_INVALID', 'Invalid starting project; preserve the original.'); }
+    }
+  }
   if (value) for (const event of value.routes) {
     try { validateStoredTargets(event.snapshot); } catch { fail('TASK_DATA_INVALID', 'Invalid archived ownership; preserve the original.'); }
   }
@@ -92,10 +111,28 @@ export function config(root) {
   }
   return value;
 }
+export function turnTiming(turn) {
+  const timing = { userSentAt: null, assistantRepliedAt: null, durationMs: null };
+  if (turn.policy !== 'capture' || turn.capturePolicyHeld || turn.chatPolicyHeld || turn.explicitExcluded || turn.status === 'excluded') return timing;
+  const user = turn.messages.find(message => message.role === 'user' && message.phase !== 'answer' && message.content.length);
+  const start = Date.parse(user?.at ?? user?.sourceAt);
+  if (!Number.isFinite(start)) return timing;
+  timing.userSentAt = new Date(start).toISOString();
+  const answer = turn.messages.findLast(message => message.role === 'assistant'
+    && ['final', 'final_answer'].includes(message.phase) && message.content.length);
+  // The final message's source timestamp marks delivery. Its creation time may mark the start of generation.
+  const end = Date.parse(answer?.sourceAt ?? answer?.at);
+  if (end >= start) {
+    timing.assistantRepliedAt = new Date(end).toISOString();
+    timing.durationMs = end - start;
+  }
+  return timing;
+}
 export function summarizeTurn(value) {
   const route = value.routes.at(-1);
   return { turnId: value.turnId, roundId: value.roundId, revision: value.revision, startedAt: value.startedAt,
     updatedAt: value.updatedAt, status: value.status, policy: value.policy, messageCount: value.messages.length,
+    ...(value.routeFacts ? { routingFactsAvailable: true } : {}),
     routeCount: value.routes.length, route: route?.snapshot ?? null, issues: value.issues,
     preview: value.messages.find(m => m.role === 'user')?.content?.filter(c => c.type === 'input_text' || c.type === 'text').map(c => c.text).join('\n').slice(0, 200) ?? '' };
 }
@@ -107,6 +144,7 @@ export function rebuildTask(root, taskId, title) {
   const last = all.at(-1), route = last.routes.at(-1);
   const titleSource = title || old?.titleSource === 'host' ? 'host' : 'captured-input';
   const next = { protocol: PROTOCOL, taskId, host: 'codex', titleSource,
+    ...(all.find(turn => turn.lineage)?.lineage ? { lineage: all.find(turn => turn.lineage).lineage } : {}),
     title: title || (old?.titleSource === 'host' ? old.title : null) || all.map(summarizeTurn).find(t => t.preview)?.preview || 'Codex 任务',
     createdAt: all[0].startedAt, updatedAt: all.reduce((v, t) => v > t.updatedAt ? v : t.updatedAt, ''),
     turnCount: all.length, lastTurn: summarizeTurn(last), lastRouteAt: route?.at ?? null, route: route?.snapshot ?? null };

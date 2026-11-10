@@ -1,19 +1,27 @@
 import assert from 'node:assert/strict';
 import {cpSync,mkdirSync} from 'node:fs';
-import {join} from 'node:path';
+import {join,dirname} from 'node:path';
 import {distributionFixture,git} from './distribution-fixture.js';
 import {ForkAPI} from './contribution-api.js';
 import {initializeInstance} from '../../src/distribution/instance.js';
 import {writeAtomic} from '../../src/distribution/files.js';
-export async function template(t) {
+export async function template(t,{beforeCopy}={}) {
   const f = await distributionFixture(t), instance = join(f.directory, '新用户 独立实例');
-  cpSync(f.root, instance, { recursive: true, filter: path => !path.endsWith('/.git') && !path.endsWith('\\.git') });
+  await beforeCopy?.(f);
+  mkdirSync(instance);
+  // A GitHub template contains the recorded source tree, not ignored or
+  // untracked files from the developer's working directory.
+  for(const path of git(f.root,['ls-files','-z']).split('\0').filter(Boolean)){
+    const destination=join(instance,path);mkdirSync(dirname(destination),{recursive:true});
+    cpSync(join(f.root,path),destination);
+  }
   git(instance, ['init','--template=','--initial-branch=core-main']);
   git(instance, ['config','user.name','Fixture']); git(instance, ['config','user.email','fixture@example.invalid']);
   git(instance, ['config','core.autocrlf','false']);
   git(instance, ['config','commit.gpgsign','false']); git(instance, ['add','--force','.']);
   git(instance, ['update-index','--chmod=+x','.agents/ksf']); git(instance,['commit','-m','Independent template initial commit']);
   assert.notEqual(git(instance,['rev-parse','HEAD']),f.first.coreRevision);
+  assert.equal(git(instance,['rev-parse','HEAD^{tree}']),git(f.root,['rev-parse','HEAD^{tree}']),'independent template preserves the exact recorded source tree');
   const api = new ForkAPI({ coreRoot: f.root }), request = api.request.bind(api);
   api.request = async (method,path,...rest) => path.includes('/commits?sha=') ? [{ sha: f.first.coreRevision, commit: { tree: { sha: git(f.root,['rev-parse','HEAD^{tree}']) } } }] : request(method,path,...rest);
   return { ...f, instance, api };

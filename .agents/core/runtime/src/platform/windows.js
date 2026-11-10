@@ -38,7 +38,10 @@ export const windows = {
     return `${name}.exe`;
   },
   launcher: (root, args) => ({ executable: powershell(), args: ['-ExecutionPolicy','Bypass',...encodedCommand(`$ksfNativeArguments=@(${args.map(quote).join(',')}); & ${quote(win32.join(root,'.agents/ksf.ps1'))} @ksfNativeArguments; exit $LASTEXITCODE`)] }),
-  hookCommand: root => `${powershell()} ${encodedCommand(`& ${quote(win32.join(root, '.agents/ksf.ps1'))} task hook; exit $LASTEXITCODE`).join(' ')}`,
+  hookCommand(root,kind='task') {
+    if(!['task','context'].includes(kind))throw new Error('Unsupported KSF Hook command.');
+    return `${powershell()} ${encodedCommand(`& ${quote(win32.join(root, '.agents/ksf.ps1'))} ${kind} hook; exit $LASTEXITCODE`).join(' ')}`;
+  },
   desktopEndpoint: () => '\\\\.\\pipe\\codex-ipc',
   desktopCandidates() {
     // Query the current user's package registration; never pin a Store version path.

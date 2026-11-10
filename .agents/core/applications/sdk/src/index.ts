@@ -17,3 +17,4 @@ export * from './workflows';
 export type * from './service-types';
 
 export type {ApplicationMenuItem,ApplicationMenuEvent,ApplicationMenuRegistration} from './application-menu';
+export * from './context';

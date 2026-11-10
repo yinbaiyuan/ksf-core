@@ -11,8 +11,9 @@ export function currentTargetKey(key) {
 }
 export function currentReference(ref) {
   if (typeof ref !== 'string') return ref;
-  const [id, ...version] = ref.split('@');
-  return [currentObjectId(id), ...version].join('@');
+  const prefix = ['+', '#'].includes(ref[0]) ? ref[0] : '';
+  const [id, ...version] = ref.slice(prefix.length).split('@');
+  return prefix + [currentObjectId(id), ...version].join('@');
 }
 export function currentObjectPath(path) {
   if (typeof path !== 'string') return path;

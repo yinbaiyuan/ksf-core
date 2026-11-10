@@ -15,7 +15,7 @@ export function readPosition(storage?: Pick<Storage, 'getItem'>): Position | nul
 export function saveLocal(key: string, value: unknown) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Reading works without storage. */ } }
 export function localDisplay() { try { return readDisplay(localStorage); } catch { return { ...defaultDisplay }; } }
 export function localPosition() { try { return readPosition(localStorage); } catch { return null; } }
-export function roundTitle(turn?: TurnSummary | null) { return turn?.route?.summary?.trim() || (turn?.policy === 'exclude' ? '本轮未记录' : turn?.preview?.trim()) || '等待采集与上报'; }
+export function roundTitle(turn?: TurnSummary | null) { return turn?.route?.summary?.trim() || (turn?.policy === 'exclude' ? '本轮未记录' : turn?.preview?.trim()) || '等待采集'; }
 export function filterTurns(turns: TurnSummary[], query: string) { const q = query.trim().toLocaleLowerCase(); return q ? turns.filter(t => `${roundTitle(t)} ${t.turnNumber ?? ''} ${t.targetRelation?.label ?? ''}`.toLocaleLowerCase().includes(q)) : turns; }
 export function titleMatches(task: Task, query: string) { return task.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()); }
 export function highlightParts(value: string, query: string) {

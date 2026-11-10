@@ -8,10 +8,11 @@ import { validateJSONMapping } from '../shared/json.js';
 import { validId, parseReference } from '../objects/schema.js';
 import { currentObjectId } from '../objects/legacy.js';
 import { assertNoCooperationMigration } from '../migrations/guard.js';
-import { isToken, isKey } from '../routing/schema.js';
+import { isToken, isKey, validateStoredTarget } from '../routing/schema.js';
 
 export const DIRECTORY = '.agents/user-data/chats';
 export const CONFIG = `${DIRECTORY}/config.json`;
+export const CURRENT_WORK_KEY = 'ksf.currentWork';
 export const plain = value => value !== null && typeof value === 'object' && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 export function fail(code, message, exitCode = 1) { throw Object.assign(new Error(message), { code, exitCode }); }
 export const invalid = message => fail('INVALID_ARGUMENTS', message, 2);
@@ -27,6 +28,32 @@ export function location(chatId, objectId) {
   return `${DIRECTORY}/${chatId}/${objectId === undefined ? 'shared.json' : `abilities/${sha256(objectId)}.json`}`;
 }
 export const turnsPath = chatId => { location(chatId); return `${DIRECTORY}/${chatId}/turns.json`; };
+export const validWorkRevision = value => Number.isSafeInteger(value) && value > 0;
+function validWorkPointer(value) {
+  return fields(value, ['turnId', 'revision', 'at']) && isToken(value.turnId) && validWorkRevision(value.revision) && date(value.at);
+}
+export function validWorkChange(change) {
+  if (!fields(change, ['turnId', 'revision', 'at', 'project', 'projectChanged', 'arrangement', 'previousArrangementRevision']) ||
+      !validWorkPointer({ turnId: change.turnId, revision: change.revision, at: change.at })) return false;
+  const { project, projectChanged, arrangement, previousArrangementRevision } = change;
+  const stored = (target, kind) => {
+    if (target?.kind !== kind) return false;
+    validateStoredTarget(target);
+    return true;
+  };
+  try {
+    if (project !== null && !stored(project, 'project')) return false;
+    if (arrangement === undefined) return projectChanged === undefined && previousArrangementRevision === undefined;
+    if (typeof projectChanged !== 'boolean') return false;
+    if (previousArrangementRevision !== undefined && (!validWorkRevision(previousArrangementRevision) || previousArrangementRevision >= change.revision)) return false;
+    if (arrangement === null) return project === null;
+    return fields(arrangement, ['relatedProjects', 'executor', 'methods']) &&
+      Array.isArray(arrangement.relatedProjects) && arrangement.relatedProjects.length <= 16 &&
+      arrangement.relatedProjects.every(item => stored(item, 'project')) &&
+      (arrangement.executor === null || stored(arrangement.executor, 'ability')) &&
+      Array.isArray(arrangement.methods) && arrangement.methods.length <= 32 && arrangement.methods.every(item => stored(item, 'ability'));
+  } catch { return false; }
+}
 export function validate(document, kind, chatId, objectId) {
   if (!plain(document)) fail('CHAT_DATA_INVALID', 'Invalid chat document; preserve the original.');
   if (document.schemaVersion !== 1) fail('CHAT_VERSION_UNSUPPORTED', 'Unsupported chat format; preserve the original.');
@@ -38,7 +65,13 @@ export function validate(document, kind, chatId, objectId) {
   if (kind === 'turns') {
     if (!fields(document, ['schemaVersion', 'kind', 'chatId', 'revision', 'host', 'countingSince', 'turnIds']) || document.host !== 'codex' || !date(document.countingSince) || !ids(document.turnIds) || !document.turnIds.length) fail('CHAT_DATA_INVALID', 'Invalid native turn ledger.');
   } else {
-    if (!fields(document, ['schemaVersion', 'kind', 'chatId', 'revision', 'objectId', 'runId', 'turnIds', 'values']) || document.objectId !== (objectId ?? null) || !ids(document.turnIds) || (objectId === undefined ? document.runId !== null || document.turnIds.length : !isToken(document.runId))) fail('CHAT_DATA_INVALID', 'Invalid variable scope.');
+    if (!fields(document, ['schemaVersion', 'kind', 'chatId', 'revision', 'objectId', 'runId', 'turnIds', 'values', 'workChanges', 'workArrangement']) || document.objectId !== (objectId ?? null) || !ids(document.turnIds) || (objectId === undefined ? document.runId !== null || document.turnIds.length : !isToken(document.runId))) fail('CHAT_DATA_INVALID', 'Invalid variable scope.');
+    if (document.workArrangement !== undefined && (objectId !== undefined || !validWorkPointer(document.workArrangement) ||
+        document.workArrangement.revision > document.revision)) fail('CHAT_DATA_INVALID', 'Invalid current work arrangement.');
+    if (document.workChanges !== undefined && (objectId !== undefined || !Array.isArray(document.workChanges) ||
+        document.workChanges.some((change, index, all) => !validWorkChange(change) || change.revision > document.revision || index > 0 && all[index - 1].revision >= change.revision))) {
+      fail('CHAT_DATA_INVALID', 'Invalid pending work changes.');
+    }
     try { values(document.values); } catch { fail('CHAT_DATA_INVALID', 'Invalid stored variables; preserve the original.'); }
   }
   return document;

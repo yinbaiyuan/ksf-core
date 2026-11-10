@@ -14,6 +14,7 @@ import {captureStatus,configureCapture} from './tasks.js';
 import {chatConfig} from './chat.js';
 import {atomicJSON,safeDirectory,readJSON} from '../shared/durable-json.js';
 import {sha256} from '../shared/hash.js';
+import {incubationHooks} from '../incubation/hooks.js';
 import {platformCapabilities,requirePlatformCapability} from '../platform/index.js';
 
 const own=(object,key)=>Object.prototype.hasOwnProperty.call(object,key);
@@ -74,7 +75,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
       else if(d.owner==='ai'&&ai){effective=saved;if(application.state!=='failed')application={state:'new-task'};}
       else if(d.id==='service'&&service&&prior?.etag===stored.etag&&application.state==='immediate')effective=saved;
     }
-    return {id,label:d.label,owner:d.owner,scope:d.scope,description:d.description,fields:d.fields,capabilities:d.capabilities,path:stored.path,state:stored.state,etag:stored.etag,revision:stored.revision??stored.document?.revision??null,defaults:base,values:stored.values,effective,application,...(stored.extra?{details:stored.extra}:{}),...(id==='incubation'?{details:{root}}:{})};
+    return {id,label:d.label,owner:d.owner,scope:d.scope,description:d.description,fields:d.fields,capabilities:d.capabilities,path:stored.path,state:stored.state,etag:stored.etag,revision:stored.revision??stored.document?.revision??null,defaults:base,values:stored.values,effective,application,...(stored.extra?{details:stored.extra}:{}),...(id==='incubation'?{details:{root,hooks:incubationHooks(root,stored.values)}}:{})};
   }
   function validate(d,values){
     if(!values||typeof values!=='object'||Array.isArray(values))throw configError('CONFIG_INVALID','配置需要 JSON 对象。');

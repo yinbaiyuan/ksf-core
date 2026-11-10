@@ -1,7 +1,7 @@
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {createRequire} from 'node:module';
-import {loadCatalog, sha256, fail} from './catalog.js';
+import {loadCatalog, sha256, fail, safePath} from './catalog.js';
 
 export const coverageBaseline = '.agents/core/runtime/testing/coverage-baseline.json';
 
@@ -59,13 +59,34 @@ export function contractAssertions(update) {
   return [...remaining,...replacements];
 }
 
+// Retired upstream interfaces are not preserved coverage. Keep their original
+// ledger entries and require both absent implementation paths and a pinned,
+// executable native guard for the retirement adopted by that upstream commit.
+export function retirementGuard(root, original, current) {
+  const r=original.retiredBy;
+  if (!r || !/^[a-f0-9]{40}$/.test(r.commit) || typeof r.reason!=='string' || !r.reason.trim() ||
+      !Array.isArray(r.removedPaths) || !r.removedPaths.length || !/^[a-f0-9]{64}$/.test(r.guard?.hash) || !r.guard?.path)
+    fail('TEST_COVERAGE_REDUCED','A retirement requires an upstream commit, reason, removed implementation paths and a pinned executable guard.');
+  for (const path of r.removedPaths) if (typeof path!=='string' || existsSync(safePath(root,path).full))
+    fail('TEST_COVERAGE_REDUCED','A retired interface implementation has reappeared.');
+  const guard=current.find(s=>s.hash===r.guard.hash && s.test.path===r.guard.path);
+  if (!guard || original.nativePlatforms?.length && (guard.test.verification.lane!=='native' || !original.nativePlatforms.every(p=>guard.test.platforms.includes(p))))
+    fail('TEST_COVERAGE_REDUCED','A retirement guard is missing, changed or lacks its original native obligations.');
+  return guard;
+}
+
 export function auditCoverage(root) {
   const catalog = loadCatalog(root), baseline = JSON.parse(readFileSync(join(root,coverageBaseline),'utf8'));
   const current = catalog.tests.flatMap(t => scenarios(root,t.path).map(s => ({...s,test:t})));
   const available = new Map();
   for (const s of current) {const rows = available.get(s.hash) ?? []; rows.push(s); available.set(s.hash,rows);}
-  let preserved = 0, native = 0, amended = 0, updated = 0;
+  let preserved = 0, native = 0, amended = 0, updated = 0, retired = 0, retiredNative = 0, supplemental = 0;
   for (const original of baseline.scenarios) {
+    if (original.retiredBy) {
+      if (original.amendment || original.contractUpdate || original.replacedBy) fail('TEST_COVERAGE_REDUCED','A retired scenario cannot also claim preserved or replaced coverage.');
+      retirementGuard(root,original,current);retired++;if(original.nativePlatforms?.length)retiredNative++;
+      continue;
+    }
     if (original.replacedBy) {
       if (original.amendment || original.contractUpdate) fail('TEST_COVERAGE_REDUCED','A replacement cannot also claim an amendment or contract update.');
       if (!current.some(s => s.title === original.replacedBy)) fail('TEST_COVERAGE_REDUCED', `Missing replacement for ${original.title}.`);
@@ -81,9 +102,27 @@ export function auditCoverage(root) {
     if (index < 0) fail('TEST_COVERAGE_REDUCED', `Missing or weakened baseline scenario: ${original.path}: ${original.title}`);
     candidates.splice(index,1); preserved++; if(amendment)amended++; if(contract)updated++; if (original.nativePlatforms?.length) native++;
   }
+  if (baseline.mainline) {
+    if (!/^[a-f0-9]{40}$/.test(baseline.mainline.commit) || !Array.isArray(baseline.mainline.scenarios)) fail('TEST_COVERAGE_REDUCED','Invalid supplemental mainline ledger.');
+    // The two histories may independently constrain the same amended case.
+    // Require multiplicity within each ledger without demanding duplicate runs
+    // just because one executable case preserves assertions from both parents.
+    const mainAvailable=new Map();
+    for(const s of current){const rows=mainAvailable.get(s.hash)??[];rows.push(s);mainAvailable.set(s.hash,rows);}
+    for (const original of baseline.mainline.scenarios) {
+      const amendment=original.amendment;
+      if(amendment && (!amendment.reason || !/^[a-f0-9]{64}$/.test(amendment.hash) || !amendment.originalAssertions?.length))fail('TEST_COVERAGE_REDUCED','A mainline amendment must retain its original assertions and reviewed hash.');
+      const candidates=mainAvailable.get(amendment?.hash??original.hash)??[];
+      const index=candidates.findIndex(s=>(!amendment || preservesAssertions(amendment.originalAssertions,s.assertions)) && (!original.nativePlatforms?.length || s.test.verification.lane==='native' && original.nativePlatforms.every(p=>s.test.platforms.includes(p))));
+      if(index<0)fail('TEST_COVERAGE_REDUCED',`Missing or weakened mainline scenario: ${original.path}: ${original.title}`);
+      candidates.splice(index,1);supplemental++;
+    }
+  }
   return {baseline:baseline.commit, originalFiles:baseline.files, preservedScenarios:preserved,
     reviewedReplacements:baseline.scenarios.filter(s=>s.replacedBy).length, nativeScenarios:native,
     unchangedScenarios:preserved-amended-updated, additiveAmendments:amended, reviewedContractUpdates:updated,
+    reviewedRetirements:retired, retiredNativeScenarios:retiredNative,
+    supplementalMainlineScenarios:supplemental, mainline:baseline.mainline?.commit??null,
     currentFiles:catalog.tests.length, currentScenarios:current.length,
     sharedFiles:catalog.tests.filter(t=>t.verification.lane==='shared').length,
     windowsFiles:catalog.tests.filter(t=>t.verification.lane==='native'&&t.platforms.includes('win32')).length};

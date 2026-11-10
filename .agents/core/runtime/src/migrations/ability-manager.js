@@ -9,6 +9,8 @@ import {parseFrontmatter,encodeFrontmatter,setField} from '../metadata/frontmatt
 import {validateObjectDocument} from '../user-data/records.js';
 import {validate as validateChat,locked} from '../chat-state/storage.js';
 import {syncDirectorySync} from '../platform/index.js';
+import {currentReference} from '../objects/legacy.js';
+import {parseStoredDependencyReference} from '../objects/schema.js';
 
 export const oldManagerId='partner.ksf.object-designer',newManagerId='partner.ksf.ability-manager';
 const oldHash=sha256(oldManagerId),newHash=sha256(newManagerId);
@@ -27,7 +29,11 @@ export function migrateAbilityManager({root,apply=false}) {
       for(const entry of ['cooperation.md','partner.md','competency.md','datapackage.md']) {
         const p=`${base}/${entry}`;if(!existsSync(safePath(root,p)))continue;
         const text=readConfigFile(root,p,{text:true}).document,meta=parseFrontmatter(Buffer.from(text),p).values;
-        if(meta.id===oldManagerId || meta.references?.some(r=>r.split('@')[0]===oldManagerId))review.push(p);
+        if(meta.id===oldManagerId || meta.references?.some(r=>{
+          if(currentReference(r)===r)return false;
+          try{return parseStoredDependencyReference(r).id===oldManagerId;}
+          catch{return true;} // Malformed legacy references also require explicit review.
+        }))review.push(p);
       }
     }
   }

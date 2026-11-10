@@ -11,6 +11,7 @@ import { parseFrontmatter } from '../metadata/frontmatter.js';
 import { types, protectedPaths, parseReference, fail, compare } from '../objects/schema.js';
 import { catalog, fingerprint, summary } from '../objects/catalog.js';
 import { resolveObject, referenceResults, problems } from '../objects/references.js';
+import { definitionView, expandDefinitions } from '../objects/expansion.js';
 import { safeDirectory, withObjectLock, readTree, copyTree, writeDurably, stageDirectory, removeDirectory, canonicalRoot } from '../objects/storage.js';
 import { validSourceId } from '../sources/schema.js';
 
@@ -47,15 +48,6 @@ function ksfVersion(root) {
   const doc = YAML.parseDocument(decodeUtf8(readSnapshot(path).bytes, path), { version: '1.2', schema: 'core', uniqueKeys: true });
   if (doc.errors.length || doc.warnings.length) fail('OBJECT_BASELINE_INVALID', 'KSF manifest cannot be read for baseline provenance.');
   return doc.get('version') ?? null;
-}
-
-function view(row, part) {
-  const result = { id: row.id, source: row.source, path: row.path, directory: row.directory,
-    ...(row.sourceRoot ? { source_root: row.sourceRoot } : {}),
-    version: row.metadata.version, user_revision: row.metadata.user_revision ?? null, definition_digest: row.digest, protected: Object.hasOwn(protectedPaths, row.id) };
-  if (part !== 'body') result.metadata = row.metadata;
-  if (part !== 'metadata') result.body = row.parsed.body.toString('utf8');
-  return result;
 }
 
 export function objectQuery({ root, type, operation, reference, source = 'effective', part = 'all', sourceScope }) {
@@ -106,7 +98,9 @@ export function objectQuery({ root, type, operation, reference, source = 'effect
   }
   const row = resolveObject(c, parsedReference, source);
   const references = referenceResults(c, row);
-  return { data: { object: view(row, part), references }, errors: references.filter(r => r.error).map(r => r.error) };
+  const expansion = expandDefinitions(c, row, part, references);
+  return { data: { object: definitionView(row, part), references, ...(expansion ? { expanded: expansion.expanded } : {}) },
+    errors: references.filter(r => r.error).map(r => r.error).concat(expansion?.errors ?? []) };
 }
 
 export function objectMutation({ root, type, operation, id, input = {}, dryRun = false, ifMatch }, { beforePublish, cleanup } = {}) {

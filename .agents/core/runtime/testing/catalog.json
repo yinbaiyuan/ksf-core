@@ -123,6 +123,60 @@
         "app:com.ksf.terminal"
       ],
       "reason": "Verification policy, fixture, runtime, workflow or toolchain changed: require all shared and native obligations."
+    },
+    {
+      "paths": [
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/migrations",
+        ".agents/core/runtime/src/testing",
+        ".agents/core/runtime/testing",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/services/*storage*",
+        ".agents/core/runtime/src/services/*lock*",
+        ".agents/core/applications/sdk",
+        ".github",
+        "**/package-lock.json",
+        "**/package.json",
+        ".agents/core/build.json",
+        ".agents/core/runtime/src/commands/test.js",
+        ".agents/core/runtime/src/cli.js",
+        ".agents/core/runtime/src/metadata",
+        ".agents/core/runtime/src/user-data",
+        ".agents/core/runtime/src/chat-state",
+        ".agents/core/runtime/src/task-capture",
+        ".agents/core/runtime/src/communication",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/objects",
+        ".agents/core/runtime/src/data-compatibility.js",
+        ".agents/core/runtime/src/ai-tasks",
+        ".agents/core/runtime/src/codex-conversations",
+        ".agents/core/applications/card-fixture",
+        ".agents/core/runtime/src/services/tasks.js",
+        ".agents/core/runtime/src/services/chat.js",
+        ".agents/core/runtime/src/services/configuration.js",
+        ".agents/core/runtime/src/services/git-settings.js"
+      ],
+      "components": [
+        "core",
+        "web",
+        "sdk",
+        "app:com.ksf.abilities",
+        "app:com.ksf.activity-monitor",
+        "app:com.ksf.conversations",
+        "app:com.ksf.cooperation-center",
+        "app:com.ksf.documentation",
+        "app:com.ksf.markdown",
+        "app:com.ksf.git",
+        "app:com.ksf.knowledge",
+        "app:com.ksf.projects",
+        "app:com.ksf.terminal"
+      ],
+      "reason": "Shared persistence, lifecycle, SDK, toolchain or test-policy change requires full native verification."
     }
   ],
   "tests": [
@@ -5660,53 +5714,6 @@
       ]
     },
     {
-      "id": "core:project-intake",
-      "path": ".agents/core/runtime/tests/project-intake.test.js",
-      "owner": "core",
-      "covers": [
-        "core"
-      ],
-      "suite": "quick",
-      "platforms": [
-        "darwin",
-        "win32"
-      ],
-      "cacheable": false,
-      "inputs": [
-        ".agents/core/runtime/src",
-        ".agents/core/runtime/tests/helpers",
-        ".agents/core/abilities",
-        ".agents/core/docs",
-        ".agents/core/distribution",
-        ".agents/core/build.json",
-        ".agents/core/applications/sdk/src",
-        ".agents/core/applications/sdk/server",
-        ".github",
-        "AGENTS.md",
-        ".agents/ksf",
-        ".agents/ksf.ps1",
-        ".gitignore",
-        ".gitattributes",
-        "README.md"
-      ],
-      "requirements": [],
-      "timeoutMs": 120000,
-      "seconds": {
-        "darwin": 0.94,
-        "win32": 3.79
-      },
-      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
-      "verification": {
-        "lane": "native",
-        "kind": "contract",
-        "reason": "Contains native symlink/junction, sharing-lock, process termination, platform naming, permission or host-default SDK behavior; retain each declared OS execution."
-      },
-      "selectionInputs": [
-        ".agents/core/runtime/src/platform/index.js",
-        ".agents/core/runtime/src/services/project-intake.js"
-      ]
-    },
-    {
       "id": "core:project-routing",
       "path": ".agents/core/runtime/tests/project-routing.test.js",
       "owner": "core",
@@ -10516,6 +10523,896 @@
         ".agents/core/runtime/src/applications/protocol.js",
         ".agents/core/data-compatibility.json",
         ".agents/core/applications/store"
+      ]
+    },
+    {
+      "id": "core:work-context",
+      "path": ".agents/core/runtime/tests/work-context.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Local darwin-arm64 targeted run below one second; conservative Windows estimate, not native Windows proof.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ]
+    },
+    {
+      "id": "core:meta-design-systems",
+      "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "timingBasis": "Timing not established; planner fallback applies. Windows execution has not been verified.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ]
+    },
+    {
+      "id": "core:task-capture-correctness",
+      "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "timingBasis": "Timing not established; planner fallback applies. Windows execution has not been verified.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ]
+    },
+    {
+      "id": "core:task-route-compatibility",
+      "path": ".agents/core/runtime/tests/task-route-compatibility.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "timingBasis": "Timing not established; planner fallback applies. Windows execution has not been verified.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ]
+    },
+    {
+      "id": "core:project-governance",
+      "path": ".agents/core/runtime/tests/project-governance.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-governance.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.4,
+        "win32": 4
+      },
+      "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-governance.test.js"
+      ]
+    },
+    {
+      "id": "core:project-governance-transactions",
+      "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-governance-transactions.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.4,
+        "win32": 4
+      },
+      "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-governance-transactions.test.js"
+      ]
+    },
+    {
+      "id": "app:projects-governance",
+      "path": ".agents/core/applications/projects/tests/governance.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/projects/tests/governance.test.mjs",
+        ".agents/core/runtime/src/projects/governance",
+        ".agents/core/runtime/src/services/project-governance.js",
+        ".agents/core/runtime/tests/helpers/governance-fixture.js"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.34,
+        "win32": 4
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/projects/tests/governance.test.mjs",
+        ".agents/core/runtime/src/projects/governance",
+        ".agents/core/runtime/src/services/project-governance.js",
+        ".agents/core/runtime/tests/helpers/governance-fixture.js"
+      ]
+    },
+    {
+      "id": "core:project-task-numbering",
+      "path": ".agents/core/runtime/tests/project-task-numbering.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-task-numbering.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.4,
+        "win32": 4
+      },
+      "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-task-numbering.test.js"
+      ]
+    },
+    {
+      "id": "core:project-task-create",
+      "path": ".agents/core/runtime/tests/project-task-create.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-task-create.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.4,
+        "win32": 4
+      },
+      "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-task-create.test.js"
+      ]
+    },
+    {
+      "id": "core:project-context-files",
+      "path": ".agents/core/runtime/tests/project-context-files.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-context-files.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 8,
+        "win32": 15
+      },
+      "timingBasis": "Conservative estimate for directory reconciliation tests; native timing not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-context-files.test.js"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:project-card-motion",
+      "path": ".agents/core/applications/projects/tests/project-card-motion.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:inspiration-outline",
+      "path": ".agents/core/applications/projects/tests/inspiration-outline.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:project-brief",
+      "path": ".agents/core/applications/projects/tests/project-brief.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:context-scopes",
+      "path": ".agents/core/applications/projects/tests/context-scopes.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:project-plan",
+      "path": ".agents/core/applications/projects/tests/project-plan.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:context-outline",
+      "path": ".agents/core/applications/projects/tests/context-outline.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:detail-autosave",
+      "path": ".agents/core/applications/projects/tests/detail-autosave.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Current-main source and pure model assertions run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ]
+    },
+    {
+      "id": "core:communication-config",
+      "path": ".agents/core/runtime/tests/communication-config.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.cooperation-center"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/communication",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2,
+        "linux": 1
+      },
+      "timingBasis": "Conservative estimate for configuration snapshot regression; native timings not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "contract",
+        "reason": "Current-main filesystem, locking, transactions and native process contracts remain required on each declared native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/communication",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform"
       ]
     }
   ],

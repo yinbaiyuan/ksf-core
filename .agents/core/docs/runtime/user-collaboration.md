@@ -1,8 +1,10 @@
 # USER 与 BOT 的加载说明
 
-根 USER.md 保存稳定身份与偏好，BOT.md 保存当前宿主 Agent 的长期定位和协作方式；两者属于用户内容。基础内容由 entry-context 和 collaboration-context 程序读取并随正常 context entry 返回。完整性、来源、状态和摘要可从响应核对，运行时采用规则由 [runtime](../../abilities/partners/ksf-runtime/partner.md#userbot-的采用)持有。
+根USER.md保存稳定身份与偏好，BOT.md保存宿主Agent的长期定位和协作方式，两者属于当前实例的用户内容。Runtime以 `#` 引用[人设路由](../../abilities/competencies/persona-route/competency.md)，后者通过 `+/USER.md`、`+/BOT.md` 声明基础卡。正常context entry使用公共展开机制，完整提供Runtime、人设路由和两个文件原文，共四项基础内容；能力与项目路由按需读取，没有专门的人设读取分支。完整关系见[Runtime与上下文机制](work-context.md)。
 
-长期设定维护及详细人设加载由 [人设管理搭档](../../abilities/partners/persona-manager/partner.md)及 [人设维护](../../abilities/competencies/persona-maintenance/competency.md)持有。配置接口 collaboration.user / collaboration.bot 提供带版本的文本读写。临时指令和基础内容注入没有自动保存或归属切换副作用。
+文件项kind=file，file.content为完整原文，path/state/sha256用于核对来源和完整性。人设路由先核对并采用已提供内容，仍有效时复用；缺失按默认处理，读取失败与缺失分开。单独只有路由主文、已知变化或维护前需重取版本时，才使用 `config read collaboration.user --json` / `config read collaboration.bot --json` 补读；其data.values.text及etag与同一根文件对应。维护的条件写入继续使用配置接口。[Runtime](../../abilities/partners/ksf-runtime/partner.md#职责)保持任务连续，采用实际返回范围。
+
+人设路由识别详情及维护需要，形成目的、入口与授权交接；长期设定维护及详细人设加载仍由[人设管理搭档](../../abilities/partners/persona-manager/partner.md)及[人设维护](../../abilities/competencies/persona-maintenance/competency.md)持有。基础卡、深层资料和临时表达按任务需要区分；不自动扫描个人资料、推断价值观或保存画像。配置接口提供带版本的原文读写，临时指令和基础读取没有自动保存或归属切换副作用。
 
 通用模板位于 distribution/template。新实例从模板生成根文件；真实实例文件不进入发行，系统升级和回滚保留其内容。详情及业务资料保留原位置，通过明确入口按需使用。
 

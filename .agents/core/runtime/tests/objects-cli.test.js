@@ -100,6 +100,24 @@ test('invalid object CLI calls return exit 2 and a JSON result without writing',
   assert.equal(existsSync(join(f.root, '.agents/runtime-data')), false);
 });
 
+test('CLI emits expanded main text for body/all and keeps partial output when recursion fails', t => {
+  const f = fixture(t), child = 'competency.test.child', owner = 'partner.test.owner';
+  const write = (type, id, references, body) => f.run(type, 'write', id, '--data', JSON.stringify({metadata:{name:id,description:id,status:'active',version:'0.1.0',references},body}), '--json');
+  assert.equal(write('competency', child, [], 'CHILD_MAIN_TEXT\n').exitCode, 0);
+  assert.equal(write('partner', owner, ['#' + child + '@0.1.0'], 'PARENT\n').exitCode, 0);
+  for (const part of ['all', 'body']) {
+    const read = f.run('partner', 'read', owner, '--part', part, '--json');
+    assert.equal(read.exitCode, 0, read.stdout); assert.equal(read.result.data.expanded[0].object.body, 'CHILD_MAIN_TEXT\n');
+  }
+  assert.equal(f.run('partner', 'read', owner, '--part', 'metadata', '--json').result.data.expanded, undefined);
+  const childPath = join(f.root, types.competency.user, child, types.competency.entry);
+  writeFileSync(childPath, readFileSync(childPath, 'utf8').replace('references: []', 'references: ["+competency.test.missing@0.1.0"]'));
+  const partial = f.run('partner', 'read', owner, '--json');
+  assert.equal(partial.exitCode, 1); assert.equal(partial.result.ok, false);
+  assert.equal(partial.result.data.expanded[0].object.body, 'CHILD_MAIN_TEXT\n');
+  assert.equal(partial.result.errors[0].code, 'OBJECT_NOT_FOUND');
+});
+
 test('object metadata validation errors report fields; missing objects and invalid checks return exit 1', t => {
   const f = fixture(t), id = 'partner.test.x';
   const invalid = f.run('partner', 'write', id, '--data', '{"body":"x"}', '--json');

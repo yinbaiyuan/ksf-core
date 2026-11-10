@@ -15,6 +15,7 @@
 .agents/ksf task list --target knowledge:知识/认知-业务公式/cognition.md --json
 .agents/ksf task read --task <taskId> --limit 20 --offset 0 --json
 .agents/ksf task read --task <taskId> --turn <nativeTurnId> --json
+.agents/ksf task input --turn <nativeTurnId> --json
 ```
 
 hooks 合并当前根的 `.codex/hooks.json`，保留已有处理器，接入 UserPromptSubmit、PreCompact、Stop、Interrupt；首次建立未来轮次基线，重复执行不重置。既有聊天从基线后的下一次原生轮次开始，不导入历史正文；中途启用不导入当前轮次。命令包含启动器绝对路径，移动整个 KSF 后需重新接入和审核。
@@ -24,6 +25,21 @@ hooks 合并当前根的 `.codex/hooks.json`，保留已有处理器，接入 Us
 sync 默认扫描 `$CODEX_HOME/sessions` 与 archived_sessions（默认 ~/.codex），只接入 session_meta 明确声明当前 KSF 根为 cwd 或工作区根的 transcript。它只限定采集范围，不绑定业务项目。可用 `--from -|file` 输入 `{"transcriptPath":"/absolute/rollout.jsonl"}`，仍核对身份与根。Web 启动时和每 3 秒补采，来源未变时跳过；关闭 Web 后 Hooks 与 CLI 独立工作。CLI sync 强制重查，可重建来源游标和索引。
 
 启用归档即允许自动采集基线后的普通轮次。用户原话、过程说明和最终答复不依赖 Agent 调用 declare，也不依赖路由上报；没有可靠路由时只保留 `TASK_ROUTE_UNREPORTED`，不借用其他轮次的安排。旧采集器留下的普通 pending 空占位会在首次补采时从宿主原件修复，仍不导入启用前正文，不越过排除轮次。
+
+## 按项目和能力统计轮次
+
+```sh
+.agents/ksf task stats --current-project --json
+.agents/ksf task stats --project ksf-develop-daily-workflows --time-zone Asia/Shanghai --json
+.agents/ksf task stats --ability competency.ksf.project-control --json
+.agents/ksf task turns --project ksf-develop-daily-workflows --ability competency.ksf.project-control --with-messages --json
+```
+
+`stats` 返回归档聊天数、轮次数、近 30 天每日轮次和累计对话耗时。`turns` 按轮次开始时间从新到旧分页，默认返回 20 轮的摘要和身份。加 `--with-messages` 后，每个匹配项的 `turn` 包含该轮已归档的用户消息、可见过程、最终答复、路由事实和计时。按 `nextOffset` 继续取下一页。需要同一聊天中其他轮次时，可用结果里的 `taskId` 调用 `task read`。
+
+省略项目和能力时使用当前 Codex 聊天绑定的工作项目。`--current-project` 也可与 `--ability` 组合。命令行外部调用或当前聊天未绑定项目时，用 `--project` 指定目录名、`current:目录名` 或 `archived:目录名`。只传 `--ability` 则在本实例的全部归档中按完整能力 ID 查询。两个条件一起使用时，须在同一轮满足。
+
+项目口径与项目活跃度卡一致。使用已归档的单轮项目上报，或无单轮上报时可核实的工作项目。能力口径使用已归档的实际参与记录及旧上报中明确采用的能力，每个能力每轮只计一次。项目活动与能力参与查询独立于下文的主归属目录。耗时使用用户发送至最终答复的时间，缺失时间的轮次另计。查询遵守采集限制，输出有读取缺口时会返回 `partial` 和 `errors`。
 
 ## 只读声明
 
@@ -49,6 +65,10 @@ UserPromptSubmit 向 Runtime 提供准确 turnId 与 taskId。当前 Agent 在�
 
 report 可省略，复用 [route](route.md) 的完整快照、项目、精确引用、来源和 definitionDigest 校验。reason 是可向用户说明的选择/变化依据，不保存隐藏推理。身份默认 CODEX_THREAD_ID，显式身份仅通过输入 `identity:{host:"codex",sessionId}`；不使用 cwd 代替宿主身份。每次变化使用新 eventId；同 ID 不同内容保留首次声明并标注冲突。
 
+Hook可提供`inputScope:{version:1,count,digest}`，声明应原样携带Agent已经收到的输入范围。缺失或同轮有新增输入时，可用只读`task input --turn <nativeTurnId> --json`取得当前聊天、当前实例原生来源的已核实边界；不得猜造count/digest。该命令不归档正文、不写游标或参与记录。范围未知、来源损坏或未刷盘时返回明确缺口。
+
+范围随声明签名。新增记录限制或原消息的新内容版本未被有效范围覆盖时，本轮转为pending，清除本轮正文、修订和正文派生预览，直到相应的新声明澄清；旧capture回执重放不会扩大范围。旧无范围回执按首次可核实来源位置及签名时间保守兼容，不能确认后来才出现的输入。归档中`policyEvidence`仅保留输入摘要、限制标记及声明覆盖关系，不复制私密正文；既有v1档案无需全量迁移。
+
 declare 仅读配置、密钥与定义，不写文件，规划模式可调用。`data.receipt` 为本地签名回执，必须完整出现在工具结果中；采集器只接受对应轮次的有效回执，拒绝跨会话/轮次、伪造和用户引文。截断时不伪造上报成功。readOnly 说明声明服务；共同启动器首次准备 Node 缓存仍可能写入运行目录，已接入实例已完成准备。
 
 | policy | 含义 |
@@ -58,7 +78,7 @@ declare 仅读配置、密钥与定义，不写文件，规划模式可调用。
 | pause | 排除当前轮次，并暂停此聊天的后续采集，直到明确 resume |
 | resume | 从本轮恢复，已经排除的轮次不回填 |
 
-明确“本轮不记录”使用 exclude；未限定轮次的“不记录对话”使用 pause。两者优先于自动采集。没有声明时，如果可见用户输入包含对话记录限制词组，采集器先保守暂停默认采集，只保存无正文的 pending 占位及 `TASK_CAPTURE_POLICY_PENDING`；这些词组可能只是引文，不直接生成永久排除。当前轮次的有效声明可以澄清；限制尚未澄清就进入后续轮次时，继续等待明确 resume，不自动恢复。缺少可核对用户输入或策略待确认时不先存正文。排除只作用于 KSF 副本，不改宿主日志。
+明确“本轮不记录”使用 exclude；未限定轮次的“不记录对话”使用 pause。两者优先于自动采集。如果可见用户输入包含尚未被声明范围覆盖的对话记录限制词组，采集器先保守暂停默认采集，只保存无正文的 pending 占位及 `TASK_CAPTURE_POLICY_PENDING`；这些词组可能只是引文，不直接生成永久排除。当前轮次覆盖该输入的有效声明可以澄清；限制尚未澄清就进入后续轮次时，继续等待明确 resume，不自动恢复。缺少可核对用户输入或策略待确认时不先存正文。排除只作用于 KSF 副本，不改宿主日志。
 
 ## 数据和恢复
 
@@ -69,6 +89,8 @@ declare 仅读配置、密钥与定义，不写文件，规划模式可调用。
 - 同任务锁与最新基线合并，同目录 fsync 暂存和原子替换。轮次先发布，task.json 为可重建摘要；中断后 sync 修复。来源缩短、压缩或移动不删除已归档消息。仅回收可证明原进程退出的本机锁；存活、权限未知或 PID 被复用时保留锁并报告 TASK_LOCKED。
 - 任务档案成为新路由投影的事实源，完整路由原件不受旧 50 条历史与 4096 次事件上限限制。旧 route API 只投影最近 50 次，完整变化在 turn 查询中。旧 v1 数据保留，不猜配历史轮次。已采用任务档案的聊天继续用 task declare；旧 start/write 拒绝更新该聊天，避免两份事实源。
 - completed、interrupted、pending、partial、excluded 为采集状态；Agent preparing/working/completed 等为声明状态，两者不等于宿主实时状态。
+- 原生时间解析与chat计数共用毫秒精度规则。分叉只接入已核实创建边界后的自身原生轮次；缺少可靠分叉边界时不导入父历史。新轮次中的`lineage`保存匿名parentTaskId和创建时间，任务查询补充父档案available；会话页面通过关联查看父历史，仍受父档案自己的采集策略约束。旧重复归档不自动删除，另行盘点迁移。
+- 完整JSONL行严格UTF-8解码，坏记录报告`TASK_SOURCE_ENCODING`或`TASK_SOURCE_PARTIAL`，只关联可核实的轮次；可能丢失边界时不把后续无明确归属消息接到上一轮。尾部尚未换行作为来源级待刷盘问题，不把已完成历史轮次降为partial。同步结果和来源游标的`sourceIssues`提供来源健康，独立于逐轮issues。
 
 Codex JSONL 不是稳定接口，适配器与归档协议分离。未知格式、缺少消息 ID、损坏记录、读取失败明确报缺口并保留原件。查询不创建文件；sync/Hook 才采集。config.enabled 为 false 时同步与 Hook 零采集写入，declare 报 TASK_CAPTURE_DISABLED。首版不支持其他宿主、后台常驻服务、纠错分析、频率统计或知识提炼。
 

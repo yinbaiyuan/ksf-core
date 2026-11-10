@@ -24,6 +24,15 @@ test('all adapters implement the same native-operation contract',()=>{
   const script=Buffer.from(hook.split('-EncodedCommand ')[1],'base64').toString('utf16le');
   assert.match(script,/quote''file/);assert.match(script,/ksf\.ps1.*task hook/);
 });
+test('context hooks are generated before Windows encoding and stay distinct from task hooks',()=>{
+  const root="E:\\中文 工作区\\quote'file",win=platformServices('win32');
+  const context=win.hookCommand(root,'context'),task=win.hookCommand(root);
+  const decode=command=>Buffer.from(command.split('-EncodedCommand ')[1],'base64').toString('utf16le');
+  assert.match(decode(context),/ksf\.ps1' context hook; exit \$LASTEXITCODE/);
+  assert.match(decode(context),/quote''file/);assert.notEqual(context,task);assert.match(decode(task),/task hook/);
+  assert.match(platformServices('darwin').hookCommand("/tmp/中文 quote'file",'context'),/context hook$/);
+  for(const name of ['darwin','win32'])assert.throws(()=>platformServices(name).hookCommand(root,'context; injected'));
+});
 test('distribution target and official Windows archive identity are deliberately distinct',()=>{
   const win=runtimePackage('win32-x64','24.21.0');
   assert.equal(win.archiveRoot,'node-v24.21.0-win-x64');assert.equal(win.nodeMember,win.archiveRoot+'/node.exe');assert.equal(win.format,'zip');

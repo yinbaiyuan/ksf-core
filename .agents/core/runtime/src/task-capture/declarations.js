@@ -7,6 +7,7 @@ import { sha256 } from '../shared/hash.js';
 import { readTurn } from './storage.js';
 import { config } from './storage.js';
 import { readUserData } from '../services/user-data.js';
+import { validateInputScope } from './input-scope.js';
 
 export const MARKER = 'KSF_TASK_RECEIPT:';
 const protocol = 'ksf-task-declaration-v1';
@@ -17,7 +18,8 @@ function sign(root, body) {
 }
 // Pure read-only declaration. The collector is the only writer of host transcripts.
 export function declareTask({ root, input, env = process.env, now = new Date().toISOString() }) {
-  keys(input, ['identity', 'turnId', 'eventId', 'policy', 'reason', 'report', 'targetBindings'], 'task declaration');
+  keys(input, ['identity', 'turnId', 'eventId', 'policy', 'reason', 'report', 'targetBindings', 'inputScope'], 'task declaration');
+  if (input.inputScope !== undefined) validateInputScope(input.inputScope);
   if (!config(root)) fail('TASK_CAPTURE_DISABLED', 'Enable task capture before declaring a turn.');
   const identity = hostIdentity(input.identity, env);
   if (identity.host !== 'codex' || !isToken(input.turnId) || !isToken(input.eventId) ||
@@ -47,6 +49,7 @@ export function declareTask({ root, input, env = process.env, now = new Date().t
     }
   }
   const body = { protocol, taskId, turnId: input.turnId, eventId: input.eventId, policy: input.policy,
+    ...(input.inputScope !== undefined ? { inputScope: input.inputScope } : {}),
     reason: input.reason, snapshot, at: now, ...(requestDigest ? { requestDigest } : {}), ...(targetChanges.length ? { targetChanges } : {}),
     roundId: createHmac('sha256', taskId).update(input.turnId).digest('hex') };
   const receipt = { ...body, signature: sign(root, body) };
@@ -61,6 +64,7 @@ export function receipts(root, output, taskId, turnId) {
       if (body.protocol !== protocol || body.taskId !== taskId || body.turnId !== turnId || !isToken(body.eventId) ||
           !['capture', 'exclude', 'pause', 'resume'].includes(body.policy) || !text(body.reason, 2000) ||
           typeof signature !== 'string' || !/^[a-f0-9]{64}$/.test(signature)) continue;
+      if (body.inputScope !== undefined) validateInputScope(body.inputScope);
       if (timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(sign(root, body), 'hex'))) found.push(body);
     } catch { /* User quotations and incomplete or foreign receipts are not declarations. */ }
   }

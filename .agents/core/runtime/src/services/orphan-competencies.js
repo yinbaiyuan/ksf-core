@@ -22,7 +22,8 @@ export function orphanCompetencies(root, {source} = {}) {
   function edges(row) {
     const key = identity(row);
     if (references.has(key)) return references.get(key);
-    const result = referenceResults(c,row), targets = [];
+    // File locators are context resources, not capability identities or owners.
+    const result = referenceResults(c,row).filter(r=>r.kind!=='file'), targets = [];
     for (const r of result) {
       if (r.error) { errors.push({...r.error,source:row.source}); continue; }
       const target = c.rows.find(t => t.source === r.source && t.path === r.path && t.id === r.id && t.metadata.version === r.version);

@@ -1,6 +1,8 @@
 # 项目管理数据与接口说明
 
-项目管理责任由项目管理搭档持有，规划、推进与检查点恢复、验收与项目归档分别由对应基本功持有。程序中的 project-management、project-intake、projects、project-transitions 与 repositories 模块提供结构、依赖、版本、路径和物理操作。本文解释已实现的数据与接口，不增加专业判断或运行步骤。
+项目管理责任由项目管理搭档持有，规划、推进与检查点恢复、验收与项目归档分别由对应基本功持有。程序中的 project-management、projects、project-transitions 与 repositories 模块提供结构、依赖、版本、路径和物理操作。项目管理使用已核实的项目事实与来源入口，外部材料导入由独立能力处理。本文解释旧格式已实现的数据与接口，不增加专业判断或运行步骤。
+
+后续项目治理的文档组织与信息归属，以[项目文档架构与治理指南](project-management/document-architecture.md)为核心设计基线。本文继续描述未迁移项目的JSON接口；新格式使用[治理文件协议与接口](project-management/governance.md)。根卡包含governance_schema时，旧management接口明确拒绝，避免把冻结JSON当作现行安排。
 
 ## 共同项目模型
 

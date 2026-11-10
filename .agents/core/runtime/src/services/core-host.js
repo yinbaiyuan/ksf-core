@@ -1,10 +1,12 @@
 import { createAssetService } from './assets.js';
 import {createWorkflowService} from './workflows.js';
 import {createCapabilities} from './capabilities.js';
+import {createWorkContext} from './work-context.js';
 import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {project as projectService} from './projects.js';
 import {projectManagement} from './project-management.js';
+import {projectGovernance} from './project-governance.js';
 import {listTasks} from './tasks.js';
 import {createPersistedWorkbenchGit} from './workbench-git.js';
 import {createApplicationStorage} from './application-storage.js';
@@ -13,6 +15,7 @@ import {createCommunicationService} from '../communication/service.js';
 import {createLocalControl} from '../communication/control.js';
 import { createCoordinator, problem, assert } from './workbench-common.js';
 import { createWorkspaceFiles } from './workspace-files.js';
+import { createProjectContextFiles } from './project-context-files.js';
 import {createTaskActivitySource} from './task-activity.js';
 import {createTaskReviewSource} from './task-review.js';
 import { createApplicationManager } from '../applications/manager.js';
@@ -27,6 +30,7 @@ export function createCoreHost(root,options={}) {
   let draining=false,started=false,closed=false,backgroundReady=Promise.resolve(),communicationStart;let resolveCommunication,rejectCommunication;
   const coordinator = createCoordinator(), files = createWorkspaceFiles(root, coordinator),activity=createTaskActivitySource(files.root),reviewSource=createTaskReviewSource(files.root);
   const appStorage=createApplicationStorage(files.root);
+  const contextFiles=createProjectContextFiles(files,appStorage);
   let gitReady;
   const hostGit=()=>gitReady??=createPersistedWorkbenchGit(files.root,files,coordinator,appStorage);
   const gitMethods=['list','owner','status','diff','history','commit','tree','refs','conflict','stashDetail','start','operation','settings','invalidate'];
@@ -40,7 +44,7 @@ export function createCoreHost(root,options={}) {
   messages.material=async(caller,id)=>(await communicationReady).store.material(appCaller(caller),id);
   let workflows;
   const workflowMethods=['list','describe','start','get','reconcile','cancel','signal'];
-  const applications=createApplicationManager(files.root,{...options.applications,locks:coordinator,services:{assets:createAssetService(files.root,{files,reviewSource}),capabilities:createCapabilities(files.root),workflows:Object.fromEntries(workflowMethods.map(method=>[method,(...args)=>workflows[method](...args)])),cooperation:{request:(...args)=>workflows.request(...args)},projects:{...Object.fromEntries(['read','check','write'].map(operation=>['management'+operation[0].toUpperCase()+operation.slice(1),input=>projectManagement({...input,root:files.root,operation})])),list:input=>projectService({root:files.root,operation:'list',scope:input?.scope??'all'}),read:input=>projectService({root:files.root,operation:'read',name:input?.name,scope:input?.scope??'current'}),tasks:input=>{const {errors,...data}=listTasks({root:files.root,target:input?.target,limit:input?.limit??20,offset:input?.offset??0});return {data,errors};}},git:gitService,messages,peers:{list:async caller=>(await communicationReady).peerDirectory({appId:caller.appId})},'codex-conversations':Object.fromEntries(CONVERSATION_METHODS.map(method=>[method,(...params)=>codexConversations[method](...params)])),ai:Object.fromEntries(['describe','submit','get','readResult','cancel','events','register','executionRules','configureExecution'].map(method=>[method,(...params)=>ai[method](...params)])),tasks:{activity:()=>activity.read(),reviewSources:input=>reviewSource.sources(input),readReviewTurn:input=>reviewSource.read(input)},workspace:Object.fromEntries(['locate','tree','read','search','save','saveUnlocked','create','createUnlocked','move','unlock','upload'].map(method=>[method,(...params)=>files[method](...params)]))}});
+  const applications=createApplicationManager(files.root,{...options.applications,locks:coordinator,services:{'work-context':createWorkContext(files.root),assets:createAssetService(files.root,{files,reviewSource}),capabilities:createCapabilities(files.root),workflows:Object.fromEntries(workflowMethods.map(method=>[method,(...args)=>workflows[method](...args)])),cooperation:{request:(...args)=>workflows.request(...args)},projects:{contextFiles:contextFiles.call,activity:input=>activity.readProject(input),...Object.fromEntries(['archive','restore'].map(operation=>[operation,input=>projectService({...input,root:files.root,operation})])),resolve:input=>projectService({root:files.root,operation:'locate',name:input.path,source:input.source,digest:input.digest,data:input.read?{read:true}:undefined}),...Object.fromEntries(['read','check','apply','migrate','create-task','renumber','reorganize','context-list','recover'].map(operation=>['governance'+operation.split('-').map(part=>part[0].toUpperCase()+part.slice(1)).join(''),input=>projectGovernance({...input,root:files.root,operation})])),...Object.fromEntries(['read','check','write'].map(operation=>['management'+operation[0].toUpperCase()+operation.slice(1),input=>projectManagement({...input,root:files.root,operation})])),list:input=>projectService({root:files.root,operation:'list',scope:input?.scope??'all'}),read:input=>projectService({root:files.root,operation:'read',name:input?.name,scope:input?.scope??'current'}),tasks:input=>{const {errors,...data}=listTasks({root:files.root,target:input?.target,limit:input?.limit??20,offset:input?.offset??0});return {data,errors};}},git:gitService,messages,peers:{list:async caller=>(await communicationReady).peerDirectory({appId:caller.appId})},'codex-conversations':Object.fromEntries(CONVERSATION_METHODS.map(method=>[method,(...params)=>codexConversations[method](...params)])),ai:Object.fromEntries(['describe','submit','get','readResult','cancel','events','register','executionRules','configureExecution'].map(method=>[method,(...params)=>ai[method](...params)])),tasks:{activity:()=>activity.read(),reviewSources:input=>reviewSource.sources(input),readReviewTurn:input=>reviewSource.read(input)},workspace:Object.fromEntries(['locate','tree','read','search','save','saveUnlocked','create','createUnlocked','move','unlock','upload'].map(method=>[method,(...params)=>files[method](...params)]))}});
 
   workflows=createWorkflowService(files.root,{applications,ai});
   const configuration=createConfigurationService(files.root,{ai,communication:communicationReady,service:options.service});
@@ -54,5 +58,5 @@ export function createCoreHost(root,options={}) {
     try{const communication=await communicationReady.catch(()=>null);communication?.pauseDispatch();await ai.pauseDispatch();await applications.quiesce({force});while(!force&&(ai.runtimeStatus().active>0||(communication?.runtimeStatus().active??0)>0||control.pendingCount()>controlOffset)&&Date.now()<deadline)await new Promise(r=>setTimeout(r,50));assert(force||(ai.runtimeStatus().active===0&&(communication?.runtimeStatus().active??0)===0&&control.pendingCount()<=controlOffset),'APP_BUSY','仍有 AI 或通信工作在执行，请稍后重试或显式强制停止。',409);}
     catch(error){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});throw error;}
   }
-  return {start,resume(){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});},quiesce,draining:()=>draining,files,activity,applications,ai,codexConversations,monitor,communication:communicationReady,control,configuration,git,backgroundReady,async close(){closed=true;await startPromise?.catch(()=>{});monitor.close();if(!started)rejectCommunication(problem('SERVICE_STOPPED','主服务未激活。',503));await backgroundReady;await control.drain();await applications.close();if(gitReady)await (await gitReady).close();await (await communicationReady.catch(()=>null))?.close();await control.close();await ai.close();await codexConversations.close();}};
+  return {start,resume(){draining=false;applications.resume();ai.resumeDispatch();void communicationReady.then(service=>service.resumeDispatch(),()=>{});},quiesce,draining:()=>draining,files,activity,applications,ai,codexConversations,monitor,communication:communicationReady,control,configuration,git,backgroundReady,async close(){closed=true;contextFiles.close();await startPromise?.catch(()=>{});monitor.close();if(!started)rejectCommunication(problem('SERVICE_STOPPED','主服务未激活。',503));await backgroundReady;await control.drain();await applications.close();if(gitReady)await (await gitReady).close();await (await communicationReady.catch(()=>null))?.close();await control.close();await ai.close();await codexConversations.close();}};
 }

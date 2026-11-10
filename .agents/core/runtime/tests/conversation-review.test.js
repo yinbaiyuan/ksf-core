@@ -79,6 +79,31 @@ test('privacy exclusions and held records never expose bodies, routes, or timest
   await f.configure(); await f.generate(); assert(f.submissions.every(r => !r.inputs[0].text.includes(B)));
 });
 
+test('the chat directory and search include an arranged project without assigning ordinary turns to it', async t => {
+  const f = fixture(t);
+  const project = name => ({ kind: 'project', name, scope: 'current', path: `项目/${name}/project.md` });
+  const work = (turnId, name) => ({ routes: [], routeFacts: { abilityIds: [], workChanges: [{ turnId, revision: 1, at: AT, project: project(name) }] } });
+  const key = 'current:daily-workflows';
+  f.turn(A, 'bind', work('bind', 'daily-workflows'));
+  f.turn(A, 'aside', { routes: [], routeFacts: { abilityIds: [], workChanges: [], startingProject: { name: 'daily-workflows', scope: 'current' } } });
+  f.turn(B, 'reference', { routes: [], routeFacts: { abilityIds: [], workChanges: [{ turnId: 'reference', revision: 1, at: AT,
+    project: project('another'), projectChanged: false, arrangement: { relatedProjects: [project('reference-only')], executor: null, methods: [] } }] } });
+  f.turn(B, 'held', { ...work('held', 'private-project'), capturePolicyHeld: true });
+
+  const targets = (await f.app.call('chats.targets', { state: 'active' })).targets;
+  const arranged = targets.find(item => item.key === key);
+  assert.equal(arranged.chatCount, 1);
+  assert.equal(arranged.turnCount, 0);
+  assert(!targets.some(item => ['another', 'reference-only', 'private-project'].includes(item.label)));
+  const list = await f.app.call('chats.list', { target: key });
+  assert.deepEqual(list.records.map(item => item.taskId), [A]);
+  assert.deepEqual(list.records[0].targetContext, { key, arrangementTurnId: 'bind', turnCount: 0, latestTurnId: null, latestReported: null });
+  const search = await f.app.call('chats.search', { q: 'daily-workflows' });
+  assert.equal(search.groups[key].total, 1);
+  assert.equal(search.groups[key].records[0].targetContext.turnCount, 0);
+  assert((await f.source.sources()).records.every(item => item.workTargets === undefined));
+});
+
 test('read-only overview does not initialize application data or invoke AI; empty days need no profile', async t => {
   const f = fixture(t); await f.app.call('review.overview'); assert.equal(existsSync(join(f.root, 'user')), false); assert.equal(f.submissions.length, 0);
   const report = await f.generate(); assert.equal(report.workItems.length, 0); assert.equal(f.submissions.length, 0);

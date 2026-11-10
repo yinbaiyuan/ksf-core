@@ -24,8 +24,10 @@ test('isolated lifecycle: older assistant entry -> runtime -> rollback -> upgrad
   assert.equal(existsSync(join(f.workspace, '.agents/core/abilities/partners/ksf-assistant/partner.md')), false);
   assert.throws(() => objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.assistant' }), { code: 'OBJECT_NOT_FOUND' });
   assert.throws(() => objectQuery({ root: f.workspace, type: 'competency', operation: 'read', reference: 'competency.ksf.task-route' }), { code: 'OBJECT_NOT_FOUND' });
-  const routeReference = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.runtime' }).data.references.find(r => r.id === 'competency.ksf.ability-route').reference;
-  assert.equal(objectQuery({ root: f.workspace, type: 'competency', operation: 'check', reference: routeReference }).data.valid, true);
+  const route = objectQuery({ root: f.workspace, type: 'partner', operation: 'read', reference: 'partner.ksf.runtime' }).data.references.find(r => r.id === 'competency.ksf.ability-route');
+  // Routing is loaded on demand; the base entry is covered by minimal-runtime.
+  assert.equal(route.reference, route.id + '@' + route.version);
+  assert.equal(objectQuery({ root: f.workspace, type: 'competency', operation: 'check', reference: route.id + '@' + route.version, source: route.source }).data.valid, true);
   const capabilities = contextCapabilities(f.workspace);
   assert.equal(capabilities.data.complete, true, JSON.stringify(capabilities.errors));
   const partners = capabilities.data.partners.objects;

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./context": "./src/context.ts",
     "./runtime-monitor": "./src/runtime-monitor.ts",
     ".": "./src/index.ts",
     "./build": "./build.mjs",
@@ -37,6 +38,8 @@
     "./lib/utils": "./src/lib/utils.ts",
     "./routing/view-targets.js": "./src/routing/view-targets.js",
     "./routing/route-evolution.js": "./src/routing/route-evolution.js",
+    "./apps/markdown-editor": "./src/apps/markdown-editor.tsx",
+    "./apps/rich-preview": "./src/apps/rich-preview.tsx",
     "./apps/document-model": "./src/apps/document-model.ts",
     "./apps/app-services": "./src/apps/app-services.ts",
     "./apps/client": "./src/apps/client.ts",

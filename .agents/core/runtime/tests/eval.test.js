@@ -18,8 +18,25 @@ import { prepareReviewPacket } from '../src/eval/review-packet.js';
 const temporary = t => { const root = mkdtempSync(join(tmpdir(), 'ksf-eval-unit-')); t.after(() => rmSync(root, { recursive: true, force: true })); return root; };
 const passJudge = evidence => ({ dimensions: suite.dimensions.map(dimension => ({ dimension, verdict: 'pass', explanation: 'Synthetic test data only', evidence: evidence.map(e => e.id) })), abilityChecks: abilityChecks.map(check => ({ check, verdict: 'not_applicable', explanation: 'Synthetic check', evidence: [] })), interpretation: 'fixture', disputes: [] });
 
+test('lightweight explicit/preset paths do not require a redundant global discovery', () => {
+  for (const id of ['A01','A02','D02','D04','T01','T02','T03','C01','C02','C03']) assert.equal(suite.cases.find(c=>c.id===id).expected.requiresDiscovery,false,id);
+  for (const id of ['A03','D01','D03']) assert.equal(suite.cases.find(c=>c.id===id).expected.requiresDiscovery,true,id);
+});
+test('entry/current body evidence is recognized while manifests, receipts and truncated text are not', () => {
+  const path='.agents/core/abilities/partners/ksf-runtime/partner.md', raw='---\nid: partner.ksf.runtime\n---\n# Runtime\nFULL_CURRENT_RUNTIME\n', body=raw.replace(/^---\n[\s\S]*?\n---\n/,''), file='USER.md', contents='FULL_USER_BODY\n';
+  const proofs={[path]:readProof(raw),[file]:readProof(contents)};
+  const command=(operation,data)=>({id:'t1-e1',type:'command',command:`ksf context ${operation} --json`,exitCode:0,output:JSON.stringify({data})});
+  const found=e=>observedReads([e],[path,file],proofs,{full:true}).map(x=>x.evidence.length);
+  assert.deepEqual(found(command('entry',{entry:{path,content:raw},context:{expanded:[{kind:'file',file:{path:file,state:'present',content:contents}}]}})),[1,1]);
+  assert.deepEqual(found(command('current',{bodies:[{object:{path,body}},{kind:'file',file:{path:file,state:'present',content:contents}}]})),[1,1]);
+  assert.deepEqual(found({...command('current',{expanded:[{object:{path,body}},{file:{path:file,state:'present',content:contents}}]}),command:'ksf partner read parent --json'}),[1,1]);
+  assert.deepEqual(found(command('current --manifest',{active:[{path,body},{path:file,content:contents}]})),[0,0]);
+  assert.deepEqual(found(command('current',{bodies:[{object:{path,body:body.slice(0,8)}},{file:{path:file,state:'missing',content:null}}]})),[0,0]);
+  assert.deepEqual(found(command('accept',{entry:{path,content:raw}})),[0,0]);
+});
+
 test('routing suite has 24 cases, two real materials, six calibration cases and eight triple repetitions', () => {
-  assert.equal(suite.version, '2.0.0');
+  assert.equal(suite.version, '2.1.0');
   assert.deepEqual(suite.dimensions, ['project', 'ability', 'materials', 'adoption', 'boundary']);
   assert.deepEqual(validateSuite(), { valid: true, errors: [] });
   assert.equal(suite.cases.filter(c => c.material === 'instance').length, 2);

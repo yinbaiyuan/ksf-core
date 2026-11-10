@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync,rmSync,cpSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,existsSync,rmSync,cpSync,symlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -11,7 +11,7 @@ import {validateLayeredCoverage,aggregateLayeredReports} from '../src/testing/ci
 import {sourceIdentity,validateProof} from '../src/testing/ci.js';
 import {fixtureDigest} from '../src/testing/fixtures.js';
 import {testEnvironment,executeTestPlan} from '../src/testing/runner.js';
-import {scenarios,preservesAssertions,contractAssertions} from '../src/testing/coverage-audit.js';
+import {scenarios,preservesAssertions,contractAssertions,retirementGuard,auditCoverage} from '../src/testing/coverage-audit.js';
 import {fileURLToPath} from 'node:url';
 import {gitBinary,nullDevice} from './helpers/platform.js';
 
@@ -59,6 +59,38 @@ test('reviewed contract changes name replacement assertions and retain every una
   assert.equal(preservesAssertions(contractAssertions({...update,assertionUpdates:[]}),after.assertions),false);
   assert.throws(()=>contractAssertions({...update,assertionUpdates:[{before:before.assertions[0],after:[]}]}),{code:'TEST_COVERAGE_REDUCED'});
   assert.throws(()=>contractAssertions({...update,assertionUpdates:[{before:'0'.repeat(64),after:after.assertions}]}),{code:'TEST_COVERAGE_REDUCED'});
+});
+
+test('upstream retirements require absent implementations and a pinned guard on every original native host',t=>{
+  const f=fixture(t),guard={hash:'a'.repeat(64),test:{path:f.catalog.tests[1].path,verification:{lane:'native'},platforms:['darwin','win32','linux']}};
+  const original={nativePlatforms:['darwin','win32'],retiredBy:{commit:'b'.repeat(40),reason:'Upstream removed this interface.',removedPaths:[f.runtime+'/src/retired.js'],guard:{hash:guard.hash,path:guard.test.path}}};
+  assert.equal(retirementGuard(f.root,original,[guard]),guard);
+  for(const r of [{...original.retiredBy,commit:'unknown'},{...original.retiredBy,reason:''},{...original.retiredBy,removedPaths:[]}])
+    assert.throws(()=>retirementGuard(f.root,{...original,retiredBy:r},[guard]),{code:'TEST_COVERAGE_REDUCED'});
+  assert.throws(()=>retirementGuard(f.root,original,[]),{code:'TEST_COVERAGE_REDUCED'});
+  assert.throws(()=>retirementGuard(f.root,original,[{...guard,hash:'c'.repeat(64)}]),{code:'TEST_COVERAGE_REDUCED'});
+  assert.throws(()=>retirementGuard(f.root,original,[{...guard,test:{...guard.test,platforms:['darwin']}}]),{code:'TEST_COVERAGE_REDUCED'});
+  assert.throws(()=>retirementGuard(f.root,original,[{...guard,test:{...guard.test,verification:{lane:'shared'}}}]),{code:'TEST_COVERAGE_REDUCED'});
+  writeFileSync(join(f.root,original.retiredBy.removedPaths[0]),'export const revived=true;');
+  assert.throws(()=>retirementGuard(f.root,original,[guard]),{code:'TEST_COVERAGE_REDUCED'});
+});
+
+test('both parent ledgers constrain shared cases while mainline omissions, duplicates and weaker native coverage fail',t=>{
+  const f=fixture(t),repository=fileURLToPath(new URL('../../../../',import.meta.url));
+  const sdk=join(f.root,'.agents/core/applications/sdk');mkdirSync(sdk,{recursive:true});
+  symlinkSync(join(repository,'.agents/core/applications/sdk/node_modules'),join(sdk,'node_modules'),'junction');
+  const shared="test('shared',()=>{assert.equal(value,1);});",native="test('native',()=>{assert.equal(native,true);});";
+  writeFileSync(join(f.root,f.catalog.tests[0].path),shared);writeFileSync(join(f.root,f.catalog.tests[1].path),native);
+  const a=scenarios(repository,'shared.test.js',shared)[0],b=scenarios(repository,'native.test.js',native)[0];
+  const one={path:f.catalog.tests[0].path,hash:a.hash,title:a.title},two={path:f.catalog.tests[1].path,hash:b.hash,title:b.title,nativePlatforms:['darwin','win32','linux']};
+  const baseline={commit:'a'.repeat(40),files:2,scenarios:[one],mainline:{commit:'b'.repeat(40),scenarios:[one,two]}},path=join(f.root,f.runtime,'testing/coverage-baseline.json');
+  const save=()=>writeFileSync(path,JSON.stringify(baseline));save();
+  assert.equal(auditCoverage(f.root).preservedScenarios,1);assert.equal(auditCoverage(f.root).supplementalMainlineScenarios,2);
+  baseline.mainline.scenarios.push(two);save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});baseline.mainline.scenarios.pop();save();
+  writeFileSync(join(f.root,two.path),'');assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});writeFileSync(join(f.root,two.path),native);
+  f.catalog.tests[1].verification={lane:'shared',kind:'logic',reason:'Synthetic downgrade.'};f.save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
+  f.catalog.tests[1].verification={lane:'native',kind:'contract',reason:'Restored native contract.'};f.save();
+  two.amendment={hash:b.hash,reason:'Invalid empty assertion inventory.',originalAssertions:[]};save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
 });
 
 test('reviewed lanes reject missing declarations and a native label on pure logic',t=>{

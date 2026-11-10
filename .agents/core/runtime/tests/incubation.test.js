@@ -15,6 +15,7 @@ import {readConfigFile,publishConfigFile,expectConfig} from '../src/configuratio
 import {startWebServer} from '../src/services/web.js';
 import {runConfigurationCommand} from '../src/commands/configuration.js';
 import {controlRequest} from '../src/communication/client.js';
+import {installTaskHooks} from '../src/services/tasks.js';
 
 const core=fileURLToPath(new URL('../../',import.meta.url));
 function fixture(t,{pending=true,failStartup=false,unknownOpen=false}={}){
@@ -86,6 +87,61 @@ test('explicit capture off and this-time no-open preserve the chosen behavior',a
   const f=fixture(t);await f.configuration.perform('capture','write',{ifMatch:'missing',values:{enabled:false}});
   await f.draft({userLabel:'小林',openWorkbench:false});await f.finish();assert.equal(f.flags.opens,0);assert.equal((await f.configuration.read('capture')).values.enabled,false);
 });
+test('finish prepares context hooks with capture off, preserves other handlers, and never claims host trust',async t=>{
+  const f=fixture(t);const other={hooks:[{type:'command',command:'echo existing',timeout:2}]};
+  f.put('.codex/hooks.json',JSON.stringify({description:'保留原有配置',hooks:{UserPromptSubmit:[other]}}));
+  await f.configuration.perform('capture','write',{ifMatch:'missing',values:{enabled:false}});
+  await f.draft({userLabel:'小林',openWorkbench:false});const result=await f.finish();
+  assert.equal(result.hooks.state,'review_pending');assert.equal(result.hooks.configuration.configuredCount,6);
+  assert.equal(result.hooks.review.state,'unknown');assert.equal(result.hooks.verification.state,'unverified');
+  assert.equal(result.hooks.review.cli,'/hooks');assert.ok(result.hooks.review.desktop.some(entry=>entry.includes('Settings')));
+  assert.match(result.hooks.verification.steps.join(' '),/真实新消息/);
+  const configured=JSON.parse(readFileSync(join(f.root,'.codex/hooks.json'),'utf8'));
+  assert.deepEqual(configured.hooks.UserPromptSubmit[0],other);assert.equal(configured.description,'保留原有配置');
+  assert.equal((await f.configuration.read('capture')).values.enabled,false);
+  const before=tree(f.root);await f.finish();assert.deepEqual(tree(f.root),before);
+  assert.deepEqual((await f.configuration.read('incubation')).details.hooks,result.hooks);
+});
+test('hook status distinguishes missing, partial and unreadable config without mutation or invented approval',async t=>{
+  const f=fixture(t),before=tree(f.root);let result=await f.service.hooks();
+  assert.equal(result.hooks.state,'not_installed');assert.deepEqual(tree(f.root),before);
+  await f.draft({userLabel:'小林',openWorkbench:false});await f.finish();
+  const path=join(f.root,'.codex/hooks.json'),document=JSON.parse(readFileSync(path,'utf8'));
+  delete document.hooks.SessionStart;writeFileSync(path,JSON.stringify(document));
+  const partial=tree(f.root);result=await f.service.read();assert.equal(result.hooks.state,'partial');assert.deepEqual(tree(f.root),partial);
+  writeFileSync(path,'{');const broken=tree(f.root);result=await f.service.hooks();
+  assert.equal(result.hooks.state,'unavailable');assert.equal(result.hooks.review.state,'unknown');assert.deepEqual(tree(f.root),broken);
+});
+test('explicit hook deferral survives completion and resumes with CAS without repeating setup or changing capture',async t=>{
+  const f=fixture(t);await f.draft({userLabel:'小林',deferHooks:true,openWorkbench:false,captureEnabled:false});await f.finish();
+  const saved=f.state(),id=saved.values.operation.id,calls=f.calls.length;
+  assert.equal((await f.service.read()).hooks.state,'deferred');
+  const initial=tree(f.root);await f.service.hooks({ifMatch:saved.etag,defer:false,dryRun:true});assert.deepEqual(tree(f.root),initial);
+  const result=await f.service.hooks({ifMatch:saved.etag,defer:false});
+  assert.equal(result.values.status,'completed');assert.equal(result.values.operation.id,id);
+  assert.equal(result.hooks.state,'review_pending');assert.equal(f.calls.length,calls);
+  assert.equal((await f.configuration.read('capture')).values.enabled,false);
+  await assert.rejects(f.service.hooks({ifMatch:saved.etag,defer:true}),{code:'CONFIG_CONFLICT'});
+  const again=await f.service.hooks({ifMatch:f.state().etag,defer:true});assert.equal(again.hooks.state,'deferred');
+  assert.equal(again.values.draft.userLabel,'小林');assert.equal(again.values.operation.id,id);
+});
+test('hook decisions do not initialize legacy state or accept trust/activation claims',async t=>{
+  const legacy=fixture(t,{pending:false}),before=tree(legacy.root);
+  assert.equal((await legacy.service.hooks()).hooks.state,'not_required');
+  await assert.rejects(legacy.service.hooks({ifMatch:'missing',defer:true}),{code:'INCUBATION_NOT_PENDING'});
+  assert.deepEqual(tree(legacy.root),before);
+  const f=fixture(t);
+  for(const values of [{deferHooks:'yes'},{hooksTrusted:true},{hooksVerified:true}])await assert.rejects(f.draft(values),{code:'INCUBATION_INVALID'});
+});
+test('hook inspection rejects another root or additional shell commands even when the handler looks similar',async t=>{
+  const f=fixture(t),other=fixture(t);installTaskHooks({root:f.root,capture:false});
+  const path=join(f.root,'.codex/hooks.json'),document=JSON.parse(readFileSync(path,'utf8'));
+  const handler=document.hooks.SessionStart[0].hooks[0],own=handler.command;
+  handler.command=(await other.service.hooks()).hooks.configuration.required.find(item=>item.event==='SessionStart').command;
+  writeFileSync(path,JSON.stringify(document));assert.equal((await f.service.hooks()).hooks.configuration.configuredCount,5);
+  handler.command=own+'; echo injected';writeFileSync(path,JSON.stringify(document));
+  assert.equal((await f.service.hooks()).hooks.configuration.configuredCount,5);
+});
 test('saved-but-failed startup remains pending and resumes the same operation without repeating saved steps',async t=>{
   const f=fixture(t,{failStartup:true});await f.draft({userLabel:'小林'});await assert.rejects(f.finish(),{code:'INCUBATION_APPLY_FAILED'});
   const interrupted=f.state(),id=interrupted.values.operation.id;assert.equal(interrupted.values.status,'pending');assert.equal(interrupted.values.operation.steps.service.state,'failed');assert.equal((await f.configuration.read('service')).values.autostart,true);
@@ -136,12 +192,23 @@ test('CLI validates input and supports one JSON reply from stdin',async t=>{
   for(const args of [['finish'],['read','--dry-run'],['write','--if-match',f.state().etag],['finish','--if-match','bad'],['read','--json','--json']])assert.equal((await runIncubationCommand(args,f.root)).exitCode,2);
   const result=await runIncubationCommand(['write','--from','-','--if-match',f.state().etag,'--json'],f.root,{stdin:'{"userLabel":"小林","instanceName":"灵台","autostart":false}',service:f.service});assert.equal(result.exitCode,0,result.stdout);assert.equal(JSON.parse(result.stdout).data.values.draft.instanceName,'灵台');
 });
+test('hook CLI supports readonly inspection and explicit defer/resume, rejecting ambiguous or unversioned writes',async t=>{
+  const f=fixture(t),run=args=>runIncubationCommand(args,f.root,{service:f.service});
+  const before=tree(f.root),query=await run(['hooks','--json']);assert.equal(query.exitCode,0,query.stdout);assert.deepEqual(tree(f.root),before);
+  for(const args of [['hooks','--defer'],['hooks','--resume'],['hooks','--defer','--resume','--if-match',f.state().etag],['hooks','--dry-run'],['hooks','--if-match',f.state().etag],['hooks','--defer=false','--if-match',f.state().etag]])assert.equal((await run(args)).exitCode,2);
+  const preview=await run(['hooks','--defer','--if-match',f.state().etag,'--dry-run','--json']);assert.equal(preview.exitCode,0,preview.stdout);assert.deepEqual(tree(f.root),before);
+  const deferred=await run(['hooks','--defer','--if-match',f.state().etag,'--json']);assert.equal(deferred.exitCode,0,deferred.stdout);assert.equal(JSON.parse(deferred.stdout).data.hooks.state,'deferred');
+  const resumed=await run(['hooks','--resume','--if-match',f.state().etag,'--json']);assert.equal(resumed.exitCode,0,resumed.stdout);assert.equal(JSON.parse(resumed.stdout).data.values.draft.deferHooks,false);
+});
 test('real CLI entry and incubation preview run with empty PATH outside the instance root',async t=>{
   const f=fixture(t);cpSync(join(core,'runtime/src'),join(f.root,'.agents/core/runtime/src'),{recursive:true});cpSync(join(core,'runtime/package.json'),join(f.root,'.agents/core/runtime/package.json'));cpSync(join(core,'applications/sdk/src/shared'),join(f.root,'.agents/core/applications/sdk/src/shared'),{recursive:true});cpSync(join(core,'applications/sdk/package.json'),join(f.root,'.agents/core/applications/sdk/package.json'));
   const cli=join(f.root,'.agents/core/runtime/src/cli.js'),launch=(...args)=>spawnSync(process.execPath,[cli,...args],{cwd:tmpdir(),encoding:'utf8',env:{...process.env,PATH:''}});
   const entry=launch('context','entry','--json');assert.equal(entry.status,0,entry.stdout+entry.stderr);assert.equal(JSON.parse(entry.stdout).data.mode,'incubation');
   const draft=launch('incubate','write','--data','{"userLabel":"小林","openWorkbench":false}','--if-match',f.state().etag,'--json');assert.equal(draft.status,0,draft.stdout+draft.stderr);
   const before=tree(f.root),preview=launch('incubate','finish','--if-match',f.state().etag,'--dry-run','--json');assert.equal(preview.status,0,preview.stdout+preview.stderr);assert.deepEqual(tree(f.root),before);
+  installTaskHooks({root:f.root,capture:false});const installed=tree(f.root),hooks=launch('incubate','hooks','--json');
+  assert.equal(hooks.status,0,hooks.stdout+hooks.stderr);const status=JSON.parse(hooks.stdout).data.hooks;
+  assert.equal(status.state,'review_pending');assert.equal(status.configuration.configuredCount,6);assert.equal(status.review.state,'unknown');assert.deepEqual(tree(f.root),installed);
 });
 test('nickname replacement is idempotent and preserves unrelated bytes',()=>{
   const before='\uFEFF# 用户\r\n- 常用称呼：原名。\r\n其余 **正文**\r\n';const after=userWithLabel(before,'小林');assert.equal(after,'\uFEFF# 用户\r\n- 常用称呼：小林。\r\n其余 **正文**\r\n');assert.equal(userWithLabel(after,'小林'),after);

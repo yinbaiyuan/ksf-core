@@ -371,6 +371,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
         if(message.service==='storage')assert(['read','write','inspect','migrate'].includes(message.method),'APP_SERVICE_UNKNOWN','未知存储方法。');
         if(message.service==='assets')assert(runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明资产访问所需的 filesystem 权限。',403);
         if(message.service==='capabilities')assert(message.method==='read'&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明能力读取所需的 filesystem 权限。',403);
+        if(message.service==='work-context')assert(['read','bind','current','accept','reset'].includes(message.method)&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','工作上下文需要 filesystem 权限及显式会话身份。',403);
         if(message.service==='tasks'&&message.method!=='activity')assert(runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明证据读取所需的 filesystem 权限。',403);
         if(message.service==='projects')assert(runtime.release.manifest.permissions.includes('filesystem')||runtime.release.manifest.permissions.includes('projects.read')&&['list','read'].includes(message.method),'APP_PERMISSION_REQUIRED','此应用没有声明 filesystem 权限。',403);
         if(message.service==='git')assert(runtime.release.manifest.permissions.includes('shell')&&runtime.release.manifest.permissions.includes('filesystem'),'APP_PERMISSION_REQUIRED','此应用没有声明 Git 所需权限。',403);

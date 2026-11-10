@@ -6,6 +6,8 @@ import {createConfigurationService} from './configuration.js';
 import {canonical,expectConfig,withConfigLock} from '../configuration/storage.js';
 import {ensureService,openWorkbench,serviceStatus} from './service-manager.js';
 import {controlRequest} from '../communication/client.js';
+import {installTaskHooks} from './tasks.js';
+import {incubationHooks} from '../incubation/hooks.js';
 import {platformCapabilities,requirePlatformCapability} from '../platform/index.js';
 
 const subset=(current,desired)=>Object.entries(desired).every(([key,value])=>canonical(current.values[key])===canonical(value));
@@ -49,12 +51,24 @@ export function createIncubationService(root,adapters={}) {
   async function read(){
     const state=readState(),actual=await configs(),proposed=candidate(state,actual);
     return {...state,candidate:proposed,actual,missing:state.values.status==='pending'?Object.entries(proposed).filter(([,value])=>value===null).map(([key])=>key):[],
-      capabilities:platformCapabilities,workbenchUrl:state.values.operation?.workbench.url??`http://127.0.0.1:${actual.service.details.port}/`,root,handoff:'ksf context entry --json'};
+      capabilities:platformCapabilities,workbenchUrl:state.values.operation?.workbench.url??`http://127.0.0.1:${actual.service.details.port}/`,root,hooks:incubationHooks(root,state.values),handoff:'ksf context entry --json'};
   }
   function requirePending(state){if(state.values.status!=='pending')throw incubationError('INCUBATION_NOT_PENDING','当前实例未处于孵化中；保留现有配置，不自动重新孵化。');}
   function save(state,patch){
     const result=writeUserData({root,namespace:'incubation',ifMatch:state.etag,values:patch});
     return {...state,...result,state:'present',values:result.values};
+  }
+  async function hooks({ifMatch,defer,dryRun=false}={}){
+    if(defer===undefined){const state=readState();return {...state,hooks:incubationHooks(root,state.values)};}
+    if(typeof defer!=='boolean')throw incubationError('INCUBATION_INVALID','Hook 暂缓选择需要布尔值。');
+    const action=()=>{
+      let state=readState();expectConfig(state,ifMatch);
+      if(state.state!=='present')throw incubationError('INCUBATION_NOT_PENDING','当前实例没有孵化记录，请保留现有配置。');
+      const draft={...state.values.draft,deferHooks:defer};
+      if(dryRun)return {...state,dryRun:true,hooks:incubationHooks(root,{...state.values,draft})};
+      state=save(state,{draft});return {...state,hooks:incubationHooks(root,state.values)};
+    };
+    return dryRun?action():lock(action);
   }
   async function write({values,ifMatch,dryRun=false}){
     validateIncubationDraft(values);
@@ -141,8 +155,8 @@ export function createIncubationService(root,adapters={}) {
     const action=async()=>{
       let state=readState();expectConfig(state,ifMatch);const terminal=kind==='finish'?'completed':'skipped';
       if(state.values.status===terminal){
-        if(!dryRun&&kind==='finish')state=await openOnce(state);
-        return {...state,dryRun,alreadyFinished:true,handoff:'ksf context entry --json'};
+        if(!dryRun&&kind==='finish'){installTaskHooks({root,capture:false});state=await openOnce(state);}
+        return {...state,dryRun,alreadyFinished:true,hooks:incubationHooks(root,state.values),handoff:'ksf context entry --json'};
       }
       requirePending(state);
       if(kind==='finish'){
@@ -157,14 +171,18 @@ export function createIncubationService(root,adapters={}) {
       operation??=await prepare(state,kind);
       if(dryRun){
         for(const item of operation.targets){const current=await configuration.read(item.domain);if(!subset(current,item.values))expectConfig(current,item.beforeEtag);await configuration.check(item.domain,{values:item.values,ifMatch:current.etag});}
-        return {...state,dryRun:true,operation,wouldComplete:true};
+        return {...state,dryRun:true,operation,wouldComplete:true,hooks:incubationHooks(root,state.values)};
       }
       if(!state.values.operation||state.values.operation.id!==operation.id)state=save(state,{operation});
-      state=await runTargets(state);state=save(state,{status:terminal,[kind==='finish'?'completedAt':'skippedAt']:now()});
+      state=await runTargets(state);
+      // Context/continuation hooks are also needed when capture was explicitly
+      // disabled. Installing them must not change that saved choice.
+      if(kind==='finish')installTaskHooks({root,capture:false});
+      state=save(state,{status:terminal,[kind==='finish'?'completedAt':'skippedAt']:now()});
       if(kind==='finish')state=await openOnce(state);
-      return {...state,handoff:'ksf context entry --json'};
+      return {...state,hooks:incubationHooks(root,state.values),handoff:'ksf context entry --json'};
     };
     return dryRun?action():lock(action);
   }
-  return {read,write,finish:input=>commit('finish',input),skip:input=>commit('skip',input)};
+  return {read,write,hooks,finish:input=>commit('finish',input),skip:input=>commit('skip',input)};
 }
