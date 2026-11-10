@@ -16,7 +16,7 @@ import {runAbilityStoreCommand} from '../src/commands/ability-store.js';
 import {checkSourceCompatibility} from '../src/sources/compatibility.js';
 import {gitBinary} from './helpers/platform.js';
 function fixture(t){
- const folder=realpathSync(mkdtempSync(join(tmpdir(),'ksf-store-'))),root=join(folder,'ksf');t.after(()=>rmSync(folder,{recursive:true,force:true}));
+ const folder=realpathSync(mkdtempSync(join(tmpdir(),'ksf-store-'))),root=join(folder,'ksf');t.after(()=>rmSync(folder,{recursive:true,force:true,maxRetries:8,retryDelay:50}));
  for(const type of Object.values(types))for(const source of ['system','user'])mkdirSync(join(root,type[source]),{recursive:true});
  const source=(id='team')=>{const path=join(folder,id);mkdirSync(path);assert.equal(spawnSync(gitBinary,['init','--template=','--initial-branch=main',path]).status,0);const r=abilitySource({root,operation:'init',target:path,id,name:id});assert.deepEqual(r.errors,[]);return path;};
  const add=(path,id,refs=[],version='0.1.0',body='# original\n')=>{const where=join(path,types[id.split('.')[0]].user,id);mkdirSync(where,{recursive:true});writeFileSync(join(where,types[id.split('.')[0]].entry),'---\n'+YAML.stringify({id,name:id,description:'Fictional test method',version,status:'draft',references:refs})+'---\n'+body);return where;};
@@ -68,7 +68,7 @@ test('Git sources clone and refresh using a real local Git HTTP endpoint; authen
  const url='http://127.0.0.1:'+server.address().port;await f.mutate('source-add',{kind:'git',location:url});await f.apply('install',{sourceId:'team',id});f.add(s,id,[],'0.2.0');command(['add','.']);command(['commit','-m','Second fixture']);command(['update-server-info']);await f.mutate('refresh',{sourceId:'team'});assert.equal(abilityStoreCatalog(f.root).abilities[0].available.version,'0.2.0');assert.equal(f.query(id).data.object.version,'0.1.0');denied=true;const result=await f.mutate('refresh',{sourceId:'team'});assert.equal(result.error.code,'ABILITY_STORE_GIT_FAILED');assert.equal(f.query(id).data.object.version,'0.1.0');
 });
 test('HTTP exposes the shared catalog and protects every mutation with the workbench session',async t=>{
- const f=fixture(t),s=f.source(),id='partner.author.one';f.add(s,id);const {startWebServer}=await import('../src/services/web.js');mkdirSync(join(f.root,'项目'));writeFileSync(join(f.root,'USER.md'),'# Fixture\n');const server=await startWebServer({root:f.root,port:0,capture:false});t.after(()=>server.close());
+ let server;t.after(()=>server?.close());const f=fixture(t),s=f.source(),id='partner.author.one';f.add(s,id);const {startWebServer}=await import('../src/services/web.js');mkdirSync(join(f.root,'项目'));writeFileSync(join(f.root,'USER.md'),'# Fixture\n');server=await startWebServer({root:f.root,port:0,capture:false,applications:{defaultSource:null}});
  const get=async path=>(await fetch(server.url+path)).json(),session=(await get('api/workbench/session')).data;
  const post=(path,input,token=session.token)=>fetch(server.url+path,{method:'POST',headers:{Origin:server.url.slice(0,-1),'Content-Type':'application/json','X-KSF-Token':token},body:JSON.stringify(input)});
  const input={kind:'local',location:s,operationId:randomUUID(),ifMatch:'missing'};assert.equal((await post('api/ability-store/source-add',input,'bad')).status,403);assert.equal((await post('api/ability-store/source-add',input)).status,200);

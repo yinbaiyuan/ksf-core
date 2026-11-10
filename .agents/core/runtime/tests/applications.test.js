@@ -59,9 +59,9 @@ test('HTTP registry works independently; disabling and removing it preserve inst
   const server = createServer(async (req, res) => { try { const bytes = await readFile(join(f.store, req.url.slice(1))); res.end(bytes); } catch { res.writeHead(404); res.end(); } });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve)); t.after(() => new Promise(resolve => server.close(resolve)));
   const source = await f.manager.saveSource({ name: 'Independent source', url: `http://127.0.0.1:${server.address().port}/index.json`, enabled: true });
-  assert.equal((await f.manager.catalog()).applications.filter(a => a.display.source.id === source.id).length, 1);
+  assert.equal((await f.manager.storeDetail({appId:f.one.entry.manifest.id,sourceId:source.id})).candidate.source.id,source.id);
   await f.install(f.one, source.id); await f.manager.saveSource({ ...source, enabled: false });
-  assert.equal((await f.manager.catalog()).apps.filter(a => a.source.id === source.id).length, 0);
+  assert.equal((await f.manager.storeDetail({appId:f.one.entry.manifest.id})).candidate,null);
   await f.manager.removeSource(source.id); assert.equal((await f.manager.snapshot()).installed[0].active.source.id, source.id);
   const instance = await f.manager.launch('com.example.echo', f.one.entry.package.sha256); assert.equal((await f.manager.call(instance.id, 'echo', { hello: '中文' })).input.hello, '中文'); await f.manager.release(instance.id);
 });

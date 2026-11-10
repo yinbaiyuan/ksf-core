@@ -277,7 +277,46 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "330b05596d2074b5dcac2e954c64d7f77cfd4eb52a7d7ce32602eebec405ac8e",
+        "originalAssertions": [
+          "367206c83ef50f9c2069dc2a97b30ad45ec5de6df424766b6332fff0fe240b2d",
+          "cb35946b8396820993db2e63143706d56f4dd70bd4a0493b9ff501bc91d0e7ab",
+          "605742c95cacbc014cb5d969b2ac3d817423116b0bee4410f1a73c6ac81a82cc",
+          "91da97fc9bb155bb7744fb7463782cb9eb64a8fea159f97a357c422632a2fb3e",
+          "b9103c14b39af58637f9c13471db8293f3a5f4820c40097a66e08c3b7366bdbd",
+          "e9e9df6b9b6512098edfbc9bb1868c137d790a9de772a54c9ea0163f2b77fd17",
+          "cc95337f408bb081893ac8a25ec57fc1e141f5c6d44eb4f349b76de140e02a78",
+          "4810ec4a30bea98460bb40fbab871ddd09185784a33650d6df72ff3a4836cdf9",
+          "f22741570f0f2bdffa6faab2e3173f82e96e230d1b54672afcf14edee9593829",
+          "8203cc3dd5faaa34c42774c7ac713566cea8940f7c60dba85196b2f628dbdc99",
+          "f7a2fe5434ad99515e3ca5a114dd7498f0f291a2da161c3601516296d4af1112",
+          "4edd0b4544b98b4d0e8434f55fa8c7206eb09453fed9000ae50dc2eeb7351043",
+          "365df7e7ab6022bd876b6bbf7d020ae4c10932c090536ecd07362e0f94e93384"
+        ],
+        "reason": "Core随包只保留最新统一包，旧业务后端移到独立测试夹具，继续核验真实旧偏好和项目迁移；发行包下限断言由0.5.2提升为0.5.5，拒绝0.5.4，其余数据保全、许可及离线断言不变。",
+        "assertionUpdates": [
+          {
+            "before": "cb35946b8396820993db2e63143706d56f4dd70bd4a0493b9ff501bc91d0e7ab",
+            "after": [
+              "fc86897a227103068806fc7cf0aa081c8988c91c2bc5a59a57ce9335991b1a52"
+            ]
+          },
+          {
+            "before": "605742c95cacbc014cb5d969b2ac3d817423116b0bee4410f1a73c6ac81a82cc",
+            "after": [
+              "1cc25020ab26f836e0a3a373abb834e6bca094f479f8c028a9292ae233a656e0"
+            ]
+          },
+          {
+            "before": "91da97fc9bb155bb7744fb7463782cb9eb64a8fea159f97a357c422632a2fb3e",
+            "after": [
+              "04d1b7404d5141d63d357a22ccc46faf67a20fd3aadec64f82222e22f59a625f"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/applications/sdk/tests/ai-services-build.test.mjs",
@@ -1496,7 +1535,14 @@
       "path": ".agents/core/runtime/tests/application-development.test.js",
       "hash": "544b77261b565552d02c2d463634be9637749dcc0fb62bb6dc5a9e12ead1cfe3",
       "title": "'runtime manager and generated protocol run without SDK or external dependencies'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "d1c40cfe318ee0717081373be8aeee1ca3795abd35ed55a94af850dff85f947b",
+        "originalAssertions": [
+          "463a841f2e3c635de4435e7baeb3ecca88db0523672b8ae6b0d72f2b6f457224"
+        ],
+        "reason": "隔离运行时夹具补齐新增的纯Node分片模块，保留无SDK依赖的原执行断言。"
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-file-export.test.js",
@@ -1682,7 +1728,18 @@
       "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
       "hash": "7fa71ba374449f72a8cf8fd59d253520287d7c797a1e960e82685cb7ab970702",
       "title": "'canonical remote package paths resolve to equal-digest offline bytes and newer remote upgrades'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "fab53531605a566dd450d07c010c2c77c37be140ec5f42525ec3564068f94ead",
+        "originalAssertions": [
+          "07edb48c90a5291530f7e0137ce4afdea1d735e6d5a5550d9c9ac5692de96c07",
+          "06604b6691dea91e58db1d94a93d37bc3f9b6a1cfa51066b675b8e2bfe9e15af",
+          "0c7f6c4d678e8ac6d6f35eaa6a024c569987e358712b941d963023c215b6a90e",
+          "a3aaaa965a6553fa589925b2ab476bacb6fae9089ac651c81e7270d59b9ee9b4",
+          "3fc68be5bf97ea7e31a6cd611ad4596720d823e2002b254b934270ba2a0319f3"
+        ],
+        "reason": "分页目录只返回摘要，转为定向详情及显式刷新检查；原来源、离线摘要与安装断言全部保留。"
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
@@ -1890,19 +1947,25 @@
         "win32"
       ],
       "contractUpdate": {
-        "hash": "6a89ad090b25a617edf5418b21bbc4a487c79dd94beb62bb57b62044d1132521",
-        "reason": "目录返回分页摘要，发布记录由定向预览读取；将原全量apps来源断言替换为摘要applications的同来源断言，其余安装、停用、移除和保留检查不变。",
+        "hash": "f732802db58a97458d3a6dcd1f8a4a852d5fd14ee08d85d978478dfbe75f4e08",
         "originalAssertions": [
           "6349378bca82964fd845d8323a5ff760bf9beab4fccc3d46137f93eb593d4a4b",
           "8bf5ca311ee0b2854548929d3a5c3e975a31d3d3c230c67c8b778f95662e28b4",
           "2004a4ab8ce02d261aeecde907882ebe5ff867458858ed8ef1b315b771818999",
           "06194eaa96bd6c7fc04ecf4a466e91324086942cd0bf367bd62808c9013c949d"
         ],
+        "reason": "分页目录不再暴露全部声明；来源可用性转为定向详情、停用后候选为空的检查。SDK统一包要求Core0.5.5并拒绝0.5.4；其他断言保留。",
         "assertionUpdates": [
           {
             "before": "6349378bca82964fd845d8323a5ff760bf9beab4fccc3d46137f93eb593d4a4b",
             "after": [
-              "794946e8f825bd0b36eb3c76d6c786fde94928091e5acd25bef26c379281a711"
+              "a126c43af8ccc9b518cd5d2e0c569821d6386512713e425692558a83ef01479b"
+            ]
+          },
+          {
+            "before": "8bf5ca311ee0b2854548929d3a5c3e975a31d3d3c230c67c8b778f95662e28b4",
+            "after": [
+              "a72b3a02852b4387c91b1dcd6b726d375421b50378503058510deef51c3a96e1"
             ]
           }
         ]
@@ -2680,7 +2743,17 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "828bb7df424f4151e50ac9ab3b38a20614bd78a5ef901b4cf1abbfc4373b3cb0",
+        "originalAssertions": [
+          "fc7c0028c6f5be7da9b3facb7bec0a71ef7769f61a90564198bdd6764f720c4b",
+          "8b8181e5b7bd5e7bdd80fa9a958457f9cdf715c4f1935465806df2a2e15de7f0",
+          "27732257669f5eb99a51ba0fc480502a0f773d6d77081f3803457db392d61b25",
+          "56453c2510215fcfb1c95d6bb5fb9dd62b46759f2a113e990cc0b1d23253181c"
+        ],
+        "reason": "目录以摘要分页返回，夹具改为定向预览或隔离离线输入；保留全部原执行、数据与权限断言。"
+      }
     },
     {
       "path": ".agents/core/runtime/tests/capabilities.test.js",
@@ -3007,7 +3080,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "1f9738b401abbba6ab28d8f1935f03929555e956ba977792551db9df281582f5",
+        "originalAssertions": [
+          "d8a6ffa0d38e1dbffcff15d83830b0a66d2d82e62d0b5022fd7ee5f7b56ddb4b",
+          "0fdc46a00a33b1f895d7619cff79d1baa7d6ac8f99366e1c387674a231149348",
+          "7e3c276e6e2faf47b47ca69867b4add39bd2e720a884d978861666c3a1a5cdcb",
+          "8e5a3261c4dcebff1d48c45af050fefdbf95ea8c28854ccfbf7d4b86ab3726b3",
+          "3fc9c979a1bec1ad953324e9d59129136ebc4d6f1a3ed9f73dfdbd1e8baf7d8f",
+          "49beeac09c800750de77791fb9c1c674cc6366c69458ddfc668907c492eb2c21"
+        ],
+        "reason": "目录以摘要分页返回，夹具改为定向预览或隔离离线输入；保留全部原执行、数据与权限断言。"
+      }
     },
     {
       "path": ".agents/core/runtime/tests/codex-conversation-permissions.test.js",
@@ -11245,7 +11330,30 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "amendment": {
+          "hash": "56c2c563452214bbe6bb49dff1691a0651b91aba9301d2a66d22631de411ddc1",
+          "originalAssertions": [
+            "3a2cb9dae7fd35a591c832543ccbfda4b4746423dcaf71b838401db2c826ed88",
+            "8b48047d9f6b0b5c3adf479d6cc02dbac3ddf9583b46c1b17a078a37ccdfdc1c",
+            "6fcdc1566b1b537427128f8f19a1b1ceab4287e90780c9d6bee65f47bb2e293d",
+            "00d5ee8c2c50b4cc9f78f1d6a3bb4e09ea9ec2ddc8c093cb05cbe938d790b3a6",
+            "99910344e2343ead98a928a0cb17babaeac15aaac3c6386511330e5391d6b7b2",
+            "97b38ae052fc3f6f0a431f4869550e1f80772b4e9ba7eda332d939a9ce474a37",
+            "29cd62d383d7d79fffc730db8f09643ceea055257c43b51af5399709d9ff600c",
+            "360dc4fe37c0556e066b7b3bd34769e8f1ff266dbf73dcffdd607d1f0fe28617",
+            "b786e0ecfd4a04c0c1304776e0ba29ef17c9ebe3b6a1e47c5a6fee078c6c2349",
+            "cdcbdc9b48693bb0622c976fb2e16ba6058ab360fdf353360dbb34e304c7acfd",
+            "fb4a0a3bc08085f57428e113f3ab625db0f3bd9e0fc42a8c8a0dccfeb0bcca47",
+            "7cd1b2b6561fb473b858745b11e54dc6f3f556c15915baf1512483c683d36ca6",
+            "410adc5c48c397a78182deac5a16df6055d2fcdc2a6331f854210a2bf04296ce",
+            "f3cc8c0fb1fbd9d27b31cb6f9173943c932b52d49bc9fdfc187ecf0b21ca7dea",
+            "8fa41c44af553d8ae6cf78b19b2cdb81b1c90262e3b4e4f88c112d056d68f562",
+            "9fe7e93b0b421d378e07b1c7990f5be9e5b635ad31b72d4758a6c4e8a1254e0e",
+            "b7f41abfa128f79f0389d239c0c66e9c80b8c41cbf117eb5b227e42a8414a80d"
+          ],
+          "reason": "目录以摘要分页返回，夹具改为定向预览或隔离离线输入；保留全部原执行、数据与权限断言。"
+        }
       },
       {
         "path": ".agents/core/runtime/tests/application-background.test.js",
@@ -11268,7 +11376,16 @@
         "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
         "hash": "e48bf9ea59610a2f8b19bce102ed8ac1e7fd20472b0164f759b31be8d261ebed",
         "title": "'newer local Core baseline is not mislabeled as an online published version'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "amendment": {
+          "hash": "8b56f7586a8e7f3a1f8af471e398f0cd9d9a82f838656484e99b0cf19ee142ed",
+          "originalAssertions": [
+            "4daad9a242190adedaf69a59417b88c84b6b2e3414366b0f5ab4731879dccada",
+            "572151a83c23d78e6c279e23eb6ed9342c10fea82811279516cee932dccb69c8",
+            "69512630dc10d5e04b0cce95bae5558b44d9a297d975f9852d2042a7d5abb0e8"
+          ],
+          "reason": "分页目录只返回摘要，转为定向详情及显式刷新检查；原来源、离线摘要与安装断言全部保留。"
+        }
       },
       {
         "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
@@ -11286,7 +11403,28 @@
         "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
         "hash": "a3a8f261b004efa0a42c1b4a3aa911a238b5c579ea62d87941747a12c5431f8d",
         "title": "'builder stamps actual SDK and protects old hosts without mutating source'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "contractUpdate": {
+          "hash": "93f6c1c10b4342596d07e71ecb7746720e56bbd7a5b9a63a50697e69523bb1bd",
+          "originalAssertions": [
+            "799065684e899f491491dd4d28bfb0a57c6c7e50aade8d63b4ca25d2e3cffc57",
+            "84a2ce6bed42875c4fde22e6c38698cd940de0d560c44b25e448f68a709a582d",
+            "7f5daba9157e70121716f32c06a196be18f99aabbb2013b397fd60e8c26b6759",
+            "8a334939423aa335bec1a3eadd28fcf4e9f6bbba67b6294fe270cf06b3707a33",
+            "12c227b0ef7167c3cb992fdfaf16030ad94523688292468048abbb19077a3a58",
+            "c1508bf14ce0f5052a0d41bfb2db2479b8d21619ce06729926b801287c550728"
+          ],
+          "reason": "统一包的Core下限从0.5.3提升为0.5.5，同时验证0.5.4宿主拒绝该包；SDK边界和源Manifest保全断言不变。",
+          "assertionUpdates": [
+            {
+              "before": "7f5daba9157e70121716f32c06a196be18f99aabbb2013b397fd60e8c26b6759",
+              "after": [
+                "8d5c9c92bcf7d07d021888f61dc110d1f77f0c9ad7437d9aceee1e96a3ffc772",
+                "246c3c9087d4071a8a20f1e6653610a4ed02d1d5af66e2b497f363b33a4b2b32"
+              ]
+            }
+          ]
+        }
       },
       {
         "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",

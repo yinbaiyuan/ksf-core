@@ -110,10 +110,12 @@ export function auditCoverage(root) {
     const mainAvailable=new Map();
     for(const s of current){const rows=mainAvailable.get(s.hash)??[];rows.push(s);mainAvailable.set(s.hash,rows);}
     for (const original of baseline.mainline.scenarios) {
-      const amendment=original.amendment;
+      const amendment=original.amendment,contract=original.contractUpdate;
+      if(amendment&&contract)fail('TEST_COVERAGE_REDUCED','A mainline scenario cannot claim both an amendment and a changed contract.');
       if(amendment && (!amendment.reason || !/^[a-f0-9]{64}$/.test(amendment.hash) || !amendment.originalAssertions?.length))fail('TEST_COVERAGE_REDUCED','A mainline amendment must retain its original assertions and reviewed hash.');
-      const candidates=mainAvailable.get(amendment?.hash??original.hash)??[];
-      const index=candidates.findIndex(s=>(!amendment || preservesAssertions(amendment.originalAssertions,s.assertions)) && (!original.nativePlatforms?.length || s.test.verification.lane==='native' && original.nativePlatforms.every(p=>s.test.platforms.includes(p))));
+      const assertions=contract?contractAssertions(contract):amendment?.originalAssertions;
+      const candidates=mainAvailable.get(contract?.hash??amendment?.hash??original.hash)??[];
+      const index=candidates.findIndex(s=>(!assertions || preservesAssertions(assertions,s.assertions)) && (!original.nativePlatforms?.length || s.test.verification.lane==='native' && original.nativePlatforms.every(p=>s.test.platforms.includes(p))));
       if(index<0)fail('TEST_COVERAGE_REDUCED',`Missing or weakened mainline scenario: ${original.path}: ${original.title}`);
       candidates.splice(index,1);supplemental++;
     }

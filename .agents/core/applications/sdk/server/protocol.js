@@ -74,9 +74,9 @@ export function groupStoreApplications(apps,sources,installed={},errors=[]) {
   return [...ids].map(appId=>{
     const local=installed[appId],all=apps.filter(e=>e.manifest.id===appId),origin=local?.active.source.id,source=sources.find(s=>s.id===origin);
     const scoped=(origin?all.filter(e=>e.source.id===origin):all).sort(order),compatible=scoped.filter(e=>!e.incompatibility),candidate=compatible[0]??null;
-    const unavailableReason=origin&&!source?'原安装源已移除，暂时无法检查更新。':origin&&!source.enabled?'原安装源已停用，暂时无法检查更新。':origin&&failed.has(origin)?'原安装源暂时无法读取，请刷新重试。':!scoped.length?'应用源已不再提供此应用。':!candidate?scoped[0].incompatibility:null;
+    const unavailableReason=origin==='local-import'?null:origin&&!source?'原安装源已移除，暂时无法检查更新。':origin&&!source.enabled?'原安装源已停用，暂时无法检查更新。':origin&&failed.has(origin)?'原安装源暂时无法读取，请刷新重试。':!scoped.length?'应用源已不再提供此应用。':!candidate?scoped[0].incompatibility:null;
     const display=local&&(!candidate||compareVersions(local.active.manifest.version,candidate.manifest.version)>0)?local.active:candidate??scoped[0]??local?.active;
-    return {appId,display:{manifest:display.manifest,source:display.source,...(display.listing?{listing:display.listing}:{})},candidate:unavailableReason?null:candidate,latestPublishedVersion:scoped[0]?.manifest.version??null,unavailableReason};
+    return {appId,display:{manifest:display.manifest,source:display.source,...(display.listing?{listing:display.listing}:{})},candidate:unavailableReason?null:candidate,latestPublishedVersion:scoped.find(e=>e.publicationKnown!==false)?.manifest.version??null,unavailableReason};
   }).sort((a,b)=>a.display.manifest.name.localeCompare(b.display.manifest.name));
 }
 export function validateManifest(value) {

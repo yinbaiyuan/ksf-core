@@ -15,7 +15,7 @@ test('only declared v2 applications receive the Codex conversation bridge; calle
     const entry={manifest,package:{url:manifest.id+'.ksfapp',sha256:checksum(bytes),size:bytes.length}};await writeFile(join(store,entry.package.url),bytes);return entry;
   }));
   await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps}));
-  const manager=createApplicationManager(root,{storeDirectory:store,services:{'codex-conversations':{check(caller,params){seen.push(caller);return{appId:caller.appId,argument:params.appId};}}}});t.after(()=>manager.close());
+  const manager=createApplicationManager(root,{storeDirectory:store,defaultSource:null,services:{'codex-conversations':{check(caller,params){seen.push(caller);return{appId:caller.appId,argument:params.appId};}}}});t.after(()=>manager.close());
   for(const entry of apps){await manager.install({trusted:true,sourceId:'builtin',appId:entry.manifest.id,version:'1.0.0',digest:entry.package.sha256});const instance=await manager.launch(entry.manifest.id,entry.package.sha256);if(entry.manifest.permissions.length){const result=await manager.call(instance.id,'check',{appId:'forged.identity'});assert.equal(result.appId,'com.example.allowed');assert.equal(result.argument,'forged.identity');}else await assert.rejects(manager.call(instance.id,'check',{}),{code:'APP_PERMISSION_REQUIRED'});await manager.release(instance.id);}
   assert.equal(seen.length,1);assert.equal(seen[0].version,'1.0.0');assert.match(seen[0].releaseDigest,/^[a-f0-9]{64}$/);
 });
