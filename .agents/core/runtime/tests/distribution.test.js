@@ -173,3 +173,11 @@ test('a tampered compatibility index cannot publish a second or different produc
   writeFileSync(path,stableJSON(bridge));
   assert.throws(()=>inspectReleaseDirectory(f.root,f.first.output),{code:'RELEASE_INVALID'});
 });
+
+test('a new updater explicitly targets an existing instance and leaves its source directory untouched',async t=>{
+ const f=await distributionFixture(t),next=await f.next('0.1.1',{'.agents/core/example.txt':'target update\n'}),{runDistributionCommand}=await import('../src/commands/distribution.js');
+ writeAtomic(join(f.workspace,'USER.md'),'Private instance\n');const sourceBefore=readFileSync(join(f.root,'.agents/core/example.txt')),targetBefore=readFileSync(join(f.workspace,'.agents/core/example.txt'));
+ assert.throws(()=>parseDistributionArgs('system',['read','--instance',f.workspace]),{code:'INVALID_ARGUMENTS'});
+ const args=['update','--instance',f.workspace,'--from',next.coreArchive,'--json'],preview=await runDistributionCommand('system',[...args,'--dry-run'],f.root);assert.equal(preview.exitCode,0,preview.stdout);const planned=JSON.parse(preview.stdout);assert.equal(planned.data.current,'0.1.0');assert.equal(planned.data.latest,'0.1.1');assert.equal(planned.data.instanceRoot,realpathSync(f.workspace));assert.deepEqual(readFileSync(join(f.workspace,'.agents/core/example.txt')),targetBefore);
+ const applied=await runDistributionCommand('system',args,f.root);assert.equal(applied.exitCode,0,applied.stdout);assert.equal(installedManifest(f.workspace).version,'0.1.1');assert.equal(readFileSync(join(f.workspace,'.agents/core/example.txt'),'utf8'),'target update\n');assert.equal(readFileSync(join(f.workspace,'USER.md'),'utf8'),'Private instance\n');assert.deepEqual(readFileSync(join(f.root,'.agents/core/example.txt')),sourceBefore);assert.equal(existsSync(join(f.root,'.agents/core/release.json')),false);
+});
