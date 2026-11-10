@@ -33,10 +33,10 @@ runtime:
       distribution_url: "https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip"
 build:
   generator: "ksf build"
-  built_at: "2026-11-10T04:57:37.827Z"
-  source_revision: "eb2ffe3f8d759b09d1a8f13fb058a2d7ed3c576b"
+  built_at: "2026-11-10T05:04:16.592Z"
+  source_revision: "f52c806ee257c60e97360c47467295207a8ace14"
   source_dirty: true
-  source_sha256: "e22dbca5191e87dc8b207f342adf9eeef9c083512f8587ba8d748f2d54161565"
+  source_sha256: "d37c9d74e7ea3c2747082efeeef1dd3c14a58aea365ee144910bbd6188b8bd6b"
   input_sha256: "19d7dc357ddeccc7a9b62a4c3166e6e0834432c82eac946079f2e93c47d662dd"
   toolchain: "Official prebuilt Node.js 24.21.0 and JavaScript source"
   generator_node: "v24.21.0"
