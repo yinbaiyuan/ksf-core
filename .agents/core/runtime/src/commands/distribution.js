@@ -89,7 +89,7 @@ export async function runDistributionCommand(command, args, root) {
       const system = await import('../distribution/system.js');
       const methods = { read: system.systemRead, check: system.systemCheck, update: system.systemUpdate, rollback: system.systemRollback, sync: system.systemSync };
       const targetRoot=parsed.instance?realpathSync(resolve(root,parsed.instance)):root;
-      if(parsed.instance)system.recoverTransaction(targetRoot);
+      if(parsed.instance){const {assertNoCooperationMigration}=await import('../migrations/guard.js');assertNoCooperationMigration(targetRoot);system.recoverTransaction(targetRoot);}
       data = await methods[parsed.operation]({ root:targetRoot, ...parsed });
       if(parsed.instance)data={...data,instanceRoot:targetRoot};
     } else if (command === 'contribute') {
