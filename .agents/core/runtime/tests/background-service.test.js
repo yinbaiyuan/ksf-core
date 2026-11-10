@@ -142,6 +142,19 @@ test('graceful application stop waits for in-flight work',async t=>{
   const pending=manager.call(instance.id,'slow');await new Promise(r=>setTimeout(r,40));
   await manager.runtimeManage({action:'stop',appId:'com.example.headless'});assert.equal((await pending).sdk,1);
 });
+test('runtime status remains readable while initial background holds are pending',async t=>{
+  const {root,manager,digest}=await application(t),holds=join(root,'.agents/user-data/applications/background');
+  const context=new AsyncLocalStorage(),attempt={},entered=Promise.withResolvers(),proceed=Promise.withResolvers(),original=fsPromises.readdir;
+  fsPromises.readdir=async(path,...args)=>{if(path===holds&&context.getStore()===attempt){entered.resolve();await proceed.promise;}return original(path,...args);};syncBuiltinESMExports();
+  const pending=context.run(attempt,()=>manager.launch('com.example.headless',digest,{kind:'service'})).then(value=>({value}),error=>({error}));
+  const deadline=setTimeout(()=>entered.reject(new Error('Runtime startup did not reach the controlled holds read')),10000);
+  try{
+    await entered.promise;clearTimeout(deadline);
+    const runtime=(await manager.runtimeSnapshot()).applications[0].runtimes[0];
+    assert.ok(runtime);assert.equal(runtime.pid,undefined);assert.ok(Number.isFinite(Date.parse(runtime.startedAt)));
+    proceed.resolve();const result=await pending;assert.equal(result.error,undefined);await manager.release(result.value.id);
+  }finally{clearTimeout(deadline);proceed.resolve();await pending;fsPromises.readdir=original;syncBuiltinESMExports();context.disable();}
+});
 test('manually retained on-demand backend recovers after an unexpected child exit',async t=>{
   const {manager}=await application(t);await manager.runtimeManage({action:'start',appId:'com.example.headless'});const first=(await manager.runtimeSnapshot()).applications[0].runtimes[0].pid;process.kill(first,'SIGKILL');
   const deadline=Date.now()+6000;let next;while(Date.now()<deadline){next=(await manager.runtimeSnapshot()).applications[0].runtimes[0]?.pid;if(next&&next!==first)break;await new Promise(r=>setTimeout(r,50));}assert.ok(next&&next!==first);
