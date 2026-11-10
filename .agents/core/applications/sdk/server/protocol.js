@@ -13,6 +13,7 @@ export const OFFICIAL_APPLICATIONS = [...DEFAULT_APPLICATIONS,'com.ksf.terminal'
 export const isOfficialApplicationId = id => typeof id==='string'&&id.startsWith('com.ksf.');
 export const windowEntry = manifest => manifest.window;
 export const entryPoints = manifest => [windowEntry(manifest), ...(manifest.cards ?? [])].filter(Boolean);
+export const PACKAGE_MIN_CORE_VERSION = '0.5.5';
 export const MAX_PACKAGE = 32 * 1024 * 1024;
 export const MAX_EXPANDED = 96 * 1024 * 1024;
 export const MAX_CLI_DOCUMENT = 256 * 1024;
@@ -29,7 +30,7 @@ export function sameManifest(a, b) { const stable = value => Array.isArray(value
 export const validPath = value => typeof value === 'string' && value.length < 512 && !/[\\\x00-\x1f:]/.test(value) && value.split('/').every(p => p && p !== '.' && p !== '..' && p !== '.git');
 export const validId = value => typeof value === 'string' && /^[a-z][a-z0-9.-]{1,79}$/.test(value) && !value.includes('..') && !['constructor', 'prototype', 'app-store'].includes(value);
 // Application identities and local keys (cards, commands, etc.) are distinct.
-export const validApplicationId = value => typeof value === 'string' && value.length <= 80 && /^com\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && value !== 'com.ksf.app-store';
+export const validApplicationId = value => typeof value === 'string' && value.length <= 80 && /^com\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && !['com.ksf.app-store','com.ksf.ability-store'].includes(value);
 export const validVersion = value => typeof value === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value) && value.split('.').every(part => Number.isSafeInteger(Number(part)));
 export const compareVersions = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 export function validateSDKCompatibility(value) {
@@ -46,10 +47,10 @@ export function stampSDKManifest(manifest) {
   assert(manifest.builtWithSdkVersion === undefined || manifest.builtWithSdkVersion === SDK_API_VERSION,
     'APP_SDK_BUILD_MISMATCH', '不能伪造构建 SDK 版本。');
   return {...manifest, sdkApiVersion: SDK_API_VERSION, builtWithSdkVersion: SDK_API_VERSION,
-    minCoreVersion: compareVersions(manifest.minCoreVersion, SDK_API_MIN_CORE_VERSION) < 0 ? SDK_API_MIN_CORE_VERSION : manifest.minCoreVersion};
+    minCoreVersion: [manifest.minCoreVersion,SDK_API_MIN_CORE_VERSION,PACKAGE_MIN_CORE_VERSION].sort(compareVersions).at(-1)};
 }
 export const MAX_STORE_IMAGE = 8 * 1024 * 1024;
-export const storeMediaPath = value => typeof value === 'string' && /^media\/[a-f0-9]{64}\.(png|jpg|webp)$/.test(value);
+export const storeMediaPath = value => validPath(value) && /^store\/.+\.(png|jpg|webp)$/.test(value);
 export function storeImageType(bytes) {
   if(bytes.length>=8 && bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return 'image/png';
   if(bytes.length>=3 && bytes[0]===255 && bytes[1]===216 && bytes[2]===255)return 'image/jpeg';
@@ -61,7 +62,7 @@ export function validateStoreListing(value) {
   assert(value && typeof value==='object' && !Array.isArray(value),'APP_LISTING_INVALID','商店展示资料必须是对象。',400);
   for(const [key,max] of [['subtitle',120],['description',12000],['releaseNotes',8000]])assert(value[key]===undefined || typeof value[key]==='string' && value[key].length<=max,'APP_LISTING_INVALID',`商店字段 ${key} 无效或过长。`,400);
   assert(value.screenshots===undefined || Array.isArray(value.screenshots) && value.screenshots.length<=8,'APP_LISTING_INVALID','应用最多提供 8 张商店截图。',400);
-  for(const image of [value.icon,...(value.screenshots??[])].filter(x=>x!==undefined))assert(image && storeMediaPath(image.url) && /^[a-f0-9]{64}$/.test(image.sha256) && image.url.split('/')[1].split('.')[0]===image.sha256 && Number.isSafeInteger(image.size) && image.size>0 && image.size<=MAX_STORE_IMAGE && (image.alt===undefined || typeof image.alt==='string' && image.alt.length<=200),'APP_LISTING_INVALID','商店图片路径、摘要、容量或替代文字无效。',400);
+  for(const image of [value.icon,...(value.screenshots??[])].filter(x=>x!==undefined))assert(image && storeMediaPath(image.url) && /^[a-f0-9]{64}$/.test(image.sha256) && Number.isSafeInteger(image.size) && image.size>0 && image.size<=MAX_STORE_IMAGE && (image.alt===undefined || typeof image.alt==='string' && image.alt.length<=200),'APP_LISTING_INVALID','商店图片路径、摘要、容量或替代文字无效。',400);
   for(const image of value.screenshots??[])assert(typeof image.alt==='string'&&image.alt.trim().length>0,'APP_LISTING_INVALID','商店截图必须提供替代文字。',400);
   return value;
 }
@@ -73,14 +74,14 @@ export function groupStoreApplications(apps,sources,installed={},errors=[]) {
   return [...ids].map(appId=>{
     const local=installed[appId],all=apps.filter(e=>e.manifest.id===appId),origin=local?.active.source.id,source=sources.find(s=>s.id===origin);
     const scoped=(origin?all.filter(e=>e.source.id===origin):all).sort(order),compatible=scoped.filter(e=>!e.incompatibility),candidate=compatible[0]??null;
-    const unavailableReason=origin&&!source?'原安装源已移除，暂时无法检查更新。':origin&&!source.enabled?'原安装源已停用，暂时无法检查更新。':origin&&failed.has(origin)?'原安装源暂时无法读取，请刷新重试。':!scoped.length?'应用源已不再提供此应用。':!candidate?scoped[0].incompatibility:null;
+    const unavailableReason=origin==='local-import'?null:origin&&!source?'原安装源已移除，暂时无法检查更新。':origin&&!source.enabled?'原安装源已停用，暂时无法检查更新。':origin&&failed.has(origin)?'原安装源暂时无法读取，请刷新重试。':!scoped.length?'应用源已不再提供此应用。':!candidate?scoped[0].incompatibility:null;
     const display=local&&(!candidate||compareVersions(local.active.manifest.version,candidate.manifest.version)>0)?local.active:candidate??scoped[0]??local?.active;
-    return {appId,display:{manifest:display.manifest,source:display.source,...(display.listing?{listing:display.listing}:{})},candidate:unavailableReason?null:candidate,latestPublishedVersion:scoped[0]?.manifest.version??null,unavailableReason};
+    return {appId,display:{manifest:display.manifest,source:display.source,...(display.listing?{listing:display.listing}:{})},candidate:unavailableReason?null:candidate,latestPublishedVersion:scoped.find(e=>e.publicationKnown!==false)?.manifest.version??null,unavailableReason};
   }).sort((a,b)=>a.display.manifest.name.localeCompare(b.display.manifest.name));
 }
 export function validateManifest(value) {
   assert(value && typeof value === 'object' && value.schemaVersion === 1 && validVersion(value.version), 'APP_MANIFEST_INVALID', '应用版本或清单格式无效。');
-  assert(validApplicationId(value.id), 'APP_ID_INVALID', '应用 ID 必须是 com.<发布者>.<应用名> 三段式，后两段使用小写字母开头的小写字母、数字或段内连字符，总长不超过 80；com.ksf.app-store 为宿主保留。');
+  assert(validApplicationId(value.id), 'APP_ID_INVALID', '应用 ID 必须是 com.<发布者>.<应用名> 三段式，后两段使用小写字母开头的小写字母、数字或段内连字符，总长不超过 80；com.ksf.app-store 与 com.ksf.ability-store 为宿主保留。');
   assert(typeof value.name === 'string' && value.name.length > 0 && value.name.length <= 80 && typeof value.description === 'string' && value.description.length <= 2000, 'APP_MANIFEST_INVALID', '应用名称或说明无效。');
   assert(value.sdkVersion === 1, 'APP_MANIFEST_INVALID', '应用 SDK 版本声明无效。');
   assert(validVersion(value.minCoreVersion), 'APP_MANIFEST_INVALID', '应用必须声明明确的 minCoreVersion。');
@@ -152,19 +153,20 @@ export function assertCompatible(manifest, {coreVersion, sdkCompatibility = SDK_
 }
 export function encodePackage(manifest, files) {
   validateManifest(manifest);
-  return gzipSync(Buffer.from(JSON.stringify({ protocol: 'ksf-app-package-v1', manifest, files })), { level: 9 });
+  const entries={...files};if(!entries['store/listing.json']){const bytes=Buffer.from('{}');entries['store/listing.json']={content:bytes.toString('base64'),sha256:checksum(bytes),mode:0o644};}
+  return gzipSync(Buffer.from(JSON.stringify({ protocol: 'ksf-app-package-v2', manifest, files:entries })), { level: 9 });
 }
 export function decodePackage(bytes) {
   assert(bytes.length <= MAX_PACKAGE, 'APP_PACKAGE_TOO_LARGE', '应用包超过大小上限。');
   let value;
   try { value = JSON.parse(gunzipSync(bytes, { maxOutputLength: MAX_EXPANDED }).toString('utf8')); }
   catch { assert(false, 'APP_PACKAGE_INVALID', '应用包损坏或解压后超过大小上限。'); }
-  assert(value?.protocol === 'ksf-app-package-v1', 'APP_PACKAGE_INVALID', '不支持此应用包格式。');
+  assert(value?.protocol === 'ksf-app-package-v2', 'APP_PACKAGE_INVALID', '不支持此应用包格式。');
   validateManifest(value.manifest);
   assert(value.files && typeof value.files === 'object' && !Array.isArray(value.files) && Object.keys(value.files).length > 0 && Object.keys(value.files).length <= 2000, 'APP_PACKAGE_INVALID', '应用文件清单无效。');
   const paths = new Set(), files = new Map(); let total = 0;
   for (const [path, file] of Object.entries(value.files)) {
-    assert(validPath(path) && /^(frontend|backend|cli|docs)\//.test(path) && !paths.has(path.toLowerCase()), 'APP_PACKAGE_INVALID', '应用包包含越界或重复路径。');
+    assert(validPath(path) && /^(frontend|backend|cli|docs|store)\//.test(path) && !paths.has(path.toLowerCase()), 'APP_PACKAGE_INVALID', '应用包包含越界或重复路径。');
     assert(file && typeof file.content === 'string' && file.content.length % 4 === 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(file.content) && /^[a-f0-9]{64}$/.test(file.sha256) && [0o644, 0o755].includes(file.mode), 'APP_PACKAGE_INVALID', '应用文件内容或模式无效。');
     const data = Buffer.from(file.content, 'base64'); total += data.length;
     assert(total <= MAX_EXPANDED && checksum(data) === file.sha256, 'APP_PACKAGE_INVALID', '应用文件完整性校验失败。');
@@ -172,5 +174,7 @@ export function decodePackage(bytes) {
   }
   for (const path of [...entryPoints(value.manifest).flatMap(entry => [entry.entry, ...(entry.styles ?? [])]), ...(value.manifest.backend ? [value.manifest.backend.entry] : []),...(value.manifest.cli?[value.manifest.cli.entry,value.manifest.cli.documentation]:[])]) assert(files.has(path), 'APP_PACKAGE_INVALID', `应用包缺少入口：${path}`);
   if(value.manifest.cli)readCLIDocument(files.get(value.manifest.cli.documentation).data,{main:true});
-  return { manifest: value.manifest, files };
+  let listing;try{listing=JSON.parse(files.get('store/listing.json')?.data.toString('utf8'));}catch{assert(false,'APP_LISTING_INVALID','应用包缺少store/listing.json或格式无效。');}validateStoreListing(listing);
+  for(const image of [listing.icon,...(listing.screenshots??[])].filter(Boolean)){const file=files.get(image.url);assert(file&&file.data.length===image.size&&file.sha256===image.sha256,'APP_LISTING_INVALID','包内商店图片与声明不一致。');storeImageType(file.data);}
+  return { manifest: value.manifest, files,listing };
 }

@@ -177,7 +177,7 @@
     },
     {
       "id": "task-archive",
-      "root": "档案/对话/Codex",
+      "root": "\u6863\u6848/\u5bf9\u8bdd/Codex",
       "pattern": "^[a-f0-9]{64}/(task\\.json|turns/[a-zA-Z0-9._:-]+\\.json)$",
       "versionField": "protocol",
       "versions": [
@@ -452,6 +452,16 @@
       "root": ".agents/runtime-data/instance-initialization",
       "pattern": "^transaction\\.json$",
       "versionField": "schema_version",
+      "versions": [
+        1
+      ],
+      "recursive": false
+    },
+    {
+      "id": "ability-store",
+      "root": ".agents/user-data/ability-store",
+      "pattern": "^state\\.json$",
+      "versionField": "schemaVersion",
       "versions": [
         1
       ],

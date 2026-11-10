@@ -1,5 +1,5 @@
 import { lazy, useEffect, useSyncExternalStore, type ComponentType } from 'react';
-import { Activity,MessagesSquare, GitBranch, BookOpen, BookMarked, ChartNoAxesCombined, Disc3, LibraryBig, Package, Puzzle, Terminal } from 'lucide-react';
+import { Activity,MessagesSquare, GitBranch, BookOpen, BookMarked, ChartNoAxesCombined, Disc3, LibraryBig, Package, Puzzle, Store, Terminal } from 'lucide-react';
 import type { OpenApp } from '../apps/app-services';
 import { request } from '../apps/client';
 import {applicationIcons} from '../apps/application-icon';
@@ -12,11 +12,14 @@ export interface AppProps {search:URLSearchParams;navigate:(changes:Record<strin
 export interface AppDefinition {id:string;name:string;icon:typeof MessagesSquare;component:ComponentType<AppProps>;multiInstance:boolean;defaultSize:Pick<Bounds,'width'|'height'>;minSize:Pick<Bounds,'width'|'height'>;release?:AppRelease}
 const AppStore=lazy(()=>import('../apps/app-store').then(module=>({default:module.AppStore})));
 const store:AppDefinition={id:'com.ksf.app-store',name:'应用商店',icon:AppStoreIcon,component:AppStore,multiInstance:false,defaultSize:{width:1040,height:720},minSize:{width:580,height:420}};
-export const apps:AppDefinition[]=[store];
+const AbilityStore=lazy(()=>import('../apps/ability-store').then(module=>({default:module.AbilityStore})));
+const abilityStore:AppDefinition={id:'com.ksf.ability-store',name:'能力商店',icon:Store,component:AbilityStore,multiInstance:false,defaultSize:{width:1040,height:720},minSize:{width:480,height:420}};
+const builtins=[store,abilityStore];
+export const apps:AppDefinition[]=[...builtins];
 export let applicationsReady=false;
 export let installedApplications:InstalledApplication[]=[];
 let installedSignature='';
-export function applicationShortcuts(){return [{id:store.id,name:store.name,installationId:'builtin',hasWindow:true,enabled:true,release:undefined as AppRelease|undefined},...installedApplications.map(app=>({id:app.id,name:app.active.manifest.name,installationId:app.installationId??`legacy:${app.id}`,hasWindow:!!mainWindow(app.active.manifest),enabled:app.enabled,release:app.active}))];}
+export function applicationShortcuts(){return [...builtins.map(app=>({id:app.id,name:app.name,installationId:'builtin',hasWindow:true,enabled:true,release:undefined as AppRelease|undefined})),...installedApplications.map(app=>({id:app.id,name:app.active.manifest.name,installationId:app.installationId??`legacy:${app.id}`,hasWindow:!!mainWindow(app.active.manifest),enabled:app.enabled,release:app.active}))];}
 export interface WidgetProps {compact?:boolean;visible?:boolean;open:(search:string,fresh?:boolean)=>void}
 export interface WidgetDefinition {id:string;appId:string;appName:string;cardId:string;name:string;description:string;icon:typeof MessagesSquare;defaultSize:Pick<WidgetLayout,'w'|'h'>;minSize:Pick<WidgetLayout,'w'|'h'>;release:AppRelease;entry:ApplicationCard}
 export const widgets:WidgetDefinition[]=[];
@@ -40,7 +43,7 @@ export async function refreshApplications(){
       }external.push(definition);}
       for(const card of manifest.cards??[]){const cardKey=`${key}:${card.id}`;let definition=cardDefinitions.get(cardKey);if(!definition){definition={...card,id:`${app.id}:${card.id}`,appId:app.id,appName:manifest.name,cardId:card.id,icon:icons[card.icon??'']??icons[manifest.icon??'']??Package,release,entry:card};cardDefinitions.set(cardKey,definition);}cards.push(definition);}
     }
-    const order=['com.ksf.conversations','com.ksf.markdown','com.ksf.git','com.ksf.documentation','com.ksf.app-store'];const next=[store,...external].sort((a,b)=>{const x=order.indexOf(a.id),y=order.indexOf(b.id);return (x<0?5:x)-(y<0?5:y);});
+    const order=['com.ksf.conversations','com.ksf.markdown','com.ksf.git','com.ksf.documentation','com.ksf.app-store','com.ksf.ability-store'];const next=[...builtins,...external].sort((a,b)=>{const x=order.indexOf(a.id),y=order.indexOf(b.id);return (x<0?5:x)-(y<0?5:y);});
     const signature=JSON.stringify(snapshot.installed.map(app=>[app.id,app.installationId,app.enabled,app.active.digest]));
     const changed=!applicationsReady||signature!==installedSignature||next.length!==apps.length||next.some((app,i)=>app!==apps[i])||cards.length!==widgets.length||cards.some((card,i)=>card!==widgets[i]);
     applicationsReady=true;installedSignature=signature;installedApplications=snapshot.installed;

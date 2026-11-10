@@ -11414,6 +11414,215 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ]
+    },
+    {
+      "id": "core:ability-store",
+      "path": ".agents/core/runtime/tests/ability-store.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/ability-store"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real Git repositories, atomic local install snapshots, HTTP authentication and object discovery."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/services/ability-store.js",
+        ".agents/core/runtime/src/objects",
+        ".agents/core/ability-store"
+      ]
+    },
+    {
+      "id": "core:ability-store-http",
+      "path": ".agents/core/runtime/tests/ability-store-http.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/ability-store"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "HTTP source, exact dependency installation, interrupted/offline cache and personal snapshot persistence."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/services/ability-store.js",
+        ".agents/core/runtime/src/objects",
+        ".agents/core/ability-store"
+      ]
+    },
+    {
+      "id": "core:store-catalog",
+      "path": ".agents/core/runtime/tests/store-catalog.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/ability-store"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30
+      },
+      "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic 10k catalog protocol, lazy paging, search and integrity validation with injected transport."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/services/ability-store.js",
+        ".agents/core/runtime/src/objects",
+        ".agents/core/ability-store"
+      ]
+    },
+    {
+      "id": "core:application-catalog-v2",
+      "path": ".agents/core/runtime/tests/application-catalog-v2.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/ability-store"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "HTTP source, exact dependency installation, interrupted/offline cache and personal snapshot persistence."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/applications/sdk/server"
+      ]
     }
   ],
   "timingBaseline": {

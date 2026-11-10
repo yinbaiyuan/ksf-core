@@ -89,7 +89,7 @@
 
 ## 包与完整性
 
-.ksfapp 是gzip JSON，protocol=ksf-app-package-v1，包含manifest及files。files包含base64 content、mode和sha256。最大包32 MiB、展开96 MiB、2000文件；前后端全部在包内。安装器拒绝越界、大小写冲突、完整性错误、缺入口及平台/SDK不兼容。
+.ksfapp 是gzip JSON，protocol=ksf-app-package-v2，包含manifest及files。files包含base64 content、mode和sha256。最大包32 MiB、展开96 MiB、2000文件；前后端、固定store/listing.json及商店图片全部在包内。安装器拒绝越界、大小写冲突、完整性错误、缺入口及平台/SDK不兼容。
 
 打包器检查静态前端依赖和CSS资源引用；动态表达式、外部业务网络行为仍需验收。SHA256证明内容与索引一致，不证明发布者身份或代码安全。源码不得携带真实凭据、私人样本或实例数据。
 

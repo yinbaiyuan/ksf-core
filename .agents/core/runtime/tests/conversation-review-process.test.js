@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { createTaskReviewSource } from '../src/services/task-review.js';
 import { PROTOCOL, turnPath, taskPath } from '../src/task-capture/storage.js';
 

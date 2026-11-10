@@ -15,7 +15,7 @@ test('legacy packages remain byte-identical and retain their Core floor',()=>{
   assert.throws(()=>assertCompatible({...legacy,minCoreVersion:'0.7.0'},{coreVersion:'0.5.3'}),{code:'APP_CORE_INCOMPATIBLE'});
 });
 test('builder stamps actual SDK and protects old hosts without mutating source',()=>{
-  const stamped=stampSDKManifest(legacy);assert.equal(stamped.sdkApiVersion,'1.1.0');assert.equal(stamped.builtWithSdkVersion,'1.1.0');assert.equal(stamped.minCoreVersion,'0.5.3');assert.equal(legacy.minCoreVersion,'0.3.0');
+  const stamped=stampSDKManifest(legacy);assert.equal(stamped.sdkApiVersion,'1.1.0');assert.equal(stamped.builtWithSdkVersion,'1.1.0');assert.equal(stamped.minCoreVersion,'0.5.5');assert.throws(()=>assertCompatible(stamped,{coreVersion:'0.5.4'}),{code:'APP_CORE_INCOMPATIBLE'});assert.equal(legacy.minCoreVersion,'0.3.0');
   assert.throws(()=>stampSDKManifest(app('1.0.0')),{code:'APP_SDK_BUILD_MISMATCH'});
   assert.throws(()=>assertCompatible({...stamped,minCoreVersion:'0.5.2'},{coreVersion:'0.5.3'}),{code:'APP_MANIFEST_INVALID'});
 });

@@ -6,7 +6,7 @@
 | --- | --- |
 | `system read` | 模式、版本、来源、系统改动和备份 |
 | `system check [--source <地址或索引文件>]` | 检查适用的新 Release |
-| `system update [--source <地址或索引文件> \| --from <Core包>] [--dry-run]` | 校验、合并、升级；from 指定更新包 |
+| `system update [--source <地址或索引文件> \| --from <Core包>] [--instance <现有实例目录>] [--dry-run]` | 校验、合并、升级；from 指定更新包 |
 | `system sync [--quiet]` | 仅显式调用时按间隔检查和升级，记录尝试结果 |
 | `system rollback [--dry-run]` | 恢复上次事务保存的系统 |
 | `system cleanup [--apply \| --dry-run]` | 默认只预览受管材料退役；apply 才清理 |
@@ -58,3 +58,14 @@ JSON：`{ok, command:"system", operation, data, errors}`，成功 0、操作失�
 check 另返回 installedPlatform、platform 与 platformSwitch。旧模板或跨设备复制保留了其他平台的发行凭据时，新索引按本机平台选包；同版本且完整 Core SHA 相同，允许显式 update 完成平台标记校正，保留原始来源与个人数据。旧客户端由兼容索引先升级程序，再重新检查并完成本机平台校正。
 
 目标平台精简发行包只携带自身 Node。把此类实例复制到另一系统后，需要先取得目标系统对应的 Core 包并保留个人资料；不能依赖缺失的目标运行时执行上述检查。旧多平台包的标记校正兼容路径继续保留。
+
+## 用新框架更新器接管旧实例
+
+0.5.5使用新的统一应用包。0.5.4及更早更新器无法解析这批新包时，先把最新Core包解压到独立目录，使用其中的更新器指向现有实例；无需在临时目录初始化实例。
+
+```sh
+/path/to/new-core/.agents/ksf system update --instance /path/to/existing --from /path/to/ksf-core-0.5.5-darwin-arm64.tar.gz --dry-run --json
+/path/to/new-core/.agents/ksf system update --instance /path/to/existing --from /path/to/ksf-core-0.5.5-darwin-arm64.tar.gz --json
+```
+
+Windows使用新目录的`.agents/ksf.ps1`及对应平台Core包。此入口仍校验现有安装凭据、来源、版本、应用和业务数据，执行相同的备份与原子切换；本地系统改动有冲突时保留当前实例。使用绝对包路径，确认预览中的实例、版本和变更后再执行。

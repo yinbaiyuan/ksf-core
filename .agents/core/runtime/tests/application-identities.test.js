@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {validApplicationId,validId,validateManifest,encodePackage,checksum} from '../src/applications/protocol.js';
 import {inspectApplicationIdentityMigration,prepareApplicationIdentityMigration,applyApplicationIdentityMigration} from '../src/distribution/application-identities.js';
 import {inspectMatchedSwitch,prepareMatchedSwitch,applyMatchedSwitch} from '../src/distribution/matched-switch.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {LEGACY_APPLICATION_IDS,applicationLinkId,migrateDesktopApplicationIds} from '../../applications/sdk/src/shared/application-identities.js';
 const old='daily.brief',id='com.yinbaiyuan.daily-brief',mapping={[old]:id};
 const write=async(path,value)=>{await mkdir(dirname(path),{recursive:true});await writeFile(path,Buffer.isBuffer(value)?value:JSON.stringify(value));};

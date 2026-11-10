@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 
 const fixed={id:'ksf-apps',name:'KSF 公用应用源',url:'https://yinbaiyuan.github.io/ksf-apps/index.json',enabled:true,locked:true,default:true};
 async function fixture(t,state){

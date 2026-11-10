@@ -9,7 +9,7 @@ import {startWebServer} from '../src/services/web.js';
 import {ensureService,stopService,serviceStatus,serviceDoctor,redactLog} from '../src/services/service-manager.js';
 import {processIdentity} from '../src/services/service-lock.js';
 import {controlRequest} from '../src/communication/client.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {encodePackage,checksum,validateManifest,OFFICIAL_APPLICATIONS} from '../src/applications/protocol.js';
 import {createCommunicationService} from '../src/communication/service.js';
 import {randomUUID} from 'node:crypto';
@@ -141,6 +141,19 @@ test('graceful application stop waits for in-flight work',async t=>{
   const {manager,digest}=await application(t),instance=await manager.launch('com.example.headless',digest,{kind:'service'});
   const pending=manager.call(instance.id,'slow');await new Promise(r=>setTimeout(r,40));
   await manager.runtimeManage({action:'stop',appId:'com.example.headless'});assert.equal((await pending).sdk,1);
+});
+test('runtime status remains readable while initial background holds are pending',async t=>{
+  const {root,manager,digest}=await application(t),holds=join(root,'.agents/user-data/applications/background');
+  const context=new AsyncLocalStorage(),attempt={},entered=Promise.withResolvers(),proceed=Promise.withResolvers(),original=fsPromises.readdir;
+  fsPromises.readdir=async(path,...args)=>{if(path===holds&&context.getStore()===attempt){entered.resolve();await proceed.promise;}return original(path,...args);};syncBuiltinESMExports();
+  const pending=context.run(attempt,()=>manager.launch('com.example.headless',digest,{kind:'service'})).then(value=>({value}),error=>({error}));
+  const deadline=setTimeout(()=>entered.reject(new Error('Runtime startup did not reach the controlled holds read')),10000);
+  try{
+    await entered.promise;clearTimeout(deadline);
+    const runtime=(await manager.runtimeSnapshot()).applications[0].runtimes[0];
+    assert.ok(runtime);assert.equal(runtime.pid,undefined);assert.ok(Number.isFinite(Date.parse(runtime.startedAt)));
+    proceed.resolve();const result=await pending;assert.equal(result.error,undefined);await manager.release(result.value.id);
+  }finally{clearTimeout(deadline);proceed.resolve();await pending;fsPromises.readdir=original;syncBuiltinESMExports();context.disable();}
 });
 test('manually retained on-demand backend recovers after an unexpected child exit',async t=>{
   const {manager}=await application(t);await manager.runtimeManage({action:'start',appId:'com.example.headless'});const first=(await manager.runtimeSnapshot()).applications[0].runtimes[0].pid;process.kill(first,'SIGKILL');

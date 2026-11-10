@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { startWebServer } from '../src/services/web.js';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { decodePackage,compareVersions } from '../src/applications/protocol.js';
 const store=fileURLToPath(new URL('../../applications/store/',import.meta.url));
 async function root(){return mkdtemp(join(tmpdir(),'ksf-bundled-apps-'));}
@@ -39,7 +39,7 @@ test('packaged Git coordinates with Core file writes and preserves operation res
   const fresh=await post('api/apps/launch',{appId:'com.ksf.git',digest:git.active.digest});assert.equal((await read('api/git/operations/'+started.id)).status,'completed');await post('api/apps/release',{instanceId:fresh.id});
 });
 test('existing v1 Terminal still launches independent PTYs and closes through the same manager',{skip:!['darwin-arm64','darwin-x64','win32-x64','win32-arm64'].includes(`${process.platform}-${process.arch}`)},async t=>{
-  const workspace=await mkdtemp(join(tmpdir(),'ksf-bundled-terminal-')),manager=createApplicationManager(workspace);t.after(async()=>{await manager.close();await rm(workspace,{recursive:true,force:true});});const catalog=await manager.catalog();const app=catalog.apps.filter(item=>item.manifest.id==='com.ksf.terminal'&&!item.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version))[0];assert.ok(app);
+  const workspace=await mkdtemp(join(tmpdir(),'ksf-bundled-terminal-')),manager=createApplicationManager(workspace,{defaultSource:null});t.after(async()=>{await manager.close();await rm(workspace,{recursive:true,force:true});});const app=await manager.previewInstall({appId:'com.ksf.terminal'});assert.ok(app);
   await manager.install({appId:app.manifest.id,version:app.manifest.version,digest:app.package.sha256,sourceId:'builtin',trusted:true});
   const one=await manager.launch(app.manifest.id,app.package.sha256),two=await manager.launch(app.manifest.id,app.package.sha256);
   const a=await manager.call(one.id,'create',{cols:80,rows:24}),b=await manager.call(two.id,'create',{cols:80,rows:24});assert.notEqual(a.pid,b.pid);

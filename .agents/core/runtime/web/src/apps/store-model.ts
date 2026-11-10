@@ -4,6 +4,8 @@ export const compareStoreVersions=(a:string,b:string)=>{const x=a.split('.').map
 export type StoreAction='install'|'update'|'open'|'enable'|'installed'|'pending'|'unavailable';
 export function storeAction(item:StoreApplication,local?:InstalledApplication):{kind:StoreAction;label:string;disabled?:boolean}{
  if(local?.pending)return{kind:'pending',label:'等待切换',disabled:true};
+ if(item.summary&&(!local||compareStoreVersions(item.display.manifest.version,local.active.manifest.version)>0))return {kind:local?'update':'install',label:local?'更新':'安装'};
+
  if(item.candidate&&(!local||compareStoreVersions(item.candidate.manifest.version,local.active.manifest.version)>0))return{kind:local?'update':'install',label:local?'更新':'安装'};
  if(local){if(!local.enabled)return{kind:'enable',label:'启用'};return mainWindow(local.active.manifest)?{kind:'open',label:'打开'}:{kind:'installed',label:'已安装',disabled:true};}
  return{kind:'unavailable',label:'暂不可用',disabled:true};
@@ -14,3 +16,5 @@ export const storePage=(search:URLSearchParams)=>({tab:['apps','updates','instal
 export const hasStoreUpdate=(item:StoreApplication,local?:InstalledApplication)=>['update','pending'].includes(storeAction(item,local).kind);
 /** Installed lists describe the active release, including while an upgrade drains. */
 export const storeListManifest=(item:StoreApplication,tab:string,local?:InstalledApplication)=>tab==='installed'&&local?local.active.manifest:item.display.manifest;
+
+export function mergeStorePages(current:StoreApplication[],incoming:StoreApplication[],installed:InstalledApplication[]=[]){const merged=new Map(current.map(a=>[a.appId,a]));for(const item of incoming){const prior=merged.get(item.appId),origin=installed.find(a=>a.id===item.appId)?.active.source.id;const rank=(a:StoreApplication)=>origin?Number(a.display.source.id===origin):0;if(!prior||rank(item)>rank(prior)||rank(item)===rank(prior)&&compareStoreVersions(item.display.manifest.version,prior.display.manifest.version)>0)merged.set(item.appId,item);}return [...merged.values()];}

@@ -1,58 +1,49 @@
-# 商店展示资料与最新版本
+# 商店资料与统一应用包
 
-**SDK v1 展示资料。** 商店资料位于应用源条目的可选`listing`，不进入Manifest或`.ksfapp`。应用源索引与执行包分别管理；素材缺失时使用内置图标和Manifest说明。
+应用源码使用固定的 `store/` 目录维护商店文案、图标和截图。构建生成一个 `ksf-app-package-v2` 的 `.ksfapp`，程序和商店资料共同参与包摘要；分享或导入这个包即可携带完整资料。
 
-## 开发工程
+## 工程结构
 
-可选`store-listing.json`示例：
+```text
+manifest.json
+frontend.tsx
+store/
+  listing.json
+  icon.png
+  screenshots/
+    overview.png
+```
+
+`store/listing.json` 示例：
 
 ```json
 {
   "subtitle": "一句话说明应用用途",
-  "description": "完整介绍。支持换行，按纯文本展示。",
-  "icon": {"path": "store-assets/icon.png", "alt": "应用图标"},
-  "screenshots": [
-    {"path": "store-assets/overview.png", "alt": "项目概览，使用虚构数据"}
-  ],
-  "releaseNotes": "当前版本的改进与修复。"
+  "description": "该版本的完整介绍。",
+  "icon": {"path": "icon.png", "alt": "应用图标"},
+  "screenshots": [{"path": "screenshots/overview.png", "alt": "使用虚构数据的应用概览"}],
+  "releaseNotes": "该版本的改进。"
 }
 ```
 
-| 字段 | 输入、默认和约束 |
-| --- | --- |
-| subtitle | 可选字符串，最多120字符；缺失用Manifest简述 |
-| description | 可选字符串，最多12000字符；缺失用Manifest说明 |
-| icon | 可选本地路径字符串或`{path,alt?}`；缺失使用宿主内置图标 |
-| screenshots | 可选数组，最多8张，元素`{path,alt}`；空数组隐藏预览区 |
-| releaseNotes | 可选字符串，最多8000字符；缺失隐藏新内容区 |
+路径相对 `store/`，不得越界或经过链接。图片支持PNG、JPEG和WebP，每张不超过8 MiB，最多8张截图；截图必须有有意义的alt。subtitle、description、releaseNotes分别限制120、12000、8000字符。资料缺失时使用Manifest说明和宿主图标。截图和介绍只陈述该版本的实际功能，不携带私人实例资料。
 
-所有内容必须反映该版本实际能力，不编造评分、下载量或尚未实现的功能。截图使用虚构资料，不包含用户实例内容、密钥和其他应用的私人信息。必须为截图提供有意义的替代文字。
+## 构建与发布
 
-图片仅支持PNG、JPEG、WebP，每张最多8 MiB；路径必须位于工程内部，父目录链接不得越界。构建器读取文件头检查格式，使用SHA256命名为`media/<sha256>.png|jpg|webp`。索引中的图片是`{url,sha256,size,alt?}`，url必须是该内容摘要路径，size单位字节。不要把本地path写入正式索引。
+`ksf-app check . --json` 校验资料和资源；`ksf-app build . --store ../store --json` 生成统一包。生成的包固定包含 `store/listing.json` 和声明的图片。包内资料中的图片引用记录包内路径、大小和SHA-256，安装和读取均复核。修改文案或图片同样需要递增应用版本并重打包，同版本不能替换内容。
 
-## 检查和发布
+发布源按单个应用、单个版本保存包引用，CI从完整包生成 `ksf-store-catalog-v2`。图片属于包内资源，不需要独立发布media目录。目录摘要不包含完整声明；安装确认必须先调用预览接口读取实际兼容版本及权限。
 
-```sh
-npm run check
-npm run build -- --store ../store
-# 仅更新已发布版本的商店资料，无需编译、打包或改变执行包
-npx --no-install ksf-app build . --listing-only --store ../store --json
-```
+## 商店接口
 
-`check`的输入是工程目录，输出人类/JSON诊断；非法字段、图片、容量或路径是阻断错误。`build`先校验，发布不可变包及图片，再原子更新索引。`--listing-only`需要存在对应ID/版本的本地包和索引，重新校验包摘要和Manifest；结果返回更新条目，覆盖该版本全部平台变体的展示资料。没有版本报`APP_RELEASE_MISSING`，非法素材报`APP_LISTING_INVALID`；失败不改变原索引和包。下载源部署时同步部署media目录。
+`GET /api/apps/catalog` 接受query、type、limit、cursor、tab，返回revision、摘要applications、nextCursor、errors和directories缓存状态。每页最多40项。翻页时修订号变化返回 `STORE_CURSOR_EXPIRED`，客户端刷新并重建游标。
 
-展示文本或截图变化允许更新同版本listing；执行代码或Manifest变化仍必须递增应用版本。展示资料与可执行包独立核对。
+`GET /api/apps/detail?appId=...` 按ID读取详情；`GET /api/apps/versions?appId=...&sourceId=...` 分页读取版本。`POST /api/apps/preview` 返回实际兼容版本的完整声明和数据检查。安装继续要求来源、版本、摘要与明确的信任确认，旧确认或来源变化均拒绝。
 
-## 浏览与安装规则
+`GET /api/apps/media?sourceId=...&appId=...&version=...&digest=...` 从校验后的统一包或已安装副本中读取图片。详情图片按需加载，首页不下载全部应用包。已安装图片可离线读取；桌面图标从安装记录取得，不扫描全目录。
 
-`GET /api/apps/catalog`保留原始`apps/errors`，新增`applications`。每项包括`appId`、`display:{manifest,source,listing?}`、`candidate`（最新兼容StoreEntry或null）、`latestPublishedVersion`、`unavailableReason`。客户端不得把原始版本数组直接画成应用列表。
+更新只检查已安装ID并保持原安装来源；刷新目录不会自动更新程序。网络失败使用已验证缓存或Core随包资源，并标明最新状态尚未确认。旧公共目录格式和分离素材发布流程不再支持。
 
-未安装时选择已启用源的最高兼容版本；同版优先默认源及源配置顺序。已安装时仅跟随原源；源失效仍保留本地应用，不自动换源。平台/ABI专用且匹配的变体优先通用变体。低于本地或pending的版本不可用于常规安装；已有故障恢复操作独立保留。
+## CLI标识
 
-`POST /api/apps/install`沿用`{appId,sourceId,version,digest,trusted:true}`。服务端复核最新兼容版本和来源；旧确认报409 `APP_RELEASE_CHANGED`，来源改变报409 `APP_SOURCE_CHANGED`，应用应刷新并重新确认，不能自动替换目标后继续安装。更新保留停用状态；旧窗口和任务仍按租约规则延迟切换。没有自动更新或批量信任。
-
-`GET /api/apps/media?sourceId=...&appId=...&version=...&digest=...`返回已在当前启用源声明、通过摘要与容量校验的图片及正确MIME，不接受任意URL或本机路径。失败用图标/占位恢复，不阻断应用安装。图片缓存不包含模型凭据或业务数据。
-
-## CLI 能力标识
-
-宿主依据页面所展示版本的 `manifest.cli` 自动显示“支持 CLI”，不读取 listing 文案作为能力声明。已安装列表采用当前生效包；详情、候选及安装/导入预览各跟随展示的包版本。已安装应用的详情另提供当前安装版本的 CLI 文档入口，即使停用、纯后台或仅有卡片也可阅读。未安装只展示标识，不下载文档包。见 [CLI 文档标准](cli.md#商店标识与标准文档入口)。
+“支持CLI”由展示版本的 `manifest.cli` 决定，介绍文案不能代替契约。已安装版本的CLI文档入口遵循[CLI文档标准](cli.md#商店标识与标准文档入口)。

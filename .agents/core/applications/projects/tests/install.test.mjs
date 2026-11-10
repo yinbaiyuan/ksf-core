@@ -4,7 +4,7 @@ import {mkdtemp,mkdir,readFile,writeFile,rm,copyFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createApplicationManager} from '../../../runtime/src/applications/manager.js';
-import {DEFAULT_APPLICATIONS,decodePackage,assertCompatible} from '../../../runtime/src/applications/protocol.js';
+import {DEFAULT_APPLICATIONS,decodePackage,assertCompatible,checksum} from '../../../runtime/src/applications/protocol.js';
 import {managedPath} from '../../../runtime/src/distribution/paths.js';
 import {project} from '../../../runtime/src/services/projects.js';
 import {projectManagement} from '../../../runtime/src/services/project-management.js';
@@ -14,19 +14,21 @@ import {buildApplication} from '../../sdk/build.mjs';
 import {fileURLToPath} from 'node:url';
 
 const sourceStore=new URL('../../store/',import.meta.url);
+const releaseURL=e=>e.package.url.startsWith('fixture-projects-')?new URL('./fixtures/'+e.package.url,import.meta.url):new URL(e.package.url,sourceStore);
+async function historicalProject(version){const url='fixture-projects-'+version+'.ksfapp',bytes=await readFile(new URL('./fixtures/'+url,import.meta.url));return {manifest:decodePackage(bytes).manifest,package:{url,size:bytes.length,sha256:checksum(bytes)}};}
 test('Core project source is distributable; bundled package upgrades the old identity and installs offline by default',async t=>{
   assert(DEFAULT_APPLICATIONS.includes('com.ksf.projects'));
   assert(managedPath('.agents/core/applications/projects/backend.mjs'));
   assert(!managedPath('.agents/core/applications/projects/node_modules/marked/lib/marked.esm.js'));
   const index=JSON.parse(await readFile(new URL('index.json',sourceStore),'utf8'));
-  const previous=index.apps.find(e=>e.manifest.id==='com.ksf.projects'&&e.manifest.version==='0.2.9');
-  const current=index.apps.find(e=>e.manifest.id==='com.ksf.projects'&&e.manifest.version==='0.3.3');assert(previous&&current);assert.equal(current.manifest.name,'KSF项目');
-  for(const [id,version]of [['com.ksf.projects','0.3.3'],['com.ksf.conversations','0.3.4'],['com.ksf.knowledge','0.2.1'],['com.ksf.abilities','0.2.1']]){const entry=index.apps.find(e=>e.manifest.id===id&&e.manifest.version===version);assert(entry);assert.equal(entry.manifest.minCoreVersion,'0.5.2');assert.throws(()=>assertCompatible(entry.manifest,{coreVersion:'0.5.1'}),{code:'APP_CORE_INCOMPATIBLE'});assert.doesNotThrow(()=>assertCompatible(entry.manifest,{coreVersion:'0.5.2'}));}
+  const previous=await historicalProject('0.2.9');
+  const current=index.apps.find(e=>e.manifest.id==='com.ksf.projects');assert(previous&&current);assert.equal(current.manifest.name,'KSF项目');
+  for(const id of ['com.ksf.projects','com.ksf.conversations','com.ksf.knowledge','com.ksf.abilities']){const entry=index.apps.find(e=>e.manifest.id===id);assert(entry);assert.equal(entry.manifest.minCoreVersion,'0.5.5');assert.throws(()=>assertCompatible(entry.manifest,{coreVersion:'0.5.4'}),{code:'APP_CORE_INCOMPATIBLE'});assert.doesNotThrow(()=>assertCompatible(entry.manifest,{coreVersion:'0.5.5'}));}
   const bytes=await readFile(new URL(current.package.url,sourceStore)),pkg=decodePackage(bytes);
   assert(pkg.files.get('frontend/THIRD_PARTY_NOTICES.txt').data.toString().includes('## marked@16.4.2'));
   const root=await mkdtemp(join(tmpdir(),'ksf-core-projects-')),store=join(root,'store');await mkdir(store);let manager;
   t.after(async()=>{await manager?.close();await rm(root,{recursive:true,force:true});});
-  const publish=async entries=>{for(const e of entries)await copyFile(new URL(e.package.url,sourceStore),join(store,e.package.url));await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:entries}));};
+  const publish=async entries=>{for(const e of entries)await copyFile(releaseURL(e),join(store,e.package.url));await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:entries}));};
   await mkdir(join(root,'.agents'));await mkdir(join(root,'项目/示例/任务'),{recursive:true});
   const projectText='---\nname: 示例\nstatus: active\n---\n# 示例\n';await writeFile(join(root,'项目/示例/project.md'),projectText);
   const stub=`#!${process.execPath}\nconst args=process.argv.slice(2);const project={name:'示例',scope:'current',directory:'项目/示例',path:'项目/示例/project.md',metadata:{name:'示例',status:'active'},body:'# 示例'};console.log(JSON.stringify({ok:true,data:args[1]==='read'?{project}:{projects:[{name:'示例',title:'示例',scope:'current'}]},errors:[]}));`;
@@ -46,8 +48,8 @@ test('matching packaged app opens migrated Markdown projects after upgrade and p
   assert.deepEqual(f.apply([{path:material,ifMatch:'missing',body:'# 编号原件\n'}]).errors,[]);
   const store=join(f.root,'store'),candidateStore=join(f.root,'candidate');await mkdir(store);
   const bundledIndex=await readFile(new URL('index.json',sourceStore),'utf8'),index=JSON.parse(bundledIndex);
-  const old=index.apps.find(e=>e.manifest.id==='com.ksf.projects'&&e.manifest.version==='0.3.4');assert(old);
-  await copyFile(new URL(old.package.url,sourceStore),join(store,old.package.url));
+  const old=await historicalProject('0.3.4');assert(old);
+  await copyFile(releaseURL(old),join(store,old.package.url));
   await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[old]}));
   await mkdir(join(f.root,'项目/旧项目'),{recursive:true});
   const legacy='---\nname: 旧项目\nstatus: active\n---\n# 旧项目\n';

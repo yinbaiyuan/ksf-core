@@ -1,8 +1,8 @@
 import type {ApplicationManifest,StoreApplication,StoreCatalog} from './application-model.ts';
 import {storeImageURL} from './store-model.ts';
 import {applicationLinkId} from '../../../../applications/sdk/src/shared/application-identities.js';
-const aliases:Record<string,string>={'com.ksf.documentation':'manual','com.ksf.projects':'projects','com.ksf.knowledge':'knowledge','com.ksf.abilities':'abilities','com.ksf.app-store':'store','com.ksf.markdown':'documents','com.ksf.conversations':'flywheel','com.ksf.git':'git','com.ksf.terminal':'terminal','com.yinbaiyuan.daily-meeting':'meeting','com.yinbaiyuan.daily-brief':'brief','com.yinbaiyuan.camp-tasks':'tasks','com.ksf.cooperation-center':'cooperation','com.ksf.activity-monitor':'monitor'};
-const known=new Set(['activity','knowledge','abilities','projects','store','documents','manual','conversations','flywheel','git','terminal','meeting','brief','tasks','lan','monitor','cooperation','handshake']);
+const aliases:Record<string,string>={'com.ksf.documentation':'manual','com.ksf.projects':'projects','com.ksf.knowledge':'knowledge','com.ksf.abilities':'abilities','com.ksf.ability-store':'ability-store','com.ksf.app-store':'store','com.ksf.markdown':'documents','com.ksf.conversations':'flywheel','com.ksf.git':'git','com.ksf.terminal':'terminal','com.yinbaiyuan.daily-meeting':'meeting','com.yinbaiyuan.daily-brief':'brief','com.yinbaiyuan.camp-tasks':'tasks','com.ksf.cooperation-center':'cooperation','com.ksf.activity-monitor':'monitor'};
+const known=new Set(['activity','knowledge','abilities','ability-store','projects','store','documents','manual','conversations','flywheel','git','terminal','meeting','brief','tasks','lan','monitor','cooperation','handshake']);
 export function applicationIconModel(id:string,manifest?:Pick<ApplicationManifest,'icon'>,app?:StoreApplication){
   const key=aliases[applicationLinkId(id)]??app?.display.manifest.icon??manifest?.icon??'';
   const image=app?.display.listing?.icon;

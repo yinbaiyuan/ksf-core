@@ -17,7 +17,7 @@ node scripts/ksf-app.mjs create ../my-app --template window
 
 `protocol:check` 与 `scripts/sync-protocol.mjs` 仅供 Core 维护者生成/核对运行时副本；独立开发包不包含该副本，应用开发只需 create/check/build 与模板验收，不执行该维护脚本。
 
-商店图标、截图和更新说明见[展示资料规范](../../docs/app-development/store-listing.md)。可使用 `ksf-app build . --listing-only --store ../store` 独立更新已构建版本的介绍，无需重打包。
+商店图标、截图和更新说明见[展示资料规范](../../docs/app-development/store-listing.md)。应用在固定 `store/` 目录定义资料，程序与资料构建为同一个 `.ksfapp`；修改资料须递增版本并重新打包。
 
 新增接口见[应用包内 CLI](../../docs/app-development/cli.md)与[通信、后台和工作流](../../docs/app-development/communication.md)。新建 --template collaboration 可获得包内 CLI 与消息激活的独立工作流示例；任务、等待和审批状态均由应用保存。
 

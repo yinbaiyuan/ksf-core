@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.ksf.git",
   "name": "KSF仓库",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "查看和管理本地 Git 仓库、变更、历史、分支与同步。",
   "author": "KSF",
   "icon": "git",
@@ -31,7 +31,7 @@
     "network",
     "environment"
   ],
-  "minCoreVersion": "0.5.3",
+  "minCoreVersion": "0.5.5",
   "dataStores": [],
   "sdkApiVersion": "1.1.0",
   "builtWithSdkVersion": "1.1.0"

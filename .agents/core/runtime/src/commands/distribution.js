@@ -1,5 +1,6 @@
 import { parseOptions, optionSpecs, hasJsonFlag } from '../shared/options.js';
 import { resolve } from 'node:path';
+import { realpathSync } from 'node:fs';
 import { DistributionError, invalid } from '../distribution/errors.js';
 import { readCommitText } from '../services/commit-message.js';
 import { readPRText } from '../services/pr-description.js';
@@ -15,7 +16,7 @@ const specs = {
   system: {
     read: { options: [], usage: 'read' },
     check: { options: ['source'], usage: 'check [--source <Release URL or index file>]' },
-    update: { options: ['source', 'from', 'dry-run'], usage: 'update [--source <URL or index file> | --from <Core archive>] [--dry-run]' },
+    update: { options: ['source', 'from', 'instance', 'dry-run'], usage: 'update [--source <URL or index file> | --from <Core archive>] [--instance <existing workspace>] [--dry-run]' },
     sync: { options: ['quiet'], usage: 'sync [--quiet]' },
     rollback: { options: ['dry-run'], usage: 'rollback [--dry-run]' },
     cleanup: { options: ['apply', 'dry-run'], usage: 'cleanup [--apply | --dry-run]' },
@@ -32,7 +33,7 @@ export function distributionHelp(command, operation) {
   const notes = {
     release: 'Build and publish one ksf-core product and its release index.\nA local ksf/ directory is an initialized instance for inspection; it is not a second release artifact.\nOfficial publishing rejects dirty/development packages and requires GitHub authorization.\n',
     instance: 'Initialize a private instance created from the Core template.\nVerify its original tree against exact Core commits, seed missing user files, record the immutable baseline, and use main for personal work.\nNever replaces existing personal content or changes the Git remote.\n',
-    system: 'Read, check, update and roll back copied or template-created workspaces.\nVersion checks and installation require an explicit command; startup never invokes sync.\nUpdates use explicit release baselines and never merge personal Git history.\n--source accepts HTTPS, absolute/local index files and loopback HTTP.\n--from selects a verified Core archive; original baselines are resolved online.\nUser directories and .gitignore are never update targets.\nConflicts preserve the current system. Use .agents/ksf for recovery.\n',
+    system: 'Read, check, update and roll back copied or template-created workspaces.\nVersion checks and installation require an explicit command; startup never invokes sync.\nUpdates use explicit release baselines and never merge personal Git history.\n--source accepts HTTPS, absolute/local index files and loopback HTTP.\n--from selects a verified Core archive; original baselines are resolved online.\n--instance runs this updater against an existing workspace; use an absolute --from path.\nUser directories and .gitignore are never update targets.\nConflicts preserve the current system. Use .agents/ksf for recovery.\n',
     contribute: 'Select committed HEAD system changes against its original Core baseline.\nGit, a local HEAD and network access to the recorded Core are required; index and working changes are ignored.\nPersonal files, history and local commit IDs are never published.\n--paths takes root-relative literal system paths, not globs.\nPrepare requires a reviewed conventional title and 原因／变更／验证 body (--body or --body-file).\nA separate PR description is required (--pr-body or --pr-body-file), with four Markdown sections.\nSchema-5 plans freeze the full commit message, PR body, provenance and upstream core-main target.\nSchema-1/2/3/4 plans remain readable and can only reconcile existing publication records.\nRetries never overwrite remote PR descriptions.\nPrepare warns about prior PRs for the same local commit or system content.\nIdentical content reuses its verified PR; unknown prior attempts must be reconciled.\nSubmission creates a draft Core PR; it requires GitHub authorization.\n',
   };
   return `KSF ${command}${operation ? ` ${operation}` : ''}\n\nUsage:\n` + selected.map(s => `  ksf ${command} ${s.usage} [--json]`).join('\n') + '\n\n' + notes[command] +
@@ -87,7 +88,10 @@ export async function runDistributionCommand(command, args, root) {
     } else if (command === 'system') {
       const system = await import('../distribution/system.js');
       const methods = { read: system.systemRead, check: system.systemCheck, update: system.systemUpdate, rollback: system.systemRollback, sync: system.systemSync };
-      data = await methods[parsed.operation]({ root, ...parsed });
+      const targetRoot=parsed.instance?realpathSync(resolve(root,parsed.instance)):root;
+      if(parsed.instance){const {assertNoCooperationMigration}=await import('../migrations/guard.js');assertNoCooperationMigration(targetRoot);system.recoverTransaction(targetRoot);}
+      data = await methods[parsed.operation]({ root:targetRoot, ...parsed });
+      if(parsed.instance)data={...data,instanceRoot:targetRoot};
     } else if (command === 'contribute') {
       const contribution = await import('../distribution/contribute.js');
       const methods = { prepare: contribution.prepareContribution, read: contribution.readContribution, submit: contribution.submitContribution };

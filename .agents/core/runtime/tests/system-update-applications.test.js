@@ -9,7 +9,7 @@ import {systemUpdate,systemRollback} from '../src/distribution/system.js';
 import {encodePackage,checksum} from '../src/applications/protocol.js';
 import {stageApplicationPackages,applicationStatePath} from '../src/applications/core-upgrade.js';
 import {processIdentity} from '../src/services/service-lock.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {assertKilled} from './helpers/core-application-fixture.js';
 const origin={id:'ksf-apps',name:'KSF 公用应用源',url:'https://yinbaiyuan.github.io/ksf-apps/index.json'};
 function release(version,modern=false,{schema}={}){const code=Buffer.from((schema===2?`export async function prepareData(ctx){const v=await ctx.storage.read('state.json'),d=JSON.parse(v.text);if(d.schemaVersion===1)await ctx.storage.migrate('state.json',{text:JSON.stringify({...d,schemaVersion:2}),ifMatch:v.etag,fromVersion:1,toVersion:2});}`:'')+'export function activate(){return{call(){return "ok"}}}'),manifest={schemaVersion:1,sdkVersion:1,minCoreVersion:modern?'0.5.3':'0.1.0',...(modern?{sdkApiVersion:'1.1.0',builtWithSdkVersion:'1.1.0'}:{}),id:'com.ksf.projects',name:'fixture',description:'test',version,dataStores:schema?[{name:'state.json',scope:'user',schemaVersion:schema,migrateFrom:schema===2?[1]:[]}]:[],permissions:[],backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'}},archive=encodePackage(manifest,{'backend/index.mjs':{content:code.toString('base64'),sha256:checksum(code),mode:420}}),digest=checksum(archive);return {archive,release:{manifest,digest,source:origin},entry:{manifest,package:{url:'projects-'+version+'.ksfapp',size:archive.length,sha256:digest}}};}

@@ -1,0 +1,28 @@
+{
+  "commit": "eb2ffe3f8d759b09d1a8f13fb058a2d7ed3c576b",
+  "scope": "Historical first-party backend snapshots; frontend is a minimal test stub; current package protocol only.",
+  "records": [
+    {
+      "version": "0.2.9",
+      "originalPackage": {
+        "url": "projects-0.2.9.ksfapp",
+        "sha256": "ead0d1917dac3c906ad1ae380f4b5d4a237017ab857252a885eb329e7ce01cce",
+        "size": 127778
+      },
+      "backendSHA256": "ceb12c981baf242aa121d381ff6b02bb6af866278cb5066790935e89d41b6ebb",
+      "fixtureSHA256": "ba325423eb656469d901b679823c2a4188a630e06c013ac7e4794608432241c1",
+      "fixtureSize": 62888
+    },
+    {
+      "version": "0.3.4",
+      "originalPackage": {
+        "url": "com.ksf.projects-0.3.4.ksfapp",
+        "sha256": "4561b70a5bb0cdef16a1face38cac0016fff40c7df1537873926d5192b136c53",
+        "size": 252749
+      },
+      "backendSHA256": "e0365adee65b6fb98405923c0caa8a161e696ab97714285069b2492126c779d5",
+      "fixtureSHA256": "0e0b75e9bd77a7a974f4002fbf4a90bc1075df2df4b7ae0a85570037ce2e0bee",
+      "fixtureSize": 94043
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 Core、SDK工具包、应用业务版本和业务数据格式分别管理。`schemaVersion:1`是清单格式，`sdkVersion:1`是运行协议代际；二者不因SDK API补丁或次版本变化而递增。
 
-当前候选SDK为1.1.0，宿主声明`{version:"1.1.0",minCompatibleVersion:"1.0.0"}`。应用的`sdkApiVersion`必须位于这个闭区间；范围表示经验证的连续兼容承诺，不自动跨越破坏性主版本。构建器将实际工具包版本写入`sdkApiVersion`和`builtWithSdkVersion`，首版要求两者相同，不支持手填更低运行目标。新包的`minCoreVersion`至少为0.5.3，旧宿主会因Core下限而拒绝误装。
+当前候选SDK为1.1.0，宿主声明`{version:"1.1.0",minCompatibleVersion:"1.0.0"}`。应用的`sdkApiVersion`必须位于这个闭区间；范围表示经验证的连续兼容承诺，不自动跨越破坏性主版本。构建器将实际工具包版本写入`sdkApiVersion`和`builtWithSdkVersion`，首版要求两者相同，不支持手填更低运行目标。统一应用包的`minCoreVersion`至少为0.5.5，旧宿主会因Core下限而拒绝误装。
 
 旧包缺少两个新增字段时，读取方按API 1.0.0解释，保留原始字节和摘要。旧包的Core下限、平台、Node ABI和业务数据检查仍然有效。SDK包版本、API导出、宿主数据兼容声明由构建检查核对；运行时协议副本及官方应用源校验器从SDK协议维护源同步。
 

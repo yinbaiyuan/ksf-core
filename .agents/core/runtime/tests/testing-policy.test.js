@@ -228,3 +228,11 @@ test('cancelling seed preparation stops the owned builder before tests start',as
   assert.ok(existsSync(marker));process.emit('SIGTERM');const {ok,result}=await pending;
   assert.equal(ok,false);assert.equal(result.status,'cancelled');assert.equal(result.results[0].status,'not-executed');assert.equal(existsSync(result.temporaryDirectory),false);
 });
+
+test('mainline contract updates retain unaffected assertions and native obligations',t=>{
+ const f=fixture(t),repository=fileURLToPath(new URL('../../../../',import.meta.url)),sdk=join(f.root,'.agents/core/applications/sdk');mkdirSync(sdk,{recursive:true});symlinkSync(join(repository,'.agents/core/applications/sdk/node_modules'),join(sdk,'node_modules'),'junction');
+ const before="test('floor',()=>{assert.equal(floor,3);assert.equal(keep,true);});",after="test('floor',()=>{assert.equal(floor,5);assert.equal(keep,true);});",a=scenarios(repository,'floor.test.js',before)[0],b=scenarios(repository,'floor.test.js',after)[0];writeFileSync(join(f.root,f.catalog.tests[0].path),'');writeFileSync(join(f.root,f.catalog.tests[1].path),after);
+ const item={path:f.catalog.tests[1].path,title:a.title,hash:a.hash,nativePlatforms:['darwin','win32','linux'],contractUpdate:{hash:b.hash,reason:'Explicit new floor.',originalAssertions:a.assertions,assertionUpdates:[{before:a.assertions[0],after:[b.assertions[0]]}]}},ledger={commit:'a'.repeat(40),files:2,scenarios:[],mainline:{commit:'b'.repeat(40),scenarios:[item]}},save=()=>writeFileSync(join(f.root,f.runtime,'testing/coverage-baseline.json'),JSON.stringify(ledger));save();assert.equal(auditCoverage(f.root).supplementalMainlineScenarios,1);
+ item.contractUpdate.assertionUpdates=[];save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});item.contractUpdate.assertionUpdates=[{before:a.assertions[0],after:[b.assertions[0]]}];f.catalog.tests[1].platforms=['darwin'];f.save();save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
+ f.catalog.tests[1].platforms=['darwin','win32','linux'];f.save();const weak="test('floor',()=>{assert.equal(floor,5);});";writeFileSync(join(f.root,item.path),weak);item.contractUpdate.hash=scenarios(repository,'floor.test.js',weak)[0].hash;save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
+});

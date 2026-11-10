@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createCapabilities} from '../src/services/capabilities.js';
 import {objectMutation} from '../src/services/objects.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {checksum,encodePackage} from '../src/applications/protocol.js';
 async function fixture(t){
   const root=await mkdtemp(join(tmpdir(),'ksf-capability-'));t.after(()=>rm(root,{recursive:true,force:true}));

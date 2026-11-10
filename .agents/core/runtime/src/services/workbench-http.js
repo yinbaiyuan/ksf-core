@@ -1,3 +1,4 @@
+import {abilityStorePage,abilityStoreDetail,abilityStoreVersions,previewAbilityStore,mutateAbilityStore} from './ability-store.js';
 import {createCoreHost} from './core-host.js';
 import {project as projectService} from './projects.js';
 import {listTasks} from './tasks.js';
@@ -26,7 +27,7 @@ export function createWorkbenchHTTP(root, options = {}) {
   const {files,activity,applications,ai,codexConversations,communication:communicationReady,control,configuration,git}=host;
   const token = randomBytes(32).toString('hex'), nonce = randomBytes(24).toString('base64');
   const secureEqual = value => typeof value === 'string' && value.length === token.length && timingSafeEqual(Buffer.from(value), Buffer.from(token));
-  const matches = pathname => (pathname==='/api/config'||pathname.startsWith('/api/config/')) || pathname.startsWith('/api/runtime/') || pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
+  const matches = pathname => pathname.startsWith('/api/ability-store/') || (pathname==='/api/config'||pathname.startsWith('/api/config/')) || pathname.startsWith('/api/runtime/') || pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
   async function handle(request, url, send, response) {
     if (!matches(url.pathname) && !url.pathname.startsWith('/api/ai/')) return false;
     const json = (status, data) => send(status, JSON.stringify({ ok: true, data }) + '\n');
@@ -46,6 +47,14 @@ export function createWorkbenchHTTP(root, options = {}) {
         if(url.pathname==='/api/config'){assert(!write,'WEB_METHOD_NOT_ALLOWED','目录仅支持读取。',405);json(200,await configuration.list());}
         else if(url.pathname==='/api/config/export'){assert(write,'WEB_METHOD_NOT_ALLOWED','配置导出需要 POST。',405);json(200,await configuration.export(input));}
         else{const domain=decodeURIComponent(url.pathname.slice('/api/config/'.length));json(200,write?await configuration.perform(domain,input.operation??'write',input):await configuration.read(domain));}
+        return true;
+      }
+      if(url.pathname.startsWith('/api/ability-store/')){
+        const operation=url.pathname.slice('/api/ability-store/'.length);
+        if(operation==='catalog'){assert(!write,'WEB_METHOD_NOT_ALLOWED','目录仅支持读取。',405);json(200,await abilityStorePage(root,Object.fromEntries(url.searchParams)));}
+        else if(operation==='versions'){assert(!write,'WEB_METHOD_NOT_ALLOWED','版本仅支持读取。',405);json(200,await abilityStoreVersions(root,Object.fromEntries(url.searchParams)));}
+        else if(operation==='detail'){assert(!write,'WEB_METHOD_NOT_ALLOWED','详情仅支持读取。',405);const item=await abilityStoreDetail(root,Object.fromEntries(url.searchParams));assert(item,'ABILITY_STORE_NOT_FOUND','能力不存在。',404);json(200,item);}
+        else{assert(write,'WEB_METHOD_NOT_ALLOWED','管理操作需要POST。',405);const input=await readJSON(request);json(200,operation==='preview'?await previewAbilityStore(root,input):await mutateAbilityStore(root,operation,input));}
         return true;
       }
       if(url.pathname==='/api/runtime/monitor'){assert(write,'WEB_METHOD_NOT_ALLOWED','监控接口需要会话保护的 POST。',405);json(200,await host.monitor.perform(await readJSON(request)));return true;}
@@ -95,7 +104,9 @@ export function createWorkbenchHTTP(root, options = {}) {
             json(200,await applications.cliDocs(appId,{expectedPackageDigest:digest,path:query('path')}));return true;
           }
           if (route === '/api/apps/installed') { json(200, await applications.snapshot()); return true; }
-          if (route === '/api/apps/catalog') { json(200, await applications.catalog()); return true; }
+          if (route === '/api/apps/detail') { json(200,await applications.storeDetail(Object.fromEntries(url.searchParams)));return true; }
+          if (route === '/api/apps/versions') { json(200,await applications.storeVersions(Object.fromEntries(url.searchParams)));return true; }
+          if (route === '/api/apps/catalog') { json(200, await applications.catalog(Object.fromEntries(url.searchParams))); return true; }
           if(route==='/api/apps/file-read'){let params;try{params=JSON.parse(query('params')??'{}');}catch{throw problem('INVALID_ARGUMENTS','导出参数无效。');}assert(Buffer.byteLength(JSON.stringify(params))<=8192,'INVALID_ARGUMENTS','导出参数过大。');const file=await applications.download(query('instanceId'),params);send(200,file.bytes,'application/octet-stream',{'X-Content-Type-Options':'nosniff','Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(file.name),'Cache-Control':'no-store'});return true;}
           if (route === '/api/apps/media') { const asset=await applications.media({sourceId:query('sourceId'),appId:query('appId'),version:query('version'),digest:query('digest')});send(200,asset.bytes,asset.type,{'X-Content-Type-Options':'nosniff','Cache-Control':'private, max-age=300'});return true; }
           throw problem('WEB_METHOD_NOT_ALLOWED', '应用操作需要 POST。', 405);
@@ -111,6 +122,7 @@ export function createWorkbenchHTTP(root, options = {}) {
         switch (route) {
           case '/api/apps/import/install': json(200,await applications.installImport(input));break;
           case '/api/apps/import/discard': await applications.discardImport(input.importId);json(200,{});break;
+          case '/api/apps/preview': json(200,await applications.previewInstall(input));break;
           case '/api/apps/install': json(200, await applications.install(input)); break;
           case '/api/apps/source': json(200, await applications.saveSource(input)); break;
           case '/api/apps/source/remove': json(200, await applications.removeSource(input.id)); break;
@@ -163,6 +175,7 @@ export function createWorkbenchHTTP(root, options = {}) {
         return true;
       }
       if(url.pathname==='/api/work-stats'){send(error.code==='INVALID_ARGUMENTS'?400:error.status??500,JSON.stringify({ok:false,error:{code:error.code??'WORK_STATS_READ_FAILED',message:error.code==='INVALID_ARGUMENTS'||error.status===405?error.message:'工作统计暂时无法读取，请重试。'}})+'\n');return true;}
+      if(url.pathname.startsWith('/api/ability-store/')){const status=error.status??(error.code==='INVALID_ARGUMENTS'?400:409);send(status,JSON.stringify({ok:false,error:{code:error.code??'ABILITY_STORE_FAILED',message:error.message},...(error.details?{data:error.details}:{})})+'\n');return true;}
       const status = error.status ?? (error.code === 'INVALID_ARGUMENTS' ? 400 : error.code === 'ENOENT' ? 404 : error.code === 'EACCES' || error.code === 'EPERM' ? 403 : 500);
       send(status, JSON.stringify({ ok: false, error: { code: error.code ?? 'WORKBENCH_FAILED', message: error.status ? error.message : status === 404 ? '文件或目录已不存在。' : status === 403 ? '没有访问此文件的权限。' : '工作台操作失败，请重试并检查本机文件状态。' }, ...(error.data ? { data: error.data } : {}) }) + '\n');
     }

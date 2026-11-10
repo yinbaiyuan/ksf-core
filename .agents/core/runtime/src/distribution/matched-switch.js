@@ -58,7 +58,7 @@ export async function inspectMatchedSwitch(root,candidate,{migrateIds=false}={})
   const bytes=await ordinary(candidate,join(candidate,packagePath));assert(bytes.length===entry.package.size&&checksum(bytes)===entry.package.sha256,'MATCHED_INTEGRITY','应用包摘要不符。');
   const decoded=decodePackage(bytes);assert(sameManifest(decoded.manifest,entry.manifest),'MATCHED_INTEGRITY','应用清单与包不一致。');
   const data=await storage.inspectAll({appId,dataStores:entry.manifest.dataStores,releaseDigest:entry.package.sha256});assert(data.canPrepare,'APP_DATA_INCOMPATIBLE','现有数据不支持配套切换。',409,data);
-  const release={manifest:entry.manifest,digest:entry.package.sha256,source:next.installed[appId].active.source,installedAt:new Date().toISOString()};
+  const release={manifest:entry.manifest,listing:entry.listing,digest:entry.package.sha256,source:next.installed[appId].active.source,installedAt:new Date().toISOString()};
   if(targetId!==appId)delete next.installed[appId];
   next.installed[targetId]={...app,...(targetId!==appId?{installationId:app.installationId??`legacy:${appId}`,legacyIds:[...new Set([...(app.legacyIds??[]),appId])]}:{}),active:release,previous:null,pending:null};applications.push({appId:targetId,previousId:appId,from:app.active.manifest.version,to:entry.manifest.version,enabled:app.enabled,data});
  }

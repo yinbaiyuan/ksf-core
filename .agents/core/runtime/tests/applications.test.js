@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { encodePackage, decodePackage, checksum,compareVersions } from '../src/applications/protocol.js';
 import { startWebServer } from '../src/services/web.js';
 
@@ -59,9 +59,9 @@ test('HTTP registry works independently; disabling and removing it preserve inst
   const server = createServer(async (req, res) => { try { const bytes = await readFile(join(f.store, req.url.slice(1))); res.end(bytes); } catch { res.writeHead(404); res.end(); } });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve)); t.after(() => new Promise(resolve => server.close(resolve)));
   const source = await f.manager.saveSource({ name: 'Independent source', url: `http://127.0.0.1:${server.address().port}/index.json`, enabled: true });
-  assert.equal((await f.manager.catalog()).apps.filter(a => a.source.id === source.id).length, 1);
+  assert.equal((await f.manager.storeDetail({appId:f.one.entry.manifest.id,sourceId:source.id})).candidate.source.id,source.id);
   await f.install(f.one, source.id); await f.manager.saveSource({ ...source, enabled: false });
-  assert.equal((await f.manager.catalog()).apps.filter(a => a.source.id === source.id).length, 0);
+  assert.equal((await f.manager.storeDetail({appId:f.one.entry.manifest.id})).candidate,null);
   await f.manager.removeSource(source.id); assert.equal((await f.manager.snapshot()).installed[0].active.source.id, source.id);
   const instance = await f.manager.launch('com.example.echo', f.one.entry.package.sha256); assert.equal((await f.manager.call(instance.id, 'echo', { hello: '中文' })).input.hello, '中文'); await f.manager.release(instance.id);
 });
@@ -146,8 +146,8 @@ test('live HTTP server installs and runs an app without changing its health star
   await post('/api/apps/release', { instanceId: launch.body.data.id });
 });
 test('distributed Terminal uses a real PTY with UTF-8 output, resizing, Ctrl-C and isolated sessions', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'ksf-terminal-test-')), manager = createApplicationManager(root); t.after(async () => { await manager.close(); await rm(root, { recursive: true, force: true,maxRetries:8,retryDelay:50 }); });
-  const catalog = await manager.catalog(), app = catalog.apps.filter(a => a.manifest.id === 'com.ksf.terminal' && !a.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version))[0]; assert.ok(app, 'current platform needs a distributed Terminal package');
+  const root = await mkdtemp(join(tmpdir(), 'ksf-terminal-test-')), manager = createApplicationManager(root,{defaultSource:null}); t.after(async () => { await manager.close(); await rm(root, { recursive: true, force: true,maxRetries:8,retryDelay:50 }); });
+  const app = await manager.previewInstall({appId:'com.ksf.terminal'}); assert.ok(app, 'current platform needs a distributed Terminal package');
   await manager.install({ trusted: true, sourceId: 'builtin', appId: app.manifest.id, version: app.manifest.version, digest: app.package.sha256 });
   const instance = await manager.launch(app.manifest.id, app.package.sha256), session = await manager.call(instance.id, 'create', { cols: 80, rows: 24 }); let cursor = 0;
   async function until(pattern, timeout = 10000) { const until = Date.now() + timeout; let text = ''; while (Date.now() < until) { const out = await manager.call(instance.id, 'read', { id: session.id, after: cursor }); cursor = out.seq; text += out.chunks.map(c => c.data).join(''); if (pattern.test(terminalText(text))) return text; } assert.fail(`missing ${pattern} in terminal output: ${JSON.stringify(text.slice(-4096))}`); }

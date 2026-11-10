@@ -3,11 +3,11 @@
   "sdkVersion": 1,
   "id": "com.ksf.knowledge",
   "name": "KSF知识",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "浏览、搜索、记录和修订现有知识原文，核对来源与链接并沿实例规则组织。",
   "author": "KSF",
   "icon": "knowledge",
-  "minCoreVersion": "0.5.3",
+  "minCoreVersion": "0.5.5",
   "permissions": [
     "filesystem"
   ],

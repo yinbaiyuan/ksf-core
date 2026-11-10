@@ -26,6 +26,7 @@
 | service | 独立主服务、诊断及登录自启动 | [service](service.md) |
 | open | 确保主服务就绪并打开工作台 | [open](open.md) |
 | source | 独立Git能力源关联、检查及导出 | [source](source.md) |
+| ability-store | 自定义能力源、逐项安装、手动更新、卸载和个人复制 | [能力商店](ability-store.md) |
 | user-data | 系统设置、本地身份、能力源关联及对象配置／必要状态 | [user-data](user-data.md) |
 | metadata | 任意 Markdown frontmatter 管理 | [metadata](metadata.md) |
 | context | 返回固定运行入口及能力发现上下文 | [context](context.md) |

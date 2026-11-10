@@ -1,3 +1,4 @@
+import {readStore,installedScopes} from '../ability-store/storage.js';
 import { configuredSources } from './storage.js';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -6,7 +7,10 @@ import { problems, referenceResults } from '../objects/references.js';
 import { sourceFailure } from './schema.js';
 
 export function checkSourceCompatibility(root, candidate) {
-  const entries = configuredSources(root);
+  const record=readStore(root);
+  const entries = [...configuredSources(root).filter(s=>!record.state.adopted.includes(s.id)),...installedScopes(root,record)];
+  if(Object.keys(record.state.installed).length&&!existsSync(join(candidate,'.agents/core/runtime/src/ability-store/storage.js')))sourceFailure('SOURCE_CORE_INCOMPATIBLE','目标Core不支持已安装能力，请保留当前Core。');
+  if(record.version!=='missing'&&record.state.sources.some(s=>s.kind==='http')&&!existsSync(join(candidate,'.agents/core/runtime/src/ability-store/http.js')))sourceFailure('SOURCE_CORE_INCOMPATIBLE','目标Core不支持HTTP能力源状态，请保留当前Core。');
   if (!entries.length) return;
   // Pre-source Core releases can satisfy old object versions while silently
   // ignoring every association. Require the v1 reader and command support too.

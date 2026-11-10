@@ -22,6 +22,7 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   process.stdout.write('  ksf repository --help       Manage independent local project repositories\n');
   process.stdout.write('  ksf commit-message --help   Check commit messages or print the template\n');
   process.stdout.write('  ksf pr-description --help   Check PR descriptions or print the template\n');
+  process.stdout.write('  ksf ability-store --help    Browse and install abilities from custom sources\n');
   process.stdout.write('  ksf source --help           Associate and share Git ability sources\n');
   process.stdout.write('  ksf config --help           Manage the unified configuration center\n  ksf incubate --help         Configure and finish first-use incubation\n');
   process.stdout.write('  ksf user-data --help        Manage portable KSF system-user settings\n');
@@ -86,6 +87,8 @@ if (args.length === 0 || (args.length === 1 && ['--help', '-h'].includes(command
   const result = runPRDescriptionCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
   process.stdout.write(result.stdout);
   process.exitCode = result.exitCode;
+} else if(command==='ability-store'){
+  const {runAbilityStoreCommand}=await import('./commands/ability-store.js');const result=await runAbilityStoreCommand(options,currentRoot);process.stdout.write(result.stdout);process.exitCode=result.exitCode;
 } else if (command === 'source') {
   const { runSourceCommand } = await import('./commands/sources.js');
   const result = runSourceCommand(options, fileURLToPath(new URL('../../../../', import.meta.url)));
