@@ -5,7 +5,15 @@ import {PROTOCOL,digest,rootCatalog,reference,normalize,queryTerms,searchText,cu
 /** Content-addressed verified cache. A failed refresh never overwrites a verified root. */
 export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDirectory,fetcher=fetch,offlineOnly=false}){
  const memory=new Map();let current,live=false,rootError;
- const http=async(address,limit)=>{const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw fault('STORE_URL_INVALID','目录只支持无凭据的HTTP(S)地址。');const r=await fetcher(u.href,{signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw fault('STORE_UNAVAILABLE','目录返回HTTP '+r.status);if(Number(r.headers.get('content-length')??0)>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');const parts=[];let size=0;for await(const b of r.body){size+=b.length;if(size>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');parts.push(Buffer.from(b));}return Buffer.concat(parts);};
+ const http=async(address,limit)=>{
+  const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw fault('STORE_URL_INVALID','目录只支持无凭据的HTTP(S)地址。');
+  const r=await fetcher(u.href,{signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw fault('STORE_UNAVAILABLE','目录返回HTTP '+r.status);
+  // Fetch decodes HTTP compression, but Content-Length still measures the
+  // encoded transfer. An already-compressed package can grow under gzip.
+  const encoding=r.headers.get('content-encoding')?.trim().toLowerCase();
+  if((!encoding||encoding==='identity')&&Number(r.headers.get('content-length')??0)>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');
+  const parts=[];let size=0;for await(const b of r.body){size+=b.length;if(size>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');parts.push(Buffer.from(b));}return Buffer.concat(parts);
+ };
  const save=async(name,bytes)=>{if(!cacheDirectory)return;await mkdir(cacheDirectory,{recursive:true});const tmp=join(cacheDirectory,name+'.'+randomUUID()+'.tmp');await writeFile(tmp,bytes);await rename(tmp,join(cacheDirectory,name));};
  async function open({refresh=false}={}){
   if(current&&!refresh)return current;
