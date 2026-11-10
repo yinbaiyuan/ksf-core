@@ -51,4 +51,4 @@ ksf ability-store preview --data '{"action":"import","packagePath":"/share/team.
 
 再执行 `ability-store import`，同样传入 `packagePath`，并携带预览返回的 `planDigest`、`version`（作为 `ifMatch`）及唯一 `operationId`。API 的 `/api/ability-store/preview` 与 `/api/ability-store/import` 接收 base64 `package`，不读取浏览器提交的本机路径。单包压缩大小最多20MiB，展开JSON最多32MiB，资源总大小最多24MiB。
 
-HTTP分发与手动导入使用同一 `ksf-ability-package-v1`：`sourceId`、`objects[]` 和带路径、权限、大小、SHA-256及内容的 `files[]`。一项能力也使用数组；对象声明须与包内正文身份、版本和定义摘要一致。
+HTTP分发与手动导入使用同一 `ksf-ability-package-v1`：`sourceId`、显式安装项`roots[]`、`objects[]` 和带路径、权限、大小、SHA-256及内容的 `files[]`。一项能力也使用数组；对象声明须与包内正文身份、版本和定义摘要一致。
