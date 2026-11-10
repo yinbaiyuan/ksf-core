@@ -3,8 +3,8 @@
     "file": "assets/window-toolbar-C5qhXk7S.css",
     "src": "_window-toolbar-C5qhXk7S.css"
   },
-  "_window-toolbar-DXOJNqHB.js": {
-    "file": "assets/window-toolbar-DXOJNqHB.js",
+  "_window-toolbar-tgflJx81.js": {
+    "file": "assets/window-toolbar-tgflJx81.js",
     "name": "window-toolbar",
     "imports": [
       "index.html"
@@ -14,7 +14,7 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-CbOoOH9P.js",
+    "file": "assets/index-D8rS_WeQ.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -31,12 +31,12 @@
     ]
   },
   "src/apps/ability-store.tsx": {
-    "file": "assets/ability-store-B7HrAef6.js",
+    "file": "assets/ability-store-B5IvnB35.js",
     "name": "ability-store",
     "src": "src/apps/ability-store.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_window-toolbar-DXOJNqHB.js",
+      "_window-toolbar-tgflJx81.js",
       "index.html"
     ],
     "css": [
@@ -44,12 +44,12 @@
     ]
   },
   "src/apps/app-store.tsx": {
-    "file": "assets/app-store-CPVMUIOK.js",
+    "file": "assets/app-store-DM44A5UP.js",
     "name": "app-store",
     "src": "src/apps/app-store.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_window-toolbar-DXOJNqHB.js",
+      "_window-toolbar-tgflJx81.js",
       "index.html"
     ]
   },
