@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {createServer} from 'node:http';import {once} from 'node:events';import {gzipSync} from 'node:zlib';import {digest} from '../src/store-catalog/protocol.js';
+import {gzipSync} from 'node:zlib';import {digest} from '../src/store-catalog/protocol.js';
 import {buildCatalog} from '../src/store-catalog/build.js';import {createCatalogClient} from '../src/store-catalog/client.js';
 const fixture=(count=10001)=>{const directory=mkdtempSync(join(tmpdir(),'ksf-catalog-')),objects=Array.from({length:count},(_,i)=>({id:'partner.example.item'+String(i).padStart(5,'0'),name:'设计能力'+i,description:i===8240?'罕见交互测试':'架构方法',type:i%2?'partner':'competency',versions:Array.from({length:i===8240?123:1},(_,j)=>({version:'0.'+(123-j)+'.0',package:{url:'x',size:1,sha256:'a'.repeat(64)}}))}));const root=buildCatalog({directory,kind:'abilities',source:{id:'test',name:'测试'},objects});let calls=[];const fetcher=async url=>{const path=new URL(url).pathname;calls.push(path);try{return new Response(readFileSync(join(directory,path)),{status:200});}catch{return new Response('',{status:404});}};const client=createCatalogClient({url:'https://test/index.json',kind:'abilities',sourceId:'test',fetcher,cacheDirectory:join(directory,'cache')});return {directory,root,client,calls,fetcher};};
 test('10k objects use bounded home fragments and targeted paged histories',async t=>{const f=fixture();t.after(()=>rmSync(f.directory,{recursive:true,force:true}));assert.ok(readFileSync(join(f.directory,'index.json')).length<8192);const first=await f.client.list({limit:20});assert.equal(first.items.length,20);assert.ok(f.calls.length<25,f.calls.length);assert.ok(first.nextCursor);const second=await f.client.list({limit:20,cursor:first.nextCursor});assert.ok(second.items[0].id>first.items.at(-1).id);const before=f.calls.length;const d=await f.client.detail('partner.example.item08240');assert.equal(d.totalVersions,123);assert.ok(f.calls.length-before<15);const history=await f.client.versions(d.id);assert.equal(history.items.length,40);assert.equal((await f.client.versions(d.id,{cursor:history.nextCursor})).items.length,40);assert.ok(f.calls.every(p=>!p.includes('package')));});
@@ -9,9 +9,11 @@ test('revision cursor cannot cross deployments or query changes',async t=>{const
 test('HTTP compression uses decoded limits and preserves binary integrity',async t=>{
  const f=fixture(3),bytes=gzipSync(Buffer.from('ability package content')),url='packages/'+digest(bytes)+'.ksfability';
  mkdirSync(join(f.directory,'packages'),{recursive:true});writeFileSync(join(f.directory,url),bytes);
- const server=createServer((req,res)=>{try{const body=readFileSync(join(f.directory,req.url)),wire=gzipSync(body);res.writeHead(200,{'content-encoding':'gzip','content-length':wire.length});res.end(wire);}catch{res.writeHead(404);res.end();}});
- server.listen(0,'127.0.0.1');await once(server,'listening');t.after(async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));rmSync(f.directory,{recursive:true,force:true});});
- const client=createCatalogClient({url:'http://127.0.0.1:'+server.address().port+'/index.json',kind:'abilities',sourceId:'test'}),ref={url,size:bytes.length,sha256:digest(bytes)};
+ t.after(()=>rmSync(f.directory,{recursive:true,force:true}));
+ // Model Fetch's decoded Response here; native HTTP decoding is exercised by
+ // ability-store-http.test.js on each supported operating system.
+ const fetcher=async address=>{const body=readFileSync(join(f.directory,new URL(address).pathname));return new Response(body,{headers:{'content-encoding':'gzip','content-length':String(gzipSync(body).length)}});};
+ const client=createCatalogClient({url:'https://test/index.json',kind:'abilities',sourceId:'test',fetcher}),ref={url,size:bytes.length,sha256:digest(bytes)};
  assert.ok(gzipSync(bytes).length>bytes.length);assert.equal((await client.list()).items.length,3);
  assert.deepEqual(await client.binary(ref),bytes);
  await assert.rejects(client.binary({...ref,size:bytes.length-1}),{code:'STORE_SIZE_INVALID'});
