@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {createApplicationManager} from '../src/applications/manager.js';import {encodePackage,checksum} from '../src/applications/protocol.js';
+import {createApplicationManager} from './helpers/application-catalog.js';import {encodePackage,checksum} from '../src/applications/protocol.js';
 const manifest={schemaVersion:1,sdkVersion:1,minCoreVersion:'0.3.0',id:'com.ksf.synthetic-official',name:'Synthetic',version:'1.0.0',description:'test',dataStores:[],permissions:[],backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'}};
 function entry(version){const m={...manifest,version},b=Buffer.from('export function activate(){return {call(){return 1}}}'),bytes=encodePackage(m,{'backend/index.mjs':{content:b.toString('base64'),sha256:checksum(b),mode:420}});return{manifest:m,package:{url:'official-'+version+'.ksfapp',sha256:checksum(bytes),size:bytes.length},bytes};}
 test('newer local Core baseline is not mislabeled as an online published version',async t=>{

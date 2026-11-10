@@ -1,11 +1,26 @@
 {
+  "_window-toolbar-C5qhXk7S.css": {
+    "file": "assets/window-toolbar-C5qhXk7S.css",
+    "src": "_window-toolbar-C5qhXk7S.css"
+  },
+  "_window-toolbar-Cb0v7eYf.js": {
+    "file": "assets/window-toolbar-Cb0v7eYf.js",
+    "name": "window-toolbar",
+    "imports": [
+      "index.html"
+    ],
+    "css": [
+      "assets/window-toolbar-C5qhXk7S.css"
+    ]
+  },
   "index.html": {
-    "file": "assets/index-1Ns1OUVl.js",
+    "file": "assets/index-D9J5Kqw3.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "src/apps/app-store.tsx"
+      "src/apps/app-store.tsx",
+      "src/apps/ability-store.tsx"
     ],
     "css": [
       "assets/index-BvDDJg4J.css"
@@ -15,16 +30,27 @@
       "assets/ksf-favicon-J5dv2kU6.svg"
     ]
   },
+  "src/apps/ability-store.tsx": {
+    "file": "assets/ability-store-DT5CGXSZ.js",
+    "name": "ability-store",
+    "src": "src/apps/ability-store.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_window-toolbar-Cb0v7eYf.js",
+      "index.html"
+    ],
+    "css": [
+      "assets/ability-store-bMvAXBYz.css"
+    ]
+  },
   "src/apps/app-store.tsx": {
-    "file": "assets/app-store-NKGFMq2s.js",
+    "file": "assets/app-store-CmYXnpFZ.js",
     "name": "app-store",
     "src": "src/apps/app-store.tsx",
     "isDynamicEntry": true,
     "imports": [
+      "_window-toolbar-Cb0v7eYf.js",
       "index.html"
-    ],
-    "css": [
-      "assets/app-store-C5qhXk7S.css"
     ]
   },
   "src/assets/ksf-favicon.svg": {

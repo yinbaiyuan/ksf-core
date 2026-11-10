@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createRuntimeMonitor} from '../src/services/runtime-monitor.js';
 import {createProcessMetrics,parseDarwinProcesses,parseWindowsProcesses,cpuMilliseconds} from '../src/services/process-metrics.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {encodePackage,checksum} from '../src/applications/protocol.js';
 import {createAITaskService} from '../src/ai-tasks/service.js';
 import {createWorkbenchTerminal} from '../src/services/workbench-terminal.js';

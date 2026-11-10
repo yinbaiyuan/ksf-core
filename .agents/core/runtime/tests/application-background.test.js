@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp,mkdir,writeFile,readFile,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { checksum,encodePackage,validateManifest } from '../src/applications/protocol.js';
 const file=text=>{const bytes=Buffer.from(text);return{content:bytes.toString('base64'),sha256:checksum(bytes),mode:0o644};};
 async function fixture(t,{holdReady=false}={}){const root=await mkdtemp(join(tmpdir(),'ksf-background-')),storeDirectory=join(root,'store');await mkdir(storeDirectory);const managers=[];t.after(async()=>{for(const manager of managers)await manager.close();await rm(root,{recursive:true,force:true});});

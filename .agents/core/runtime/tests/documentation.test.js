@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {documentHeadings,resolveLink,readerDestination,searchDocuments,historyPush} from '../../applications/documentation/model.mjs';
 import {generateDocumentation,runDocumentation,withinRoot} from '../tools/documentation.mjs';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {encodePackage,checksum} from '../src/applications/protocol.js';
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 async function temporary(t){const dir=await mkdtemp(join(tmpdir(),'ksf-documentation-'));t.after(()=>rm(dir,{recursive:true,force:true}));return dir;}

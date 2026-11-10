@@ -17,7 +17,7 @@ async function checkProductionImports(root,manifest,entries,add){
  }
 }
 export async function checkApplication(root){root=resolve(root);const diagnostics=[];const add=(severity,code,message,file)=>diagnostics.push({severity,code,message,file});let manifest;try{manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));validateManifest(manifest);}catch(error){add('error',error.code??'APP_MANIFEST_INVALID',error.message,'manifest.json');return {ok:false,diagnostics};}
- try{await loadStoreListing(root);}catch(error){add('error',error.code??'APP_LISTING_INVALID',error.message,'store-listing.json');}
+ try{await loadStoreListing(root);}catch(error){add('error',error.code??'APP_LISTING_INVALID',error.message,'store/listing.json');}
  let options={};try{options=JSON.parse(await readFile(join(root,'ksf-build.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')add('error','APP_BUILD_CONFIG_INVALID',error.message,'ksf-build.json');}
  const entries=options.entries??{};for(const file of [...(manifest.window?[entries.window??'frontend.tsx']:[]),...(manifest.cards??[]).map(card=>entries.cards?.[card.id]??card.id+'.tsx'),...(manifest.backend?[entries.backend??'backend.mjs']:[]),...(manifest.cli?[entries.cli??manifest.cli.entry,manifest.cli.documentation]:[])])try{await readFile(sourcePath(root,file));}catch(error){add('error','APP_SOURCE_MISSING',error.message,file);}
  if(manifest.cli)try{readCLIDocument(await readFile(sourcePath(root,manifest.cli.documentation)),{main:true});}catch(error){add('error',error.code??'APP_CLI_DOCUMENT_INVALID',error.message,manifest.cli.documentation);}

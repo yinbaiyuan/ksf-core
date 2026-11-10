@@ -9,7 +9,7 @@ import {startWebServer} from '../src/services/web.js';
 import {ensureService,stopService,serviceStatus,serviceDoctor,redactLog} from '../src/services/service-manager.js';
 import {processIdentity} from '../src/services/service-lock.js';
 import {controlRequest} from '../src/communication/client.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {encodePackage,checksum,validateManifest,OFFICIAL_APPLICATIONS} from '../src/applications/protocol.js';
 import {createCommunicationService} from '../src/communication/service.js';
 import {randomUUID} from 'node:crypto';

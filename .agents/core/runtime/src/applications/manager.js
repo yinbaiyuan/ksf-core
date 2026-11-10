@@ -1,3 +1,4 @@
+import {createCatalogClient} from '../store-catalog/client.js';
 import {resolveInstalledApplicationId} from './identity-resolution.js';
 import {redactLog} from '../shared/logs.js';
 import {platform} from '../platform/index.js';
@@ -155,20 +156,55 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
       return {...item,source:{...source},incompatibility,dataCompatibility};
     }));
   }
-  async function index(source,{bundled=false}={}) {
-    if(source.id===canonicalSource.id){const result=await resolver.resolve({bundled});sourceFreshness.set(source.id,result.freshness);return result.entries.map(e=>({...e,incompatibility:e.incompatibility??(result.freshness.kind!=='live'&&e.resource==='remote'?'离线时此版本的包尚未保存在本机，恢复连接后可安装。':null),directory:{...result.freshness,latestConfirmed:result.freshness.latestConfirmed&&e.publicationKnown!==false}}));}
-    const result=await parseIndex(await boundedFetch(sourceURL(source.url),2*1024*1024,fetcher),source);sourceFreshness.set(source.id,{kind:'live',checkedAt:new Date(now()).toISOString(),latestConfirmed:true});return result;
+  const catalogClients=new Map(),catalogProbes=new Map();
+  async function sourceCatalog(source,{refresh=false}={}){
+    const key=source.id+':'+source.url;if(refresh){catalogProbes.delete(key);catalogClients.delete(key);}
+    if(catalogClients.has(key))return catalogClients.get(key);if(catalogProbes.has(key))return catalogProbes.get(key);
+    const promise=(async()=>{let bytes;try{bytes=await boundedFetch(sourceURL(source.url),2*1024*1024,fetcher);}catch(error){
+      // Prefer a verified v2 cache; old offline bundles remain a valid baseline.
+      const candidate=createCatalogClient({offlineOnly:true,url:source.url,kind:'applications',...(source.id===canonicalSource.id?{sourceId:canonicalSource.id}:{}),cacheDirectory:join(root,'.agents/runtime-data/applications/catalog',checksum(Buffer.from(key))),fetcher});
+      try{await candidate.open();catalogClients.set(key,candidate);return candidate;}catch{return null;}
+    }
+    const value=JSON.parse(bytes);if(value.protocol!=='ksf-store-catalog-v2'){if(source.id===canonicalSource.id)return null;throw problem('APP_SOURCE_INVALID','应用源需要ksf-store-catalog-v2分片目录。');}
+    let initialBytes=bytes;const client=createCatalogClient({url:source.url,kind:'applications',...(source.id===canonicalSource.id?{sourceId:canonicalSource.id}:{}),cacheDirectory:join(root,'.agents/runtime-data/applications/catalog',checksum(Buffer.from(key))),fetcher:async(url,options)=>{if(url===source.url&&initialBytes){const first=initialBytes;initialBytes=null;return new Response(first);}return fetcher(url,options);}});
+    await client.open();catalogClients.set(key,client);return client;})();catalogProbes.set(key,promise);try{return await promise;}finally{catalogProbes.delete(key);}
   }
-  async function catalog() {
-    await ensureDefaults();
-    const state = await readState(), apps = [], errors = [];
-    await Promise.all(state.sources.filter(s => s.enabled).map(async source => { try { apps.push(...await index(source)); } catch (error) { errors.push({ sourceId: source.id, name: source.name, message: error.message }); } }));
-    const variants = new Map();
-    for (const item of apps) { const key = `${item.source.id}:${item.manifest.id}:${item.manifest.version}`, previous = variants.get(key); if (!previous || previous.incompatibility && !item.incompatibility || !previous.incompatibility && !item.incompatibility && (Number(!!item.manifest.target)*2+Number(!!item.manifest.nodeAbi))>(Number(!!previous.manifest.target)*2+Number(!!previous.manifest.nodeAbi))) variants.set(key, item); }
-    const hasLegacyCooperation=Object.keys(state.installed).some(id=>['yinbaiyuan.lan-messenger','com.yinbaiyuan.lan-messenger'].includes(id));
-    const selected = [...variants.values()].map(e=>hasLegacyCooperation&&e.manifest.id==='com.ksf.cooperation-center'?{...e,incompatibility:'需先通过配套迁移接续旧内网通信的消息与配对。'}:e); selected.sort((a, b) => a.manifest.name.localeCompare(b.manifest.name) || compareVersions(b.manifest.version, a.manifest.version));
-    const applications=groupStoreApplications(selected,state.sources,state.installed,errors).map(app=>({...app,directory:sourceFreshness.get(app.display.source.id)??null,latestPublishedVersion:sourceFreshness.get(app.display.source.id)?.latestConfirmed?(selected.filter(e=>e.manifest.id===app.appId&&e.source.id===app.display.source.id&&e.publicationKnown!==false).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version))[0]?.manifest.version??null):null})).map(app=>state.installed[app.appId]?.active.source.id==='local-import'?{...app,candidate:null,latestPublishedVersion:null,unavailableReason:null}:app);
-    return { sdkCompatibility,coreVersion,apps: selected, applications,errors, directories:Object.fromEntries(sourceFreshness) };
+  async function index(source,{bundled=false,appId}={}) {
+    if(!bundled&&(defaultSource!==null||source.id!==canonicalSource.id)){const client=await sourceCatalog(source);if(client){
+      assert(appId,'APP_QUERY_REQUIRED','分片目录需要指定应用ID。');let token,entries=[];do{const page=await client.versions(appId,{cursor:token});if(!page)break;
+        const rows=await parseIndex(Buffer.from(JSON.stringify({protocol:'ksf-app-registry-v1',apps:page.items})),source);entries.push(...rows);sourceFreshness.set(source.id,page.freshness);token=page.nextCursor;
+        if(rows.some(e=>!e.incompatibility))break;
+      }while(token);
+      if(source.id===canonicalSource.id){const local=await resolver.baseline();entries=entries.map(e=>{const old=local.find(b=>b.manifest.id===e.manifest.id&&b.manifest.version===e.manifest.version&&b.manifest.target===e.manifest.target&&b.manifest.nodeAbi===e.manifest.nodeAbi);assert(!old||old.package.sha256===e.package.sha256&&sameManifest(old.manifest,e.manifest),'APP_VERSION_REUSED','公用源同版本摘要冲突。',409);return {...e,resource:old?'baseline':'remote',...(old?{baselinePackage:old.package.url,baselineListing:old.listing}:{}),directory:sourceFreshness.get(source.id)};});}
+      return entries;
+    }}
+    if(source.id===canonicalSource.id){const result=await resolver.resolve({bundled:true});sourceFreshness.set(source.id,result.freshness);return result.entries.filter(e=>!appId||e.manifest.id===appId).map(e=>({...e,directory:{...result.freshness,latestConfirmed:result.freshness.latestConfirmed&&e.publicationKnown!==false}}));}
+    throw problem('APP_SOURCE_UNAVAILABLE','应用源暂时无法读取。',502);
+  }
+  async function storeDetail({appId,sourceId}={}){
+    assert(validId(appId),'APP_ID_INVALID','请选择应用。');await ensureDefaults();const state=await readState(),installed=state.installed[appId],origin=installed?.active.source.id;
+    const errors=[],entries=[];for(const source of state.sources.filter(s=>s.enabled&&(!sourceId||sourceId===s.id)))try{entries.push(...await index(source,{appId}));}catch(error){errors.push({sourceId:source.id,name:source.name,message:error.message});}
+    const groups=groupStoreApplications(entries,state.sources,state.installed,errors);return groups.find(a=>a.appId===appId)??(installed?{appId,display:{manifest:installed.active.manifest,source:installed.active.source,listing:installed.active.listing},candidate:null,latestPublishedVersion:null,unavailableReason:origin==='local-import'?'通过导入新版应用包更新。':'安装来源暂不可用。'}:null);
+  }
+  async function previewInstall(input){const app=await storeDetail(input);assert(app?.candidate,'APP_RELEASE_UNAVAILABLE',app?.unavailableReason??'没有兼容的可安装版本。');return app.candidate;}
+  async function storeVersions({appId,sourceId,cursor}={}){const state=await readState(),source=state.sources.find(s=>s.id===sourceId&&s.enabled);assert(source,'APP_SOURCE_MISSING','应用源不可用。');const client=await sourceCatalog(source);if(client)return client.versions(appId,{cursor});const entries=await index(source,{appId});return {revision:checksum(Buffer.from(JSON.stringify(entries))),items:entries.slice(0,40),nextCursor:null,freshness:sourceFreshness.get(source.id)};}
+  async function catalog(input={}){
+    await ensureDefaults();const state=await readState(),sources=state.sources.filter(s=>s.enabled),errors=[],directories={},descriptors=[];
+    for(const source of sources)try{const client=defaultSource===null&&source.id===canonicalSource.id?null:await sourceCatalog(source,{refresh:input.refresh==='1'});if(client){const r=await client.open();directories[source.id]=r.freshness;descriptors.push({source,client,revision:r.revision});}else{const entries=await index(source);directories[source.id]=sourceFreshness.get(source.id);descriptors.push({source,entries,revision:checksum(Buffer.from(JSON.stringify(entries.map(e=>[e.manifest.id,e.manifest.version,e.package.sha256]))))});}}catch(error){errors.push({sourceId:source.id,name:source.name,message:error.message});}
+    const query=String(input.query??'').normalize('NFKC').trim().toLowerCase(),tab=input.tab??'apps',type=input.type??'',limit=Math.max(1,Math.min(40,Number(input.limit)||40));
+    const revision=checksum(Buffer.from(JSON.stringify([descriptors.map(d=>[d.source.id,d.revision]),query,tab,type])));let position={source:0,offset:0,inner:null};if(input.cursor){let c;try{c=JSON.parse(Buffer.from(input.cursor,'base64url'));}catch{throw problem('STORE_CURSOR_INVALID','目录游标无效。',409);}assert(c.revision===revision,'STORE_CURSOR_EXPIRED','目录已更新，请刷新列表。',409);position=c.position;}
+    let applications=[],apps=[],next=null;
+    if(tab==='installed'||tab==='updates'){
+      for(const id of Object.keys(state.installed)){const app=await storeDetail({appId:id});if(app&&(tab!=='updates'||app.candidate&&compareVersions(app.candidate.manifest.version,state.installed[id].active.manifest.version)>0)&&(!query||[id,app.display.manifest.name,app.display.manifest.description].join(' ').toLowerCase().includes(query)))applications.push(app);}
+      const all=applications;applications=all.slice(position.offset,position.offset+limit);if(position.offset+limit<all.length)next={...position,offset:position.offset+limit};
+    }else if(tab!=='sources')for(let at=position.source;at<descriptors.length;at++){
+      const d=descriptors[at],room=limit-applications.length;
+      if(d.client){const page=await d.client.list({query,type,limit:room,cursor:at===position.source?position.inner:null});applications.push(...page.items.map(row=>({appId:row.id,summary:true,display:{manifest:{id:row.id,name:row.name,description:row.description,version:row.latestVersion},source:d.source},candidate:null,latestPublishedVersion:page.freshness.latestConfirmed?row.latestVersion:null,unavailableReason:null})));if(page.nextCursor){next={source:at,offset:0,inner:page.nextCursor};break;}}
+      else{const all=groupStoreApplications(d.entries,state.sources,state.installed,errors).map(a=>({...a,latestPublishedVersion:directories[d.source.id]?.latestConfirmed?a.latestPublishedVersion:null})).filter(a=>(!query||[a.appId,a.display.manifest.name,a.display.manifest.description].join(' ').normalize('NFKC').toLowerCase().includes(query))),offset=at===position.source?position.offset:0;applications.push(...all.slice(offset,offset+room));apps.push(...d.entries.filter(e=>applications.some(a=>a.appId===e.manifest.id)));if(offset+room<all.length){next={source:at,offset:offset+room,inner:null};break;}}
+      if(applications.length===limit){if(at+1<descriptors.length)next={source:at+1,offset:0,inner:null};break;}
+    }
+    const merged=new Map();for(let app of applications){const installed=state.installed[app.appId],origin=installed?.active.source.id;if(app.summary&&origin&&app.display.source.id!==origin)app={appId:app.appId,display:{manifest:installed.active.manifest,source:installed.active.source,listing:installed.active.listing},candidate:null,latestPublishedVersion:null,unavailableReason:null};const prior=merged.get(app.appId),rank=a=>origin?Number(a.display.source.id===origin):0;if(!prior||rank(app)>rank(prior)||rank(app)===rank(prior)&&compareVersions(app.display.manifest.version,prior.display.manifest.version)>0)merged.set(app.appId,app);}applications=[...merged.values()];
+    return {revision,sdkCompatibility,coreVersion,applications,items:applications,apps,errors,directories,nextCursor:next?Buffer.from(JSON.stringify({revision,position:next})).toString('base64url'):null};
   }
   async function saveSource(input) {
     assert(input.id !== canonicalSource.id, 'APP_SOURCE_LOCKED', 'KSF 公用应用源不可编辑或停用。', 403);
@@ -187,17 +223,18 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     const before = await readState(), source = before.sources.find(s => s.id === (input.sourceId==='builtin'?canonicalSource.id:input.sourceId) && s.enabled);
     assert(input.appId!=='com.ksf.cooperation-center'||!Object.keys(before.installed).some(id=>['yinbaiyuan.lan-messenger','com.yinbaiyuan.lan-messenger'].includes(id)),'APP_ID_MIGRATION_REQUIRED','请先完成合作中心身份迁移，以保留现有消息、安装与配对，不能并列安装。',409);
     assert(source, 'APP_SOURCE_MISSING', '应用源已移除或停用，请刷新商店。', 409);
-    const sourceEntries=await index(source,{bundled}),item = sourceEntries.find(i => i.manifest.id === input.appId && i.manifest.version === input.version && i.package.sha256 === input.digest);
+    const sourceEntries=await index(source,{bundled,appId:input.appId}),item = sourceEntries.find(i => i.manifest.id === input.appId && i.manifest.version === input.version && i.package.sha256 === input.digest);
     assert(item, 'APP_RELEASE_CHANGED', '应用源中的版本已变化，请刷新并重新核对。', 409); compatible(item.manifest);
     const installed=before.installed[input.appId];
     assert(!installed || installed.active.source.id===source.id,'APP_SOURCE_CHANGED','更新须使用原安装源；更换来源请先卸载并核对数据兼容。',409);
     const eligible=sourceEntries.filter(e=>e.manifest.id===input.appId&&!e.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version)||Number(!!b.manifest.target)-Number(!!a.manifest.target)||Number(!!b.manifest.nodeAbi)-Number(!!a.manifest.nodeAbi));
     assert(eligible[0]?.package.sha256===item.package.sha256 && (!installed||compareVersions(item.manifest.version,installed.pending?.manifest.version??installed.active.manifest.version)>=0),'APP_RELEASE_CHANGED','此版本已不是最新兼容版本，请刷新商店后重新核对。',409);
-    if(!installed&&!bundled){const others=(await Promise.all(before.sources.filter(s=>s.enabled&&s.id!==source.id).map(s=>index(s).catch(()=>[])))).flat();assert(!others.some(e=>e.manifest.id===input.appId&&!e.incompatibility&&compareVersions(e.manifest.version,item.manifest.version)>0),'APP_RELEASE_CHANGED','已有更高的兼容版本，请刷新商店后重新核对来源。',409);}
+    if(!installed&&!bundled){const others=(await Promise.all(before.sources.filter(s=>s.enabled&&s.id!==source.id).map(s=>index(s,{appId:input.appId}).catch(()=>[])))).flat();assert(!others.some(e=>e.manifest.id===input.appId&&!e.incompatibility&&compareVersions(e.manifest.version,item.manifest.version)>0),'APP_RELEASE_CHANGED','已有更高的兼容版本，请刷新商店后重新核对来源。',409);}
     const bytes = item.resource === 'baseline' ? await readFile(join(storeDirectory, item.baselinePackage??item.package.url)) : await boundedFetch(sourceURL(new URL(item.package.url, source.url).href), MAX_PACKAGE, fetcher);
     assert(bytes.length === item.package.size && checksum(bytes) === item.package.sha256, 'APP_PACKAGE_INTEGRITY', '应用包大小或 SHA256 校验失败。');
-    const decoded = decodePackage(bytes); assert(sameManifest(decoded.manifest, item.manifest), 'APP_PACKAGE_INTEGRITY', '应用包与安装前展示的声明不一致。');
-    const latest=(await index(source,{bundled})).filter(e=>e.manifest.id===input.appId&&!e.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version));
+    const decoded = decodePackage(bytes); assert(sameManifest(decoded.manifest, item.manifest)&&sameManifest(decoded.listing,item.listing??{}), 'APP_PACKAGE_INTEGRITY', '应用包与安装前展示的声明不一致。');
+    if(!bundled&&(defaultSource!==null||source.id!==canonicalSource.id))await sourceCatalog(source,{refresh:true});
+    const latest=(await index(source,{bundled,appId:input.appId})).filter(e=>e.manifest.id===input.appId&&!e.incompatibility).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version));
     assert(latest.some(e=>e.package.sha256===item.package.sha256)&&latest[0]?.manifest.version===item.manifest.version,'APP_RELEASE_CHANGED','下载期间应用目录已更新，请重新核对最新版本。',409);
     return commitPackage(decoded,item.package.sha256,source,state=>{
       assert(state.sources.some(s => s.id === source.id && s.enabled && s.url === source.url), 'APP_SOURCE_CHANGED', '安装期间应用源配置已变化，请重试。', 409);
@@ -234,12 +271,12 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     assert(typeof fileName==='string'&&fileName.length<=240&&/\.ksfapp$/i.test(fileName)&&!/[\\/\u0000-\u001f]/.test(fileName),'APP_IMPORT_INVALID','请选择 .ksfapp 应用包。');
     assert(Buffer.isBuffer(bytes)&&bytes.length>0,'APP_IMPORT_INVALID','应用包为空。');
     assert(bytes.length<=MAX_PACKAGE,'APP_PACKAGE_TOO_LARGE','应用包不能超过 32 MiB。',413);
-    const {manifest}=decodePackage(bytes);compatible(manifest);
+    const {manifest,listing}=decodePackage(bytes);compatible(manifest);
     const digest=checksum(bytes),state=await readState(),action=importAction(state,manifest,digest),dataCompatibility=await storage.inspectAll({appId:manifest.id,dataStores:manifest.dataStores});
     pruneImports();assert(imports.size<8&&[...imports.values()].reduce((size,item)=>size+item.bytes.length,bytes.length)<=64*1024*1024,'APP_IMPORT_LIMIT','待确认的应用包过多，请取消其他导入或稍后重试。',429);
     const importId=randomUUID(),expiresAt=now()+15*60*1000;
     imports.set(importId,{bytes:Buffer.from(bytes),digest,expiresAt,currentDigest:state.installed[manifest.id]?.active.digest??null,currentPending:state.installed[manifest.id]?.pending?.digest??null});
-    return {importId,fileName,expiresAt,action,currentVersion:state.installed[manifest.id]?.active.manifest.version??null,manifest,source:{...importSource,enabled:true},package:{size:bytes.length,sha256:digest,url:fileName},dataCompatibility,incompatibility:dataCompatibility.canPrepare?null:'当前数据无法用于此版本。'};
+    return {importId,fileName,expiresAt,action,currentVersion:state.installed[manifest.id]?.active.manifest.version??null,manifest,listing,source:{...importSource,enabled:true},package:{size:bytes.length,sha256:digest,url:fileName},dataCompatibility,incompatibility:dataCompatibility.canPrepare?null:'当前数据无法用于此版本。'};
   }
   async function discardImport(importId){assert(uuid(importId),'APP_IMPORT_INVALID','导入凭据无效。');imports.delete(importId);}
   async function installImport(input) {
@@ -253,7 +290,7 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     });
   }
   async function commitPackage(decoded,digest,source,checkState) {
-    const appId=decoded.manifest.id,release = { manifest: decoded.manifest, digest, source: { id: source.id, name: source.name, url: source.url }, installedAt: new Date().toISOString() };
+    const appId=decoded.manifest.id,release = { manifest: decoded.manifest, listing:decoded.listing, digest, source: { id: source.id, name: source.name, url: source.url }, installedAt: new Date().toISOString() };
     const target = directory(release), staging = join(home, 'staging', randomUUID());
     await mkdir(staging, { recursive: true, mode: 0o700 });
     try {
@@ -581,17 +618,19 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     return {bytes,name:descriptor.name};
   }
   async function storeAsset(name) { assert(name === 'index.json' || /^[a-zA-Z0-9_.-]+\.ksfapp$/.test(name) || storeMediaPath(name), 'APP_ASSET_NOT_FOUND', '应用源资源不存在。', 404); return readFile(join(storeDirectory, name)); }
-  const mediaCache=new Map(),mediaPending=new Map();
+  const mediaCache=new Map(),mediaPending=new Map(),storePackages=new Map();
   async function media({sourceId,appId,version,digest}){
     assert(/^[a-f0-9]{64}$/.test(digest??''),'APP_ASSET_NOT_FOUND','商店图片不存在。',404);
-    const state=await readState(),source=state.sources.find(s=>s.id===(sourceId==='builtin'?canonicalSource.id:sourceId)&&s.enabled);assert(source,'APP_ASSET_NOT_FOUND','图片所属应用源不可用。',404);
+    const state=await readState(),installed=state.installed[appId]?.active;
+    if(installed&&installed.manifest.version===version){const image=[installed.listing?.icon,...(installed.listing?.screenshots??[])].find(i=>i?.sha256===digest);if(image){const info=await verifyRelease(installed),file=info.files[image.url];assert(file&&file.sha256===digest,'APP_PACKAGE_INTEGRITY','已安装商店素材声明无效。');const bytes=await readFile(join(directory(installed),image.url));return {bytes,type:storeImageType(bytes)};}}
+    const source=state.sources.find(s=>s.id===(sourceId==='builtin'?canonicalSource.id:sourceId)&&s.enabled);assert(source,'APP_ASSET_NOT_FOUND','图片所属应用源不可用。',404);
     const key=source.id+':'+source.url+':'+appId+':'+version+':'+digest;
     if(mediaCache.has(key)){const value=mediaCache.get(key);mediaCache.delete(key);mediaCache.set(key,value);return value;}
     if(mediaPending.has(key))return mediaPending.get(key);
     const pending=(async()=>{
-      const entries=await index(source),entry=entries.find(e=>e.manifest.id===appId&&e.manifest.version===version&&[e.listing?.icon,...(e.listing?.screenshots??[])].some(i=>i?.sha256===digest));
+      const entries=await index(source,{appId}),entry=entries.find(e=>e.manifest.id===appId&&e.manifest.version===version&&[e.listing?.icon,...(e.listing?.screenshots??[])].some(i=>i?.sha256===digest));
       const image=[entry?.listing?.icon,...(entry?.listing?.screenshots??[])].find(i=>i?.sha256===digest);assert(image&&storeMediaPath(image.url),'APP_ASSET_NOT_FOUND','图片未在应用源中声明。',404);
-      const bytes=entry.resource==='baseline'&&[entry.baselineListing?.icon,...(entry.baselineListing?.screenshots??[]),...(entry.baselinePackage?[]:[entry.listing?.icon,...(entry.listing?.screenshots??[])])].some(i=>i?.sha256===digest)?await readFile(join(storeDirectory,image.url)):await boundedFetch(sourceURL(new URL(image.url,source.url).href),MAX_STORE_IMAGE,fetcher);
+      const packageKey=entry.package.sha256;let decoded=storePackages.get(packageKey);if(!decoded){const packed=entry.resource==='baseline'?await readFile(join(storeDirectory,entry.baselinePackage??entry.package.url)):await boundedFetch(sourceURL(new URL(entry.package.url,source.url).href),MAX_PACKAGE,fetcher);assert(packed.length===entry.package.size&&checksum(packed)===packageKey,'APP_PACKAGE_INTEGRITY','应用整包摘要校验失败。');decoded=decodePackage(packed);assert(sameManifest(decoded.manifest,entry.manifest)&&sameManifest(decoded.listing,entry.listing??{}),'APP_PACKAGE_INTEGRITY','商店资料与统一包声明不一致。');storePackages.set(packageKey,{...decoded,files:new Map([...decoded.files].filter(([path])=>path.startsWith('store/')))});while(storePackages.size>4)storePackages.delete(storePackages.keys().next().value);}const bytes=decoded.files.get(image.url)?.data;assert(bytes,'APP_ASSET_NOT_FOUND','包中没有此商店素材。',404);
       assert(bytes.length===image.size&&bytes.length<=MAX_STORE_IMAGE&&checksum(bytes)===digest,'APP_PACKAGE_INTEGRITY','商店图片摘要或容量校验失败。',422);
       const value={bytes,type:storeImageType(bytes)};mediaCache.set(key,value);while([...mediaCache.values()].reduce((n,v)=>n+v.bytes.length,0)>32*1024*1024)mediaCache.delete(mediaCache.keys().next().value);return value;
     })().finally(()=>mediaPending.delete(key));mediaPending.set(key,pending);return pending;
@@ -644,5 +683,5 @@ export function createApplicationManager(root, { storeDirectory = bundledStore, 
     }
     throw problem('MONITOR_STALE','任务已经结束，请刷新。',409);
   }
-  return { resolveApplicationId,applicationIdentityMap,authorizeMonitor,monitorSnapshot,monitorCancelTask,monitorCloseTerminal:input=>terminal.monitorClose(input),resume:()=>{accepting=true;},quiesce,runtimeManage,runtimeSnapshot,snapshot, catalog, install, prepareImport,installImport,discardImport,invoke,invokeWorkflow, notify, ensureDefaults, startBackground,getBackgroundErrors:()=>structuredClone(backgroundErrors),saveSource, removeSource, asset, launch, call, release, heartbeat, changeApp, storeAsset, media,download,caller,listApplications,cliDocs,cliExec,messageRoute,messageRoutes,deliverMessage,backgroundHolds,communicationPermission,close };
+  return { resolveApplicationId,applicationIdentityMap,authorizeMonitor,monitorSnapshot,monitorCancelTask,monitorCloseTerminal:input=>terminal.monitorClose(input),resume:()=>{accepting=true;},quiesce,runtimeManage,runtimeSnapshot,snapshot, catalog, storeDetail,previewInstall,storeVersions, install, prepareImport,installImport,discardImport,invoke,invokeWorkflow, notify, ensureDefaults, startBackground,getBackgroundErrors:()=>structuredClone(backgroundErrors),saveSource, removeSource, asset, launch, call, release, heartbeat, changeApp, storeAsset, media,download,caller,listApplications,cliDocs,cliExec,messageRoute,messageRoutes,deliverMessage,backgroundHolds,communicationPermission,close };
 }

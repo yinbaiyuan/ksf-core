@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { encodePackage, checksum } from '../src/applications/protocol.js';
 const file=text=>{const bytes=Buffer.from(text);return{content:bytes.toString('base64'),sha256:checksum(bytes),mode:0o644};};
 test('only declared v2 applications receive the Codex conversation bridge; caller identity comes from the host',async t=>{

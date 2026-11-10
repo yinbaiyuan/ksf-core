@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { startWebServer } from '../src/services/web.js';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { decodePackage,compareVersions } from '../src/applications/protocol.js';
 const store=fileURLToPath(new URL('../../applications/store/',import.meta.url));
 async function root(){return mkdtemp(join(tmpdir(),'ksf-bundled-apps-'));}

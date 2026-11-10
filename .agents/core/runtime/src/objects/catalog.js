@@ -6,6 +6,7 @@ import { parseFrontmatter } from '../metadata/frontmatter.js';
 import { readSnapshot } from '../metadata/files.js';
 import { types, protectedPaths, validId, validateObject, fail, compare } from './schema.js';
 import { configuredSources, readDeclaration } from '../sources/storage.js';
+import {readStore,installedScopes} from '../ability-store/storage.js';
 
 export { sha256 as sha } from '../shared/hash.js';
 export { portable } from '../shared/paths.js';
@@ -87,7 +88,7 @@ export function catalog(root, { linked = true, sourceFilter, extraSources = [] }
   if (existsSync(join(root, 'AGENTS.md'))) load(join(root, 'AGENTS.md'), 'cooperation', 'system');
   let entries = [];
   if (linked) {
-    try { entries = configuredSources(root); }
+    try { const record=readStore(root); entries = [...configuredSources(root).filter(s=>!record.state.adopted.includes(s.id)),...installedScopes(root,record)]; }
     catch (error) { errors.push({ code: error.code ?? 'SOURCE_REGISTRY_INVALID', message: error.message, source: '@registry' }); }
   }
   entries = [...entries.filter(entry => !sourceFilter || entry.id === sourceFilter), ...extraSources];
@@ -101,7 +102,8 @@ export function catalog(root, { linked = true, sourceFilter, extraSources = [] }
       for (const [type, definition] of Object.entries(types)) {
         const path = definition.user;
         try {
-          if (existsSync(join(scanRoot, path))) scan(inspect(path), type, entry.id);
+          if(entry.installed){for(const object of entry.objects.filter(o=>o.id.split('.')[0]===type)){scan(inspect(object.relative),type,entry.id);const row=rows.find(r=>r.source===entry.id&&r.id===object.id);if(row&&(row.metadata?.version!==object.version||object.definitionDigest&&row.digest!==object.definitionDigest))row.errors.push({code:'ABILITY_STORE_INSTALLED_CHANGED',message:'已安装能力原件发生变化，请保留现场并核对安装版本。',target:row.path});}}
+          else if (existsSync(join(scanRoot, path))) scan(inspect(path), type, entry.id);
           scopes.push({ type, source: entry.id, path: join(scanRoot, path), complete: true });
         } catch (error) {
           errors.push({ code: error.code ?? 'OBJECT_SCOPE_UNREADABLE', message: error.message, target: join(scanRoot, path), type, source: entry.id });

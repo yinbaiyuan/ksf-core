@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { encodePackage, decodePackage, checksum, validateManifest } from '../src/applications/protocol.js';
 const file=text=>{const bytes=Buffer.from(text);return {content:bytes.toString('base64'),sha256:checksum(bytes),mode:0o644};};
 function release(version='1.0.0',window=false,permissions=[]){

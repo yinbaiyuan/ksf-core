@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {validateManifest,encodePackage,checksum} from '../src/applications/protocol.js';
 import {packApplication} from '../../applications/sdk/server/pack.mjs';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 const manifest=()=>({schemaVersion:1,minCoreVersion:'0.3.0',dataStores:[],sdkVersion:1,id:'com.example.review',name:'Review',version:'1.0.0',description:'Synthetic',window:{entry:'frontend/index.js'},cards:[],backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/main.mjs'},permissions:[]});
 const file=s=>{const b=Buffer.from(s);return{content:b.toString('base64'),sha256:checksum(b),mode:0o644};};
 async function temporary(t){const root=await mkdtemp(join(tmpdir(),'ksf-app-review-'));t.after(()=>rm(root,{recursive:true,force:true}));return root;}

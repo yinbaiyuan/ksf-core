@@ -10,7 +10,7 @@ import { createCoordinator } from '../src/services/workbench-common.js';
 import { objectMutation } from '../src/services/objects.js';
 import { activateAssets } from '../../applications/shared/assets-backend.mjs';
 import { suggestionUpdate, suggestionHandoff } from '../../applications/conversations/backend/suggestion-delivery.js';
-import { createApplicationManager } from '../src/applications/manager.js';
+import { createApplicationManager } from './helpers/application-catalog.js';
 import { encodePackage, checksum } from '../src/applications/protocol.js';
 
 const repository = fileURLToPath(new URL('../../../../', import.meta.url));

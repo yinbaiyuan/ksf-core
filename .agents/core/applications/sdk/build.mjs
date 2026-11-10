@@ -43,10 +43,11 @@ async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntri
   // Reuse the verified, complete notices from this SDK toolchain.
   if(frontend)await cp(join(sdkRoot,'THIRD_PARTY_NOTICES.txt'),join(out,'frontend/THIRD_PARTY_NOTICES.txt'));
   if(frontend&&existsSync(join(root,'THIRD_PARTY_NOTICES.txt'))){const extra=await readFile(sourcePath(root,'THIRD_PARTY_NOTICES.txt'),'utf8');await writeFile(join(out,'frontend/THIRD_PARTY_NOTICES.txt'),await readFile(join(out,'frontend/THIRD_PARTY_NOTICES.txt'),'utf8')+'\n\n'+extra);}
+  await mkdir(join(out,'store'),{recursive:true});await writeFile(join(out,'store/listing.json'),JSON.stringify(storeListing.listing)+'\n');for(const image of storeListing.media){await mkdir(dirname(join(out,image.url)),{recursive:true});await writeFile(join(out,image.url),image.bytes);}
   await writeFile(join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   const store=storeDirectory??resolve(root,'../store'),entry=await packApplication(out,join(store,`${manifest.id}-${manifest.version}.ksfapp`));
   await withStoreLock(store,async()=>{let index;try{index=JSON.parse(await readFile(join(store,'index.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;index={protocol:'ksf-app-registry-v1',name:'KSF 应用',apps:[]};}
   const previous=index.apps.find(item=>item.manifest.id===manifest.id&&item.manifest.version===manifest.version);if(previous&&previous.package.sha256!==entry.package.sha256)throw Error('索引已存在同版本不同内容。');
-  if(storeListing.listing!==undefined){entry.listing=storeListing.listing;for(const image of storeListing.media)await atomicWrite(join(store,image.url),image.bytes);}else if(previous?.listing)entry.listing=previous.listing;
+  entry.listing=storeListing.listing;
   index.apps=[...index.apps.filter(item=>!(item.manifest.id===manifest.id&&item.manifest.version===manifest.version)),entry];await atomicWrite(join(store,'index.json'),JSON.stringify(index,null,2)+'\n');});if(!quiet)console.log(`Built ${manifest.id}@${manifest.version}: ${entry.package.size} bytes (${entry.package.sha256})`);return entry;
 }

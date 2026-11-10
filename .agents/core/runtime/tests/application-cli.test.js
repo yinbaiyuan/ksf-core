@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createServer} from 'node:http';
 import {createWorkbenchHTTP} from '../src/services/workbench-http.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {checksum,encodePackage,decodePackage,validateManifest,assertCompatible} from '../src/applications/protocol.js';
 const file=text=>{const data=Buffer.from(text);return {content:data.toString('base64'),sha256:checksum(data),mode:0o644};};
 async function fixture(t,options={},applicationId='com.example.team'){const root=await mkdtemp(join(tmpdir(),'ksf-cli-')),storeDirectory=join(root,'store');await mkdir(storeDirectory);const manifest={schemaVersion:1,minCoreVersion:'0.3.0',dataStores:[],sdkVersion:1,id:applicationId,name:'Synthetic team',description:'CLI lifecycle fixture',version:'1.0.0',window:{entry:'frontend/index.js'},backend:{entry:'backend/index.mjs',runtime:'node',lifecycle:'on-demand'},permissions:['background','messages.receive'],activation:{messages:{channels:['team.feedback.v1']}},cli:{contractVersion:1,entry:'cli/index.mjs',documentation:'docs/cli.md',commands:[{id:'task.create'},{id:'task.get'},{id:'background.retain'},{id:'background.release'}]}};

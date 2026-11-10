@@ -7,7 +7,7 @@ import {tmpdir} from 'node:os';
 import {createApplicationStorage} from '../src/services/application-storage.js';
 import {createJSONStore} from '../../applications/sdk/server/storage.mjs';
 import {validateManifest,assertCompatible,encodePackage,checksum} from '../src/applications/protocol.js';
-import {createApplicationManager} from '../src/applications/manager.js';
+import {createApplicationManager} from './helpers/application-catalog.js';
 import {runApplicationCommand} from '../src/commands/application-cli.js';
 
 const declaration=(version=2,scope='user')=>({name:'state.json',scope,schemaVersion:version,migrateFrom:version===1?[]:[1]});

@@ -1,3 +1,4 @@
+import {loadStoreListing} from '../sdk/server/listing.mjs';
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir, cp, rm, chmod, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,7 @@ const notices=await Promise.all(['@xterm/xterm','@xterm/addon-fit'].map(async na
 await writeFile(join(out,'frontend/THIRD_PARTY_NOTICES.txt'),notices.join('\n\n')+'\nKSF patch: xterm 5.5 DomRendererRowFactory applies ANSI inline colors through CSSOM rather than setAttribute, preserving strict CSP.\n');
 const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));
 await writeFile(join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+const listing=await loadStoreListing(root);await mkdir(join(out,'store'),{recursive:true});await writeFile(join(out,'store/listing.json'),JSON.stringify(listing.listing)+'\n');for(const image of listing.media){await mkdir(join(out,image.url.slice(0,image.url.lastIndexOf('/'))),{recursive:true});await writeFile(join(out,image.url),image.bytes);}
 const store=join(root,'../store'),name=`terminal-${manifest.version}.ksfapp`,entry=await packApplication(out,join(store,name));
 const index=JSON.parse(await readFile(join(store,'index.json'),'utf8'));
 index.apps=[...index.apps.filter(a=>!(a.manifest.id===manifest.id&&a.manifest.version===manifest.version)),entry];

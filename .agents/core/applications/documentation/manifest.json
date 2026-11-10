@@ -3,11 +3,11 @@
   "sdkVersion": 1,
   "id": "com.ksf.documentation",
   "name": "KSF手册",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "离线阅读完整KSF手册，按路线浏览、搜索正文和跳转章节。",
   "author": "KSF",
   "icon": "manual",
-  "minCoreVersion": "0.5.3",
+  "minCoreVersion": "0.5.5",
   "dataStores": [],
   "window": {
     "entry": "frontend/index.js",

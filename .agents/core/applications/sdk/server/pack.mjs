@@ -2,7 +2,7 @@ import {realpathSync,existsSync} from 'node:fs';
 import { readdir, lstat, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname, basename, resolve, posix } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { encodePackage, decodePackage, checksum, validPath } from './protocol.js';
+import { encodePackage, decodePackage, checksum, validPath,compareVersions,PACKAGE_MIN_CORE_VERSION } from './protocol.js';
 
 import {atomicWrite,withStoreLock} from './publication.mjs';
 import {init,parse} from 'es-module-lexer';
@@ -22,7 +22,7 @@ export async function validateBuiltPackage(bytes){
 }
 
 export async function packApplication(directory, output) {
-  const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8')), files = {};
+  const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8')), files = {};if(compareVersions(manifest.minCoreVersion,PACKAGE_MIN_CORE_VERSION)<0)manifest.minCoreVersion=PACKAGE_MIN_CORE_VERSION;
   async function walk(path) {
     const stat = await lstat(join(directory, path));
     if (!validPath(path) || stat.isSymbolicLink()) throw new Error(`Unsupported app path: ${path}`);
@@ -31,9 +31,9 @@ export async function packApplication(directory, output) {
     else throw new Error(`Unsupported app entry: ${path}`);
   }
   if(manifest.window||(manifest.cards??[]).length)await walk('frontend'); if (manifest.backend) await walk('backend');
-  if(manifest.cli){await walk('cli');await walk('docs');}
+  if(manifest.cli){await walk('cli');await walk('docs');}if(existsSync(join(directory,'store')))await walk('store');
   const bytes = encodePackage(manifest, files);await validateBuiltPackage(bytes);await withStoreLock(dirname(output),async()=>{let existing;try{existing=await readFile(output);}catch(error){if(error.code!=='ENOENT')throw error;}if(existing&&checksum(existing)!==checksum(bytes))throw Object.assign(Error('同版本应用包已有不同内容，请递增版本。'),{code:'APP_VERSION_REUSED'});await atomicWrite(output,bytes);});
-  return { manifest, package: { url: basename(output), sha256: checksum(bytes), size: bytes.length } };
+  return { manifest,listing:decodePackage(bytes).listing, package: { url: basename(output), sha256: checksum(bytes), size: bytes.length } };
 }
 export async function runPackCLI(directory,output){
   if(!directory||!output){console.error('Usage: node pack.mjs <built-app-directory> <output.ksfapp>');process.exitCode=2;}

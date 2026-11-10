@@ -68,7 +68,7 @@ export async function mountLibrary(container, sdk, kind) {
       file = ability ? result.data.object : result;
       if (ability && result.errors.length) message = '部分依赖不可用：' + result.errors.map(e => e.message).join('；');
       if (ability) type = file.id.split('.')[0];
-      lookupPath = file.path; sdk.navigate({ path: file.path }, true);
+      lookupPath = file.path; sdk.navigate({ path: file.path,ref:null,source:null,type:null }, true);
       if (!ability || ['user', 'system'].includes(file.source)) await loadLinks(file.path, token); if (token !== generation || !alive) return;
       if (!preserve) restoreDraft(); render(); renderList();
     } catch (e) { if (alive && token === generation) notify(e.message, true); }
@@ -163,7 +163,7 @@ export async function mountLibrary(container, sdk, kind) {
     const readonly = ability && (file.protected || !['user', 'system'].includes(file.source));
     actions.append(button('修订', startEdit)); actions.lastChild.disabled = readonly || busy;
     actions.append(button('核对', () => void run(async () => { check = await call(ability ? 'checkObject' : 'checkKnowledge', ability ? { type, ref: file.id, source: file.source } : { path: file.path }); })));
-    if(!ability||['user','system'].includes(file.source))actions.append(button('查看原件', () => sdk.openApp('com.ksf.markdown', new URLSearchParams({ path: file.path, mode: 'read' }).toString())));else main.append(el('p','ka-muted','关联源原件位于：'+(file.source_root??file.source)+'/'+file.path));
+    if(!ability||['user','system'].includes(file.source))actions.append(button('查看原件', () => sdk.openApp('com.ksf.markdown', new URLSearchParams({ path: file.path, mode: 'read' }).toString())));else main.append(el('p','ka-muted','能力原件位于：'+file.path));
     const meta = el('div', 'ka-meta'); if (ability) for (const text of [typeNames[type], file.source, file.version, file.user_revision ? `修订 ${file.user_revision}` : '', stateNames[file.metadata.status], file.protected ? '固定入口 · 只读' : ''].filter(Boolean)) meta.append(el('span', 'ka-pill', text));
     else meta.append(el('span', 'ka-pill', `${file.size} 字节`), el('span', 'ka-pill', new Date(file.modifiedAt).toLocaleString('zh-CN'))); main.append(meta, el('p', 'ka-muted', file.path));
     if (ability) main.append(el('p', 'ka-muted', file.metadata.description), el('p', 'ka-muted', '状态表示是否参与使用；效果以定义中的验证范围和真实任务证据判断。'));
@@ -201,15 +201,19 @@ export async function mountLibrary(container, sdk, kind) {
     if(needsMerge)main.append(el('p','ka-banner','原件与草稿基线不同。请在正文中合并需要保留的改动，再确认合并完成。'),button('已比较并完成合并',()=>{needsMerge=false;draftBaseVersion=file?.definition_digest??file?.version??'missing';stash();message='将按当前草稿保存；请核对上方差异。';error='';render();}));
     if (error) main.append(button('重新读取原件并保留草稿', () => { if (file) void readRow(ability ? { id: file.id, source: file.source, type } : { path: file.path }); }));
   }
-  const initial = new URLSearchParams(sdk.getSnapshot().search).get('path');
+  const initialSearch = new URLSearchParams(sdk.getSnapshot().search);
+  const initial = initialSearch.get('path');
+  let lookupRef='';
+  async function openReference(params){const ref=params.get('ref'),selectedSource=params.get('source')??'effective',selectedType=params.get('type')??ref?.split('.')[0];if(!ability||!ref||busy||!typeNames[selectedType])return;const key=selectedSource+':'+ref;if(key===lookupRef)return;lookupRef=key;type=selectedType;controls.querySelector('select').value=type;await reload();await readRow({id:ref,source:selectedSource,type});}
+
   async function openPath(path) {
     if (busy || !path || path === lookupPath) return;
     if (!ability) { if(/\.md$/i.test(path)){folder = path.split('/').slice(0, -1).join('/') || '知识'; await reload(); await readRow({ path });}else{if(draft)stash();generation++;file=null;draft=null;editing=false;folder=path;lookupPath=path;sdk.navigate({path},true);await reload();} }
     else { for (const t of Object.keys(typeNames)) { const result = await call('listObjects', { type: t, source: 'all' }); const row = result.data.objects.find(row => row.path === path); if (row) { type = t; controls.querySelector('select').value = t; await reload(); await readRow({ ...row, type: t }); return; } } notify('此路径当前不在能力发现范围内，请核对原件与来源。', true); }
   }
-  const unsubscribe = sdk.subscribe(() => { const path = new URLSearchParams(sdk.getSnapshot().search).get('path'); if (path && path !== lookupPath) void openPath(path).catch(e => notify(e.message, true)); });
+  const unsubscribe = sdk.subscribe(() => { const params=new URLSearchParams(sdk.getSnapshot().search);if(params.get('ref')){void openReference(params).catch(e=>notify(e.message,true));return;} const path = new URLSearchParams(sdk.getSnapshot().search).get('path'); if (path && path !== lookupPath) void openPath(path).catch(e => notify(e.message, true)); });
   const beforeClose = sdk.onBeforeClose(() => { if (draft) stash(); return true; });
   render(); await reload();
-  if (initial) await openPath(initial); else if (!ability && rows.some(r => r.path === '知识/knowledge.md')) await readRow({ path: '知识/knowledge.md' });
+  if(ability&&initialSearch.get('ref'))await openReference(initialSearch);else if (initial) await openPath(initial); else if (!ability && rows.some(r => r.path === '知识/knowledge.md')) await readRow({ path: '知识/knowledge.md' });
   return { dispose() { alive = false; generation++; listGeneration++; if (draft) stash(); unsubscribe?.(); beforeClose?.(); root.remove(); } };
 }

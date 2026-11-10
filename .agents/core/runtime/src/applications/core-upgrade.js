@@ -116,7 +116,7 @@ export async function planCoreApplications(root,targetCore,{rollbackRecord,envir
       if(old&&old.active.source.id!=='ksf-apps'){publish(id,old,'keep','保留原安装来源。');continue;}
       const installed=[old?.active,old?.pending].filter(Boolean).filter(release=>{try{check(release);return true;}catch{return false;}}).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version));
       let selected=installed[0];
-      if(!selected||compareVersions(baseline.manifest.version,selected.manifest.version)>0){selected={manifest:baseline.manifest,digest:baseline.package.sha256,source:{id:DEFAULT_APPLICATION_SOURCE.id,name:DEFAULT_APPLICATION_SOURCE.name,url:DEFAULT_APPLICATION_SOURCE.url},installedAt:new Date().toISOString()};packages.push({release:selected,archive});}
+      if(!selected||compareVersions(baseline.manifest.version,selected.manifest.version)>0){selected={manifest:baseline.manifest,listing:decodePackage(archive).listing,digest:baseline.package.sha256,source:{id:DEFAULT_APPLICATION_SOURCE.id,name:DEFAULT_APPLICATION_SOURCE.name,url:DEFAULT_APPLICATION_SOURCE.url},installedAt:new Date().toISOString()};packages.push({release:selected,archive});}
       else if(compareVersions(baseline.manifest.version,selected.manifest.version)===0&&baseline.manifest.target===selected.manifest.target&&baseline.manifest.nodeAbi===selected.manifest.nodeAbi)assert(selected.digest===baseline.package.sha256,'APP_VERSION_REUSED','已安装包与随包同版本摘要冲突。');
       assert(!old||compareVersions(selected.manifest.version,old.active.manifest.version)>=0,'APP_CORE_INCOMPATIBLE','目标Core要求应用降级，请先显式处理应用兼容性。',409);
       check(selected);await data(selected);
