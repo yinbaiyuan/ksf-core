@@ -11,14 +11,17 @@ import { ordinaryDirectory, readDeclaration, readSourceRegistry, within } from '
 import { declarationFile, validateDeclaration, sourceFailure } from '../sources/schema.js';
 import { exportObjects } from '../sources/export.js';
 import { assertNoCooperationMigration } from '../migrations/guard.js';
+import {annotateDistribution} from '../sources/distribution.js';
 
 export function sourceCatalog(root, declaration) {
-  return catalog(root, { linked: false, extraSources: [{ id: declaration.id, root: declaration.root }] });
+  return annotateDistribution(catalog(root, { linked: false, extraSources: [{ id: declaration.id, root: declaration.root }] }), declaration.id, declaration.distribution?.entries);
 }
 export function inspectSource(root, path, expectedId) {
   const target = ordinaryDirectory(path);
   if (within(root, target) && dirname(target) !== join(root, 'repositories')) sourceFailure('SOURCE_PATH_INVALID', 'Inside a KSF instance, sources must be direct children of the ignored repositories container.', { target });
   const checked = repository({ root, operation: 'check', target });
+  const gitError=checked.errors.find(e=>['REPOSITORY_GIT_REQUIRED','REPOSITORY_GIT_FAILED','REPOSITORY_GIT_UNAVAILABLE'].includes(e.code));
+  if(gitError)sourceFailure(gitError.code,gitError.message,{target,errors:checked.errors});
   if (checked.errors.length) sourceFailure('SOURCE_REPOSITORY_INVALID', 'Source must be an independent Git working-tree root.', { target, errors: checked.errors });
   const declaration = readDeclaration(target, expectedId);
   const c = sourceCatalog(root, declaration), errors = problems(c, { source: declaration.id });
@@ -32,6 +35,7 @@ export function inspectSource(root, path, expectedId) {
   }
   return { declaration, catalog: c, errors, data: { id: declaration.id, name: declaration.name,
     ...(declaration.description !== undefined ? { description: declaration.description } : {}),
+    ...(declaration.distribution ? {distribution: declaration.distribution} : {}),
     path: target, branch: checked.data.repositories[0].branch, schemaVersion: 2, valid: errors.length === 0,
     objects: rows.filter(row => !row.errors.length).map(summary) } };
 }

@@ -40,7 +40,12 @@ export function resolveDependency(c, row, reference) {
   const parsed = parseDependencyReference(reference), { id, version } = parsed;
   if (parsed.kind === 'file') return { ...parsed, target: fileReferenceLocation(c, row, parsed) };
   let target;
-  if (row.sourceRoot) {
+  const binding=row.dependencyBindings?.find(d=>d.id===id&&d.version===version);
+  if(binding){
+    target=resolveObject(c,{id,version},binding.source);
+    if(binding.contentDigest&&target.releaseContentDigest!==binding.contentDigest)fail('ABILITY_STORE_DEPENDENCY_CHANGED','已绑定的依赖内容身份不一致。',{id,source:binding.source});
+    if(target.metadata.status==='archived')fail('OBJECT_NOT_FOUND','Archived dependencies are not active.',{id});
+  }else if (row.sourceRoot) {
     // Repository dependencies bind to this repository or Core, never to
     // another repository or a reader's private overrides.
     if (!Object.hasOwn(protectedPaths, id)) {

@@ -95,16 +95,61 @@ test('updates reject breaking exact dependencies of personal definitions and pre
 test('multi-ability packages import atomically with recursive resources, receipts, and personal precedence',async t=>{
  const {packAbilityStore}=await import('../src/services/ability-store.js'),{decodeAbilityPackage,encodeAbilityPackage}=await import('../src/ability-store/package.js');
  const f=fixture(t),s=f.source(),dep='competency.author.bundle',a='partner.author.bundle',b='cooperation.author.bundle';f.add(s,dep);const dir=f.add(s,a,[dep+'@0.1.0','+../shared.md']);f.add(s,b,[dep+'@0.1.0']);writeFileSync(join(dirname(dir),'shared.md'),'Shared bundle resource');
- const output=join(f.folder,'team.ksfability'),packed=packAbilityStore(f.root,{path:s,ids:[a,b],output});assert.equal(packed.objects.length,3);assert.throws(()=>packAbilityStore(f.root,{path:s,ids:[a],output}),{code:'EEXIST'});
+ const output=join(f.folder,'team.ksfabi'),packed=packAbilityStore(f.root,{path:s,ids:[a,b],output});assert.equal(packed.objects.length,3);assert.throws(()=>packAbilityStore(f.root,{path:s,ids:[a],output}),{code:'EEXIST'});
  const bytes=readFileSync(output),packet=decodeAbilityPackage(bytes);assert.equal(packet.objects.length,3);const input={package:bytes.toString('base64')},p=await previewAbilityStore(f.root,{action:'import',...input});assert.equal(p.objects.length,3);assert.throws(()=>f.query(a),{code:'OBJECT_NOT_FOUND'});assert.equal(readStore(f.root).version,'missing');
  const request={...input,ifMatch:p.version,planDigest:p.planDigest,operationId:randomUUID()};await assert.rejects(mutateAbilityStore(f.root,'import',request,{beforePublish(){throw Error('Interrupted bundle');}}));assert.equal(readStore(f.root).version,'missing');
  const installed=await mutateAbilityStore(f.root,'import',request);assert.equal(installed.objects.length,3);assert.deepEqual(readStore(f.root).state.installed.team.roots,[a,b]);assert.equal((await mutateAbilityStore(f.root,'import',request)).replayed,true);assert.equal(f.query(a).data.expanded[0].file.content,'Shared bundle resource');assert.equal(abilityStoreCatalog(f.root).sources.some(s=>s.id==='team'),false);
- await f.apply('copy',{sourceId:'team',id:a});f.add(s,a,[dep+'@0.1.0','+../shared.md'],'0.2.0','# updated bundle\n');const newer=join(f.folder,'newer.ksfability');packAbilityStore(f.root,{path:s,ids:[a,b],output:newer});const updateInput={package:readFileSync(newer).toString('base64')},up=await previewAbilityStore(f.root,{action:'import',...updateInput});await f.mutate('import',{...updateInput,planDigest:up.planDigest});assert.equal(f.query(a).data.object.source,'user');assert.equal(f.query(a,'team').data.object.version,'0.2.0');assert.throws(()=>previewAbilityStore(f.root,{action:'import',...input}),{code:'ABILITY_STORE_VERSION_CONFLICT'});
+ await f.apply('copy',{sourceId:'team',id:a});f.add(s,a,[dep+'@0.1.0','+../shared.md'],'0.2.0','# updated bundle\n');const newer=join(f.folder,'newer.ksfabi');packAbilityStore(f.root,{path:s,ids:[a,b],output:newer});const updateInput={package:readFileSync(newer).toString('base64')},up=await previewAbilityStore(f.root,{action:'import',...updateInput});await f.mutate('import',{...updateInput,planDigest:up.planDigest});assert.equal(f.query(a).data.object.source,'user');assert.equal(f.query(a,'team').data.object.version,'0.2.0');assert.throws(()=>previewAbilityStore(f.root,{action:'import',...input}),{code:'ABILITY_STORE_VERSION_CONFLICT'});
  const damaged=structuredClone(packet);damaged.files[0].sha256='0'.repeat(64);assert.throws(()=>previewAbilityStore(f.root,{action:'import',package:encodeAbilityPackage(damaged).toString('base64')}),{code:'ABILITY_PACKAGE_INTEGRITY'});
  const command=await runAbilityStoreCommand(['preview','--data',JSON.stringify({action:'import',packagePath:newer}),'--json'],f.root);assert.equal(command.exitCode,0);assert.equal(JSON.parse(command.stdout).data.action,'import');
 });
 test('import rejects incomplete exact dependencies and cross-source IDs without publishing a generation',async t=>{
- const {packAbilityStore}=await import('../src/services/ability-store.js'),{decodeAbilityPackage,encodeAbilityPackage}=await import('../src/ability-store/package.js');const f=fixture(t),s=f.source(),dep='competency.author.bundle',id='partner.author.bundle';f.add(s,dep);f.add(s,id,[dep+'@0.1.0']);const output=join(f.folder,'bundle.ksfability');packAbilityStore(f.root,{path:s,ids:[id],output});const packet=decodeAbilityPackage(readFileSync(output)),only=packet.objects.find(o=>o.id===id);packet.objects=[only];packet.roots=[id];packet.files=packet.files.filter(f=>f.path.startsWith(only.relative+'/'));
+ const {packAbilityStore}=await import('../src/services/ability-store.js'),{decodeAbilityPackage,encodeAbilityPackage}=await import('../src/ability-store/package.js');const f=fixture(t),s=f.source(),dep='competency.author.bundle',id='partner.author.bundle';f.add(s,dep);f.add(s,id,[dep+'@0.1.0']);const output=join(f.folder,'bundle.ksfabi');packAbilityStore(f.root,{path:s,ids:[id],output});const packet=decodeAbilityPackage(readFileSync(output)),only=packet.objects.find(o=>o.id===id);packet.objects=[only];packet.roots=[id];packet.files=packet.files.filter(f=>f.path.startsWith(only.relative+'/'));
  assert.throws(()=>previewAbilityStore(f.root,{action:'import',package:encodeAbilityPackage(packet).toString('base64')}));assert.equal(readStore(f.root).version,'missing');
- const other=f.source('other');f.add(other,id);await f.mutate('source-add',{kind:'local',location:other});await f.apply('install',{sourceId:'other',id});const before=readStore(f.root).version;assert.throws(()=>previewAbilityStore(f.root,{action:'import',package:readFileSync(output).toString('base64')}),{code:'ABILITY_STORE_SOURCE_CONFLICT'});assert.equal(readStore(f.root).version,before);assert.equal(f.query(id).data.object.source,'other');
+ const other=f.source('other');f.add(other,id);await f.mutate('source-add',{kind:'local',location:other});await f.apply('install',{sourceId:'other',id});const before=readStore(f.root).version;assert.throws(()=>previewAbilityStore(f.root,{action:'import',package:readFileSync(output).toString('base64')}),{code:'ABILITY_STORE_VERSION_REUSED'});assert.equal(readStore(f.root).version,before);assert.equal(f.query(id).data.object.source,'other');
+});
+test('same-version definition and external resource replacement are rejected, identical reinstall is safe',async t=>{
+ const f=fixture(t),s=f.source(),id='competency.author.immutable';f.add(s,id,['+../shared.txt']);const resource=join(s,'能力/基本功/shared.txt');writeFileSync(resource,'published');await f.mutate('source-add',{kind:'local',location:s});await f.apply('install',{sourceId:'team',id});const before=readStore(f.root);await f.apply('install',{sourceId:'team',id});writeFileSync(resource,'changed at the same version');assert.throws(()=>previewAbilityStore(f.root,{action:'update',sourceId:'team',id}),{code:'ABILITY_STORE_VERSION_REUSED'});writeFileSync(resource,'published');f.add(s,id,['+../shared.txt'],'0.1.0','# changed definition');assert.throws(()=>previewAbilityStore(f.root,{action:'update',sourceId:'team',id}),{code:'ABILITY_STORE_VERSION_REUSED'});assert.equal(f.query(id).data.object.body,'# original\n');assert.equal(readStore(f.root).state.installed.team.objects[0].version,before.state.installed.team.objects[0].version);
+});
+test('source-wide update uses every installed object even when no visible IDs were submitted',async t=>{
+ const f=fixture(t),s=f.source(),ids=Array.from({length:43},(_,i)=>'competency.author.bulk'+i);for(const id of ids)f.add(s,id);await f.mutate('source-add',{kind:'local',location:s});await f.apply('install',{sourceId:'team',ids});for(const id of ids)f.add(s,id,[],'0.2.0');const p=await previewAbilityStore(f.root,{action:'update',sourceId:'team'});assert.equal(p.group.length,43);await f.mutate('update',{sourceId:'team',planDigest:p.planDigest});assert.ok(readStore(f.root).state.installed.team.objects.every(o=>o.version==='0.2.0'));
+});
+
+test('declared partner products bundle methods and data; shared members are not separate store entries',async t=>{
+ const {abilityStorePage,packAbilityStore}=await import('../src/services/ability-store.js');
+ const {validateAbilityPackage,decodeAbilityPackage}=await import('../src/ability-store/package.js');
+ const f=fixture(t),s=f.source(),a='partner.author.one',b='partner.author.two',m='competency.author.method',d='data-package.author.material';
+ const profile=entries=>writeFileSync(join(s,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:'team',name:'team',distribution:{entries}}));
+ f.add(s,d);f.add(s,m,[d+'@0.1.0']);f.add(s,a,[m+'@0.1.0']);f.add(s,b,[d+'@0.1.0']);profile([a,b]);
+ await f.mutate('source-add',{kind:'local',location:s});
+ assert.deepEqual((await abilityStorePage(f.root,{sourceId:'team'})).abilities.map(o=>o.id).sort(),[a,b]);
+ assert.throws(()=>previewAbilityStore(f.root,{action:'install',sourceId:'team',id:d}),{code:'ABILITY_STORE_BUNDLED_MEMBER'});
+ assert.throws(()=>packAbilityStore(f.root,{path:s,ids:[d],output:join(f.folder,'member.ksfabi'),protocol:'ksf-ability-package-v2'}),{code:'ABILITY_STORE_BUNDLED_MEMBER'});
+ const output=join(f.folder,'partner.ksfabi');packAbilityStore(f.root,{path:s,ids:[a],output,protocol:'ksf-ability-package-v2'});
+ const packet=validateAbilityPackage(decodeAbilityPackage(readFileSync(output)));assert.deepEqual(packet.roots,[a]);assert.equal(packet.groups[0].objects.length,3);
+ assert.equal(packet.groups[0].objects.find(o=>o.id===a).distribution.members.length,2);
+ await f.apply('install',{sourceId:'team',id:a});await f.apply('install',{sourceId:'team',id:b});
+ assert.equal(readStore(f.root).state.installed.team.objects.length,4);
+ assert.equal((await abilityStorePage(f.root,{sourceId:'team',tab:'installed'})).abilities.length,2);
+ f.add(s,d,[],'0.2.0');f.add(s,m,[d+'@0.2.0'],'0.2.0');f.add(s,a,[m+'@0.2.0'],'0.2.0');f.add(s,b,[d+'@0.2.0'],'0.2.0');
+ const preview=await previewAbilityStore(f.root,{action:'update',sourceId:'team'});assert.ok(preview.batch.every(g=>g.status==='ready'));await f.mutate('update',{sourceId:'team',planDigest:preview.planDigest});
+ assert.ok(readStore(f.root).state.installed.team.objects.every(o=>o.version==='0.2.0'));
+ await f.apply('uninstall',{sourceId:'team',id:a});assert.throws(()=>f.query(m),{code:'OBJECT_NOT_FOUND'});assert.equal(f.query(d).data.object.version,'0.2.0');
+ await f.apply('uninstall',{sourceId:'team',id:b});assert.equal(readStore(f.root).state.installed.team.objects.length,0);
+ profile(['partner.author.missing']);assert.throws(()=>previewAbilityStore(f.root,{action:'install',sourceId:'team',id:a}),{code:'SOURCE_DISTRIBUTION_INVALID'});
+});
+
+test('legacy explicit members become dependencies only while an owning partner retains them',async t=>{
+ const {abilityStorePage}=await import('../src/services/ability-store.js');
+ const f=fixture(t),s=f.source(),a='partner.author.one',d='data-package.author.material';f.add(s,a);f.add(s,d);
+ await f.mutate('source-add',{kind:'local',location:s});await f.apply('install',{sourceId:'team',ids:[a,d]});
+ writeFileSync(join(s,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:'team',name:'team',distribution:{entries:[a]}}));
+ f.add(s,a,[d+'@0.1.0'],'0.2.0');const p=await previewAbilityStore(f.root,{action:'update',sourceId:'team'});assert.ok(p.batch.every(g=>g.status==='ready'));await f.mutate('update',{sourceId:'team',planDigest:p.planDigest});
+ assert.deepEqual(readStore(f.root).state.installed.team.roots,[a]);assert.equal((await abilityStorePage(f.root,{sourceId:'team',tab:'installed'})).abilities.length,1);
+ await f.apply('uninstall',{sourceId:'team',id:a});assert.equal(readStore(f.root).state.installed.team.objects.length,0);
+});
+
+test('a broken unselected product does not block an installed independent product update',async t=>{
+ const f=fixture(t),s=f.source(),a='partner.author.one',bad='partner.author.bad';f.add(s,a);f.add(s,bad);writeFileSync(join(s,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:'team',name:'team',distribution:{entries:[a,bad]}}));await f.mutate('source-add',{kind:'local',location:s});await f.apply('install',{sourceId:'team',id:a});
+ f.add(s,bad,['competency.ksf.unavailable@9.0.0'],'0.2.0');f.add(s,a,[],'0.2.0');await f.apply('update',{sourceId:'team',id:a});assert.equal(f.query(a).data.object.version,'0.2.0');
 });

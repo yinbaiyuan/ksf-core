@@ -11623,6 +11623,110 @@
         ".agents/core/runtime/src/applications",
         ".agents/core/applications/sdk/server"
       ]
+    },
+    {
+      "id": "core:ability-distribution",
+      "path": ".agents/core/runtime/tests/ability-distribution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "File and HTTP ability release identities, atomic multi-source dependencies, active work pins and verified rollback."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/applications/sdk"
+      ]
+    },
+    {
+      "id": "core:source-publication",
+      "path": ".agents/core/runtime/tests/source-publication.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Publisher author namespaces, source publication, consumer readback, withdrawal and immutable history."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/applications/sdk"
+      ]
     }
   ],
   "timingBaseline": {

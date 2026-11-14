@@ -5,11 +5,15 @@ import { fail } from './schema.js';
 // Rebase only actual Markdown destinations, not prose examples or fenced code.
 // Directory-internal links remain relative to the copied object; external links
 // keep pointing at their original assets through the new relative location.
-export function rebaseMarkdown(bytes, oldFile, newFile, objectDirectory, { mapExternal } = {}) {
+export function rebaseMarkdown(bytes, oldFile, newFile, objectDirectory, { mapExternal, mapAbsolute } = {}) {
   const text = bytes.toString('utf8');
   if (!Buffer.from(text).equals(bytes)) fail('ENCODING_INVALID', 'Markdown resource must be UTF-8.', { target: oldFile });
   const rebase = destination => {
     const raw = destination.startsWith('<') && destination.endsWith('>') ? destination.slice(1, -1) : destination;
+    if(mapAbsolute && /^(?:file:|\/(?!\/)|[a-z]:[\\/])/i.test(raw)) {
+      const next=mapAbsolute(raw);
+      return destination.startsWith('<') ? `<${next}>` : next.replace(/ /g,'%20');
+    }
     if (mapExternal && /^(?:file:|\/(?!\/)|[a-z]:[\\/])/i.test(raw)) fail('SOURCE_RESOURCE_EXTERNAL', 'Absolute local resource links must be packaged explicitly before sharing.', { target: oldFile });
     if (!raw || /^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(raw)) return destination;
     const split = raw.search(/[?#]/);

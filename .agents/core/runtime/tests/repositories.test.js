@@ -269,3 +269,9 @@ test('missing Git is a specific failure and a repository container cannot itself
   mkdirSync(join(f.root, 'repositories')); git(join(f.root, 'repositories'), ['init', '--template=']);
   assert.throws(() => f.call('create', 'nested'), { code: 'REPOSITORY_SCOPE_INVALID' });
 });
+test('developer-tool failure and repository access failure are not reported as a non-root directory',t=>{
+ const f=fixture(t,false),target=join(f.directory,'独立目录');mkdirSync(target);
+ for(const [stderr,code]of [['You have not agreed to the Xcode license agreements.','REPOSITORY_GIT_UNAVAILABLE'],['xcrun: error: invalid active developer path','REPOSITORY_GIT_UNAVAILABLE'],['fatal: detected dubious ownership in repository','REPOSITORY_GIT_FAILED'],['fatal: not a git repository (or any of the parent directories): .git','REPOSITORY_ROOT_MISMATCH']]){
+  const out=f.call('check',target,{}, {run:()=>({status:128,stdout:'',stderr})});assert.equal(out.errors[0].code,code);
+ }
+});
