@@ -3,6 +3,7 @@ import{mkdir,lstat}from'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { homedir, userInfo } from 'node:os';
+import {darwinGit} from './darwin-git.js';
 
 export const darwin = {
   terminalLaunch(env = process.env) { const account=userInfo(), shell=env.SHELL&&existsSync(env.SHELL)?env.SHELL:account.shell&&existsSync(account.shell)?account.shell:'/bin/sh'; return {shell,args:['-l'],env:{...env,SHELL:shell,USER:env.USER??account.username,HOME:env.HOME??homedir(),TERM:'xterm-256color',COLORTERM:'truecolor'}}; },
@@ -10,7 +11,7 @@ export const darwin = {
   name: 'darwin', validSegment: () => true, supervisorOptions: {detached:false}, supportsPosixModes: true,
   fileMode: (_path, mode) => mode & 0o111 ? 0o755 : 0o644, detachedChildren: true, directorySyncErrors: [], replaceErrors: [],
   hostsPath: () => '/etc/hosts',
-  tool: name => `/usr/bin/${name}`,
+  tool: name => name==='git'?darwinGit():`/usr/bin/${name}`,
   launcher: (root, args) => ({ executable: '/bin/sh', args: [join(root, '.agents/ksf'), ...args] }),
   hookCommand(root,kind='task') {
     if(!['task','context'].includes(kind))throw new Error('Unsupported KSF Hook command.');

@@ -236,3 +236,28 @@ test('mainline contract updates retain unaffected assertions and native obligati
  item.contractUpdate.assertionUpdates=[];save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});item.contractUpdate.assertionUpdates=[{before:a.assertions[0],after:[b.assertions[0]]}];f.catalog.tests[1].platforms=['darwin'];f.save();save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
  f.catalog.tests[1].platforms=['darwin','win32','linux'];f.save();const weak="test('floor',()=>{assert.equal(floor,5);});";writeFileSync(join(f.root,item.path),weak);item.contractUpdate.hash=scenarios(repository,'floor.test.js',weak)[0].hash;save();assert.throws(()=>auditCoverage(f.root),{code:'TEST_COVERAGE_REDUCED'});
 });
+
+test('literal selection fast path preserves native glob, separator and case semantics', async () => {
+  const {matchesGlob} = await import('node:path');
+  const {matchesInput} = await import('../src/testing/catalog.js');
+  const cases = [
+    ['.agents/core/runtime/src/a.js','.agents/core/runtime/src/a.js'],
+    ['.agents/core/runtime/src/a.js','.agents/core/runtime/src'],
+    ['.agents/core/runtime/src/a.js','.agents/core/runtime/tests'],
+    ['A/B','a/b'], ['a//b','a/b'], ['a/b/','a/b'], ['./a/b','a/b'], ['a/b','a/b/'],
+    ['a/b.js','a/*.js'], ['a/b.js','**/*.js'], ['a/b.js','a/{b,c}.js'],
+    ['a/b.js','a/[bc].js'], ['a/b.js','a/!(c).js'], ['a/b.js','a/@(b|c).js'],
+    ['a\\b','a/b'], ['a b/c','a b/c'], ['能力/搭档/a.md','能力/搭档/*.md'],
+    ['K/file','k/file'], ['!a/file','!a/file'], ['a/../b','b'], ['a/./b','a/b'],
+  ];
+  for (const [file,pattern] of cases) assert.equal(matchesInput(file,pattern),file===pattern||file.startsWith(pattern+'/')||matchesGlob(file,pattern),JSON.stringify([file,pattern]));
+});
+
+test('large literal dependency comparisons complete without a glob compiler bottleneck', () => {
+  const url = new URL('../src/testing/catalog.js',import.meta.url).href;
+  const program = `import {matchesInput} from ${JSON.stringify(url)};let count=0;const patterns=Array.from({length:100},(_,i)=>'.agents/core/runtime/src/dependency'+i+'.js');for(let n=0;n<10000;n++)for(const pattern of patterns)if(matchesInput('.agents/core/ability-store/catalog/'+n+'.json',pattern))count++;console.log(count);`;
+  const run = spawnSync(process.execPath,['--input-type=module','-e',program],{encoding:'utf8',timeout:15000,maxBuffer:8192});
+  assert.equal(run.error,undefined,run.error?.message);
+  assert.equal(run.status,0,run.stderr);
+  assert.equal(run.stdout.trim(),'0');
+});

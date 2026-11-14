@@ -1,4 +1,11 @@
+import {distributionOf,requireDistributionEntry,normalizeDistributionRoots,distributionRequests} from '../sources/distribution.js';
+import {linkedHTTPPlan} from '../ability-store/linked-update.js';
+import {pruneAbilityGenerations} from '../ability-store/retention.js';
+import {compositeImportPlan,snapshotPacket,validateTransition,proposedCatalog,rollbackAbilityPlan,applyAbilityRollback} from '../ability-store/composite.js';
+import {contentIdentity} from '../ability-store/content.js';
+import {assertCurrentBindings} from '../ability-store/pins.js';
 import {abilityHTTP,inspectHTTP,prepareHTTP} from '../ability-store/http.js';
+import {localAbilityPackage,previewLocalAbilityPackage} from '../ability-store/local-package.js';
 import {decodeAbilityPackage,encodeAbilityPackage,validateAbilityPackage,MAX_ABILITY_PACKAGE} from '../ability-store/package.js';
 import {DEFAULT_ABILITY_SOURCE} from '../ability-store/default-source.js';
 import {existsSync,readFileSync,mkdirSync,rmSync,renameSync,lstatSync,cpSync,writeFileSync} from 'node:fs';
@@ -24,7 +31,7 @@ const portable=value=>value.split(sep).join('/');
 const packageOf=(state,id)=>Object.hasOwn(state.installed,id)?state.installed[id]:undefined;
 const err=e=>({code:e.code??'ABILITY_STORE_FAILED',message:e.message});
 const requireSource=(s,id)=>{const source=s.sources.find(x=>x.id===id);if(!source)fail('ABILITY_STORE_SOURCE_MISSING','能力源不存在，请重新添加。');return source;};
-const checkedSource=(root,source)=>{const checked=['http','package'].includes(source.kind)?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
+const checkedSource=(root,source,{selectedOnly=false}={})=>{const checked=['http','package'].includes(source.kind)?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id);if(checked.errors.length&&!selectedOnly)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
 function git(path,args,{timeout=120000}={}){
  return new Promise((accept,reject)=>{
   const env={...process.env,GIT_TERMINAL_PROMPT:'0',GIT_OPTIONAL_LOCKS:'0',GIT_NO_REPLACE_OBJECTS:'1',GIT_SSH_COMMAND:'ssh -oBatchMode=yes'};
@@ -47,11 +54,11 @@ export function abilityStoreCatalog(root){
   let checked;try{checked=checkedSource(root,source);}catch(e){errors.push({...err(e),sourceId:source.id});}
   sources.push({...source,valid:!!checked,...(!checked?{error:errors.at(-1)}:{})});
   if(!source.enabled||!checked)continue;
-  for(const row of checked.catalog.rows.filter(r=>r.source===source.id&&!r.errors.length&&r.metadata.status!=='archived'))items.set(source.id+':'+row.id,{key:source.id+':'+row.id,id:row.id,type:row.type,sourceId:source.id,sourceName:source.name,available:{...summary(row),digest:objectDigest(row)},dependencies:referenceResults(checked.catalog,row)});
+  for(const row of checked.catalog.rows.filter(r=>r.source===source.id&&!r.errors.length&&r.metadata.status!=='archived'))items.set(source.id+':'+row.id,{key:source.id+':'+row.id,id:row.id,type:row.type,sourceId:source.id,sourceName:source.name,available:{...summary(row),digest:objectDigest(row),...(distributionOf(row)?{distribution:distributionOf(row)}:{})},dependencies:referenceResults(checked.catalog,row)});
  }
  for(const [sourceId,p] of Object.entries(state.installed))for(const object of p.objects){
   const key=sourceId+':'+object.id;let item=items.get(key);if(!item){item={key,id:object.id,type:object.id.split('.')[0],sourceId,sourceName:p.origin.name,dependencies:object.dependencies};items.set(key,item);}
-  item.installed={...object,explicit:p.roots.includes(object.id),path:join(packageRoot(root,sourceId,p.generation),object.relative,types[object.id.split('.')[0]].entry)};
+  item.installed={...object,canRollback:!!Object.values(state.history?.[state.previous?.[sourceId]]?.changes??{}).some(change=>change.before),explicit:p.roots.includes(object.id),path:join(packageRoot(root,sourceId,p.generation),object.relative,types[object.id.split('.')[0]].entry)};
  }
  errors.push(...runtime.errors.filter(e=>state.installed[e.source]),...runtime.rows.filter(r=>state.installed[r.source]).flatMap(r=>r.errors.map(e=>({...e,sourceId:r.source}))));
  const abilities=[...items.values()].map(item=>({...item,personal:personal.get(item.id)??null,updateAvailable:!!item.installed&&!!item.available&&compareVersion(item.available.version,item.installed.version)>0}));
@@ -60,8 +67,9 @@ export function abilityStoreCatalog(root){
 export const compareVersion=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);return x[0]-y[0]||x[1]-y[1]||x[2]-y[2];};
 function objectDigest(row){const tree=readTree(row.directory);return hash({files:tree.files.map(f=>[f.path,f.digest,f.mode]),directories:tree.directories.map(d=>[d.path,d.mode])});}
 function descriptor(c,row){
- return {...summary(row),relative:portable(relative(row.sourceRoot,row.directory)),digest:objectDigest(row),definitionDigest:row.digest,dependencies:referenceResults(c,row).filter(r=>r.id).map(({id,version,source})=>({id,version,source})),_row:row,_catalog:c};
+ return {...summary(row),...(distributionOf(row)?{distribution:distributionOf(row)}:{}),relative:portable(relative(row.sourceRoot,row.directory)),digest:objectDigest(row),definitionDigest:row.digest,dependencies:referenceResults(c,row).filter(r=>r.id).map(({id,version,source})=>({id,version,source})),_row:row,_catalog:c};
 }
+function canonicalObject(object){const resources=collectFiles([object]);return contentIdentity({files:[...resources.files].map(([path,f])=>({path,content:f.bytes.toString('base64'),sha256:f.digest,size:f.bytes.length,mode:f.mode}))},object);}
 function installedDescriptors(root,sourceId,p){
  if(!p)return new Map();const c=catalog(root);return new Map(p.objects.map(o=>{const row=resolveObject(c,{id:o.id,version:o.version},sourceId);return [o.id,{...o,_row:row,_catalog:c}];}));
 }
@@ -74,7 +82,7 @@ function collectFiles(objects){
  const files=new Map(),directories=new Set(),visited=new Set(),origins=[];
  function add(path,base){
   if(!within(base,path)||relative(base,path).split(sep).some(p=>['.git','.upstream'].includes(p)))fail('ABILITY_STORE_RESOURCE_INVALID','资源越过能力源边界。');
-  const rel=portable(relative(base,path));let component=base;for(const segment of relative(base,path).split(sep)){component=join(component,segment);if(lstatSync(component).isSymbolicLink())fail('ABILITY_STORE_RESOURCE_INVALID','能力资源路径不能经过符号链接。');}const value=readSnapshot(path),digest=sha256(value.bytes);
+  const rel=portable(relative(base,path));if(rel.split('/').includes('.ksf-store-origin.json'))fail('ABILITY_STORE_RESOURCE_INVALID','个人操作回执不能作为发布资源。');let component=base;for(const segment of relative(base,path).split(sep)){component=join(component,segment);if(lstatSync(component).isSymbolicLink())fail('ABILITY_STORE_RESOURCE_INVALID','能力资源路径不能经过符号链接。');}const value=readSnapshot(path),digest=sha256(value.bytes);
   const before=files.get(rel);if(before&&before.digest!==digest)fail('ABILITY_STORE_RESOURCE_CONFLICT','共享资源版本不同，请一起更新此源中相关的已安装能力。',{path:rel});
   files.set(rel,{bytes:value.bytes,digest,mode:value.stat.mode&0o777});origins.push({path,digest});
   return value.bytes;
@@ -85,11 +93,12 @@ function collectFiles(objects){
    const bytes=add(target.target,row.sourceRoot);if(/\.md$/i.test(target.target)){const parsed=parseFrontmatter(bytes,target.target);references(c,{...row,path:target.target,metadata:parsed.values});}
   }
  }
- for(const o of objects){const row=o._row,tree=readTree(row.directory);for(const dir of tree.directories)directories.add(portable(relative(row.sourceRoot,join(row.directory,dir.path))));for(const file of tree.files)add(join(row.directory,file.path),row.sourceRoot);references(o._catalog,row);}
+ for(const o of objects){const row=o._row,tree=readTree(row.directory);for(const dir of tree.directories)directories.add(portable(relative(row.sourceRoot,join(row.directory,dir.path))));for(const file of tree.files)if(file.path!=='.ksf-store-origin.json')add(join(row.directory,file.path),row.sourceRoot);references(o._catalog,row);}
  return {files,directories:[...directories].sort(),origins};
 }
 function plan(root,state,input){
  const {action,sourceId,id}=input;
+ if(action==='rollback')return rollbackAbilityPlan(root,state,input);
  if(action==='copy'){
   if(!validId(id))fail('INVALID_ARGUMENTS','请选择能力。');const p=packageOf(state,sourceId),o=p?.objects.find(o=>o.id===id);if(!o)fail('ABILITY_STORE_NOT_INSTALLED','请先安装该能力。');
   if(catalog(root).rows.some(r=>r.source==='user'&&r.id===id))fail('ABILITY_STORE_PERSONAL_EXISTS','已存在个人能力，请在KSF能力中编辑，不能覆盖。');
@@ -109,10 +118,12 @@ function plan(root,state,input){
  let source=state.sources.find(s=>s.id===sourceId);if(action==='migrate'){const linked=configuredSources(root).find(s=>s.id===sourceId);if(!linked)fail('ABILITY_STORE_SOURCE_MISSING','原能力源不存在。');const checked=inspectSource(root,linked.root,sourceId);source={id:sourceId,name:checked.data.name,path:linked.root,kind:'local',enabled:true};}
  if(action!=='migrate'&&configuredSources(root).some(s=>s.id===sourceId)&&!state.adopted.includes(sourceId))fail('ABILITY_STORE_MIGRATION_REQUIRED','请先迁移原关联，以保留其中全部现有能力。');
  source??=requireSource(state,sourceId);if(!source.enabled)fail('ABILITY_STORE_SOURCE_DISABLED','请先启用此能力源。');
- const checked=checkedSource(root,source),c=checked.catalog,p=packageOf(state,sourceId),all=installedDescriptors(root,sourceId,p),replaced=new Set(),selected=new Map();
- const requested=action==='migrate'?c.rows.filter(r=>r.source===sourceId&&!r.errors.length).map(r=>r.id):(input.ids??[id]);
+ const checked=checkedSource(root,source,{selectedOnly:action!=='migrate'}),c=checked.catalog,p=packageOf(state,sourceId),all=installedDescriptors(root,sourceId,p),replaced=new Set(),selected=new Map();
+ const requested=action==='migrate'?c.rows.filter(r=>r.source===sourceId&&!r.errors.length).map(r=>r.id):(input.ids??(id?[id]:action==='update'?p?.objects.map(o=>o.id):[]));
  if(!Array.isArray(requested)||!requested.length||requested.some(id=>!validId(id)))fail('INVALID_ARGUMENTS','请选择要安装或更新的能力。');
+ if(action!=='migrate')for(const id of requested)requireDistributionEntry(resolveObject(c,{id},sourceId));
  const select=(id,version)=>{
+  if(c.rows.some(row=>row.source==='system'&&row.id===id))fail('ABILITY_STORE_CORE_MANAGED','Core 基础能力随 Core 更新，不能从源替换。',{id});
   const row=resolveObject(c,{id,...(version?{version}:{})},sourceId);if(row.metadata.status==='archived'&&action!=='migrate')fail('ABILITY_STORE_ARCHIVED','归档能力不接受新的安装。');
   if(selected.has(id)){if(selected.get(id).version!==row.metadata.version)fail('ABILITY_STORE_DEPENDENCY_CONFLICT','依赖要求不同版本，无法同时安装。');return;}
   const d=descriptor(c,row);selected.set(id,d);replaced.add(id);
@@ -120,46 +131,62 @@ function plan(root,state,input){
  };
  if(action==='update'&&requested.some(id=>!p?.objects.some(o=>o.id===id)))fail('ABILITY_STORE_NOT_INSTALLED','更新只接受已安装能力。');
  requested.forEach(id=>select(id));
- let again=true;while(again){again=false;const merged=new Map([...all,...selected]);for(const o of merged.values())for(const d of o.dependencies)if(d.source===sourceId&&merged.get(d.id)?.version!==d.version){if(selected.has(o.id))fail('ABILITY_STORE_DEPENDENCY_CONFLICT','无法同时满足精确版本依赖。');select(o.id);again=true;}}
+ let again=true;while(again){again=false;const merged=new Map([...all,...selected]),retained=new Set();const visit=id=>{if(retained.has(id))return;retained.add(id);for(const d of merged.get(id)?.dependencies??[])if(d.source===sourceId)visit(d.id);};(action==='update'?p.roots:[...new Set([...(p?.roots??[]),...requested])]).forEach(visit);for(const o of merged.values())if(retained.has(o.id))for(const d of o.dependencies)if(d.source===sourceId&&merged.get(d.id)?.version!==d.version){if(selected.has(o.id))fail('ABILITY_STORE_DEPENDENCY_CONFLICT','无法同时满足精确版本依赖。');select(o.id);again=true;}}
+ for(const object of selected.values()){object.contentDigest=canonicalObject(object);const old=all.get(object.id),known=state.knownReleases?.[object.id+'@'+object.version];if(known&&known!==object.contentDigest)fail('ABILITY_STORE_VERSION_REUSED','已知历史存在同版本不同内容。',{id:object.id});if(old){if(compareVersion(object.version,old.version)<0)fail('ABILITY_STORE_VERSION_CONFLICT','不能将已安装能力降级，请使用受控回退。',{id:object.id});if(object.version===old.version&&object.contentDigest!==(old.contentDigest??canonicalObject(old)))fail('ABILITY_STORE_VERSION_REUSED','已发布的同版本能力内容或资源不同，请提升版本。',{id:object.id,version:object.version});}}
  for(const [other,q] of Object.entries(state.installed))if(other!==sourceId)for(const id of selected.keys())if(q.objects.some(o=>o.id===id))fail('ABILITY_STORE_SOURCE_CONFLICT','该能力已从另一个源安装，请先卸载旧来源。',{id,source:other});
  for(const row of catalog(root).rows)if(row.sourceRoot&&row.source!==sourceId&&selected.has(row.id))fail('ABILITY_STORE_SOURCE_CONFLICT','另一个直接关联源提供同ID能力，请先明确保留哪个来源。',{id:row.id,source:row.source});
- const merged=new Map([...all,...selected]),roots=action==='update'?[...p.roots]:[...new Set([...(p?.roots??[]),...requested])],keep=new Set();const visit=id=>{if(keep.has(id))return;keep.add(id);for(const d of merged.get(id)?.dependencies??[])if(d.source===sourceId)visit(d.id);};roots.forEach(visit);
+ const merged=new Map([...all,...selected]),roots=normalizeDistributionRoots(action==='update'?[...p.roots]:[...new Set([...(p?.roots??[]),...requested])],[...merged.values()]),keep=new Set();const visit=id=>{if(keep.has(id))return;keep.add(id);for(const d of merged.get(id)?.dependencies??[])if(d.source===sourceId)visit(d.id);};roots.forEach(visit);
  const objects=[...merged.values()].filter(o=>keep.has(o.id));for(const o of objects)for(const d of o.dependencies)if(d.source==='system')resolveObject(c,{id:d.id,version:d.version},'system');
  const runtime=catalog(root),after={...runtime,rows:[...runtime.rows.filter(r=>r.source!==sourceId),...objects.map(o=>o._row)]};
  const blocked=[];for(const row of runtime.rows.filter(r=>r.source!==sourceId&&!r.errors.length&&r.metadata.status!=='archived'))for(const ref of row.metadata.references??[]){let before;try{before=resolveDependency(runtime,row,ref);}catch{continue;}if(before.kind==='file'||before.target.source!==sourceId)continue;try{resolveDependency(after,row,ref);}catch{blocked.push(row.metadata.name);break;}}
+ assertCurrentBindings(root,runtime,after);
  if(blocked.length)fail('ABILITY_STORE_EXTERNAL_DEPENDENCY','个人或其他能力仍依赖旧版本，本次未更新：'+blocked.join('、'),{dependents:blocked});
- let resources;try{resources=collectFiles(objects);}catch(e){if(e.code==='ABILITY_STORE_RESOURCE_CONFLICT'&&selected.size<objects.length)return plan(root,state,{...input,ids:roots});throw e;}return {action,sourceId,source,origin:source,roots,objects,...resources,group:[...replaced],planDigest:hash([action,sourceId,roots,objects.map(o=>[o.id,o.version,o.digest]),[...resources.files].map(([p,f])=>[p,f.digest])])};
+ let resources;try{resources=collectFiles(objects);}catch(e){if(e.code==='ABILITY_STORE_RESOURCE_CONFLICT'&&selected.size<objects.length&&source.kind!=='http')return plan(root,state,{...input,ids:roots});throw e;}return {action,sourceId,source,origin:source,roots,objects,...resources,group:[...replaced],planDigest:hash([action,sourceId,roots,objects.map(o=>[o.id,o.version,o.digest,o.distribution]),[...resources.files].map(([p,f])=>[p,f.digest])])};
 }
-const publicPlan=p=>({action:p.action,sourceId:p.sourceId,planDigest:p.planDigest,objects:p.objects.map(({_row,_catalog,...o})=>o),roots:p.roots,group:p.group??[],removed:p.removed??[],personalPath:p.personalPath});
-async function preparedPlan(root,state,input){const prepared=await prepareHTTP(root,state,input),source=prepared.sources.find(s=>s.id===input.sourceId),temporary=prepared!==state&&source?.kind==='http'?source.path:null;try{const result=plan(root,prepared,input);if(temporary){for(const object of result.objects){delete object.directory;delete object.path;delete object.source_root;}result.dispose=()=>rmSync(temporary,{recursive:true,force:true});}return result;}catch(e){if(temporary)rmSync(temporary,{recursive:true,force:true});throw e;}}
+const publicPlan=p=>({...(p.batch?{scope:p.scope,batch:p.batch}:{}),...(p.reused?{reused:p.reused}:{}),...(p.plans?{sources:p.plans.map(v=>({sourceId:v.sourceId,roots:v.roots,objects:v.objects.map(o=>o.id)}))}:{}),action:p.action,sourceId:p.sourceId,planDigest:p.planDigest,objects:p.objects.map(({_row,_catalog,...o})=>o),roots:p.roots,group:p.group??[],removed:p.removed??[],personalPath:p.personalPath});
+async function batchUpdatePlan(root,state,input){
+ const installed=state.installed[input.sourceId];if(!installed?.objects.length)fail('ABILITY_STORE_NOT_INSTALLED','该源没有已安装能力。');const all=installedDescriptors(root,input.sourceId,installed),links=new Map([...all.keys()].map(id=>[id,new Set()])),owners=new Map();
+ const connect=(a,b)=>{if(links.has(a)&&links.has(b)){links.get(a).add(b);links.get(b).add(a);}};
+ for(const object of all.values()){for(const d of object.dependencies)if(d.source===input.sourceId)connect(object.id,d.id);for(const [path] of collectFiles([object]).files){const prior=owners.get(path);if(prior)connect(prior,object.id);else owners.set(path,object.id);}}
+ let components=[];const seen=new Set();for(const id of all.keys()){if(seen.has(id))continue;const group=[],queue=[id];while(queue.length){const current=queue.pop();if(seen.has(current))continue;seen.add(current);group.push(current);queue.push(...links.get(current));}components.push(group.sort());}
+ const source=state.sources.find(s=>s.id===input.sourceId);
+ const current=source&&['local','git'].includes(source.kind)?checkedSource(root,source,{selectedOnly:true}).catalog.rows.filter(r=>r.source===input.sourceId&&!r.errors.length).map(r=>({id:r.id,distribution:distributionOf(r)})):[];
+ const units=new Map([...all.values(),...current].map(o=>[o.id,o]));
+ const prepared=[],batch=[];try{
+  // A new release can introduce a connection that was absent in the installed
+  // graph. Join overlapping candidate closures/resources before committing any
+  // group, then preview that combined request again so exact-version conflicts
+  // block only the truly connected component.
+  for(;;){
+   const candidates=[];for(const ids of components){try{const requested=source&&['local','git'].includes(source.kind)?ids.filter(id=>installed.roots.includes(id)):ids;candidates.push({ids,value:await preparedPlan(root,state,{...input,ids:distributionRequests(requested,[...units.values()])})});}catch(error){candidates.push({ids,error});}}
+   const parent=components.map((_,i)=>i),find=i=>parent[i]===i?i:parent[i]=find(parent[i]),connect=(a,b)=>{parent[find(a)]=find(b);},byId=new Map(components.flatMap((ids,i)=>ids.map(id=>[id,i]))),resources=new Map();
+   for(let i=0;i<candidates.length;i++){const value=candidates[i].value;if(!value)continue;for(const id of value.group??[])if(byId.has(id))connect(i,byId.get(id));
+    for(const part of value.plans??[value])for(const object of part.objects.filter(o=>value.group?.includes(o.id))){for(const [path] of collectFiles([object]).files){const key=part.sourceId+':'+path;if(resources.has(key))connect(i,resources.get(key));else resources.set(key,i);}}
+   }
+   const joined=new Map();for(let i=0;i<components.length;i++){const id=find(i);if(!joined.has(id))joined.set(id,[]);joined.get(id).push(...components[i]);}
+   if(joined.size===components.length){for(const candidate of candidates){if(candidate.value){prepared.push(candidate.value);batch.push({ids:candidate.ids,status:'ready',planDigest:candidate.value.planDigest});}else batch.push({ids:candidate.ids,status:'blocked',error:err(candidate.error)});}break;}
+   for(const candidate of candidates)candidate.value?.dispose?.();components=[...joined.values()].map(ids=>[...new Set(ids)].sort());
+  }
+  const targets=new Map();for(const value of prepared)for(const part of value.plans??[value]){let target=targets.get(part.sourceId);if(!target){target={sourceId:part.sourceId,origin:part.origin??part.source,roots:state.installed[part.sourceId]?.roots??part.roots,objects:installedDescriptors(root,part.sourceId,state.installed[part.sourceId]),selected:new Set()};targets.set(part.sourceId,target);}for(const object of part.objects){if(!target.objects.has(object.id)||value.group.includes(object.id)){const old=target.objects.get(object.id);if(target.selected.has(object.id)&&old.version!==object.version)fail('ABILITY_STORE_DEPENDENCY_CONFLICT','候选更新组要求不同精确版本。');target.objects.set(object.id,object);target.selected.add(object.id);}else if(object.contentDigest&&!target.objects.get(object.id).contentDigest)target.objects.get(object.id).contentDigest=object.contentDigest;}}
+  const plans=[...targets.values()].map(target=>{const roots=normalizeDistributionRoots(target.roots,[...target.objects.values()]),keep=new Set();const visit=id=>{if(keep.has(id))return;keep.add(id);for(const d of target.objects.get(id)?.dependencies??[])if(d.source===target.sourceId)visit(d.id);};roots.forEach(visit);const objects=[...target.objects.values()].filter(o=>keep.has(o.id)),resources=collectFiles(objects);return{action:'update',sourceId:target.sourceId,origin:target.origin,roots,objects,...resources};});
+  return{action:'update',sourceId:input.sourceId,scope:'source-installed',batch,plans,roots:[...new Set(plans.flatMap(p=>p.roots))],group:[...new Set(prepared.flatMap(p=>p.group))],objects:plans.flatMap(p=>p.objects),planDigest:hash(['batch-update',input.sourceId,batch,plans.map(p=>p.objects.map(o=>[o.id,o.version,o.contentDigest??o.digest]))]),dispose:()=>prepared.forEach(p=>p.dispose?.())};
+ }catch(error){prepared.forEach(p=>p.dispose?.());throw error;}
+}
+async function preparedPlan(root,state,input){if(input.action==='update'&&!input.id&&!input.ids)return batchUpdatePlan(root,state,input);const prepared=await prepareHTTP(root,state,input);if(prepared._composite)return linkedHTTPPlan(root,state,input,prepared);const source=prepared.sources.find(s=>s.id===input.sourceId),temporary=prepared!==state&&source?.kind==='http'?source.path:null;try{const result=plan(root,prepared,input);if(temporary){for(const object of result.objects){delete object.directory;delete object.path;delete object.source_root;}result.dispose=()=>rmSync(temporary,{recursive:true,force:true});}return result;}catch(e){if(temporary)rmSync(temporary,{recursive:true,force:true});throw e;}}
 function importPlan(root,state,input){
  if(typeof input.package!=='string'||input.package.length>Math.ceil(MAX_ABILITY_PACKAGE/3)*4)fail('ABILITY_PACKAGE_INVALID','请选择有效能力包（最大20MiB）。');
- const bytes=Buffer.from(input.package,'base64'),packet=validateAbilityPackage(decodeAbilityPackage(bytes)),sourceId=packet.sourceId,installed=packageOf(state,sourceId);
- for(const object of packet.objects){const old=installed?.objects.find(o=>o.id===object.id);if(old&&compareVersion(object.version,old.version)<0)fail('ABILITY_STORE_VERSION_CONFLICT','能力包版本低于本机版本：'+object.id,{installed:old.version,packaged:object.version});}
- const path=join(root,'.agents/runtime-data/ability-store/previews',randomUUID());mkdirSync(path,{recursive:true});
- try{
-  if(installed)cpSync(packageRoot(root,sourceId,installed.generation),path,{recursive:true});
-  for(const f of packet.files){const target=join(path,f.path);safeDirectory(root,portable(relative(root,dirname(target))),{create:true});if(existsSync(target)&&lstatSync(target).isSymbolicLink())fail('ABILITY_PACKAGE_INVALID','能力包资源不能经过符号链接。');writeFileSync(target,Buffer.from(f.content,'base64'),{mode:f.mode});}
-  const configured=state.sources.find(s=>s.id===sourceId),name=configured?.name??installed?.origin.name??packet.sourceName??sourceId;
-  writeFileSync(join(path,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:sourceId,name}));
-  const prepared=structuredClone(state);prepared.sources=prepared.sources.filter(s=>s.id!==sourceId);prepared.sources.push({id:sourceId,name,kind:'package',path,enabled:true});
-  const p=plan(root,prepared,{action:'install',sourceId,ids:packet.roots});
-  p.action='import';p.planDigest=hash(['import',sha256(bytes),p.planDigest]);p.origin=installed?.origin??(configured?{id:sourceId,name,kind:configured.kind,location:configured.location,commit:null,dirty:false}:{id:sourceId,name,kind:'package',commit:null,dirty:false});delete p.source;
-  for(const object of p.objects){delete object.directory;delete object.path;delete object.source_root;}
-  p.dispose=()=>rmSync(path,{recursive:true,force:true});return p;
- }catch(e){rmSync(path,{recursive:true,force:true});throw e;}
+ const bytes=Buffer.from(input.package,'base64'),packet=validateAbilityPackage(decodeAbilityPackage(bytes));return compositeImportPlan(root,state,packet,input);
 }
-export function previewAbilityStore(root,input){const record=readStore(root);if(input.action==='import'){const p=importPlan(root,record.state,input);try{return {version:record.version,...publicPlan(p)};}finally{p.dispose();}}
- if(record.state.sources.find(s=>s.id===input.sourceId)?.kind==='http'&&['install','update'].includes(input.action))return preparedPlan(root,record.state,input).then(p=>{try{return {version:record.version,...publicPlan(p)};}finally{p.dispose?.();}});return {version:record.version,...publicPlan(plan(root,record.state,input))};}
+export function previewAbilityStore(root,input){if(input.action==='pack')return previewLocalAbilityPackage(root,input);const record=readStore(root);if(input.action==='import'){const p=importPlan(root,record.state,input);try{return {version:record.version,...publicPlan(p)};}finally{p.dispose();}}
+ if(input.action==='update'&&!input.id&&!input.ids||record.state.sources.find(s=>s.id===input.sourceId)?.kind==='http'&&['install','update'].includes(input.action))return preparedPlan(root,record.state,input).then(p=>{try{return {version:record.version,...publicPlan(p)};}finally{p.dispose?.();}});return {version:record.version,...publicPlan(plan(root,record.state,input))};}
 /** Export selected abilities, recursive same-source dependencies and relative resources. */
 export function packAbilityStore(root,input){
+ if(input.items){if(typeof input.output!=='string')fail('INVALID_ARGUMENTS','请选择输出文件output。');const {bytes,...plan}=localAbilityPackage(root,input),path=resolve(root,input.output);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,bytes,{flag:'wx'});return {...plan,path,sha256:sha256(bytes)};}
  if(typeof input.path!=='string'||typeof input.output!=='string'||!Array.isArray(input.ids)||!input.ids.length)fail('INVALID_ARGUMENTS','打包需要源目录path、能力ids和输出文件output。');
- const path=resolve(root,input.path),checked=inspectSource(root,path);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});const sourceId=checked.data.id,c=checked.catalog,selected=new Map();
- const visit=(id,version)=>{const row=resolveObject(c,{id,...(version?{version}:{})},sourceId);if(selected.has(id)){if(selected.get(id).version!==row.metadata.version)fail('ABILITY_STORE_DEPENDENCY_CONFLICT','能力包依赖版本冲突。');return;}const o=descriptor(c,row);selected.set(id,o);for(const d of o.dependencies)if(d.source===sourceId)visit(d.id,d.version);else if(d.source!=='system')fail('ABILITY_STORE_DEPENDENCY_MISSING','能力包只支持同源或Core依赖。');};input.ids.forEach(id=>visit(id));
- const resources=collectFiles([...selected.values()]),objects=[...selected.values()].map(({_row,_catalog,path,directory,source_root,...o})=>o),packet={protocol:'ksf-ability-package-v1',sourceId,sourceName:checked.data.name,roots:[...new Set(input.ids)],objects,files:[...resources.files].map(([path,f])=>({path,content:f.bytes.toString('base64'),size:f.bytes.length,sha256:f.digest,mode:f.mode}))};validateAbilityPackage(packet);const bytes=encodeAbilityPackage(packet);if(bytes.length>MAX_ABILITY_PACKAGE)fail('ABILITY_PACKAGE_INVALID','能力包超过20MiB。');const output=resolve(root,input.output);mkdirSync(dirname(output),{recursive:true});writeFileSync(output,bytes,{flag:'wx'});return {path:output,sourceId,objects:objects.map(o=>({id:o.id,version:o.version})),size:bytes.length,sha256:sha256(bytes)};
+ const path=resolve(root,input.path),checked=inspectSource(root,path);if(checked.errors.length)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});const sourceId=checked.data.id,packed=localAbilityPackage(root,{items:input.ids.map(id=>({id,source:sourceId}))},{catalog:checked.catalog});let bytes=packed.bytes;if(input.protocol!=='ksf-ability-package-v2'){const packet=decodeAbilityPackage(bytes);if(packet.groups.length!==1)fail('ABILITY_PACKAGE_INVALID','多来源导出请显式选择 v2 包协议。');bytes=encodeAbilityPackage({...packet.groups[0],protocol:'ksf-ability-package-v1',sourceName:checked.data.name,roots:[...new Set(input.ids)]});}const {bytes:ignored,...packet}=packed;const output=resolve(root,input.output);mkdirSync(dirname(output),{recursive:true});writeFileSync(output,bytes,{flag:'wx'});return {...packet,roots:input.protocol==='ksf-ability-package-v2'?packet.roots:[...new Set(input.ids)],planDigest:sha256(bytes),size:bytes.length,path:output,sourceId,sha256:sha256(bytes)};
 }
 
-function publishGeneration(root,p){
+function publishGeneration(root,p,{validate=true}={}){
  const generation=randomUUID(),path=packageRoot(root,p.sourceId,generation);safeDirectory(root,portable(relative(root,path)),{create:true});
  try{
   writeDurably(join(path,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:p.sourceId,name:p.origin.name}));mkdirSync(join(path,'能力'),{recursive:true});
@@ -167,7 +194,7 @@ function publishGeneration(root,p){
   for(const [rel,f] of p.files){const dest=join(path,rel);safeDirectory(root,portable(relative(root,dirname(dest))),{create:true});writeDurably(dest,f.bytes,{mode:f.mode});}
   for(const origin of p.origins)if(sha256(readSnapshot(origin.path).bytes)!==origin.digest)fail('ABILITY_STORE_SOURCE_CHANGED','源文件在安装时变化，请重新预览。');
   const objects=p.objects.map(({_row,_catalog,...o})=>o),c=catalog(root,{linked:false,extraSources:[{id:p.sourceId,root:path,installed:true,objects}]});
-  for(const row of c.rows.filter(r=>r.source===p.sourceId)){const errors=[...row.errors,...referenceResults(c,row).filter(r=>r.error).map(r=>r.error)];if(errors.length)fail('ABILITY_STORE_INSTALL_INVALID','安装副本未通过校验。',{errors});}
+  if(validate)for(const row of c.rows.filter(r=>r.source===p.sourceId)){const errors=[...row.errors,...referenceResults(c,row).filter(r=>r.error).map(r=>r.error)];if(errors.length)fail('ABILITY_STORE_INSTALL_INVALID','安装副本未通过校验。',{errors});}
   writeDurably(join(path,'installed-manifest.json'),JSON.stringify({objects:objects.map(o=>[o.id,o.version,o.digest])}));
   return {generation,origin:p.origin,roots:p.roots,objects,installedAt:new Date().toISOString()};
  }catch(e){rmSync(path,{recursive:true,force:true});throw e;}
@@ -226,19 +253,28 @@ export async function mutateAbilityStore(root,operation,input={},hooks={}){
     }if(source.kind==='http')await abilityHTTP(root,source).open({refresh:true});else checkedSource(root,source);source.checkedAt=new Date().toISOString();delete source.refreshError;
    }catch(e){source.refreshError=err(e);source.checkedAt=new Date().toISOString();result={source,error:source.refreshError};}}
    result??={source,repositoryPreserved:true};
-  }else if(['install','update','uninstall','migrate','copy','import'].includes(operation)){
+  }else if(['install','update','uninstall','migrate','copy','import','rollback'].includes(operation)){
    let p;
    // Reconcile a personal-directory publication interrupted before its receipt.
    const personal=validId(input.id)?join(root,types[input.id.split('.')[0]].user,input.id,'.ksf-store-origin.json'):null;
    if(operation==='copy'&&personal&&existsSync(personal)&&JSON.parse(readFileSync(personal)).operationId===input.operationId){result={id:input.id,source:'user',path:portable(relative(root,dirname(personal)))+'/'+types[input.id.split('.')[0]].entry};}
    else{p=operation==='import'?importPlan(root,state,input):await preparedPlan(root,state,{...input,action:operation});try{if(input.planDigest!==p.planDigest)fail('ABILITY_STORE_PREVIEW_CHANGED','安装计划已变化，请重新预览。');hooks.beforePublish?.();
-    if(operation==='copy')result=copyPersonal(root,state,p,input.operationId);
-    else{if(p.source)p.origin=p.source.kind==='http'?{id:p.source.id,name:p.source.name,kind:'http',location:p.source.location,catalogRevision:p.source.catalogRevision,commit:null,dirty:false}:{...p.origin,...await origin(root,p.source)};const installed=publishGeneration(root,p);state.installed[p.sourceId]=installed;if(operation==='migrate'){if(!state.sources.some(s=>s.id===p.sourceId))state.sources.push(p.source);state.adopted=[...new Set([...state.adopted,p.sourceId])];}result={...publicPlan(p),generation:installed.generation};}
+    if(operation==='rollback'){applyAbilityRollback(state,p);result={...publicPlan(p),restored:true};}
+    else if(operation==='copy')result=copyPersonal(root,state,p,input.operationId);
+    else{if(p.source)p.origin=p.source.kind==='http'?{id:p.source.id,name:p.source.name,kind:'http',location:p.source.location,catalogRevision:p.source.catalogRevision,commit:null,dirty:false}:{...p.origin,...await origin(root,p.source)};
+     const before=structuredClone(state),parts=p.plans??[p],changes={},staged=[];
+     try{for(const part of parts){const installed=publishGeneration(root,part,{validate:false});staged.push({sourceId:part.sourceId,installed});hooks.afterStage?.(part.sourceId,staged.length);changes[part.sourceId]={before:state.installed[part.sourceId]??null,afterGeneration:installed.generation};}
+      const next=structuredClone(state);for(const {sourceId,installed} of staged)next.installed[sourceId]=installed;if(operation==='migrate')next.adopted=[...new Set([...next.adopted,p.sourceId])];validateTransition(root,before,next,new Set(staged.map(s=>s.sourceId)));state.installed=next.installed;
+      state.schemaVersion=2;state.history??={};state.previous??={};state.history[input.operationId]={changes};for(const {sourceId} of staged)state.previous[sourceId]=input.operationId;for(const key of Object.keys(state.history))if(!Object.values(state.previous).includes(key))delete state.history[key];
+      state.knownReleases={...(state.knownReleases??{}),...(p.knownReleases??{})};for(const {installed} of staged)for(const object of installed.objects){const key=object.id+'@'+object.version;if(object.contentDigest){if(state.knownReleases[key]&&state.knownReleases[key]!==object.contentDigest)fail('ABILITY_STORE_VERSION_REUSED','已知历史存在同版本不同内容。',{id:object.id});state.knownReleases[key]=object.contentDigest;}}
+     }catch(error){for(const {sourceId,installed} of staged)rmSync(packageRoot(root,sourceId,installed.generation),{recursive:true,force:true});throw error;}
+     if(operation==='migrate'){if(!state.sources.some(s=>s.id===p.sourceId))state.sources.push(p.source);state.adopted=[...new Set([...state.adopted,p.sourceId])];}result={...publicPlan(p),generation:staged[0]?.installed.generation,generations:Object.fromEntries(staged.map(s=>[s.sourceId,s.installed.generation]))};}
+
     }finally{p.dispose?.();}
    }
    if(operation==='copy'&&!state.copies.some(c=>c.operationId===input.operationId))state.copies.push({...result,operationId:input.operationId,sourceId:input.sourceId});
   }else fail('INVALID_ARGUMENTS','未知能力商店操作。');
-  state.operations.push({id:input.operationId,fingerprint,result});state.operations=state.operations.slice(-128);const version=saveStore(root,state,record.version);return {...result,version};
+  state.operations.push({id:input.operationId,fingerprint,result});state.operations=state.operations.slice(-128);const version=saveStore(root,state,record.version);try{pruneAbilityGenerations(root,state);}catch{/* A committed installation remains authoritative; defer best-effort cleanup. */}return {...result,version};
  });
 }
 
@@ -248,11 +284,12 @@ export async function abilityStorePage(root,input={}){
  const clients=new Map();for(const s of state.sources.filter(s=>s.enabled&&s.kind==='http'&&(!input.sourceId||s.id===input.sourceId)&&(!['installed','updates'].includes(tab)||state.installed[s.id]?.objects.length)))try{const client=abilityHTTP(root,s),catalog=await client.open({refresh:input.refresh==='1'||tab==='updates'});clients.set(s.id,client);revisions[s.id]=catalog.revision;cache[s.id]=catalog.freshness;}catch(e){errors.push({...err(e),sourceId:s.id});}
  const revision=hash([local.version,revisions,query,type,tab]);let position={source:0,inner:null,offset:0};if(input.cursor){try{const p=JSON.parse(Buffer.from(input.cursor,'base64url'));if(p.revision!==revision)fail('STORE_CURSOR_EXPIRED','目录已更新，请刷新后继续浏览。');position=p.position;}catch(e){if(e.code)throw e;fail('STORE_CURSOR_INVALID','目录游标无效。');}}
  const personal=new Map(catalog(root).rows.filter(r=>r.source==='user'&&!r.errors.length).map(r=>[r.id,summary(r)]));
- const overlay=(s,row)=>{const existing=local.abilities.find(a=>a.sourceId===s.id&&a.id===row.id),installed=existing?.installed;return {key:s.id+':'+row.id,id:row.id,type:row.type,sourceId:s.id,sourceName:s.name,available:{id:row.id,name:row.name,description:row.description,version:row.latestVersion,status:'active',digest:row.detail.sha256},installed,personal:existing?.personal??personal.get(row.id)??null,dependencies:[],updateAvailable:!!installed&&compareVersion(row.latestVersion,installed.version)>0};};
- const match=a=>(!type||a.type===type)&&(!query||`${a.id} ${a.available?.name??a.installed?.name} ${a.available?.description??a.installed?.description}`.normalize('NFKC').toLowerCase().includes(query));
+ const overlay=(s,row)=>{const existing=local.abilities.find(a=>a.sourceId===s.id&&a.id===row.id),installed=existing?.installed;return {key:s.id+':'+row.id,id:row.id,type:row.type,sourceId:s.id,sourceName:s.name,available:row.withdrawn?undefined:{id:row.id,name:row.name,description:row.description,version:row.latestVersion,status:'active',digest:row.detail.sha256,...(row.distribution?{distribution:row.distribution}:{})},installed,personal:existing?.personal??personal.get(row.id)??null,dependencies:[],withdrawalNotice:row.withdrawn?'该能力当前没有可安装的公开版本，已装副本保留。':undefined,updateAvailable:!row.withdrawn&&!!installed&&compareVersion(row.latestVersion,installed.version)>0};};
+ const visible=a=>{const d=(a.available??a.installed)?.distribution;if(d?.entry!==false)return true;if(tab==='abilities')return false;return !d.owners.some(id=>local.abilities.some(owner=>owner.sourceId===a.sourceId&&owner.id===id&&owner.installed));};
+ const match=a=>visible(a)&&(!type||a.type===type)&&(!query||`${a.id} ${a.available?.name??a.installed?.name} ${a.available?.description??a.installed?.description}`.normalize('NFKC').toLowerCase().includes(query));
  const abilities=[];let next=null;
  if(tab==='installed'||tab==='updates'){
-  const candidates=[];for(const item of local.abilities.filter(a=>a.installed&&(!input.sourceId||a.sourceId===input.sourceId))){const client=clients.get(item.sourceId);let a=item;if(client)try{const d=await client.detail(item.id);if(d)a=overlay(state.sources.find(s=>s.id===item.sourceId),{...d,detail:{sha256:d.versions.sha256}});}catch(e){errors.push({...err(e),sourceId:item.sourceId});}if(match(a)&&(tab!=='updates'||a.updateAvailable))candidates.push(a);}
+  const candidates=[];for(const item of local.abilities.filter(a=>a.installed&&visible(a)&&(!input.sourceId||a.sourceId===input.sourceId))){const client=clients.get(item.sourceId);let a=item;if(client)try{const d=await client.detail(item.id);if(d)a=overlay(state.sources.find(s=>s.id===item.sourceId),{...d,detail:{sha256:d.versions.sha256}});}catch(e){errors.push({...err(e),sourceId:item.sourceId});}if(match(a)&&(tab!=='updates'||a.updateAvailable))candidates.push(a);}
   abilities.push(...candidates.slice(position.offset,position.offset+limit));if(position.offset+limit<candidates.length)next={...position,offset:position.offset+limit};
  }else if(tab!=='sources'){
   const sources=state.sources.filter(s=>s.enabled&&(!input.sourceId||s.id===input.sourceId));for(let at=position.source;at<sources.length;at++){const s=sources[at],client=clients.get(s.id);if(s.kind==='http'&&!client)continue;
@@ -265,6 +302,6 @@ export async function abilityStorePage(root,input={}){
 }
 export async function abilityStoreDetail(root,{sourceId,id}){
  const local=abilityStoreCatalog(root),source=readStore(root).state.sources.find(s=>s.id===sourceId),existing=local.abilities.find(a=>a.id===id&&a.sourceId===sourceId);if(source?.kind!=='http'||!source.enabled)return existing??null;
- try{const client=abilityHTTP(root,source),d=await client.detail(id);if(!d)return existing??null;const release=(await client.versions(id)).items[0];return {...existing,key:sourceId+':'+id,id,type:d.type,sourceId,sourceName:source.name,available:{id,name:d.name,description:d.description,version:d.latestVersion,status:release.status??'active',digest:release.package.sha256},personal:existing?.personal??catalog(root).rows.filter(r=>r.source==='user'&&r.id===id&&!r.errors.length).map(summary)[0]??null,dependencies:release.dependencies??[],updateAvailable:!!existing?.installed&&compareVersion(d.latestVersion,existing.installed.version)>0,revision:d.revision,freshness:d.freshness};}catch(e){if(existing)return {...existing,sourceError:err(e)};throw e;}
+ try{const client=abilityHTTP(root,source),d=await client.detail(id);if(!d)return existing??null;let page=await client.versions(id),release=page.items.find(r=>!r.withdrawn);while(!release&&page.nextCursor){page=await client.versions(id,{cursor:page.nextCursor});release=page.items.find(r=>!r.withdrawn);}if(!release)return existing?{...existing,available:undefined,updateAvailable:false,withdrawalNotice:'该能力版本已撤回，已安装副本仍可使用。'}:null;return {...existing,key:sourceId+':'+id,id,type:d.type,sourceId,sourceName:source.name,available:{id,name:d.name,description:d.description,version:d.latestVersion,status:release.status??'active',digest:release.package.sha256,...(release.distribution?{distribution:release.distribution}:{})},personal:existing?.personal??catalog(root).rows.filter(r=>r.source==='user'&&r.id===id&&!r.errors.length).map(summary)[0]??null,dependencies:release.dependencies??[],updateAvailable:!!existing?.installed&&compareVersion(d.latestVersion,existing.installed.version)>0,revision:d.revision,freshness:d.freshness};}catch(e){if(existing)return {...existing,sourceError:err(e)};throw e;}
 }
 export async function abilityStoreVersions(root,input){const source=requireSource(readStore(root).state,input.sourceId);if(source.kind==='http')return abilityHTTP(root,source).versions(input.id,input);const item=await abilityStoreDetail(root,input);return {revision:readStore(root).version,items:item?.available?[item.available]:[],nextCursor:null};}

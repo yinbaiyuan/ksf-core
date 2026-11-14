@@ -1,0 +1,5 @@
+import {publishSource,verifyPublishedSource} from '../../../applications/sdk/server/source-publication.mjs';
+import {decodeAbilityPackage,validateAbilityPackage,encodeAbilityPackage} from './package.js';import {contentIdentity,contentFiles,groupsOf} from './content.js';
+export function publishAbilitySource(input){return publishSource(input,{kind:'abilities',describe:bytes=>{const packet=validateAbilityPackage(decodeAbilityPackage(bytes)),groups=groupsOf(packet);packet.sourceId=input.source.id;for(const group of groups)for(const object of group.objects){object.contentDigest=contentIdentity(group,object);object.contentManifest=contentFiles(group,object).map(f=>({path:f.path,sha256:f.sha256,mode:f.mode}));}return{bytes:encodeAbilityPackage(packet),extension:'ksfabi',releases:groups.flatMap(group=>group.objects.filter(o=>packet.roots.includes(o.id)).map(o=>({...o,identity:o.contentDigest})))}}});}
+
+export const verifyAbilitySource=input=>verifyPublishedSource({...input,kind:'abilities',validatePackage:(bytes,id,release)=>validateAbilityPackage(decodeAbilityPackage(bytes),{id,version:release.version})});

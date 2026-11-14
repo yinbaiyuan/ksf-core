@@ -38,6 +38,7 @@ function git(path, args, run = spawnSync) {
   const result = run(binary, ['--no-replace-objects', ...(args[0] === 'ls-files' ? ['--literal-pathspecs'] : []), '-C', path, ...args], { encoding: 'utf8', env, timeout: 10000, maxBuffer: 4 * 1024 * 1024 });
   if (result.error?.code === 'ENOENT') fail('REPOSITORY_GIT_REQUIRED', 'Install Git to manage project repositories.');
   if (result.error || result.signal) fail('REPOSITORY_GIT_FAILED', 'Git could not complete the local operation.', path);
+  if(result.status!==0&&/license agreements|xcodebuild -license|xcrun: error|invalid active developer path/i.test(result.stderr??''))fail('REPOSITORY_GIT_UNAVAILABLE','本机 Git 无法运行：macOS 开发工具或 Xcode 许可尚未就绪，请检查 Git 安装和开发工具配置。',path);
   return result;
 }
 function scopeOf(root) {
@@ -76,6 +77,7 @@ function identity(root, path, run) {
     parentIsolation(root, run);
   }
   const top = git(real, ['rev-parse', '--show-toplevel'], run);
+  if(top.status!==0&&!/not a git repository/i.test(top.stderr??''))fail('REPOSITORY_GIT_FAILED','Git 无法检查此仓库，请检查本机 Git 及仓库访问权限。',path);
   if (top.status !== 0 || realpathSync.native(top.stdout.replace(/\r?\n$/, '')) !== realpathSync.native(real)) fail('REPOSITORY_ROOT_MISMATCH', 'The selected directory must itself be a Git working-tree root, not inherit its parent repository.', path);
   const outerCommon = commonDirectory(root, run, true);
   if (outerCommon && commonDirectory(real, run) === outerCommon) fail('REPOSITORY_SHARED_GIT', 'The engineering repository must not share Git history with the outer KSF repository; use an independent repository.', path);

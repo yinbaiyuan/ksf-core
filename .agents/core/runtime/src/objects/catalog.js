@@ -102,7 +102,7 @@ export function catalog(root, { linked = true, sourceFilter, extraSources = [] }
       for (const [type, definition] of Object.entries(types)) {
         const path = definition.user;
         try {
-          if(entry.installed){for(const object of entry.objects.filter(o=>o.id.split('.')[0]===type)){scan(inspect(object.relative),type,entry.id);const row=rows.find(r=>r.source===entry.id&&r.id===object.id);if(row&&(row.metadata?.version!==object.version||object.definitionDigest&&row.digest!==object.definitionDigest))row.errors.push({code:'ABILITY_STORE_INSTALLED_CHANGED',message:'已安装能力原件发生变化，请保留现场并核对安装版本。',target:row.path});}}
+          if(entry.installed){for(const object of entry.objects.filter(o=>o.id.split('.')[0]===type)){scan(inspect(object.relative),type,entry.id);const row=rows.find(r=>r.source===entry.id&&r.id===object.id);if(row){row.dependencyBindings=object.dependencies;row.releaseContentDigest=object.contentDigest;row.releaseObject=object;}if(row&&(row.metadata?.version!==object.version||object.definitionDigest&&row.digest!==object.definitionDigest))row.errors.push({code:'ABILITY_STORE_INSTALLED_CHANGED',message:'已安装能力原件发生变化，请保留现场并核对安装版本。',target:row.path});}}
           else if (existsSync(join(scanRoot, path))) scan(inspect(path), type, entry.id);
           scopes.push({ type, source: entry.id, path: join(scanRoot, path), complete: true });
         } catch (error) {

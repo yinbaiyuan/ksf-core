@@ -12,6 +12,7 @@ import {supportedCodexVersion} from '../src/ai-tasks/executors/codex-compatibili
 import {terminalText} from './helpers/platform.js';
 import {launchAgentBelongsToRoot,windowsLoginStartupJob} from '../src/platform/service.js';
 import {powershell,encodedCommand} from '../src/platform/windows.js';
+import {darwinGit} from '../src/platform/darwin-git.js';
 
 test('all adapters implement the same native-operation contract',()=>{
   for(const name of ['darwin','win32','linux']){
@@ -23,6 +24,17 @@ test('all adapters implement the same native-operation contract',()=>{
   const hook=platformServices('win32').hookCommand("E:\\中文 工作区\\quote'file");
   const script=Buffer.from(hook.split('-EncodedCommand ')[1],'base64').toString('utf16le');
   assert.match(script,/quote''file/);assert.match(script,/ksf\.ps1.*task hook/);
+});
+test('macOS Git selection keeps a usable system shim and falls back to an installed working Git without license changes',()=>{
+ const system='/usr/bin/git',clt='/Library/Developer/CommandLineTools/usr/bin/git',brew='/opt/homebrew/bin/git',calls=[];
+ const version={status:0,stdout:'git version 2.39.3\n'},license={status:69,stdout:'',stderr:'You have not agreed to the Xcode license agreements.'};
+ const run=(path,args,options)=>{calls.push(path);assert.deepEqual(args,['--version']);assert.equal(options.timeout,3000);return path===system?license:version;};
+ assert.equal(darwinGit({exists:()=>true,run:()=>version}),system);
+ assert.equal(darwinGit({exists:()=>true,run}),clt);assert.deepEqual(calls,[system,clt]);
+ assert.equal(darwinGit({exists:p=>p!==clt,run}),brew);
+ assert.equal(darwinGit({exists:()=>false,run:()=>{throw Error('must not launch');}}),system);
+ assert.equal(darwinGit({exists:()=>true,run:()=>({status:0,stdout:'not a Git executable'})}),system);
+ assert.equal(darwinGit({exists:()=>true,run:()=>({status:null,error:{code:'ETIMEDOUT'}})}),system);
 });
 test('context hooks are generated before Windows encoding and stay distinct from task hooks',()=>{
   const root="E:\\中文 工作区\\quote'file",win=platformServices('win32');

@@ -29,7 +29,9 @@ export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDi
  async function binary(ref){reference(ref);let bytes;
   if(!offlineOnly&&current?.freshness.latestConfirmed!==false)try{bytes=await http(new URL(ref.url,url).href,ref.size);}catch(e){if(!['STORE_UNAVAILABLE','TypeError','TimeoutError','AbortError'].includes(e.code??e.name))throw e;}
   if(!bytes&&cacheDirectory)try{bytes=await readFile(join(cacheDirectory,ref.sha256));}catch(e){if(e.code!=='ENOENT')throw e;}
-  if(!bytes&&baselineDirectory)try{if(/^(?:catalog|packages)\/[a-f0-9./-]+\.(?:json|ksfability)$/.test(ref.url))bytes=await readFile(join(baselineDirectory,ref.url));}catch(e){if(e.code!=='ENOENT')throw e;}
+  // Published resource URLs are opaque and retain their original names; newly
+  // exported user files use .ksfabi.
+  if(!bytes&&baselineDirectory)try{if(/^(?:catalog|packages)\/[a-f0-9./-]+\.(?:json|ksfabi|ksfability)$/.test(ref.url))bytes=await readFile(join(baselineDirectory,ref.url));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(!bytes){const before=current?.revision;if(before&&current.freshness.latestConfirmed){await open({refresh:true});if(current.revision!==before)throw fault('STORE_CURSOR_EXPIRED','目录已更新，请刷新后继续浏览。');}throw fault('STORE_RESOURCE_MISSING','目录分片不可用，请刷新或恢复连接。');}
   if(bytes.length!==ref.size||digest(bytes)!==ref.sha256)throw fault('STORE_INTEGRITY','目录资源大小或SHA-256校验失败。');
   await save(ref.sha256,bytes);return bytes;
@@ -45,7 +47,7 @@ export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDi
    const streams=refs.map(ref=>rows(ref,{after})[Symbol.asyncIterator]()),heads=await Promise.all(streams.map(s=>s.next()));
    candidates=(async function*(){while(heads.every(h=>!h.done)){const max=heads.map(h=>h.value.id).sort().at(-1);for(let i=0;i<heads.length;i++)while(!heads[i].done&&heads[i].value.id<max)heads[i]=await streams[i].next();if(heads.some(h=>h.done))return;if(heads.every(h=>h.value.id===max)){const row=await lookup(root.directory,max);if(row&&(!type||row.type===type)&&searchText(row).includes(query))yield row;for(let i=0;i<heads.length;i++)heads[i]=await streams[i].next();}}})();
   }else candidates=rows(root.directory,{after,type});
-  for await(const row of candidates){if(items.length===limit){more=true;break;}items.push(row);last=row.id;}
+  for await(const row of candidates){if(row.withdrawn)continue;if(items.length===limit){more=true;break;}items.push(row);last=row.id;}
   return {revision:root.revision,items,nextCursor:more?nextCursor(basis,last):null,freshness:root.freshness};
  }
  async function detail(id){const root=await open(),row=await lookup(root.directory,id);return row?{...await read(row.detail),revision:root.revision,freshness:root.freshness}:null;}

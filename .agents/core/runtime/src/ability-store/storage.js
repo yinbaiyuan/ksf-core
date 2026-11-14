@@ -14,13 +14,18 @@ export function readStore(root){
   const path=join(root,storePath,'state.json');if(!existsSync(path))return {state:emptyState(),version:'missing'};
   safeDirectory(root,storePath);if(lstatSync(path).isSymbolicLink())fail('ABILITY_STORE_STATE_INVALID','能力商店注册表不能是符号链接。');
   const bytes=readFileSync(path);let state;try{state=JSON.parse(bytes);}catch{fail('ABILITY_STORE_STATE_INVALID','能力商店注册表损坏，原件已保留。');}
-  if(state.schemaVersion!==1||!Number.isSafeInteger(state.revision)||!Array.isArray(state.sources)||!Array.isArray(state.adopted)||!Array.isArray(state.operations)||!Array.isArray(state.copies)||!state.installed||typeof state.installed!=='object')fail('ABILITY_STORE_STATE_INVALID','能力商店注册表格式不受支持。');
+  if(![1,2].includes(state.schemaVersion)||!Number.isSafeInteger(state.revision)||!Array.isArray(state.sources)||!Array.isArray(state.adopted)||!Array.isArray(state.operations)||!Array.isArray(state.copies)||!state.installed||typeof state.installed!=='object')fail('ABILITY_STORE_STATE_INVALID','能力商店注册表格式不受支持。');
   const ids=new Set();for(const s of state.sources){if(!validSourceId(s.id)||ids.has(s.id)||!['local','git','http'].includes(s.kind)||(s.kind==='http'?(typeof s.location!=='string'):typeof s.path!=='string'||!s.path)||typeof s.enabled!=='boolean')fail('ABILITY_STORE_STATE_INVALID','能力源注册信息无效。');ids.add(s.id);}
   for(const id of state.adopted)if(!validSourceId(id))fail('ABILITY_STORE_STATE_INVALID','迁移来源无效。');
   for(const [id,p] of Object.entries(state.installed)){
     if(!validSourceId(id)||!/^[-a-f0-9]{36}$/.test(p.generation)||!Array.isArray(p.roots)||!Array.isArray(p.objects))fail('ABILITY_STORE_STATE_INVALID','安装版本记录无效。');
     for(const o of p.objects)if(!validId(o.id)||!versionPattern.test(o.version)||typeof o.relative!=='string'||o.relative.startsWith('/')||o.relative.split('/').some(v=>!v||['.','..','.git','.upstream'].includes(v))||!Array.isArray(o.dependencies))fail('ABILITY_STORE_STATE_INVALID','安装能力记录无效。');
     if(p.roots.some(id=>!p.objects.some(o=>o.id===id)))fail('ABILITY_STORE_STATE_INVALID','显式安装项不存在。');
+  }
+  if(state.schemaVersion===2){
+    if(!state.knownReleases||typeof state.knownReleases!=='object'||!state.previous||typeof state.previous!=='object'||!state.history||typeof state.history!=='object')fail('ABILITY_STORE_STATE_INVALID','安装身份或恢复记录缺失。');
+    for(const [key,digest] of Object.entries(state.knownReleases)){const at=key.lastIndexOf('@');if(!validId(key.slice(0,at))||!versionPattern.test(key.slice(at+1))||!/^[a-f0-9]{64}$/.test(digest))fail('ABILITY_STORE_STATE_INVALID','发布内容身份记录无效。');}
+    for(const [source,id] of Object.entries(state.previous))if(!validSourceId(source)||typeof id!=='string'||!state.history[id]?.changes)fail('ABILITY_STORE_STATE_INVALID','恢复代次关联无效。');
   }
   state.sources=withDefaultAbilitySource(state.sources);return {state,version:sha256(bytes)};
 }
