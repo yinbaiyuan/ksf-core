@@ -110,4 +110,16 @@ export function missingRequirements(root, catalog, tests) {
   }
   return [...new Map(missing.map(m => [JSON.stringify(m), m])).values()];
 }
-export const matchesInput = (path, pattern) => path === pattern || path.startsWith(pattern + '/') || matchesGlob(path, pattern);
+const plainPaths = new Map();
+function plainPath(path) {
+  if (!plainPaths.has(path)) plainPaths.set(path, /^[a-zA-Z0-9_./-]+$/.test(path) &&
+    !/(?:\/\/|\/$|(?:^|\/)\.\.?(?:\/|$))/.test(path));
+  return plainPaths.get(path);
+}
+export const matchesInput = (path, pattern) => {
+  if (path === pattern || path.startsWith(pattern + '/')) return true;
+  // Normalized ASCII literal paths have no glob syntax or separator/case
+  // ambiguity. Avoid recompiling minimatch for every dependency comparison.
+  if (plainPath(path) && plainPath(pattern)) return false;
+  return matchesGlob(path, pattern);
+};
