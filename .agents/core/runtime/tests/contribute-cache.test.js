@@ -109,3 +109,14 @@ test('unrelated historical paths retain their records without bypassing checks f
   const tampered = JSON.parse(readFileSync(path)); tampered.core.revision = 'd'.repeat(40); writeAtomic(path,stableJSON(tampered));
   await assert.rejects(prepare(f),{code:'CONTRIBUTION_TAMPERED'});
 });
+
+test('GitHub terminal-LF presentation preserves frozen messages while edited text remains rejected', async t => {
+  const s = await submitted(t); assert.ok(s.plan.commitMessage.endsWith('\n'));
+  s.api.commit.message = s.plan.commitMessage.slice(0,-1);
+  assert.equal((await s.retry()).reused,true);
+  assert.ok(s.api.calls.every(call=>call.method==='GET'));
+  for (const message of [s.plan.commitMessage+' ',s.plan.commitMessage+'\n',s.plan.commitMessage.slice(0,-2)]) {
+    s.api.commit.message = message;
+    await assert.rejects(s.retry(),{code:'CONTRIBUTION_BRANCH_CHANGED'});
+  }
+});

@@ -16,6 +16,9 @@ import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { contributionCommitMessage, checkCommitMessage } from '../services/commit-message.js';
 import { requirePRDescription, checkPRDescription, contributionPRBody } from '../services/pr-description.js';
 
+// GitHub omits the final LF when presenting an otherwise identical Git message.
+const matchesCommitMessage = (actual, expected) => actual === expected || expected.endsWith('\n') && actual === expected.slice(0, -1);
+
 function publicDiff(path, base, bytes, baseMode, mode) {
   if ((base !== null && !textBytes(base)) || (bytes !== null && !textBytes(bytes))) return `Binary change: ${path}\n`;
   const temporary = mkdtempSync(join(tmpdir(), 'ksf-contribution-diff-'));
@@ -276,12 +279,12 @@ export async function submitContribution({ root, id, reviewed, dryRun = false, a
   let legacyTree;
   if (ref) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${ref.object.sha}`);
-    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
+    if (plan.schema_version >= 3 && !matchesCommitMessage(existing.message, plan.commitMessage)) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The contribution branch was changed remotely; it will not be overwritten.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (previous) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${commit}`);
-    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
+    if (plan.schema_version >= 3 && !matchesCommitMessage(existing.message, plan.commitMessage)) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The merged contribution commit differs from the reviewed contribution.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (pr) {
