@@ -94,9 +94,16 @@ export async function registryFiles(root, contracts) {
       if (!found) throw fail('COMPONENT_SOURCE_MISSING', '组件依赖不可读：' + target);
     }
   }
-  const hashes = {};
-  for (const file of [...files].sort()) hashes[file] = digest(await bytes(root, file));
-  return hashes;
+  const ordered = [...files].sort(), hashes = new Array(ordered.length);
+  let nextFile = 0;
+  await Promise.all(Array.from({length: Math.min(8, ordered.length)}, async () => {
+    while (nextFile < ordered.length) {
+      const index = nextFile++, file = ordered[index];
+      hashes[index] = [file, digest(await bytes(root, file))];
+    }
+  }));
+  // Preserve the canonical key order regardless of asynchronous completion.
+  return Object.fromEntries(hashes);
 }
 
 export async function loadRegistry(root, {verify = true} = {}) {

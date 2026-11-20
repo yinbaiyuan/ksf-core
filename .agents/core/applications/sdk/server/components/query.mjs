@@ -17,7 +17,9 @@ async function executeQuery({operation, selector = '', appDir, sdkRoot: explicit
   try {reference = await loadRegistry(sdkRoot);} catch (error) {return errorResult(operation, error.code ?? 'COMPONENT_REFERENCE_INVALID', error.message);}
   const resolution = await resolveTarget({appDir, sdkRoot: explicitSDK});
   const base = {protocol, ok: true, operation, catalogSource: reference.identity, target: resolution.target};
-  let targetRegistry;
+  // The reference was just fully verified. Reuse it only for this query when
+  // the resolved target is that exact SDK; successful results are rechecked below.
+  let targetRegistry = !resolution.issue && resolution.target?.sdkRoot === reference.root ? reference : undefined;
   const inspect = async (component, requestedExample, deferTypes = false) => {
     const referenceContract = reference.contracts.find(contract => contract.id === component.id) ?? null;
     if (component.delivery === 'planned') return {support: issue('notApplicable', 'COMPONENT_NOT_IMPLEMENTED'), contract: null, source: null};

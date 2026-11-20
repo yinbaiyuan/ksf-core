@@ -29,6 +29,42 @@ test('same SDK version with changed bytes is unknown until maintained metadata m
   assert.notEqual(updated.catalogSource.fingerprint, updated.contractSource.fingerprint);
 });
 
+test('a target sharing the reference SDK still rejects a resealed change during compilation', async t => {
+  const f = await fixture(t);
+  for (const file of ['server/source-path.mjs', ...['query', 'registry', 'target', 'typecheck'].map(name => 'server/components/' + name + '.mjs')]) {
+    await mkdir(dirname(join(f.target, file)), {recursive: true});
+    await copyFile(join(sdk, file), join(f.target, file));
+  }
+  // The isolated compiler injects a change at the type-check boundary. The
+  // other cases use the real compiler; this case protects final revalidation.
+  await rm(join(f.target, 'node_modules'));
+  const compiler = join(f.target, 'node_modules/typescript');
+  await mkdir(compiler, {recursive: true});
+  await symlink(join(sdk, 'node_modules/es-module-lexer'), join(f.target, 'node_modules/es-module-lexer'), process.platform === 'win32' ? 'junction' : 'dir');
+  await save(join(compiler, 'package.json'), {name: 'typescript', version: '0.0.0-fixture', bin: {tsc: 'compile.mjs'}});
+  await writeFile(join(compiler, 'compile.mjs'), `
+    import {readFileSync, writeFileSync} from 'node:fs';
+    import {createHash} from 'node:crypto';
+    const file = ${JSON.stringify(join(f.target, 'src/component-examples/button-basic.tsx'))};
+    const integrityFile = ${JSON.stringify(join(f.target, 'components/integrity.json'))};
+    const digest = value => createHash('sha256').update(value).digest('hex');
+    const changed = readFileSync(file, 'utf8') + '\\n// changed during compilation\\n';
+    writeFileSync(file, changed);
+    const integrity = JSON.parse(readFileSync(integrityFile, 'utf8'));
+    integrity.files['src/component-examples/button-basic.tsx'] = digest(changed);
+    integrity.fingerprint = digest(JSON.stringify(integrity.files));
+    writeFileSync(integrityFile, JSON.stringify(integrity));
+  `);
+  const localQuery = (await import(pathToFileURL(join(f.target, 'server/components/query.mjs')).href)).queryComponents;
+  const result = await localQuery({operation: 'read', selector: 'ACT-01', appDir: f.app});
+  assert.equal(result.target.sdkRoot, f.target);
+  assert.equal(result.targetSupport.status, 'unknown');
+  assert.equal(result.targetSupport.reason, 'SDK_CHANGED_DURING_QUERY');
+  assert.equal(result.canGenerateSdkUsage, false);
+  const current = await loadRegistry(f.target);
+  assert.notEqual(current.identity.fingerprint, result.catalogSource.fingerprint);
+});
+
 test('missing public subpath is unsupported even if the private source file remains', async t => {
   const f = await fixture(t), file = join(f.target, 'package.json'), pkg = await read(file);
   delete pkg.exports['./button']; await save(file, pkg);
