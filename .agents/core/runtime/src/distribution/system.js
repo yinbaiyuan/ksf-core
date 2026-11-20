@@ -5,6 +5,7 @@ import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, re
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { checkedPath, fileMode, parseJSON, readJSON, readRegular, textBytes, walkFiles, writeAtomic, writeJSON } from './files.js';
 import { compareVersions, versionParts } from './versions.js';
@@ -106,6 +107,20 @@ export async function systemCheck({ root, source, fetcher, api }) {
   return { current: current.version, latest: index.version, platform: selectedPlatform, installedPlatform: current.platform, platformSwitch, available: comparison > 0 || promotion || platformSwitch, sourcePromotion: promotion, sourceAhead,
     source: resolvedSource, indexURL: url, index, artifacts };
 }
+// Only derived documentation metadata may differ here. All payload fields,
+// including unknown future fields, must match before adopting the release bytes.
+function sameDocumentationPayload(local, remote) {
+  try {
+    const values = [local, remote].map(bytes => JSON.parse(bytes.toString('utf8')));
+    for (const value of values) {
+      if (value?.schemaVersion !== 1 || !Array.isArray(value.groups) || !Array.isArray(value.documents) || !isSHA(value.contentDigest)) return false;
+      versionParts(value.coreVersion);
+      delete value.coreVersion;
+      delete value.contentDigest;
+    }
+    return isDeepStrictEqual(values[0], values[1]);
+  } catch { return false; }
+}
 export async function planUpdate(root, current, incoming, entries) {
   const result = { files: new Map(), changes: [], conflicts: [] };
   const paths = [...new Set([...Object.keys(current.files), ...Object.keys(incoming.files)])].sort();
@@ -121,7 +136,8 @@ export async function planUpdate(root, current, incoming, entries) {
     else if (base && next && local && textBytes(local.bytes) && textBytes(remote.bytes)) {
       const original = await current.read(path);
       if (!textBytes(original)) { result.conflicts.push({ path, kind: 'binary' }); continue; }
-      const merged = mergeText(original, local.bytes, remote.bytes);
+      const merged = path === '.agents/core/docs/catalog.json' && sameDocumentationPayload(local.bytes, remote.bytes)
+        ? { conflict: false, bytes: remote.bytes } : mergeText(original, local.bytes, remote.bytes);
       if (merged.conflict) result.conflicts.push({ path, kind: 'text', merged: merged.bytes.toString('utf8') });
       else chosen = { bytes: merged.bytes, mode: local.mode === base.mode ? next.mode : local.mode };
     } else result.conflicts.push({ path, kind: !base ? 'add-add' : !next ? 'delete-modify' : !local ? 'modify-delete' : 'binary' });
