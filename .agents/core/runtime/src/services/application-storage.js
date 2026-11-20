@@ -13,10 +13,10 @@ export function jsonDataVersion(text,path){
   return value.schemaVersion;
 }
 /** Storage owns file durability; applications own conversion and business validation. */
-export function createApplicationStorage(root,{fault}={}) {
+export function createApplicationStorage(root,{fault,locks=createCoordinator()}={}) {
   root=resolve(root);
   const homes={user:join(root,'.agents/user-data/applications/data'),runtime:join(root,'.agents/runtime-data/applications/data')};
-  const locks=createCoordinator(),inflight=new Map();
+  const inflight=new Map();
   const declaration=(caller,name,scope)=>caller.dataStores?.find(s=>s.name===name&&s.scope===scope);
   function pathFor(caller,name,scope='user'){
     assert(Object.hasOwn(homes,scope),'APP_STORAGE_SCOPE_INVALID','存储范围需要 user 或 runtime。');
@@ -81,7 +81,7 @@ export function createApplicationStorage(root,{fault}={}) {
     assert(typeof text==='string'&&Buffer.byteLength(text)<=MAX_DATA,'APP_DATA_INVALID','应用数据必须是 8 MiB 以内的文本。');
     if(store)assert(jsonDataVersion(text,path)===store.schemaVersion,'APP_DATA_INCOMPATIBLE','写入数据版本与应用声明不符。');
     await safeDirectory(root,dirname(path));
-    return locks.run(path,()=>withAsyncFileLock(path+'.lock',async()=>{
+    return locks.run(path.normalize('NFC').toLowerCase(),()=>withAsyncFileLock(path+'.lock',async()=>{
       const current=await read(caller,name,{scope});
       if(store&&current.exists)assert(jsonDataVersion(current.text,path)===store.schemaVersion,'APP_DATA_MIGRATION_REQUIRED','请先迁移，不能用普通写入覆盖其他版本的数据。',409);
       if(Object.hasOwn(options??{},'ifMatch'))assert(options.ifMatch===current.etag,'APP_DATA_CONFLICT','应用数据已变化，请重读后合并。',409);
@@ -94,7 +94,7 @@ export function createApplicationStorage(root,{fault}={}) {
     assert(toVersion===store.schemaVersion&&store.migrateFrom.includes(fromVersion)&&fromVersion<toVersion,'APP_DATA_MIGRATION_UNSUPPORTED','未声明此数据迁移路径。');
     assert(typeof ifMatch==='string'&&typeof text==='string'&&Buffer.byteLength(text)<=MAX_DATA&&jsonDataVersion(text,path)===toVersion,'APP_DATA_INVALID','迁移候选、目标版本或原件条件无效。');
     await checkParent(path);
-    return locks.run(path,()=>withAsyncFileLock(path+'.lock',async()=>{
+    return locks.run(path.normalize('NFC').toLowerCase(),()=>withAsyncFileLock(path+'.lock',async()=>{
       const current=await read(caller,name,{scope});
       assert(current.exists&&current.etag===ifMatch,'APP_DATA_CONFLICT','迁移原件已变化，请重读后核对。',409);
       assert(jsonDataVersion(current.text,path)===fromVersion,'APP_DATA_CONFLICT','迁移来源版本已变化。',409);

@@ -1,0 +1,7 @@
+import {forwardRef,type ButtonHTMLAttributes} from 'react';
+import Source from './fidelity/kokonut/bell-button';
+import {FidelityScope} from './fidelity/scope';
+import {useValue,useFormReset,useElementRef} from './primitives/state';
+import './fidelity/styles/bell-button.css';
+export interface SubscribeButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,'value'|'defaultValue'|'onChange'>{subscribed?:boolean;defaultSubscribed?:boolean;onSubscribedChange?:(subscribed:boolean)=>void;count?:number;label?:string;subscribedLabel?:string;appearance?:'full'|'compact'|'icon'}
+export const SubscribeButton=forwardRef<HTMLButtonElement,SubscribeButtonProps>(function SubscribeButton({subscribed,defaultSubscribed=false,onSubscribedChange,count=1284,label='Notify me',subscribedLabel='Subscribed',appearance='full',...props},ref){const [checked,setChecked,reset]=useValue(subscribed,defaultSubscribed,onSubscribedChange),[root,assign]=useElementRef(ref);useFormReset(root,subscribed===undefined,reset,props.form);return <FidelityScope module="bell-button" inline><Source controlRef={assign} subscribed={checked} onSubscribedChange={setChecked} count={Number.isFinite(count)?Math.max(0,Math.floor(count)):0} label={label} subscribedLabel={subscribedLabel} variant={appearance==='full'?'default':appearance} disabled={props.disabled} className={props.className} nativeProps={props}/></FidelityScope>;});

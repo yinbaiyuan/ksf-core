@@ -5,7 +5,8 @@ export class APIError extends Error {
   constructor(message: string, code: string, data?: any) { super(message); this.code = code; this.data = data; }
 }
 
-export function createWorkbenchClient(fetcher: typeof fetch = (...args) => fetch(...args)) {
+export function createWorkbenchClient(fetcher: typeof fetch = (...args) => fetch(...args),options:{styleNonce?:string}={}) {
+  const documentNonce=options.styleNonce??(typeof document==='undefined'?undefined:document.querySelector<HTMLMetaElement>('meta[name="ksf-style-nonce"]')?.content);
   let session: Promise<WorkbenchSession> | undefined;
   let initial: WorkbenchSession | undefined;
   function getSession(): Promise<WorkbenchSession> {
@@ -14,7 +15,7 @@ export function createWorkbenchClient(fetcher: typeof fetch = (...args) => fetch
         if (initial && fresh.instanceId !== initial.instanceId) throw new APIError('工作台已切换到其他实例，请重新打开文档；未保存草稿仍保留在原实例。', 'WORKBENCH_INSTANCE_CHANGED');
         initial ??= fresh;
         // The document's CSP stays in force until navigation, even after a restart.
-        return { ...fresh, nonce: initial.nonce };
+        return { ...fresh, nonce: documentNonce??initial.nonce };
       }).catch(error => {
         if (session === pending) session = undefined;
         throw error;
@@ -37,7 +38,7 @@ export function createWorkbenchClient(fetcher: typeof fetch = (...args) => fetch
         headers: auth ? { 'Content-Type': 'application/json', 'X-KSF-Token': auth.token } : undefined,
         body: payload });
       const body = await response.json();
-      if (response.ok && body.ok !== false) return body.data ?? body;
+      if (response.ok && body.ok !== false) return Object.hasOwn(body,'data') ? body.data : body;
       const code = body.error?.code ?? 'REQUEST_FAILED';
       // Only explicit pre-write authentication rejections are safe to replay.
       // WEB_WRITE_FORBIDDEN also supports pages talking to an older local server.

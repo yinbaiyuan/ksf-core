@@ -9,6 +9,9 @@ export const LEGACY_APPLICATION_IDS = Object.freeze({
   'yinbaiyuan.lan-messenger':'com.ksf.cooperation-center',
   'com.yinbaiyuan.lan-messenger':'com.ksf.cooperation-center',
 });
+// Optional migrations require a confirmed package and an explicit installation transaction.
+export const OPTIONAL_APPLICATION_MIGRATIONS=Object.freeze({'com.ksf.terminal':'com.yinbaiyuan.terminal'});
+export const isApplicationIdentityAlias=(old,id)=>LEGACY_APPLICATION_IDS[old]===id||LEGACY_APPLICATION_IDS[old]===LEGACY_APPLICATION_IDS[id]&&Object.hasOwn(LEGACY_APPLICATION_IDS,old)||OPTIONAL_APPLICATION_MIGRATIONS[old]===id||OPTIONAL_APPLICATION_MIGRATIONS[LEGACY_APPLICATION_IDS[old]]===id;
 // Browser links and browser-only desktop state may outlive the installed host.
 export const applicationLinkId = id => id==='app-store'?'com.ksf.app-store':Object.hasOwn(LEGACY_APPLICATION_IDS,id)?LEGACY_APPLICATION_IDS[id]:id;
 export function migrateDesktopApplicationIds(value) {

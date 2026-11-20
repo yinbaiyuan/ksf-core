@@ -1,9 +1,20 @@
 import { createRoot } from 'react-dom/client';
 import { Desktop } from './desktop/desktop';
 import { MaterialProvider } from './components/material-provider';
+import {startFrontendClient} from './ui-runtime/client';
+import {initializeStyleNonce} from './style-nonce';
+import {startOverlayRuntime} from './overlay-runtime';
+import {startCommandRuntime} from './command-runtime';
 import './styles.css';
 import './material.css';
 import 'react-grid-layout/css/styles.css';
 import './desktop.css';
 import './apps/app-store.css';
+import './host-theme.css';
+// The independent Core guard checks initial styles before any application surface can start.
+await (window as Window&{__ksfFrontendBoot?:{prepare:()=>Promise<void>}}).__ksfFrontendBoot?.prepare();
+initializeStyleNonce();
+startOverlayRuntime();
+startCommandRuntime();
+startFrontendClient();
 createRoot(document.getElementById('root')!).render(<MaterialProvider><Desktop /></MaterialProvider>);

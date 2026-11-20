@@ -12,13 +12,21 @@ import { currentObjectId } from '../objects/legacy.js';
 import { project } from '../services/projects.js';
 import { fail } from './schema.js';
 import { ownershipOf, relatedOf, projectProjection, resolveKnowledge } from './targets.js';
+import {locateProjectResource} from '../projects/governance/locations.js';
 
 export function definitionContext(root) {
   let definitions;
   return { root, catalog() { return definitions ??= catalog(root); } };
 }
 function projectTarget(context, input) {
-  const result = project({ root: context.root, operation: 'read', ...input, part: 'metadata' });
+  let result;
+  try{result=project({ root: context.root, operation: 'read', ...input, part: 'metadata' });}
+  catch(error){
+    if(input.scope!=='current'||!['PROJECT_NOT_FOUND','PROJECT_DIRECTORY_MISSING'].includes(error.code))throw error;
+    const located=locateProjectResource(context.root,{path:'项目/'+input.name+'/project.md',metadataOnly:true});
+    if(located.relocated)return {name:posix.basename(posix.dirname(located.path)),scope:located.scope,path:located.path};
+    throw error;
+  }
   return { name: input.name, scope: input.scope, path: result.data.project.path };
 }
 export const registryFor = context => context.registry ??= targetRegistry(context.root);

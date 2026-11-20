@@ -207,6 +207,8 @@
     "tests",
     "../../applications/*/frontend.tsx",
     "../../applications/conversations/work-stats.tsx",
-    "../../applications/sdk/src/react.tsx"
+    "../../applications/sdk/src/react.tsx",
+    "../../applications/sdk/examples/*/frontend.tsx",
+    "../../applications/projects/private-ui"
   ]
 }

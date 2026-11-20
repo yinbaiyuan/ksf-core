@@ -1,0 +1,5 @@
+import {useState,useRef} from 'react';
+import {TreeSelect} from '@ksf/sdk/tree-select';
+import {Button} from '@ksf/sdk/button';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TreeSelectStatesExample(){const [value,setValue]=useState<string[]>(['design']);return <div className='ksf-demo-stack'><TreeSelect searchable clearable defaultExpandAll label='多选资料' nodes={[{id:'team',label:'工作空间',children:[{id:'design',label:'设计资料'},{id:'develop',label:'开发资料'},{id:'locked',label:'归档资料',disabled:true}]},{id:'personal',label:'个人空间',children:[{id:'notes',label:'笔记'},{id:'tasks',label:'任务'}]}]} multiple leafOnly value={value} onValueChange={setValue}/><output>{value.join('、')||'未选择'}；过滤后继续勾选也会保留其他选项。</output><TreeSelect searchable clearable defaultExpandAll label='禁用树选' nodes={[{id:'team',label:'工作空间',children:[{id:'design',label:'设计资料'},{id:'develop',label:'开发资料'},{id:'locked',label:'归档资料',disabled:true}]},{id:'personal',label:'个人空间',children:[{id:'notes',label:'笔记'},{id:'tasks',label:'任务'}]}]} disabled/></div>;}

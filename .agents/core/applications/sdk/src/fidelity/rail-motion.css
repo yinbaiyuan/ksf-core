@@ -1,0 +1,32 @@
+
+@keyframes kokonutui-rail-tilt {
+  0% { transform: perspective(900px) translateZ(-180px) rotateY(-14deg); }
+  50% { transform: perspective(900px) translateZ(0) rotateY(0deg); }
+  100% { transform: perspective(900px) translateZ(-180px) rotateY(14deg); }
+}
+@keyframes kokonutui-rail-parallax {
+  from { transform: translate3d(calc(var(--rail-depth) * -1), 0, 0); }
+  to { transform: translate3d(var(--rail-depth), 0, 0); }
+}
+@keyframes kokonutui-rail-details {
+  0%, 32% { opacity: 0; transform: translate3d(0, 6px, 0); }
+  45%, 55% { opacity: 1; transform: translate3d(0, 0, 0); }
+  68%, 100% { opacity: 0; transform: translate3d(0, 6px, 0); }
+}
+@supports (animation-timeline: view()) {
+  .kokonutui-rail-card { view-timeline: --kokonutui-rail inline; }
+  .kokonutui-rail-details {
+    animation: kokonutui-rail-details linear both;
+    animation-timeline: --kokonutui-rail;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .kokonutui-rail-tilt {
+      animation: kokonutui-rail-tilt linear both;
+      animation-timeline: --kokonutui-rail;
+    }
+    .kokonutui-rail-layer {
+      animation: kokonutui-rail-parallax linear both;
+      animation-timeline: --kokonutui-rail;
+    }
+  }
+}

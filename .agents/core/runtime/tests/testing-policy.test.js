@@ -11,6 +11,7 @@ import {validateLayeredCoverage,aggregateLayeredReports} from '../src/testing/ci
 import {sourceIdentity,validateProof} from '../src/testing/ci.js';
 import {fixtureDigest} from '../src/testing/fixtures.js';
 import {testEnvironment,executeTestPlan} from '../src/testing/runner.js';
+import {dependencyInputs} from '../src/testing/selection.js';
 import {scenarios,preservesAssertions,contractAssertions,retirementGuard,auditCoverage} from '../src/testing/coverage-audit.js';
 import {fileURLToPath} from 'node:url';
 import {gitBinary,nullDevice} from './helpers/platform.js';
@@ -149,6 +150,21 @@ test('selection follows current transitive imports and read-file literals withou
   const explicit=createTestPlan(f.root,parseTestOptions(['--suite','full','--changed']),{changes:{paths:[f.catalog.tests[0].path]}});
   assert.deepEqual(explicit.tests.map(t=>t.id),['logic','native']);
 });
+test('dependency scanning excludes dependency and Git directory roots before following symlinks',t=>{
+  const f=fixture(t),path=f.catalog.tests[0].path,allowed=f.runtime+'/src/allowed';
+  mkdirSync(join(f.root,allowed),{recursive:true});writeFileSync(join(f.root,allowed,'logic.js'),'export const value=1;\n');
+  const imports=["import '../src/allowed';"];
+  for(const name of ['node_modules','.git']){
+    const directory=join(f.root,f.runtime,'src',name);mkdirSync(directory,{recursive:true});
+    symlinkSync(join(f.root,allowed),join(directory,'linked'),'junction');
+    imports.push(`import '../src/${name}';`,`import '../src/${name}/linked';`);
+  }
+  writeFileSync(join(f.root,path),imports.join('\n'));
+  const inputs=dependencyInputs(f.root,[path]).get(path);
+  assert.ok(inputs.includes(allowed+'/logic.js'));
+  assert.equal(inputs.some(p=>p.split('/').some(part=>part==='node_modules'||part==='.git')),false);
+});
+
 test('incidental path strings cannot hide an unmapped owned source change',t=>{
   const f=fixture(t),path=f.runtime+'/src/incidental.js';
   writeFileSync(join(f.root,path),'export const added=true;\n');

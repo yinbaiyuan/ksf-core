@@ -4,6 +4,7 @@ import { objectQuery, objectMutation } from './objects.js';
 import { types } from '../objects/schema.js';
 import { knowledgeLinks, checkKnowledge } from './knowledge-organize.js';
 import { assert } from './workbench-common.js';
+import {previewLocalAbilityPackage,downloadLocalAbilityPackage} from '../ability-store/local-package.js';
 
 // Root-bound primitives. Applications own editing, review and cross-domain handoff.
 export function createAssetService(root, { files, reviewSource }) {
@@ -18,6 +19,8 @@ export function createAssetService(root, { files, reviewSource }) {
   };
   const textPath = path => { knowledgePath(path); assert(/\.md$/i.test(path), 'KNOWLEDGE_FORMAT_INVALID', '知识正文使用 Markdown 文件。'); return path; };
   return {
+    previewAbilityPackage(input) { return previewLocalAbilityPackage(root,input); },
+    downloadAbilityPackage(input) { return downloadLocalAbilityPackage(root,input); },
     listObjects(input = {}) {
       const request = objectInput(input);
       return objectQuery({ ...request, operation: 'list' });

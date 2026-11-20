@@ -38,7 +38,7 @@ export function inventory(folder, ignore = new Set()) {
     } else if (entry.isDirectory()) {
       entries.push({ ...base, type: 'directory' });
       for (const child of readdirSync(path).sort()) visit(join(path, child), name ? `${name}/${child}` : child);
-    } else if (entry.isFile()) entries.push({ ...base, type: 'file', sha256: sha256(readSnapshot(path).bytes) });
+    } else if (entry.isFile()) entries.push({ ...base, type: 'file', sha256: readSnapshot(path,{digestOnly:true}).digest });
     else fail('PROJECT_RESOURCE_UNSUPPORTED', 'Only ordinary files, directories and supported links can move.', { target: path });
   };
   visit(folder);

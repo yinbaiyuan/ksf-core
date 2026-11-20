@@ -1,0 +1,764 @@
+import {AnimatePresence, MotionConfig} from '../motion-provider';
+import '../styles/ai-message-queue.css';
+// Adapted for KSF from the free MIT Kokonut UI source.
+// Source commit: 655ec61161aff87721e4c60c3cc4dc3329f3e80e
+// Copyright (c) 2025 kokonutUI. Full license: ../../../THIRD_PARTY_NOTICES.txt
+import {useScopedEffect as useEffect,useScopedReducedMotion as useReducedMotion} from "../scope";
+"use client";
+
+/**
+ * @author: @kokonutui
+ * @description: AI Message Queue
+ * @version: 1.1.0
+ * @date: 2026-10-21
+ * @license: MIT
+ * @website: https://kokonutui.com
+ * @github: https://github.com/kokonut-labs/kokonutui
+ */
+
+import {
+  ArrowUp,
+  Check,
+  CornerDownLeft,
+  GripVertical,
+  ListPlus,
+  Pencil,
+  Play,
+  Square,
+  X,
+} from "lucide-react";
+import {motion, Reorder, useDragControls} from 'motion/react';
+import {type KeyboardEvent, useCallback, useRef, useState} from "react";
+import type {Ref} from "react";
+import { cn } from "../../lib/utils";
+
+export interface AgentResponse {
+  /** What the agent shows while it works, one line per step. */
+  steps: string[];
+  reply: string;
+}
+
+/**
+ * One update from a live run: a `step` starts a new line of work (the one
+ * before it is done), a `text` adds to the reply.
+ */
+export type AgentUpdate = { step: string } | { text: string };
+
+export interface QueuedMessage {
+  id: string;
+  text: string;
+}
+
+export interface AIMessageQueueProps {
+  title?: string;
+  /**
+   * The message the agent is working on when the component mounts. The
+   * demo's when `respond` is left out.
+   */
+  initialPrompt?: string;
+  /** Follow-ups already waiting in the queue. */
+  initialQueue?: string[];
+  /**
+   * Runs the agent on a message. Return a stream of updates (steps as they
+   * start, reply text as it comes) and the run follows it, ending when the
+   * stream does. Stop and Send now abort `signal`; a throw ends the run with
+   * the error's message. Or return fixed steps and a reply, played on
+   * `stepMs`. Demo when omitted.
+   */
+  respond?: (
+    text: string,
+    signal: AbortSignal
+  ) => AgentResponse | AsyncIterable<AgentUpdate>;
+  /** Called with the queue whenever it changes, to keep it across reloads. */
+  onQueueChange?: (queue: QueuedMessage[]) => void;
+  /** Milliseconds per step of a run with fixed steps. */
+  stepMs?: number;
+  className?: string;controlRef?:Ref<HTMLDivElement>;workspace?:{entries:Entry[];queue:QueuedMessage[];paused:boolean;draft:string;onDraftChange:(text:string)=>void;onQueueChange:(queue:QueuedMessage[])=>void;onSubmit:(text:string,immediate:boolean)=>void;onStop:()=>void;onResume:()=>void;onSendNow:(id:string)=>void};
+}
+
+interface UserEntry {
+  id: string;
+  role: "user";
+  text: string;
+}
+
+interface AgentEntry {
+  id: string;
+  role: "agent";
+  steps: string[];
+  reply: string;
+  step: number;
+  status: "running" | "done" | "stopped";
+  seconds: number;
+  /** Follows a stream of updates rather than a timer. */
+  live?: boolean;
+  /** Why the run ended early. */
+  error?: string;
+}
+
+type Entry = UserEntry | AgentEntry;
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+const APPLE = /Mac|iPhone|iPad/;
+
+const DEMO: Record<string, AgentResponse> = {
+  "Move session handling onto the new token store": {
+    steps: [
+      "Reading src/auth/session.ts",
+      "Finding every getSession call",
+      "Editing 6 files",
+      "Running auth tests",
+    ],
+    reply:
+      "Session handling now reads from TokenStore. I updated 6 files and the auth tests pass.",
+  },
+  "Also add a test for expired tokens": {
+    steps: [
+      "Opening session.test.ts",
+      "Writing the expired token case",
+      "Running auth tests",
+    ],
+    reply:
+      "Added a test that expires a token mid-request and checks we answer 401. 14 of 14 pass.",
+  },
+  "Keep the old cookie name for now": {
+    steps: [
+      "Searching for SESSION_COOKIE",
+      "Restoring kk_session",
+      "Running auth tests",
+    ],
+    reply:
+      "The cookie stays kk_session so nobody gets signed out. I left a TODO to rename it after the migration.",
+  },
+  "Then open a PR": {
+    steps: [
+      "Writing the PR description",
+      "Pushing auth/token-store",
+      "Opening the pull request",
+    ],
+    reply:
+      "Opened #482, Move sessions onto TokenStore, with the test and the cookie change in it.",
+  },
+};
+
+const demoRespond = (text: string): AgentResponse =>
+  DEMO[text] ?? {
+    steps: ["Reading the thread", "Making the change", "Checking the result"],
+    reply: "Done, that's in. The tests still pass.",
+  };
+
+let counter = 0;
+const uid = (prefix: string) => {
+  counter += 1;
+  return `${prefix}-${counter}`;
+};
+
+const useModKey = () => {
+  const [mod, setMod] = useState("⌘");
+  useEffect(() => {
+    if (!APPLE.test(navigator.userAgent)) {
+      setMod("Ctrl");
+    }
+  }, []);
+  return mod;
+};
+
+type Respond = NonNullable<AIMessageQueueProps["respond"]>;
+
+const isStream = (
+  value: AgentResponse | AsyncIterable<AgentUpdate>
+): value is AsyncIterable<AgentUpdate> => Symbol.asyncIterator in value;
+
+const reasonOf = (error: unknown) =>
+  error instanceof Error && error.message
+    ? error.message
+    : "The run failed. Try again.";
+
+const DEMO_QUEUE = [
+  "Also add a test for expired tokens",
+  "Keep the old cookie name for now",
+];
+
+export default function AIMessageQueue({title='Agent queue',className,controlRef,workspace}:AIMessageQueueProps){
+  const state=workspace!,entries=state.entries,queue=state.queue,paused=state.paused,draft=state.draft;
+  const setDraft=state.onDraftChange,setQueue=(next:QueuedMessage[]|((queue:QueuedMessage[])=>QueuedMessage[]))=>state.onQueueChange(typeof next==='function'?next(queue):next);
+  const setPaused=(value:boolean)=>{if(!value)state.onResume();};
+  const [announcement,setAnnouncement]=useState(''),mod=useModKey(),scrollRef=useRef<HTMLDivElement>(null),inputRef=useRef<HTMLTextAreaElement>(null);
+  const last=entries.at(-1),running=last?.role==='agent'&&last.status==='running';
+  const count=entries.length,step=last?.role==='agent'?last.step:0;
+  useEffect(()=>{const el=scrollRef.current;if(count>0&&el)el.scrollTo({top:el.scrollHeight+step,behavior:'smooth'});},[count,step]);
+  const submit=(now:boolean)=>{const text=draft.trim();if(text)state.onSubmit(text,now);},stopCurrent=state.onStop;
+  const onKeyDown=(event:KeyboardEvent<HTMLTextAreaElement>)=>{if(event.nativeEvent.isComposing||event.nativeEvent.keyCode===229)return;if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit(event.metaKey||event.ctrlKey);}};
+  const toComposer=()=>{if(inputRef.current?.ownerDocument.activeElement?.matches(':focus-visible'))inputRef.current.focus({preventScroll:true});};
+  const queueing=running&&draft.trim().length>0,action:'stop'|'queue'|'send'=queueing?'queue':running?'stop':'send';
+
+  return (
+    <>
+      <div
+        className={cn(
+          "flex w-full max-w-md flex-col rounded-2xl bg-white ring-1 ring-black/[0.08] dark:bg-zinc-900 dark:ring-white/10",
+          className
+        )}
+        data-state={running ? "running" : "idle"} ref={controlRef} role="region" aria-label={title}
+      >
+        <header className="flex items-center gap-2 border-black/[0.06] border-b px-4 py-3 dark:border-white/[0.08]">
+          <h2 className="min-w-0 flex-1 truncate font-medium text-[13px] text-zinc-900 dark:text-zinc-100">
+            {title}
+          </h2>
+          <span
+            className={cn(
+              "text-[12px] tabular-nums",
+              "flex items-center gap-1.5",
+              running
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-zinc-400 dark:text-zinc-500"
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-1.5 rounded-full transition-colors duration-300",
+                running
+                  ? "bg-blue-500 dark:bg-blue-400"
+                  : "bg-zinc-300 dark:bg-zinc-600"
+              )}
+            />
+            {running ? "Working" : "Idle"}
+          </span>
+        </header>
+
+        <div
+          className="h-72 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-width:thin]"
+          ref={scrollRef}
+        >
+          <div className="flex min-h-full flex-col justify-end gap-4">
+            <AnimatePresence initial={false}>
+              {entries.map((entry) => (
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  key={entry.id}
+                  transition={{ duration: 0.3, ease: EASE_OUT }}
+                >
+                  {entry.role === "user" ? (
+                    <div className="flex justify-end">
+                      <p className="max-w-[85%] rounded-2xl rounded-br-md bg-zinc-100 px-3.5 py-2 text-[13px] text-zinc-800 leading-snug dark:bg-zinc-800 dark:text-zinc-100">
+                        {entry.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <AgentBlock entry={entry} />
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="p-2 pt-0">
+          <div className="rounded-2xl bg-zinc-50 ring-1 ring-black/[0.07] dark:bg-zinc-800/60 dark:ring-white/[0.08]">
+            <QueueList
+              onClear={() => {
+                setQueue([]);
+                toComposer();
+              }}
+              onEdit={(id, text) =>
+                setQueue((q) =>
+                  q.map((m) => (m.id === id ? { ...m, text } : m))
+                )
+              }
+              onMoved={(text, position) =>
+                setAnnouncement(`Moved "${text}" to position ${position}`)
+              }
+              onRemove={(id) => {
+                setQueue((q) => q.filter((m) => m.id !== id));
+                toComposer();
+              }}
+              onReorder={setQueue}
+              onResume={() => setPaused(false)}
+              onSendNow={(m) => {
+                state.onSendNow(m.id);
+                toComposer();
+              }}
+              paused={paused && !running}
+              progress={
+                running && !last.live && last.steps.length > 0
+                  ? (last.step + 1) / last.steps.length
+                  : 0
+              }
+              queue={queue}
+            />
+            <span aria-live="polite" className="sr-only">
+              {announcement}
+            </span>
+            <div className="flex items-end gap-2 p-2">
+              <textarea
+                aria-label="Message the agent"
+                className="max-h-28 min-h-8 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-[13px] text-zinc-900 leading-5 caret-blue-500 outline-hidden placeholder:text-zinc-400 dark:text-zinc-100 dark:caret-blue-400 dark:placeholder:text-zinc-500 [@media(pointer:coarse)]:text-base"
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder={
+                  running
+                    ? "Queue a follow-up…"
+                    : "Ask the agent to do something…"
+                }
+                ref={inputRef}
+                rows={1}
+                value={draft}
+              />
+              <ComposerAction
+                draft={draft}
+                mode={action}
+                onSend={() => submit(false)}
+                onStop={() => {
+                  stopCurrent();
+
+                }}
+              />
+            </div>
+          </div>
+          <p className="flex h-7 items-center gap-1 px-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+            {running ? (
+              <>
+                <CornerDownLeft aria-hidden="true" className="size-3" />
+                to queue
+                <span className="mx-1">·</span>
+                <kbd className="font-sans">{mod}</kbd>
+                <CornerDownLeft aria-hidden="true" className="size-3" />
+                to send now
+              </>
+            ) : (
+              "The agent picks up queued messages when it finishes"
+            )}
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AgentBlock({ entry }: { entry: AgentEntry }) {
+  const working = entry.status === "running";
+  const current =
+    entry.steps[Math.min(entry.step, entry.steps.length - 1)] ?? "Thinking";
+  const showReply =
+    entry.status === "done" || (entry.live === true && entry.reply !== "");
+  return (
+    <div className="space-y-1.5">
+      <div className="flex h-5 items-center gap-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+        <StatusIcon status={entry.status} />
+        {working ? (
+          <>
+            <span className="relative h-5 min-w-0 flex-1 overflow-hidden">
+              <AnimatePresence initial={false} mode="popLayout">
+                <motion.span
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  className="absolute inset-0 truncate leading-5"
+                  exit={{ y: -10, opacity: 0, filter: "blur(2px)" }}
+                  initial={{ y: 10, opacity: 0, filter: "blur(2px)" }}
+                  key={entry.step}
+                  transition={{ duration: 0.25, ease: EASE_OUT }}
+                >
+                  {current}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+            <span className="shrink-0 text-zinc-400 tabular-nums dark:text-zinc-500">
+              {entry.live
+                ? `${entry.seconds}s`
+                : `${entry.step + 1}/${entry.steps.length} · ${entry.seconds}s`}
+            </span>
+          </>
+        ) : (
+          <EndLine entry={entry} />
+        )}
+      </div>
+      <AnimatePresence initial={false}>
+        {showReply && (
+          <motion.p
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            className="text-[13px] text-zinc-800 leading-relaxed dark:text-zinc-200"
+            initial={{ opacity: 0, filter: "blur(3px)" }}
+            transition={{ duration: 0.35, ease: EASE_OUT }}
+          >
+            {entry.reply}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function EndLine({ entry }: { entry: AgentEntry }) {
+  if (entry.error) {
+    return (
+      <span className="min-w-0 truncate text-rose-600 dark:text-rose-400">
+        {entry.error}
+      </span>
+    );
+  }
+  if (entry.status === "done") {
+    return (
+      <span>
+        {entry.steps.length} steps · {entry.seconds}s
+      </span>
+    );
+  }
+  return (
+    <span>
+      Stopped after {entry.step} of {entry.steps.length} steps
+    </span>
+  );
+}
+
+function ComposerAction({
+  mode,
+  draft,
+  onSend,
+  onStop,
+}: {
+  mode: "stop" | "queue" | "send";
+  draft: string;
+  onSend: () => void;
+  onStop: () => void;
+}) {
+  const swap = {
+    initial: { opacity: 0, filter: "blur(2px)" },
+    animate: { opacity: 1, filter: "blur(0px)" },
+    exit: { opacity: 0, filter: "blur(2px)" },
+    transition: { duration: 0.14, ease: EASE_OUT },
+  };
+  // The wrapper fades, so the button's own disabled opacity still shows.
+  return (
+    <AnimatePresence initial={false} mode="popLayout">
+      <motion.span className="flex shrink-0" key={mode} {...swap}>
+        {mode === "stop" ? (
+          <button
+            aria-label="Stop the agent"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-zinc-700 transition-colors duration-150 hover:bg-zinc-300 active:bg-zinc-400/70 dark:bg-zinc-700 dark:text-zinc-200 dark:active:bg-zinc-500 dark:hover:bg-zinc-600"
+            onClick={onStop}
+            type="button"
+          >
+            <Square className="size-3 fill-current" />
+          </button>
+        ) : (
+          <button
+            aria-label={mode === "queue" ? "Add to queue" : "Send"}
+            className="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-zinc-900 px-2.5 font-medium text-[12px] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_1px_2px_rgb(0_0_0/0.16)] transition-[background-color,opacity] duration-150 hover:bg-zinc-800 active:bg-zinc-700 disabled:opacity-30 dark:bg-white dark:text-zinc-900 dark:active:bg-zinc-300 dark:hover:bg-zinc-200"
+            disabled={!draft.trim()}
+            onClick={onSend}
+            type="button"
+          >
+            {mode === "queue" ? (
+              <>
+                <ListPlus aria-hidden="true" className="size-3.5" />
+                Queue
+              </>
+            ) : (
+              <ArrowUp aria-hidden="true" className="size-3.5" />
+            )}
+          </button>
+        )}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
+function QueueList({
+  queue,
+  paused,
+  progress,
+  onMoved,
+  onReorder,
+  onEdit,
+  onRemove,
+  onSendNow,
+  onClear,
+  onResume,
+}: {
+  queue: QueuedMessage[];
+  paused: boolean;
+  /** How far the current run is, 0 to 1. The next row in line shows it. */
+  progress: number;
+  onMoved: (text: string, position: number) => void;
+  onReorder: (queue: QueuedMessage[]) => void;
+  onEdit: (id: string, text: string) => void;
+  onRemove: (id: string) => void;
+  onSendNow: (message: QueuedMessage) => void;
+  onClear: () => void;
+  onResume: () => void;
+}) {
+  const move = (index: number, by: number) => {
+    const to = index + by;
+    if (to < 0 || to >= queue.length) {
+      return;
+    }
+    const next = [...queue];
+    const [item] = next.splice(index, 1);
+    next.splice(to, 0, item);
+    onReorder(next);
+    onMoved(item.text, to + 1);
+  };
+
+  return (
+    <AnimatePresence initial={false}>
+      {queue.length > 0 && (
+        <motion.div
+          animate={{ height: "auto", opacity: 1 }}
+          className="overflow-hidden"
+          exit={{ height: 0, opacity: 0 }}
+          initial={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.25, ease: EASE_OUT }}
+        >
+          <div className="border-black/[0.06] border-b px-1.5 pt-1.5 pb-1 dark:border-white/[0.08]">
+            <div className="flex h-6 items-center gap-2 px-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+              <span>
+                {paused ? "Queue paused" : "Queued"}
+                <span className="ml-1 tabular-nums">{queue.length}</span>
+              </span>
+              {paused && (
+                <button
+                  className="flex items-center gap-1 rounded-full px-1 font-medium text-zinc-800 transition-colors duration-100 hover:bg-zinc-900/[0.06] dark:text-zinc-100 dark:hover:bg-white/10"
+                  onClick={onResume}
+                  type="button"
+                >
+                  <Play aria-hidden="true" className="size-2.5 fill-current" />
+                  Resume
+                </button>
+              )}
+              <button
+                className="ml-auto rounded-full px-1 transition-colors duration-100 hover:bg-zinc-900/[0.06] hover:text-zinc-800 dark:hover:bg-white/10 dark:hover:text-zinc-100"
+                onClick={onClear}
+                type="button"
+              >
+                Clear
+              </button>
+            </div>
+            <Reorder.Group
+              axis="y"
+              className="space-y-0.5"
+              onReorder={onReorder}
+              values={queue}
+            >
+              <AnimatePresence initial={false}>
+                {queue.map((message, index) => (
+                  <QueueRow
+                    index={index}
+                    key={message.id}
+                    message={message}
+                    next={index === 0}
+                    onEdit={(text) => onEdit(message.id, text)}
+                    onMove={(by) => move(index, by)}
+                    onRemove={() => onRemove(message.id)}
+                    onSendNow={() => onSendNow(message)}
+                    progress={paused ? 0 : progress}
+                  />
+                ))}
+              </AnimatePresence>
+            </Reorder.Group>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function QueueRow({
+  message,
+  index,
+  next,
+  progress,
+  onEdit,
+  onMove,
+  onRemove,
+  onSendNow,
+}: {
+  message: QueuedMessage;
+  index: number;
+  next: boolean;
+  progress: number;
+  onEdit: (text: string) => void;
+  onMove: (by: number) => void;
+  onRemove: () => void;
+  onSendNow: () => void;
+}) {
+  const controls = useDragControls();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(message.text);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editRef = useRef<HTMLButtonElement>(null);
+  /** Set once an edit ends, so the blur that follows can't save it again. */
+  const finished = useRef(false);
+
+  useEffect(() => {
+    if (editing) {
+      finished.current = false;
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  /** Ends the edit. Escape passes `save: false`; keyboard exits refocus Edit. */
+  const finish = (save: boolean, refocus: boolean) => {
+    if (finished.current) {
+      return;
+    }
+    finished.current = true;
+    const text = value.trim();
+    if (save && text) {
+      onEdit(text);
+    } else {
+      setValue(message.text);
+    }
+    setEditing(false);
+    if (refocus) {
+      editRef.current?.focus();
+    }
+  };
+
+  const icon =
+    "flex size-6 shrink-0 items-center justify-center rounded-full text-zinc-400 outline-hidden transition-colors duration-100 hover:bg-zinc-900/[0.06] hover:text-zinc-800 focus-visible:bg-zinc-900/[0.06] active:bg-zinc-900/[0.1] dark:active:bg-white/15 focus-visible:text-zinc-800 dark:text-zinc-500 dark:focus-visible:bg-white/10 dark:focus-visible:text-zinc-100 dark:hover:bg-white/10 dark:hover:text-zinc-100";
+
+  return (
+    <Reorder.Item
+      animate={{ opacity: 1, y: 0 }}
+      className="group/row relative flex h-8 items-center gap-1 overflow-hidden rounded-xl bg-white pr-1 pl-0.5 ring-1 ring-black/[0.05] dark:bg-zinc-900 dark:ring-white/[0.06]"
+      dragControls={controls}
+      dragListener={false}
+      exit={{ opacity: 0, y: -6, transition: { duration: 0.15 } }}
+      initial={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.22, ease: EASE_OUT }}
+      value={message}
+      whileDrag={{
+        boxShadow: "0 8px 20px -8px rgb(0 0 0 / 0.25)",
+        zIndex: 10,
+      }}
+    >
+      <button
+        aria-label={`Move "${message.text}". Use the arrow keys to reorder`}
+        className={cn(icon, "cursor-grab touch-none active:cursor-grabbing")}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            event.preventDefault();
+            onMove(event.key === "ArrowUp" ? -1 : 1);
+          }
+        }}
+        onPointerDown={(event) => controls.start(event)}
+        type="button"
+      >
+        <GripVertical className="size-3.5" />
+      </button>
+      {next && (
+        <motion.span
+          animate={{ scaleX: progress, opacity: progress > 0 ? 1 : 0 }}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left bg-blue-500/70 dark:bg-blue-400/70"
+          initial={false}
+          transition={{ duration: 0.4, ease: EASE_OUT }}
+        />
+      )}
+      <span className="w-3.5 shrink-0 text-center text-[11px] text-zinc-400 tabular-nums dark:text-zinc-500">
+        {index + 1}
+      </span>
+      {editing ? (
+        <input
+          aria-label="Edit queued message"
+          className="h-6 min-w-0 flex-1 rounded-md bg-zinc-100 px-1.5 text-[12px] text-zinc-900 outline-hidden dark:bg-zinc-800 dark:text-zinc-100 [@media(pointer:coarse)]:text-base"
+          onBlur={() => finish(true, false)}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing||event.nativeEvent.keyCode===229) {
+              return;
+            }
+            if (event.key === "Enter") {
+              event.preventDefault();
+              finish(true, true);
+            } else if (event.key === "Escape") {
+              event.preventDefault();
+              finish(false, true);
+            }
+          }}
+          ref={inputRef}
+          value={value}
+        />
+      ) : (
+        <p className="min-w-0 flex-1 truncate px-1.5 text-[12px] text-zinc-700 dark:text-zinc-200">
+          {message.text}
+        </p>
+      )}
+      <div className="flex shrink-0 items-center opacity-100 transition-opacity duration-150 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:focus-within:opacity-100 [@media(hover:hover)]:group-hover/row:opacity-100">
+        <button
+          aria-label="Edit"
+          className={icon}
+          onClick={() => setEditing(true)}
+          ref={editRef}
+          type="button"
+        >
+          <Pencil className="size-3" />
+        </button>
+        <button
+          aria-label="Send now"
+          className={icon}
+          onClick={onSendNow}
+          title="Stop the agent and send this now"
+          type="button"
+        >
+          <ArrowUp className="size-3.5" />
+        </button>
+        <button
+          aria-label="Remove from queue"
+          className={icon}
+          onClick={onRemove}
+          type="button"
+        >
+          <X className="size-3.5" />
+        </button>
+      </div>
+    </Reorder.Item>
+  );
+}
+
+const FACE =
+  "absolute transition-[opacity,filter,scale] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+const face = (on: boolean) =>
+  on ? "scale-100 opacity-100 blur-0" : "scale-[0.3] opacity-0 blur-[3px]";
+
+/**
+ * The working pulse, the done check and the stopped square share one slot
+ * and crossfade, so finishing reads as the same mark changing state.
+ */
+function StatusIcon({ status }: { status: AgentEntry["status"] }) {
+  const working = status === "running";
+  const reduced=useReducedMotion();
+  const moving=working&&!reduced;
+  return (
+    <span
+      aria-hidden="true"
+      className="relative flex size-3.5 shrink-0 items-center justify-center"
+    >
+      <span className={cn(FACE, "flex", face(working))}>
+        <motion.span
+          animate={moving ? { opacity: [0.35, 1, 0.35] } : { opacity: 1 }}
+          className="size-1.5 rounded-full bg-blue-500 dark:bg-blue-400"
+          transition={
+            moving
+              ? {
+                  duration: 1.2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }
+              : { duration: 0 }
+          }
+        />
+      </span>
+      <Check className={cn(FACE, "size-3.5", face(status === "done"))} />
+      <Square
+        className={cn(
+          FACE,
+          "size-2.5 fill-current",
+          face(!working && status !== "done")
+        )}
+      />
+    </span>
+  );
+}

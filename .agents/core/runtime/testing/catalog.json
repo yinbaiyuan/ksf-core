@@ -2898,7 +2898,8 @@
         ".agents/ksf.ps1",
         ".gitignore",
         ".gitattributes",
-        "README.md"
+        "README.md",
+        ".agents/core/applications/sdk/src/codex-conversations.ts"
       ],
       "requirements": [],
       "timeoutMs": 120000,
@@ -2917,7 +2918,8 @@
         ".agents/core/runtime/src/codex-conversations/protocol.js",
         ".agents/core/runtime/src/codex-conversations/state.js",
         ".agents/core/runtime/src/routing/storage.js",
-        ".agents/core/runtime/src/services/codex-conversations.js"
+        ".agents/core/runtime/src/services/codex-conversations.js",
+        ".agents/core/applications/sdk/src/codex-conversations.ts"
       ]
     },
     {
@@ -7977,6 +7979,42 @@
       ]
     },
     {
+      "id": "core:web-address",
+      "path": ".agents/core/runtime/tests/web-address.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/web-address.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Initial estimate; verifies canonical loopback URL, persisted port policy and macOS socket job serialization.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Temporary filesystem policy/CLI and platform launcher serialization; retain execution on declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/services/web-address.js",
+        ".agents/core/runtime/src/services/service-manager.js",
+        ".agents/core/runtime/src/commands/service.js",
+        ".agents/core/runtime/src/platform/service.js"
+      ]
+    },
+    {
       "id": "core:work-stats",
       "path": ".agents/core/runtime/tests/work-stats.test.js",
       "owner": "core",
@@ -8110,7 +8148,9 @@
         ".agents/ksf.ps1",
         ".gitignore",
         ".gitattributes",
-        "README.md"
+        "README.md",
+        ".agents/core/runtime/src/services/application-sessions.js",
+        ".agents/core/applications/sdk/src/session-contract.js"
       ],
       "requirements": [],
       "timeoutMs": 120000,
@@ -8130,7 +8170,9 @@
       },
       "selectionInputs": [
         ".agents/core/runtime/src/services/web.js",
-        ".agents/core/runtime/web/src/apps/request-client.ts"
+        ".agents/core/runtime/web/src/apps/request-client.ts",
+        ".agents/core/runtime/src/services/application-sessions.js",
+        ".agents/core/applications/sdk/src/session-contract.js"
       ]
     },
     {
@@ -8508,7 +8550,13 @@
       },
       "selectionInputs": [
         ".agents/core/applications/sdk/src",
-        ".agents/core/runtime/web/src/configuration-preferences.ts"
+        ".agents/core/runtime/web/src/configuration-preferences.ts",
+        ".agents/core/runtime/web/src/desktop/settings-window.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-controls.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-comparison.ts",
+        ".agents/core/runtime/web/src/desktop/settings-reload.ts",
+        ".agents/core/runtime/web/src/desktop/appearance-editor.tsx",
+        ".agents/core/runtime/web/src/desktop/configuration-settings.tsx"
       ]
     },
     {
@@ -9640,6 +9688,41 @@
       ]
     },
     {
+      "id": "app:com.ksf.projects:result-detail",
+      "path": ".agents/core/applications/projects/tests/result-detail.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/projects/tests/result-detail.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.06,
+        "win32": 0.15
+      },
+      "timingBasis": "Conservative planning estimate for new local tests; macOS targeted run ~50 ms, Windows not yet measured.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/result-detail-model.js"
+      ]
+    },
+    {
       "id": "core:assets",
       "path": ".agents/core/runtime/tests/assets.test.js",
       "owner": "core",
@@ -9758,8 +9841,68 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 32.75,
-        "win32": 109.35,
+        "darwin": 35,
+        "win32": 125,
+        "linux": 45
+      },
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/archive.js",
+        ".agents/core/runtime/src/distribution/baseline.js",
+        ".agents/core/runtime/src/distribution/contribute.js",
+        ".agents/core/runtime/src/distribution/manifests.js",
+        ".agents/core/runtime/src/distribution/publish.js",
+        ".agents/core/runtime/src/distribution/release.js",
+        ".agents/core/runtime/src/distribution/system.js",
+        ".agents/core/runtime/src/platform/catalog.js",
+        ".agents/core/runtime/src/platform/runtime-bundle.js",
+        ".agents/core/runtime/src/services/build-manifest.js",
+        ".agents/core/runtime/src/shared/hash.js",
+        ".agents/core/runtime/src/vendor/yaml/dist/index.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ],
+      "timingBasis": "Windows first scenario measured 123.7 seconds in Actions run 44781528373; other targets use conservative estimates."
+    },
+    {
+      "id": "core:runtime-bundle-inspection",
+      "path": ".agents/core/runtime/tests/runtime-bundle-inspection.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "timeoutMs": 180000,
+      "isolation": "exclusive",
+      "inputs": [
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/services/build-manifest.js",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/distribution/runtime-layout.json",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/runtime/bootstrap.sh",
+        ".agents/core/runtime/bootstrap.ps1",
+        ".agents/core/runtime/tools/bootstrap-config.py",
+        ".agents/ksf",
+        ".agents/ksf.ps1"
+      ],
+      "requirements": [],
+      "cacheable": false,
+      "seconds": {
+        "darwin": 30,
+        "win32": 100,
         "linux": 40
       },
       "verification": {
@@ -9785,7 +9928,8 @@
       ],
       "fixtures": [
         "distribution"
-      ]
+      ],
+      "timingBasis": "Independent archive rejection scenario split from runtime-bundle after a Windows file timeout; conservative estimate, not a new hosted measurement."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10444,9 +10588,61 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 120,
-        "win32": 300
+        "win32": 400,
+        "linux": 120
       },
-      "timingBasis": "Conservative estimate for real archive/HTTP/Core+app rollback and process-kill recovery.",
+      "timingBasis": "Ownership/rollback first scenario measured 156.2 seconds on Windows in run 44781528373; migration/live-service protection retain conservative allowance.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real CLI archives, HTTP store, process death, fixed launcher recovery, data migration and rollback must execute on Mac and Windows."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/data-compatibility.json",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".agents/core/runtime/tests/helpers/distribution-fixture.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:system-update-applications-recovery",
+      "path": ".agents/core/runtime/tests/system-update-applications-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk",
+        "web"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 120,
+        "win32": 430,
+        "linux": 120
+      },
+      "timingBasis": "Three crash points measured 103.6–107.5 seconds each on Windows in run 44781528373; concurrent-edit recovery adds a conservative allowance.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11465,6 +11661,7 @@
         ".agents/core/runtime/src/store-catalog",
         ".agents/core/runtime/src/services/ability-store.js",
         ".agents/core/runtime/src/objects",
+        ".agents/core/runtime/src/sources",
         ".agents/core/ability-store"
       ]
     },
@@ -11518,6 +11715,7 @@
         ".agents/core/runtime/src/store-catalog",
         ".agents/core/runtime/src/services/ability-store.js",
         ".agents/core/runtime/src/objects",
+        ".agents/core/runtime/src/sources",
         ".agents/core/ability-store"
       ]
     },
@@ -11625,6 +11823,62 @@
       ]
     },
     {
+      "id": "core:application-local-install",
+      "path": ".agents/core/runtime/tests/application-local-install.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/data-compatibility.json"
+      ],
+      "requirements": [
+        {
+          "name": "es-module-lexer",
+          "component": "sdk"
+        }
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "macOS Node 24 targeted execution under one second; Windows estimate, not validated.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Retained local application package, identity, data, and workspace filesystem boundary regression."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/manager.js",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/core-upgrade.js",
+        ".agents/core/runtime/src/data-compatibility.js",
+        ".agents/core/data-compatibility.json"
+      ]
+    },
+    {
       "id": "core:ability-distribution",
       "path": ".agents/core/runtime/tests/ability-distribution.test.js",
       "owner": "core",
@@ -11667,6 +11921,129 @@
         "lane": "native",
         "kind": "integration",
         "reason": "File and HTTP ability release identities, atomic multi-source dependencies, active work pins and verified rollback."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/applications/sdk"
+      ]
+    },
+    {
+      "id": "core:application-optional-migration",
+      "path": ".agents/core/runtime/tests/application-optional-migration.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Explicit optional app identity migration, durable recovery, data and installation identity preservation."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/ability-store",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/store-catalog",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/applications/sdk"
+      ]
+    },
+    {
+      "id": "core:application-source-lifecycle",
+      "path": ".agents/core/runtime/tests/application-source-lifecycle.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/templates"
+      ],
+      "requirements": [
+        {
+          "component": "sdk",
+          "name": "postcss"
+        },
+        {
+          "component": "sdk",
+          "name": "es-module-lexer"
+        },
+        {
+          "component": "sdk",
+          "name": "rolldown"
+        }
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real SDK build, consumer app business execution, pending update, source switch, rollback and complete batch scope."
       },
       "selectionInputs": [
         ".agents/core/runtime/src/ability-store",
@@ -11726,6 +12103,3037 @@
         ".agents/core/runtime/src/store-catalog",
         ".agents/core/runtime/src/distribution",
         ".agents/core/applications/sdk"
+      ]
+    },
+    {
+      "id": "core:project-artifacts",
+      "path": ".agents/core/runtime/tests/project-artifacts.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Existing project artifact directory creation, large binary evidence and archive/restore contracts."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/projects",
+        ".agents/core/abilities/partners/project-manager"
+      ]
+    },
+    {
+      "id": "core:project-confirmation",
+      "path": ".agents/core/runtime/tests/project-confirmation.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Existing project stage confirmation provenance and execution governance contracts."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/projects",
+        ".agents/core/abilities/partners/project-manager"
+      ]
+    },
+    {
+      "id": "core:task-execution",
+      "path": ".agents/core/runtime/tests/task-execution.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Existing task execution claims, locks, ownership and recovery contracts."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/projects",
+        ".agents/core/abilities/partners/project-manager"
+      ]
+    },
+    {
+      "id": "app:projects-artifact-evidence",
+      "path": ".agents/core/applications/projects/tests/artifact-evidence.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server"
+      ],
+      "requirements": [
+        "yaml"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.31,
+        "win32": 0.42
+      },
+      "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Existing app backend reads complete binary evidence through real local filesystem boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/backend.mjs"
+      ]
+    },
+    {
+      "id": "core:files",
+      "path": ".agents/core/runtime/tests/files.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 20,
+        "win32": 30,
+        "linux": 20
+      },
+      "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Existing generic file-service native regression discovered in the shared workspace; registration retains all platform obligations."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/services/files.js",
+        ".agents/core/runtime/src/services/workspace-files.js"
+      ]
+    },
+    {
+      "id": "core:files-http",
+      "path": ".agents/core/runtime/tests/files-http.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk",
+        "app:com.ksf.markdown",
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/docs",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/files-http.test.js",
+        ".agents/core/runtime/src/services/files.js",
+        ".agents/core/runtime/src/shared/durable-files.js",
+        ".agents/core/applications/sdk/src/files.ts",
+        ".agents/core/applications/sdk/src/file-dialogs.tsx",
+        ".agents/core/applications/sdk/src/file-manager.tsx",
+        ".agents/core/runtime/src/services/core-host.js",
+        ".agents/core/runtime/src/services/workbench-http.js",
+        ".agents/core/runtime/src/services/project-context-files.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5,
+        "win32": 12
+      },
+      "timingBasis": "Initial conservative estimate for file API tests; native timings will be recorded by the test runner.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/tests/files-http.test.js",
+        ".agents/core/runtime/src/services/files.js",
+        ".agents/core/runtime/src/shared/durable-files.js",
+        ".agents/core/applications/sdk/src/files.ts",
+        ".agents/core/applications/sdk/src/file-dialogs.tsx",
+        ".agents/core/applications/sdk/src/file-manager.tsx",
+        ".agents/core/runtime/src/services/core-host.js",
+        ".agents/core/runtime/src/services/workbench-http.js",
+        ".agents/core/runtime/src/services/project-context-files.js"
+      ]
+    },
+    {
+      "id": "sdk:files",
+      "path": ".agents/core/applications/sdk/tests/files.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/applications/identities.js",
+        ".agents/core/applications/sdk/tests/files.test.ts",
+        ".agents/core/runtime/src/services/files.js",
+        ".agents/core/runtime/src/shared/durable-files.js",
+        ".agents/core/applications/sdk/src/files.ts",
+        ".agents/core/applications/sdk/src/file-dialogs.tsx",
+        ".agents/core/applications/sdk/src/file-manager.tsx",
+        ".agents/core/applications/sdk/src/file-client.ts",
+        ".agents/core/applications/sdk/src/file-navigation.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5,
+        "win32": 12
+      },
+      "timingBasis": "Initial conservative estimate for file API tests; native timings will be recorded by the test runner.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/tests/files.test.ts",
+        ".agents/core/runtime/src/services/files.js",
+        ".agents/core/runtime/src/shared/durable-files.js",
+        ".agents/core/applications/sdk/src/files.ts",
+        ".agents/core/applications/sdk/src/file-dialogs.tsx",
+        ".agents/core/applications/sdk/src/file-manager.tsx"
+      ]
+    },
+    {
+      "id": "core:project-merge-child",
+      "path": ".agents/core/runtime/tests/project-merge-child.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "app:com.ksf.projects"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-merge-child.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 10,
+        "win32": 25
+      },
+      "timingBasis": "macOS ARM64 local observed approximately 8 seconds; Windows estimate, not yet measured.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Child-to-parent filesystem migration, CAS, execution claims, rollback and historical evidence must be verified on each native host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/abilities",
+        ".agents/core/distribution",
+        ".agents/core/build.json",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md",
+        ".agents/core/runtime/tests/project-merge-child.test.js"
+      ]
+    },
+    {
+      "id": "web:ui-policy",
+      "path": ".agents/core/runtime/web/tests/ui-policy.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/internal-ui",
+        ".agents/core/runtime/web/tests/ui-policy.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.3,
+        "win32": 0.5
+      },
+      "timingBasis": "Conservative estimate for pure UI policy and public compatibility gates; replace with native observations when available.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure configuration policy and compatibility logic with no DOM, filesystem or native host contracts."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/internal-ui/policy.ts",
+        ".agents/core/runtime/web/src/internal-ui/types.ts"
+      ]
+    },
+    {
+      "id": "core:legacy-frontend-bootstrap",
+      "path": ".agents/core/runtime/tests/legacy-frontend-bootstrap.test.js",
+      "owner": "core",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/tests/legacy-frontend-bootstrap.test.js",
+        ".agents/core/runtime/tests/helpers/legacy-ui-bootstrap.mjs",
+        ".agents/core/runtime/src/web/legacy-frontend-contract.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.2,
+        "win32": 0.4
+      },
+      "timingBasis": "Conservative estimate for deterministic module-map generation and incomplete-closure checks.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic metadata, ordering and hash logic; no browser or filesystem integration."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/tests/legacy-frontend-bootstrap.test.js",
+        ".agents/core/runtime/tests/helpers/legacy-ui-bootstrap.mjs",
+        ".agents/core/runtime/src/web/legacy-frontend-contract.js"
+      ]
+    },
+    {
+      "id": "core:ui-runtime-assets",
+      "path": ".agents/core/runtime/tests/ui-runtime-assets.test.js",
+      "owner": "web",
+      "covers": [
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web/assets.js",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/tests/ui-runtime-assets.test.js",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js",
+        ".agents/core/runtime/tests/helpers/legacy-ui-bootstrap.mjs",
+        ".agents/core/runtime/src/web/legacy-frontend-contract.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.5,
+        "win32": 1
+      },
+      "timingBasis": "Conservative estimate for isolated on-disk asset closure and bootstrap integrity fixtures.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real filesystem snapshot validation, hashes, local resource allowlist and startup integrity on each native platform."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/web/assets.js",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs"
+      ]
+    },
+    {
+      "id": "core:application-ui-runtime",
+      "path": ".agents/core/runtime/tests/application-ui-runtime.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk",
+        "web"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/web/assets.js",
+        ".agents/core/runtime/src/store-catalog"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for real isolated package install/launch compatibility and preserved legacy access.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real package verification, application manager and durable install registry; no business side effects."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/manager.js",
+        ".agents/core/runtime/src/applications/protocol.js"
+      ]
+    },
+    {
+      "id": "core:frontend-store",
+      "path": ".agents/core/runtime/tests/frontend-store.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5,
+        "win32": 10
+      },
+      "timingBasis": "Conservative estimate for durable multi-snapshot staging, CAS, registry-lock races, qualification gates and client/GC fixtures.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real filesystem, production snapshot verification and application registry concurrency; qualification callback fixtures do not certify product UX."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/src/applications/manager.js"
+      ]
+    },
+    {
+      "id": "core:frontend-runtime",
+      "path": ".agents/core/runtime/tests/frontend-runtime.test.js",
+      "owner": "web",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 3,
+        "win32": 6
+      },
+      "timingBasis": "Conservative estimate for first selection, next-document upgrades, persistent rollback and damaged-candidate/old-client fixtures.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Production runtime coordinator and durable snapshot store; metadata fixtures do not substitute browser or application UX acceptance."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/web/frontend-runtime.js",
+        ".agents/core/runtime/src/web/frontend-store.js",
+        ".agents/core/runtime/src/web/assets.js"
+      ]
+    },
+    {
+      "id": "core:frontend-http",
+      "path": ".agents/core/runtime/tests/frontend-http.test.js",
+      "owner": "web",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/src/services/web.js",
+        ".agents/core/runtime/src/services/workbench-http.js",
+        ".agents/core/runtime/web-recovery",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js",
+        ".agents/core/applications/sdk/src/shared/document-session.js",
+        ".agents/core/applications/sdk/src/session-contract.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5,
+        "win32": 10
+      },
+      "timingBasis": "Conservative estimate for actual loopback server, private document leases, CSP, old/new snapshot routing, HTTP CAS and standalone recovery.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Actual HTTP/Core services and durable registry; production-shaped metadata fixtures do not certify browser rendering."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/services/web.js",
+        ".agents/core/runtime/src/services/workbench-http.js",
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/web-recovery",
+        ".agents/core/applications/sdk/src/shared/document-session.js",
+        ".agents/core/applications/sdk/src/session-contract.js"
+      ]
+    },
+    {
+      "id": "sdk:ui-save",
+      "path": ".agents/core/applications/sdk/tests/ui-save.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src/controllers.ts",
+        ".agents/core/applications/sdk/src/random-id.ts",
+        ".agents/core/applications/sdk/tests/ui-save.test.ts",
+        ".agents/core/runtime/src/services/configuration.js",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/services/user-data.js",
+        ".agents/core/runtime/src/user-data",
+        ".agents/core/runtime/src/services/application-storage.js",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/web/src/configuration-preferences.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative initial estimate; includes actual isolated configuration and durable application-storage services.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real temporary configuration and application-storage files, CAS, durability and injected lost write receipts on each host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/controllers.ts",
+        ".agents/core/runtime/web/src/configuration-preferences.ts"
+      ]
+    },
+    {
+      "id": "sdk:ui-run",
+      "path": ".agents/core/applications/sdk/tests/ui-run.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src/ai-tasks.ts",
+        ".agents/core/applications/sdk/src/codex-conversations.ts",
+        ".agents/core/applications/sdk/src/random-id.ts",
+        ".agents/core/applications/sdk/tests/ui-run.test.ts",
+        ".agents/core/runtime/src/ai-tasks",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/platform"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 3
+      },
+      "timingBasis": "Initial estimate for dual adapter fault/race tests and actual temporary durable AI service integration.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises public run controllers with actual temporary AI service storage and injected executor, plus clearly marked Desktop client fixtures."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/ai-tasks.ts",
+        ".agents/core/applications/sdk/src/codex-conversations.ts"
+      ]
+    },
+    {
+      "id": "sdk:ui-session",
+      "path": ".agents/core/applications/sdk/tests/ui-session.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src/ai-tasks.ts",
+        ".agents/core/applications/sdk/src/codex-conversations.ts",
+        ".agents/core/applications/sdk/src/random-id.ts",
+        ".agents/core/applications/sdk/tests/ui-run.test.ts",
+        ".agents/core/runtime/src/ai-tasks",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/configuration",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/applications/sdk/src/controllers.ts",
+        ".agents/core/applications/sdk/src/application-session.ts",
+        ".agents/core/applications/sdk/src/session-contract.js",
+        ".agents/core/runtime/src/services/application-storage.js",
+        ".agents/core/runtime/src/services/application-sessions.js",
+        ".agents/core/applications/sdk/tests/ui-session.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 3
+      },
+      "timingBasis": "Initial measured local recovery/close checks with actual managed session storage and actual isolated AI queue; executor explicitly injected.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises actual durable app session CAS/restart, original save/run identity recovery, and close transaction races without cancelling business execution."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/application-session.ts",
+        ".agents/core/applications/sdk/src/session-contract.js",
+        ".agents/core/runtime/src/services/application-sessions.js",
+        ".agents/core/runtime/web/src/window-close.ts"
+      ]
+    },
+    {
+      "id": "core:icon-layers",
+      "path": ".agents/core/runtime/tests/icon-layers.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/applications/icon-layers",
+        ".agents/core/runtime/src/vendor/icon-codecs",
+        ".agents/core/runtime/src/applications/manager.js",
+        ".agents/core/runtime/src/applications/protocol.js",
+        ".agents/core/runtime/src/services/workbench-http.js",
+        ".agents/core/runtime/src/services/web.js",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/tests/icon-layers.test.js",
+        ".agents/core/runtime/tests/helpers/application-catalog.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 10,
+        "win32": 20
+      },
+      "timingBasis": "Conservative initial estimate after source inspection; no Windows execution is implied by declaration.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Actual worker process/filesystem/cache, isolated package lifecycle and local HTTP assets; requires native execution on each target."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/applications/icon-layers",
+        ".agents/core/runtime/src/vendor/icon-codecs",
+        ".agents/core/runtime/src/applications/manager.js",
+        ".agents/core/runtime/src/services/workbench-http.js"
+      ]
+    },
+    {
+      "id": "web:icon-layer-catalog",
+      "path": ".agents/core/runtime/web/tests/icon-layer-catalog.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/tests/icon-layer-catalog.test.ts",
+        ".agents/core/runtime/web/src/desktop/icon-layer-catalog.ts",
+        ".agents/core/runtime/web/src/apps/application-model.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Conservative initial estimate for pure in-memory icon catalog projection.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure host projection of release identity, old-host fallback and local icon listing."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/desktop/icon-layer-catalog.ts"
+      ]
+    },
+    {
+      "id": "sdk:icon-standard",
+      "path": ".agents/core/applications/sdk/tests/icon-standard.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/tests/icon-standard.test.mjs",
+        ".agents/core/applications/sdk/server/listing.mjs",
+        ".agents/core/applications/sdk/server/protocol.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Conservative initial estimate; local PNG/JPEG listing byte and extension checks.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Actual temporary files test PNG listing acceptance, invalid icon bytes and JPEG screenshot compatibility."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/server/listing.mjs"
+      ]
+    },
+    {
+      "id": "sdk:ui-overlay",
+      "path": ".agents/core/applications/sdk/tests/ui-overlay.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src/controllers/overlay-stack.ts",
+        ".agents/core/applications/sdk/tests/ui-overlay.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Initial estimate for pure ownership/close-event stack logic.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure event consumption, nested ownership, close races and stale disposal with injected event objects; does not certify native focus/IME."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/controllers/overlay-stack.ts"
+      ]
+    },
+    {
+      "id": "sdk:ui-commands",
+      "path": ".agents/core/applications/sdk/tests/ui-commands.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src/controllers/command-registry.ts",
+        ".agents/core/applications/sdk/tests/ui-commands.test.ts",
+        ".agents/core/applications/sdk/src/apps/surface-capabilities.ts",
+        ".agents/core/applications/sdk/src/overlay-coordinator.ts",
+        ".agents/core/applications/sdk/src/controllers/overlay-stack.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Initial estimate for pure ownership/close-event stack logic.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure command scope routing, disabled-action barriers, native/composition guards, disposal and registered shortcut descriptions; no native keyboard acceptance implied."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/controllers/command-registry.ts",
+        ".agents/core/applications/sdk/src/apps/surface-capabilities.ts"
+      ]
+    },
+    {
+      "id": "web:card-motion",
+      "path": ".agents/core/runtime/web/tests/card-motion.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/desktop/card-motion-model.ts",
+        ".agents/core/runtime/web/tests/card-motion.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Initial conservative estimate for existing pure corner projection and bounded transform geometry cases.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure transform geometry over finite dimensions and viewport budgets; does not certify native pointer or animation behavior."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/desktop/card-motion-model.ts"
+      ]
+    },
+    {
+      "id": "web:document-reload",
+      "path": ".agents/core/runtime/web/tests/document-reload.test.ts",
+      "owner": "web",
+      "covers": [
+        "web",
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/ui-runtime/reload-model.ts",
+        ".agents/core/runtime/web/tests/document-reload.test.ts",
+        ".agents/core/applications/sdk/src/random-id.ts",
+        ".agents/core/applications/sdk/src/application-session.ts",
+        ".agents/core/runtime/web/src/ui-runtime/reload-participants.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Conservative estimate for two-phase reload state and race tests.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Injected participants, checkpoint acknowledgements and navigation verify no early unmount or stale commit; not native browser/reload proof."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/ui-runtime/reload-model.ts",
+        ".agents/core/applications/sdk/src/application-session.ts",
+        ".agents/core/runtime/web/src/ui-runtime/reload-participants.ts"
+      ]
+    },
+    {
+      "id": "core:document-sessions",
+      "path": ".agents/core/runtime/tests/document-sessions.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web/document-sessions.js",
+        ".agents/core/runtime/src/shared/durable-json.js",
+        ".agents/core/runtime/src/shared/files.js",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/applications/sdk/src/shared/document-session.js",
+        ".agents/core/applications/sdk/src/session-contract.js",
+        ".agents/core/runtime/tests/document-sessions.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for immutable managed window checkpoint files and symlink/receipt cases.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real durable filesystem records, restart, identity/schema and symlink checks; browser navigation remains separate."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/web/document-sessions.js",
+        ".agents/core/runtime/src/shared/durable-json.js",
+        ".agents/core/runtime/src/shared/files.js",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/applications/sdk/src/shared/document-session.js",
+        ".agents/core/applications/sdk/src/session-contract.js"
+      ]
+    },
+    {
+      "id": "core:frontend-qualifications",
+      "path": ".agents/core/runtime/tests/frontend-qualifications.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/src/web",
+        ".agents/core/runtime/src/shared/durable-json.js",
+        ".agents/core/runtime/src/shared/files.js",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs",
+        ".agents/core/runtime/tests/frontend-qualifications.test.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 4
+      },
+      "timingBasis": "Conservative estimate for independent qualification files and real product runtime gates.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real filesystem evidence hashes and product qualification reader/selector; synthetic acceptance fixtures do not qualify an actual product snapshot."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/web/frontend-qualifications.js",
+        ".agents/core/runtime/src/web/frontend-runtime.js",
+        ".agents/core/runtime/src/web/frontend-store.js"
+      ]
+    },
+    {
+      "id": "web:ui-controls",
+      "path": ".agents/core/runtime/web/tests/ui-controls.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/internal-ui/controls-model.ts",
+        ".agents/core/runtime/web/src/internal-ui/position-model.ts",
+        ".agents/core/runtime/web/src/internal-ui/menu-model.ts",
+        ".agents/core/runtime/web/tests/ui-controls.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Numeric draft/commit, owner-bound placement and stable menu identity/typeahead cases.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure numeric, owner-space placement and menu identity invariants; native DOM, editing/IME and accessibility require actual UI checks."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/internal-ui/controls-model.ts",
+        ".agents/core/runtime/web/src/internal-ui/controls.tsx",
+        ".agents/core/runtime/web/src/internal-ui/position-model.ts",
+        ".agents/core/runtime/web/src/internal-ui/position.ts",
+        ".agents/core/runtime/web/src/internal-ui/menu-model.ts",
+        ".agents/core/runtime/web/src/internal-ui/menus.tsx"
+      ]
+    },
+    {
+      "id": "web:ui-compositions",
+      "path": ".agents/core/runtime/web/tests/ui-compositions.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/internal-ui/composition-model.ts",
+        ".agents/core/applications/sdk/src/resource-model.ts",
+        ".agents/core/applications/sdk/src/controllers/resource-adapter.ts",
+        ".agents/core/applications/sdk/src/window-toolbar-model.ts",
+        ".agents/core/runtime/web/tests/ui-compositions.test.ts",
+        ".agents/core/applications/sdk/src/file-client.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Split minima, stable selection, Unicode truncation and public resource version boundaries.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure combination constraints and injected public file-client contracts; actual keyboard, layout, focus and resource integration are verified separately."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/internal-ui/layouts.tsx",
+        ".agents/core/runtime/web/src/internal-ui/collections.tsx",
+        ".agents/core/runtime/web/src/internal-ui/resources.tsx",
+        ".agents/core/runtime/web/src/internal-ui/toolbar.tsx",
+        ".agents/core/runtime/web/src/internal-ui/composition-model.ts",
+        ".agents/core/applications/sdk/src/resource-model.ts",
+        ".agents/core/applications/sdk/src/controllers/resource-adapter.ts",
+        ".agents/core/applications/sdk/src/window-toolbar-model.ts"
+      ]
+    },
+    {
+      "id": "sdk:rich-preview-csp",
+      "path": ".agents/core/applications/sdk/tests/rich-preview-csp.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/server/mermaid-csp.mjs",
+        ".agents/core/applications/sdk/tests/rich-preview-csp.test.mjs",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/src/apps/diagram-input.ts",
+        ".agents/core/applications/sdk/src/apps/diagram-style.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Locked source drift fails closed; D3 CSSOM preserves attribute semantics. Real diagrams and strict CSP are checked in a production browser.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Build adapter source guards and attribute semantics; actual SVG layout, safety and CSP are separately observed in the production host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/server/mermaid-csp.mjs",
+        ".agents/core/applications/sdk/src/apps/rich-preview.tsx",
+        ".agents/core/runtime/web/vite.config.ts",
+        ".agents/core/applications/sdk/src/apps/diagram-input.ts",
+        ".agents/core/applications/sdk/src/apps/diagram-style.ts"
+      ]
+    },
+    {
+      "id": "web:window-geometry",
+      "path": ".agents/core/runtime/web/tests/window-geometry.test.ts",
+      "owner": "web",
+      "covers": [
+        "web",
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web/src/window-geometry.ts",
+        ".agents/core/runtime/web/tests/window-geometry.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Owner, IME, repeated Escape and late pointer completion at the host geometry/SDK overlay boundary.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Injected keyboard events and restore callbacks verify cancellation ownership; native drag/resize and overlay ordering are checked separately in the production host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/window-geometry.ts",
+        ".agents/core/runtime/web/src/overlay-runtime.ts",
+        ".agents/core/applications/sdk/src/controllers/overlay-dom.ts",
+        ".agents/core/runtime/web/src/desktop/desktop.tsx"
+      ]
+    },
+    {
+      "id": "sdk:file-operation-state",
+      "path": ".agents/core/applications/sdk/tests/file-operation-state.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src/controllers/file-operation-state.ts",
+        ".agents/core/applications/sdk/tests/file-operation-state.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Serial file intents, original unknown operation identity and authoritative receipt matching.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Injected ledger outcomes verify UI intent and close protection; actual dialogs and service behavior are checked separately."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/controllers/file-operation-state.ts",
+        ".agents/core/applications/sdk/src/file-manager.tsx",
+        ".agents/core/applications/sdk/tests/file-operation-state.test.ts",
+        ".agents/core/applications/sdk/src/file-dialogs.tsx"
+      ]
+    },
+    {
+      "id": "web:ui-ai",
+      "path": ".agents/core/runtime/web/tests/ui-ai.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects/private-ui/ai-model.ts",
+        ".agents/core/applications/sdk/src/resource-model.ts",
+        ".agents/core/applications/sdk/src/controllers/run-types.ts",
+        ".agents/core/runtime/web/tests/ui-ai.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Immutable draft/answer snapshots and independent execution, connection, stop and result axes.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure AI input and fact-presentation contracts; actual host form/overlay/native interaction and service adapters are verified separately."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/private-ui/ai-model.ts",
+        ".agents/core/applications/projects/private-ui/ai.tsx",
+        ".agents/core/applications/projects/private-ui/ai.css",
+        ".agents/core/runtime/web/tests/ui-ai.test.ts"
+      ]
+    },
+    {
+      "id": "core:private-domain",
+      "path": ".agents/core/runtime/tests/private-domain.test.js",
+      "owner": "core",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects/private-ui/domain-model.ts",
+        ".agents/core/runtime/tests/private-domain.test.js",
+        ".agents/core/runtime/src/projects/governance/model.js"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Structural compatibility with current governance records, immutable intent identities and no inferred authority or stage confirmation.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure display projections tested against actual governance defaultMetadata; visual reuse and service model reads checked separately."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/private-ui/domain-model.ts",
+        ".agents/core/applications/projects/private-ui/domain.tsx",
+        ".agents/core/applications/projects/private-ui/domain.css",
+        ".agents/core/runtime/tests/private-domain.test.js"
+      ]
+    },
+    {
+      "id": "app:projects-workspace-model",
+      "path": ".agents/core/applications/projects/tests/workspace-model.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.2,
+        "win32": 0.3
+      },
+      "timingBasis": "Initial local direct model check; native timings to be observed.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure query/identity/service-fact projection; real browser request sequencing and window recovery are validated separately."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/workspace-model.js",
+        ".agents/core/applications/projects/frontend.js",
+        ".agents/core/applications/projects/governance.js"
+      ]
+    },
+    {
+      "id": "app:projects-conversation-model",
+      "path": ".agents/core/applications/projects/tests/conversation-model.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.2,
+        "win32": 0.3
+      },
+      "timingBasis": "Initial local direct model check; native timings to be observed.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Real public Run/Save controllers and per-window app orchestration with injected storage/Desktop peers. External model and native interaction evidence are separate."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/conversation-model.js",
+        ".agents/core/applications/projects/conversation.js",
+        ".agents/core/applications/projects/conversation-view.tsx",
+        ".agents/core/applications/sdk/src/controllers/run-controller.ts"
+      ]
+    },
+    {
+      "id": "core:application-open-ui",
+      "path": ".agents/core/runtime/tests/application-open-ui.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/tests/application-open-ui.test.js",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/web",
+        ".agents/core/applications/sdk",
+        ".agents/core/runtime/tests/helpers/open-ui-apps.js",
+        ".agents/core/runtime/tests/fixtures/open-ui"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 4
+      },
+      "timingBasis": "Initial estimate for open SDK retirement regression; actual native receipt recorded separately.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real package verification, application manager and durable install registry; no business side effects."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/tests/application-open-ui.test.js",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/web",
+        ".agents/core/applications/sdk",
+        ".agents/core/runtime/tests/helpers/open-ui-apps.js",
+        ".agents/core/runtime/tests/fixtures/open-ui"
+      ]
+    },
+    {
+      "id": "core:frontend-snapshot",
+      "path": ".agents/core/runtime/tests/frontend-snapshot.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web",
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/runtime/tests/frontend-snapshot.test.js",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/web",
+        ".agents/core/applications/sdk",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.5,
+        "win32": 1
+      },
+      "timingBasis": "Initial estimate for open SDK retirement regression; actual native receipt recorded separately.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real filesystem snapshot validation, hashes, local resource allowlist and startup integrity on each native platform."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/tests/frontend-snapshot.test.js",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/runtime/src/web",
+        ".agents/core/applications/sdk",
+        ".agents/core/runtime/tests/helpers/ui-runtime-fixture.js",
+        ".agents/core/runtime/web/scripts/ui-runtime.mjs"
+      ]
+    },
+    {
+      "id": "sdk:view",
+      "path": ".agents/core/applications/sdk/tests/view.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/view.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 3
+      },
+      "timingBasis": "Actual locked Vite SSR rendering and local package build; declared estimates, not Windows acceptance.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises the actual installed compiler, public View entry, React server renderer and application CSS/package output; browser layout and host theme updates remain separate real UI checks."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/view.tsx",
+        ".agents/core/applications/sdk/src/view.css",
+        ".agents/core/applications/sdk/src/react.tsx",
+        ".agents/core/applications/sdk/src/components/material-provider.tsx",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/server/styles.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/view.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/src/theme.ts",
+        ".agents/core/applications/sdk/src/theme.css"
+      ]
+    },
+    {
+      "id": "sdk:theme",
+      "path": ".agents/core/applications/sdk/tests/theme.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src/theme.ts",
+        ".agents/core/applications/sdk/src/theme.css",
+        ".agents/core/applications/sdk/scripts/generate-theme.mjs",
+        ".agents/core/applications/sdk/THEME-COLORS.md",
+        ".agents/core/applications/sdk/server/styles.mjs",
+        ".agents/core/applications/sdk/tests/theme.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 60000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1
+      },
+      "timingBasis": "Pure palette, generated artifact, contrast and mocked host-subscription logic; estimates are not Windows acceptance.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Checks semantic palette consistency, intended color pair contrast and scoped binding ownership/cleanup; actual CSS rendering and host theme propagation are validated separately."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/theme.ts",
+        ".agents/core/applications/sdk/src/theme.css",
+        ".agents/core/applications/sdk/scripts/generate-theme.mjs",
+        ".agents/core/applications/sdk/THEME-COLORS.md",
+        ".agents/core/applications/sdk/tests/theme.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:button",
+      "path": ".agents/core/applications/sdk/tests/button.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/button.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 2,
+        "win32": 3
+      },
+      "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Checks native button/form semantics through public SSR and scoped local application builds. Real keyboard, ref, pointer and host-theme checks remain separate browser evidence."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/button.tsx",
+        ".agents/core/applications/sdk/src/button.css",
+        ".agents/core/applications/sdk/src/theme.ts",
+        ".agents/core/applications/sdk/src/theme.css",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/button.test.mjs",
+        ".agents/core/applications/component-library"
+      ]
+    },
+    {
+      "id": "sdk:components",
+      "path": ".agents/core/applications/sdk/tests/components.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 25,
+        "win32": 65
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-target-integrity",
+      "path": ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-target-resolution",
+      "path": ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-reference",
+      "path": ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:foundation",
+      "path": ".agents/core/applications/sdk/tests/foundation.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/foundation.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/components"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 5,
+        "win32": 8
+      },
+      "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Checks native typography/kbd semantics, icon accessible names, scoped packages and real target SDK/source examples. Native browser keyboard/ref/theme checks remain separate evidence."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/typography.tsx",
+        ".agents/core/applications/sdk/src/typography.css",
+        ".agents/core/applications/sdk/src/icon.tsx",
+        ".agents/core/applications/sdk/src/icon.css",
+        ".agents/core/applications/sdk/src/kbd.tsx",
+        ".agents/core/applications/sdk/src/kbd.css",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/foundation.test.mjs",
+        ".agents/core/applications/component-library"
+      ]
+    },
+    {
+      "id": "sdk:actions",
+      "path": ".agents/core/applications/sdk/tests/actions.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/actions.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/components"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 8,
+        "win32": 12
+      },
+      "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Checks command/menu navigation and geometry, responsive toolbar fitting, native public controls, scoped packages and real target contracts. Actual host focus/portal/interactions remain separate browser evidence."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src/icon-button.tsx",
+        ".agents/core/applications/sdk/src/button-group.tsx",
+        ".agents/core/applications/sdk/src/link.tsx",
+        ".agents/core/applications/sdk/src/dropdown-menu.tsx",
+        ".agents/core/applications/sdk/src/context-menu.tsx",
+        ".agents/core/applications/sdk/src/toolbar.tsx",
+        ".agents/core/applications/sdk/src/menubar.tsx",
+        ".agents/core/applications/sdk/src/actions",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/actions.test.mjs",
+        ".agents/core/applications/component-library"
+      ]
+    },
+    {
+      "id": "sdk:assistant-diff",
+      "path": ".agents/core/applications/sdk/tests/assistant-diff.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/assistant-diff.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/assistant-diff.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:business-demo-model",
+      "path": ".agents/core/applications/sdk/tests/business-demo-model.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/business-demo-model.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/business-demo-model.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:cascade-model",
+      "path": ".agents/core/applications/sdk/tests/cascade-model.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/cascade-model.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/cascade-model.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:color-model",
+      "path": ".agents/core/applications/sdk/tests/color-model.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/color-model.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/color-model.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:date",
+      "path": ".agents/core/applications/sdk/tests/date.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/date.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/date.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:decorations",
+      "path": ".agents/core/applications/sdk/tests/decorations.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/decorations.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 15,
+        "win32": 25
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/decorations.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:floating-layout",
+      "path": ".agents/core/applications/sdk/tests/floating-layout.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/floating-layout.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/floating-layout.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:floating",
+      "path": ".agents/core/applications/sdk/tests/floating.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/floating.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/floating.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:kokonut-style-isolation",
+      "path": ".agents/core/applications/sdk/tests/kokonut-style-isolation.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/kokonut-style-isolation.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 15,
+        "win32": 25
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/kokonut-style-isolation.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:layer-relations",
+      "path": ".agents/core/applications/sdk/tests/layer-relations.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/layer-relations.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/layer-relations.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:layer-scroll",
+      "path": ".agents/core/applications/sdk/tests/layer-scroll.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/layer-scroll.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/layer-scroll.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:layout",
+      "path": ".agents/core/applications/sdk/tests/layout.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/layout.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/layout.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:media-edit-model",
+      "path": ".agents/core/applications/sdk/tests/media-edit-model.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/media-edit-model.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/media-edit-model.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:mention-model",
+      "path": ".agents/core/applications/sdk/tests/mention-model.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/mention-model.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/mention-model.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:navigation-branches",
+      "path": ".agents/core/applications/sdk/tests/navigation-branches.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/navigation-branches.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 15,
+        "win32": 25
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/navigation-branches.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:qrcode",
+      "path": ".agents/core/applications/sdk/tests/qrcode.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/qrcode.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 15,
+        "win32": 25
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/qrcode.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:showcase-render",
+      "path": ".agents/core/applications/sdk/tests/showcase-render.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/showcase-render.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 60,
+        "win32": 90
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/showcase-render.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:style-nonce",
+      "path": ".agents/core/applications/sdk/tests/style-nonce.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/style-nonce.test.mjs"
+      ],
+      "requirements": [
+        "postcss",
+        "es-module-lexer",
+        "vite",
+        "rolldown",
+        "@vitejs/plugin-react"
+      ],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 15,
+        "win32": 25
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Uses the real locked Vite/consumer packaging toolchain and native module resolution; verify on each declared host platform."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/style-nonce.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:table",
+      "path": ".agents/core/applications/sdk/tests/table.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/table.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/table.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:time-model",
+      "path": ".agents/core/applications/sdk/tests/time-model.test.ts",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/time-model.test.ts"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/time-model.test.ts"
+      ]
+    },
+    {
+      "id": "sdk:transfer-model",
+      "path": ".agents/core/applications/sdk/tests/transfer-model.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/transfer-model.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/transfer-model.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:tree",
+      "path": ".agents/core/applications/sdk/tests/tree.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/tree.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/tree.test.mjs"
+      ]
+    },
+    {
+      "id": "sdk:upload",
+      "path": ".agents/core/applications/sdk/tests/upload.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/upload.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 2
+      },
+      "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic SDK model/parser and injected DOM calculations; no native process or platform contract."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/tests/upload.test.mjs"
       ]
     }
   ],

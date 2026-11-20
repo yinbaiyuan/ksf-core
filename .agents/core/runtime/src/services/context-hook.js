@@ -38,6 +38,7 @@ export function workContextHook({ root, input }) {
     payload = { protocol: 'ksf-work-context-v1', chatId: d.chatId, bindingEtag: d.bindingEtag, generation: d.generation,
       mode: d.mode, goal: d.current?.goal ?? null, status: d.current?.status ?? null, ownership: d.current?.ownership ?? null,
       complete: d.complete, active: d.active.map(short), pending: d.pending.map(i => i.fingerprint), retired: d.retired.map(short),
+      executionBlocked:d.executionBlocked===true,execution:d.execution?.claim?{task:d.execution.task,owner:d.execution.claim.chat_id,owned:d.execution.claim.owned,acquiredAt:d.execution.claim.acquired_at}:null,
       readRequired: !d.complete || d.pending.length > 0 || d.retired.length > 0, errors: d.errors };
     if (Buffer.byteLength(JSON.stringify(payload)) > 6000) payload = { protocol: payload.protocol, chatId: d.chatId, bindingEtag: d.bindingEtag,
       generation: d.generation, complete: false, readRequired: true, activeCount: d.active.length, error: 'CONTEXT_HEADER_CAPACITY' };

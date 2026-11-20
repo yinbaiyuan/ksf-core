@@ -1,0 +1,1 @@
+import {useState} from 'react';import {PaymentCardView} from '@ksf/sdk/component-examples/payment-card-view';export default function Example(){const [fail,setFail]=useState(true);return <div><label><input type='checkbox' checked={fail} onChange={e=>setFail(e.target.checked)}/>模拟付款失败（仅测试卡）</label><PaymentCardView simulateFailure={fail}/></div>;}

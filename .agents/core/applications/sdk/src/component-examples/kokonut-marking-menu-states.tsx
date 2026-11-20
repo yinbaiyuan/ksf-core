@@ -1,0 +1,1 @@
+import {RadialMenu} from '@ksf/sdk/radial-menu';export default function Example(){return <div style={{width:'100%',display:'grid',gap:20}}><RadialMenu label="禁用命令" disabled items={[{id:'copy',label:'Copy'}]} onAction={()=>{}}/><RadialMenu label="空命令" items={[]} onAction={()=>{}}/></div>;}

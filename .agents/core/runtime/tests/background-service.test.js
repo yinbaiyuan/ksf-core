@@ -25,7 +25,7 @@ async function availablePort(){const server=createServer();await new Promise(r=>
 test('frontend failure cannot prevent health, local control and application CLI metadata',async t=>{
   const root=await temporary(t),storeDirectory=join(root,'empty-store');await mkdir(storeDirectory);await writeFile(join(storeDirectory,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));
   const server=await startWebServer({root,port:0,capture:false,webDirectory:join(root,'missing-ui'),applications:{storeDirectory,defaultSource:null}});cleanup(root,()=>server.close());
-  const response=await fetch(server.url);assert.equal(response.status,503);assert.equal((await response.json()).error.code,'WEB_FRONTEND_UNAVAILABLE');
+  const response=await fetch(server.url);assert.equal(response.status,503);assert.match(response.headers.get('content-type'),/^text\/html/);assert.match(await response.text(),/基础恢复/);
   const health=await (await fetch(new URL('/api/health',server.url))).json();assert.equal(health.service,'ksf-core');assert.equal(health.frontend.state,'unavailable');
   assert.deepEqual(await controlRequest(root,'/api/local/apps',{operation:'list'}),[]);
   const status=await controlRequest(root,'/api/local/service',{operation:'status'});assert.equal(status.state,'running');assert.equal(status.port,server.port);
@@ -35,8 +35,9 @@ test('offline diagnosis creates no service, application or user data',async t=>{
   const root=await temporary(t);assert.equal((await serviceDoctor(root)).state,'stopped');assert.deepEqual(await readdir(root),[]);
 });
 test('a bodyless catalog GET may outlive the incoming-body deadline',async t=>{
-  const root=await temporary(t),server=await startWebServer({root,port:0,capture:false,applications:{fetcher:async()=>{await new Promise(r=>setTimeout(r,10300));return new Response(JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));}}});cleanup(root,()=>server.close());
-  const response=await fetch(new URL('/api/apps/catalog',server.url));assert.equal(response.status,200);assert.ok((await response.json()).data.applications.length>0);
+  const root=await temporary(t),directory=join(root,'slow-source');const {buildCatalog}=await import('../src/store-catalog/build.js');buildCatalog({directory,kind:'applications',source:{id:'ksf-apps',name:'Synthetic'},objects:[]});
+  const server=await startWebServer({root,port:0,capture:false,applications:{fetcher:async url=>{const path=new URL(url).pathname.replace(/^\/ksf-apps\//,'');if(path==='index.json')await new Promise(r=>setTimeout(r,10300));return new Response(await readFile(join(directory,path)));}}});cleanup(root,()=>server.close());
+  const response=await fetch(new URL('/api/apps/catalog',server.url));assert.equal(response.status,200);const data=(await response.json()).data;assert.deepEqual(data.errors,[]);assert.deepEqual(data.applications,[]);
 });
 test('status never probes a non-loopback control address',async t=>{
   const root=await temporary(t);await mkdir(join(root,'.agents/runtime-data/web'),{recursive:true});await writeFile(join(root,'.agents/runtime-data/web/control.json'),JSON.stringify({...processIdentity(),root:await realpath(root),url:'http://example.invalid/',token:'synthetic'}));await assert.rejects(serviceStatus(root),{code:'SERVICE_CONTROL_INVALID'});

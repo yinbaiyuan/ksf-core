@@ -1,0 +1,1 @@
+import {ScrollIndex} from '@ksf/sdk/scroll-index';import {ScrollIndexArticle} from '@ksf/sdk/component-examples/scroll-index-article';export default function Example(){return <ScrollIndex><ScrollIndexArticle/></ScrollIndex>;}

@@ -1,0 +1,2 @@
+import {useState} from 'react';import {TimePicker} from '@ksf/sdk/time-picker';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TimePickerDirectExample(){const [value,setValue]=useState('09:30');return <div className="ksf-demo-stack"><TimePicker label="15分钟步长" value={value} onValueChange={setValue} needConfirm={false} step={900} showNow={false}/><output role="status">当前值：{value||'未选择'}</output><p>选择候选即提交，无需再次确认。</p></div>;}

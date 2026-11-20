@@ -10,7 +10,7 @@ import { PROTOCOL, turnPath, taskPath } from '../src/task-capture/storage.js';
 
 test('installed resident application survives real child-process restarts and preserves review, archive and suggestions', async t => {
   const root = await mkdtemp(join(tmpdir(),'ksf-rv-process-')), store = join(root,'store'), taskId='a'.repeat(64), at='2026-10-28T02:00:00Z';
-  await mkdir(store); const sourceStore=fileURLToPath(new URL('../../applications/store/',import.meta.url));
+  await mkdir(store); const sourceStore=fileURLToPath(new URL('../../applications/builtin/',import.meta.url));
   const index=JSON.parse(await readFile(join(sourceStore,'index.json'),'utf8')), entry=index.apps.filter(e=>e.manifest.id==='com.ksf.conversations').sort((a,b)=>b.manifest.version.localeCompare(a.manifest.version,undefined,{numeric:true}))[0];
   await copyFile(join(sourceStore,entry.package.url),join(store,entry.package.url)); await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[entry]}));
   const ownership={state:'none'}, turn={protocol:PROTOCOL,taskId,turnId:'first',revision:1,policy:'capture',status:'completed',startedAt:at,updatedAt:at,completedAt:at,declarations:[],issues:[],routes:[{eventId:'route',at,snapshot:{summary:'完成示例核对',status:'completed',ownership,project:{state:'none'},references:[],relatedTargets:[],abilities:[]}}],messages:[{id:'u',role:'user',at,phase:'user',content:[{type:'text',text:'核对示例结果'}],revisions:[]},{id:'f',role:'assistant',at,phase:'final_answer',content:[{type:'text',text:'示例核对已完成'}],revisions:[]}]};

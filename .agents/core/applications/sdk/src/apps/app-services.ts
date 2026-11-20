@@ -1,7 +1,8 @@
 import { randomId } from '../random-id.ts';
 import {applicationLinkId} from '../shared/application-identities.js';
+import type {CloseRequest} from '../application-session';
 export type OpenApp = (app: string, search?: string, fresh?: boolean) => void;
-export const closeGuards = new Map<string, () => Promise<boolean>>();
+export const closeGuards = new Map<string, (request?:CloseRequest) => Promise<boolean>>();
 export function appFromSearch(search: string) { const value = new URLSearchParams(search).get('app'),app=value&&applicationLinkId(value); return app && app.length<=80 && /^com\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(app) ? app : 'com.ksf.conversations'; }
 export function appSearch(app: string, search: string) { const params = new URLSearchParams(search); if (app === 'com.ksf.conversations') params.delete('app'); else params.set('app', app); return params.toString(); }
 export function resourceKey(app: string, search: string) { const p = new URLSearchParams(search); return p.get(app === 'com.ksf.markdown' ? 'path' : app === 'com.ksf.git' ? 'repo' : app === 'com.ksf.conversations' ? 'task' : 'resource') ?? ''; }

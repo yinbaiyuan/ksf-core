@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-send';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function DraftSendView({simulateFailure=false,writing=false}:{simulateFailure?:boolean;writing?:boolean}={}){const task=useLocalRequest();return <div ref={task.ref} style={{width:"100%",maxWidth:448,minWidth:0,marginInline:"auto"}}><FidelityScope module="ai-send"><Source writing={writing} onSend={()=>task.request(undefined,700,simulateFailure?"模拟发送失败，草稿保留。":undefined)}/></FidelityScope></div>;}

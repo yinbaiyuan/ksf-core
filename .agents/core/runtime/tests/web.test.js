@@ -1,5 +1,6 @@
 import{platform}from'../src/platform/index.js';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { request } from 'node:http';
@@ -105,7 +106,8 @@ test('about exposes only current Core product metadata through guarded read-only
   assert.equal(result.status, 200);
   const about=JSON.parse(result.body);
   assert.equal(about.ok,true);assert.equal(about.productName,'KSF 工作台');assert.equal(about.coreVersion,core.version);
-  assert.deepEqual(about.sdkCompatibility,{version:'1.1.0',minCompatibleVersion:'1.0.0'});
+  const sdk=JSON.parse(readFileSync(new URL('../../applications/sdk/package.json',import.meta.url),'utf8'));
+  assert.deepEqual(about.sdkCompatibility,{version:sdk.version,minCompatibleVersion:'1.0.0'});
   assert.equal(Object.keys(about).every(key=>['ok','productName','coreVersion','sdkCompatibility','installedVersion','candidate'].includes(key)),true);
   const head = await call(instance, '/api/about', { method: 'HEAD' });
   assert.equal(head.status, 200); assert.equal(head.body, '');
@@ -123,7 +125,10 @@ test('Web serves only verified bundled chunks with a restrictive CSP', async t =
   const script = await call(instance, scriptPath), css = await call(instance, cssPath);
   assert.equal(script.status, 200); assert.equal(css.status, 200);
   assert.match(script.headers['content-type'], /^text\/javascript/); assert.match(css.headers['content-type'], /^text\/css/);
-  assert.match(page.headers['content-security-policy'], /script-src 'self'; style-src 'self' 'nonce-[A-Za-z0-9+/=]+'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'/);
+  const map=page.body.match(/<script type="importmap" id="ksf-ui-import-map">([\s\S]*?)<\/script>/)?.[1];
+  const scriptPolicy="script-src 'self'"+(map?" 'sha256-"+createHash('sha256').update(map).digest('base64')+"'":'');
+  assert.equal(page.headers['content-security-policy'].split(';').map(value=>value.trim()).find(value=>value.startsWith('script-src ')),scriptPolicy);
+  assert.match(page.headers['content-security-policy'], /style-src 'self' 'nonce-[A-Za-z0-9+/=]+'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'/);
   assert.doesNotMatch(page.headers['content-security-policy'], /img-src[^;]*(?:https:|http:|\*)/);
   assert.doesNotMatch(page.headers['content-security-policy'], /unsafe-inline|unsafe-eval/);
   assert.doesNotMatch(script.body, /\beval\(/);
@@ -148,6 +153,9 @@ test('Web rejects foreign hosts, origins and unsupported methods', async t => {
   assert.equal((await call(instance, '/', { headers: { Origin: `http://127.0.0.1:${instance.port}` } })).status, 200);
   assert.equal((await call(instance, '/', { headers: { Host: `localhost:${instance.port}` } })).status, 200);
   assert.equal((await call(instance, '/', { headers: { Host: `ksf.ai:${instance.port}`, Origin: `http://ksf.ai:${instance.port}` } })).status, 200);
+  assert.equal((await call(instance, '/', { headers: { Host: `ksf.localhost:${instance.port}`, Origin: `http://ksf.localhost:${instance.port}` } })).status, 200);
+  for(const host of ['ksf.localhost','evil.ksf.localhost',`ksf.localhost:${instance.port+1}`,'ksf.localhost.evil.test'])assert.equal((await call(instance,'/',{headers:{Host:host}})).status,403);
+  assert.equal((await call(instance,'/',{headers:{Host:`ksf.localhost:${instance.port}`,Origin:'http://evil.ksf.localhost'}})).status,403);
   for (const host of ['ksf.ai.evil.test', 'evil.ksf.ai', `ksf.ai:${instance.port + 1}`]) {
     assert.equal((await call(instance, '/', { headers: { Host: host } })).status, 403);
   }
@@ -206,7 +214,7 @@ test('Web CLI documents its startup and rejects invalid or repeated options', ()
   const help = spawnSync(process.execPath, [cli, 'web', '--help'], { encoding: 'utf8' });
   assert.equal(help.status, 0, help.stderr);
   assert.match(help.stdout, /127\.0\.0\.1.*1313/);
-  assert.match(help.stdout, /http:\/\/ksf\.ai:1313\//);
+  assert.match(help.stdout, /http:\/\/ksf\.localhost\//);
   assert.match(help.stdout, /ksf web hosts/);
   for (const args of [['--port'], ['--port', '-1'], ['--port', '65536'], ['--port', '1.5'],
     ['--port', '0', '--port', '0'], ['--json', '--json'], ['--host', '0.0.0.0'], ['start'], ['--help', '--json']]) {
@@ -252,7 +260,7 @@ test('real launcher starts with bundled Node from another cwd and stops on SIGIN
     assert.equal(ready.data.nodeVersion, process.version);
     assert.ok(['configured', 'missing', 'conflict', 'unavailable'].includes(ready.data.hosts));
     assert.equal('mdns' in ready.data, false);
-    if (ready.data.localUrl) assert.equal(ready.data.localUrl, `http://ksf.ai:${ready.data.port}/`);
+    assert.equal(ready.data.localUrl, `http://ksf.localhost:${ready.data.port}/`);
     assert.equal((await call(ready.data, '/api/health')).status, 200);
     child.kill(signal);
     assert.deepEqual(await exited, [0, null], stderr);

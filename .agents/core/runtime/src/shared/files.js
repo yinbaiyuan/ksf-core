@@ -1,5 +1,7 @@
-import { constants, lstatSync, openSync, closeSync, fstatSync, readFileSync,
+import { constants, lstatSync, openSync, closeSync, fstatSync, readFileSync, readSync,
   writeFileSync, fchmodSync, fsyncSync, unlinkSync } from 'node:fs';
+import { uptime } from 'node:os';
+import {createHash} from 'node:crypto';
 
 // Callers own path policy, identity fields and domain errors. These operations
 // only own descriptors, durable staging and cleanup of files they opened.
@@ -8,20 +10,66 @@ export function sameIdentity(a, b, fields = ['dev', 'ino', 'size', 'mtimeMs', 'c
 }
 
 export function readFileSnapshot(target, { entry = lstatSync(target), noFollow = constants.O_NOFOLLOW ?? 0,
-  validateEntry, validateOpen, validateRead } = {}) {
+  validateEntry, validateOpen, validateRead,consume=fd=>readFileSync(fd) } = {}) {
   validateEntry?.(entry);
   let fd;
   try {
     fd = openSync(target, constants.O_RDONLY | noFollow);
     const before = fstatSync(fd);
     validateOpen?.(entry, before);
-    const bytes = readFileSync(fd), after = fstatSync(fd);
+    const bytes = consume(fd), after = fstatSync(fd);
     validateRead?.(before, after, bytes);
     return { target, bytes, stat: after };
   } finally { if (fd !== undefined) closeSync(fd); }
 }
 
-export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, onCleanup } = {}) {
+export function readFileDigestSnapshot(target,options={}){
+  const result=readFileSnapshot(target,{...options,consume(fd){
+    const hash=createHash('sha256'),chunk=Buffer.allocUnsafe(64*1024);let size;
+    while((size=readSync(fd,chunk,0,chunk.length,null))>0)hash.update(chunk.subarray(0,size));
+    return hash.digest('hex');
+  }});
+  return {target,digest:result.bytes,stat:result.stat};
+}
+
+// A lock is stale only when its recorded owner certainly no longer runs: the
+// PID is gone (ESRCH; EPERM means alive) or the file predates this boot. A
+// reused PID keeps the lock, which is the conservative failure. Removal happens
+// under a short reclaim lock and only for the exact file that was inspected, so
+// two reclaimers cannot delete a fresh lock taken in between.
+function staleOwner(path) {
+  let entry, owner;
+  try { entry = lstatSync(path); if (!entry.isFile()) return null; owner = JSON.parse(readFileSync(path, 'utf8')); }
+  catch { return null; }
+  if (entry.mtimeMs < Date.now() - uptime() * 1000) return entry;
+  if (!Number.isSafeInteger(owner?.pid) || owner.pid <= 0 || owner.pid === process.pid) return null;
+  try { process.kill(owner.pid, 0); return null; }
+  catch (error) { return error.code === 'ESRCH' ? entry : null; }
+}
+const RECLAIM_GRACE_MS = 30_000;
+function reclaimStaleLock(path) {
+  const guard = `${path}.reclaim`;
+  let fd;
+  try { fd = openSync(guard, 'wx', 0o600); }
+  catch (error) {
+    if (error.code !== 'EEXIST') return false;
+    // A reclaimer killed mid-way leaves only this short-lived guard behind.
+    try { if (lstatSync(guard).mtimeMs < Date.now() - RECLAIM_GRACE_MS) unlinkSync(guard); } catch {}
+    return false;
+  }
+  try {
+    closeSync(fd); fd = undefined;
+    const stale = staleOwner(path);
+    if (!stale) return false;
+    const current = lstatSync(path);
+    if (current.dev !== stale.dev || current.ino !== stale.ino) return false;
+    unlinkSync(path);
+    return true;
+  } catch { return false; }
+  finally { if (fd !== undefined) closeSync(fd); try { unlinkSync(guard); } catch {} }
+}
+
+export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, onCleanup, reclaimStale = false } = {}) {
   let fd, owned;
   const release = () => {
     if (fd !== undefined) closeSync(fd);
@@ -37,7 +85,12 @@ export function withExclusiveLock(path, owner, action, { onLocked, onReplaced, o
   let result;
   try {
     try { fd = openSync(path, 'wx', 0o600); }
-    catch (error) { if (error.code === 'EEXIST') onLocked?.(); throw error; }
+    catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      if (!(reclaimStale && reclaimStaleLock(path))) { onLocked?.(); throw error; }
+      try { fd = openSync(path, 'wx', 0o600); }
+      catch (retry) { if (retry.code === 'EEXIST') onLocked?.(); throw retry; }
+    }
     owned = fstatSync(fd);
     writeFileSync(fd, JSON.stringify(owner) + '\n');
     // Exclusivity belongs to the atomically created name. Retaining its file

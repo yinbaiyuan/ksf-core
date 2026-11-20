@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-handoff';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function HandoffReviewView({state,position=3,reply,empty=false}:{state?:'waiting'|'joined';position?:number;reply?:string;empty?:boolean}={}){return <FidelityScope module="ai-handoff" style={{maxWidth:448,marginInline:"auto"}}>{empty?<EmptyState heading="没有可接入的同事" description="接入团队和实际联络由应用负责。"/>:<Source status={state} position={Math.max(1,Math.floor(position))} reply={reply}/>}</FidelityScope>;}

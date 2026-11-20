@@ -118,7 +118,7 @@ CLI 适配在 `runtime/src/commands/context.js`，组合服务在 `runtime/src/s
 
 ## 当前工作与增量正文
 
-`context work --json` 只读当前会话的绑定与 etag；`context bind (--from -|file | --data JSON) --if-match <etag|missing> --json` 更新唯一当前绑定，JSON null 清空。身份来自 CODEX_THREAD_ID，不来自 cwd。绑定复用 shared.json 的 `ksf.currentWork`，不创建原生轮次、不登记能力参与、不写项目进度。写入有结构与实际来源校验，带 etag 保留并发更新。
+`context work --json` 只读当前会话的绑定与 etag；`context bind (--from -|file | --data JSON) --if-match <etag|missing> --json` 更新唯一当前绑定，JSON null 清空。身份按顺序取自 `KSF_SESSION_HOST`+`KSF_SESSION_ID`（两项同时设置，用于嵌套宿主消歧）、Codex 的 `CODEX_THREAD_ID`、Claude Code 的 `CLAUDE_CODE_SESSION_ID`，不来自 cwd。绑定复用 shared.json 的 `ksf.currentWork`，不创建原生轮次、不登记能力参与、不写项目进度。写入有结构与实际来源校验，带 etag 保留并发更新。
 
 最小绑定示例（例中对象必须真实存在；采用实际版本与来源）：
 
@@ -147,7 +147,7 @@ executor/methods 使用 `{ref:"ID@精确版本",source:"实际来源"}`；bind �
 
 内容指纹包含实际来源、定位、版本和定义/文件摘要。输出只发送当前代次尚未确认读过的内容；变化项提供完整主文。missing 文件保留状态与 null 原文，不假装已读；不可读、编码、依赖及来源错误保留有效部分并使 complete=false。程序不追踪正文链接、不执行路由或采用动作。
 
-完整读取本批清单和所有 bodies 后，将 data.delivery 原样通过 `context accept --from - --json` 提交。accept 重新核对绑定、代次、内容摘要及缓存版本，拒绝变化或迟到确认；失败/截断一批不更新缓存，允许重复读取。它只确认消费，不证明理解或永久保留。正常模式 entry 额外提供基础正文的 delivery，完整消费 entry/content 与 expanded 后可以确认；此确认不退出既有工作用途，也不重复发送基础正文。没有可核实会话身份时原 entry 契约仍可单独使用。
+完整读取本批清单和所有 bodies 后，将 data.delivery 原样通过 `context accept --from - --json` 提交。accept 重新核对绑定、代次、内容摘要及缓存版本，拒绝变化或迟到确认；失败/截断一批不更新缓存，允许重复读取。它只确认消费，不证明理解或永久保留。正常模式 entry 额外提供基础正文的 delivery，完整消费 entry/content 与 expanded 后可以确认；此确认不退出既有工作用途，也不重复发送基础正文。没有可核实会话身份或工作状态不可用时原 entry 契约仍可单独使用，不提供 delivery，并以 `data.deliveryIssue {code,message}` 说明原因；它不计入 errors，也不改变 ok。
 
 work、current及对象read保持只读；bind、accept、reset/--reload和hooks安装会写入状态。用户禁止写入时不执行这些写操作，正文可临时读取且不确认消费；缓存已有指纹但原文已不在上下文时，按active中的精确定位用对象read或原件读取取得正文。是否采用、持续绑定及何时恢复持久确认，由Runtime按实际授权决定。
 
@@ -160,3 +160,15 @@ work、current及对象read保持只读；bind、accept、reset/--reload和hooks
 新/变更 Hook 须由 Codex 审查并信任；程序不读写信任数据库。接入与宿主实测分别验收。
 
 SDK `createWorkContextClient(context, {host,sessionId})` 提供 read/bind/current/accept/reset，调用 filesystem 权限保护的 work-context 公共服务；必须显式传原生身份，不推断其他会话。CLI、SDK、Hook 共用同一装配与并发校验服务。业务承接、切换、暂停/结束和退出适用规则由 Runtime 持有，本文仅说明程序契约。
+
+## 当前任务执行占用
+
+绑定及读取不取得占用。schema2任务实际执行前，以当前原生聊天身份调用：
+
+```sh
+.agents/ksf context execute --data '{"action":"acquire"}' --json
+.agents/ksf context execute --data '{"action":"check","token":"返回的令牌"}' --json
+.agents/ksf context execute --data '{"action":"release","token":"返回的令牌"}' --json
+```
+
+status只读。takeover须提供最新claim.etag作为ifMatch、具体reason及previousRunSettled:true；调用方先取得明确接手意图，核对旧运行及未知操作已结束。时间不自动解除占用。current/work及Hook返回占用来源和executionBlocked，业务状态和授权分别判断。执行保存沿治理请求execution:{task_id,token}核验；明确用户工作台维护保留并发合并，执行者继续前重读。暂停绑定、退出或切换taskRef释放本聊天占用，任务暂停/结束提交释放对应占用。旧令牌不能释放或覆盖新执行者。实现见runtime/src/projects/task-execution.js，不新增调度器或长期历史。

@@ -1,10 +1,10 @@
+import './private-ui/styles.css';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { ClipboardList, FileText, List, LocateFixed, MessageSquare, Sparkles } from 'lucide-react';
-import { mountReact, useApplicationSDK, type ApplicationSDK } from '@ksf/sdk/react';
-import { useWindowContext } from '@ksf/sdk/window-context';
-import { WindowToolbar } from '@ksf/sdk/window-toolbar';
-import { useContextMenu } from '@ksf/sdk/components/ui/context-menu';
-import { Sheet } from '@ksf/sdk/components/ui/sheet';
+import {mountReact,useApplicationSDK,useWindowContext,WindowToolbar,useContextMenu,Sheet} from './private-ui/compat';
+import type {ApplicationSDK} from '@ksf/sdk';
+import {ProjectWorkspaceView,type WorkspacePresentation} from './workspace-view';
+import {ConversationPortal,type ConversationPresentation} from './conversation-view';
 
 interface ProjectActions {
   inspirationPanel: {node:HTMLElement;owner:string;close():void}|null;
@@ -18,9 +18,11 @@ interface ProjectActions {
     plan(): void;
     review(): void;
     prepare: (() => void) | null;
+    prepareLabel?: string | null;
     focus: (() => void) | null;
     inspiration(): void;
   } | null;
+  conversation: {active:boolean;open():void}|null;
   canReturn: boolean;
   busy: boolean;
   showCatalog(): void;
@@ -42,6 +44,8 @@ type MountContent = (
   sdk: ApplicationSDK,
   updateActions: (actions: ProjectActions) => void,
   contextMenu: ReturnType<typeof useContextMenu>['bind'],
+  publishWorkspace:(state:WorkspacePresentation)=>void,
+  publishConversation:(state:ConversationPresentation)=>void,
 ) => { dispose(): void };
 
 function ObjectNavigation({ node }: { node: HTMLElement }) {
@@ -61,11 +65,13 @@ export function mountProjectWindow(container: HTMLElement, sdk: ApplicationSDK, 
     const { toolbarHost } = useWindowContext();
     const content = useRef<HTMLDivElement>(null);
     const [commands, setCommands] = useState<ProjectActions | null>(null);
+    const [workspace,setWorkspace]=useState<WorkspacePresentation|null>(null);
+    const [conversation,setConversation]=useState<ConversationPresentation|null>(null);
     const contextMenu = useContextMenu();
 
     useLayoutEffect(() => {
       if (!content.current) return;
-      const mounted = mountContent(content.current, app, setCommands, contextMenu.bind);
+      const mounted = mountContent(content.current, app, setCommands, contextMenu.bind,setWorkspace,setConversation);
       return () => mounted.dispose();
     }, [app]);
 
@@ -99,12 +105,12 @@ export function mountProjectWindow(container: HTMLElement, sdk: ApplicationSDK, 
           </button>
           {commands?.navigation && <ObjectNavigation node={commands.navigation} />}
         </>}
-        actions={projectActions ? [
+        actions={[...(projectActions ? [
           ...(projectActions.planLabel ? [
             { id: 'plan', label: projectActions.planLabel, icon: ClipboardList, disabled: projectActions.planDisabled, onAction: projectActions.plan },
           ] : []),
           ...(projectActions.prepare ? [
-            { id: 'prepare', label: '准备推进对话', icon: MessageSquare, disabled: projectActions.planDisabled, onAction: projectActions.prepare },
+            { id: 'prepare', label: '准备'+(projectActions.prepareLabel??'推进')+'对话', icon: MessageSquare, disabled: projectActions.planDisabled, onAction: projectActions.prepare },
           ] : []),
           ...(projectActions.focus ? [
             { id: 'focus', label: '定位重点', icon: LocateFixed, disabled: projectActions.planDisabled, onAction: projectActions.focus },
@@ -113,8 +119,10 @@ export function mountProjectWindow(container: HTMLElement, sdk: ApplicationSDK, 
             { id: 'review', label: projectActions.reviewLabel, icon: FileText, disabled: projectActions.reviewDisabled, onAction: projectActions.review },
           ] : []),
           inspirationAction,
-        ] : inspirationPanel ? [inspirationAction] : []} />
-      <div ref={content} className="kp-projects-host" />
+        ] : inspirationPanel ? [inspirationAction] : []),...(commands?.conversation?[{id:'ai-workspace',label:'AI 工作区',icon:MessageSquare,priority:90,pressed:commands.conversation.active,onAction:commands.conversation.open}]:[])]} />
+      {workspace&&<ProjectWorkspaceView state={workspace}/>}
+      {conversation&&<ConversationPortal panel={conversation}/>}
+      <div ref={content} className="kp-projects-host" hidden={!!workspace}/>
       <Sheet open={!!commands?.inspirationPanel} onOpenChange={open=>{if(!open)commands?.inspirationPanel?.close();}}
         title="灵感闪现" description={commands?.inspirationPanel?.owner} side="right" solid showClose={false} showHeader={false} className="pg-inspiration-drawer">
         {commands?.inspirationPanel&&<InspirationContent node={commands.inspirationPanel.node}/>}

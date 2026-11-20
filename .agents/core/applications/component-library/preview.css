@@ -1,0 +1,67 @@
+/* Preserved example canvas and supplementary theme demonstrations from build120. */
+
+.component-library-canvas,.component-library-theme-sample {border:1px solid var(--ksf-color-border)}
+.component-library-caption {display:flex;justify-content:space-between;gap:12px;color:var(--ksf-color-muted-foreground);font:11px/1.6 ui-monospace,monospace;flex-wrap:wrap}
+.component-library-region {border:1px solid var(--ksf-color-border);background:var(--ksf-color-surface);min-height:220px}
+.component-library-lines {display:grid;gap:10px;margin-top:12px}
+.component-library-lines i {height:5px;background:var(--ksf-color-border);width:88%}
+.component-library-lines i:nth-child(2) {width:66%}
+.component-library-lines i:nth-child(3) {width:75%}
+.component-library-swatch {font-size:24px;line-height:48px;text-align:center;width:48px;border:1px solid var(--ksf-color-border);color:var(--ksf-color-primary)}
+.component-library-note {align-self:center;color:var(--ksf-color-muted-foreground);font-size:12px}
+.component-library-theme-pair {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.component-library-theme-sample strong {font-size:13px;font-weight:550}
+.component-library-theme-sample code {font-size:11px;font-weight:400;margin-left:10px;color:var(--ksf-color-muted-foreground)}
+.component-library-theme-sample p {font-size:12px}
+.theme-preview-pair {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.theme-preview {border:1px solid var(--ksf-color-border)}
+.theme-preview h3 {margin:8px 0}
+.theme-preview-surface {padding:18px;background:var(--ksf-color-surface);border:1px solid var(--ksf-color-border)}
+.theme-preview-surface p {font-size:12px;margin-top:6px}
+.theme-feedback-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-feedback-grid>span {padding:8px 12px;font-size:12px}
+.component-library .theme-demo-button {padding:9px 16px;background:var(--ksf-color-primary);color:var(--ksf-color-on-primary);border:1px solid var(--ksf-color-primary);align-self:flex-start;font-weight:550}
+.component-library .theme-demo-button:focus-visible {outline-color:var(--ksf-color-focus-ring)}
+.theme-guidance {font-size:12px;margin:0 0 12px!important}
+.theme-color-table-wrap {overflow:auto}
+.theme-color-table {min-width:520px;margin:0!important}
+.theme-color-table th:first-child {width:50%}
+.theme-color-table tbody th strong,.theme-color-table tbody th>code,.theme-color-table tbody th small {display:block}
+.theme-color-table tbody th>code {font-size:11px;font-weight:400;margin:4px 0;color:var(--ksf-color-primary)}
+.theme-color-table tbody th small {font-size:11px;font-weight:400;color:var(--ksf-color-muted-foreground)}
+.theme-color-value {display:flex;align-items:center;gap:10px;white-space:nowrap}
+.theme-color-value i {width:24px;height:24px;border:1px solid var(--ksf-color-border-strong);flex:none}
+.theme-color-value code {font:11px ui-monospace,monospace}
+.theme-native-example {display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:20px;margin-bottom:20px;background:var(--ksf-color-surface);color:var(--ksf-color-foreground);border:1px solid var(--ksf-color-border-strong)}
+.theme-native-example p {font-size:12px;margin-top:6px}
+@container ksf-components (max-width:760px) {
+  .component-library-region {min-height:180px}
+}
+@container ksf-components (max-width:520px) {
+  .component-library-theme-pair {grid-template-columns:minmax(0,1fr)}
+  .theme-preview-pair {grid-template-columns:minmax(0,1fr)}
+}
+.component-library .detail-preview-canvas {padding:36px 28px;min-height:170px;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--ksf-color-border);border-radius:6px;background:var(--ksf-color-background)}
+.component-library .detail-preview-canvas output:not(:where(.detail-preview-canvas [class^="ksf-"] *, .detail-preview-canvas [class*=" ksf-"] *)) {font-size:13px;color:var(--ksf-color-muted-foreground);border-top:1px solid var(--ksf-color-border);padding-top:16px}
+.component-library .detail-preview-canvas label:not(:where(.detail-preview-canvas [class^="ksf-"] *, .detail-preview-canvas [class*=" ksf-"] *)) {font-size:13px;max-width:100%}
+.component-library .detail-preview-canvas input:not([class]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(:where(.detail-preview-canvas [class^="ksf-"] *, .detail-preview-canvas [class*=" ksf-"] *)) {font:inherit;box-sizing:border-box;max-width:100%;min-height:32px;padding:5px 10px;border:1px solid var(--ksf-color-border-strong);border-radius:4px;background:var(--ksf-color-surface);color:var(--ksf-color-foreground)}
+.component-library button.theme-demo-button {padding:9px 16px;background:var(--ksf-color-primary);color:var(--ksf-color-on-primary);border:1px solid var(--ksf-color-primary);align-self:flex-start;font-weight:550}
+@container ksf-components (max-width:660px) {
+  .component-library .detail-preview-canvas {padding:26px 20px}
+}
+
+.component-library .detail-example-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.component-library .detail-example-grid > .detail-example {min-width:0;border:1px solid var(--ksf-color-border);border-radius:8px;overflow:hidden;background:var(--ksf-color-surface-raised)}
+.component-library .detail-example-grid .detail-preview-canvas {padding:42px 24px 50px;min-height:172px;border:0;border-radius:0;background:var(--ksf-color-surface-raised)}.component-library .detail-example{scroll-margin-block-start:16px}.component-library .detail-example[data-example-layout=wide]{grid-column:1/-1}
+@container ksf-detail-examples (min-width:900px){.component-library .detail-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.component-library .component-gallery-item .detail-preview-canvas {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  justify-content: flex-start;
+  border: 0;
+  border-top: 1px solid var(--ksf-color-border);
+  border-radius: 0 0 6px 6px;
+}
+/* Freeze the original canvas inheritance independently from AppLayout typography. */
+.component-library .detail-preview-canvas{font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}

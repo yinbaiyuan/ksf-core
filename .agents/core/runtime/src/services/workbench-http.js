@@ -4,11 +4,15 @@ import {project as projectService} from './projects.js';
 import {listTasks} from './tasks.js';
 import {createWorkbenchGit} from './workbench-git.js';
 import {createApplicationStorage} from './application-storage.js';
+import {createApplicationSessions} from './application-sessions.js';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import {createCommunicationService} from '../communication/service.js';
 import {createLocalControl} from '../communication/control.js';
 import { createCoordinator, problem, assert } from './workbench-common.js';
 import { createWorkspaceFiles } from './workspace-files.js';
+import {MAX_FILE_BYTES} from './files.js';
+import {Readable} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import {createTaskActivitySource} from './task-activity.js';
 import { createApplicationManager } from '../applications/manager.js';
 import { MAX_PACKAGE } from '../applications/protocol.js';
@@ -24,12 +28,13 @@ async function readJSON(request) {
 }
 export function createWorkbenchHTTP(root, options = {}) {
   const host=options.host??createCoreHost(root,options);
-  const {files,activity,applications,ai,codexConversations,communication:communicationReady,control,configuration,git}=host;
+  const {files,fileService,activity,applications,ai,codexConversations,communication:communicationReady,control,configuration,git}=host;
+  const sessions=createApplicationSessions(root,{instanceId:files.instanceId});
   const token = randomBytes(32).toString('hex'), nonce = randomBytes(24).toString('base64');
   const secureEqual = value => typeof value === 'string' && value.length === token.length && timingSafeEqual(Buffer.from(value), Buffer.from(token));
-  const matches = pathname => pathname.startsWith('/api/ability-store/') || (pathname==='/api/config'||pathname.startsWith('/api/config/')) || pathname.startsWith('/api/runtime/') || pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
+  const matches = pathname => pathname.startsWith('/api/ability-store/') || (pathname==='/api/config'||pathname.startsWith('/api/config/')) || pathname.startsWith('/api/runtime/') || pathname.startsWith('/api/local/') || pathname.startsWith('/api/communication/') || pathname === '/api/work-stats' || pathname.startsWith('/api/apps/') || pathname.startsWith('/app-assets/') || pathname.startsWith('/app-store/') || pathname === '/api/workbench/session' || pathname.startsWith('/api/files/') || pathname.startsWith('/api/workspace/') || pathname === '/api/git/repositories' || pathname.startsWith('/api/git/repositories/') || pathname === '/api/git/operations' || pathname.startsWith('/api/git/operations/');
   async function handle(request, url, send, response) {
-    if (!matches(url.pathname) && !url.pathname.startsWith('/api/ai/')) return false;
+    if (!matches(url.pathname) && !url.pathname.startsWith('/api/ai/') && !url.pathname.startsWith('/api/ui-runtime/')) return false;
     const json = (status, data) => send(status, JSON.stringify({ ok: true, data }) + '\n');
     try {
       if(url.pathname.startsWith('/api/local/'))return await control.handle(request,url,send,response,{local:true});
@@ -42,6 +47,27 @@ export function createWorkbenchHTTP(root, options = {}) {
         assert(secureEqual(request.headers['x-ksf-token']), 'WEB_SESSION_EXPIRED', '工作台会话已失效，请重新连接后保存。', 403);
       }
       if(write&&host.draining()&&!url.pathname.startsWith('/api/runtime/'))throw problem('SERVICE_STOPPING','后台正在退出，请稍后重试。',409);
+      if(url.pathname.startsWith('/api/ui-runtime/')){
+        const service=options.frontend;assert(service,'UI_RUNTIME_UNAVAILABLE','共享前端维护服务尚未就绪。',503);
+        const operation=url.pathname.slice('/api/ui-runtime/'.length),input=write?await readJSON(request):{};
+        if(operation==='status'){assert(!write,'WEB_METHOD_NOT_ALLOWED','状态只支持读取。',405);json(200,await service.status());}
+        else if(operation==='recovery'){assert(!write,'WEB_METHOD_NOT_ALLOWED','恢复目录只支持读取。',405);json(200,await service.recoveryStates());}
+        else if(operation==='operation'){assert(!write,'WEB_METHOD_NOT_ALLOWED','操作回执只支持读取。',405);json(200,await service.operation(url.searchParams.get('id')));}
+        else if(operation==='document-session'&&!write){assert(typeof service.documentSession==='function','UI_RUNTIME_UNAVAILABLE','窗口恢复服务尚未就绪。',503);json(200,await service.documentSession({action:'read',resumeToken:url.searchParams.get('resumeToken')}));}
+        else if(operation==='document-session-export'){assert(!write,'WEB_METHOD_NOT_ALLOWED','恢复记录导出只支持读取。',405);assert(typeof service.documentSession==='function','UI_RUNTIME_UNAVAILABLE','窗口恢复服务尚未就绪。',503);const file=await service.documentSession({action:'export',resumeToken:url.searchParams.get('resumeToken')});send(200,file.bytes,'application/json; charset=utf-8',{'Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(file.name),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});}
+        else{assert(write,'WEB_METHOD_NOT_ALLOWED','此维护操作需要POST。',405);
+          if(operation==='preview')json(200,await service.preview(input.releaseId));
+          else if(operation==='activate')json(200,await service.activate(input.releaseId,input));
+          else if(operation==='stage-bundled')json(200,await service.stageBundled(input));
+          else if(operation==='qualify')json(200,await service.qualify(input.releaseId,input));
+          else if(operation==='boot')json(200,await service.boot(input));
+          else if(operation==='recover')json(200,await service.recover(input));
+          else if(operation==='client')json(200,await service.client(input));
+          else if(operation==='document-session'){assert(typeof service.documentSession==='function','UI_RUNTIME_UNAVAILABLE','窗口恢复服务尚未就绪。',503);json(200,await service.documentSession(input));}
+          else throw problem('WEB_NOT_FOUND','未知的前端维护操作。',404);
+        }
+        return true;
+      }
       if(url.pathname==='/api/config'||url.pathname.startsWith('/api/config/')){
         const input=write?await readJSON(request):{};
         if(url.pathname==='/api/config'){assert(!write,'WEB_METHOD_NOT_ALLOWED','目录仅支持读取。',405);json(200,await configuration.list());}
@@ -68,7 +94,24 @@ export function createWorkbenchHTTP(root, options = {}) {
       }
       const query = key => { const values = url.searchParams.getAll(key); assert(values.length <= 1, 'INVALID_ARGUMENTS', `参数 ${key} 重复。`); return values[0] ?? undefined; };
       const path = query('path') ?? '', route = url.pathname;
-      if (route === '/api/workbench/session' && !write) { json(200, { instanceId: files.instanceId, token, nonce, capabilities: ['workspace', 'git', 'applications-v1', 'ai-tasks-v1', 'codex-conversations-v1','host-terminal-v1','app-storage-v1','app-storage-runtime-v1','projects-v1','projects-management-v1','assets-v1','config-v1','runtime-monitor-v1'], sessionId: nonce }); return true; }
+      if (route === '/api/workbench/session' && !write) { json(200, { instanceId: files.instanceId, token, nonce, capabilities: ['workspace', 'git', 'applications-v1', 'ai-tasks-v1', 'codex-conversations-v1','host-terminal-v1','app-storage-v1','app-storage-runtime-v1','app-sessions-v1',...(options.frontend?.enabled?['ui-document-sessions-v1']:[]),'projects-v1','projects-management-v1','assets-v1','config-v1','runtime-monitor-v1'], sessionId: nonce }); return true; }
+      if(route.startsWith('/api/files/')) {
+        const method=route.slice('/api/files/'.length);
+        if(method==='content') {
+          const caller=applications.fileCaller(query('instanceId'));let ref;try{ref=JSON.parse(query('ref'));}catch{throw problem('FILE_PATH_INVALID','文件引用无效。');}
+          if(write){request.allowLargeBody?.();assert(Number(request.headers['content-length']??0)<=MAX_FILE_BYTES,'FILE_TOO_LARGE','文件超过128 MiB。',413);json(200,await fileService.write(caller,{ref,ifMatch:query('ifMatch'),operationId:query('operationId'),contentDigest:request.headers['x-ksf-sha256']},request));return true;}
+          const item=await fileService.openRead(caller,ref,{ifMatch:query('ifMatch')});
+          try{response.writeHead(200,{'Content-Type':'application/octet-stream','Content-Length':item.info.size,'X-KSF-File-Version':item.info.version,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store','Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(ref.path.split('/').at(-1)||'download')});
+            if(request.method==='HEAD'){response.end();return true;}
+            async function* chunks(){let last;for(;;){const bytes=Buffer.allocUnsafe(64*1024),{bytesRead}=await item.handle.read(bytes,0,bytes.length,null);if(!bytesRead)break;if(last)yield last;last=bytes.subarray(0,bytesRead);}await item.verify();if(last)yield last;}
+            await pipeline(Readable.from(chunks()),response);
+          }finally{await item.handle.close();}return true;
+        }
+        assert(write,'WEB_METHOD_NOT_ALLOWED','文件查询与管理需要会话保护的POST。',405);
+        assert(['stat','exists','list','readText','mkdir','copy','move','trash','listTrash','restore','purge','emptyTrash','operation','changes','unwatch'].includes(method),'APP_SERVICE_UNKNOWN','未知文件方法。');
+        const body=await readJSON(request),caller=applications.fileCaller(body.instanceId);
+        json(200,await fileService[method](caller,body.input));return true;
+      }
       if (route.startsWith('/api/ai/')) {
         assert(write,'WEB_METHOD_NOT_ALLOWED','AI 配置与管理接口需要会话保护的 POST。',405);
         if(route==='/api/ai/material-upload') {
@@ -103,6 +146,7 @@ export function createWorkbenchHTTP(root, options = {}) {
             assert(typeof appId==='string'&&/^[a-z][a-z0-9.-]{1,79}$/.test(appId)&&typeof digest==='string'&&/^[a-f0-9]{64}$/.test(digest),'INVALID_ARGUMENTS','CLI 文档需要应用标识和完整包摘要。');
             json(200,await applications.cliDocs(appId,{expectedPackageDigest:digest,path:query('path')}));return true;
           }
+          if (route === '/api/apps/icon-layer') { const asset=await applications.iconLayerAsset(query('key'),query('digest'));send(200,asset.bytes,asset.type,{'X-Content-Type-Options':'nosniff','Cache-Control':'private, max-age=31536000, immutable'});return true; }
           if (route === '/api/apps/installed') { json(200, await applications.snapshot()); return true; }
           if (route === '/api/apps/detail') { json(200,await applications.storeDetail(Object.fromEntries(url.searchParams)));return true; }
           if (route === '/api/apps/versions') { json(200,await applications.storeVersions(Object.fromEntries(url.searchParams)));return true; }
@@ -122,12 +166,21 @@ export function createWorkbenchHTTP(root, options = {}) {
         switch (route) {
           case '/api/apps/import/install': json(200,await applications.installImport(input));break;
           case '/api/apps/import/discard': await applications.discardImport(input.importId);json(200,{});break;
+          case '/api/apps/source-switch/preview': json(200,await applications.previewSourceSwitch(input));break;
+          case '/api/apps/updates/preview': json(200,await applications.previewBatchUpdates(input));break;
+          case '/api/apps/updates/apply': json(200,await applications.applyBatchUpdates(input));break;
+          case '/api/apps/migration/preview': json(200,await applications.previewIdentityMigration(input));break;
+          case '/api/apps/migration/apply': json(200,await applications.applyIdentityMigration(input));break;
+          case '/api/apps/migration/resume': json(200,await applications.resumeIdentityMigration());break;
+          case '/api/apps/local': json(200,await applications.localApplication(input));break;
           case '/api/apps/preview': json(200,await applications.previewInstall(input));break;
           case '/api/apps/install': json(200, await applications.install(input)); break;
           case '/api/apps/source': json(200, await applications.saveSource(input)); break;
           case '/api/apps/source/remove': json(200, await applications.removeSource(input.id)); break;
-          case '/api/apps/launch': json(200, await applications.launch(input.appId, input.digest, input.surface)); break;
+          case '/api/apps/launch': {const documentRuntime=input.surface?.frontend&&input.surface.kind!=='service'?await options.frontend?.documentRuntime(input.surface.frontend):undefined;assert(!input.surface?.frontend||documentRuntime||input.surface.kind==='service','UI_RUNTIME_UNAVAILABLE','文档快照维护服务不可用。',503);json(200, await applications.launch(input.appId, input.digest, input.surface));break;}
           case '/api/apps/call': json(200, await applications.call(input.instanceId, input.method, input.params)); break;
+          case '/api/apps/session/read': json(200, await sessions.read(applications.caller(input.instanceId),input));break;
+          case '/api/apps/session/write': json(200, await sessions.write(applications.caller(input.instanceId),input));break;
           case '/api/apps/release': json(200, await applications.release(input.instanceId)); break;
           case '/api/apps/release-many': assert(Array.isArray(input.ids)&&input.ids.length<=256,'APP_CALL_INVALID','应用租约参数无效。'); await Promise.all(input.ids.map(id=>applications.release(id)));json(200,{});break;
           case '/api/apps/heartbeat': assert(Array.isArray(input.ids) && input.ids.length <= 256, 'APP_CALL_INVALID', '应用租约参数无效。'); json(200, await applications.heartbeat(input.ids)); break;

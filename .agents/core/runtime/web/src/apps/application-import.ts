@@ -2,7 +2,7 @@ import type {StoreEntry} from './application-model.ts';
 import {APIError,createWorkbenchClient} from '../../../../applications/sdk/src/apps/request-client.ts';
 
 export interface ImportPreview extends StoreEntry {
-  importId:string;fileName:string;expiresAt:number;action:'install'|'update'|'installed'|'pending';currentVersion:string|null;
+  importId:string;fileName:string;expiresAt:number;action:'install'|'update'|'installed'|'pending'|'migrate';migrationFrom?:string;currentVersion:string|null;
 }
 export function validateImportFile(file:Pick<File,'name'|'size'>){
   if(!/\.ksfapp$/i.test(file.name))throw new APIError('请选择 .ksfapp 应用包。','APP_IMPORT_INVALID');

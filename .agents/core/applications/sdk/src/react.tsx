@@ -1,7 +1,9 @@
 import {SurfaceScopeContext} from './surface-context';
+export {useSurfaceScope} from './surface-context';
 import {applicationScope} from './surface-scope.js';
 import './surface.css';
 import { createRoot } from 'react-dom/client';
+import {rootIdentifierPrefix} from './root-identifier';
 import { createContext,useContext,useCallback,useSyncExternalStore, type ComponentType } from 'react';
 import { WindowContext } from './window-context';
 import { connectReadingPositions } from './window-session';
@@ -23,14 +25,14 @@ export function mountReact(Component:ComponentType<any>,container:HTMLElement,sd
   const fallback=sdk.kind==='window'&&!initial.overlayHost;
   const content=fallback?document.createElement('div'):container, overlay=fallback?document.createElement('div'):null;
   if(overlay){content.style.cssText='height:100%;min-height:0';overlay.style.cssText='position:absolute;inset:0;z-index:100;pointer-events:none;overflow:hidden;contain:layout style;isolation:isolate';container.style.position='relative';container.append(content,overlay);}
-  const root=createRoot(content,{onUncaughtError:error=>sdk.reportError(error)});
+  const root=createRoot(content,{identifierPrefix:rootIdentifierPrefix(initial.id,'legacy'),onUncaughtError:error=>sdk.reportError(error)});
   const disconnect=connectReadingPositions(initial.id,sdk.session);
   const unguard=sdk.onBeforeClose(()=>closeGuards.get(initial.id)?.()??true);
   function Surface() {
     const registerMenu=useCallback((items:ApplicationMenuItem[])=>sdk.menu?.register(items)??{update(){},dispose(){}},[]);
     const registerSettings=useCallback((handler:()=>void|Promise<void>)=>sdk.onSettings?.(handler)??(()=>{}),[]);
     const state=useSyncExternalStore(sdk.subscribe,sdk.getSnapshot);
-    const context={registerMenu,registerSettings,id:state.id,active:state.active,enabled:state.enabled,root:state.root,toolbarHost:state.toolbarHost,overlayHost:state.overlayHost??overlay,contentHost:state.contentHost??(fallback?content:null),setObject:(value:{title:string;detail?:string}|null)=>sdk.setTitle(value?.title??'',value?.detail),session:sdk.session,overlays:sdk.overlays};
+    const context={registerMenu,registerSettings,styleNonce:sdk.styleNonce,id:state.id,active:state.active,enabled:state.enabled,root:state.root,toolbarHost:state.toolbarHost,overlayHost:state.overlayHost??overlay,contentHost:state.contentHost??(fallback?content:null),setObject:(value:{title:string;detail?:string}|null)=>sdk.setTitle(value?.title??'',value?.detail),session:sdk.session,overlays:sdk.overlays,commands:sdk.commands};
     return <SurfaceScopeContext.Provider value={scope}><ApplicationContext.Provider value={sdk}><MaterialContext.Provider value={{settings:state.material,update:()=>{},saved:'default'}}><WindowContext.Provider value={context}><Component search={new URLSearchParams(state.search)} navigate={sdk.navigate} onDiagnostics={sdk.showDiagnostics} openApp={sdk.openApp} compact={state.compact} visible={state.enabled} open={(search:string,fresh=false)=>sdk.openApp(sdk.appId,search,fresh)}/></WindowContext.Provider></MaterialContext.Provider></ApplicationContext.Provider></SurfaceScopeContext.Provider>;
   }
   root.render(<Surface/>);

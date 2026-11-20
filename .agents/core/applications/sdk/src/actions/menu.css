@@ -1,0 +1,34 @@
+@import '../theme.css';
+.ksf-menu-owner {display:inline-flex;position:relative;min-width:0;max-width:100%}
+.ksf-menu-trigger-arrow {font-size:11px;line-height:1}
+.ksf-action-menu {box-sizing:border-box;z-index:1000;pointer-events:auto;width:200px;min-width:0;overflow:visible;padding:0;border:1px solid var(--ksf-color-border);border-radius:8px;background:var(--ksf-color-surface-raised);color:var(--ksf-color-foreground);box-shadow:0 8px 24px var(--ksf-color-scrim);font:14px/1.57 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';outline:none;overscroll-behavior:contain}
+.ksf-menu-content>button {box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;min-height:32px;padding:5px 12px;border:0;border-radius:4px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:default}
+.ksf-menu-content>button:hover:enabled,.ksf-menu-content>button:focus:enabled {outline:none;background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary)}
+.ksf-menu-content>button[data-danger="true"] {color:var(--ksf-color-danger)}
+.ksf-menu-content>button[data-danger="true"]:focus,.ksf-menu-content>button[data-danger="true"]:hover:enabled {background:var(--ksf-color-danger-surface);color:var(--ksf-color-danger)}
+.ksf-menu-content>button:disabled {color:var(--ksf-color-muted-foreground)}
+.ksf-menu-check {width:16px;flex:none;font-size:12px}
+.ksf-menu-label {flex:1;min-width:0;overflow-wrap:anywhere}
+.ksf-menu-shortcut {font-size:11px;color:var(--ksf-color-muted-foreground);white-space:nowrap}
+.ksf-menu-separator {height:1px;background:var(--ksf-color-border);margin:5px 6px}
+.ksf-context-target {box-sizing:border-box;min-width:0;max-width:100%;outline-offset:3px}
+.ksf-context-target:focus-visible {outline:2px solid var(--ksf-color-focus-ring)}
+.ksf-menu-feedback {font-size:12px;color:var(--ksf-color-danger);margin:8px 0}
+.ksf-menubar {display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-width:0;padding:4px;border:1px solid var(--ksf-color-border);border-radius:4px;background:var(--ksf-color-surface)}
+.ksf-menubar>button {font:inherit;font-size:13px;color:var(--ksf-color-foreground);background:transparent;border:0;border-radius:4px;padding:6px 10px;cursor:default}
+.ksf-menubar>button[aria-expanded="true"],.ksf-menubar>button:hover:enabled {background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary)}
+.ksf-menubar>button:disabled {color:var(--ksf-color-muted-foreground)}
+.ksf-menubar>button:focus-visible {outline:2px solid var(--ksf-color-focus-ring);outline-offset:1px}
+@media (forced-colors:active) {.ksf-action-menu {border-color:CanvasText;box-shadow:none}.ksf-menu-content>button:focus {outline:1px solid Highlight}}
+
+.ksf-menu-content{box-sizing:border-box;overflow:auto;overscroll-behavior:contain;max-height:inherit;padding:4px;border-radius:inherit}.ksf-menu-extra{font-size:12px;color:var(--ksf-color-muted-foreground);margin-inline-start:auto}.ksf-action-menu[data-arrow]:before{content:'';position:absolute;box-sizing:border-box;width:8px;height:8px;background:inherit;border:1px solid var(--ksf-color-border);transform:rotate(45deg);pointer-events:none}.ksf-action-menu[data-menu-side=bottom]:before{top:-5px;left:calc(var(--ksf-menu-arrow-x) - 4px);border-bottom:0;border-right:0}.ksf-action-menu[data-menu-side=top]:before{bottom:-5px;left:calc(var(--ksf-menu-arrow-x) - 4px);border-top:0;border-left:0}.ksf-action-menu[data-menu-side=right]:before{left:-5px;top:calc(var(--ksf-menu-arrow-y) - 4px);border-top:0;border-right:0}.ksf-action-menu[data-menu-side=left]:before{right:-5px;top:calc(var(--ksf-menu-arrow-y) - 4px);border-bottom:0;border-left:0}
+
+/* Fixed Ant 6.7.1 proportions using KSF theme tokens. */
+.ksf-action-menu{width:max-content;min-width:0;border:0;line-height:22px;box-shadow:0 6px 16px 0 color-mix(in srgb,var(--ksf-color-scrim) 26.6667%,transparent),0 3px 6px -4px color-mix(in srgb,var(--ksf-color-scrim) 40%,transparent),0 9px 28px 8px color-mix(in srgb,var(--ksf-color-scrim) 16.6667%,transparent);animation:ksf-menu-in .2s cubic-bezier(.23,1,.32,1) both;transform-origin:0 0}
+.ksf-action-menu[data-menu-side=top]{transform-origin:100% 100%}.ksf-action-menu[data-menu-side=left],.ksf-action-menu[data-menu-side=right]{animation-name:ksf-menu-side-in}.ksf-action-menu[data-menu-side=left]{transform-origin:100% 0}
+.ksf-action-menu[data-exiting]{animation:ksf-menu-out .2s cubic-bezier(.755,.05,.855,.06) both;pointer-events:none}.ksf-action-menu[data-exiting][data-menu-side=left],.ksf-action-menu[data-exiting][data-menu-side=right]{animation-name:ksf-menu-side-out}
+.ksf-menu-content{padding:4px}.ksf-menu-content>button{min-height:32px;padding:5px 12px;text-align:start;gap:8px;font:14px/22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';white-space:nowrap}
+.ksf-menu-content>button:hover:enabled,.ksf-menu-content>button:focus:enabled{background:color-mix(in srgb,var(--ksf-color-foreground) 4%,transparent);color:inherit}.ksf-menu-content>button[data-selected]{background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary)}.ksf-menu-content>button[data-selected]:is(:hover,:focus):enabled{background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary)}
+.ksf-menu-content>button:disabled{color:color-mix(in srgb,var(--ksf-color-foreground) 25%,transparent);cursor:not-allowed}.ksf-menu-check{display:inline-flex;align-items:center;justify-content:center;width:14px;font-size:14px}.ksf-menu-check>svg{width:14px;height:14px}.ksf-menu-label{overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}.ksf-menu-shortcut{font-size:12px}.ksf-menu-separator{margin:4px -4px}
+@keyframes ksf-menu-in{from{opacity:0;transform:scaleY(.8)}to{opacity:1;transform:scaleY(1)}}@keyframes ksf-menu-out{from{opacity:1;transform:scaleY(1)}to{opacity:0;transform:scaleY(.8)}}@keyframes ksf-menu-side-in{from{opacity:0;transform:scaleX(.8)}to{opacity:1;transform:scaleX(1)}}@keyframes ksf-menu-side-out{from{opacity:1;transform:scaleX(1)}to{opacity:0;transform:scaleX(.8)}}
+@media(prefers-reduced-motion:reduce){.ksf-action-menu{animation:none!important}}

@@ -1,0 +1,1 @@
+import {useState} from 'react';import {CommandButton} from '@ksf/sdk/command-button';export default function Example(){const [count,setCount]=useState(0);return <div><CommandButton shortcut="mod+k" onClick={()=>setCount(count=>count+1)}>Search</CommandButton>{count>0&&<output style={{display:'block',fontSize:12,marginTop:12}}>已激活 {count} 次</output>}</div>;}

@@ -72,12 +72,12 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
       // package/frontend acceptance and must not be copied per fault scenario.
       if(rel.startsWith('.agents/core/applications/')){
         const parts=rel.slice('.agents/core/applications/'.length).split('/');
-        if(!['sdk','store'].includes(parts[0]))return false;
+        if(!['sdk','builtin'].includes(parts[0]))return false;
         if(parts[0]==='sdk'&&['tests','templates','build','scripts'].includes(parts[1]))return false;
       }
       return true;
     } });
-  writeFileSync(join(root,'.agents/core/applications/store/index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',name:'Lifecycle fixture',apps:[]}));
+  writeFileSync(join(root,'.agents/core/applications/builtin/index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',name:'Lifecycle fixture',apps:[]}));
   for (const entry of ['ksf', 'ksf.ps1']) cpSync(join(sourceRoot, '.agents', entry), join(root, '.agents', entry));
   cpSync(join(sourceRoot, 'AGENTS.md'), join(root, 'AGENTS.md'));
   const definitionFiles = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {

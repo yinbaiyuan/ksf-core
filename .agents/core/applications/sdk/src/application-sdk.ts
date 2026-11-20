@@ -1,8 +1,12 @@
 import type {ApplicationMenuItem,ApplicationMenuRegistration} from './application-menu';
 import type { WorkbenchSession } from './apps/request-client';
 import type { MaterialSettings } from './material-settings';
-import type { OverlayCoordinator } from './overlay-coordinator';
+import type { OverlayAccess } from './overlay-coordinator';
 import type { MessageService, MessageEvent, PeerService } from './communication';
+import type {ApplicationSessionStorage,CloseGuard,CloseRequest,SessionCloseChoice,SessionClosePromptState} from './application-session';
+import type {ApplicationCommands} from './controllers/command-registry';
+export type {ApplicationCommands,CommandInvocation,CommandView,ScopedCommandDefinition} from './controllers/command-registry';
+export type {ApplicationSessionStorage,ApplicationSessionRecord,ApplicationSessionRead,CloseReason,CloseRequest,CloseResponse,CloseGuard,SessionCloseChoice,SessionClosePromptState} from './application-session';
 interface ApplicationSurfaceBase {
   readonly sdkVersion: 1; readonly appId:string; readonly version:string; readonly instanceId:string; readonly styleNonce:string;
   call<T=unknown>(method:string,params?:unknown):Promise<T>;
@@ -10,6 +14,10 @@ interface ApplicationSurfaceBase {
   menu?:{register(items:ApplicationMenuItem[]):ApplicationMenuRegistration};
   onSettings?(handler:()=>void|Promise<void>):()=>void;
   onBeforeClose(guard:()=>boolean|Promise<boolean>):()=>void;
+  /** Structured close/reload negotiation; absent on older hosts. Never implies execution cancellation. */
+  onCloseRequest?(guard:CloseGuard):()=>void;
+  /** Only valid with the actual request currently delivered to onCloseRequest; the host chooses presentation scope. */
+  chooseSessionClose?(request:CloseRequest,state:SessionClosePromptState):Promise<SessionCloseChoice>;
 }
 export interface SurfaceSnapshot {
   id:string; active:boolean; enabled:boolean; root:{current:HTMLDivElement|null}|null; toolbarHost:HTMLDivElement|null;
@@ -26,7 +34,9 @@ export interface ApplicationSDK extends ApplicationSurfaceBase { readonly kind:'
   navigate(changes:Record<string,string|null>,replace?:boolean):void;
   openApp(appId:string,search?:string,fresh?:boolean):void; showDiagnostics():void;
   session:{get(key:string):unknown;set(key:string,value:unknown):void;getPosition(key:string):number|undefined;setPosition(key:string,value:number):void};
-  overlays:OverlayCoordinator;
+  durableSession?:ApplicationSessionStorage;
+  commands?:ApplicationCommands;
+  overlays:OverlayAccess;
   configuration:{get():unknown;set(value:unknown):void};
   resources:{prepare(path:string):Promise<void>;register(prepare:(path:string)=>Promise<unknown>):()=>void};
 }
@@ -64,5 +74,5 @@ export interface ApplicationCLIContext {invoke<T=unknown>(method:string,input?:u
 export interface ApplicationCLI {execute(commandId:string,input:unknown,caller:ApplicationCaller):unknown|Promise<unknown>}
 /** Optional registry metadata; not embedded in the executable Manifest. */
 export interface StoreImage {url:string;sha256:string;size:number;alt?:string}
-export interface StoreListing {subtitle?:string;description?:string;releaseNotes?:string;icon?:StoreImage;screenshots?:StoreImage[]}
+export interface StoreListing {subtitle?:string;description?:string;releaseNotes?:string;/** Application icons must use PNG; screenshots retain their raster formats. */icon?:StoreImage;screenshots?:StoreImage[]}
 export interface StoreListingSource {subtitle?:string;description?:string;releaseNotes?:string;icon?:string|{path:string;alt?:string};screenshots?:{path:string;alt:string}[]}

@@ -1,0 +1,11 @@
+/* The fixed source's continuous indicator timings; names are scoped by the SDK builder. */
+@keyframes ksf-reference-spin {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ksf-reference-pulse {0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ksf-reference-flow {from{stroke-dashoffset:0}to{stroke-dashoffset:-12}}
+@keyframes ksf-reference-typing {0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-3px);opacity:1}}
+.ksf-fidelity-spin{animation:ksf-reference-spin .6s linear infinite}
+.ksf-fidelity-pulse{animation:ksf-reference-pulse 1s ease-in-out infinite}
+.ksf-fidelity-flow[data-loop-running=true]{animation:ksf-reference-flow .6s linear infinite}
+.ksf-fidelity-typing{animation:ksf-reference-typing .9s ease-in-out infinite}
+[data-loop-reduced=true]{animation:none!important}
+.ksf-fidelity-typing[data-loop-reduced=true]{opacity:.4;transform:none}

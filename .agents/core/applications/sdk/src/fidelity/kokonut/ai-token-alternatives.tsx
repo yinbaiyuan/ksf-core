@@ -1,0 +1,798 @@
+import {AnimatePresence, MotionConfig} from '../motion-provider';
+import '../styles/ai-token-alternatives.css';
+// Adapted for KSF from the free MIT Kokonut UI source.
+// Source commit: 655ec61161aff87721e4c60c3cc4dc3329f3e80e
+// Copyright (c) 2025 kokonutUI. Full license: ../../../THIRD_PARTY_NOTICES.txt
+import {useScopedEffect as useEffect, useScopedReducedMotion as useReducedMotion} from "../scope";
+"use client";
+
+/**
+ * @author: @kokonutui
+ * @description: AI Token Alternatives
+ * @version: 1.1.0
+ * @date: 2026-10-21
+ * @license: MIT
+ * @website: https://kokonutui.com
+ * @github: https://github.com/kokonut-labs/kokonutui
+ */
+
+import { Check, RotateCcw, X } from "lucide-react";
+import {motion} from 'motion/react';
+import {type KeyboardEvent, useCallback, useMemo, useRef, useState} from "react";
+import {useLayoutEffect as useRawLayoutEffect,useEffect as useRawEffect,type Ref,useId} from "react";
+import {FidelityPopup} from "../popup";
+import {useWindowContext} from "../../window-context";
+import { cn } from "../../lib/utils";
+
+export interface TokenOption {
+  text: string;
+  /** How likely the model was to pick this word, from 0 to 1. */
+  p: number;
+}
+
+export interface TokenSlot {
+  id: string;
+  /** Most likely first. The first one is what the model wrote. */
+  options: TokenOption[];
+}
+
+/**
+ * Plain text, plain text with the model's probability for it, or a word the
+ * model nearly wrote differently.
+ */
+export type AnswerPiece =
+  | string
+  | { text: string; p: number }
+  | { slot: string };
+
+/** An answer, with its own slots when they change from one take to the next. */
+export type ComposedAnswer =
+  | AnswerPiece[]
+  | { pieces: AnswerPiece[]; slots: TokenSlot[] };
+
+export interface AITokenAlternativesProps {
+  /** The user's message, drawn as a bubble. Only the demo draws one by default. */
+  prompt?: string;
+  /** The words with alternatives. `compose` can return new ones instead. */
+  slots?: TokenSlot[];
+  /**
+   * Builds the answer from the word picked in each slot. Return it or a
+   * Promise of it: after a pick, the words up to that one stay and the rest
+   * is written again once it arrives. `signal` aborts when another pick
+   * replaces this one. Throw and the answer shows the error's message.
+   */
+  compose?: (
+    choice: Record<string, string>,
+    signal: AbortSignal
+  ) => ComposedAnswer | Promise<ComposedAnswer>;
+  className?: string;controlRef?:Ref<HTMLDivElement>;label?:string;controlled?:{pieces:AnswerPiece[];slots:TokenSlot[];choice:Record<string,string>;loading?:boolean;error?:string;onChoose?:(id:string,text:string)=>void};
+}
+
+/** One token of an OpenAI-style `logprobs.content` list. */
+export interface LogprobToken {
+  token: string;
+  logprob: number;
+  top_logprobs?: { token: string; logprob: number }[];
+}
+
+interface Token {
+  key: string;
+  /** Whitespace before the word, kept outside the button. */
+  lead: string;
+  word: string;
+  p: number;
+  slot?: string;
+}
+
+interface Open {
+  slot: string;
+  x: number;
+  y: number;
+}
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+const MENU_WIDTH = 252;
+const TOKEN_PATTERN = /\s+|[^\s,.?!]+|[,.?!]/g;
+const SPACE = /^\s+$/;
+
+const DEMO_SLOTS: TokenSlot[] = [
+  {
+    id: "greet",
+    options: [
+      { text: "Sure", p: 0.58 },
+      { text: "Yes", p: 0.23 },
+      { text: "Good call", p: 0.12 },
+    ],
+  },
+  {
+    id: "day",
+    options: [
+      { text: "Thursday", p: 0.41 },
+      { text: "Friday", p: 0.34 },
+      { text: "next Monday", p: 0.17 },
+    ],
+  },
+  {
+    id: "time",
+    options: [
+      { text: "2pm", p: 0.38 },
+      { text: "10am", p: 0.31 },
+      { text: "after lunch", p: 0.22 },
+    ],
+  },
+  {
+    id: "length",
+    options: [
+      { text: "30 minutes", p: 0.52 },
+      { text: "an hour", p: 0.29 },
+      { text: "15 minutes", p: 0.13 },
+    ],
+  },
+];
+
+const dayReason: Record<string, string> = {
+  Friday: " since the build lands Thursday night.",
+  "next Monday": ", so we get the weekend to fix the last bugs.",
+};
+
+const demoCompose = (c: Record<string, string>): AnswerPiece[] => [
+  { slot: "greet" },
+  ", ",
+  { slot: "day" },
+  " works better for me",
+  dayReason[c.day] ?? ", and it gives design a day to finish the flows.",
+  " Want to do ",
+  { slot: "time" },
+  c.time === "after lunch" ? " when everyone is back" : "",
+  "? Let's keep it to ",
+  { slot: "length" },
+  c.length === "15 minutes"
+    ? " and only go through the blockers."
+    : " and walk through the launch checklist together.",
+];
+
+/** Words the model was less sure of, so the confidence view has texture. */
+const SOFT: Record<string, number> = {
+  design: 0.62,
+  flows: 0.71,
+  build: 0.68,
+  bugs: 0.64,
+  blockers: 0.6,
+  checklist: 0.57,
+  together: 0.74,
+  everyone: 0.7,
+};
+
+/** A steady, high probability for a plain word, so renders match. */
+const plainP = (word: string, index: number) => {
+  if (SOFT[word] !== undefined) {
+    return SOFT[word];
+  }
+  let h = index * 31;
+  for (const ch of word) {
+    h = (h * 33 + ch.charCodeAt(0)) % 997;
+  }
+  return 0.86 + (h % 13) / 100;
+};
+
+const LEADING_SPACE = /^\s+/;
+const WORDLIKE = /\p{L}/u;
+
+/**
+ * Turns a model's logprobs into an answer: each token where another word was
+ * at least `minAlternative` likely becomes a slot with those words.
+ */
+export function fromLogprobs(
+  content: LogprobToken[],
+  { minAlternative = 0.08, maxOptions = 4 } = {}
+): { pieces: AnswerPiece[]; slots: TokenSlot[] } {
+  const pieces: AnswerPiece[] = [];
+  const slots: TokenSlot[] = [];
+  content.forEach((t, i) => {
+    const p = Math.exp(t.logprob);
+    const lead = t.token.match(LEADING_SPACE)?.[0] ?? "";
+    const word = t.token.slice(lead.length);
+    const others = (t.top_logprobs ?? [])
+      .map((o) => ({ text: o.token.trim(), p: Math.exp(o.logprob) }))
+      .filter((o) => o.text && o.text !== word && o.p >= minAlternative);
+    if (!WORDLIKE.test(word) || others.length === 0) {
+      pieces.push({ text: t.token, p });
+      return;
+    }
+    const id = `t${i}`;
+    if (lead) {
+      pieces.push(lead);
+    }
+    pieces.push({ slot: id });
+    slots.push({
+      id,
+      options: [{ text: word, p }, ...others].slice(0, maxOptions),
+    });
+  });
+  return { pieces, slots };
+}
+
+const normalize = (answer: ComposedAnswer, fallback: TokenSlot[]) =>
+  Array.isArray(answer)
+    ? { pieces: answer, slots: fallback }
+    : { pieces: answer.pieces, slots: answer.slots };
+
+const reasonOf = (error: unknown) =>
+  error instanceof Error && error.message
+    ? error.message
+    : "Couldn’t write the rest. Try another word.";
+
+/** A piece's text and known probability, or null for a slot. */
+const plainText = (piece: AnswerPiece): [string, number?] | null => {
+  if (typeof piece === "string") {
+    return [piece];
+  }
+  return "text" in piece ? [piece.text, piece.p] : null;
+};
+
+const tokenize = (
+  pieces: AnswerPiece[],
+  choice: Record<string, string>,
+  slots: TokenSlot[]
+) => {
+  const tokens: Token[] = [];
+  let lead = "";
+  const push = (word: string, p: number, slot?: string) => {
+    const index = tokens.length;
+    tokens.push({ key: `${index}:${word}`, lead, word, p, slot });
+    lead = "";
+  };
+  for (const piece of pieces) {
+    const plain = plainText(piece);
+    if (plain) {
+      const [text, known] = plain;
+      for (const part of text.match(TOKEN_PATTERN) ?? []) {
+        if (SPACE.test(part)) {
+          lead += part;
+        } else {
+          push(part, known ?? plainP(part, tokens.length));
+        }
+      }
+      continue;
+    }
+    const id = (piece as { slot: string }).slot;
+    const slot = slots.find((s) => s.id === id);
+    const picked =
+      slot?.options.find((o) => o.text === choice[id]) ?? slot?.options[0];
+    if (picked) {
+      push(picked.text, picked.p, id);
+    }
+  }
+  return tokens;
+};
+
+const defaults = (slots: TokenSlot[]) =>
+  Object.fromEntries(slots.map((s) => [s.id, s.options[0]?.text ?? ""]));
+
+/**
+ * The answer for the current choice. A Promise holds the old answer (cut at
+ * `keep` words by the caller) until the new one lands.
+ */
+function useAnswer(
+  compose: NonNullable<AITokenAlternativesProps["compose"]>,
+  choice: Record<string, string>,
+  fallback: TokenSlot[]
+) {
+  const [answer, setAnswer] = useState<{
+    pieces: AnswerPiece[];
+    slots: TokenSlot[];
+  }>({ pieces: [], slots: fallback });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const composeRef = useRef(compose);
+  composeRef.current = compose;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const result = composeRef.current(choice, controller.signal);
+    setError(undefined);
+    if (!(result instanceof Promise)) {
+      setAnswer(normalize(result, fallback));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    result.then(
+      (next) => {
+        if (!controller.signal.aborted) {
+          setAnswer(normalize(next, fallback));
+          setLoading(false);
+        }
+      },
+      (e: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(reasonOf(e));
+          setLoading(false);
+        }
+      }
+    );
+    return () => controller.abort();
+  }, [choice, fallback]);
+
+  return { ...answer, loading, error };
+}
+
+export default function AITokenAlternatives({
+  prompt,
+  slots: slotsProp,
+  compose: composeProp,
+  className,controlRef,label,controlled,
+}: AITokenAlternativesProps) {
+  const isDemo = !controlled&&composeProp === undefined;
+  const compose = composeProp ?? demoCompose;
+  const shownPrompt = isDemo
+    ? (prompt ??
+      "Sam wants to push the launch review. Can you draft a quick reply?")
+    : prompt;
+  const reduceMotion = useReducedMotion();
+  const [startSlots] = useState(() => slotsProp ?? (isDemo ? DEMO_SLOTS : []));
+  const owner=useWindowContext(),rootRef=useRef<HTMLDivElement>(null),popupAnchor=useRef<HTMLElement|null>(null),popupId=useId();
+  const [ownChoice,setOwnChoice]=useState(()=>defaults(startSlots)),choice=controlled?.choice??ownChoice;
+  const setChoice=(next:Record<string,string>|((current:Record<string,string>)=>Record<string,string>))=>{const value=typeof next==='function'?next(choice):next;if(controlled){for(const [id,text] of Object.entries(value))if(choice[id]!==text)controlled.onChoose?.(id,text);}else setOwnChoice(value);};
+  const answer={pieces:controlled?.pieces??[],slots:controlled?.slots??[],loading:!!controlled?.loading,error:controlled?.error};
+  const { slots } = answer;
+  // Words up to the last pick stay while the rest is being written again.
+  const [keep, setKeep] = useState(0);
+  const [shown, setShown] = useState(Number.POSITIVE_INFINITY);
+  const [open, setOpen] = useState<Open | null>(null);
+  const [heat, setHeat] = useState(false);
+  // Only a rewrite the user asked for is announced, not the first answer.
+  const [edited, setEdited] = useState(false);
+  const answerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  /** Holds the height while a rewrite streams, so the card does not jump. */
+  const [minHeight, setMinHeight] = useState<number>();
+  const tokenRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  const tokens = useMemo(
+    () => tokenize(answer.pieces, choice, slots),
+    [answer.pieces, choice, slots]
+  );
+  const previousChoice=useRef(choice);
+  useRawLayoutEffect(()=>{const previous=previousChoice.current;previousChoice.current=choice;const changed=Object.keys(choice).filter(id=>choice[id]!==previous[id]);if(changed.length){const at=tokens.findIndex(token=>!!token.slot&&changed.includes(token.slot));if(at>=0){setShown(reduceMotion?tokens.length:at+1);setKeep(at+1);}}},[choice,reduceMotion]);
+  const waiting = answer.loading;
+  // While the rest is on its way, or failed to come, only the kept words show.
+  const cut = waiting || Boolean(answer.error);
+  const visible = cut ? Math.min(shown, keep) : shown;
+  const streaming = waiting || (!cut && shown < tokens.length);
+
+  // Stream the answer in a word at a time.
+  useEffect(() => {
+    if (!streaming || waiting) {
+      return;
+    }
+    if (reduceMotion) {
+      setShown(tokens.length);
+      return;
+    }
+    const word = tokens[shown]?.word ?? "";
+    const id = setTimeout(
+      () => setShown((n) => n + 1),
+      26 + Math.min(40, word.length * 6)
+    );
+    return () => clearTimeout(id);
+  }, [shown, streaming, waiting, tokens, reduceMotion]);
+
+  const pick = useCallback(
+    (slotId: string, text: string) => {
+      const index = tokens.findIndex((t) => t.slot === slotId);
+      setOpen(null);
+      // The list unmounts, so focus goes back to the word either way.
+      tokenRefs.current.get(slotId)?.focus({preventScroll:true});
+      if (choice[slotId] === text) {
+        return;
+      }
+      setMinHeight(textRef.current?.offsetHeight);
+      setEdited(true);
+      setChoice((c) => ({ ...c, [slotId]: text }));
+      // Keep everything up to the new word, then write the rest again.
+      if(!controlled){setShown(index + 1);setKeep(index + 1);}
+    },
+    [choice, tokens]
+  );
+
+  const toggle = (token: Token) => {
+    const slotId = token.slot;
+    const button = slotId ? tokenRefs.current.get(slotId) : undefined;
+    const box = answerRef.current;
+    if (!(slotId && button && box)) {
+      return;
+    }
+    if (open?.slot === slotId) {
+      setOpen(null);
+      return;
+    }
+    popupAnchor.current=button;
+    const b = button.getBoundingClientRect();
+    const r = box.getBoundingClientRect();
+    setOpen({
+      slot: slotId,
+      x: Math.max(0, Math.min(b.left - r.left - 10, r.width - MENU_WIDTH)),
+      y: b.bottom - r.top + 6,
+    });
+  };
+
+  const close = useCallback(() => {
+    const slotId = open?.slot;
+    setOpen(null);
+    if (slotId) {
+      tokenRefs.current.get(slotId)?.focus({ preventScroll: true });
+    }
+  }, [open]);
+
+  useRawEffect(()=>{if(!owner.active||!owner.enabled)setOpen(null);},[owner.active,owner.enabled]);
+  const edits = slots.filter(
+    (s) => s.id in choice && choice[s.id] !== s.options[0]?.text
+  );
+  const openSlot = slots.find((s) => s.id === open?.slot);
+
+  return (
+    <>
+      <div
+        className={cn(
+          "w-full max-w-md rounded-2xl bg-white ring-1 ring-black/[0.08] dark:bg-zinc-900 dark:ring-white/10",
+          className
+        )}
+        data-state={streaming ? "streaming" : "idle"} aria-label={label} role="group" ref={node=>{rootRef.current=node;if(typeof controlRef==='function')return controlRef(node);if(controlRef)controlRef.current=node;}}
+      >
+        {shownPrompt ? (
+          <div className="flex justify-end px-4 pt-4">
+            <p className="max-w-[85%] rounded-2xl rounded-br-md bg-zinc-100 px-3.5 py-2 text-[13px] text-zinc-700 leading-snug dark:bg-zinc-800 dark:text-zinc-200">
+              {shownPrompt}
+            </p>
+          </div>
+        ) : null}
+
+        <div className="relative px-4 pt-4 pb-5" ref={answerRef}>
+          <p
+            className="text-pretty text-[15px] text-zinc-800 leading-7 dark:text-zinc-200"
+            ref={textRef}
+            style={{ minHeight: streaming ? minHeight : undefined }}
+          >
+            {tokens.slice(0, visible).map((token) => (
+              <TokenView
+                active={open?.slot === token.slot && Boolean(token.slot)}
+                edited={
+                  Boolean(token.slot) && edits.some((s) => s.id === token.slot)
+                }
+                heat={heat}
+                key={token.key}
+                onToggle={() => toggle(token)}
+                ref={(el) => {
+                  if (token.slot && el) {
+                    tokenRefs.current.set(token.slot, el);
+                  }
+                }}
+                token={token}
+              />
+            ))}
+            {streaming && (
+              <span
+                aria-hidden="true"
+                className="ml-0.5 inline-block h-4 w-[7px] translate-y-[3px] animate-pulse rounded-[2px] bg-zinc-800 motion-reduce:animate-none dark:bg-zinc-200"
+              />
+            )}
+          </p>
+          {answer.error ? (
+            <p
+              className="mt-2 text-[12.5px] text-rose-600 dark:text-rose-400"
+              role="alert"
+            >
+              {answer.error}
+            </p>
+          ) : null}
+
+          <FidelityPopup anchor={popupAnchor} open={!!open&&!!openSlot} onClose={close} id={popupId} label="候选词" placement="bottom-start"><AnimatePresence>
+            {open && openSlot && (
+              <Alternatives
+                current={choice[openSlot.id]}
+                key={openSlot.id}
+                onClose={close}
+                onPick={(text) => pick(openSlot.id, text)}
+                slot={openSlot}
+                x={open.x}
+                y={open.y}
+              />
+            )}
+          </AnimatePresence></FidelityPopup>
+        </div>
+
+        <footer className="flex min-h-12 flex-wrap items-center gap-2 border-black/[0.06] border-t px-4 py-2.5 dark:border-white/[0.08]">
+          <HeatSwitch on={heat} onToggle={() => setHeat((h) => !h)} />
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+            {edits.length === 0 ? (
+              <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+                Click a dotted word to swap it
+              </p>
+            ) : (
+              <EditChips
+                choice={choice}
+                edits={edits}
+                onReset={() => {
+                  const first = tokens.findIndex(
+                    (t) => t.slot && edits.some((s) => s.id === t.slot)
+                  );
+                  setMinHeight(textRef.current?.offsetHeight);
+                  setEdited(true);
+                  setChoice(defaults(slots));
+                  // Like a pick: the word itself lands at once, the rest
+                  // is written again.
+                  if(!controlled){setShown(first + 1);setKeep(first + 1);}
+                  // Reset leaves with the chips; focus goes to the first
+                  // word that changed back.
+                  const slot = tokens[first]?.slot;
+                  if(slot)tokenRefs.current.get(slot)?.focus({preventScroll:true});
+                }}
+                onRevert={(slot) => pick(slot.id, slot.options[0].text)}
+              />
+            )}
+          </div>
+        </footer>
+        <p aria-live="polite" className="sr-only">
+          {edited && !streaming ? "Answer updated" : ""}
+        </p>
+      </div>
+    </>
+  );
+}
+
+function TokenView({
+  token,
+  heat,
+  active,
+  edited,
+  onToggle,
+  ref,
+}: {
+  token: Token;
+  heat: boolean;
+  active: boolean;
+  edited: boolean;
+  onToggle: () => void;
+  ref: (el: HTMLButtonElement | null) => void;
+}) {
+  // The less sure the model was, the warmer the word in the confidence view.
+  const warmth = heat ? Math.max(0, (0.95 - token.p) / 0.75) : 0;
+  const style = {
+    backgroundColor: `rgb(234 88 12 / ${(warmth * 0.32).toFixed(3)})`,
+  };
+  const enter = {
+    initial: { opacity: 0, filter: "blur(3px)" },
+    animate: { opacity: 1, filter: "blur(0px)" },
+    transition: { duration: 0.28, ease: EASE_OUT },
+  };
+
+  if (!token.slot) {
+    return (
+      <>
+        {token.lead}
+        <motion.span
+          {...enter}
+          className="rounded-[3px] transition-[background-color] duration-300 [box-decoration-break:clone]"
+          style={style}
+        >
+          {token.word}
+        </motion.span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {token.lead}
+      <motion.button
+        {...enter}
+        aria-expanded={active}
+        aria-haspopup="listbox"
+        aria-label={`${token.word}, ${Math.round(token.p * 100)}% likely. Show alternatives`}
+        className={cn(
+          "-mx-0.5 cursor-pointer rounded-[4px] px-0.5 underline decoration-[1.5px] underline-offset-[5px] outline-hidden transition-[background-color,text-decoration-color] duration-150 [box-decoration-break:clone] focus-visible:ring-2 focus-visible:ring-orange-600/40",
+          edited
+            ? "decoration-orange-600 decoration-solid dark:decoration-orange-400"
+            : "decoration-zinc-400 decoration-dotted dark:decoration-zinc-500",
+          active
+            ? "bg-orange-500/10 dark:bg-orange-400/15"
+            : "hover:bg-orange-500/[0.06] dark:hover:bg-orange-400/10"
+        )}
+        onClick={onToggle}
+        ref={ref}
+        style={heat ? style : undefined}
+        type="button"
+      >
+        {token.word}
+      </motion.button>
+    </>
+  );
+}
+
+function Alternatives({
+  slot,
+  current,
+  x,
+  y,
+  onPick,
+  onClose,
+}: {
+  slot: TokenSlot;
+  current: string;
+  x: number;
+  y: number;
+  onPick: (text: string) => void;
+  onClose: () => void;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const options = [...slot.options].sort((a, b) => b.p - a.p);
+
+  useEffect(() => {
+    const selected = listRef.current?.querySelector<HTMLButtonElement>(
+      '[aria-selected="true"]'
+    );
+    selected?.focus({ preventScroll: true });
+  }, []);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if(event.nativeEvent.isComposing||event.nativeEvent.keyCode===229)return;
+    const items = [
+      ...(listRef.current?.querySelectorAll<HTMLButtonElement>(
+        '[role="option"]'
+      ) ?? []),
+    ];
+    const at = items.indexOf(listRef.current?.ownerDocument.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      items.at((at + step + items.length) % items.length)?.focus();
+    } else if (event.key === "Escape" || event.key === "Tab") {
+      event.preventDefault();
+      onClose();
+    }
+  };
+
+  return (
+    <motion.div
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      aria-label="Other words the model considered"
+      className="relative max-w-full z-20 origin-top-left rounded-2xl bg-white p-1.5 shadow-[0_12px_32px_-12px_rgb(0_0_0/0.25)] ring-1 ring-black/[0.08] dark:bg-zinc-800 dark:shadow-[0_12px_32px_-12px_rgb(0_0_0/0.7)] dark:ring-white/10"
+      exit={{ opacity: 0, transition: { duration: 0.1 } }}
+      initial={{ opacity: 0, scale: 0.97, y: -4 }}
+      onKeyDown={onKeyDown}
+      ref={listRef}
+      role="listbox"
+      style={{width:MENU_WIDTH,maxWidth:'100%'}}
+      transition={{ duration: 0.16, ease: EASE_OUT }}
+    >
+      <p className="px-2 pt-1 pb-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+        Words it weighed here
+      </p>
+      {options.map((option) => {
+        const selected = option.text === current;
+        return (
+          <button
+            aria-selected={selected}
+            className="flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left outline-hidden transition-colors duration-100 hover:bg-zinc-100 focus-visible:bg-zinc-100 dark:focus-visible:bg-white/[0.07] dark:hover:bg-white/[0.07]"
+            key={option.text}
+            onClick={() => onPick(option.text)}
+            role="option"
+            type="button"
+          >
+            <span className="min-w-0 flex-1 truncate font-medium text-[13px] text-zinc-900 dark:text-zinc-100">
+              {option.text}
+            </span>
+            <span className="h-1 w-14 shrink-0 overflow-hidden rounded-full bg-zinc-900/[0.07] dark:bg-white/10">
+              <motion.span
+                animate={{ scaleX: option.p }}
+                className={cn(
+                  "block h-full origin-left rounded-full",
+                  selected
+                    ? "bg-orange-600 dark:bg-orange-400"
+                    : "bg-zinc-400 dark:bg-zinc-500"
+                )}
+                initial={{ scaleX: 0 }}
+                transition={{ duration: 0.25, ease: EASE_OUT }}
+              />
+            </span>
+            <span className="w-8 shrink-0 text-right font-mono text-[11px] text-zinc-500 tabular-nums dark:text-zinc-400">
+              {Math.round(option.p * 100)}%
+            </span>
+            <Check
+              aria-hidden="true"
+              className={cn(
+                "size-3.5 shrink-0 text-zinc-900 dark:text-zinc-100",
+                !selected && "invisible"
+              )}
+            />
+          </button>
+        );
+      })}
+    </motion.div>
+  );
+}
+
+function HeatSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      aria-checked={on}
+      className="group flex items-center gap-2 rounded-md py-1 text-[12px] text-zinc-600 outline-hidden focus-visible:ring-2 focus-visible:ring-orange-600/40 dark:text-zinc-300"
+      onClick={onToggle}
+      role="switch"
+      type="button"
+    >
+      <span
+        className={cn(
+          "relative h-4 w-7 rounded-full transition-colors duration-200",
+          on
+            ? "bg-orange-600 dark:bg-orange-500"
+            : "bg-zinc-300 dark:bg-zinc-600"
+        )}
+      >
+        <span
+          className={cn(
+            "absolute top-0.5 left-0.5 size-3 rounded-full bg-white shadow-sm transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
+            on && "translate-x-3"
+          )}
+        />
+      </span>
+      Confidence
+    </button>
+  );
+}
+
+function EditChips({
+  edits,
+  choice,
+  onRevert,
+  onReset,
+}: {
+  edits: TokenSlot[];
+  choice: Record<string, string>;
+  onRevert: (slot: TokenSlot) => void;
+  onReset: () => void;
+}) {
+  return (
+    <>
+      <AnimatePresence initial={false} mode="popLayout">
+        {edits.map((slot) => (
+          <motion.span
+            animate={{ opacity: 1 }}
+            className="flex h-6 items-center gap-1 rounded-full bg-zinc-100 pr-1 pl-2 text-[11px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            key={slot.id}
+            layout
+            transition={{ duration: 0.18, ease: EASE_OUT }}
+          >
+            <span className="text-zinc-400 line-through decoration-zinc-400/70 dark:text-zinc-500">
+              {slot.options[0].text}
+            </span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              {choice[slot.id]}
+            </span>
+            <button
+              aria-label={`Back to ${slot.options[0].text}`}
+              className="flex size-4 items-center justify-center rounded-full text-zinc-400 transition-colors duration-100 hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-white/10 dark:hover:text-zinc-100"
+              onClick={() => onRevert(slot)}
+              type="button"
+            >
+              <X className="size-3" />
+            </button>
+          </motion.span>
+        ))}
+      </AnimatePresence>
+      {edits.length > 1 && (
+        <button
+          className="flex h-6 items-center gap-1 rounded-full px-2 text-[11px] text-zinc-500 transition-colors duration-100 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/[0.07] dark:hover:text-white"
+          onClick={onReset}
+          type="button"
+        >
+          <RotateCcw className="size-3" />
+          Reset
+        </button>
+      )}
+    </>
+  );
+}

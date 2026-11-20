@@ -1,0 +1,5 @@
+.workbench-backdrop.is-side-rays .side-rays { position:absolute; inset:0; mix-blend-mode:screen; }
+.workbench-backdrop.is-side-rays .side-rays::before { content:''; position:absolute; inset:0; opacity:min(1,var(--side-rays-strength,1)); filter:brightness(var(--side-rays-strength,1)); background:conic-gradient(from 210deg at 108% -8%,transparent 0deg,#ffe1a066 8deg,transparent 13deg,#fff4dd8c 20deg,transparent 24deg,#ffdf9b66 32deg,transparent 42deg); }
+.workbench-backdrop.is-side-rays .side-rays[data-renderer=webgl]::before { display:none; }
+.workbench-backdrop.is-aero-shards { background:#edf3fa; filter:none; }
+.host-theme-dark .workbench-backdrop.is-aero-shards { background:#070b12; }

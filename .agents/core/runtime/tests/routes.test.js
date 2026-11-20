@@ -13,6 +13,7 @@ import { writeUserData, readUserData } from '../src/services/user-data.js';
 import { abilitySource } from '../src/services/sources.js';
 import { routingFixture } from './helpers/routing-fixture.js';
 import { ROUTE_DIRECTORY } from '../src/routing/schema.js';
+import { hostIdentity } from '../src/routing/storage.js';
 
 const recordFile = (f, record) => join(f.root, ROUTE_DIRECTORY, `${record.sessionKey}.json`);
 const update = (f, record, eventId, overrides = {}, hooks) => mutateRoute({ root: f.root, operation: 'write',
@@ -233,4 +234,17 @@ test('real CLI waits for fragmented valid stdin and accepts it without EAGAIN or
   assert.equal((await exited)[0], 0, output);
   assert.equal(JSON.parse(output).data.record.revision, 1);
   assert.ok(!output.includes(f.identity.sessionId));
+});
+
+test('host identity comes from explicit input, a KSF pair, Codex, then Claude Code', () => {
+  const codex = { CODEX_THREAD_ID: 'thread-1' }, claude = { CLAUDE_CODE_SESSION_ID: 'session-1' };
+  assert.deepEqual(hostIdentity(undefined, codex), { host: 'codex', sessionId: 'thread-1' });
+  assert.deepEqual(hostIdentity(undefined, claude), { host: 'claude-code', sessionId: 'session-1' });
+  // Existing Codex records keep their identity when a Claude Code variable is inherited.
+  assert.deepEqual(hostIdentity(undefined, { ...claude, ...codex }), { host: 'codex', sessionId: 'thread-1' });
+  assert.deepEqual(hostIdentity(undefined, { ...claude, ...codex, KSF_SESSION_HOST: 'other-host', KSF_SESSION_ID: 'x' }), { host: 'other-host', sessionId: 'x' });
+  assert.deepEqual(hostIdentity({ host: 'stdin', sessionId: 'y' }, { ...codex }), { host: 'stdin', sessionId: 'y' });
+  assert.throws(() => hostIdentity(undefined, { KSF_SESSION_HOST: 'only-host' }), { code: 'INVALID_ARGUMENTS' });
+  assert.throws(() => hostIdentity(undefined, { KSF_SESSION_HOST: 'Bad Host', KSF_SESSION_ID: 'x' }), { code: 'INVALID_ARGUMENTS' });
+  assert.throws(() => hostIdentity(undefined, {}), { code: 'ROUTE_IDENTITY_REQUIRED' });
 });

@@ -1,0 +1,9 @@
+@import '../theme.css';
+.ksf-floating-panel {box-sizing:border-box;z-index:20;pointer-events:auto;min-width:120px;max-width:360px;overflow:auto;border:1px solid var(--ksf-color-border);border-radius:8px;padding:12px;background:var(--ksf-color-surface-raised);color:var(--ksf-color-foreground);box-shadow:0 6px 24px color-mix(in srgb,var(--ksf-color-foreground) 14%,transparent);font:14px/1.7 system-ui,sans-serif;outline:0}
+.ksf-floating-panel[role="tooltip"] {pointer-events:none;min-width:0;max-width:280px;font-size:12px;padding:6px 10px;border-radius:6px}
+.ksf-floating-panel:focus-visible {outline:2px solid var(--ksf-color-focus-ring);outline-offset:2px}
+.ksf-listbox {padding:4px;max-height:280px;list-style:none}
+.ksf-option {box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;text-align:start;border:0;border-radius:4px;min-height:32px;padding:5px 10px;background:transparent;color:var(--ksf-color-foreground);font:14px/1.6 system-ui;cursor:pointer}
+.ksf-option:hover,.ksf-option[data-active] {background:var(--ksf-color-surface)}
+.ksf-option[aria-selected="true"] {background:var(--ksf-color-selection);color:var(--ksf-color-selection-foreground);font-weight:500}
+.ksf-option:disabled {color:var(--ksf-color-muted-foreground);opacity:.6;cursor:not-allowed}

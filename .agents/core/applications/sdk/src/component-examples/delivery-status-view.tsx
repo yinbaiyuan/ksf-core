@@ -1,0 +1,3 @@
+import {useState} from 'react';import Source from '../fidelity/kokonut/ai-order-status';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function DeliveryStatusView({state}:{state?:'on-the-way'|'delivered'}={}){const [message,setMessage]=useState(false);return <FidelityScope module="ai-order-status" style={{maxWidth:448,marginInline:"auto"}}><Source status={state} onMessage={state?undefined:()=>setMessage(true)}/>{message&&<output>已打开本地联系示例，未发送消息。</output>}</FidelityScope>;}

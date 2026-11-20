@@ -4,9 +4,11 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from '
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webSourceDigest } from '../../src/web/assets.js';
+import { createUIBootstrap, injectUIBootstrap } from './ui-runtime.mjs';
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 process.chdir(directory);
-await build();
+const bundles = await build();
+const chunks = (Array.isArray(bundles) ? bundles : [bundles]).flatMap(bundle => bundle.output ?? []);
 // react-draggable sees this external stylesheet marker and skips inline style injection.
 // Selection rules live in desktop.css, keeping production style-src 'self'.
 const html = readFileSync('dist/index.html', 'utf8').replace('<link rel="stylesheet"', '<link id="react-draggable-style-el" rel="stylesheet"');
@@ -28,7 +30,7 @@ for (const name of pending) { const key = locate(name); if (key) included.add(ke
 for (const key of included) for (const name of Object.keys(lock.packages[key].dependencies ?? {})) {
   const dependency = locate(name, key); if (dependency) included.add(dependency);
 }
-const notices = [readFileSync('scripts/licenses/shadcn-ui.txt', 'utf8'), readFileSync('scripts/licenses/liquidglass.txt', 'utf8')];
+const notices = [readFileSync('scripts/licenses/react-bits-aero-shards.txt', 'utf8'), readFileSync('scripts/licenses/kokonutui-drape-background.txt', 'utf8'), readFileSync('scripts/licenses/react-bits-magic-bento.txt', 'utf8'), readFileSync('scripts/licenses/react-bits-glass-icons.txt', 'utf8'), readFileSync('scripts/licenses/shadcn-ui.txt', 'utf8'), readFileSync('scripts/licenses/liquidglass.txt', 'utf8'), readFileSync('scripts/licenses/react-bits-side-rays.txt', 'utf8'), readFileSync('scripts/licenses/cult-ui-gradient-button-group.txt', 'utf8')];
 for (const key of [...included].sort()) {
   const pkg = JSON.parse(readFileSync(join(key, 'package.json'), 'utf8'));
   const licenses = readdirSync(key).filter(name => /^(licen[sc]e|copying|notice)(?:[._-]|$)/i.test(name) && statSync(join(key, name)).isFile());
@@ -46,5 +48,9 @@ const files = Object.fromEntries([...names].sort().map(name => {
   if (!existsSync(join('dist', name))) throw new Error(`Missing bundled asset ${name}`);
   return [name, createHash('sha256').update(readFileSync(join('dist', name))).digest('hex')];
 }));
-writeFileSync('dist/build.json', JSON.stringify({ protocol: 'ksf-web-build-v1', sourceDigest: webSourceDigest(directory), files }, null, 2) + '\n');
+const sourceDigest = webSourceDigest(directory);
+const frontendRuntime = createUIBootstrap(manifest, {sourceDigest, files});
+writeFileSync('dist/index.html', injectUIBootstrap(readFileSync('dist/index.html', 'utf8'), frontendRuntime));
+files['index.html'] = createHash('sha256').update(readFileSync('dist/index.html')).digest('hex');
+writeFileSync('dist/build.json', JSON.stringify({ protocol: 'ksf-web-build-v1', sourceDigest, files, frontendRuntime }, null, 2) + '\n');
 console.log(`Verified ${names.size} assets; ${included.size} runtime dependency license notices.`);

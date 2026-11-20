@@ -1,0 +1,2 @@
+import {useState} from 'react';import {Calendar} from '@ksf/sdk/calendar';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function CalendarMiniExample(){const [value,setValue]=useState('2026-11-20');return <div className="ksf-demo-stack"><div style={{width:320,maxWidth:'100%'}}><Calendar label="迷你日历" fullSize={false} value={value} onSelect={setValue}/></div><output role="status">已选日期：{value}</output></div>;}

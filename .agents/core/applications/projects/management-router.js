@@ -3,6 +3,7 @@ import {createGovernanceManagement} from './governance.js';
 export function createProjectManagement(options){
   const legacy=createLegacy(options),governance=createGovernanceManagement(options);let active=legacy;
   return {navigation:governance.navigation,async select(project,detail,location){active=detail?.governance?governance:legacy;await active.select(project,detail,location);},render(detail){return active.render(detail);},
+    getLocation:()=>active.getLocation?.()??{objectPath:null,objectScroll:0,navigationScroll:0},
     flushFileSaves:()=>governance.flushFileSaves(),
     closeReviews:()=>governance.closeReviews(),
     isSaving:()=>governance.isSaving(),

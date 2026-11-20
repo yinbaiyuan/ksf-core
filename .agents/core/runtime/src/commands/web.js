@@ -1,16 +1,18 @@
 import { hasJsonFlag, parseOptions, optionSpecs } from '../shared/options.js';
 import { invalid } from '../metadata/errors.js';
 import { startWebServer, WEB_PORT } from '../services/web.js';
-import { readWebHosts, WEB_LOCAL_NAME } from '../services/web-hosts.js';
+import { readWebHosts } from '../services/web-hosts.js';
 import { runWebHostsCommand } from './web-hosts.js';
+import {readServicePolicy} from '../services/service-manager.js';
+import {workbenchURL} from '../services/web-address.js';
 
 export function webHelp() {
   return 'KSF web\n\nUsage:\n' +
     '  ksf web [--port <0-65535>] [--json]\n' +
     '  ksf web hosts [--apply] [--json]\n' +
     '  ksf web --help\n\n' +
-    `Start a foreground HTTP server on 127.0.0.1 (default port ${WEB_PORT}).\n` +
-    'Use http://ksf.ai:1313/ after configuring the system hosts mapping. Use the user login service for background operation.\n' +
+    `Start a foreground HTTP server on 127.0.0.1 (uses service policy; fallback port ${WEB_PORT}).\n` +
+    'Use http://ksf.localhost/ on port 80, or add the configured port. No hosts mapping is required. Use ksf service for background operation.\n' +
     'Port 0 chooses a free port. Press Ctrl+C to stop.\n' +
     'Serves task turns and routing, read-only task/route APIs and GET /api/health; enabled transcript catch-up runs while open.\n' +
     '--json prints one readiness result after listening; later errors use stderr.\n';
@@ -31,7 +33,7 @@ export async function runWebCommand(args, root) {
     if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
       process.stdout.write(webHelp()); return 0;
     }
-    const parsed = { port: WEB_PORT };
+    const parsed = { port: (await readServicePolicy(root)).port };
     parseOptions(args, { result: parsed, options: optionSpecs(['port', 'json']), invalid,
       target() { invalid('Web does not accept positional arguments.'); } });
     if (!/^\d+$/.test(String(parsed.port)) || Number(parsed.port) > 65535) {
@@ -42,8 +44,7 @@ export async function runWebCommand(args, root) {
     instance = await startWebServer({ root, port: Number(parsed.port), listenFD: fd === undefined ? undefined : Number(fd) });
     const { host, port, url, startedAt, nodeVersion } = instance;
     const hosts = readWebHosts();
-    const localUrl = hosts.state === 'configured' ? `http://${WEB_LOCAL_NAME}${port === 80 ? '' : `:${port}`}/` : null;
-    if (port === WEB_PORT && !localUrl) process.stderr.write(`WEB_HOSTS_${hosts.state.toUpperCase()}: Configure the ksf.ai loopback entries with web hosts --apply; use the direct loopback URL until then.\n`);
+    const localUrl = workbenchURL(port);
     return await new Promise(resolve => {
       let stopping = false;
       const stop = error => {

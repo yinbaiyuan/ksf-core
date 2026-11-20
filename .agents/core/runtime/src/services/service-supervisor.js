@@ -3,6 +3,7 @@ import {mkdir,stat,rename,appendFile,rm} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {waitForServiceTransition} from './service-manager.js';
+import {stopLoginJob} from '../platform/service.js';
 
 // One supervisor per host captures both native stderr and JS output without
 // PowerShell transcoding. Each stream has backpressure and two bounded files.
@@ -20,12 +21,15 @@ export async function superviseService(root,{port,reason,attemptId}){
       await appendFile(path,data,{mode:0o600});
     });return writes;
   }
-  const child=spawn(process.execPath,[fileURLToPath(new URL('./service-entry.js',import.meta.url)),root,String(port),reason,attemptId??''],{cwd:dirname(process.execPath),windowsHide:true,stdio:['ignore','pipe','pipe','ipc'],env:{...process.env,KSF_SERVICE_WORKER:'1'}});
+  const fd=process.env.KSF_WEB_LISTEN_FD;
+  if(fd!==undefined&&(!/^\d+$/.test(fd)||!Number.isSafeInteger(Number(fd))||Number(fd)<3))throw Object.assign(Error('Invalid inherited Web listener.'),{code:'WEB_LISTENER_INVALID'});
+  const child=spawn(process.execPath,[fileURLToPath(new URL('./service-entry.js',import.meta.url)),root,String(port),reason,attemptId??''],{cwd:dirname(process.execPath),windowsHide:true,stdio:['ignore','pipe','pipe','ipc',...(fd===undefined?[]:[Number(fd)])],env:{...process.env,KSF_SERVICE_WORKER:'1',...(fd===undefined?{}:{KSF_WEB_LISTEN_FD:'4'})}});
   for(const [stream,name] of [[child.stdout,'service.log'],[child.stderr,'service.err']])stream.on('data',chunk=>{
     stream.pause();void write(name,chunk).catch(error=>process.stderr.write('SERVICE_LOG_FAILED: '+error.message+'\n')).finally(()=>stream.resume());
   });
   const stop=()=>{if(child.connected)child.send({type:'ksf-service-stop'},()=>{});else if(child.exitCode===null)child.kill('SIGTERM');};
   process.once('SIGINT',stop);process.once('SIGTERM',stop);
-  try{return await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',code=>resolve(code??1));});}
-  finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);await writes.catch(()=>{});}
+  let code;
+  try{code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',code=>resolve(code??1));});return code;}
+  finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);await writes.catch(()=>{});if(fd!==undefined&&code===0)stopLoginJob();}
 }

@@ -1,0 +1,2 @@
+import {useState} from 'react';import {TimePicker} from '@ksf/sdk/time-picker';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TimePickerConfirmationExample(){const [value,setValue]=useState('09:30');return <div className="ksf-demo-stack"><TimePicker label="确认后提交" value={value} onValueChange={setValue} needConfirm showNow={false}/><output role="status">已提交：{value||'未选择'}</output><p>打开面板修改时间，选择确定后提交；按Escape取消本次修改。</p></div>;}

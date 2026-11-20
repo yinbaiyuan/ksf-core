@@ -2,17 +2,18 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseOptions, optionSpecs } from '../shared/options.js';
 import { invalid } from '../chat-state/storage.js';
-import { readCurrentWork, bindCurrentWork, currentWorkContext, acceptWorkContext, resetWorkContext } from '../services/work-context.js';
+import { readCurrentWork, bindCurrentWork, currentWorkContext, acceptWorkContext, resetWorkContext,executeCurrentTask } from '../services/work-context.js';
 import { installContextHooks, workContextHook } from '../services/context-hook.js';
 
-export const workContextOperations = ['work', 'bind', 'current', 'accept', 'hook', 'hooks'];
+export const workContextOperations = ['work', 'bind', 'current', 'accept', 'execute', 'hook', 'hooks'];
 export const workContextHelp = () => `KSF work context\n\n` +
   `  ksf context work --json\n` +
   `  ksf context bind (--data <JSON|null> | --from -|file) --if-match <etag|missing> [--turn <nativeTurnId>] --json\n` +
   `  ksf context current [--manifest] [--reload] [--extras <JSON array>] --json\n` +
   `  ksf context accept (--data <delivery JSON> | --from -|file) --json\n` +
+  `  ksf context execute (--data <action JSON> | --from -|file) --json\n` +
   `  ksf context hooks --json\n\n` +
-  `Identity comes from CODEX_THREAD_ID. Binding and cache do not create native turns.\n` +
+  `Identity: KSF_SESSION_HOST+KSF_SESSION_ID, else CODEX_THREAD_ID, else CLAUDE_CODE_SESSION_ID. Binding and cache do not create native turns.\n` +
   `Read all returned bodies before accepting data.delivery. Missing confirmation causes safe rereads.\n` +
   `Extras are turn-local exact {ref,source} locators; they never update the binding.\n` +
   `For read-only work, omit bind/accept/reload/hooks; read listed originals directly if cached bodies are unavailable.\n`;
@@ -28,12 +29,12 @@ async function input(root, p, supplied) {
 export async function runWorkContextCommand(args, root, { env = process.env, stdin } = {}) {
   const operation = args[0], result = { ok: false, command: 'context', operation, data: null, errors: [] };
   try {
-    const p = {}, names = { work: [], bind: ['data', 'from', 'if-match', 'turn'], current: ['manifest', 'reload', 'extras'], accept: ['data', 'from'], hook: [], hooks: [] }[operation];
+    const p = {}, names = { work: [], bind: ['data', 'from', 'if-match', 'turn'], current: ['manifest', 'reload', 'extras'], accept: ['data', 'from'], execute:['data','from'], hook: [], hooks: [] }[operation];
     const seen = parseOptions(args.slice(1), { result: p, options: optionSpecs([...names, 'json', 'help'], {
       from: { kind: 'value', allowDash: true }, manifest: { kind: 'flag' }, reload: { kind: 'flag' },
     }), invalid, target() { invalid('Context does not accept positional targets.'); } });
     if (p.help) { if (seen.size !== 1) invalid('Use --help alone.'); return { stdout: workContextHelp(), exitCode: 0 }; }
-    if (['bind', 'accept'].includes(operation) && Number(p.data !== undefined) + Number(p.from !== undefined) !== 1) invalid('Choose exactly one of --data or --from.');
+    if (['bind', 'accept','execute'].includes(operation) && Number(p.data !== undefined) + Number(p.from !== undefined) !== 1) invalid('Choose exactly one of --data or --from.');
     const options = { root, env };
     if (operation === 'hook') return { stdout: JSON.stringify(workContextHook({ root, input: await input(root, p, stdin) })) + '\n', exitCode: 0 };
     if (operation === 'hooks') result.data = installContextHooks(options);
@@ -44,6 +45,7 @@ export async function runWorkContextCommand(args, root, { env = process.env, std
       if (p.reload) resetWorkContext(options);
       result.data = currentWorkContext({ ...options, manifestOnly: p.manifest, extras });
     }
+    if (operation === 'execute') result.data=executeCurrentTask({...options,input:await input(root,p,stdin)});
     if (operation === 'accept') result.data = acceptWorkContext({ ...options, delivery: await input(root, p, stdin) });
     result.errors = result.data.errors ?? []; result.ok = result.data.complete && !result.errors.length;
     return { stdout: JSON.stringify(result, null, p.json ? undefined : 2) + '\n', exitCode: result.ok ? 0 : 1 };

@@ -36,3 +36,13 @@ test('project plans preserve source AST, comments, omitted metadata and body acr
   assert.equal(actual.result.project.body, '# Keep body\n');
   assert.equal(actual.result.changed, false);
 });
+
+test('project creation plans use the supplied artifacts observation without reading the filesystem', () => {
+  const root='/not-a-real-ksf-root',current={target:root+'/项目/甲/project.md',snapshot:null,parsed:parseFrontmatter(Buffer.alloc(0),'project.md')};
+  const request={root,name:'甲',data:{body:'# 项目\n'}},artifacts={path:'项目/甲/成果',previous:null};
+  const preview=planProjectWrite(current,{...request,dryRun:true},{artifacts}),actual=planProjectWrite(current,request,{artifacts});
+  assert.deepEqual(preview.bytes,actual.bytes);
+  assert.deepEqual(preview.result.directoryChanges,[{path:artifacts.path,action:'create'}]);
+  assert.equal(actual.result.changed,false);
+  assert.deepEqual(artifacts,{path:'项目/甲/成果',previous:null});
+});

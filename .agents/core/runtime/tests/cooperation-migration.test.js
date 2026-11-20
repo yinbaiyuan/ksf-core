@@ -1,7 +1,7 @@
 import {platform} from '../src/platform/index.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync, statSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, realpathSync, symlinkSync, readdirSync, chmodSync, statSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -240,4 +240,46 @@ test('legacy stable target identities project to the current ability without rew
   assert.equal(primaryTarget(historical).key, `ability:user:${newId}`);
   assert.equal(historical.ownership.target.id, oldId);
   assert.deepEqual(readFileSync(file), before);
+});
+
+// Moving an instance changes its absolute root; journals record the root that started them.
+function relocate(t, f) {
+  const parent = realpathSync(mkdtempSync(join(tmpdir(), 'ksf-relocated-')));
+  t.after(() => rmSync(parent, { recursive: true, force: true }));
+  const moved = join(parent, 'renamed-ksf');
+  renameSync(f.root, moved);
+  return moved;
+}
+
+test('a completed journal never gates an instance that was moved or renamed', t => {
+  const f = fixture(t); f.addOld();
+  assert.equal(migrateCooperation({ root: f.root, apply: true }).changed, true);
+  const moved = relocate(t, f), journal = join(moved, migrationDirectory, 'state.json'), bytes = readFileSync(journal);
+  assert.notEqual(read(journal).root, moved);
+  assertNoCooperationMigration(moved);
+  assert.equal(migrateCooperation({ root: moved }).wouldChange, false);
+  assert.equal(objectQuery({ root: moved, type: 'cooperation', operation: 'read', reference: newId }).data.object.id, newId);
+  assert.deepEqual(readFileSync(journal), bytes);
+});
+
+test('an unfinished journal from another root reports INSTANCE_ROOT_MOVED and preserves every file', t => {
+  const f = fixture(t); f.addOld(); f.put(`能力/工作流/${oldId}/asset.bin`, 'asset');
+  assert.throws(() => migrateCooperation({ root: f.root, apply: true }, { afterOperation(index) { if (index === 0) throw new Error('simulated interruption'); } }), /simulated/);
+  const original = f.root, moved = relocate(t, f), journal = join(moved, migrationDirectory, 'state.json'), bytes = readFileSync(journal);
+  assert.throws(() => assertNoCooperationMigration(moved), e => e.code === 'INSTANCE_ROOT_MOVED' && e.details.recordedRoot === original && e.details.currentRoot === moved);
+  fails(() => migrateCooperation({ root: moved, apply: true }), 'INSTANCE_ROOT_MOVED');
+  assert.deepEqual(readFileSync(journal), bytes);
+  renameSync(moved, original);
+  const resumed = migrateCooperation({ root: original, apply: true });
+  assert.equal(resumed.resumed, true);
+  assertNoCooperationMigration(original);
+  assert.equal(readFileSync(join(original, `能力/协同/${newId}/asset.bin`), 'utf8'), 'asset');
+});
+
+test('a malformed journal is still reported as invalid data', t => {
+  const f = fixture(t);
+  f.put(`${migrationDirectory}/state.json`, JSON.stringify({ schemaVersion: 1, status: 'complete', actions: [] }));
+  fails(() => assertNoCooperationMigration(f.root), 'MIGRATION_DATA_INVALID');
+  f.put(`${migrationDirectory}/state.json`, 'null');
+  fails(() => assertNoCooperationMigration(f.root), 'MIGRATION_DATA_INVALID');
 });

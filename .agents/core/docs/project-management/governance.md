@@ -32,7 +32,7 @@ goals保留稳定id、title及可选successCriteria，goal_ids引用所属项目
 
 任务验收保存在verification：`{basis_digest,results}`；里程碑/项目验收保存在复盘原件的basis_digest与criterion_results。结果项为`{criterion_id,result,evidence,reviewer,reviewed_at}`，通过条件需要实际复核者、ISO时间与证据。basis_digest是对criteria按键排序后JSON内容计算的SHA256。
 
-本地证据使用`{path,digest}`，digest为原件SHA256；网页使用`{url,version}`，注明所核对的版本或时间，程序不自动联网验证内容。证据与上下文可以引用项目外的工作区原件，但拒绝越界路径、符号链接及实例私有运行/用户数据。正式治理原件及公共写入只位于项目或项目档案下；单文件最大2MB。
+本地证据使用`{path,digest}`，digest为原件SHA256；网页使用`{url,version}`，注明所核对的版本或时间，程序不自动联网验证内容。证据与上下文可以引用项目外的工作区原件，但拒绝越界路径、符号链接及实例私有运行/用户数据。正式治理原件及公共写入只位于项目或项目档案下；主文与内联预览单文件最大2MB。引用的二进制交付文件不受这一主文限制，证据摘要计算及校验流式读取，文件变化仍标记需复核。制品由生成工具保存，治理接口维护引用和验收信息。
 
 completed任务要求每项条件通过。completed里程碑/项目还要求复盘completed且outcome=passed、下级必需工作已结束。复盘完成可得出failed或cancelled；任务/子项目全部结束不自动完成父级。ongoing项目不会因最后一个现有里程碑结束而自动结项。
 
@@ -75,6 +75,8 @@ apply输入：
 ```
 
 metadata合并顶层字段，body提供时替换完整正文；无关元数据、正文和已有YAML注释尽量保留。文件总数最多128，编号上下文和灵感闪现可用contentBase64保存原字节，手记不解释为YAML元数据；不能借此覆盖根卡、旧JSON或任意业务文件。业务保存统一使用治理apply；project write仍可维护能力预设、工程关联、主题和摘要。
+
+正常新建项目根卡时同次创建空 `成果/` 目录，check及apply预演返回 `directoryChanges`，实际提交沿项目锁和恢复日志办理；重试不重复创建，冲突停止。仅维护已有项目不会补建；目录与文件职责见[能力治理定义](../../abilities/partners/project-manager/references/governance.md#项目成果目录与产物归位)。
 
 可选setParent为`{child:{id,path},parent:{id,path}|null}`，与changes同次提交，程序同步移除旧父关系并维护新父子两端。操作持有项目锁，核对整体与逐文件基线，保存恢复日志后逐文件发布，根卡最后发布。中断留下待恢复状态，读取不会把混合结果当作正常结果；不声称操作系统支持跨文件原子替换。
 
@@ -125,3 +127,11 @@ Agent和应用均先预览project archive/restore，再提交同一targets、rea
 业务方法见项目推进搭档能力包的公共自动取号与建档定义，字段和安全约束由runtime/src/projects/governance/create-task.js及store.js持有，本文只解释调用。
 
 CLI入口为project governance create-task，公共服务为projects.governanceCreateTask。传入operationId、milestone的id/path、已定义stage、name及必要任务业务字段；先dry-run，再携返回的ifMatch提交。预览不写文件、不占号，最终编号以提交回执为准。程序在项目锁内取下一个号、创建task.md并维护milestone.tasks与task_counters，取消编号不复用；同一创建重试沿用operationId。此入口只支持新版字母阶段，不兼容旧任务结构，不自动迁移。
+
+## 统一阶段确认与执行边界
+
+新完成及重开后完成里程碑需要现有apply的confirmMilestone意图：{subject:{id,path},scope_digest,source}。read/check返回confirmationScopes供当前范围核对，摘要依据稳定阶段身份、标准、证据版本及下级结论派生；路径归档和改号保留稳定身份，不冒充新的用户确认。工作台source.kind=workbench的调用身份由宿主核验，不能由请求伪造。对话source.kind=chat须引用chat_id、turn_id、message_id，Core核验可读的实际用户消息；Agent负责判断明确阶段通过语义。私密或未落盘来源不自动开放，保留待验收或由用户在工作台确认。
+
+Core在复盘生成user_confirmation及实际确认正文，同一事务更新阶段和复盘；不得直接编辑确认记录。预演不保存事实，范围变化重新核对。旧完成记录不批量补认，新规则不倒写历史。
+
+完成标准沿criteria写可观察结果、核对方法和责任。需要用户或外部结果而缺证时保持review，标准实质变化沿原摘要失效。任务实际执行另取得当前聊天占用；治理执行保存携带execution:{task_id,token}，旧令牌和其他聊天写入被拒绝，用户工作台显式维护仍保留原有CAS保护。具体方法以能力治理定义为准。

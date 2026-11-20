@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-code-run';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function CodeRunReviewView({state}:{state?:'writing'|'running'|'done'|'error'}={}){return <FidelityScope module="ai-code-run" style={{maxWidth:448,marginInline:"auto"}}><Source status={state} activeLine={state?3:undefined} duration={state?1.2:undefined} stdout={state==="error"?"Local simulation: the input file was not found.":undefined}/></FidelityScope>;}

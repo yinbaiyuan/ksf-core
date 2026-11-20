@@ -28,9 +28,9 @@ test('source writes and removals enforce the policy and retain normal source man
   await assert.rejects(manager.saveSource({id:'builtin',name:'随附应用',enabled:false}),{code:'APP_SOURCE_INVALID'});const snapshot=await manager.snapshot();assert.deepEqual(snapshot.sources[0],fixed);assert.equal(snapshot.sources.some(s=>s.id==='builtin'),false);
   const stored=JSON.parse(await readFile(join(root,'.agents/user-data/applications/state.json'),'utf8'));assert.deepEqual(stored.sources[0],fixed);
 });
-test('a failed public registry leaves the bundled catalog and installed state available',async t=>{
+test('a failed public registry reports unavailability without an official offline mirror',async t=>{
   const {manager,root}=await fixture(t);await manager.close();const offline=createApplicationManager(root,{storeDirectory:join(root,'store'),fetcher:async()=>{throw Error('offline');}});t.after(()=>offline.close());
-  const catalog=await offline.catalog();assert.equal(catalog.errors.length,0);assert.equal(catalog.directories[fixed.id].latestConfirmed,false);assert.equal((await offline.snapshot()).sources[0].enabled,true);
+  const catalog=await offline.catalog();assert.equal(catalog.errors.length,1);assert.match(catalog.errors[0].message,/offline/);assert.equal(catalog.directories[fixed.id],undefined);assert.deepEqual(catalog.applications,[]);assert.equal((await offline.snapshot()).sources[0].enabled,true);
 });
 
 
@@ -51,4 +51,8 @@ test('HTTP refuses to change or remove the fixed source without restarting',asyn
     const response=await fetch(base+path,{method:'POST',headers:{Origin:base,'X-KSF-Token':session.token,'Content-Type':'application/json'},body:JSON.stringify(input)});assert.equal(response.status,403);assert.equal((await response.json()).error.code,'APP_SOURCE_LOCKED');
   }
   assert.deepEqual((await(await fetch(base+'/api/apps/installed')).json()).data.sources[0],fixed);assert.equal((await(await fetch(base+'/api/health')).json()).startedAt,started);
+});
+test('legacy Core origins migrate once while local builds, independent sources and installation records survive',async t=>{
+ const {migrateApplicationOrigins,CORE_APPLICATION_SOURCE}=await import('../src/applications/default-source.js');const record=({id,name,url})=>({installationId:'stable-id',enabled:false,active:{digest:'unchanged',source:{id,name,url}},pending:{digest:'pending',source:{id,name,url}},previous:{digest:'previous',source:{id,name,url}},local:{sequence:3}});const state={schemaVersion:1,revision:9,defaults:['com.ksf.projects'],sources:[fixed],installed:{'com.ksf.projects':record(fixed),'com.ksf.abilities':record({id:'local-app',name:'本地应用',url:'local-app:'}),'com.ksf.terminal':record(fixed),'com.ksf.git':record({id:'foreign',name:'Foreign',url:'https://foreign.invalid/index.json'})}};
+ const next=migrateApplicationOrigins(state);assert.deepEqual(next.installed['com.ksf.projects'],{...state.installed['com.ksf.projects'],...Object.fromEntries(['active','pending','previous'].map(key=>[key,{...state.installed['com.ksf.projects'][key],source:CORE_APPLICATION_SOURCE}]))});for(const id of ['com.ksf.abilities','com.ksf.terminal','com.ksf.git'])assert.deepEqual(next.installed[id],state.installed[id]);assert.deepEqual(migrateApplicationOrigins(next),next);assert.equal(state.installed['com.ksf.projects'].active.source.id,'ksf-apps');
 });

@@ -2,7 +2,7 @@ import { products, legacyProducts, launcherFiles, launcherProtocol } from './pro
 import { fail } from './errors.js';
 import { sha256, isSHA } from '../shared/hash.js';
 import { isRevision, isRepository, isBranch } from './git-values.js';
-import { managedPath } from './paths.js';
+import { managedPath,retiredCorePath,validRelative } from './paths.js';
 import { textBytes, readJSON } from './files.js';
 import { versionParts } from './versions.js';
 import { supportedTargets } from '../platform/catalog.js';
@@ -16,7 +16,7 @@ export function validateProducts(value, { legacy = false } = {}) {
   }
 }
 function validateReleaseManifest(manifest, legacy) {
-  const acceptsPath = path => managedPath(path) || (legacy && path === '.agents/bin/ksf');
+  const acceptsPath = path => managedPath(path)||(validRelative(path)&&retiredCorePath(path)) || (legacy && path === '.agents/bin/ksf');
   const launchers = legacy ? ['.agents/bin/ksf'] : launcherFiles;
   if (!manifest || manifest.schema_version !== (legacy ? 2 : 3) || (!legacy && manifest.launcher_protocol !== launcherProtocol) || manifest.name !== products.core || manifest.product !== products.core ||
       !isRepository(manifest.core?.repository) || !isRevision(manifest.core?.revision) ||

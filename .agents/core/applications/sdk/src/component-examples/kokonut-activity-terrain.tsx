@@ -1,0 +1,3 @@
+import {useMemo, useState} from 'react';
+import {ActivityTerrain} from '@ksf/sdk/activity-terrain';
+export default function Example(){const [selected,setSelected]=useState('');const cells=useMemo(()=>Array.from({length:364},(_,i)=>({id:String(i),label:`第${i+1}天`,value:Math.floor(Math.max(0,Math.sin(i*.19)+Math.sin(i*.071)) * 12)})),[]);return <div style={{width:'100%',minWidth:0,display:'grid',gridTemplateColumns:'minmax(0,1fr)',gap:16}}><ActivityTerrain label="Contribution terrain" endDate="2026-11-19" cells={cells} onCellSelect={setSelected}/><output aria-live="polite">{selected?'所选活动格 '+selected:'拖动旋转与轻甩；点 Flat / Terrain 切换，方向键逐日读取。'}</output></div>;}

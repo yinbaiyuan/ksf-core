@@ -63,7 +63,7 @@ UserPromptSubmit 向 Runtime 提供准确 turnId 与 taskId。当前 Agent 在�
 }
 ```
 
-report 可省略，复用 [route](route.md) 的完整快照、项目、精确引用、来源和 definitionDigest 校验。reason 是可向用户说明的选择/变化依据，不保存隐藏推理。身份默认 CODEX_THREAD_ID，显式身份仅通过输入 `identity:{host:"codex",sessionId}`；不使用 cwd 代替宿主身份。每次变化使用新 eventId；同 ID 不同内容保留首次声明并标注冲突。
+report 可省略，复用 [route](route.md) 的完整快照、项目、精确引用、来源和 definitionDigest 校验。reason 是可向用户说明的选择/变化依据，不保存隐藏推理。身份默认按 [route](route.md#身份轮次与版本) 的环境顺序取得（含 Claude Code 的 CLAUDE_CODE_SESSION_ID），显式身份仅通过输入 `identity:{host:"codex",sessionId}`；不使用 cwd 代替宿主身份。每次变化使用新 eventId；同 ID 不同内容保留首次声明并标注冲突。
 
 Hook可提供`inputScope:{version:1,count,digest}`，声明应原样携带Agent已经收到的输入范围。缺失或同轮有新增输入时，可用只读`task input --turn <nativeTurnId> --json`取得当前聊天、当前实例原生来源的已核实边界；不得猜造count/digest。该命令不归档正文、不写游标或参与记录。范围未知、来源损坏或未刷盘时返回明确缺口。
 

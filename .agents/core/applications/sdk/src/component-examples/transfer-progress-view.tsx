@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/currency-transfer';import {useState} from 'react';import {FidelityScope} from '../fidelity/scope';import {EmptyState} from '../empty-state';import {useLocalRequest} from './local-request';
+/** Fixed free-source composition; fictional local data, no business service. */
+export function TransferProgressView({state}:{state?:'processing'|'completed'|'failed'}={}){const [retry,setRetry]=useState(false);return <div style={{width:'100%',maxWidth:384,minWidth:0,marginInline:'auto'}}><FidelityScope module="currency-transfer"><Source status={retry?undefined:state} onRetry={()=>setRetry(true)}/></FidelityScope></div>;}

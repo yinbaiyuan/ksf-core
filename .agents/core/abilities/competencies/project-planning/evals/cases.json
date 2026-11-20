@@ -99,6 +99,123 @@
       "scenario": "新版公共自动建档",
       "input": "在B阶段增加任务，取消后再追加；提交回执丢失，需要重试。",
       "expected": "基本功确定阶段和目标条件，调用create-task预览提交；不手填编号或tasks索引。程序在锁内追加且不复用取消号，重试复用原operationId按稳定ID对账。旧项目不自动适配。"
+    },
+    {
+      "id": "project-planning-implicit-work",
+      "scenario": "直接开始项目工作",
+      "input": "把当前项目的导入功能做完，没有先说创建任务",
+      "expected": "先核对taskRef及当前阶段相关任务；复用相同成果或公共建档，再按依赖、容量和授权推进。普通问答不建任务。"
+    },
+    {
+      "id": "project-planning-same-outcome",
+      "scenario": "同一成果多轮返工与临时插问",
+      "input": "继续修复刚才的失败，中途问一个概念，再继续",
+      "expected": "实现、测试与返工维护同一稳定任务；临时插问保留主任务及taskRef，不按轮次建任务。"
+    },
+    {
+      "id": "project-planning-ambiguous-task",
+      "scenario": "相似名称与已结束任务",
+      "input": "有两个名称相近的导入任务，还有一个已完成",
+      "expected": "比较目标、条件与成果，多义只澄清落点；不按名称合并，不自动重开已结束任务。"
+    },
+    {
+      "id": "project-planning-close-and-recommend",
+      "scenario": "当前任务收尾后停止",
+      "input": "当前交付已有充分证据，项目还有下一项",
+      "expected": "逐条件核验充分则完成并清空本任务next_action；所属里程碑记录一项建议及理由，等待用户选择，不自动启动。"
+    },
+    {
+      "id": "project-planning-human-acceptance",
+      "scenario": "人工体验或外部结果仍缺",
+      "input": "代码通过测试，真实体验尚未取得",
+      "expected": "保留待验收并明确条件、责任和下一验收动作；不以程序通过、用户转述或Agent自述替代真实证据。"
+    },
+    {
+      "id": "project-planning-capacity-boundary",
+      "scenario": "容量或依赖未满足",
+      "input": "用户选择的新任务可做，但当前容量已满",
+      "expected": "列出占用和具体原因，不自动暂停其他任务、扩容或绕过准入。"
+    },
+    {
+      "id": "project-planning-resume-identity",
+      "scenario": "独立聊天接续",
+      "input": "新的聊天要求继续现有任务",
+      "expected": "按明确入口读取同一任务及里程碑、当前结果和未决，保存taskRef；不新建同名任务，不重问已有决定。"
+    },
+    {
+      "id": "project-planning-stable-stage",
+      "scenario": "连续具体工作",
+      "input": "已确认阶段内，用户先要求编译安装，再要求开启主题预览",
+      "expected": "先匹配阶段内相关任务，相同成果接续，独立成果建任务；不逐项新增里程碑。"
+    },
+    {
+      "id": "project-planning-no-stage",
+      "scenario": "没有合适阶段",
+      "input": "所有旧阶段已结束，用户提出新的具体工作",
+      "expected": "给出阶段归属与成果标准建议，等待用户确定；不自动新增或重开阶段。"
+    },
+    {
+      "id": "project-planning-broad-continue",
+      "scenario": "宽泛推进指令",
+      "input": "继续这个项目或推进这个里程碑",
+      "expected": "恢复唯一明确当前任务；没有明确任务或多个候选时给一项主建议并等待选择，不顺次执行整阶段。"
+    },
+    {
+      "id": "project-planning-milestone-human",
+      "scenario": "客观条件全部满足",
+      "input": "阶段全部任务及逐项证据已通过，但用户尚未确认",
+      "expected": "Agent整理复盘draft/pending，阶段review；任务可完成，里程碑仍等待用户针对该阶段确认。"
+    },
+    {
+      "id": "project-planning-local-stop",
+      "scenario": "局部停止反馈",
+      "input": "安装任务里用户说：不要再试了，可以了",
+      "expected": "按停止指令结束相应尝试，按任务标准核对；不扩大为整个里程碑通过。"
+    },
+    {
+      "id": "project-planning-changed-acceptance",
+      "scenario": "确认依据变化",
+      "input": "阶段呈现验收草稿后，标准或证据发生实质变化",
+      "expected": "先核对新依据和原确认范围，需要重新确认；保留旧证据，不沿用旧确认或启动下一阶段。"
+    },
+    {
+      "id": "project-planning-artifact-create",
+      "scenario": "新建与已有项目",
+      "input": "新建项目；旧项目只读恢复；成果位置有同名文件",
+      "expected": "新建预演无写入，提交建立空成果目录；旧项目不批量补建；同名文件或链接冲突停止，不覆盖。",
+      "method_specific": "拆计划时明确目标文件及所属项目的成果路径；可编辑文件与导出文件同名同版本，任务通过result_refs关联。工程源码和缓存留在工程位置，工程交付包导出到成果目录。"
+    },
+    {
+      "id": "project-planning-artifact-deliver",
+      "scenario": "多格式和工程交付",
+      "input": "需要PPT、PDF和固件，继续修改v1",
+      "expected": "成果内保存同名同版源文件与导出文件，工程包导出后引用，源码缓存留原处，修订增版保留原件。",
+      "method_specific": "拆计划时明确目标文件及所属项目的成果路径；可编辑文件与导出文件同名同版本，任务通过result_refs关联。工程源码和缓存留在工程位置，工程交付包导出到成果目录。"
+    },
+    {
+      "id": "project-planning-artifact-accept",
+      "scenario": "大文件与历史证据",
+      "input": "3MB安装包已生成，旧验收报告位于任务目录",
+      "expected": "流式计算并校验实际文件摘要，检查内容、路径、版本及引用；旧验收不因位置不同失效，不凭文件存在自动通过阶段。",
+      "method_specific": "拆计划时明确目标文件及所属项目的成果路径；可编辑文件与导出文件同名同版本，任务通过result_refs关联。工程源码和缓存留在工程位置，工程交付包导出到成果目录。"
+    },
+    {
+      "id": "project-planning-confirmation-source",
+      "scenario": "阶段人工确认",
+      "input": "任务全部完成，用户只说安装成功",
+      "expected": "保留阶段待验收，不推定整阶段确认；真实确认按来源、范围及最新基线保存。"
+    },
+    {
+      "id": "project-planning-criteria-quality",
+      "scenario": "结果与核对责任",
+      "input": "标准仅写完成PDF，用户尚未实际体验",
+      "expected": "明确可观察内容、可读性及核对办法；用户判断缺证保持待验收，不以生成或摘要替代内容。"
+    },
+    {
+      "id": "project-planning-execution-ownership",
+      "scenario": "跨聊天重复执行",
+      "input": "另一个聊天持有当前任务占用，当前聊天要求继续",
+      "expected": "先只读并说明当前执行聊天；明确接手前核对旧运行和回执，新令牌使旧令牌失效，任务状态保持原义。"
     }
   ]
 }

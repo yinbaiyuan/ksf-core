@@ -1,0 +1,8 @@
+import './fidelity/styles/ai-context-meter.css';
+import {forwardRef} from 'react';
+import Source from './fidelity/kokonut/ai-context-meter';
+import {FidelityScope} from './fidelity/scope';
+export interface ContextSegment{id?:string;label:string;value:number;tone?:'neutral'|'primary'|'success'|'warning'|'danger'}
+export interface ContextMeterProps{used:number;capacity:number;segments?:readonly ContextSegment[];label?:string;model?:string;compactAt?:number;onCompact?:()=>void;compacting?:boolean}
+const tokens=(value:number)=>Number.isFinite(value)?Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,value)):0;
+export const ContextMeter=forwardRef<HTMLDivElement,ContextMeterProps>(function ContextMeter({used,capacity,segments=[],label='上下文用量',model=label,compactAt=.8,onCompact,compacting=false},ref){const total=tokens(used),valid=Number.isFinite(capacity)&&capacity>0,rows=segments.map((item,index)=>({id:item.id??'segment-'+index,label:item.label,tokens:tokens(item.value),tone:item.tone})),sum=rows.reduce((n,row)=>n+row.tokens,0);if(sum<total)rows.push({id:'ksf-unclassified',label:'其他/未归类',tokens:total-sum,tone:'neutral'});return <FidelityScope module="ai-context-meter"><Source controlRef={ref} segments={rows} used={total} limit={valid?capacity:1} invalid={!valid} compacting={compacting} compactAt={Math.max(0,Math.min(1,Number.isFinite(compactAt)?compactAt:.8))} label={label} model={model} onCompact={onCompact?()=>{if(valid&&!compacting)onCompact();}:undefined}/>{sum>total&&<p role="status" style={{fontSize:12,color:'var(--ksf-color-warning)',maxWidth:384}}>分项合计 {sum} 与总用量 {total} 不一致。</p>}</FidelityScope>;});

@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { MATERIAL_KEY, defaultMaterialSettings, profileNames, readMaterialSettings, shadowCSS, type MaterialSettings } from '../material-settings';
 const defaults = defaultMaterialSettings();
-export const MaterialContext = createContext({ settings: defaults, update: (_change: (v: MaterialSettings) => MaterialSettings) => {}, saved: 'default' as 'default' | 'saving' | 'saved' | 'failed' });
+export type MaterialSaveStatus='default'|'loading'|'pending'|'saving'|'saved'|'failed'|'conflict'|'unknown';
+export const MaterialContext = createContext({ settings: defaults, update: (_change: (v: MaterialSettings) => MaterialSettings) => {}, saved: 'default' as MaterialSaveStatus });
 export const useMaterial = () => useContext(MaterialContext);
 export function MaterialProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState(() => { try { return readMaterialSettings(localStorage); } catch { return defaultMaterialSettings(); } });

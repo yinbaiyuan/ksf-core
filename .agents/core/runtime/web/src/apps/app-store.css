@@ -15,3 +15,12 @@
 .store-dialog>.store-cli-badge{margin-bottom:10px;}
 .store-detail-actions{flex-wrap:wrap;}
 .store-detail-actions small{font-size:11px;margin-left:5px;}
+
+.store-local{margin:18px 0;padding:16px;border:1px solid var(--line,#d9dee5);border-radius:10px;background:var(--panel,#fafbfd)}
+.store-local summary{font-weight:600;cursor:pointer}.store-local p{font-size:13px;color:var(--muted,#596573);margin:10px 0}
+.store-local label{display:flex;flex-direction:column;gap:6px;font-size:13px;margin:12px 0}.store-local label>input:not([type=checkbox]){width:100%;padding:8px 10px;border:1px solid #b9c2ce;border-radius:6px;background:var(--panel,#fff);color:inherit}
+.store-local .store-local-trust{flex-direction:row;align-items:center}.store-local code{user-select:all}
+
+.store-local .store-get:not(:disabled){background:#0872df;color:#fff}.store-local .store-get:not(:disabled):hover{background:#0561c4}
+
+.store-origin-filter{display:flex;align-items:center;gap:8px;font-size:13px;margin:12px 0 20px}.store-origin-filter select{border:1px solid #cbd2dd;border-radius:6px;background:#fff;padding:5px 8px;color:inherit}

@@ -15,6 +15,7 @@ import { projectTransition, recoverProjectTransition } from './project-transitio
 import { checkRouting } from '../projects/routing.js';
 import {governanceTransition,recoverGovernanceTransition} from '../projects/governance/transitions.js';
 import {locateProjectResource} from '../projects/governance/locations.js';
+import {planArtifacts,createArtifacts,removeCreatedArtifacts} from '../projects/artifacts.js';
 import {readGovernance,governanceJournal,recoverGovernance} from '../projects/governance/store.js';
 
 const fail = (code, message, details) => { throw new MetadataError(code, message, details); };
@@ -191,23 +192,27 @@ export function project({ root, operation, name, scope = 'current', part = 'all'
     }
     if (!current.snapshot && (scope === 'archived' || stat(locations(root, name, 'archived').folder))) fail('PROJECT_ARCHIVED_EXISTS', 'An archived project cannot be silently recreated.', { target: current.target });
     if (!current.snapshot && !Object.hasOwn(data, 'body')) invalid('Creating a project requires body in the write input.');
-    const { result, bytes, wouldChange } = planProjectWrite(current, { root, name, data, dryRun });
+    const artifactPlan=!current.snapshot&&current.projectScope!=='archived'?planArtifacts(root,portable(relative(root,current.target))):null;
+    const { result, bytes, wouldChange, artifacts } = planProjectWrite(current, { root, name, data, dryRun }, {artifacts:artifactPlan});
     if (dryRun || !wouldChange) return { data: result, errors: [] };
-    commitProjectWrite(current, bytes, hooks);
+    const createdArtifacts=commitProjectWrite(current, bytes, hooks, artifacts, root);
+    if(artifacts)result.directoryChanges=createdArtifacts?.created?[{path:artifacts.path,action:'create'}]:[];
     Object.assign(result, { changed: true, created: !current.snapshot });
     return { data: result, errors: [] };
   };
   return dryRun ? execute() : withProjectLock(root, execute);
 }
 
-function commitProjectWrite(current, bytes, hooks) {
+function commitProjectWrite(current, bytes, hooks, artifacts, root) {
   directory(current.scope, { create: true });
   const createdDirectory = !directory(current.folder, { missing: true });
   if (createdDirectory) mkdirSync(current.folder);
   const ownDirectory = createdDirectory ? lstatSync(current.folder) : null;
   current.guard = guardPaths(current.scope, current.folder);
+  let createdArtifacts;
   try {
     withWriteLock(current.target, () => {
+      if(artifacts)createdArtifacts=createArtifacts(root,artifacts);
       if (current.snapshot) {
         (hooks.publish ?? publishFile)(current.snapshot, bytes, { beforeCheck: () => {
           hooks.beforeCheck?.(); current.guard();
@@ -215,6 +220,7 @@ function commitProjectWrite(current, bytes, hooks) {
       } else publishNew(current, bytes, hooks.beforeCheck);
     });
   } catch (error) {
+    if(createdArtifacts)removeCreatedArtifacts(root,createdArtifacts);
     if (ownDirectory) {
       try {
         const latest = lstatSync(current.folder);
@@ -223,6 +229,7 @@ function commitProjectWrite(current, bytes, hooks) {
     }
     throw error;
   }
+  return createdArtifacts;
 }
 
 function commitProjectRemoval(current, baseline, exclude, result, hooks) {

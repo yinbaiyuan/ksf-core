@@ -70,7 +70,7 @@ export function createConfigurationService(root,{ai,communication,service}={}){
     if(d.runtime){
       let prior;try{prior=await readJSON(metadataPath(id),null);}catch{application={state:'unknown',error:{code:'CONFIG_STATUS_INVALID',message:'上次应用状态不可读；保存的配置仍保留。'}};}
       if((ai||communication||service)&&prior?.etag===stored.etag)application=prior.application;
-      if(d.id==='communication'&&communication){try{const current=await (await communication).snapshot();effective={...pick(current.config,d.fields.map(f=>f.name)),listener:current.listener};if(application.state!=='failed')application={state:current.config.enabled&&!current.listener?'failed':'immediate'};}catch(error){application={state:'failed',error:{code:error.code??'COMM_START_FAILED',message:error.message}};}}
+      if(d.id==='communication'&&communication){try{const current=await (await communication).snapshot();effective={...pick(current.config,d.fields.map(f=>f.name)),listener:current.listener,network:current.network};application=current.config.enabled&&(!current.listener||current.network&&current.network.state!=='online')?{state:'failed',error:current.network?.error??{code:'COMM_OFFLINE',message:'尚未在当前网络上线。'}}:{state:'immediate'};}catch(error){application={state:'failed',error:{code:error.code??'COMM_START_FAILED',message:error.message}};}}
       else if(d.id==='device'&&communication){try{const current=await (await communication).snapshot();effective=current.device??null;}catch{}}
       else if(d.owner==='ai'&&ai){effective=saved;if(application.state!=='failed')application={state:'new-task'};}
       else if(d.id==='service'&&service&&prior?.etag===stored.etag&&application.state==='immediate')effective=saved;

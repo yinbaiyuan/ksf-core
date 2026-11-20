@@ -1,6 +1,8 @@
+import {createFileClient} from '@ksf/sdk/files';
 import {copyText} from '@ksf/sdk/components/ui/context-menu';
 import {contextScopeForPath} from './context-scopes.js';
 import {followPointer} from './project-card-motion.js';
+import {createFileReadOnlyNotice} from './file-readonly.js';
 
 const parent = path => path.slice(0,path.lastIndexOf('/'));
 const basename = path => path.slice(path.lastIndexOf('/')+1);
@@ -64,8 +66,9 @@ export function createContextDrafts(sdk) {
 }
 
 export function createContextFileWorkspace({
-  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction,
+  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction,readOnlyNotice,
 }) {
+  const genericFiles=createFileClient(sdk);
   const root=parent(rootPath);
   const scopes=(contextRoots??[{objectPath,root,label:rootLabel}]).map(scope=>({...scope}));
   const primaryScope=scopes.find(scope=>scope.objectPath===objectPath)??scopes[0];
@@ -216,6 +219,7 @@ export function createContextFileWorkspace({
         return fn(current);
       };
     }
+    if(entry.reason!=='deleted')items.push({id:'file-operations',label:'附件与文件操作…',onAction:choose(()=>genericFiles.manage({initialPath:entry.kind==='directory'?entry.path:parent(entry.path),rootPath:rootFor(entry.path)}))});
     if(canCreate&&entry.reason!=='deleted'){
       items.push(
         {id:'new-file',label:'新建文件',onAction:choose(()=>inlineForm('file'))},
@@ -609,10 +613,11 @@ export function createContextFileWorkspace({
   }
   function syncEditor(file) {
     if(active!==file)return;
+    const notice=readOnlyNotice?.(file.entry,file.base);
     const dirty=file.text!==file.base.text;
     const message=file.deleted?'文件已删除':file.disk?'待合并 · 自动保存暂停':file.saveError?'自动保存失败':
       file.error||file.recoveryError||file.reviewWarning||(file.saving?'自动保存中…':file.uploading?'正在上传图片…':
-        dirty?(file.base.writable?'待自动保存':'草稿未保存 · 只读'):file.message||(file.base.writable?'与原件一致':'只读'));
+        dirty?(file.base.writable?'待自动保存':'草稿未保存 · 只读'):file.message||(file.base.writable?'与原件一致':notice?.title??'只读'));
     if(status.textContent!==message)status.textContent=message;
     status.title=file.saveError&&!file.disk&&!file.deleted?file.saveError+' · 按 ⌘S / Ctrl+S 重试':message;
     status.dataset.saveState=file.deleted||file.disk||file.saveError?'attention':message==='已自动保存'?'saved':'';
@@ -704,7 +709,8 @@ export function createContextFileWorkspace({
     reviewControls.append(file.reviewButton);
     if(typeof file.original==='string'&&!file.disk)toolbar.append(reviewControls);
     const host=el('div','pg-file-document');
-    content.replaceChildren(toolbar,host);
+    const notice=createFileReadOnlyNotice(readOnlyNotice?.(file.entry,file.base));
+    content.replaceChildren(...(notice?[notice]:[]),toolbar,host);
     syncEditor(file);
     if(file.disk){host.append(mergePane(file));return true;}
     const current=()=>active===file&&render===file.render&&!disposed;

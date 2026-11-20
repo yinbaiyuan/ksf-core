@@ -1,0 +1,1 @@
+import {useState} from 'react';import {Editable} from '@ksf/sdk/editable';export default function Example(){const [value,setValue]=useState('点击编辑项目名称');return <Editable label="项目名称" value={value} onSave={setValue}/>;}

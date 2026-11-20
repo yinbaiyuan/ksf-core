@@ -1,1 +1,1 @@
-export * from '../../../../../applications/sdk/src/components/ui/context-menu.tsx';
+export * from '../../internal-ui/compat-menu';

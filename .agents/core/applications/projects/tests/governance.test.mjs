@@ -8,6 +8,23 @@ import {mergeDocuments,criteriaDigest,evidenceReferences} from '../governance-mo
 import {fixture} from '../../../runtime/tests/helpers/governance-fixture.js';
 import {projectGovernance} from '../../../runtime/src/services/project-governance.js';
 import {criteriaDigest as governanceCriteriaDigest} from '../../../runtime/src/projects/governance/model.js';
+import {milestoneCompletionChanges} from '../result-detail-model.js';
+import {fileReadOnlyNotice} from '../file-readonly.js';
+
+test('read-only guidance identifies pending evidence without mislabelling ordinary references or archived files',()=>{
+  const path='项目/示例/报告.md',entry={path},ref={path,digest:'a'.repeat(64)};
+  const task={metadata:{kind:'task',verification:{results:[{result:'pending',evidence:[ref]}]}}};
+  const record={documents:[task]};
+  const notice=fileReadOnlyNotice(record,entry,{writable:false},'current');
+  assert.equal(notice.title,'验收证据 · 只读');
+  assert.equal(fileReadOnlyNotice(record,entry,{writable:true},'current'),null);
+  assert.equal(fileReadOnlyNotice(record,entry,{writable:false},'archived'),null);
+  assert.equal(fileReadOnlyNotice({...record,valid:false},entry,{writable:false},'current'),null);
+  assert.equal(fileReadOnlyNotice({documents:[{metadata:{kind:'task',context_refs:[ref]}}]},entry,{writable:false},'current'),null);
+  const review={metadata:{kind:'review',criterion_results:[{result:'passed',evidence:[ref]}]}};
+  assert.equal(fileReadOnlyNotice({documents:[review]},entry,{writable:false},'current'),notice);
+  assert.equal(fileReadOnlyNotice(record,{...entry,digest:ref.digest},{writable:true},'current'),notice);
+});
 
 test('the application backend computes acceptance baselines with the public governance canonical rules',async t=>{
   const f=fixture(t);f.initialize();
@@ -19,6 +36,31 @@ test('the application backend computes acceptance baselines with the public gove
   const reordered=criteria.map(({id,text})=>({id,text}));
   assert.equal((await app.call('governance.criteria-digest',{...params,criteria:reordered})).digest,first.digest);
   await assert.rejects(app.call('governance.criteria-digest',{...params,criteria:'invalid'}),/有效列表/);
+});
+
+test('user stage confirmation checks evidence then atomically saves both originals, with replay and concurrent-change protection',async t=>{
+  const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);
+  const proofPath=dirname(f.tp)+'/10-证据.txt',proofText='可核对的实际结果',proof=f.proof(f.task,proofPath,proofText);
+  const reviewPath=dirname(f.mp)+'/复盘.md',basis=governanceCriteriaDigest(f.m);
+  const review={governance_schema:2,kind:'review',id:'user_review',name:'阶段复盘',status:'draft',owner:'Agent',updated:new Date().toISOString(),next_action:'等待用户阶段确认',subject:{id:f.m.id,path:f.mp},outcome:'pending',basis_digest:basis,criterion_results:f.m.criteria.map(c=>({...proof.results[0],criterion_id:c.id}))};
+  assert.deepEqual(f.apply([{path:proofPath,ifMatch:'missing',body:proofText},f.change(f.tp,{status:'completed',verification:proof,next_action:null}),f.change(f.mp,{status:'review',review_ref:{id:review.id,path:reviewPath}}),{path:reviewPath,ifMatch:'missing',metadata:review,body:'# 复盘\n\nAgent预检通过，等待用户明确确认。'}]).errors,[]);
+  const app=createBackend({workspace:f.root,dataDirectory:join(f.root,'confirm-data')},{cli:async()=>project({root:f.root,operation:'read',name:f.name}),governance:(operation,input)=>projectGovernance({...input,root:f.root,operation},{caller:{source:'surface',humanWindow:true,appId:'com.ksf.projects',instanceId:'fixture'}})});t.after(()=>app.dispose());
+  const params={name:f.name,scope:'current'};
+  const candidate=async id=>{const state=await app.call('governance.read',params);return {operationId:id,ifMatch:state.etag,confirmMilestone:{subject:{id:f.m.id,path:f.mp},scope_digest:state.confirmationScopes[f.m.id],source:{kind:'workbench'}},changes:milestoneCompletionChanges(state.documents.find(d=>d.path===f.mp),state.documents.find(d=>d.path===reviewPath),state,{basis,at:new Date().toISOString()})};};
+  const first=await candidate('stage-confirm-stale');assert((await app.call('governance.check',{...params,data:first})).valid);
+  assert.equal(f.read().documents.find(d=>d.path===f.mp).metadata.status,'review');assert.equal(f.read().documents.find(d=>d.path===reviewPath).metadata.outcome,'pending');
+  f.apply([f.change(f.mp,{next_action:'另一窗口补充的建议'})]);
+  await assert.rejects(app.call('governance.apply',{...params,data:first}),e=>e.code==='PROJECT_GOVERNANCE_CONFLICT');
+  const next=await candidate('stage-confirm-explicit');writeFileSync(join(f.root,proofPath),'证据已变化');
+  await assert.rejects(app.call('governance.check',{...params,data:next}));
+  assert.equal(f.read().documents.find(d=>d.path===f.mp).metadata.status,'review');
+  writeFileSync(join(f.root,proofPath),proofText);
+  assert((await app.call('governance.check',{...params,data:next})).valid);
+  const done=await app.call('governance.apply',{...params,data:next});
+  assert.equal(done.documents.find(d=>d.path===f.mp).metadata.status,'completed');
+  const saved=done.documents.find(d=>d.path===reviewPath);assert.equal(saved.metadata.status,'completed');assert.equal(saved.metadata.outcome,'passed');assert(saved.body.includes('用户阶段确认'));
+  const replay=await app.call('governance.apply',{...params,data:next});assert.equal(replay.documents.find(d=>d.path===f.mp).metadata.status,'completed');
+  assert.equal(replay.documents.filter(d=>d.metadata.kind==='milestone').length,1);
 });
 import {project} from '../../../runtime/src/services/projects.js';
 import {criteriaDigest as serverDigest} from '../../../runtime/src/projects/governance/model.js';

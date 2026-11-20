@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-connect';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function ConnectionReviewView({simulateFailure=false,state}:{simulateFailure?:boolean;state?:'needs-access'|'running'|'done'|'error'}={}){const task=useLocalRequest();return <div ref={task.ref} style={{width:"100%",maxWidth:448,minWidth:0,marginInline:"auto"}}><FidelityScope module="ai-connect"><Source status={state} error={state==="error"?"模拟工具请求失败。":undefined} onConnect={()=>task.request(undefined,1600,simulateFailure?"模拟连接失败，未修改权限。":undefined)}/></FidelityScope></div>;}

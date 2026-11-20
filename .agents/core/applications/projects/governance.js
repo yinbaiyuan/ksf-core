@@ -1,12 +1,15 @@
 import {randomId} from '@ksf/sdk/random-id';
-import {documentValue,mergeDocuments,evidenceReferences,adoptSavedDocument} from './governance-model.js';
+import {documentValue,documentForReading,mergeDocuments,evidenceReferences,adoptSavedDocument} from './governance-model.js';
 import {stageProgress,projectProgress,dependenciesOf,taskLabel,milestoneCode,projectCardHierarchy} from './hierarchy-model.js';
 import {createInspiration} from './inspiration.js';
 import {createContextDrafts,createContextFileWorkspace} from './context-files.js';
+import {fileReadOnlyNotice,createFileReadOnlyNotice} from './file-readonly.js';
 import {contextOwners,contextScopes,contextScopeForPath} from './context-scopes.js';
 import {createProjectPlanEditor} from './project-plan.js';
 import {followPointer} from './project-card-motion.js';
+import {workspaceDomainFacts} from './workspace-model.js';
 import {projectParentChange} from './project-plan-model.js';
+import {resultSections,taskProgressAction,taskProgressPrompt,milestoneTasks,workTasks,milestoneAcceptancePrompt,milestoneCompletionChanges} from './result-detail-model.js';
 
 const labels={A:'A · 轻量',B:'B · 协作',C:'C · 复杂',D:'D · 战略',finite:'有限交付',ongoing:'持续迭代',definition:'定方案',planning:'拆计划',execution:'管执行',high:'高',normal:'常规',low:'低',project:'项目',milestone:'里程碑',task:'任务',review:'复盘',planned:'未开始',active:'进行中',backlog:'待梳理',ready:'待开始',in_progress:'进行中',blocked:'受阻',paused:'暂停',review:'待验收',completed:'已完成',cancelled:'已取消',candidate:'候选',next:'接下来',now:'当前承诺',delivery:'交付',acceptance:'验收与补证',draft:'草稿',pending:'待核对',passed:'通过',failed:'未通过'};
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -86,13 +89,14 @@ function navigationSplitter(workspace,board,signal){
   return handle;
 }
 
-export function createGovernanceManagement({sdk,docLink,icon,contextMenu,contextLink,canPreview,renderMarkdown,onChange,onPrepare,onNavigate,onLifecycle,onProjectActionsChange,onInspirationChange}){
+export function createGovernanceManagement({sdk,docLink,icon,contextMenu,contextLink,canPreview,renderMarkdown,renderDomainSummary,onChange,onPrepare,onNavigate,onLocationChange,onLifecycle,onProjectActionsChange,onInspirationChange}){
   const node=el('div','pm-workspace pg-workspace');
   let selected=null,key='',record=null,drafts=new Map(),editing=null,error='',notice='',busy=false,alive=true,generation=0,conflict=null,storage='',pendingRequest=null;
-  let hierarchyRecord,hierarchy,activePath=null,contextPreview=null,contextRequest=0;
+  let hierarchyRecord,hierarchy,activePath=null,contextPreview=null,contextRequest=0,pendingReadingLocation=null;
   let projectDurationRequest=null,contextView,projectContextView;
   let detailSaveTimer,detailSaveJob=null,detailSaveIssue=null,detailsSaved=false,detailComposing=false;
-  const fileDrafts=createContextDrafts(sdk),fileTreeStates=new Map(),projectPlanStates=new Map();
+  const fileDrafts=createContextDrafts(sdk),fileTreeStates=new Map(),projectPlanStates=new Map(),readingPositions=new Map();
+  let navigationPosition=0;
   const reviewSession=randomId();
   let selectedDoc,selectedBranch;
   const objectHistory=[];
@@ -125,6 +129,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   treeHeader.append(el('h2','','项目 · 里程碑 · 任务'));
   const treeList=el('ol','pg-object-tree-list');
   board.append(treeHeader,treeList);
+  board.addEventListener('scroll',()=>{if(board.getClientRects().length&&board.clientHeight)navigationPosition=board.scrollTop;});
   const motion=new AbortController();
   const cardMotion=followPointer(board,motion.signal);
   navigation.append(historyControls,breadcrumbs);
@@ -132,7 +137,18 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   const selectedBody=el('section','pg-card-details');
   selectedBody.setAttribute('aria-label','当前对象详情');
   detailPane.append(selectedBody);
-  workspace.append(board,navigationSplitter(workspace,board,motion.signal),detailPane);
+  const objectSplitter=navigationSplitter(workspace,board,motion.signal);
+  let narrowObjects=false,showObjects=false;
+  const objectToggle=button('浏览项目对象',()=>showObjectNavigation(!showObjects,true),'pg-object-view-toggle');
+  function showObjectNavigation(open,focus=false){
+    showObjects=open;board.hidden=narrowObjects&&!open;detailPane.hidden=narrowObjects&&open;objectSplitter.hidden=narrowObjects;objectToggle.hidden=!narrowObjects;
+    workspace.dataset.objectLayout=narrowObjects?'narrow':'wide';objectToggle.textContent=open?'返回对象详情':'浏览项目对象';objectToggle.setAttribute('aria-expanded',String(narrowObjects&&open));
+    if(focus)requestAnimationFrame(()=>{if(!alive||!sdk.getSnapshot().active)return;const target=open?board.querySelector('[aria-current],button'):selectedBody.querySelector('h3');if(target){if(!target.matches('button'))target.tabIndex=-1;target.focus({preventScroll:true});}else objectToggle.focus();});
+  }
+  const objectObserver=new ResizeObserver(()=>{if(pendingReadingLocation)restoreReadingPosition();const next=workspace.getBoundingClientRect().width<600;if(next===narrowObjects)return;const active=document.activeElement;narrowObjects=next;showObjectNavigation(false);if(active&&workspace.contains(active)&&active.closest('[hidden]'))objectToggle.focus({preventScroll:true});});
+  objectObserver.observe(workspace);motion.signal.addEventListener('abort',()=>objectObserver.disconnect(),{once:true});
+  board.addEventListener('keydown',event=>{if(narrowObjects&&showObjects&&event.key==='Escape'&&!event.isComposing){event.preventDefault();event.stopPropagation();showObjectNavigation(false);objectToggle.focus();}},{signal:motion.signal});
+  workspace.append(objectToggle,board,objectSplitter,detailPane);showObjectNavigation(false);
 
   const notes=createInspiration({sdk,docLink,onDrawerChange:onInspirationChange,onSaved:(r,path)=>{if(r)record=r;for(const view of contextViews())view.observeOpened(path);onChange?.();}});
   const contextViews=()=>[...new Set([contextView,projectContextView].filter(Boolean))];
@@ -151,6 +167,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   const autoKind=kind=>['project','milestone','task'].includes(kind);
   function automaticDrafts(){
     return changedDrafts().filter(draft=>{
+      if(draft.requiresReviewSave)return false;
       if(!autoKind(draft.value.metadata.kind))return false;
       const review=draft.value.metadata.review_ref;
       return !review||record.documents.some(d=>d.path===review.path)||!drafts.has(review.path);
@@ -245,7 +262,25 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   node.addEventListener('compositionstart',event=>{if(event.target.closest('[data-auto-document]')){detailComposing=true;clearTimeout(detailSaveTimer);}});
   node.addEventListener('compositionend',()=>{if(detailComposing){detailComposing=false;scheduleDetailSave();}});
   node.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='s'&&event.target.closest('[data-auto-document]')){event.preventDefault();void flushDetailSave();}});
-  async function select(project,detail,{historyTarget}={}){
+  function restoreReadingPosition(){
+    const location=pendingReadingLocation,token=generation;if(!location)return;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(!alive||token!==generation||pendingReadingLocation!==location||activePath!==location.objectPath)return;
+      const reader=selectedBody.querySelector('.pg-project-context-reader')??selectedBody;
+      if(!reader.getClientRects().length||!reader.clientHeight)return;
+      reader.scrollTop=location.objectScroll??0;readingPositions.set(activePath,reader.scrollTop);board.scrollTop=location.navigationScroll??0;navigationPosition=location.navigationScroll??0;pendingReadingLocation=null;
+    }));
+  }
+  function restoreLocation(location){
+    if(!location||!record)return;
+    leaveContextEditor();clearPreview();
+    if(['plan','progress','materials'].includes(location.projectTab)){let state=projectPlanStates.get(record.project.path);if(!state){state={};projectPlanStates.set(record.project.path,state);}state.tab=location.projectTab;}
+    const document=[record.project,...record.documents].find(item=>item.path===location.objectPath);
+    if(document){activePath=document.path;draw();}
+    else if(location.objectPath){notice='先前查看的对象已不可用，已返回项目总览。';activePath=record.project.path;draw();}
+    pendingReadingLocation={...location,objectPath:activePath};restoreReadingPosition();
+  }
+  async function select(project,detail,{historyTarget,restoreLocation:location}={}){
     const next=project.scope+':'+project.name;
     if(next!==key){await flushDetailSave();await notes.flush();}
     projectDurationRequest=null;
@@ -254,7 +289,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
         record=detail.governance;
         draw();
       }
-      return;
+      restoreLocation(location);return;
     }
     if(contextView!==projectContextView)contextView?.dispose();
     projectContextView?.dispose();
@@ -275,6 +310,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       if(restoring&&target.context&&activePath===target.path){
         contextView?.openEntry(target.context,{remember:false});
       }
+      restoreLocation(location);
     }catch(e){if(alive&&g===generation){error=e.message;draw();}}
   }
   function section(title,description){const s=el('section','pm-section'),h=el('header','pm-section-heading'),left=el('div');left.append(el('h2','',title));if(description)left.append(el('p','kp-muted',description));h.append(left);s.append(h);return s;}
@@ -316,7 +352,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     }
     return panel;
   }
-  function draftFor(d){let value=drafts.get(d.path);if(!value){value={path:d.path,base:structuredClone(d),value:documentValue(d)};drafts.set(d.path,value);}return value;}
+  function draftFor(d){let value=drafts.get(d.path);const pending=pendingRequest?.changes.some(change=>change.path===d.path);if(!value||!pending&&value.base?.etag!==d.etag&&documentForReading(d,value)===d){value={path:d.path,base:structuredClone(d),value:documentValue(d)};drafts.set(d.path,value);}return value;}
   function open(d){clearPreview();editing=d.path;draftFor(d);draw();}
   async function openNote(d,entry){
     if(busy)return;
@@ -338,12 +374,92 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     syncDetailFeedback();
   }
   function badgesFor(m){const result=[chip(m.status)];if(m.kind!=='review'&&m.blocker&&!['completed','cancelled'].includes(m.status))result.push(el('span','pm-chip state-blocked','受阻'));if(m.kind==='task'&&record.projection?.readiness.some(r=>r.id===m.id&&r.ready))result.push(el('span','pm-ready','可开始'));if(record.stale?.includes(m.id))result.push(el('span','pm-chip state-review','待复核'));return result;}
-  function prepareTask(d){
-    const m=d.metadata;
-    onPrepare?.(['请继续项目「'+selected.name+'」的任务 '+m.id+'：'+taskLabel(d),
-      '先读取 '+record.path+'，再读取 '+d.path+'；按当前索引选择必要编号上下文。',
-      '下一步：'+(m.next_action??'先核对当前缺口'),
-      '执行后返回实际结果、证据和未决，维护同一任务原件；未知外部操作先对账。'].join('\n\n'));
+  async function prepareTask(d){
+    const source=generation;
+    if(!await flushDetailSave()||!alive||source!==generation)return;
+    const latest=record.documents.find(row=>row.path===d.path&&row.metadata.id===d.metadata.id);
+    if(!latest)return;
+    const prompt=taskProgressPrompt(latest,record,selected.name);
+    if(prompt)onPrepare?.(prompt);
+  }
+  function readingRecord(){
+    const documents=record.documents.map(d=>documentForReading(d,drafts.get(d.path)));
+    for(const draft of drafts.values())if(!documents.some(d=>d.path===draft.path))documents.push({path:draft.path,...draft.value});
+    return {...record,project:documentForReading(record.project,drafts.get(record.project.path)),documents};
+  }
+  async function prepareMilestone(d){
+    const source=generation;
+    if(!await flushDetailSave()||!alive||source!==generation)return;
+    const latest=record.documents.find(row=>row.path===d.path&&row.metadata.id===d.metadata.id);
+    const prompt=latest&&milestoneAcceptancePrompt(latest,record,selected.name);
+    if(prompt)onPrepare?.(prompt);
+  }
+  function workSummary(subject){
+    const view=readingRecord(),selection=workTasks(subject,view),section=el('section','pg-result-section pg-current-work');
+    section.setAttribute('aria-label','当前任务');section.append(el('h3','','当前任务'));
+    function row(task){
+      const item=el('div','pg-result-task');item.append(button(taskLabel(task),()=>selectNode(task.path),'pg-card-action'),...badgesFor(task.metadata));
+      if(subject.metadata.kind==='project')item.append(el('p','kp-muted','所属里程碑：'+(view.documents.find(d=>d.path===task.metadata.milestone.path)?.metadata.name??task.metadata.milestone.path)));
+      const claim=view.executionClaims?.[task.metadata.id];if(claim)item.append(el('p','kp-muted',claim.error?'执行占用需核对：'+claim.error.message:'执行聊天：'+claim.chat_id+'；开始于 '+claim.acquired_at+'。接手前须核对旧运行。'));
+      const sections=resultSections(task.body).sections,details=el('details','pg-work-records');details.append(el('summary','','结果与缺口'));
+      for(const name of ['当前结果','未决与缺口'])details.append(el('p','kp-muted',name+'：'+(sections[name]||'尚未记录')));item.append(details);
+      item.append(el('p','kp-muted','下一步：'+(task.metadata.next_action??'尚未记录')));
+      const action=!readOnly()&&taskProgressAction(task,view);
+      if(action)item.append(button('准备'+action.label+'对话',()=>prepareTask(task),'pg-card-action'));
+      return item;
+    }
+    const explicit=selection.current.length?selection.current:selection.focused;
+    if(!explicit.length)section.append(el('p','kp-muted','尚无明确当前任务。请结合下一项建议选择任务；查看或准备对话不会启动工作。'));
+    else{
+      if(!selection.current.length)section.append(el('p','kp-muted','以下为明确关注的任务；重点标记不等于执行授权。'));
+      if(explicit.length>1)section.append(el('p','kp-muted','存在多项当前工作，请选择本次要接续的任务。'));
+      for(const task of explicit)section.append(row(task));
+    }
+    if(selection.candidates.length){const candidates=el('details','pg-task-candidates');candidates.append(el('summary','','选择下一任务（'+selection.candidates.length+'）'));for(const task of selection.candidates)candidates.append(row(task));section.append(candidates);}
+    return section;
+  }
+  function resultDetail(document,links=[]){
+    const draft=drafts.get(document.path),d=documentForReading(document,draft),m=d.metadata;
+    const parsed=resultSections(d.body),task=m.kind==='task';
+    const article=el('article','pg-result-detail');article.setAttribute('aria-label',task?'任务结果':'里程碑进展');
+    const unsaved=!!draft&&changedDrafts().some(item=>item.path===d.path);
+    if(renderDomainSummary)article.append(renderDomainSummary(d,workspaceDomainFacts(d,record,{draft:unsaved}),{stale:unsaved||!!record.stale?.includes(m.id)}));
+    else{const header=el('header','pg-result-heading'),heading=el('h2','',task?taskLabel(d):m.name);heading.tabIndex=-1;
+      const states=el('div','pg-result-badges');states.append(...badgesFor(m));header.append(heading,states);article.append(header);}
+    const feedback=el('div','pg-plan-feedback');feedback.dataset.detailSaveFeedback='';article.append(feedback);queueMicrotask(syncDetailFeedback);
+    const claim=task&&record.executionClaims?.[m.id];if(claim)article.append(el('p','kp-muted',claim.error?'执行占用需核对：'+claim.error.message:'当前执行聊天：'+claim.chat_id+'；开始于 '+claim.acquired_at+'。其他聊天可查阅，执行前须明确接手并核对旧运行。'));
+    const actions=el('div','pg-result-actions');
+    if(!readOnly()){
+      actions.append(button(task?'编辑任务':'编辑里程碑',()=>{open(document);selectedBody.querySelector('.pg-editor h2')?.focus({preventScroll:true});},'pg-card-action'));
+      if(task)actions.append(button('维护验收',()=>{open(document);const box=selectedBody.querySelector('.pm-results-editor');box?.querySelector('select,input,textarea,button')?.focus({preventScroll:true});box?.scrollIntoView({block:'start'});},'pg-card-action'));
+      const action=task?taskProgressAction(d,record):null;
+      if(action)actions.append(button('准备'+action.label+'对话',()=>prepareTask(d),'pg-card-action'));
+      if(!task&&milestoneAcceptancePrompt(d,record,selected.name))actions.append(button('准备阶段验收对话',()=>prepareMilestone(d),'pg-card-action'));
+    }
+    article.append(actions);
+    if(draft&&changedDrafts().some(item=>item.path===d.path))article.append(el('p','pm-notice','包含本窗口未保存的草稿，请先核对保存结果。'));
+    function panel(title,text){const section=el('section','pg-result-section');section.append(el('h3','',title),text?renderMarkdown(text,links):el('p','kp-muted','尚未记录'));article.append(section);return section;}
+    const goal=panel(task?'目标与完成标准':'阶段目标与完成标准',parsed.sections['目标']);
+    const criteria=el('ul','pg-result-criteria');for(const criterion of m.criteria??[]){const result=m.verification?.results?.find(r=>r.criterion_id===criterion.id);if(renderDomainSummary&&!result)continue;const row=el('li','',criterion.text);if(task&&result)row.append(el('span','pg-card-muted',' · 验收记录：'+(labels[result.result]??result.result)+(m.status!=='completed'||record.stale?.includes(m.id)||unsaved?'（待按当前条件核对）':'')));criteria.append(row);}if(criteria.childNodes.length){if(renderDomainSummary)goal.append(el('h4','','逐项验收记录'));goal.append(criteria);}
+    panel(task?'当前结果':'当前判断',parsed.sections['当前结果']);
+    const gaps=panel('未决与缺口',parsed.sections['未决与缺口']);
+    if(m.blocker)gaps.append(el('p','pm-error','受阻：'+m.blocker));
+    if(m.resume_condition)gaps.append(el('p','kp-muted','恢复条件：'+m.resume_condition));
+    if(task){
+      const action=taskProgressAction(d,record);for(const reason of action?.reasons??[])gaps.append(el('p','kp-muted',reason));
+      panel('下一步',['completed','cancelled'].includes(m.status)?'本任务已结束。项目下一项建议见所属里程碑。':m.next_action);
+      const milestone=record.documents.find(row=>row.path===m.milestone?.path&&row.metadata.id===m.milestone?.id&&row.metadata.kind==='milestone');
+      if(milestone&&['completed','cancelled'].includes(m.status))article.append(button('查看所属里程碑与建议',()=>selectNode(milestone.path),'pg-card-action'));
+      const refs=section('成果与证据','直接引用现有原件');const seen=new Set();for(const ref of [...(m.result_refs??[]),...evidenceReferences(m)]){const key=(ref.path??ref.url)+'|'+(ref.digest??ref.version??'current');if(seen.has(key))continue;seen.add(key);if(ref.path){const label=ref.role??ref.path.split('/').at(-1);const control=button(label,()=>contextView.openEntry({...ref,kind:'file',name:label}),'kp-source-link');if(ref.digest)control.title='固定证据版本：'+ref.digest;refs.append(control);}else if(ref.url){let url;try{url=new URL(ref.url);}catch{continue;}if(!['http:','https:'].includes(url.protocol)||url.username||url.password)continue;const link=el('a','kp-source-link',ref.role??ref.url);link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';if(ref.version)link.title='记录版本：'+ref.version;refs.append(link);}}if(!seen.size)refs.append(el('p','kp-muted','尚未记录'));article.append(refs);
+    }else{
+      const tasks=milestoneTasks(d,record);
+      article.append(workSummary(d));
+      const unfinished=tasks.filter(row=>!['completed','cancelled'].includes(row.metadata.status));
+      if(unfinished.length){gaps.append(el('p','kp-muted','以下任务尚未结束；完成数量不代表阶段目标达成。'));for(const row of unfinished)gaps.append(button(taskLabel(row),()=>selectNode(row.path),'pg-card-action'));}
+      panel('下一项建议',m.next_action);article.append(el('p','kp-muted','建议供选择；准备或查看对话不会自动启动下一任务。每个里程碑由用户明确确认后完成。'));
+    }
+    if(parsed.original&&parsed.original!=='# '+m.name){const original=el('details','pg-result-original');original.append(el('summary','','原始说明'),renderMarkdown(parsed.original,links));article.append(original);}
+    return article;
   }
   function clearPreview(){
     contextRequest++;
@@ -366,6 +482,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     objectHistory.splice(historyIndex+1,objectHistory.length,{key,project:selected,path,context});
     if(objectHistory.length>100)objectHistory.shift();
     historyIndex=objectHistory.length-1;
+    queueMicrotask(()=>onLocationChange?.());
   }
   function moveThroughHistory(offset){
     const nextIndex=historyIndex+offset;
@@ -379,18 +496,22 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     leaveContextEditor();
     clearPreview();
     activePath=target.path;
+    queueMicrotask(()=>onLocationChange?.());
     selectedBody.scrollTop=0;
     renderBoard();
     if(target.context&&activePath===target.path)contextView?.openEntry(target.context,{remember:false});
   }
   function selectNode(path,{fromNavigation=false}={}){
-    if(path===activePath&&!contextPreview)return;
+    pendingReadingLocation=null;
+    const closeNavigation=narrowObjects&&showObjects;
+    if(path===activePath&&!contextPreview){if(closeNavigation)showObjectNavigation(false,true);return;}
     rememberLocation(path);
     leaveContextEditor();
     clearPreview();
     activePath=path;
     selectedBody.scrollTop=0;
     renderBoard({focusRow:fromNavigation});
+    if(closeNavigation)showObjectNavigation(false,true);
     if(!fromNavigation)selectedBody.querySelector('.pg-project-context-title h3')?.focus({preventScroll:true});
   }
   async function previewContext(entry,{remember=true,edit=false}={}){
@@ -446,6 +567,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     list.id=id('context_list');
     list.setAttribute('aria-label','上下文文件列表');
     const reader=el('article','pg-project-context-reader');
+    reader.addEventListener('scroll',()=>{if(reader.getClientRects().length&&reader.clientHeight)readingPositions.set(d.path,reader.scrollTop);});
     reader.id=id('context_reader');
     reader.setAttribute('aria-label','上下文文件内容');
     reader.tabIndex=0;
@@ -587,11 +709,17 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
           const download=el('a','kp-source-link','下载固定版本原件');download.href=source;download.download=entry.path.split('/').at(-1);
           if(file.preview.kind==='image'){const image=el('img','pg-file-image');image.alt=entry.name??'验收证据';image.src=source;content.replaceChildren(image,download);}
           else content.replaceChildren(el('p','pg-card-muted','此格式可下载所引用的固定版本。'),download);
+          content.prepend(createFileReadOnlyNotice(fileReadOnlyNotice(record,entry,file,selected?.scope)));
           status.textContent='验收证据 · 只读';status.title=entry.digest;return;
         }
-        const body=raw?el('pre','pg-project-context-text',file.body):renderMarkdown(file.body,file.links);
+        const managed=record.valid!==false?record.documents.find(doc=>doc.path===entry.path&&['task','milestone'].includes(doc.metadata.kind)):null;
+        const body=managed&&!raw?resultDetail(managed,file.links):raw?el('pre','pg-project-context-text',file.body):renderMarkdown(file.body,file.links);
         content.replaceChildren(body);
-        if(entry.digest){status.textContent='验收证据 · 只读';status.title=entry.digest;}
+        const notice=fileReadOnlyNotice(record,entry,file,selected?.scope);
+        if(notice){
+          content.prepend(createFileReadOnlyNotice(notice));
+          status.textContent=notice.title;status.title=entry.digest??notice.reason;
+        }
         if(entry.path===rootEntry.path&&record.valid===false)appendRecordDiagnostics(content);
       }else if(error){
         content.replaceChildren(el('p','pg-card-error',error),button('重试读取',()=>void previewContext(entry),'pg-card-action'));
@@ -679,6 +807,18 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       if(entry.digest){void previewContext(entry,options);return;}
       if(entry.reason==='deleted'){void previewContext(entry,{remember:false});return;}
       const owner=ownerFor(entry.path);
+      if(entry.path===owner.path&&['task','milestone'].includes(owner.metadata.kind)){
+        void (async()=>{
+          const source=generation;
+          if(!await flushDetailSave()||!alive||source!==generation)return;
+          editing=null;persist();clearPreview();
+          if(options.remember!==false)rememberLocation(d.path,owner.path===d.path?null:entry);
+          current=undefined;
+          show(owner.path===d.path?primary:{entry,file:{body:owner.body}});
+          content.querySelector('h2')?.focus({preventScroll:true});
+        })();
+        return;
+      }
       if(entry.path===owner.path&&record.valid!==false){
         if(!isContextEditing()||editing!==owner.path){
           leaveContextEditor();
@@ -774,6 +914,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       sdk,project:projectTarget,rootPath:d.path,objectPath:d.path,contextRoots,rootLabel:labels[kind]+'根目录',list,content,actions:editorActions,status,reader,icon,iconButton:editorAction,
       docLink,drafts:fileDrafts,reviewSession,contextMenu,onOpen:openEntry,onFallback:loadProjectEntries,displayName,showInFileNavigation,
       onUnread:updateUnread,focusState:fileState,projectWritable:()=>!readOnly(),navigationAction:primaryAction,
+      readOnlyNotice:(entry,file)=>fileReadOnlyNotice(record,entry,file,selected?.scope),
     });
     function updateProject(next){
       primaryAction.disabled=busy;
@@ -802,7 +943,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     if(d.metadata.kind==='project')contextView.updateProject(d);
     if(contextView.panel.parentNode!==selectedBody)selectedBody.replaceChildren(contextView.panel);
     contextView.start();
-    if(autoKind(d.metadata.kind)&&record.valid!==false&&!contextPreview&&!isContextEditing()){
+    if(d.metadata.kind==='project'&&record.valid!==false&&!contextPreview&&!isContextEditing()){
       editing=d.path;draftFor(d);
     }
     if(isContextEditing())contextView.showEditor();
@@ -1036,7 +1177,8 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     renderObjectNavigationList(focusRow);
     renderCardDetails();
     const subject=selectedDoc,kind=subject.metadata.kind;
-    const focus=kind==='milestone'?selectedBranch?.tasks.find(task=>subject.metadata.focus_tasks?.some(ref=>ref.path===task.path)):null;
+    const primary=kind==='task'?subject:workTasks(subject,readingRecord()).primary;
+    const progress=primary&&!readOnly()?taskProgressAction(primary,record):null;
     onProjectActionsChange?.(record.valid!==false?{
       planLabel:null,
       planDisabled:busy,
@@ -1048,8 +1190,9 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
         openObjectReview(subject);
         node.querySelector('.pg-editor h2')?.focus();
       },
-      prepare:kind==='task'&&!readOnly()?()=>prepareTask(subject):null,
-      focus:focus?()=>selectNode(focus.path):null,
+      prepare:progress?()=>prepareTask(primary):null,
+      prepareLabel:progress?.label??null,
+      focus:primary?()=>selectNode(primary.path):null,
       inspiration:()=>openNote(subject),
     }:null);
   }
@@ -1095,7 +1238,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   function resultsEditor(form,draft,subject){
     const m=draft.value.metadata,task=m.kind==='task';let verification=task?m.verification:m;
     const results=verification?.[task?'results':'criterion_results']??[];
-    const box=el('fieldset','pm-criteria-editor');box.append(el('legend','','逐项验收'));
+    const box=el('fieldset','pm-criteria-editor pm-results-editor');box.append(el('legend','','逐项验收'));
     for(const c of subject.metadata.criteria??[]){let r=results.find(x=>x.criterion_id===c.id);const current=r??{criterion_id:c.id,result:'pending',evidence:[],reviewer:'',reviewed_at:''};
       const update=()=>{if(!r){r=current;results.push(r);}if(task){m.verification??={basis_digest:null,results};m.verification.results=results;}else m.criterion_results=results;draft.verificationChanged=true;};
       const row=el('div','pm-criterion-editor'),label=el('strong','',c.text);label.dataset.criterionLabel=c.id;row.append(label);field(row,'结果',current.result,v=>{update();current.result=v;current.reviewed_at=new Date().toISOString();},{options:['pending','passed','failed']});field(row,'复核者',current.reviewer,v=>{update();current.reviewer=v;});
@@ -1149,6 +1292,8 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     const form=el('div','pg-editor pg-project-plan-editor'),token=generation,target={...selected};
     form.dataset.autoDocument=draft.path;
     if(!inReader)form.append(button('返回详情',()=>{editing=null;persist();draw();}));
+    if(renderDomainSummary){const summary=el('details','kp-project-domain-disclosure');summary.append(el('summary','','项目摘要'),renderDomainSummary(documentForReading(record.project,draft),workspaceDomainFacts(record.project,record,{draft:detailsChanged()})));form.append(summary);}
+    form.append(workSummary(documentForReading(record.project,draft)));
     const metrics=el('section','pg-project-dashboard');
     metrics.setAttribute('aria-label','项目概览');
     metrics.append(projectMetrics(hierarchy.branches,record.stale??[]));
@@ -1165,7 +1310,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       if(path)onNavigate?.({name:parent(path).split('/').at(-1),scope:path.startsWith('档案/项目/')?'archived':'current'});
     };
     form.append(createProjectPlanEditor({
-      draft,record,getRecord:()=>record,state,labels,field,writable:!readOnly(),busy,modified,id,renderMarkdown:text=>renderMarkdown(text,state.bodyLinks),docLink,
+      draft,record,getRecord:()=>record,state,labels,field,writable:!readOnly(),busy,modified,id,renderMarkdown:text=>renderMarkdown(text,state.bodyLinks),docLink,onViewChange:()=>queueMicrotask(()=>onLocationChange?.()),
       onObject:path=>selectNode(path),onProject:openProject,
       onFile(entry){
         const owner=record.documents.filter(doc=>(doc.path===record.project.path||['milestone','task'].includes(doc.metadata.kind)&&doc.metadata.project?.id===record.project.metadata.id&&doc.metadata.project?.path===record.project.path)&&entry.path?.startsWith(parent(doc.path)+'/')).sort((a,b)=>b.path.length-a.path.length)[0];
@@ -1192,6 +1337,87 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     queueMicrotask(syncDetailFeedback);return form;
   }
 
+  const confirmationSignature=()=>JSON.stringify({etag:record.etag,drafts:changedDrafts().map(d=>({path:d.path,value:d.value,evidenceInputs:d.evidenceInputs,verificationChanged:d.verificationChanged}))});
+  async function confirmationRequest(subjectPath,reviewPath){
+    if(pendingRequest)throw Error('请先核对上次保存回执，再确认阶段。');
+    while(evidenceJobs.size)await Promise.all([...evidenceJobs]);
+    if(changedDrafts().some(d=>Object.keys(d.evidenceInputs??{}).length))throw Error('验收证据输入尚未完成。');
+    const signature=confirmationSignature(),view=structuredClone(readingRecord()),changes=new Map();
+    for(const draft of changedDrafts()){
+      const value=structuredClone(draft.value),m=value.metadata;
+      if(draft.verificationChanged){
+        const subject=m.kind==='task'?m:view.documents.find(d=>d.path===m.subject?.path)?.metadata;
+        const {digest}=await call('criteria-digest',{criteria:subject?.criteria??[]});
+        if(m.kind==='task'&&m.verification)m.verification.basis_digest=digest;
+        else if(m.kind==='review')m.basis_digest=digest;
+      }
+      changes.set(draft.path,{path:draft.path,ifMatch:draft.base?.etag??'missing',...value});
+      const doc=view.documents.find(d=>d.path===draft.path);if(doc)Object.assign(doc,value);
+    }
+    view.project=view.documents.find(d=>d.path===view.project.path)??view.project;
+    const subject=view.documents.find(d=>d.path===subjectPath),review=view.documents.find(d=>d.path===reviewPath);
+    if(!subject||!review)throw Error('阶段或复盘原件尚未取得。');
+    const {digest:basis}=await call('criteria-digest',{criteria:subject.metadata.criteria??[]});
+    const scoped=await call('check',{data:{operationId:id('milestone_scope'),ifMatch:view.etag,changes:[...changes.values()]}});
+    const scope=scoped.confirmationScopes?.[subject.metadata.id];
+    if(!scope)throw Error('当前Core未提供阶段确认范围，请更新配套Core。');
+    for(const change of milestoneCompletionChanges(subject,review,view,{basis,at:new Date().toISOString()}))changes.set(change.path,{...changes.get(change.path),...change});
+    const relation=changedDrafts().map(draft=>projectParentChange({...draft,value:changes.get(draft.path)??draft.value})).find(Boolean);
+    const data={operationId:id('milestone_confirm'),ifMatch:view.etag,confirmMilestone:{subject:{id:subject.metadata.id,path:subject.path},scope_digest:scope,source:{kind:'workbench'}},changes:[...changes.values()],...(relation?{setParent:relation}:{})};
+    const checked=await call('check',{data});
+    if(!checked.valid)throw Error(checked.errors?.map(e=>e.message).join('；')||'阶段条件和证据尚未通过检查。');
+    if(signature!==confirmationSignature())throw Error('原件或草稿已变化，请重新核对阶段确认范围。');
+    return {data,signature};
+  }
+  function appendMilestoneConfirmation(form,reviewDraft,subject){
+    const group=el('section','pg-result-section pg-stage-confirmation'),feedback=el('p','kp-muted');
+    group.setAttribute('aria-label','用户阶段确认');
+    group.append(el('h3','','用户阶段确认'),el('p','kp-muted','逐项通过是预检结果。请核对本阶段成果、证据和遗留，明确确认后再完成里程碑；这不会启动下一阶段。'));
+    let version=0,timer,confirming=false;
+    const current=()=>alive&&form.isConnected&&editing===reviewDraft.path;
+    const control=button('确认本里程碑通过并完成',async()=>{
+      if(control.disabled||confirming)return;
+      confirming=true;control.disabled=true;const token=++version,source=generation;
+      let before;
+      try{
+        if(!await flushDetailSave())throw Error('请先处理未保存内容或并发修改。');
+        const {data}=await confirmationRequest(subject.path,reviewDraft.path);
+        if(!current()||source!==generation||token!==version)return;
+        before=new Map();
+        for(const change of data.changes){
+          const doc=record.documents.find(d=>d.path===change.path),draft=drafts.get(change.path)??(doc&&draftFor(doc));
+          if(!draft)throw Error('确认范围包含未取得的草稿。');
+          before.set(change.path,structuredClone(draft.value));
+          draft.value={metadata:structuredClone(change.metadata??draft.value.metadata),body:change.body??draft.value.body};
+          if(change.path===subject.path)draft.requiresReviewSave=true;
+          draft.verificationChanged=false;
+        }
+        pendingRequest=structuredClone(data);persist();await save();
+        if(!pendingRequest&&record.documents.find(d=>d.path===subject.path)?.metadata.status!=='completed'){
+          // A known rejection has not saved the confirmation. Keep the user's edits,
+          // but require a fresh explicit confirmation after resolving the problem.
+          for(const path of [subject.path,reviewDraft.path]){
+            const draft=drafts.get(path),prior=before.get(path);if(!draft||!prior)continue;
+            for(const key of ['status','outcome','next_action'])if(key in prior.metadata)draft.value.metadata[key]=prior.metadata[key];
+            if(path===reviewDraft.path)draft.value.body=prior.body;
+            draft.requiresReviewSave=false;
+          }
+          persist();draw();
+        }
+      }catch(e){if(current()){feedback.textContent=e.message;control.disabled=true;}}
+      finally{confirming=false;}
+    },'pm-primary');
+    control.disabled=true;group.append(control,feedback);form.append(group);
+    async function refresh(token){
+      if(!current()||token!==version||confirming)return;
+      feedback.textContent='正在核对阶段标准、固定证据与下级任务…';
+      try{await confirmationRequest(subject.path,reviewDraft.path);if(current()&&token===version){control.disabled=readOnly()||busy;feedback.textContent='检查通过，等待你明确确认。';}}
+      catch(e){if(current()&&token===version){control.disabled=true;feedback.textContent=e.message;}}
+    }
+    const schedule=()=>{const token=++version;control.disabled=true;clearTimeout(timer);timer=setTimeout(()=>void refresh(token),150);};
+    form.addEventListener('input',schedule);form.addEventListener('change',schedule);queueMicrotask(schedule);
+  }
+
   function editor(draft,{inReader=false}={}){
     if(draft.value.metadata.kind==='project')return projectEditor(draft,{inReader});
     const m=draft.value.metadata,form=el('div','pg-editor');
@@ -1200,6 +1426,12 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       if(m.kind==='project')selectedBody.querySelector('[data-project-edit]')?.focus({preventScroll:true});
     }));
     const heading=el('h2','',m.kind==='task'?taskLabel({metadata:m}):m.name);heading.tabIndex=-1;form.append(heading);
+    if(inReader&&['task','milestone'].includes(m.kind))form.append(button('返回结果阅读',async()=>{
+      const source=generation;
+      if(!await flushDetailSave()||!alive||source!==generation)return;
+      editing=null;persist();draw();selectedBody.querySelector('h2')?.focus({preventScroll:true});
+    },'pg-card-action'));
+
     if(inReader&&autoKind(m.kind)){
       form.dataset.autoDocument=draft.path;
       const feedback=el('div','pg-plan-feedback');feedback.dataset.detailSaveFeedback='';form.append(feedback);queueMicrotask(syncDetailFeedback);
@@ -1209,18 +1441,24 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       const owner=record.documents.find(d=>d.path===editing&&d.metadata.kind!=='review');
       if(owner)form.append(button('打开灵感闪现',()=>openNote(owner),'pg-note-link'));
     }
-    field(form,'名称',m.name,v=>m.name=v);field(form,'状态',m.status,v=>m.status=v,{options:statesFor(m)});field(form,'负责人',m.owner,v=>m.owner=v||null);field(form,'下一步',m.next_action,v=>m.next_action=v.trim()?v:null,{textarea:true});field(form,m.kind==='project'?'项目方案':'当前进展与说明',draft.value.body,v=>draft.value.body=v,{textarea:true});locationEditor(form,m);
+    field(form,'名称',m.name,v=>m.name=v);field(form,'状态',m.status,v=>m.status=v,{options:statesFor(m).filter(s=>m.kind!=='milestone'||s!=='completed'||m.status==='completed')});field(form,'负责人',m.owner,v=>m.owner=v||null);field(form,'下一步',m.next_action,v=>m.next_action=v.trim()?v:null,{textarea:true});field(form,m.kind==='project'?'项目方案':'当前进展与说明',draft.value.body,v=>draft.value.body=v,{textarea:true});locationEditor(form,m);
     if(m.kind!=='review'){if(m.governance_schema===2){field(form,'状态原因',m.status_reason,v=>m.status_reason=v||null,{textarea:true});field(form,'暂停前环节',m.resume_status??'planned',v=>m.resume_status=v,{options:['planned','active','review']});if(m.kind==='task')field(form,'任务用途',m.work_type,v=>m.work_type=v,{options:['delivery','acceptance']});}field(form,'阻塞原因',m.blocker,v=>m.blocker=v||null,{textarea:true});field(form,'恢复条件',m.resume_condition,v=>m.resume_condition=v||null,{textarea:true});
       const criteria=el('fieldset','pm-criteria-editor');criteria.append(el('legend','','完成条件'));for(const c of m.criteria??[]){const row=el('div','pm-criterion-editor');field(row,'条件',c.text,v=>c.text=v);if(!readOnly())row.append(button('移除条件',()=>{m.criteria=m.criteria.filter(x=>x!==c);modified();draw();}));criteria.append(row);}if(!readOnly())criteria.append(button('增加条件',()=>{m.criteria??=[];m.criteria.push({id:id('criterion'),text:''});modified();draw();}));form.append(criteria);
     }
     if(m.kind==='milestone'){
+      form.append(el('p','kp-muted','阶段通过须用户明确确认，请从里程碑复盘核对证据并完成阶段确认。'));
       const stages=el('fieldset','pm-criteria-editor');stages.append(el('legend','','任务推进阶段（A准备，B—Y自定义，Z验收复盘）'));
       for(const stage of m.task_stages??[]){const item=el('div','pm-plan-card');const assigned=record.documents.some(d=>d.metadata.kind==='task'&&d.metadata.milestone?.id===m.id&&d.metadata.task_code?.[0]===stage.code);const letter=field(item,'阶段字母',stage.code,v=>stage.code=v.trim().toUpperCase(),{disabled:assigned});letter.maxLength=1;field(item,'阶段名称',stage.name,v=>stage.name=v);field(item,'解决什么问题',stage.purpose,v=>stage.purpose=v,{textarea:true});field(item,'进入下一阶段的判断',stage.exit_criteria,v=>stage.exit_criteria=v,{textarea:true});if(!readOnly()&&!assigned)item.append(button('移除空阶段',()=>{m.task_stages=m.task_stages.filter(x=>x!==stage);modified();draw();}));stages.append(item);}
       if(!readOnly())stages.append(button('增加推进阶段',()=>{const used=new Set((m.task_stages??[]).map(x=>x.code));const code='BCDEFGHIJKLMNOPQRSTUVWXYAZ'.split('').find(x=>!used.has(x));if(!code)return;m.task_stages??=[];m.task_stages.push({code,name:'',purpose:'',exit_criteria:''});modified();draw();}));
       stages.append(el('p','kp-muted','只定义实际需要的阶段。已有任务改号由Agent调用公共renumber预览并同步旧入口；阶段没有独立状态。'));form.append(stages);
     }
     if(m.kind==='task'){if(m.task_code)field(form,'任务编号',m.task_code,()=>{},{disabled:true});field(form,'优先级',m.priority,v=>m.priority=v,{options:['high','normal','low']});field(form,'承诺',m.commitment,v=>m.commitment=v,{options:['candidate','next','now']});resultsEditor(form,draft,{metadata:m});}
-    if(m.kind==='review'){field(form,'本层验收结论',m.outcome,v=>m.outcome=v,{options:['pending','passed','failed','cancelled']});const subject=record.documents.find(d=>d.path===m.subject?.path);if(subject)resultsEditor(form,draft,{...subject,metadata:drafts.get(subject.path)?.value.metadata??subject.metadata});}
+    if(m.kind==='review'){
+      const subject=record.documents.find(d=>d.path===m.subject?.path&&d.metadata.id===m.subject?.id),milestone=subject?.metadata.kind==='milestone';
+      field(form,'本层验收结论',m.outcome,v=>m.outcome=v,{options:['pending','passed','failed','cancelled'].filter(value=>!milestone||value!=='passed'||m.outcome==='passed')});
+      if(subject)resultsEditor(form,draft,{...subject,metadata:drafts.get(subject.path)?.value.metadata??subject.metadata});
+      if(milestone&&!readOnly()&&['active','review'].includes(subject.metadata.status))appendMilestoneConfirmation(form,draft,subject);
+    }
     form.append(numberedContexts(draft.path));
     const contexts=section('引用与证据','只打开当前需要的原件');const seenContexts=new Set();for(const r of [...(m.context_refs??[]),...(m.result_refs??[]),...evidenceReferences(m)]){const key=r.path??r.url;if(seenContexts.has(key))continue;seenContexts.add(key);if(r.path)contexts.append(docLink(r.role??r.path.split('/').at(-1),r.path));else{const a=el('a','kp-source-link',r.role??r.url);a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';contexts.append(a);}}form.append(contexts);
     const advanced=el('details','pg-advanced');advanced.append(el('summary','','高级：原件元数据'));const raw=field(advanced,'元数据 JSON',JSON.stringify(m,null,2),()=>{},{textarea:true});raw.addEventListener('change',()=>{try{const value=JSON.parse(raw.value);if(!value||Array.isArray(value)||typeof value!=='object'||!statesFor(value).length||value.kind!=='review'&&!Array.isArray(value.criteria)||value.kind==='project'&&!Array.isArray(value.goals))throw Error('请保留对象类型及其列表字段');draft.value.metadata=value;modified();draw();}catch(e){error='元数据未应用：'+e.message;}});form.append(advanced);return form;
@@ -1311,6 +1549,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     }
   }
   return {navigation,select,render(){draw();return node;},prefill:onPrepare,
+    getLocation:()=>{const reader=selectedBody.querySelector('.pg-project-context-reader')??selectedBody;if(reader.getClientRects().length&&reader.clientHeight)readingPositions.set(activePath,reader.scrollTop);if(board.getClientRects().length&&board.clientHeight)navigationPosition=board.scrollTop;return {objectPath:activePath,objectScroll:pendingReadingLocation?.objectPath===activePath?pendingReadingLocation.objectScroll:readingPositions.get(activePath)??0,navigationScroll:pendingReadingLocation?.navigationScroll??navigationPosition,...(record&&projectPlanStates.get(record.project.path)?.tab?{projectTab:projectPlanStates.get(record.project.path).tab}:{})};},
     isSaving:()=>busy||!!detailSaveJob||!!pendingRequest||evidenceJobs.size>0||notes.isSaving(),
     async flushFileSaves(){await flushDetailSave();await notes.flush();await Promise.all(contextViews().map(view=>view.flushFileSave()));await fileDrafts.settle();await Promise.allSettled([...evidenceJobs]);return !fileDrafts.hasDrafts()&&!detailsChanged()&&!notes.drafts().length;},
     closeReviews:()=>sdk.call('context-files',{action:'endReview',reviewSession}),

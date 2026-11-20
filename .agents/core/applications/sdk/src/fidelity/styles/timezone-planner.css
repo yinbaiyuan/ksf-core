@@ -1,0 +1,1224 @@
+/* Generated per module from fixed free Kokonut source; MIT notice is shipped with the SDK. */
+/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
+@property --tw-animation-delay {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0s;
+}
+@property --tw-animation-direction {
+  syntax: "*";
+  inherits: false;
+  initial-value: normal;
+}
+@property --tw-animation-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-animation-fill-mode {
+  syntax: "*";
+  inherits: false;
+  initial-value: none;
+}
+@property --tw-animation-iteration-count {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+.ksf-kokonut.ksf-kokonut--timezone-planner {
+  --color-red-500: var(--ksf-color-danger);
+  --color-red-900: var(--ksf-color-danger);
+  --color-orange-500: var(--ksf-color-warning);
+  --color-emerald-400: var(--ksf-color-success);
+  --color-emerald-500: var(--ksf-color-success);
+  --color-emerald-600: var(--ksf-color-success);
+  --color-zinc-50: oklch(98.5% 0 none);
+  --color-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-zinc-200: oklch(92% 0.004 286.32);
+  --color-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-zinc-700: oklch(37% 0.013 285.805);
+  --color-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-zinc-900: oklch(21% 0.006 285.885);
+  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-black: #000;
+  --color-white: #fff;
+  --spacing: 4px;
+  --container-2xl: 672px;
+  --text-xs: 12px;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 14px;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 16px;
+  --text-base--line-height: calc(1.5 / 1);
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: -0.025em;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-2xl: 16px;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ksf-kokonut.ksf-kokonut--timezone-planner .\@container {
+    container-type: inline-size;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .pointer-events-none {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .invisible {
+    visibility: hidden;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .visible {
+    visibility: visible;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .absolute {
+    position: absolute;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fixed {
+    position: fixed;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .relative {
+    position: relative;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .inset-0 {
+    inset: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .inset-x-0 {
+    inset-inline: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .top-0 {
+    top: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .z-50 {
+    z-index: 50;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .mx-auto {
+    margin-inline: auto;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .mt-1 {
+    margin-top: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .mt-2 {
+    margin-top: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ml-auto {
+    margin-left: auto;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .block {
+    display: block;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .flex {
+    display: flex;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .grid {
+    display: grid;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .inline-block {
+    display: inline-block;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .inline-flex {
+    display: inline-flex;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .size-1\.5 {
+    width: calc(var(--spacing) * 1.5);
+    height: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .size-4 {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .size-7 {
+    width: calc(var(--spacing) * 7);
+    height: calc(var(--spacing) * 7);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .size-full {
+    width: 100%;
+    height: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .h-8 {
+    height: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .h-9 {
+    height: calc(var(--spacing) * 9);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .h-10 {
+    height: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .h-11 {
+    height: calc(var(--spacing) * 11);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .h-\[1\.25em\] {
+    height: 1.25em;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .min-h-\[80px\] {
+    min-height: 80px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .w-10 {
+    width: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .w-full {
+    width: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .max-w-2xl {
+    max-width: var(--container-2xl);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .max-w-\[19rem\] {
+    max-width: 304px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .min-w-0 {
+    min-width: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .min-w-16 {
+    min-width: calc(var(--spacing) * 16);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .min-w-\[8rem\] {
+    min-width: 128px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .flex-1 {
+    flex: 1;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .shrink-0 {
+    flex-shrink: 0;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .transform {
+    transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .cursor-default {
+    cursor: default;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .cursor-grab {
+    cursor: grab;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .cursor-grabbing {
+    cursor: grabbing;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .cursor-pointer {
+    cursor: pointer;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .touch-none {
+    touch-action: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .resize {
+    resize: both;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .flex-col {
+    flex-direction: column;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .flex-wrap {
+    flex-wrap: wrap;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .items-baseline {
+    align-items: baseline;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .items-center {
+    align-items: center;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .items-end {
+    align-items: flex-end;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .justify-center {
+    justify-content: center;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-1 {
+    gap: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-1\.5 {
+    gap: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-3 {
+    gap: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-x-3 {
+    column-gap: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .gap-y-2 {
+    row-gap: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .overflow-hidden {
+    overflow: hidden;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .overflow-visible {
+    overflow: visible;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .rounded-2xl {
+    border-radius: var(--radius-2xl);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .rounded-full {
+    border-radius: calc(infinity * 1px);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .rounded-md {
+    border-radius: var(--radius-md);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .border-t {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .border-b {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .border-black\/5 {
+    border-color: color-mix(in srgb, #000 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .border-zinc-200 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-emerald-500 {
+    background-color: var(--color-emerald-500);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-red-500 {
+    background-color: var(--color-red-500);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-white {
+    background-color: light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-zinc-100 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-zinc-200 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-emerald-500 {
+    fill: var(--color-emerald-500);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-emerald-500\/20 {
+    fill: color-mix(in srgb, oklch(69.6% 0.17 162.48) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, var(--color-emerald-500) 20%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-orange-500 {
+    fill: var(--color-orange-500);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-white {
+    fill: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-zinc-100 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-zinc-200 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-zinc-300 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-zinc-400 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .fill-zinc-900\/\[0\.03\] {
+    fill: color-mix(in srgb, oklch(21% 0.006 285.885) 3%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 3%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-emerald-600 {
+    stroke: var(--color-emerald-600);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-orange-500 {
+    stroke: var(--color-orange-500);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-zinc-200 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-zinc-300 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-zinc-500 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 56%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-zinc-900 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .stroke-zinc-900\/30 {
+    stroke: color-mix(in srgb, oklch(21% 0.006 285.885) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      stroke: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 30%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .p-1 {
+    padding: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .px-2 {
+    padding-inline: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .px-4 {
+    padding-inline: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .px-8 {
+    padding-inline: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .py-1\.5 {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .py-2 {
+    padding-block: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .pt-3 {
+    padding-top: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-center {
+    text-align: center;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-left {
+    text-align: left;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .align-top {
+    vertical-align: top;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-xs {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-\[9\.5px\] {
+    font-size: 9.5px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-\[11px\] {
+    font-size: 11px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-\[12px\] {
+    font-size: 12px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-\[13px\] {
+    font-size: 13px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-\[22px\] {
+    font-size: 22px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .leading-4 {
+    --tw-leading: calc(var(--spacing) * 4);
+    line-height: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .leading-5 {
+    --tw-leading: calc(var(--spacing) * 5);
+    line-height: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .leading-\[1\.25em\] {
+    --tw-leading: 1.25em;
+    line-height: 1.25em;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .leading-none {
+    --tw-leading: 1;
+    line-height: 1;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .font-medium {
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .font-semibold {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .tracking-tight {
+    --tw-tracking: var(--tracking-tight);
+    letter-spacing: var(--tracking-tight);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .whitespace-nowrap {
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .whitespace-pre {
+    white-space: pre;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-emerald-600 {
+    color: var(--color-emerald-600);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 2%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 56%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-700 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 75%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .text-zinc-950 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .tabular-nums {
+    --tw-numeric-spacing: tabular-nums;
+    font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .underline-offset-4 {
+    text-underline-offset: 4px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .opacity-0 {
+    opacity: 0%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .opacity-35 {
+    opacity: 35%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .opacity-45 {
+    opacity: 45%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .opacity-100 {
+    opacity: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .shadow-\[0_1px_2px_rgb\(0_0_0\/0\.04\)\] {
+    --tw-shadow: 0 1px 2px var(--tw-shadow-color, rgb(0 0 0/0.04));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .shadow-md {
+    --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .shadow-xs {
+    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.05));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ring {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ring-1 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ring-black\/5 {
+    --tw-ring-color: color-mix(in srgb, #000 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ring-black\/10 {
+    --tw-ring-color: color-mix(in srgb, #000 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-black) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ring-offset-white {
+    --tw-ring-offset-color: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .outline-hidden {
+    --tw-outline-style: none;
+    outline-style: none;
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .transition-\[stroke\] {
+    transition-property: stroke;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .transition-colors {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .transition-opacity {
+    transition-property: opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .transition-transform {
+    transition-property: transform, translate, scale, rotate;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .duration-150 {
+    --tw-duration: 150ms;
+    transition-duration: 150ms;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .duration-200 {
+    --tw-duration: 200ms;
+    transition-duration: 200ms;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .duration-300 {
+    --tw-duration: 300ms;
+    transition-duration: 300ms;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ease-\[cubic-bezier\(0\.23\,1\,0\.32\,1\)\] {
+    --tw-ease: cubic-bezier(0.23,1,0.32,1);
+    transition-timing-function: cubic-bezier(0.23,1,0.32,1);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .ease-out {
+    --tw-ease: var(--ease-out);
+    transition-timing-function: var(--ease-out);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .last\:border-b-0:last-child {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 0px;
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-red-500\/90:hover {
+      background-color: color-mix(in srgb, oklch(63.7% 0.237 25.331) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-red-500\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-500) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-50:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 2%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-100:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-100\/80:hover {
+      background-color: color-mix(in srgb, oklch(96.7% 0.001 286.375) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-100\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:bg-zinc-900\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:text-zinc-900:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .hover\:underline:hover {
+      text-decoration-line: underline;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus\:bg-zinc-100:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus\:text-zinc-900:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus-visible\:ring-2:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus-visible\:ring-emerald-500\/60:focus-visible {
+    --tw-ring-color: color-mix(in srgb, oklch(69.6% 0.17 162.48) 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-emerald-500) 60%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus-visible\:ring-zinc-950:focus-visible {
+    --tw-ring-color: var(--color-zinc-950);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus-visible\:ring-offset-2:focus-visible {
+    --tw-ring-offset-width: 2px;
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .focus-visible\:outline-hidden:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:pointer-events-none:disabled {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:cursor-default:disabled {
+    cursor: default;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:text-zinc-300:disabled {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:text-zinc-400:disabled {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:opacity-50:disabled {
+    opacity: 50%;
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .disabled\:hover\:bg-transparent:disabled:hover {
+      background-color: transparent;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[side\=bottom\]\:slide-in-from-top-2[data-side="bottom"] {
+    --tw-enter-translate-y: calc(2*var(--spacing)*-1);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[side\=top\]\:slide-in-from-bottom-2[data-side="top"] {
+    --tw-enter-translate-y: calc(2*var(--spacing));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=closed\]\:animate-out[data-state="closed"] {
+    animation: exit var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=closed\]\:fade-out-0[data-state="closed"] {
+    --tw-exit-opacity: calc(0/100);
+    --tw-exit-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=closed\]\:zoom-out-95[data-state="closed"] {
+    --tw-exit-scale: calc(95*1%);
+    --tw-exit-scale: .95;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=open\]\:animate-in[data-state="open"] {
+    animation: enter var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=open\]\:fade-in-0[data-state="open"] {
+    --tw-enter-opacity: calc(0/100);
+    --tw-enter-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .data-\[state\=open\]\:zoom-in-95[data-state="open"] {
+    --tw-enter-scale: calc(95*1%);
+    --tw-enter-scale: .95;
+  }
+@media (prefers-reduced-motion: reduce) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .motion-reduce\:transition-none {
+      transition-property: none;
+    }
+  }
+@container (width >= 448px) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .\@md\:p-5 {
+      padding: calc(var(--spacing) * 5);
+    }
+  }
+@container (width >= 512px) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .\@lg\:grid-cols-\[minmax\(0\,19rem\)_minmax\(0\,1fr\)\] {
+      grid-template-columns: minmax(0,304px) minmax(0,1fr);
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner .\@lg\:gap-6 {
+      gap: calc(var(--spacing) * 6);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:border-white\/10 {
+    border-color: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:border-zinc-800 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-emerald-400 {
+    background-color: var(--color-emerald-400);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-red-900 {
+    background-color: var(--color-red-900);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-zinc-50 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-zinc-700 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 25%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-zinc-800 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:bg-zinc-950 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-emerald-400 {
+    fill: var(--color-emerald-400);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-emerald-400\/20 {
+    fill: color-mix(in srgb, oklch(76.5% 0.177 163.223) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, var(--color-emerald-400) 20%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-white\/\[0\.1\] {
+    fill: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-white\/\[0\.04\] {
+    fill: color-mix(in srgb, #fff 4%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, var(--color-white) 4%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-white\/\[0\.05\] {
+    fill: color-mix(in srgb, #fff 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in oklab, var(--color-white) 5%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-zinc-500 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-zinc-600 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 32%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:fill-zinc-900 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-emerald-400 {
+    stroke: var(--color-emerald-400);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-white {
+    stroke: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-white\/35 {
+    stroke: color-mix(in srgb, #fff 35%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      stroke: color-mix(in oklab, var(--color-white) 35%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-zinc-100 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-zinc-400 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 64%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:stroke-zinc-700 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 25%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-emerald-400 {
+    color: var(--color-emerald-400);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-100 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-200 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 64%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:ring-white\/10 {
+    --tw-ring-color: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:ring-white\/15 {
+    --tw-ring-color: color-mix(in srgb, #fff 15%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 15%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:ring-offset-zinc-950 {
+    --tw-ring-offset-color: var(--color-zinc-950);
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(39.6% 0.141 25.723) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-900) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-white\/5:hover {
+      background-color: color-mix(in srgb, #fff 5%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-white\/5:hover {
+        background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 5%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+      background-color: color-mix(in srgb, oklch(98.5% 0 none) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+      background-color: color-mix(in srgb, oklch(27.4% 0.006 286.033) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:text-white:hover {
+      color: light-dark(var(--ksf-color-on-primary),var(--ksf-color-foreground));
+    }
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:hover\:text-zinc-50:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:focus\:bg-zinc-800:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:focus\:text-zinc-50:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:focus-visible\:ring-zinc-300:focus-visible {
+    --tw-ring-color: var(--color-zinc-300);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:disabled\:text-zinc-500:disabled {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:disabled\:text-zinc-600:disabled {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 32%,var(--ksf-color-background));
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner[data-ksf-reference-theme="dark"] .dark\:disabled\:hover\:bg-transparent:disabled:hover {
+      background-color: transparent;
+    }
+  }
+@starting-style {
+    .ksf-kokonut.ksf-kokonut--timezone-planner .starting\:opacity-0 {
+      opacity: 0%;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .\[\&_svg\]\:pointer-events-none svg {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .\[\&_svg\]\:size-4 svg {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--timezone-planner .\[\&_svg\]\:shrink-0 svg {
+    flex-shrink: 0;
+  }
+@property --tw-rotate-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-z {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ordinal {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-slashed-zero {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-figure {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-spacing {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-fraction {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-inset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-offset-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tw-ring-offset-color {
+  syntax: "*";
+  inherits: false;
+  initial-value: #fff;
+}
+@property --tw-ring-offset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity,1);
+    transform: translate3d(var(--tw-enter-translate-x,0),var(--tw-enter-translate-y,0),0)scale3d(var(--tw-enter-scale,1),var(--tw-enter-scale,1),var(--tw-enter-scale,1))rotate(var(--tw-enter-rotate,0));
+    filter: blur(var(--tw-enter-blur,0));
+  }
+}
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity,1);
+    transform: translate3d(var(--tw-exit-translate-x,0),var(--tw-exit-translate-y,0),0)scale3d(var(--tw-exit-scale,1),var(--tw-exit-scale,1),var(--tw-exit-scale,1))rotate(var(--tw-exit-rotate,0));
+    filter: blur(var(--tw-exit-blur,0));
+  }
+}
+@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    .ksf-kokonut.ksf-kokonut--timezone-planner *,.ksf-kokonut.ksf-kokonut--timezone-planner ::before,.ksf-kokonut.ksf-kokonut--timezone-planner ::after,.ksf-kokonut.ksf-kokonut--timezone-planner ::backdrop {
+      --tw-animation-delay: 0s;
+      --tw-animation-direction: normal;
+      --tw-animation-duration: initial;
+      --tw-animation-fill-mode: none;
+      --tw-animation-iteration-count: 1;
+      --tw-enter-blur: 0;
+      --tw-enter-opacity: 1;
+      --tw-enter-rotate: 0;
+      --tw-enter-scale: 1;
+      --tw-enter-translate-x: 0;
+      --tw-enter-translate-y: 0;
+      --tw-exit-blur: 0;
+      --tw-exit-opacity: 1;
+      --tw-exit-rotate: 0;
+      --tw-exit-scale: 1;
+      --tw-exit-translate-x: 0;
+      --tw-exit-translate-y: 0;
+      --tw-rotate-x: initial;
+      --tw-rotate-y: initial;
+      --tw-rotate-z: initial;
+      --tw-skew-x: initial;
+      --tw-skew-y: initial;
+      --tw-border-style: solid;
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
+      --tw-ordinal: initial;
+      --tw-slashed-zero: initial;
+      --tw-numeric-figure: initial;
+      --tw-numeric-spacing: initial;
+      --tw-numeric-fraction: initial;
+      --tw-shadow: 0 0 #0000;
+      --tw-shadow-color: initial;
+      --tw-shadow-alpha: 100%;
+      --tw-inset-shadow: 0 0 #0000;
+      --tw-inset-shadow-color: initial;
+      --tw-inset-shadow-alpha: 100%;
+      --tw-ring-color: initial;
+      --tw-ring-shadow: 0 0 #0000;
+      --tw-inset-ring-color: initial;
+      --tw-inset-ring-shadow: 0 0 #0000;
+      --tw-ring-inset: initial;
+      --tw-ring-offset-width: 0px;
+      --tw-ring-offset-color: #fff;
+      --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
+      --tw-duration: initial;
+      --tw-ease: initial;
+    }
+  }

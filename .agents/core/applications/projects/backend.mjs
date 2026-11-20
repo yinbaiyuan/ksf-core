@@ -1,6 +1,7 @@
 import { readFile, readdir, lstat, realpath, open, mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { resolve, relative, join, dirname, sep, extname, isAbsolute } from 'node:path';
 import { randomUUID,createHash } from 'node:crypto';
+import {constants} from 'node:fs';
 import YAML from 'yaml';
 import { createCodexConversationsClient } from '@ksf/sdk/codex-conversations';
 import { filePolicy } from '../sdk/server/workspace.js';
@@ -129,7 +130,7 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
   }
   async function project(params) {
     key(params); const result=await cli(['project','read',params.name,'--scope',params.scope]);
-    assert(result.data.project,'项目记录不存在。'); return result.data.project;
+    if(!result?.data?.project)throw Object.assign(Error(result?.errors?.[0]?.message??'项目记录不存在。'),{code:result?.errors?.[0]?.code??(result?.data&&Object.hasOwn(result.data,'project')?'PROJECT_NOT_FOUND':'PROJECT_READ_FAILED')});return result.data.project;
   }
   async function projectContextList(params) {
     const p=await project(params);
@@ -246,7 +247,15 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
         return {digest:createHash('sha256').update(content).digest('hex')};
       }
       if(operation==='evidence'){
-        const target=await safePath(params.path),bytes=await readFile(target);assert(bytes.length<=MAX_TEXT,'证据过大，请引用验证报告或清单。');const {createHash}=await import('node:crypto');return {path:params.path,digest:createHash('sha256').update(bytes).digest('hex')};
+        const target=await safePath(params.path),entry=await lstat(target),file=await open(target,constants.O_RDONLY|(constants.O_NOFOLLOW??0));
+        const same=(a,b)=>['dev','ino','size','mtimeMs','ctimeMs','mode'].every(key=>a[key]===b[key]);
+        try{
+          const before=await file.stat();assert(before.isFile()&&same(entry,before),'证据文件在打开时变化，请重试核对。');
+          const hash=createHash('sha256'),chunk=Buffer.allocUnsafe(64*1024);let size;
+          while((size=(await file.read(chunk,0,chunk.length,null)).bytesRead)>0)hash.update(chunk.subarray(0,size));
+          assert(same(before,await file.stat())&&same(before,await lstat(await safePath(params.path))),'证据文件在读取时变化，请重试核对。');
+          return {path:params.path,digest:hash.digest('hex')};
+        }finally{await file.close();}
       }
       assert(['read','check','apply','migrate','renumber','context-list','recover'].includes(operation),'治理操作无效。');
       return governance(operation,{name:params.name,scope:params.scope,...(params.data!==undefined?{data:params.data}:{}),...(params.dryRun?{dryRun:true}:{})});

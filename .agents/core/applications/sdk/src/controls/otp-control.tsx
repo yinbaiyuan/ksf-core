@@ -1,0 +1,40 @@
+import {forwardRef,useEffect,useId,useLayoutEffect,useRef,useState,type InputHTMLAttributes,type ReactNode} from 'react';
+import {useElementRef,useFormReset,useValue,cx} from '../primitives/state';
+import {useWindowContext} from '../window-context';
+import type {ControlSize,FieldPresentation} from './inputs';
+import './otp.css';
+export interface OTPInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>,'size'|'value'|'defaultValue'|'type'|'onChange'> {
+ label:string;showLabel?:boolean;length?:number;value?:string;defaultValue?:string;onValueChange?:(value:string)=>void;onComplete?:(value:string)=>void;
+ mask?:boolean|string;separator?:ReactNode|((index:number)=>ReactNode);format?:(text:string)=>string;numeric?:boolean;size?:ControlSize;variant?:FieldPresentation['variant'];status?:FieldPresentation['status'];
+}
+export const OTPInput=forwardRef<HTMLInputElement,OTPInputProps>(function OTPInput({label,showLabel=false,length=6,value,defaultValue='',onValueChange,onComplete,mask=false,separator,format,numeric=false,size='medium',variant='outlined',status='default',className='',id:providedId,onFocus,onBlur,onSelect,onPointerDown,onPointerMove,onPointerLeave,onKeyDown,onCompositionStart,onCompositionEnd,...props},ref){
+ const count=Number.isFinite(length)?Math.max(1,Math.min(12,Math.floor(length))):6;
+ const normalize=(text:string)=>Array.from(numeric?(format?format(text):text).replace(/\D/g,''):format?format(text):text).slice(0,count).join('');
+ const [current,setCurrent,reset]=useValue(value,normalize(defaultValue),onValueChange),[draft,setDraft]=useState(''),[composing,setComposing]=useState(false),composition=useRef(false),compositionValue=useRef<string|null>(null),[focused,setFocused]=useState(false),[hovered,setHovered]=useState<number|null>(null),[active,setActive]=useState(0),lastComplete=useRef<string|null>(null),slots=useRef(new Map<number,HTMLInputElement>()),[element,assign]=useElementRef(ref),generated=useId(),id=providedId??generated,context=useWindowContext();
+ const enabled=!props.disabled&&!props.readOnly&&context.active&&context.enabled,latest=useRef({enabled,context});latest.current={enabled,context};
+ const chars=Array.from(current).slice(0,count),point=(index:number)=>{const input=element.current;if(!input)return;const at=Math.max(0,Math.min(count-1,chars.length,index)),offset=chars.slice(0,at).join('').length,end=chars[at]?offset+chars[at].length:offset;setActive(at);input.setSelectionRange(offset,end);};
+ useEffect(()=>{if(!enabled){composition.current=false;compositionValue.current=null;setComposing(false);setDraft('');setFocused(false);setHovered(null);}},[enabled]);
+ useEffect(()=>{if(chars.length<count)lastComplete.current=null;},[current,count]);
+ useLayoutEffect(()=>{const input=element.current;if(input)input.setCustomValidity(props.required&&chars.length<count?`请填写完整的${count}位验证码`:'');},[current,count,props.required]);
+ useFormReset(element,true,()=>{composition.current=false;compositionValue.current=null;setComposing(false);setDraft('');lastComplete.current=null;if(value===undefined)reset();setActive(0);},props.form);
+ const update=(text:string,cursor:number|null)=>{if(!latest.current.enabled)return;const next=normalize(text);setCurrent(next);if(Array.from(next).length===count){if(lastComplete.current!==next&&next!==current){lastComplete.current=next;onComplete?.(next);}}else lastComplete.current=null;
+  const nextIndex=Array.from(normalize(text.slice(0,cursor??text.length))).length;
+  queueMicrotask(()=>{const input=element.current;if(!input?.isConnected||!latest.current.enabled||input.ownerDocument.activeElement!==input)return;const actual=Array.from(input.value),at=Math.min(count-1,actual.length,nextIndex),offset=actual.slice(0,at).join('').length;setActive(at);input.setSelectionRange(offset,actual[at]?offset+actual[at].length:offset);});
+ };
+ const valid=props['aria-invalid']??(status==='error'||undefined);
+ return <div className="ksf-otp-field">{showLabel&&<label className="ksf-field-label" htmlFor={id}>{label}</label>}<span className={cx('ksf-otp',className)} dir={props.dir} data-size={size} data-variant={variant} data-status={status} data-focused={focused||undefined} data-disabled={props.disabled||undefined} data-readonly={props.readOnly||undefined}>
+  <input {...props} ref={assign} id={id} className="ksf-otp-native" type={mask?'password':'text'} aria-label={props['aria-label']??label} aria-invalid={valid} disabled={props.disabled||!context.active||!context.enabled} pattern={props.pattern??(numeric?`[0-9]{${count}}`:undefined)} inputMode={props.inputMode??(numeric?'numeric':'text')} autoComplete={props.autoComplete??'one-time-code'} value={composing?draft:current} maxLength={composing?undefined:count*2}
+   onFocus={event=>{setFocused(true);onFocus?.(event);point(chars.length);}} onBlur={event=>{setFocused(false);onBlur?.(event);}}
+   onPointerDown={event=>{onPointerDown?.(event);if(event.defaultPrevented||event.button!==0)return;event.preventDefault();if(!context.active||!context.enabled||props.disabled)return;const nearest=[...slots.current].map(([index,cell])=>({index,x:Math.abs(event.clientX-(cell.getBoundingClientRect().left+cell.getBoundingClientRect().width/2))})).sort((a,b)=>a.x-b.x)[0]?.index??0;element.current?.focus({preventScroll:true});point(nearest);}}
+   onPointerMove={event=>{onPointerMove?.(event);if(props.disabled||!context.active||!context.enabled||event.pointerType==='touch'){setHovered(null);return;}const hit=[...slots.current].find(([,cell])=>{const rect=cell.getBoundingClientRect();return event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;});setHovered(hit?.[0]??null);}} onPointerLeave={event=>{setHovered(null);onPointerLeave?.(event);}}
+   onSelect={event=>{onSelect?.(event);if(!composition.current)setActive(Math.min(count-1,Array.from(event.currentTarget.value.slice(0,event.currentTarget.selectionStart??0)).length));}}
+   onKeyDown={event=>{onKeyDown?.(event);if(event.defaultPrevented||event.nativeEvent.isComposing||event.nativeEvent.keyCode===229||composition.current)return;if(!enabled&&event.key.length===1){event.preventDefault();return;}
+    if(!event.shiftKey&&!event.metaKey&&!event.ctrlKey&&(event.key==='ArrowLeft'||event.key==='ArrowRight')){event.preventDefault();point(active+(event.key==='ArrowLeft'?-1:1));}
+    else if(event.key==='Backspace'&&active===chars.length&&active>0&&event.currentTarget.selectionStart===event.currentTarget.selectionEnd){event.preventDefault();point(active-1);}
+   }}
+   onCompositionStart={event=>{composition.current=true;compositionValue.current=null;setDraft(event.currentTarget.value);setComposing(true);onCompositionStart?.(event);}}
+   onCompositionEnd={event=>{composition.current=false;compositionValue.current=event.currentTarget.value;setComposing(false);update(event.currentTarget.value,event.currentTarget.selectionStart);onCompositionEnd?.(event);}}
+   onChange={event=>{const text=event.target.value;if(composition.current||(event.nativeEvent as InputEvent).isComposing){setDraft(text);return;}if(compositionValue.current!==null){const duplicate=compositionValue.current===text;compositionValue.current=null;if(duplicate)return;}update(text,event.target.selectionStart);}}/>
+  <span className="ksf-otp-cells" aria-hidden="true">{Array.from({length:count},(_,index)=>{const between=typeof separator==='function'?separator(index):separator;return <span key={index} className="ksf-otp-slot-wrap"><input ref={node=>{if(node)slots.current.set(index,node);else slots.current.delete(index);}} className="ksf-otp-cell" type="text" size={1} tabIndex={-1} readOnly disabled={props.disabled} value={chars[index]?(mask?typeof mask==='string'?mask:'•':chars[index]):''} data-active={focused&&active===index||undefined} data-hover={hovered===index||undefined}/>{index<count-1&&between!==null&&between!==undefined&&between!==false&&between!==''&&<i className="ksf-otp-separator">{between}</i>}</span>;})}</span>
+ </span></div>;
+});

@@ -36,28 +36,41 @@ export function walk(value, visit) {
   if (Array.isArray(value)) { for (const child of value) walk(child, visit); return; }
   visit(value); for (const child of Object.values(value)) walk(child, visit);
 }
+const asyncQuestionId=(item,index)=>!item.questions?.length?item.id:JSON.stringify(['request_user_input_async',item.id,index]);
+function replyQuestionIds(item){
+  const text=textOf(item.type==='steeringUserMessage'?{content:item.input}:item).trim();
+  if(!text.startsWith('<send_user_message_question_reply>')||!text.endsWith('</send_user_message_question_reply>'))return [];
+  try{const answers=JSON.parse(text.slice(34,-35).trim());return Array.isArray(answers)?answers.flatMap(answer=>typeof answer?.questionItemId==='string'?[answer.questionItemId]:[]):[];}catch{return [];}
+}
+function answeredQuestionIds(state){
+  const ids=new Set();for(const turn of turnsOf(state))for(const item of turn.items??[])if(item.type==='userMessage'||item.type==='steeringUserMessage'&&item.status==='accepted')for(const id of replyQuestionIds(item))ids.add(id);return ids;
+}
+function privateQuestionIds(state){
+  const ids=new Set();for(const turn of turnsOf(state))for(const item of turn.items??[])if(item.type==='agentMessage'&&item.delivery==='async'&&item.id)for(const [index,question]of(item.questions??[]).entries())if(question.isSecret)ids.add(asyncQuestionId(item,index));return ids;
+}
+function nativeRequests(state){
+  if(state.requests===undefined)return [];
+  if(!Array.isArray(state.requests))throw failure('CODEX_REQUESTS_INVALID','原生请求格式未知，请在Desktop处理。');
+  return state.requests.filter(item=>item&&typeof item==='object');
+}
 export function questionsOf(state) {
   const results = [];
-  walk(state, item => {
-    if (item.method !== 'item/tool/requestUserInput' || item.id === undefined || !Array.isArray(item.params?.questions)) return;
+  // Requests belong to this native envelope. Tool results are data, even if
+  // their nested objects look exactly like requestUserInput/approval messages.
+  for(const item of nativeRequests(state)) {
+    if (item.method !== 'item/tool/requestUserInput' || item.id === undefined || !Array.isArray(item.params?.questions)) continue;
     const questions = item.params.questions;
     // Secret questions and approvals stay in Desktop. Never transport their values.
-    if (!questions.length || questions.some(q => q.isSecret)) return;
+    if (!questions.length || questions.some(q => q.isSecret)) continue;
     results.push({ request: requestRef(item.id), turnId: item.params.turnId, questions: questions.map(q => ({ id: q.id, header: q.header, question: q.question, isOther: q.isOther, options: q.options?.map(o => ({ label: o.label, description: o.description })) })) });
-  });
-  const answered = new Set();
-  for (const turn of turnsOf(state)) for (const item of turn.items ?? []) {
-    if (item.type !== 'userMessage' && !(item.type === 'steeringUserMessage' && item.status === 'accepted')) continue;
-    const text = textOf(item.type === 'steeringUserMessage' ? { content: item.input } : item).trim();
-    if (!text.startsWith('<send_user_message_question_reply>') || !text.endsWith('</send_user_message_question_reply>')) continue;
-    try { for (const answer of JSON.parse(text.slice(34, -35).trim())) answered.add(answer.questionItemId); } catch {}
   }
+  const answered = answeredQuestionIds(state);
   for (const turn of turnsOf(state)) for (const item of turn.items ?? []) {
     if (item.type !== 'agentMessage' || item.delivery !== 'async' || !item.id) continue;
     const legacy = !item.questions?.length;
     for (const [index, q] of (legacy ? [{ title: item.text }] : item.questions).entries()) {
       if (q.isSecret || !q.title?.trim()) continue;
-      const asyncId = legacy ? item.id : JSON.stringify(['request_user_input_async', item.id, index]);
+      const asyncId = asyncQuestionId(item,index);
       if (answered.has(asyncId)) continue;
       const key = 'async_' + digest(turn.id + '\x00' + asyncId).slice(0, 32);
       results.push({ request: requestRef(key), turnId: turn.id, asyncId, questions: [{ id: key, question: q.title, options: (q.options ?? []).filter(x => typeof x === 'string').map(label => ({ label, description: '' })) }] });
@@ -77,19 +90,47 @@ export function textOf(item) {
   return (item.content ?? []).filter(c => ['text', 'input_text', 'output_text'].includes(c.type)).map(c => c.text ?? '').join('');
 }
 export function messagesOf(state) {
-  const result = [];
+  const result = [],privateIds=privateQuestionIds(state);
   for (const turn of turnsOf(state)) for (const item of turn.items ?? []) {
     if (!['userMessage', 'agentMessage', 'steeringUserMessage'].includes(item.type)) continue;
+    if(item.type==='agentMessage'&&item.delivery==='async'&&item.questions?.some(q=>q.isSecret)||item.type!=='agentMessage'&&replyQuestionIds(item).some(id=>privateIds.has(id)))continue;
     const text = textOf(item.type === 'steeringUserMessage' ? { content: item.input } : item);
     if (text) result.push({ id: item.id, turnId: turn.id, role: item.type === 'agentMessage' ? 'assistant' : 'user', phase: item.phase ?? null, text });
   }
   return result;
 }
+const timeOf=value=>Number.isFinite(value)&&value>0&&value<=8640000000000000?new Date(value).toISOString():null;
+const publicStatus=value=>({inProgress:'running',in_progress:'running',running:'running',queued:'queued',completed:'completed',succeeded:'completed',failed:'failed',declined:'failed',cancelled:'cancelled',interrupted:'cancelled'}[status(value)]??'unknown');
+/** A bounded structural projection, never a transport for command text, arguments, output or reasoning. */
+export function toolsOf(state,{limit=200}={}) {
+  const turn=turnsOf(state).at(-1),records=[],size=Number.isSafeInteger(limit)&&limit>0?Math.min(limit,500):200;
+  const kinds={commandExecution:'command',mcpToolCall:'mcp',fileChange:'file-change'};
+  for(const item of turn?.items??[]){
+    const kind=kinds[item.type];if(!kind||typeof item.id!=='string'||!item.id||item.id.length>256)continue;
+    const tool={id:item.id,turnId:turn.id,kind,status:publicStatus(item.status),startedAt:timeOf(item.startedAtMs),finishedAt:timeOf(item.completedAtMs)};
+    if(typeof status(item.status)==='string'&&/^[A-Za-z_-]{1,64}$/.test(status(item.status)))tool.nativeStatus=status(item.status);
+    if(Number.isFinite(item.durationMs)&&item.durationMs>=0)tool.durationMs=item.durationMs;
+    if(kind==='command'&&Number.isSafeInteger(item.exitCode))tool.exitCode=item.exitCode;
+    // Only native identifier fields are optional labels. All payloads stay native.
+    if(kind==='mcp')for(const key of ['server','tool'])if(typeof item[key]==='string'&&/^[A-Za-z0-9_.:/-]{1,120}$/.test(item[key]))tool[key]=item[key];
+    if(kind==='file-change'&&Array.isArray(item.changes))tool.changeCount=item.changes.length;
+    records.push(tool);
+  }
+  return {scope:'latest-turn',turnId:turn?.id??null,records:records.slice(-size),total:records.length,truncated:records.length>size};
+}
+export function outcomeOf(state) {
+  const turn=turnsOf(state).at(-1);if(!turn)return null;
+  return {turnId:turn.id,status:publicStatus(turn.status),startedAt:timeOf(turn.turnStartedAtMs??turn.startedAtMs),finishedAt:timeOf(turn.completedAtMs??turn.turnCompletedAtMs)};
+}
+export const CONVERSATION_VIEW_CAPABILITIES=Object.freeze({toolEvents:'native-metadata-v1',toolKinds:Object.freeze(['command','mcp','file-change']),publicQuestions:'single-text-v1',nativeApprovals:true,privateInput:'native-only',turnOutcomes:true});
 export function summaryOf(snapshot) {
   const state = snapshot.state, turnId = activeTurn(state), questions = questionsOf(state);
-  let approvals = false; const plan = planOf(state);
-  walk(state, item => { if (typeof item.method === 'string' && /requestApproval|requestPermissions/.test(item.method)) approvals = true; });
-  return { threadId: state.id ?? null, title: state.title ?? state.name ?? '', turnId, status: approvals ? 'approval' : questions.length ? 'question' : turnId ? 'running' : 'idle', questions, approvals, plan, nativeRevision: snapshot.revision };
+  const answered=answeredQuestionIds(state);
+  let approvals = false,privateInput=[...privateQuestionIds(state)].some(id=>!answered.has(id)); const plan = planOf(state);
+  for(const item of nativeRequests(state)) { if (typeof item.method === 'string' && /requestApproval|requestPermissions/.test(item.method)) approvals = true;
+    if(item.method==='item/tool/requestUserInput'&&item.params?.turnId===turnId&&Array.isArray(item.params?.questions)&&item.params.questions.some(q=>q.isSecret))privateInput=true;
+  }
+  return { threadId: state.id ?? null, title: state.title ?? state.name ?? '', turnId, status: approvals ? 'approval' : questions.length ? 'question' : turnId ? 'running' : 'idle', questions, approvals,privateInput, plan, nativeRevision: snapshot.revision,viewCapabilities:CONVERSATION_VIEW_CAPABILITIES,lastTurn:outcomeOf(state),tools:toolsOf(state) };
 }
 export function pageMessages(messages, offset, limit) {
   let bytes = 0, end = offset;

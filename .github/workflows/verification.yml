@@ -196,6 +196,9 @@ jobs:
           .agents/ksf context entry --json > /dev/null
           ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Install locked SDK build dependencies for Core app lifecycle
+        working-directory: .agents/core/applications/sdk
+        run: npm ci --ignore-scripts
       - name: Exact planned Linux core group
         id: tests
         run: node .agents/core/runtime/src/testing/ci.js run-group verification-plan.json "${{ matrix.id }}" "${{ matrix.id }}.report.json"

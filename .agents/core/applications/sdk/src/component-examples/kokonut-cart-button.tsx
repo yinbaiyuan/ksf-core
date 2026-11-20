@@ -1,0 +1,3 @@
+import {useState} from 'react';
+import {ShoppingCartView} from '@ksf/sdk/component-examples/shopping-cart-view';
+export default function Example(){const [result,setResult]=useState('');return <div style={{width:'100%'}}><ShoppingCartView items={[{id:'milk',name:'燕麦奶',detail:'1L · 早餐搭配',price:28,kind:'drink',max:9},{id:'bread',name:'黄油可颂',detail:'本地模拟商品',price:16,kind:'bread',max:8},{id:'fruit',name:'樱桃',detail:'500g',price:36,kind:'fruit',max:3}]} initialQuantities={{bread:2}} onCheckout={items=>setResult('已选择 '+Object.values(items).reduce((sum,n)=>sum+n,0)+' 件，仅为本地结算意图。')}/><output aria-live="polite">{result}</output></div>}

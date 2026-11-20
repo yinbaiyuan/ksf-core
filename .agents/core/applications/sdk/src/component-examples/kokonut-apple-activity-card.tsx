@@ -1,0 +1,3 @@
+import {useState} from 'react';
+import {ActivityRings} from '@ksf/sdk/activity-rings';
+export default function Example(){const [value,setValue]=useState(479);return <div style={{width:'100%',display:'grid',gap:20}}><ActivityRings label="Activity Rings" rings={[{id:'move',label:'MOVE',value,goal:800,unit:'CAL'},{id:'exercise',label:'EXERCISE',value:42,goal:30,unit:'MIN',color:'var(--ksf-color-success)'},{id:'stand',label:'STAND',value:6,goal:12,unit:'HR',color:'var(--ksf-color-warning)'}]}/><label>活动数值 <input type="range" min="0" max="2400" value={value} onChange={e=>setValue(e.currentTarget.valueAsNumber)}/></label></div>;}

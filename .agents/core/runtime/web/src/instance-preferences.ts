@@ -14,7 +14,7 @@ export function useInstancePreferences<T>(store:ConfigurationPreferences<T>){
  useEffect(()=>{void store.load();const timer=setInterval(()=>{if(!document.hidden)void store.load();},5000);const visible=()=>{if(!document.hidden)void store.load();};document.addEventListener('visibilitychange',visible);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',visible);};},[store]);
  return state;
 }
-export function preferenceStatus(status:string){return ({loading:'正在读取实例设置…',default:'使用默认设置；尚未保存实例覆盖',saving:'正在保存到实例…',saved:'已保存到当前 KSF 实例',failed:'尚未确认保存',conflict:'实例配置冲突，草稿已保留'} as Record<string,string>)[status]??status;}
+export function preferenceStatus(status:string){return ({loading:'正在读取实例设置…',default:'使用默认设置；尚未保存实例覆盖',pending:'有待保存的修改',saving:'正在保存到实例…',saved:'已保存到当前 KSF 实例',failed:'保存未完成，草稿已保留',conflict:'实例配置冲突，草稿已保留',unknown:'保存结果待核实，原请求与草稿已保留'} as Record<string,string>)[status]??status;}
 export function useInstanceName(){
  const [name,setName]=useState('KSF 工作台');
  useEffect(()=>{let live=true;const load=()=>{if(document.hidden)return;void request<{values:{name?:string}}>('/api/config/instance').then(value=>{if(live)setName(value.values.name||'未命名 KSF');},()=>{});};load();const timer=setInterval(load,5000);window.addEventListener('ksf:config-change',load);return()=>{live=false;clearInterval(timer);window.removeEventListener('ksf:config-change',load);};},[]);

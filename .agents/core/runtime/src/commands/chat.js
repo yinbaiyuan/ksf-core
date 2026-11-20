@@ -16,7 +16,7 @@ export function chatHelp() {
     `  ksf chat write [--object <id>] (--data <JSON> | --from -|file) --if-match <etag|missing> [--dry-run] [--json]\n` +
     `  ksf chat remove [--object <id>] (--fields <name...> | --all) --if-match <etag|missing> [--dry-run] [--json]\n` +
     `  ksf chat restart --object <id> --turn <nativeTurnId> --if-match <etag|missing> [--dry-run] [--json]\n\n` +
-    `Identity comes from CODEX_THREAD_ID, never cwd. Hooks or explicit sync register verified native turns after activation.\n` +
+    `Identity comes from the native session (Codex only for chat tracking), never cwd. Hooks or explicit sync register verified native turns after activation.\n` +
     `Variables are arbitrary runtime JSON keys; no field registration, business schema or implicit inheritance.\n` +
     `Without --object, use shared chat variables. Object scopes use full IDs without @version.\n` +
     `write merges top-level keys; nested values replace whole values, null is a value.\n` +

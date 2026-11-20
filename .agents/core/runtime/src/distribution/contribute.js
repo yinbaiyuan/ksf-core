@@ -16,6 +16,9 @@ import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { contributionCommitMessage, checkCommitMessage } from '../services/commit-message.js';
 import { requirePRDescription, checkPRDescription, contributionPRBody } from '../services/pr-description.js';
 
+// GitHub omits the final LF when presenting an otherwise identical Git message.
+const matchesCommitMessage = (actual, expected) => actual === expected || expected.endsWith('\n') && actual === expected.slice(0, -1);
+
 function publicDiff(path, base, bytes, baseMode, mode) {
   if ((base !== null && !textBytes(base)) || (bytes !== null && !textBytes(bytes))) return `Binary change: ${path}\n`;
   const temporary = mkdtempSync(join(tmpdir(), 'ksf-contribution-diff-'));
@@ -276,12 +279,12 @@ export async function submitContribution({ root, id, reviewed, dryRun = false, a
   let legacyTree;
   if (ref) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${ref.object.sha}`);
-    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
+    if (plan.schema_version >= 3 && !matchesCommitMessage(existing.message, plan.commitMessage)) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The contribution branch was changed remotely; it will not be overwritten.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (previous) {
     const existing = await github.request('GET', `/repos/${repository}/git/commits/${commit}`);
-    if (plan.schema_version >= 3 && existing.message !== plan.commitMessage) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
+    if (plan.schema_version >= 3 && !matchesCommitMessage(existing.message, plan.commitMessage)) fail('CONTRIBUTION_BRANCH_CHANGED', 'The remote commit message differs from the reviewed message.');
     if ((!readerOnly && existing.tree.sha !== tree.sha) || existing.parents?.length !== 1 || existing.parents[0].sha !== plan.core.revision) fail('CONTRIBUTION_BRANCH_CHANGED', 'The merged contribution commit differs from the reviewed contribution.');
     if (readerOnly) { await verifyLegacyTree(github, repository, existing.tree.sha, baseEntries, plan.changes); legacyTree = existing.tree.sha; }
   } else if (pr) {
@@ -328,6 +331,14 @@ function previousPlans(root, plan) {
     const state = readJSON(root, `.agents/runtime-data/contributions/${id}/submitted.json`, true);
     const attempted = readJSON(root, `.agents/runtime-data/contributions/${id}/attempted.json`, true);
     if (!state && !attempted) continue;
+    // Historical plans may contain paths retired by a later Core. Verify their
+    // immutable envelope before deciding whether current path policy applies;
+    // a different source node and Core baseline cannot be a duplicate here.
+    const { digest, ...header } = readJSON(root, `.agents/runtime-data/contributions/${id}/plan.json`);
+    if (!isSHA(digest) || digestObject(header) !== digest || header.id !== id) fail('CONTRIBUTION_TAMPERED', 'A previous contribution changed; preserve and inspect it.');
+    if (attempted && (attempted.id !== id || attempted.digest !== digest)) fail('CONTRIBUTION_TAMPERED', 'A previous publication attempt does not match its reviewed plan.');
+    if (header.sourceCommit !== plan.sourceCommit &&
+        (header.core?.repository !== plan.core.repository || header.core?.branch !== plan.core.branch || header.core?.revision !== plan.core.revision)) continue;
     const previous = readContribution({ root, id });
     if (attempted && (attempted.id !== id || attempted.digest !== previous.digest)) fail('CONTRIBUTION_TAMPERED', 'A previous publication attempt does not match its reviewed plan.');
     if (previous.core.repository !== plan.core.repository) continue;

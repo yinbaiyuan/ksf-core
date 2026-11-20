@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { routingFixture } from './helpers/routing-fixture.js';
 import { enableChat, registerChatTurn, readChat, mutateChat, chatConfig } from '../src/services/chat.js';
 import { taskHook, enableCapture, declareTask } from '../src/services/tasks.js';
@@ -154,6 +155,10 @@ test('CAS, publication races and live locks preserve current data', t => {
   writeFileSync(lock, JSON.stringify({ pid: process.pid }));
   assert.throws(() => f.use('partner.test.lock'), { code: 'CHAT_LOCKED' });
   assert.ok(existsSync(lock));
+  // A writer killed on a tool timeout leaves its lock; a dead owner is reclaimed.
+  writeFileSync(lock, JSON.stringify({ pid: spawnSync(process.execPath, ['-e', '0']).pid }));
+  assert.equal(f.mutate({ operation: 'write', values: { x: 3 }, ifMatch: f.read().etag }).values.x, 3);
+  assert.equal(existsSync(lock), false);
 });
 test('corruption, unknown formats and symlinks are rejected without overwriting state', t => {
   const f = fixture(t); f.start('one');

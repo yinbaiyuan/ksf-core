@@ -1,0 +1,2 @@
+import {SplitView} from '@ksf/sdk/split-view';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function SplitViewVerticalExample(){return <SplitView orientation="vertical" className="ksf-demo-frame" style={{height:280}} defaultSizes={[65,35]} panels={[{id:'editor',label:'内容编辑',minSize:80,content:<div className="ksf-demo-pane"><strong>内容区域</strong><p>上下分栏可以用于编辑器与输出面板。</p></div>},{id:'output',label:'执行输出',minSize:60,content:<div className="ksf-demo-pane"><strong>输出</strong><p>准备就绪。</p></div>}]}/>;}

@@ -2,12 +2,12 @@ import {createContext,useContext,useEffect,useId,useLayoutEffect,useRef,type Rea
 import {ChevronRight} from 'lucide-react';
 
 export type SettingsDetail={key:string;title:string;back:()=>void};
-export type SettingsDraft={dirty:boolean;busy:boolean;discard?:()=>void};
+export type SettingsDraft={dirty:boolean;busy:boolean;unresolved?:boolean;discard?:()=>void|boolean|Promise<void|boolean>;save?:()=>boolean|Promise<boolean>};
 export const SettingsContext=createContext({navigate:(action:()=>void)=>action(),detail:(_value:SettingsDetail|null)=>{},draft:(_id:string,_value:SettingsDraft|null)=>{}});
 export function useSettingsNavigation(){return useContext(SettingsContext).navigate;}
-export function useSettingsDraft(dirty:boolean,busy=false,discard?:()=>void){
- const {draft}=useContext(SettingsContext),id=useId(),callback=useRef(discard);callback.current=discard;
- useLayoutEffect(()=>{draft(id,{dirty,busy,discard:()=>callback.current?.()});},[draft,id,dirty,busy]);
+export function useSettingsDraft(dirty:boolean,busy=false,discard?:()=>void|boolean|Promise<void|boolean>,save?:()=>boolean|Promise<boolean>,unresolved=false){
+ const {draft}=useContext(SettingsContext),id=useId(),callback=useRef(discard),saveCallback=useRef(save);callback.current=discard;saveCallback.current=save;
+ useLayoutEffect(()=>{draft(id,{dirty,busy,unresolved,discard:()=>callback.current?.(),...(save?{save:()=>saveCallback.current?.()??false}:{})});},[draft,id,dirty,busy,!!save,unresolved]);
  useEffect(()=>()=>draft(id,null),[draft,id]);
 }
 export function useSettingsDetail(key:string|null,title:string,back:()=>void){

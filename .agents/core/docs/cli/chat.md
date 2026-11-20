@@ -35,7 +35,7 @@
 
 ## 身份、轮次与范围
 
-CLI 使用 `CODEX_THREAD_ID`，通过既有根本地密钥派生与 taskId 相同的匿名 chatId；缺失身份不按 cwd、项目名或最近聊天猜测。内部服务接受明确的 `{host:"codex",sessionId}`，首版未自动接入其他宿主。密钥不能与已有聊天数据分离清理；缺失时拒绝生成新密钥来掩盖原状态。
+CLI 使用 `CODEX_THREAD_ID`，通过既有根本地密钥派生与 taskId 相同的匿名 chatId；缺失身份不按 cwd、项目名或最近聊天猜测。内部服务接受明确的 `{host:"codex",sessionId}`，首版未自动接入其他宿主：环境中识别到的其他宿主身份（如 Claude Code）返回 CHAT_HOST_UNSUPPORTED，而不是缺失身份。密钥不能与已有聊天数据分离清理；缺失时拒绝生成新密钥来掩盖原状态。
 
 UserPromptSubmit 校验 transcript 元数据的会话、工作区及内部线程来源，登记当前原生 turnId。接入后的第一个原生轮次为 1；重复 Hook、同轮工具问答、PreCompact、Stop、Interrupt 不新增计数，已开始后中断的轮次保留。旧轮次重放不把当前轮回退。计数起点为本实例首次 chat hooks 的 activatedAt，不能把这个计数宣称为接入前的完整聊天历史。每次核对接入后原生轮次边界，可恢复漏掉的 Hook；只保存标识，不保存消息正文。压缩或来源缩短不删除已有登记。损坏记录、未知边界无法确认时报告计数缺口，不猜数。未收到可靠 Hook 时 read 返回 null 轮次；use/restart 拒绝未登记或非当前 turnId。
 
@@ -81,5 +81,7 @@ read、context 和 dry-run 不创建状态、临时文件或写锁；共同启�
 Core 发行不携带真实聊天状态，升级/回滚保留原字节；它不是自动跨设备同步。变量历史界面、流程执行器、表达式和状态转换校验不在首版范围。
 
 主要错误：CHAT_SOURCE_UNAVAILABLE、CHAT_SOURCE_AMBIGUOUS、CHAT_IDENTITY_REQUIRED、CHAT_HOST_UNSUPPORTED、CHAT_TURN_UNAVAILABLE、CHAT_TURN_CONFLICT、CHAT_SOURCE_IDENTITY、CHAT_CONFLICT、CHAT_LOCKED、CHAT_DATA_INVALID、CHAT_VERSION_UNSUPPORTED、CHAT_CAPACITY、CHAT_CONTEXT_CAPACITY；安全文件层还会返回 USER_DATA_PATH_INVALID，身份密钥缺失返回 ROUTE_KEY_INVALID。
+
+聊天/上下文写锁（`.agents/runtime-data/chat-state/<chatId>.lock`，context bind/accept/reload 共用）只在持有进程仍存活时返回 CHAT_LOCKED。持有进程已不存在（例如 Agent 工具调用超时被强制结束），或锁文件早于本次开机时，下一个写入者在短暂回收锁保护下只删除已核对的那份陈旧锁后继续；PID 被无关进程复用时保守地保持锁定。
 
 实现为 `src/chat-state/`、`src/services/chat.js`、`src/commands/chat.js`，复用 `taskHook`。验证见 [chat.test.js](../../runtime/tests/chat.test.js)、[上下文专项](../../runtime/tests/chat-context.test.js)与[发行隔离测试](../../runtime/tests/chat-distribution.test.js)。程序验证、当前聊天实测与真正跨轮次验收分别记录，不互相替代。

@@ -15,6 +15,7 @@ import { currentObjectId, currentObjectPath } from '../objects/legacy.js';
 import { validateObject } from '../objects/schema.js';
 import { validateRouting } from '../projects/routing-schema.js';
 export { assertNoCooperationMigration } from './guard.js';
+import { assertJournalRoot } from './guard.js';
 
 export const migrationDirectory = '.agents/runtime-data/cooperation-migration';
 const fail = (code, message, details = {}) => { throw new MetadataError(code, message, details); };
@@ -234,8 +235,10 @@ function pending(root) {
   safe(file, [root]);
   if (!existsSync(file)) return null;
   const state = json(readFileSync(file));
-  if (state.schemaVersion !== 1 || state.root !== root || !/^[a-f0-9-]{36}$/.test(state.id ?? '') || !['applying', 'complete'].includes(state.status) || !Array.isArray(state.actions) || !Array.isArray(state.roots) || !Array.isArray(state.cleanup) || state.actions.some(a => typeof a.source !== 'string' || typeof a.target !== 'string' || !/^[a-f0-9]{64}$/.test(a.before) || !/^[a-f0-9]{64}$/.test(a.after) || !Number.isSafeInteger(a.mode) || a.mode < 0 || a.mode > 0o777)) fail('MIGRATION_DATA_INVALID', 'Invalid migration journal; preserve it.', { file });
+  if (state.schemaVersion !== 1 || typeof state.root !== 'string' || !/^[a-f0-9-]{36}$/.test(state.id ?? '') || !['applying', 'complete'].includes(state.status) || !Array.isArray(state.actions) || !Array.isArray(state.roots) || !Array.isArray(state.cleanup) || state.actions.some(a => typeof a.source !== 'string' || typeof a.target !== 'string' || !/^[a-f0-9]{64}$/.test(a.before) || !/^[a-f0-9]{64}$/.test(a.after) || !Number.isSafeInteger(a.mode) || a.mode < 0 || a.mode > 0o777)) fail('MIGRATION_DATA_INVALID', 'Invalid migration journal; preserve it.', { file });
   if (state.directories !== undefined && (!Array.isArray(state.directories) || state.directories.some(d => typeof d?.source !== 'string' || typeof d?.target !== 'string' || d.mode !== undefined && (!Number.isSafeInteger(d.mode) || d.mode < 0 || d.mode > 0o777)))) fail('MIGRATION_DATA_INVALID', 'Invalid migration directory journal.', { file });
+  if (state.status === 'complete') return null;
+  assertJournalRoot(state.root, root);
   if (state.status === 'applying') {
     const allowed = [root, ...configuredSources(root).map(s => ordinaryDirectory(s.root))];
     if (JSON.stringify(state.roots) !== JSON.stringify(allowed)) fail('MIGRATION_CONFLICT', 'The selected source roots changed during migration.', { file });

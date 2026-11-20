@@ -1,0 +1,1 @@
+import {useState} from 'react';import {SeatMap} from '@ksf/sdk/seat-map';export default function Example(){const [value,setValue]=useState<readonly string[]>([]);return <div style={{width:'100%',maxWidth:448,marginInline:'auto'}}><SeatMap label='Dune: Part Three' value={value} onValueChange={setValue}/></div>;}

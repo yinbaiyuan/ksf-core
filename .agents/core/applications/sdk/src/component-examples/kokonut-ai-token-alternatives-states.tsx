@@ -1,0 +1,1 @@
+import {TokenAlternatives} from '@ksf/sdk/token-alternatives';export default function Example(){return <div style={{width:'100%',display:'grid',gap:20}}><TokenAlternatives label="应用拒绝替换时保留原词" tokens={[{id:'word',text:'原词',candidates:[{value:'原词',probability:.7},{value:'候选',probability:.3}]}]} onChoose={()=>{}}/><TokenAlternatives label="无候选" tokens={[]}/></div>;}

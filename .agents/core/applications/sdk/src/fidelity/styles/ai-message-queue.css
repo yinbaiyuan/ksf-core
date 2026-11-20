@@ -1,0 +1,1311 @@
+/* Generated per module from fixed free Kokonut source; MIT notice is shipped with the SDK. */
+/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
+@property --tw-animation-delay {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0s;
+}
+@property --tw-animation-direction {
+  syntax: "*";
+  inherits: false;
+  initial-value: normal;
+}
+@property --tw-animation-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-animation-fill-mode {
+  syntax: "*";
+  inherits: false;
+  initial-value: none;
+}
+@property --tw-animation-iteration-count {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+.ksf-kokonut.ksf-kokonut--ai-message-queue {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-red-500: var(--ksf-color-danger);
+  --color-red-900: var(--ksf-color-danger);
+  --color-blue-400: var(--ksf-color-primary);
+  --color-blue-500: var(--ksf-color-primary);
+  --color-blue-600: var(--ksf-color-primary);
+  --color-rose-400: var(--ksf-color-danger);
+  --color-rose-600: var(--ksf-color-danger);
+  --color-zinc-50: oklch(98.5% 0 none);
+  --color-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-zinc-200: oklch(92% 0.004 286.32);
+  --color-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-zinc-700: oklch(37% 0.013 285.805);
+  --color-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-zinc-900: oklch(21% 0.006 285.885);
+  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-black: #000;
+  --color-white: #fff;
+  --spacing: 4px;
+  --container-md: 448px;
+  --text-sm: 14px;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 16px;
+  --text-base--line-height: calc(1.5 / 1);
+  --font-weight-medium: 500;
+  --leading-snug: 1.375;
+  --leading-relaxed: 1.625;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pointer-events-none {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .visible {
+    visibility: visible;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .absolute {
+    position: absolute;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .fixed {
+    position: fixed;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .relative {
+    position: relative;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .inset-0 {
+    inset: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .inset-x-0 {
+    inset-inline: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bottom-0 {
+    bottom: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .z-50 {
+    z-index: 50;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .mx-1 {
+    margin-inline: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ml-1 {
+    margin-left: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ml-auto {
+    margin-left: auto;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .flex {
+    display: flex;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .inline-flex {
+    display: inline-flex;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-1\.5 {
+    width: calc(var(--spacing) * 1.5);
+    height: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-2\.5 {
+    width: calc(var(--spacing) * 2.5);
+    height: calc(var(--spacing) * 2.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-3 {
+    width: calc(var(--spacing) * 3);
+    height: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-3\.5 {
+    width: calc(var(--spacing) * 3.5);
+    height: calc(var(--spacing) * 3.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-6 {
+    width: calc(var(--spacing) * 6);
+    height: calc(var(--spacing) * 6);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .size-8 {
+    width: calc(var(--spacing) * 8);
+    height: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-0\.5 {
+    height: calc(var(--spacing) * 0.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-6 {
+    height: calc(var(--spacing) * 6);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-7 {
+    height: calc(var(--spacing) * 7);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-8 {
+    height: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-9 {
+    height: calc(var(--spacing) * 9);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-10 {
+    height: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-11 {
+    height: calc(var(--spacing) * 11);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .h-72 {
+    height: calc(var(--spacing) * 72);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .max-h-28 {
+    max-height: calc(var(--spacing) * 28);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .min-h-8 {
+    min-height: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .min-h-\[80px\] {
+    min-height: 80px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .min-h-full {
+    min-height: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .w-3\.5 {
+    width: calc(var(--spacing) * 3.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .w-10 {
+    width: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .w-full {
+    width: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .max-w-\[85\%\] {
+    max-width: 85%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .max-w-md {
+    max-width: var(--container-md);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .min-w-0 {
+    min-width: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .min-w-\[8rem\] {
+    min-width: 128px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .flex-1 {
+    flex: 1;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .shrink-0 {
+    flex-shrink: 0;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .origin-left {
+    transform-origin: 0;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .scale-100 {
+    --tw-scale-x: 100%;
+    --tw-scale-y: 100%;
+    --tw-scale-z: 100%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .scale-\[0\.3\] {
+    scale: 0.3;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .cursor-default {
+    cursor: default;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .cursor-grab {
+    cursor: grab;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .cursor-pointer {
+    cursor: pointer;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .touch-none {
+    touch-action: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .resize-none {
+    resize: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .\[scrollbar-width\:thin\] {
+    scrollbar-width: thin;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .flex-col {
+    flex-direction: column;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .items-center {
+    align-items: center;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .items-end {
+    align-items: flex-end;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .justify-center {
+    justify-content: center;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .justify-end {
+    justify-content: flex-end;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .gap-1 {
+    gap: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .gap-1\.5 {
+    gap: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue :where(.space-y-0\.5 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 0.5) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 0.5) * calc(1 - var(--tw-space-y-reverse)));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue :where(.space-y-1\.5 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 1.5) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 1.5) * calc(1 - var(--tw-space-y-reverse)));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .overflow-hidden {
+    overflow: hidden;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .overflow-y-auto {
+    overflow-y: auto;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-2xl {
+    border-radius: var(--radius-2xl);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-full {
+    border-radius: calc(infinity * 1px);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-md {
+    border-radius: var(--radius-md);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .rounded-br-md {
+    border-bottom-right-radius: var(--radius-md);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .border-b {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .border-black\/\[0\.06\] {
+    border-color: color-mix(in srgb, #000 6%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-black) 6%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .border-zinc-200 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-blue-500 {
+    background-color: var(--color-blue-500);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-blue-500\/70 {
+    background-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-blue-500) 70%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-red-500 {
+    background-color: var(--color-red-500);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-transparent {
+    background-color: transparent;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-white {
+    background-color: light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-zinc-50 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 2%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-zinc-100 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-zinc-200 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-zinc-300 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .fill-current {
+    fill: currentcolor;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .p-1 {
+    padding: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-1 {
+    padding-inline: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-1\.5 {
+    padding-inline: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-2 {
+    padding-inline: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-2\.5 {
+    padding-inline: calc(var(--spacing) * 2.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-3\.5 {
+    padding-inline: calc(var(--spacing) * 3.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-4 {
+    padding-inline: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .px-8 {
+    padding-inline: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .py-1\.5 {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .py-2 {
+    padding-block: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .py-3 {
+    padding-block: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .py-4 {
+    padding-block: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pt-0 {
+    padding-top: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pt-1\.5 {
+    padding-top: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pr-1 {
+    padding-right: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pb-1 {
+    padding-bottom: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .pl-0\.5 {
+    padding-left: calc(var(--spacing) * 0.5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-center {
+    text-align: center;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-left {
+    text-align: left;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .font-sans {
+    font-family: var(--font-sans);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-\[11px\] {
+    font-size: 11px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-\[12px\] {
+    font-size: 12px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-\[13px\] {
+    font-size: 13px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .leading-5 {
+    --tw-leading: calc(var(--spacing) * 5);
+    line-height: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .leading-relaxed {
+    --tw-leading: var(--leading-relaxed);
+    line-height: var(--leading-relaxed);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .leading-snug {
+    --tw-leading: var(--leading-snug);
+    line-height: var(--leading-snug);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .font-medium {
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .whitespace-nowrap {
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-blue-600 {
+    color: var(--color-blue-600);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-rose-600 {
+    color: var(--color-rose-600);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-white {
+    color: light-dark(var(--ksf-color-on-primary),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 2%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 56%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-700 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 75%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-800 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 84%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .text-zinc-950 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .tabular-nums {
+    --tw-numeric-spacing: tabular-nums;
+    font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .underline-offset-4 {
+    text-underline-offset: 4px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .caret-blue-500 {
+    caret-color: var(--color-blue-500);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .opacity-0 {
+    opacity: 0%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .opacity-100 {
+    opacity: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .shadow-\[inset_0_1px_0_rgb\(255_255_255\/0\.14\)\,0_1px_2px_rgb\(0_0_0\/0\.16\)\] {
+    --tw-shadow: inset 0 1px 0 var(--tw-shadow-color, rgb(255 255 255/0.14)), 0 1px 2px var(--tw-shadow-color, rgb(0 0 0/0.16));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .shadow-md {
+    --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .shadow-xs {
+    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.05));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ring-1 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ring-black\/\[0\.05\] {
+    --tw-ring-color: color-mix(in srgb, #000 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ring-black\/\[0\.07\] {
+    --tw-ring-color: color-mix(in srgb, #000 7.000000000000001%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-black) 7.000000000000001%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ring-black\/\[0\.08\] {
+    --tw-ring-color: color-mix(in srgb, #000 8%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-black) 8%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ring-offset-white {
+    --tw-ring-offset-color: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .outline-hidden {
+    --tw-outline-style: none;
+    outline-style: none;
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .blur {
+    --tw-blur: blur(8px);
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .blur-\[3px\] {
+    --tw-blur: blur(3px);
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .filter {
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .transition {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .transition-\[background-color\,opacity\] {
+    transition-property: background-color,opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .transition-\[opacity\,filter\,scale\] {
+    transition-property: opacity,filter,scale;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .transition-colors {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .transition-opacity {
+    transition-property: opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .duration-100 {
+    --tw-duration: 100ms;
+    transition-duration: 100ms;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .duration-150 {
+    --tw-duration: 150ms;
+    transition-duration: 150ms;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .duration-200 {
+    --tw-duration: 200ms;
+    transition-duration: 200ms;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .duration-300 {
+    --tw-duration: 300ms;
+    transition-duration: 300ms;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .ease-\[cubic-bezier\(0\.23\,1\,0\.32\,1\)\] {
+    --tw-ease: cubic-bezier(0.23,1,0.32,1);
+    transition-timing-function: cubic-bezier(0.23,1,0.32,1);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .paused {
+    animation-play-state: paused;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .running {
+    animation-play-state: running;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .placeholder\:text-zinc-400::placeholder {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-red-500\/90:hover {
+      background-color: color-mix(in srgb, oklch(63.7% 0.237 25.331) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-red-500\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-500) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-100:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-100\/80:hover {
+      background-color: color-mix(in srgb, oklch(96.7% 0.001 286.375) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-100\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-300:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-800:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 84%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-900\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-900\/\[0\.06\]:hover {
+      background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 6%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:bg-zinc-900\/\[0\.06\]:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 6%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:text-zinc-800:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 84%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:text-zinc-900:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .hover\:underline:hover {
+      text-decoration-line: underline;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus\:bg-zinc-100:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus\:text-zinc-900:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:bg-zinc-900\/\[0\.06\]:focus-visible {
+    background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 6%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 6%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:text-zinc-800:focus-visible {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 84%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:ring-2:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:ring-zinc-950:focus-visible {
+    --tw-ring-color: var(--color-zinc-950);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:ring-offset-2:focus-visible {
+    --tw-ring-offset-width: 2px;
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .focus-visible\:outline-hidden:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .active\:cursor-grabbing:active {
+    cursor: grabbing;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .active\:bg-zinc-400\/70:active {
+    background-color: color-mix(in srgb, oklch(70.5% 0.015 286.067) 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background)) 70%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .active\:bg-zinc-700:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 75%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .active\:bg-zinc-900\/\[0\.1\]:active {
+    background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .disabled\:pointer-events-none:disabled {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .disabled\:opacity-30:disabled {
+    opacity: 30%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .disabled\:opacity-50:disabled {
+    opacity: 50%;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[side\=bottom\]\:slide-in-from-top-2[data-side="bottom"] {
+    --tw-enter-translate-y: calc(2*var(--spacing)*-1);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[side\=top\]\:slide-in-from-bottom-2[data-side="top"] {
+    --tw-enter-translate-y: calc(2*var(--spacing));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=closed\]\:animate-out[data-state="closed"] {
+    animation: exit var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=closed\]\:fade-out-0[data-state="closed"] {
+    --tw-exit-opacity: calc(0/100);
+    --tw-exit-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=closed\]\:zoom-out-95[data-state="closed"] {
+    --tw-exit-scale: calc(95*1%);
+    --tw-exit-scale: .95;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=open\]\:animate-in[data-state="open"] {
+    animation: enter var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=open\]\:fade-in-0[data-state="open"] {
+    --tw-enter-opacity: calc(0/100);
+    --tw-enter-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .data-\[state\=open\]\:zoom-in-95[data-state="open"] {
+    --tw-enter-scale: calc(95*1%);
+    --tw-enter-scale: .95;
+  }
+@media (prefers-reduced-motion: reduce) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .motion-reduce\:transition-none {
+      transition-property: none;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:border-white\/\[0\.08\] {
+    border-color: color-mix(in srgb, #fff 8%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-white) 8%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:border-zinc-800 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-blue-400 {
+    background-color: var(--color-blue-400);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-blue-400\/70 {
+    background-color: color-mix(in srgb, oklch(70.7% 0.165 254.624) 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-blue-400) 70%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-red-900 {
+    background-color: var(--color-red-900);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-white {
+    background-color: light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-50 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-600 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 32%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-700 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 25%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-800 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-800\/60 {
+    background-color: color-mix(in srgb, oklch(27.4% 0.006 286.033) 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background)) 60%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:bg-zinc-950 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-blue-400 {
+    color: var(--color-blue-400);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-rose-400 {
+    color: var(--color-rose-400);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-100 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-200 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 64%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:caret-blue-400 {
+    caret-color: var(--color-blue-400);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:ring-white\/10 {
+    --tw-ring-color: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:ring-white\/\[0\.06\] {
+    --tw-ring-color: color-mix(in srgb, #fff 6%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 6%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:ring-white\/\[0\.08\] {
+    --tw-ring-color: color-mix(in srgb, #fff 8%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 8%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:ring-offset-zinc-950 {
+    --tw-ring-offset-color: var(--color-zinc-950);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:placeholder\:text-zinc-500::placeholder {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(39.6% 0.141 25.723) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-900) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-white\/10:hover {
+      background-color: color-mix(in srgb, #fff 10%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-white\/10:hover {
+        background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 10%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+      background-color: color-mix(in srgb, oklch(98.5% 0 none) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-200:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-600:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 32%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+      background-color: color-mix(in srgb, oklch(27.4% 0.006 286.033) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:text-zinc-50:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:hover\:text-zinc-100:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:focus\:bg-zinc-800:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:focus\:text-zinc-50:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:focus-visible\:bg-white\/10:focus-visible {
+    background-color: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 10%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:focus-visible\:text-zinc-100:focus-visible {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:focus-visible\:ring-zinc-300:focus-visible {
+    --tw-ring-color: var(--color-zinc-300);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:active\:bg-white\/15:active {
+    background-color: color-mix(in srgb, #fff 15%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 15%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:active\:bg-zinc-300:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 83%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue[data-ksf-reference-theme="dark"] .dark\:active\:bg-zinc-500:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .\[\&_svg\]\:pointer-events-none svg {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .\[\&_svg\]\:size-4 svg {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--ai-message-queue .\[\&_svg\]\:shrink-0 svg {
+    flex-shrink: 0;
+  }
+@media (hover:hover) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .\[\@media\(hover\:hover\)\]\:opacity-0 {
+      opacity: 0%;
+    }
+    @media (hover: hover) {
+      .ksf-kokonut.ksf-kokonut--ai-message-queue .\[\@media\(hover\:hover\)\]\:group-hover\/row\:opacity-100:is(:where(.group\/row):hover *) {
+        opacity: 100%;
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .\[\@media\(hover\:hover\)\]\:focus-within\:opacity-100:focus-within {
+      opacity: 100%;
+    }
+  }
+@media (pointer:coarse) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue .\[\@media\(pointer\:coarse\)\]\:text-base {
+      font-size: var(--text-base);
+      line-height: var(--tw-leading, var(--text-base--line-height));
+    }
+  }
+@property --tw-scale-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-space-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ordinal {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-slashed-zero {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-figure {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-spacing {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-fraction {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-inset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-offset-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tw-ring-offset-color {
+  syntax: "*";
+  inherits: false;
+  initial-value: #fff;
+}
+@property --tw-ring-offset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-drop-shadow-size {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity,1);
+    transform: translate3d(var(--tw-enter-translate-x,0),var(--tw-enter-translate-y,0),0)scale3d(var(--tw-enter-scale,1),var(--tw-enter-scale,1),var(--tw-enter-scale,1))rotate(var(--tw-enter-rotate,0));
+    filter: blur(var(--tw-enter-blur,0));
+  }
+}
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity,1);
+    transform: translate3d(var(--tw-exit-translate-x,0),var(--tw-exit-translate-y,0),0)scale3d(var(--tw-exit-scale,1),var(--tw-exit-scale,1),var(--tw-exit-scale,1))rotate(var(--tw-exit-rotate,0));
+    filter: blur(var(--tw-exit-blur,0));
+  }
+}
+@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    .ksf-kokonut.ksf-kokonut--ai-message-queue *,.ksf-kokonut.ksf-kokonut--ai-message-queue ::before,.ksf-kokonut.ksf-kokonut--ai-message-queue ::after,.ksf-kokonut.ksf-kokonut--ai-message-queue ::backdrop {
+      --tw-animation-delay: 0s;
+      --tw-animation-direction: normal;
+      --tw-animation-duration: initial;
+      --tw-animation-fill-mode: none;
+      --tw-animation-iteration-count: 1;
+      --tw-enter-blur: 0;
+      --tw-enter-opacity: 1;
+      --tw-enter-rotate: 0;
+      --tw-enter-scale: 1;
+      --tw-enter-translate-x: 0;
+      --tw-enter-translate-y: 0;
+      --tw-exit-blur: 0;
+      --tw-exit-opacity: 1;
+      --tw-exit-rotate: 0;
+      --tw-exit-scale: 1;
+      --tw-exit-translate-x: 0;
+      --tw-exit-translate-y: 0;
+      --tw-scale-x: 1;
+      --tw-scale-y: 1;
+      --tw-scale-z: 1;
+      --tw-space-y-reverse: 0;
+      --tw-border-style: solid;
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-ordinal: initial;
+      --tw-slashed-zero: initial;
+      --tw-numeric-figure: initial;
+      --tw-numeric-spacing: initial;
+      --tw-numeric-fraction: initial;
+      --tw-shadow: 0 0 #0000;
+      --tw-shadow-color: initial;
+      --tw-shadow-alpha: 100%;
+      --tw-inset-shadow: 0 0 #0000;
+      --tw-inset-shadow-color: initial;
+      --tw-inset-shadow-alpha: 100%;
+      --tw-ring-color: initial;
+      --tw-ring-shadow: 0 0 #0000;
+      --tw-inset-ring-color: initial;
+      --tw-inset-ring-shadow: 0 0 #0000;
+      --tw-ring-inset: initial;
+      --tw-ring-offset-width: 0px;
+      --tw-ring-offset-color: #fff;
+      --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
+      --tw-blur: initial;
+      --tw-brightness: initial;
+      --tw-contrast: initial;
+      --tw-grayscale: initial;
+      --tw-hue-rotate: initial;
+      --tw-invert: initial;
+      --tw-opacity: initial;
+      --tw-saturate: initial;
+      --tw-sepia: initial;
+      --tw-drop-shadow: initial;
+      --tw-drop-shadow-color: initial;
+      --tw-drop-shadow-alpha: 100%;
+      --tw-drop-shadow-size: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+    }
+  }

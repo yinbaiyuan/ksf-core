@@ -1,0 +1,48 @@
+/* Cult UI layered tray/well/ring, resized for the straight 34px host group rail. */
+.host-theme-light {
+  --group-tray:transparent;
+  --group-well:#afb7c1; --group-gap:#e3e6eb;
+  --group-face:linear-gradient(180deg,#f8f9fa,#e9ecf0);
+}
+.host-theme-dark {
+  --group-tray:transparent;
+  --group-well:#626973; --group-gap:#363c45;
+  --group-face:linear-gradient(180deg,#414751,#30353e);
+}
+.os-desktop .gradient-button-group { box-sizing:border-box; display:flex; align-items:center; height:34px; min-width:0; max-width:100%; padding:1px; gap:2px; border:1px solid transparent; border-radius:2px; background:var(--group-tray); box-shadow:none; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+.gradient-button-group::-webkit-scrollbar { display:none; }
+.os-desktop .gradient-group-button { position:relative; isolation:isolate; display:flex; flex:none; align-items:center; justify-content:center; height:30px; min-width:0; padding:0; border:0; border-radius:2px; background:transparent; color:var(--host-muted); font-size:12px; line-height:18px; cursor:pointer; }
+.os-desktop .gradient-group-button:is(:hover,.is-active) { color:var(--host-ink); }
+.os-desktop .gradient-group-button:focus-visible { outline:2px solid var(--host-accent); outline-offset:-2px; }
+.group-active-well,.group-active-ring,.group-active-gap,.group-button-face { position:absolute; pointer-events:none; border-radius:2px; }
+.group-active-well { inset:0; background:var(--group-well); box-shadow:none; }
+.group-active-ring { inset:auto 1px 0; height:2px; overflow:hidden; border-radius:1px; z-index:1; }
+.group-gradient-spin { position:absolute; left:50%; top:50%; width:200px; height:200px; margin:-100px 0 0 -100px; background:conic-gradient(from 220deg,var(--host-accent),color-mix(in srgb,var(--host-accent) 65%,white),var(--host-accent)); transform-origin:center; animation:ksf-group-ring-spin 3s linear infinite; pointer-events:none; }
+.group-active-gap { inset:1px; border-radius:1px; background:var(--group-gap); }
+.group-button-face { inset:1px; background:var(--group-face); box-shadow:inset 0 1px var(--host-hairline); }
+.gradient-group-button:not(.is-active) .group-button-face { background:transparent; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--host-border) 55%,transparent); }
+.gradient-group-button:not(.is-active):hover .group-button-face { background:var(--host-hover); }
+.group-button-content { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:6px; min-width:0; height:100%; padding:0 10px; }
+.group-button-icon { display:flex; flex:none; width:16px; height:16px; }
+.group-button-label { display:block; max-width:6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gradient-group-button.is-active .group-button-label { font-weight:600; }
+.os-desktop .group-menu-trigger { position:relative; isolation:isolate; flex:none; box-sizing:border-box; align-items:center; width:76px; height:34px; padding:0; border:1px solid var(--host-border); border-radius:2px; background:var(--group-tray); color:var(--host-ink); }
+.group-menu-ring { position:absolute; inset:auto 1px 0; height:2px; overflow:hidden; border-radius:1px; pointer-events:none; z-index:2; }
+.group-menu-content { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:3px; height:28px; width:70px; margin:auto; padding:0 3px; background:var(--group-face); border-radius:1px; }
+.group-menu-content > svg { flex:none; }
+.group-menu-label { min-width:0; max-width:28px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; line-height:18px; }
+.os-desktop .group-menu-trigger:focus-visible { outline:2px solid var(--host-accent); outline-offset:-2px; }
+body .page-group-menu > button { align-items:flex-start; white-space:normal; }
+body .page-group-menu > button > svg { flex:none; margin-top:2px; }
+body .page-group-menu > button > span { min-width:0; overflow-wrap:anywhere; }
+@keyframes ksf-group-ring-spin { to { transform:rotate(360deg); } }
+.no-host-motion .group-gradient-spin { animation:none; }
+@media(prefers-reduced-motion:reduce) { .group-gradient-spin { animation:none; } }
+@media(prefers-contrast:more) { .group-gradient-spin { display:none; }.group-active-ring,.group-menu-ring { background:var(--host-accent); } }
+@media(forced-colors:active) {
+ .os-desktop .gradient-button-group,.os-desktop .group-menu-trigger { color:ButtonText; background:Canvas; border-color:ButtonText; box-shadow:none; }
+ .group-gradient-spin,.group-button-face,.group-active-well,.group-active-gap { display:none; }
+ .group-active-ring,.group-menu-ring { background:transparent; border:2px solid Highlight; }
+ .os-desktop .gradient-group-button { color:ButtonText; }
+ .os-desktop .gradient-group-button:focus-visible,.os-desktop .group-menu-trigger:focus-visible { outline-color:Highlight; }
+}

@@ -1,5 +1,7 @@
 # 公共 SDK 接口参考
 
+保存、执行、会话关闭和输入作用域可选用[无视觉依赖的控制器](controllers.md)。这些机制不限定应用的组件库、样式或渲染器。
+
 ApplicationPublicServices/WorkspaceService/AIService/TaskActivityService描述服务方法的输入与Promise结果；实际桥仍以paramsArray传参。所有公共类型由SDK入口导出，ApplicationSDK、ApplicationManifest、ApplicationCaller、ApplicationBackendContext及AIRequest/AITask/AIEvents等是类型主件。泛型T只描述调用方期待，不能替代运行结果校验。
 
 ## 前端
@@ -112,3 +114,7 @@ APP_MANIFEST_INVALID/APP_PACKAGE_INVALID/APP_PLATFORM_UNSUPPORTED：先修包；
 ## 工作流服务
 
 `@ksf/sdk/workflows` 导出工作流描述、字段、运行、绑定和结果事件类型，以及 createWorkflowClient/createCooperationClient。宿主核验调用应用、包摘要和本机等待点，只允许固定方法；不存在任意跨应用方法或地址回调。见[工作流与合作任务回调](workflows.md)。
+
+## 通用文件 API 1.2.0
+
+`@ksf/sdk/files` 新增 createFileClient / createBackendFileClient、FileRef / FileInfo / FileClient 等类型。完整方法、原始二进制传输、版本、操作编号及公共交互见[通用文件](files.md)。旧 createApplicationFileClient、workspace 和 storage 接口继续兼容。

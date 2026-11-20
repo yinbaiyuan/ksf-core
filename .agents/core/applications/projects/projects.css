@@ -187,6 +187,12 @@
   display: flex; flex: none; align-items: center; gap: 3px;
   padding-inline-end: clamp(5px, 1cqw, 11px); border-inline-end: 1px solid var(--card-border);
 }
+.pg-file-readonly-notice {
+  margin: 0 0 12px; padding: 12px 14px; border: 1px solid #d9e2ef; border-radius: 8px;
+  background: #f3f6fb; color: #475979; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere;
+}
+.pg-file-readonly-notice strong { color: #253653; }
+.pg-file-readonly-notice p { margin: 5px 0 0; }
 .pg-object-history-button {
   display: grid; place-items: center; inline-size: 27px; block-size: 27px;
   padding: 0; border: 0; border-radius: 6px; color: var(--card-accent); background: transparent;
@@ -868,3 +874,129 @@ details[open] > summary.pg-project-context-row::before { transform: rotate(90deg
   .pg-inspiration-drawer { animation: pg-inspiration-enter 180ms cubic-bezier(.2,.8,.2,1); }
   @keyframes pg-inspiration-enter { from { translate: 100% 0; opacity: .5; } to { translate: 0 0; opacity: 1; } }
 }
+
+/* Current results are a projection of the same governance documents. */
+.ksf-projects .pg-result-detail{max-width:1100px;margin:0 auto;padding:20px 24px 40px;overflow-wrap:anywhere}
+.ksf-projects .pg-result-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ksf-projects .pg-result-heading h2{margin:0;font-size:20px;line-height:1.5}
+.ksf-projects .pg-result-badges,.ksf-projects .pg-result-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ksf-projects .pg-result-actions{margin:16px 0 22px}
+.ksf-projects .pg-result-section{margin:0 0 18px;padding:16px 18px;border:1px solid var(--ksf-border,#dce1eb);border-radius:10px;background:var(--ksf-surface,#fff)}
+.ksf-projects .pg-result-section h3{margin:0 0 10px;font-size:14px;font-weight:650}
+.ksf-projects .pg-result-section p{margin:6px 0;line-height:1.7}
+.ksf-projects .pg-result-criteria{padding-left:22px;margin:10px 0 0}
+.ksf-projects .pg-result-criteria li{margin:6px 0;line-height:1.6}
+.ksf-projects .pg-result-task{padding:10px 0;border-bottom:1px solid var(--ksf-border,#e5e8ef)}
+.ksf-projects .pg-result-task:last-child{border-bottom:0}
+.ksf-projects .pg-result-task .pm-chip{margin-left:8px}
+.ksf-projects .pg-result-original{margin:20px 0;line-height:1.7}
+.ksf-projects .pg-result-original summary{cursor:pointer;font-weight:600;padding:8px 0}
+.ksf-projects .pg-result-detail button:focus-visible,.ksf-projects .pg-result-original summary:focus-visible{outline:2px solid #6366d9;outline-offset:3px}
+@container (max-width:580px){.ksf-projects .pg-result-detail{padding:16px 12px 28px}.ksf-projects .pg-result-section{padding:12px}}
+
+/* Shared V1 page shell; existing business editors keep their service-owned workflows. */
+.ksf-projects.kp-project-workspace{display:block;--kp-ink:var(--ksf-text-primary);--kp-muted:var(--ksf-text-secondary);--kp-line:var(--ksf-border-subtle);--kp-accent:var(--ksf-action-primary);font-family:var(--ksf-font-sans);font-size:var(--ksf-font-body);line-height:var(--ksf-line-body);background:var(--ksf-surface-content);color:var(--ksf-text-primary)}
+.kp-project-workspace .kp-shared-project-list{min-width:0;display:grid;gap:var(--ksf-space-4)}
+.kp-project-workspace .kp-shared-project-list p{overflow-wrap:anywhere;color:var(--ksf-text-secondary);font-size:var(--ksf-font-body)}
+.kp-project-workspace [data-ksf-component="search-filter-bar"]{display:grid;grid-template-columns:minmax(0,1fr);margin-bottom:var(--ksf-space-4)}
+.kp-project-workspace .kp-legacy-content{display:flex;width:100%;min-width:0;min-height:0;height:100%}
+.kp-project-workspace .kp-legacy-content>.kp-main{min-width:0;min-height:0;height:100%}
+.kp-project-workspace .kp-content{padding:0;min-height:0}
+.kp-project-workspace .kp-domain-summary-slot{min-width:0}
+.kp-project-workspace .kp-domain-summary-slot :is(h2,h3){font-size:1.142857em}
+
+.ksf-ui-root .kp-project-workspace .ksf-project-detail-scroll{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.ksf-ui-root .kp-project-workspace .ksf-project-detail-scroll>[data-ksf-component="content-state"]{display:flex;flex-direction:column;flex:1;min-height:0}
+.ksf-ui-root .kp-project-workspace .ksf-project-detail-scroll>.ksf-content-state-message{flex:none}
+.ksf-ui-root .kp-project-workspace .ksf-project-detail-scroll .ksf-content-state-body{min-height:0;flex:1}
+.ksf-ui-root .kp-project-workspace .ksf-data-row-content>[data-ksf-component="badge"]{justify-self:start}
+.kp-project-domain-disclosure{padding:12px;border:1px solid var(--ksf-border-subtle);border-radius:var(--ksf-radius-surface);background:var(--ksf-surface-content)}
+.kp-project-domain-disclosure>summary{cursor:pointer;min-height:var(--ksf-control-min);display:flex;align-items:center;font-weight:600}
+
+/* The rebuilt project app adopts V1 semantics while retaining business editors. */
+.kp-project-workspace .pg-card-workspace,.ksf-compat-toolbar-navigation .pg-object-navigation{
+ --card-ink:var(--ksf-text-primary);--card-muted:var(--ksf-text-secondary);--card-border:var(--ksf-border-subtle);--card-accent:var(--ksf-action-primary);--card-accent-soft:var(--ksf-selection-background);--card-surface:var(--ksf-surface-content);--card-shadow:none;color-scheme:inherit;color:var(--ksf-text-primary);background:var(--ksf-background)
+}
+.kp-project-workspace .pg-card-board{--column-paper:var(--ksf-surface-raised);--column-chip:var(--ksf-surface-inset);--column-ink:var(--ksf-action-primary)}
+.kp-project-workspace :is(.pg-object-card,.pg-project-panel,.pg-project-context,.pg-project-context-reader,.pg-project-context-list,.pg-result-section,.pg-result-detail,.pg-plan-section,.pg-card-records,.pg-file-readonly-notice){background:var(--ksf-surface-content);color:var(--ksf-text-primary);border-color:var(--ksf-border-subtle);border-radius:var(--ksf-radius-surface);box-shadow:none}
+.kp-project-workspace :is(.pg-object-card[data-selected],.pg-card-select[aria-current],.pg-file-node[aria-current]){background:var(--ksf-selection-background);color:var(--ksf-selection-foreground);border-color:var(--ksf-action-primary)}
+.kp-project-workspace :is(.pg-result-section p,.pg-result-detail p,.pg-plan-section p,.pg-plan-values dd,.pg-card-details .kp-markdown){font-size:var(--ksf-font-body);color:var(--ksf-text-primary);line-height:1.6}
+.kp-project-workspace :is(.pg-card-action,.pg-object-history-button,.pg-project-context-action,.pg-plan-edit,.pg-context-crumb,.pg-card-disclosure>summary,.pg-work-records>summary){min-height:var(--ksf-control-min);min-width:var(--ksf-control-min);border-radius:var(--ksf-radius-control);font-size:var(--ksf-font-body)}
+.kp-project-workspace :is(input,select,textarea){color:var(--ksf-text-primary);background:var(--ksf-surface-content);border-color:var(--ksf-border-control);font-size:var(--ksf-font-body)}
+.kp-project-workspace :is(.pm-chip,.pm-ready){font-size:12px;border-radius:2px;color:var(--ksf-text-secondary);background:var(--ksf-surface-inset)}
+.kp-project-workspace :is(.pm-chip.state-active,.pm-chip.state-in_progress){color:var(--ksf-info);background:var(--ksf-info-background)}
+.kp-project-workspace :is(.pm-chip.state-review,.pm-chip.state-paused){color:var(--ksf-warning);background:var(--ksf-warning-background)}
+.kp-project-workspace :is(.pm-ready,.pm-chip.state-completed){color:var(--ksf-success);background:var(--ksf-success-background)}
+.kp-project-workspace .pm-chip.state-blocked{color:var(--ksf-danger);background:var(--ksf-danger-background)}
+.kp-project-domain-disclosure>summary::before{content:'›';margin-inline-end:8px;transform:rotate(0deg)}
+.kp-project-domain-disclosure[open]>summary::before{transform:rotate(90deg)}
+.kp-project-workspace .pg-work-records>summary{cursor:pointer;color:var(--ksf-action-primary);padding-block:4px}
+.kp-project-workspace .pg-object-view-toggle{display:none}
+.kp-project-workspace .pg-card-workspace>[hidden]{display:none}
+.kp-project-workspace .pg-card-workspace[data-object-layout="narrow"]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.kp-project-workspace .pg-card-workspace[data-object-layout="narrow"]>.pg-object-view-toggle{display:flex;align-items:center;min-height:var(--ksf-control-min);padding:8px 12px;border:0;border-bottom:1px solid var(--ksf-border-subtle);border-radius:0;background:var(--ksf-surface-raised);color:var(--ksf-action-primary);font:inherit;text-align:start}
+.kp-project-workspace .pg-card-workspace[data-object-layout="narrow"]>:is(.pg-card-board,.pg-card-detail-pane){grid-column:1;grid-row:2}
+
+.kp-project-workspace .pg-project-context-reader{overflow-anchor:none}
+
+.kp-project-workspace .kp-legacy-view-scope{margin:0;padding:0;border:0;min-width:0;min-height:0;width:100%;height:100%}
+
+/* Shared AI workspace inherits application scope and semantic tokens. */
+.ksf-projects .kp-conversation{padding:0;min-width:0;background:transparent;border:0}
+.ksf-projects .kp-run-history-message{padding:var(--ksf-space-4);border-bottom:1px solid var(--ksf-border-subtle);overflow-wrap:anywhere}
+.ksf-projects .kp-conversation>.ksf-inline-alert{margin-block-end:var(--ksf-space-3)}
+
+.ksf-projects .kp-message{background:var(--ksf-surface-raised);color:var(--ksf-text-secondary);border-color:var(--ksf-border-subtle)}
+.ksf-projects .kp-message.is-error{background:var(--ksf-danger-background);color:var(--ksf-danger)}
+
+/* Readable content shares the SDK palette; status colors keep their meaning. */
+.ksf-projects :is(.pg-card-details,.kp-markdown,.pm-hero p,.pg-result-detail){font-size:15px;line-height:1.7;color:var(--ksf-text-primary)}
+.ksf-projects :is(.pg-eyebrow,.kp-eyebrow,.pm-eyebrow){font-size:12px!important;letter-spacing:.04em;color:var(--ksf-text-secondary)!important}
+.ksf-projects :is(.kp-project-description,.kp-footnote,.kp-source-link,.kp-resource-path,.kp-list-count,.kp-count-note,.kp-section-header>span,.kp-task-row time,.kp-task-row small,.pg-breadcrumbs,.pg-outline-footer,.pg-card-meta,.pg-card-records small){font-size:13px;line-height:1.6;color:var(--ksf-text-secondary)}
+.ksf-projects :is(.kp-task-row strong,.kp-entry strong,.pg-node>p,.pg-roadmap-item>p){font-size:14px;line-height:1.6}
+.ksf-projects :is(.pm-hero h2,.pg-note-heading h2){color:var(--ksf-text-primary)}
+.ksf-projects :is(.pm-primary,.kp-chat-submit){background:var(--ksf-action-primary);border-color:var(--ksf-action-primary);color:var(--ksf-on-primary);font-size:14px}
+.ksf-projects :is(.pm-primary,.kp-chat-submit):hover:enabled{background:var(--ksf-action-hover)}
+.ksf-projects :is(.kp-tabs button[aria-selected=true],.pg-view-switch button[aria-pressed=true]){color:var(--ksf-action-primary);border-color:var(--ksf-action-primary)}
+.ksf-projects :is(.pg-plan-section,.pg-card-records,.pg-project-panel,.pg-result-section){border-color:var(--ksf-color-border);box-shadow:none}
+@container (max-width:600px){.ksf-projects .kp-heading h1{font-size:22px}.ksf-projects .kp-markdown{font-size:15px}.ksf-projects .kp-project-description{font-size:13px}.ksf-projects .kp-source-link{font-size:13px}}
+
+/* The installed vanilla project view uses the same palette bridge. */
+.ksf-projects{--kp-ink:var(--ksf-color-foreground);--kp-muted:var(--ksf-color-muted-foreground);--kp-line:var(--ksf-color-border);--kp-accent:var(--ksf-color-primary);font-size:15px;line-height:1.6;color:var(--ksf-color-foreground);background:var(--ksf-color-background)}
+.ksf-projects :is(.kp-catalog,.kp-main,.pg-card-workspace,.pg-card-detail-pane){background:var(--ksf-color-background);color:var(--ksf-color-foreground)}
+.ksf-projects .kp-project-card{background:var(--ksf-color-surface-raised);border-color:var(--ksf-color-border);box-shadow:none;border-radius:8px}
+.ksf-projects .kp-project-description{font-size:13px;line-height:1.6;color:var(--ksf-color-muted-foreground)}
+.ksf-projects .kp-project-title strong{color:var(--ksf-color-foreground);font-size:15px;line-height:1.6}
+.ksf-projects :is(.kp-catalog-heading h1,.kp-heading h1){font-size:32px;line-height:42px;color:var(--ksf-color-foreground)}
+.ksf-projects :is(.kp-scope button,.kp-badge,.kp-topics span){font-size:12px;line-height:20px}
+.ksf-projects .kp-scope button[aria-pressed=true]{background:var(--ksf-color-selection);color:var(--ksf-color-selection-foreground)}
+.ksf-projects :is(.kp-search,input,select,textarea){background:var(--ksf-color-surface-raised);color:var(--ksf-color-foreground);border-color:var(--ksf-color-border-strong)}
+.ksf-projects .kp-search svg{color:var(--ksf-color-muted-foreground)}
+@container (max-width:600px){.ksf-projects :is(.kp-catalog-heading h1,.kp-heading h1){font-size:26px;line-height:36px}.ksf-projects .kp-project-description{font-size:13px}}
+.ksf-projects .kp-project-group.is-pinned .kp-project-group-heading{color:var(--ksf-color-foreground)}
+.ksf-projects :is(.kp-badge.state-active,.kp-badge.state-in_progress){color:var(--ksf-color-info);background:var(--ksf-color-info-surface)}
+.ksf-projects :is(.kp-badge.state-review,.kp-badge.state-paused){color:var(--ksf-color-warning);background:var(--ksf-color-warning-surface)}
+.ksf-projects .kp-badge.state-completed{color:var(--ksf-color-success);background:var(--ksf-color-success-surface)}
+.ksf-projects .kp-badge.state-blocked{color:var(--ksf-color-danger);background:var(--ksf-color-danger-surface)}
+/* The legacy detail editor has its own surfaces as well as catalog tokens. */
+.ksf-projects :is(.pg-card-workspace,.pg-object-navigation){--card-ink:var(--ksf-color-foreground);--card-muted:var(--ksf-color-muted-foreground);--card-border:var(--ksf-color-border);--card-accent:var(--ksf-color-primary);--card-accent-soft:var(--ksf-color-selection);--card-surface:var(--ksf-color-surface-raised);--card-shadow:none;--column-paper:var(--ksf-color-surface);--column-chip:var(--ksf-color-surface-raised);--column-ink:var(--ksf-color-primary)}
+.ksf-projects :is(.pg-card-details,.pg-project-context,.pg-result-section,.document-preview){background:var(--ksf-color-background);color:var(--ksf-color-foreground)}
+.ksf-projects :is(.pg-card-board,.pg-object-tree-header,.pg-project-context-list,.pg-file-controls,.pg-file-outline,.pg-file-modes){background:var(--ksf-color-surface);color:var(--ksf-color-foreground);border-color:var(--ksf-color-border)}
+.ksf-projects :is(.pg-card-board .pg-card-select,.pg-card-action,.pg-project-settings){background:var(--ksf-color-surface-raised);color:var(--ksf-color-foreground);border-color:var(--ksf-color-border);box-shadow:none}
+.ksf-projects :is(.pg-card-board .pg-card-select:hover,.pg-card-action:hover:not(:disabled),.pg-project-settings:hover){background:var(--ksf-color-surface);color:var(--ksf-color-primary);border-color:var(--ksf-color-border-strong)}
+.ksf-projects .pg-card-board .pg-object-card[data-selected]>.pg-card-select{background:var(--ksf-color-selection);color:var(--ksf-color-selection-foreground);border-color:var(--ksf-color-primary)}
+.ksf-projects :is(.pg-card-code,.pg-card-current,.pg-file-unread,.pg-file-toggle-count){background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary);font-size:12px;line-height:20px}
+.ksf-projects :is(.pg-card-muted,.pg-card-kicker,.pg-card-empty,.pg-object-tree-header,.pg-object-crumb-label,.pg-file-scope-heading,.pg-file-scope-empty,.pg-project-context-row,.pg-project-context-heading,.pg-file-controls button){color:var(--ksf-color-muted-foreground);font-size:13px;line-height:22px}
+.ksf-projects .pg-card-details .kp-markdown{color:var(--ksf-color-foreground);font-size:15px;line-height:24px}
+.ksf-projects .pg-card-details .kp-markdown :is(pre,code,blockquote,th){color:var(--ksf-color-foreground);background:var(--ksf-color-surface);border-color:var(--ksf-color-border)}
+.ksf-projects .pg-card-workspace .pm-chip{color:var(--ksf-color-muted-foreground);background:var(--ksf-color-surface);font-size:12px;line-height:20px}
+.ksf-projects .pg-card-workspace :is(.pm-chip.state-active,.pm-chip.state-in_progress){color:var(--ksf-color-info);background:var(--ksf-color-info-surface)}
+.ksf-projects .pg-card-workspace :is(.pm-chip.state-review,.pm-chip.state-paused){color:var(--ksf-color-warning);background:var(--ksf-color-warning-surface)}
+.ksf-projects .pg-card-workspace :is(.pm-ready,.pm-chip.state-completed){color:var(--ksf-color-success);background:var(--ksf-color-success-surface)}
+.ksf-projects .pg-card-workspace .pm-chip.state-blocked{color:var(--ksf-color-danger);background:var(--ksf-color-danger-surface)}
+.ksf-projects .pg-card-workspace :is(button,summary,a):focus-visible{outline:2px solid var(--ksf-color-focus-ring);outline-offset:2px}
+
+.ksf-projects .pg-card-workspace{color-scheme:inherit}
+.ksf-projects .pg-card-workspace .pg-card-name{color:var(--ksf-color-foreground)}
+.pg-object-navigation{--card-ink:currentColor;--card-muted:currentColor;--card-accent:currentColor;color:inherit;color-scheme:inherit}
+.pg-object-navigation .pg-object-crumb-label{color:inherit}

@@ -1,0 +1,6 @@
+.ksf-icon {box-sizing:border-box;display:inline-flex;flex:none;align-items:center;justify-content:center;vertical-align:middle;line-height:0;color:inherit}
+.ksf-icon>svg {display:block;width:100%;height:100%;color:inherit}
+
+.ksf-icon[data-spin]>svg{animation:ksf-icon-spin 1s linear infinite}@keyframes ksf-icon-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.ksf-icon[data-spin]>svg{animation:none}}
+
+.ksf-icon{vertical-align:-.125em}.ksf-icon[data-spin][data-motion-active=false]>svg{animation-play-state:paused}

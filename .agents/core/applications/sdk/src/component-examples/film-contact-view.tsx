@@ -1,0 +1,2 @@
+import {useState} from 'react';import Source from '../fidelity/kokonut/contact-sheet';import {FidelityScope} from '../fidelity/scope';
+export function FilmContactView({empty=false}:{empty?:boolean}={}){const [picked,setPicked]=useState<number[]|null>(null);return <FidelityScope module="contact-sheet" style={{maxWidth:672,marginInline:'auto'}}><><Source frames={empty?[]:undefined} onExport={setPicked}/>{picked&&<output>本地选择：{picked.length} 帧；未导出文件。</output>}</></FidelityScope>;}

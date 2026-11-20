@@ -1,0 +1,7 @@
+export function validDate(value:string){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const [y,m,d]=value.split('-').map(Number);if(y<1||m<1||m>12||d<1||d>31)return false;const date=new Date(0);date.setUTCHours(0,0,0,0);date.setUTCFullYear(y,m-1,d);return date.getUTCFullYear()===y&&date.getUTCMonth()===m-1&&date.getUTCDate()===d;}
+export function dateValue(value:string){const [y,m,d]=value.split('-').map(Number);const date=new Date(0);date.setUTCHours(0,0,0,0);date.setUTCFullYear(y,m-1,d);return date;}
+export function isoDate(date:Date){return `${String(date.getUTCFullYear()).padStart(4,'0')}-${String(date.getUTCMonth()+1).padStart(2,'0')}-${String(date.getUTCDate()).padStart(2,'0')}`;}
+export function todayDate(){const now=new Date();return `${String(now.getFullYear()).padStart(4,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;}
+export function addDays(value:string,days:number){const date=dateValue(value);date.setUTCDate(date.getUTCDate()+days);return isoDate(date);}
+export function addMonths(value:string,months:number){const date=dateValue(value),day=date.getUTCDate();date.setUTCDate(1);date.setUTCMonth(date.getUTCMonth()+months);const next=date.getUTCMonth();date.setUTCDate(day);if(date.getUTCMonth()!==next)date.setUTCDate(0);return isoDate(date);}
+export function monthGrid(month:string,weekStart:0|1=1){const first=month+'-01',weekday=dateValue(first).getUTCDay(),offset=(weekday-weekStart+7)%7;return Array.from({length:42},(_,index)=>addDays(first,index-offset));}

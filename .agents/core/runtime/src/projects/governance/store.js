@@ -9,6 +9,10 @@ import {hash,digest,fail,object,safePath,snapshot,encodeDocument,document} from 
 import {loadGraph,checkGraph,closure,projection} from './graph.js';
 import {documentKind,inspirationPath,resourceOwner} from './layout.js';
 import {contextEntries} from './contexts.js';
+import {checkExecutionWrite,executionViews,releaseEndedExecutions} from '../task-execution.js';
+import {hostIdentity,sessionKey} from '../../routing/storage.js';
+import {confirmationScope,prepareConfirmation,requireMilestoneConfirmation} from './confirmation.js';
+import {planArtifacts,createArtifacts,removeCreatedArtifacts,checkArtifacts,artifactsName} from '../artifacts.js';
 
 const operationId=id=>typeof id==='string'&&/^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/.test(id);
 const maxRequestedChanges=128;
@@ -28,12 +32,14 @@ export function readGovernance(root,name,scope='current',{overlay=new Map(),chan
   const documents=[...paths].map(p=>graph.docs.get(p)).filter(Boolean);
   return {format:graph.legacy.has(path)?'legacy':'documents',state:'present',path,etag:graph.etag,readOnly:scope==='archived'||rootDoc.metadata.governance_schema===1,project:rootDoc,stateModel:{version:2,unified:unified(rootDoc.metadata),states:unified(rootDoc.metadata)?STATES:LEGACY_STATES},documents,valid:checked.valid,errors:checked.errors,warnings:checked.warnings,stale:checked.stale,projection:projection(graph,path,checked),graph};
 }
-export function publicState(state){const {graph,...data}=state;return {...data,contextEntries:contextEntries(graph.root,state),taskCreation:{version:1,supported:state.project?.metadata.governance_schema===2,operation:'create-task'},taskNumbering:{version:1,supported:state.project?.metadata.governance_schema===2},lifecycle:{version:1,supported:state.project?.metadata.governance_schema===2,operations:['archive','restore'],states:ARCHIVE_STATES}};}
-export function prepareChanges(root,name,scope,data,{allowArchived=false,allowTaskCounters=false}={}){
+export function publicState(state){const {graph,...data}=state;const confirmationScopes=Object.fromEntries(data.documents.filter(d=>d.metadata.kind==='milestone'&&graph.docs.has(d.metadata.review_ref?.path)).map(d=>[d.metadata.id,confirmationScope(d,graph.docs.get(d.metadata.review_ref.path),graph)]));return {...data,confirmationScopes,executionClaims:executionViews(graph.root,data.documents),contextEntries:contextEntries(graph.root,state),taskCreation:{version:1,supported:state.project?.metadata.governance_schema===2,operation:'create-task'},taskNumbering:{version:1,supported:state.project?.metadata.governance_schema===2},lifecycle:{version:1,supported:state.project?.metadata.governance_schema===2,operations:['archive','restore'],states:ARCHIVE_STATES}};}
+export function prepareChanges(root,name,scope,data,{allowArchived=false,allowTaskCounters=false,caller,chatId}={}){
   if(!object(data)||!operationId(data.operationId)||typeof data.ifMatch!=='string'||!Array.isArray(data.changes)||data.changes.length>maxRequestedChanges)fail('PROJECT_GOVERNANCE_INPUT','需要operationId、ifMatch及不超过128项changes。');
   const before=readGovernance(root,name,scope);
   if(before.etag!==data.ifMatch)fail('PROJECT_GOVERNANCE_CONFLICT','项目原件已变化，请读取最新版本并合并。',{etag:before.etag});
   if(scope==='archived'&&!allowArchived)fail('PROJECT_GOVERNANCE_ARCHIVED','归档项目只读。');
+  if(!chatId)try{chatId=sessionKey(root,hostIdentity(undefined,process.env),false);}catch{}
+  checkExecutionWrite(root,data.changes,data.execution,{chatId,caller});
   const changes=structuredClone(data.changes),byPath=new Map(changes.map(c=>[c?.path,c]));
   if(byPath.size!==changes.length)fail('PROJECT_GOVERNANCE_INPUT','变更路径不可重复。');
   if(data.setParent!==undefined){
@@ -84,8 +90,10 @@ export function prepareChanges(root,name,scope,data,{allowArchived=false,allowTa
       const typed=!!kind;
       const old=typed&&bytes?document(root,c.path,bytes).metadata:null;
       if(c.metadata?.task_counters!==undefined&&digest(old?.task_counters??{})!==digest(c.metadata.task_counters)&&!allowTaskCounters)fail('PROJECT_TASK_COUNTERS','任务编号计数由公共创建或改号程序维护。');
+      if(c.metadata?.user_confirmation!==undefined&&digest(c.metadata.user_confirmation)!==digest(old?.user_confirmation??null))fail('PROJECT_CONFIRMATION_OWNED','阶段确认记录只能由核验后的公共事务维护。');
       if(old?.id&&c.metadata?.id!==undefined&&c.metadata.id!==old.id)fail('PROJECT_GOVERNANCE_ID','对象稳定ID不可修改。');
       if(old?.kind==='project'&&c.metadata?.task_numbering_history!==undefined&&digest(old.task_numbering_history??[])!==digest(c.metadata.task_numbering_history))fail('PROJECT_NUMBERING_HISTORY','改号历史只能由显式改号事务维护。');
+      if(old?.kind==='project'&&c.metadata?.project_merge_history!==undefined&&digest(old.project_merge_history??[])!==digest(c.metadata.project_merge_history))fail('PROJECT_MERGE_HISTORY','合并历史只能由显式合并事务维护。');
       if(old?.kind==='project'&&c.metadata?.archive_history!==undefined&&digest(old.archive_history??[])!==digest(c.metadata.archive_history)&&!allowArchived)fail('PROJECT_TRANSITION_HISTORY','归档历史只能由显式过渡操作维护。');
       const extra={};if(typed&&old&&unified({...old,...c.metadata})&&c.metadata?.status==='paused'&&old.status!=='paused')extra.resume_status=old.status;
       const stamped=typed?{...c,metadata:{...c.metadata,...extra,updated:new Date().toISOString()}}:c;
@@ -95,7 +103,18 @@ export function prepareChanges(root,name,scope,data,{allowArchived=false,allowTa
     overlay.set(c.path,after);
     if(!bytes?.equals(after))files.push({path:c.path,before:bytes?.toString('base64')??null,after:after.toString('base64'),beforeHash:bytes?hash(bytes):'missing',afterHash:hash(after)});
   }
+  if(data.confirmMilestone){
+    const candidate=readGovernance(root,name,scope,{overlay,changedPaths:new Set(changes.map(c=>c.path))});
+    const generated=prepareConfirmation(root,candidate,data.confirmMilestone,caller),change=changes.find(c=>c.path===generated.path);
+    if(!change)fail('PROJECT_CONFIRMATION_REQUIRED','阶段确认须在同一事务中保存对应复盘。');
+    const bytes=overlay.get(generated.path),after=encodeDocument(bytes,{path:generated.path,metadata:{user_confirmation:generated.confirmation},body:generated.body});
+    if(after.length>2*1024*1024)fail('PROJECT_GOVERNANCE_SIZE','单个原件不得超过2MB。');
+    overlay.set(generated.path,after);const file=files.find(f=>f.path===generated.path);
+    if(file){file.after=after.toString('base64');file.afterHash=hash(after);}
+    else {const original=snapshot(root,generated.path,{optional:true});files.push({path:generated.path,before:original?.bytes.toString('base64')??null,beforeHash:original?hash(original.bytes):'missing',after:after.toString('base64'),afterHash:hash(after)});}
+  }
   const after=readGovernance(root,name,scope,{overlay,changedPaths:new Set(changes.map(c=>c.path))});
+  requireMilestoneConfirmation(before,after,data);
   if(after.format!=='documents')fail('PROJECT_GOVERNANCE_SCHEMA','apply需要新格式项目根卡。');
   if(before.project?.metadata.governance_schema===1&&after.project?.metadata.governance_schema===1&&!allowArchived)fail('PROJECT_GOVERNANCE_UPGRADE_REQUIRED','此项目保留旧格式只读，请先预演governance migrate升级状态。');
   for(const c of changes)if(documentKind(c.path)&&!after.graph.docs.has(c.path))fail('PROJECT_GOVERNANCE_ORPHAN','正式原件必须接入双向索引：'+c.path);
@@ -118,7 +137,8 @@ export function prepareChanges(root,name,scope,data,{allowArchived=false,allowTa
     if((!unified(m)&&m.status==='ready'&&previous!=='ready'||starting)&&ready&&!ready.ready)fail('PROJECT_GOVERNANCE_NOT_READY','任务不具备启动条件：'+ready.reasons.join('；'),{target:d.path});
     if(activeStates(m).includes(m.status)&&!activeStates(m).includes(previous)&&p.overCapacity)fail('PROJECT_GOVERNANCE_NOT_READY','在制容量已满，请先收口或调整承诺。');
   }
-  return {before,after,files,changes};
+  const artifacts=scope==='current'?files.filter(f=>f.before===null&&documentKind(f.path)==='project').map(f=>planArtifacts(root,f.path)):[];
+  return {before,after,files,changes,artifacts};
 }
 function journal(root,id){for(const path of ['.agents','.agents/runtime-data','.agents/runtime-data/projects','.agents/runtime-data/projects/governance','.agents/runtime-data/projects/governance/operations']){if(!stat(join(root,path)))break;directory(join(root,path));}return join(operations(root),id+'.json');}
 function committedRecord(root,data){
@@ -127,13 +147,14 @@ function committedRecord(root,data){
   if(r.requestDigest!==digest(data))fail('PROJECT_GOVERNANCE_OPERATION_CONFLICT','同一操作ID对应不同请求。');
   if(r.phase!=='completed')fail('PROJECT_GOVERNANCE_PENDING','操作未完成或已回退，请先核对恢复记录。',{operationId:r.operationId});
   for(const f of r.files)if(hash(snapshot(root,f.path).bytes)!==f.afterHash)fail('PROJECT_GOVERNANCE_OPERATION_CONFLICT','操作后原件又发生变化。',{target:f.path});
+  for(const entry of r.artifactDirectories??[])if(!checkArtifacts(root,entry.path))fail('PROJECT_GOVERNANCE_OPERATION_CONFLICT','操作后成果目录已改变。',{target:entry.path});
   return r;
 }
 export function applyGovernance(root,name,scope,data,{dryRun=false,hooks={}}={}){
   if(!object(data)||!operationId(data.operationId))fail('PROJECT_GOVERNANCE_INPUT','需要唯一操作ID。');
   assertNoPending(root);
   const replay=committedRecord(root,data);if(replay)return {...publicState(readGovernance(root,name,scope)),changed:false,replayed:true,operationId:data.operationId,dryRun};
-  if(dryRun){const p=prepareChanges(root,name,scope,data);return {...publicState(p.after),changed:false,wouldChange:!!p.files.length,dryRun:true,changes:p.files.map(f=>({path:f.path,created:f.before===null}))};}
+  if(dryRun){const p=prepareChanges(root,name,scope,data,{caller:hooks.caller,chatId:hooks.chatId});return {...publicState(p.after),changed:false,wouldChange:!!p.files.length,dryRun:true,changes:p.files.map(f=>({path:f.path,created:f.before===null})),directoryChanges:p.artifacts.filter(a=>!a.previous).map(a=>({path:a.path,action:'create'}))};}
   return withProjectLock(root,()=>applyGovernanceUnderLock(root,name,scope,data,{hooks}));
 }
 // Internal transaction entry: allocation and publication must share the same root lock.
@@ -142,11 +163,11 @@ export function applyGovernanceUnderLock(root,name,scope,data,{hooks={},allowTas
   if(!stat(lock)||readJSON(lock).pid!==process.pid)fail('PROJECT_LOCKED','任务创建必须在项目写锁内提交。');
 
     const again=committedRecord(root,data);if(again)return {...publicState(readGovernance(root,name,scope)),changed:false,replayed:true,operationId:data.operationId};
-    const p=prepareChanges(root,name,scope,data,{allowTaskCounters});
+    const p=prepareChanges(root,name,scope,data,{allowTaskCounters,caller:hooks.caller,chatId:hooks.chatId});
     if(!p.files.length)return {...publicState(p.before),changed:false,operationId:data.operationId};
     ensureInternal(root);
     const createdDirectories=new Set();for(const f of p.files){let path=dirname(f.path);while(path!=='.'&&!stat(join(root,path))){createdDirectories.add(path);path=dirname(path);}}
-    const r={schemaVersion:1,kind:'governance',operationId:data.operationId,name,scope,phase:'prepared',requestDigest:digest(data),files:p.files,createdDirectories:[...createdDirectories].sort((a,b)=>b.length-a.length),at:new Date().toISOString(),...(taskCreation?{taskCreation}:{})};
+    const r={schemaVersion:1,kind:'governance',operationId:data.operationId,name,scope,phase:'prepared',requestDigest:digest(data),files:p.files,createdDirectories:[...createdDirectories].sort((a,b)=>b.length-a.length),artifactDirectories:p.artifacts.map(a=>({path:a.path,created:false})),at:new Date().toISOString(),...(taskCreation?{taskCreation}:{})};
     saveJSON(journal(root,r.operationId),r);saveJSON(pendingPath(root),{operationId:r.operationId,kind:'governance'});
     try{
       hooks.fault?.('prepared',r);
@@ -155,16 +176,22 @@ export function applyGovernanceUnderLock(root,name,scope,data,{hooks={},allowTas
       for(const f of ordered){
         const target=safePath(root,f.path,{missing:true}),parts=dirname(f.path).split('/');let current=root;
         for(const part of parts){current=join(current,part);directory(current,{create:true});}
+        const artifact=p.artifacts.find(a=>a.path===dirname(f.path)+'/'+artifactsName);
+        if(artifact&&documentKind(f.path)==='project'){
+          const entry=createArtifacts(root,artifact);r.artifactDirectories[r.artifactDirectories.findIndex(a=>a.path===entry.path)]=entry;
+          saveJSON(journal(root,r.operationId),r);hooks.fault?.('artifact-directory-created',entry);
+        }
         const latest=snapshot(root,f.path,{optional:true});if((latest?hash(latest.bytes):'missing')!==f.beforeHash)fail('PROJECT_GOVERNANCE_CONFLICT','发布前原件变化。',{target:f.path});
         if(latest)publishFile(latest,Buffer.from(f.after,'base64'));
         else withTemporaryFile(join(dirname(target),'.ksf-project-governance-'+randomUUID()+'.tmp'),Buffer.from(f.after,'base64'),{},temporary=>{safePath(root,f.path,{missing:true});try{linkSync(temporary,target);}catch(e){if(e.code==='EEXIST')fail('PROJECT_GOVERNANCE_CONFLICT','目标已被创建。',{target:f.path});throw e;}unlinkSync(temporary);});
         hooks.fault?.('file-written',f);
       }
       for(const f of r.files)if(hash(snapshot(root,f.path).bytes)!==f.afterHash)fail('PROJECT_GOVERNANCE_CONFLICT','提交核对发现后续修改。',{target:f.path});
+      for(const entry of r.artifactDirectories)if(!checkArtifacts(root,entry.path))fail('PROJECT_GOVERNANCE_CONFLICT','提交核对发现成果目录变化。',{target:entry.path});
       const published=readGovernance(root,name,scope,{allowPending:true,changedPaths:new Set(r.files.map(f=>f.path))});
       if(!published.valid)fail('PROJECT_GOVERNANCE_CONFLICT','提交后原件或验收依据发生变化，先按操作ID恢复。',{issues:published.errors});
-      r.phase='completed';saveJSON(journal(root,r.operationId),r);hooks.fault?.('completed',r);unlinkSync(pendingPath(root));
-      return {...publicState(readGovernance(root,name,scope)),changed:true,operationId:r.operationId,recoveryId:r.operationId};
+      r.phase='completed';saveJSON(journal(root,r.operationId),r);hooks.fault?.('completed',r);unlinkSync(pendingPath(root));releaseEndedExecutions(root,published.documents.filter(d=>r.files.some(f=>f.path===d.path)));
+      return {...publicState(readGovernance(root,name,scope)),changed:true,operationId:r.operationId,recoveryId:r.operationId,directoryChanges:r.artifactDirectories.filter(a=>a.created).map(a=>({path:a.path,action:'create'}))};
     }catch(e){if(!e.code)e.code='PROJECT_GOVERNANCE_WRITE_FAILED';e.details={...e.details,operationId:r.operationId,recoveryId:r.operationId};throw e;}
 
 }
@@ -184,8 +211,11 @@ export function recoverGovernance(root,id,{dryRun=false}={}){
       if(![f.beforeHash,f.afterHash].includes(h))fail('PROJECT_GOVERNANCE_CONFLICT','存在后续修改，保留现场：'+f.path,{target:f.path});
     }
     const allowedDirectories=new Set();for(const f of r.files.filter(f=>f.before===null)){let p=dirname(f.path);while(p!=='.'){allowedDirectories.add(p);p=dirname(p);}}
+    const allowedArtifacts=new Set(r.files.filter(f=>f.before===null&&documentKind(f.path)==='project'&&f.path.startsWith('项目/')).map(f=>dirname(f.path)+'/'+artifactsName));
+    if(r.artifactDirectories!==undefined&&(!Array.isArray(r.artifactDirectories)||r.artifactDirectories.some(a=>!allowedArtifacts.has(a.path)||typeof a.created!=='boolean'||a.created&&(!Number.isFinite(a.dev)||!Number.isFinite(a.ino)))))fail('PROJECT_GOVERNANCE_RECOVERY','成果目录恢复记录无效。');
     for(const p of r.createdDirectories){if(!allowedDirectories.has(p))fail('PROJECT_GOVERNANCE_RECOVERY','恢复目录不属于本次新建资源。');safePath(root,p+'/__directory_guard__',{missing:true});}
     if(dryRun)return {operationId:id,changed:false,wouldChange:true,files:r.files.map(f=>f.path),dryRun:true};
+    for(const entry of r.artifactDirectories??[])removeCreatedArtifacts(root,entry);
     for(const f of [...r.files].reverse()){
       const current=snapshot(root,f.path,{optional:true});if((current?hash(current.bytes):'missing')===f.beforeHash)continue;
       if(f.before===null)unlinkSync(safePath(root,f.path));else publishFile(current,Buffer.from(f.before,'base64'));

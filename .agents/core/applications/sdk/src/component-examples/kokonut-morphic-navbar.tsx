@@ -1,0 +1,1 @@
+import {MorphNavigation} from '@ksf/sdk/morph-navigation';import {morphDemoItems} from '@ksf/sdk/component-examples/navigation-demo-data';export default function Example(){return <MorphNavigation label="Main" items={morphDemoItems}/>;}

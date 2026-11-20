@@ -1,0 +1,1 @@
+import {SaveStatus} from '@ksf/sdk/save-status';export default function Example(){return <div style={{display:'flex',gap:16,flexWrap:'wrap'}}><SaveStatus status="saved"/><SaveStatus status="saving"/><SaveStatus status="offline" pendingChanges={3}/></div>;}

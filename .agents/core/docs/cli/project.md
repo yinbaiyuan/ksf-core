@@ -62,6 +62,8 @@ CLI 负责文件操作；主项目判断、来源核对、写入授权和成果�
 
 命令不自动改项目材料、成果、其他项目、外部工程或导航链接。需要同步时由 Agent 根据已授权差异处理。
 
+正常新建时同时建立项目根的空 `成果/` 目录，返回 `directoryChanges:[{path,action:"create"}]`；已有同名普通目录保留内容，同名文件或符号链接以 `PROJECT_ARTIFACTS_PATH` 拒绝。预演只展示动作，普通更新及归档恢复不补建。目录职责和版本约定见[能力治理定义](../../abilities/partners/project-manager/references/governance.md#项目成果目录与产物归位)。
+
 ## 可选 routing：四类能力偏好
 
 根卡 metadata.routing 为可省略的映射，只接受下列可选列表；省略或空列表表示没有该类预设，空映射表示没有预设。routing 不是第五类能力对象，也不要求项目 ID 或版本。

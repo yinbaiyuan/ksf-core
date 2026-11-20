@@ -5,8 +5,10 @@ import { assert } from './common.js';
 export const SDK_VERSION = 1;
 export const SUPPORTED_SDK_VERSIONS = [1];
 // Protocol generation and public API releases are deliberately independent.
-export const SDK_API_VERSION = '1.1.0';
-export const SDK_API_MIN_CORE_VERSION = '0.5.3';
+export const SDK_API_VERSION = '1.2.0';
+export const SDK_API_MIN_CORE_VERSION = '0.5.7';
+// Earlier hosts require builtWithSdkVersion === sdkApiVersion in their validator.
+export const SDK_TOOLKIT_MANIFEST_MIN_CORE_VERSION = '0.6.0';
 export const SDK_COMPATIBILITY = Object.freeze({version: SDK_API_VERSION, minCompatibleVersion: '1.0.0'});
 export const DEFAULT_APPLICATIONS = ['com.ksf.conversations', 'com.ksf.markdown', 'com.ksf.git', 'com.ksf.projects', 'com.ksf.knowledge', 'com.ksf.abilities', 'com.ksf.documentation','com.ksf.activity-monitor','com.ksf.cooperation-center'];
 export const OFFICIAL_APPLICATIONS = [...DEFAULT_APPLICATIONS,'com.ksf.terminal'];
@@ -30,7 +32,7 @@ export function sameManifest(a, b) { const stable = value => Array.isArray(value
 export const validPath = value => typeof value === 'string' && value.length < 512 && !/[\\\x00-\x1f:]/.test(value) && value.split('/').every(p => p && p !== '.' && p !== '..' && p !== '.git');
 export const validId = value => typeof value === 'string' && /^[a-z][a-z0-9.-]{1,79}$/.test(value) && !value.includes('..') && !['constructor', 'prototype', 'app-store'].includes(value);
 // Application identities and local keys (cards, commands, etc.) are distinct.
-export const validApplicationId = value => typeof value === 'string' && value.length <= 80 && /^com\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && !['com.ksf.app-store','com.ksf.ability-store'].includes(value);
+export const validApplicationId = value => typeof value === 'string' && value.length <= 80 && /^com\.[a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && !['com.ksf.app-store','com.ksf.ability-store'].includes(value);
 export const validVersion = value => typeof value === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value) && value.split('.').every(part => Number.isSafeInteger(Number(part)));
 export const compareVersions = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 export function validateSDKCompatibility(value) {
@@ -41,13 +43,15 @@ export function validateSDKCompatibility(value) {
   return value;
 }
 export const applicationSDKVersion = manifest => manifest.sdkApiVersion ?? '1.0.0';
-export function stampSDKManifest(manifest) {
-  assert(manifest.sdkApiVersion === undefined || manifest.sdkApiVersion === SDK_API_VERSION,
-    'APP_SDK_BUILD_MISMATCH', '应用 SDK API 目标必须与实际构建工具包版本一致。');
-  assert(manifest.builtWithSdkVersion === undefined || manifest.builtWithSdkVersion === SDK_API_VERSION,
+export function stampSDKManifest(manifest, {toolkitVersion = SDK_API_VERSION, apiVersion = SDK_API_VERSION} = {}) {
+  assert(validVersion(toolkitVersion) && validVersion(apiVersion) && apiVersion === SDK_API_VERSION,
+    'APP_SDK_BUILD_MISMATCH', 'SDK API 目标必须在本工具包支持的公开范围内。');
+  assert(manifest.sdkApiVersion === undefined || manifest.sdkApiVersion === apiVersion,
+    'APP_SDK_BUILD_MISMATCH', '应用 SDK API 目标与构建目标不一致。');
+  assert(manifest.builtWithSdkVersion === undefined || manifest.builtWithSdkVersion === toolkitVersion,
     'APP_SDK_BUILD_MISMATCH', '不能伪造构建 SDK 版本。');
-  return {...manifest, sdkApiVersion: SDK_API_VERSION, builtWithSdkVersion: SDK_API_VERSION,
-    minCoreVersion: [manifest.minCoreVersion,SDK_API_MIN_CORE_VERSION,PACKAGE_MIN_CORE_VERSION].sort(compareVersions).at(-1)};
+  return {...manifest, sdkApiVersion: apiVersion, builtWithSdkVersion: toolkitVersion,
+    minCoreVersion: [manifest.minCoreVersion, SDK_API_MIN_CORE_VERSION, PACKAGE_MIN_CORE_VERSION, ...(toolkitVersion!==apiVersion ? [SDK_TOOLKIT_MANIFEST_MIN_CORE_VERSION] : [])].sort(compareVersions).at(-1)};
 }
 export const MAX_STORE_IMAGE = 8 * 1024 * 1024;
 export const storeMediaPath = value => validPath(value) && /^store\/.+\.(png|jpg|webp)$/.test(value);
@@ -63,6 +67,7 @@ export function validateStoreListing(value) {
   for(const [key,max] of [['subtitle',120],['description',12000],['releaseNotes',8000]])assert(value[key]===undefined || typeof value[key]==='string' && value[key].length<=max,'APP_LISTING_INVALID',`商店字段 ${key} 无效或过长。`,400);
   assert(value.screenshots===undefined || Array.isArray(value.screenshots) && value.screenshots.length<=8,'APP_LISTING_INVALID','应用最多提供 8 张商店截图。',400);
   for(const image of [value.icon,...(value.screenshots??[])].filter(x=>x!==undefined))assert(image && storeMediaPath(image.url) && /^[a-f0-9]{64}$/.test(image.sha256) && Number.isSafeInteger(image.size) && image.size>0 && image.size<=MAX_STORE_IMAGE && (image.alt===undefined || typeof image.alt==='string' && image.alt.length<=200),'APP_LISTING_INVALID','商店图片路径、摘要、容量或替代文字无效。',400);
+  assert(value.icon===undefined||value.icon.url.endsWith('.png'),'APP_LISTING_INVALID','应用图标必须使用 PNG 格式。',400);
   for(const image of value.screenshots??[])assert(typeof image.alt==='string'&&image.alt.trim().length>0,'APP_LISTING_INVALID','商店截图必须提供替代文字。',400);
   return value;
 }
@@ -81,16 +86,19 @@ export function groupStoreApplications(apps,sources,installed={},errors=[]) {
 }
 export function validateManifest(value) {
   assert(value && typeof value === 'object' && value.schemaVersion === 1 && validVersion(value.version), 'APP_MANIFEST_INVALID', '应用版本或清单格式无效。');
-  assert(validApplicationId(value.id), 'APP_ID_INVALID', '应用 ID 必须是 com.<发布者>.<应用名> 三段式，后两段使用小写字母开头的小写字母、数字或段内连字符，总长不超过 80；com.ksf.app-store 与 com.ksf.ability-store 为宿主保留。');
+  assert(validApplicationId(value.id), 'APP_ID_INVALID', '应用 ID 必须是 com.<发布者>.<应用名> 三段式，中段为小写 GitHub 用户名，末段使用小写字母开头的小写字母、数字或段内连字符，总长不超过 80；com.ksf.app-store 与 com.ksf.ability-store 为宿主保留。');
   assert(typeof value.name === 'string' && value.name.length > 0 && value.name.length <= 80 && typeof value.description === 'string' && value.description.length <= 2000, 'APP_MANIFEST_INVALID', '应用名称或说明无效。');
   assert(value.sdkVersion === 1, 'APP_MANIFEST_INVALID', '应用 SDK 版本声明无效。');
   assert(validVersion(value.minCoreVersion), 'APP_MANIFEST_INVALID', '应用必须声明明确的 minCoreVersion。');
   if (value.sdkApiVersion !== undefined || value.builtWithSdkVersion !== undefined) {
-    assert(validVersion(value.sdkApiVersion) && value.builtWithSdkVersion === value.sdkApiVersion,
-      'APP_MANIFEST_INVALID', 'SDK API 与实际构建版本必须是相同的完整版本。');
-    assert(compareVersions(value.minCoreVersion, SDK_API_MIN_CORE_VERSION) >= 0,
-      'APP_MANIFEST_INVALID', '新版 SDK 应用要求 minCoreVersion 至少为 0.5.3。');
+    assert(validVersion(value.sdkApiVersion) && validVersion(value.builtWithSdkVersion),
+      'APP_MANIFEST_INVALID', 'SDK API 目标与实际构建工具包必须分别声明完整版本。');
+    assert(compareVersions(value.minCoreVersion, compareVersions(value.sdkApiVersion,'1.2.0')>=0?'0.5.7':'0.5.3') >= 0,
+      'APP_MANIFEST_INVALID', 'SDK 1.2 应用要求 Core 0.5.7，旧版 API 保留原兼容下限。');
+    assert(value.builtWithSdkVersion===value.sdkApiVersion || compareVersions(value.minCoreVersion,SDK_TOOLKIT_MANIFEST_MIN_CORE_VERSION)>=0,
+      'APP_MANIFEST_INVALID', '独立工具包/API版本声明需要 Core 0.6.0 或更新版本。');
   }
+  assert(value.uiRuntime === undefined, 'APP_UI_RETIRED', '未发布的共享组件库已撤回；请将界面随应用打包并移除 uiRuntime 声明。');
   assert(Array.isArray(value.dataStores) && value.dataStores.length <= 64, 'APP_MANIFEST_INVALID', '应用必须声明 dataStores，无受管数据时使用空数组。');
   const stores = new Set();
   for (const store of value.dataStores) {
@@ -148,6 +156,7 @@ export function assertCompatible(manifest, {coreVersion, sdkCompatibility = SDK_
     'APP_SDK_INCOMPATIBLE', `应用需要 SDK API ${api}，宿主支持 ${sdkCompatibility.minCompatibleVersion} 至 ${sdkCompatibility.version}；请更新 Core 或选择兼容应用版本。`, 409);
   assert(validVersion(coreVersion), 'APP_HOST_VERSION_REQUIRED', '兼容检查需要实际 Core 版本。');
   assert(compareVersions(coreVersion, manifest.minCoreVersion) >= 0, 'APP_CORE_INCOMPATIBLE', `应用需要 Core ${manifest.minCoreVersion} 或更新版本，当前为 ${coreVersion}。`, 409);
+
   assert(!manifest.target || manifest.target === `${platform}-${arch}`, 'APP_PLATFORM_UNSUPPORTED', `此应用包不支持当前平台 ${platform}-${arch}。`);
   assert(!manifest.nodeAbi || manifest.nodeAbi === nodeAbi, 'APP_RUNTIME_INCOMPATIBLE', '此应用的原生模块与当前 Node.js 不兼容，请选择匹配的应用包。');
 }
@@ -175,6 +184,6 @@ export function decodePackage(bytes) {
   for (const path of [...entryPoints(value.manifest).flatMap(entry => [entry.entry, ...(entry.styles ?? [])]), ...(value.manifest.backend ? [value.manifest.backend.entry] : []),...(value.manifest.cli?[value.manifest.cli.entry,value.manifest.cli.documentation]:[])]) assert(files.has(path), 'APP_PACKAGE_INVALID', `应用包缺少入口：${path}`);
   if(value.manifest.cli)readCLIDocument(files.get(value.manifest.cli.documentation).data,{main:true});
   let listing;try{listing=JSON.parse(files.get('store/listing.json')?.data.toString('utf8'));}catch{assert(false,'APP_LISTING_INVALID','应用包缺少store/listing.json或格式无效。');}validateStoreListing(listing);
-  for(const image of [listing.icon,...(listing.screenshots??[])].filter(Boolean)){const file=files.get(image.url);assert(file&&file.data.length===image.size&&file.sha256===image.sha256,'APP_LISTING_INVALID','包内商店图片与声明不一致。');storeImageType(file.data);}
+  for(const image of [listing.icon,...(listing.screenshots??[])].filter(Boolean)){const file=files.get(image.url);assert(file&&file.data.length===image.size&&file.sha256===image.sha256,'APP_LISTING_INVALID','包内商店图片与声明不一致。');const type=storeImageType(file.data);assert(image!==listing.icon||type==='image/png','APP_LISTING_INVALID','应用图标必须使用 PNG 格式。');}
   return { manifest: value.manifest, files,listing };
 }

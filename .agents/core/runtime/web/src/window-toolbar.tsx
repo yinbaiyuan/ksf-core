@@ -1,1 +1,1 @@
-export * from '../../../applications/sdk/src/window-toolbar.tsx';
+export * from './internal-ui/compat-toolbar';

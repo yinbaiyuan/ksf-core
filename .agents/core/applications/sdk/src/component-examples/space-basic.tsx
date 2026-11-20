@@ -1,0 +1,2 @@
+import {useState} from 'react';import {Space} from '@ksf/sdk/space';import {Button} from '@ksf/sdk/button';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function SpaceBasicExample(){const [value,setValue]=useState('统一间距，自动换行');return <div className="ksf-demo-stack"><Space gap={12}><Button variant="solid" tone="primary" onClick={()=>setValue('已保存示例')}>保存</Button><Button onClick={()=>setValue('已取消')}>取消</Button><Button variant="text" onClick={()=>setValue('已查看帮助')}>帮助</Button></Space><output role="status">{value}</output></div>;}

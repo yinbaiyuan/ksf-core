@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-schedule';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function ScheduleReviewView({simulateFailure=false,empty=false}:{simulateFailure?:boolean;empty?:boolean}={}){const task=useLocalRequest();return <div ref={task.ref} style={{width:"100%",maxWidth:448,minWidth:0,marginInline:"auto"}}><FidelityScope module="ai-schedule">{empty?<EmptyState heading="没有可预约时段" description="由应用提供可用时间。"/>:<Source onBook={()=>task.request(undefined,900,simulateFailure?"模拟预约失败，所选时间保留。":undefined)}/>}</FidelityScope></div>;}

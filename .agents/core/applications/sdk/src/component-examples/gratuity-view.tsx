@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/tip-selector';import {useState} from 'react';import {FidelityScope} from '../fidelity/scope';import {EmptyState} from '../empty-state';import {useLocalRequest} from './local-request';
+/** Fixed free-source composition; fictional local data, no business service. */
+export function GratuityView({subtotal=42.6}:{subtotal?:number}={}){const [message,setMessage]=useState('');return <div style={{width:'100%',maxWidth:384,minWidth:0,marginInline:'auto'}}><FidelityScope module="tip-selector"><><Source subtotal={Math.max(0,subtotal)} onPay={total=>setMessage(`本地演示总额 $${total.toFixed(2)}，未发生付款。`)}/>{message&&<output>{message}</output>}</></FidelityScope></div>;}

@@ -1,0 +1,1 @@
+import {SwipeTabs} from '@ksf/sdk/swipe-tabs';import {swipeTabDemoItems} from '@ksf/sdk/component-examples/navigation-demo-data';export default function Example(){return <SwipeTabs label="Sections" items={swipeTabDemoItems}/>;}

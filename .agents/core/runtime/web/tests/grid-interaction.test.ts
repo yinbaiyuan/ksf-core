@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createElement } from 'react';
-import { createGridRefresh, refreshGridChild } from '../src/desktop/grid-interaction.ts';
+import { applyGridPositions, createGridRefresh, refreshGridChild } from '../src/desktop/grid-interaction.ts';
+
+test('preview restores previous targets while preserving the active raw coordinates until drop', () => {
+  const frame=[{i:'a',x:2,y:0,w:2,h:2},{i:'b',x:0,y:0,w:1,h:1},{i:'c',x:3,y:0,w:1,h:1}];
+  const preview=[{i:'a',x:3,y:0,w:2,h:2},{i:'b',x:2,y:0,w:1,h:1},{i:'c',x:0,y:0,w:1,h:1}];
+  applyGridPositions(frame,preview,'a');
+  assert.equal(frame[0].x,2);assert.equal(frame[1].x,2);assert.equal(frame[2].x,0);
+  applyGridPositions(frame,preview);
+  assert.deepEqual(frame,preview);
+});
 
 test('pixel refresh bypasses the grid memo only for the active card and preserves its content', () => {
   const content = createElement('p', null, 'card content');

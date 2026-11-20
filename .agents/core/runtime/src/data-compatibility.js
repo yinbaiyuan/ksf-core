@@ -57,6 +57,7 @@ export async function inspectCoreDataCompatibility(root,targetCore,{applicationS
     assert(state.schemaVersion===1&&state.installed&&typeof state.installed==='object','APP_STATE_INVALID','应用安装索引无效。');
     for(const [appId,app] of Object.entries(state.installed)){
       for(const release of [app.active,app.pending].filter(Boolean))try{
+        assert(!release.localBuild||target.localApplications===1,'APP_CORE_INCOMPATIBLE','目标 Core 不支持当前本地应用安装。');
         validateManifest(release.manifest);
         assert(target.sdkVersions.includes(release.manifest.sdkVersion),'APP_SDK_INCOMPATIBLE','目标 Core 不支持已安装应用协议。');
         assertCompatible(release.manifest,{coreVersion:build.version,sdkCompatibility:target.sdkCompatibility??{version:'1.0.0',minCompatibleVersion:'1.0.0'},...environment});

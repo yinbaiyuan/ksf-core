@@ -1,0 +1,7 @@
+import {forwardRef,type HTMLAttributes} from 'react';
+import Source from './fidelity/kokonut/liquid-gauge';
+import {FidelityScope} from './fidelity/scope';
+import {useValue,useFormReset,useElementRef} from './primitives/state';
+export interface LiquidGaugeProps extends Omit<HTMLAttributes<HTMLDivElement>,'defaultValue'|'onChange'|'children'>{label:string;value?:number;defaultValue?:number;onValueChange?:(value:number)=>void;total?:number;unit?:string;warningAt?:number;readOnly?:boolean;disabled?:boolean;paused?:boolean;name?:string}
+const percent=(value:number)=>Number.isFinite(value)?Math.max(0,Math.min(100,value)):0;
+export const LiquidGauge=forwardRef<HTMLDivElement,LiquidGaugeProps>(function LiquidGauge({label,value:controlled,defaultValue=72,onValueChange,total=128,unit='GB',warningAt=90,readOnly=false,disabled=false,paused=false,name,className,...props},ref){const [root,assign]=useElementRef(ref),[value,setValue]=useValue(controlled,percent(defaultValue),onValueChange);useFormReset(root,controlled===undefined,()=>setValue(percent(defaultValue)));return <div {...props} style={{maxWidth:'100%',minWidth:0,...props.style}} className={className}><FidelityScope module="liquid-gauge" paused={paused}><Source controlRef={assign} className="max-w-full" label={label} value={percent(value)} onValueChange={setValue} total={Math.max(0,Number.isFinite(total)?total:0)} unit={unit} warnAt={percent(warningAt)} readOnly={readOnly} disabled={disabled}/></FidelityScope>{name&&<input type="hidden" name={name} value={percent(value)} disabled={disabled}/>}</div>;});

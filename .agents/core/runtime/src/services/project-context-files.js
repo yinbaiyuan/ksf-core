@@ -406,5 +406,22 @@ export function createProjectContextFiles(files, storage) {
       return result;
     });
   }
-  return {call, close(){closed=true;reviews.clear();for(const key of watches.keys())stop(key);}};
+  async function guardOperation({path,action}) {
+    assert(!/^档案\/项目(?:\/|$)/.test(path),'PROJECT_CONTEXT_READONLY','归档项目请使用项目专用入口。',403);
+    const parts=path.split('/');if(parts[0]!=='项目'||parts.length<2)return;
+    assert(!reserved.has(posix.basename(path).toLowerCase()),'PROJECT_CONTEXT_READONLY','受管原件请使用项目专用入口。',403);
+    try{await files.locate('项目/'+parts[1]+'/project.md');}catch(error){if(['ENOENT','ENOTDIR'].includes(error.code))return;throw error;}
+    const state=readGovernance(root,parts[1],'current');
+    assert(state.format==='documents'&&!state.readOnly,'PROJECT_CONTEXT_READONLY','旧格式或不可写项目请使用项目专用入口。',403);
+    if(!state.project)return;
+    const owners=[state.project,...(state.documents??[])].filter(doc=>['project','milestone','task'].includes(doc.metadata?.kind)&&within(path,parent(doc.path))).sort((a,b)=>b.path.length-a.path.length);
+    const owner=owners[0];if(!owner)return;
+    const project=target({name:parts[1],scope:'current',objectPath:owner.path});
+    assert(project.writable&&path!==project.base&&filePolicy(path)==='editable'&&!reserved.has(posix.basename(path).toLowerCase()),'PROJECT_CONTEXT_READONLY','受管原件请使用项目专用入口。',403);
+    scopePath(project,path);
+    const refs=referencePaths(state.graph),item=await files.locate(path,{missing:true,missingParents:true});
+    assert(!refs.get(pathKey(path)),'PROJECT_CONTEXT_REFERENCED','已登记证据或引用不能由通用文件操作修改。',409);
+    if(item.stat)await guardMove(project,path,refs,item);
+  }
+  return {call,guardOperation, close(){closed=true;reviews.clear();for(const key of watches.keys())stop(key);}};
 }

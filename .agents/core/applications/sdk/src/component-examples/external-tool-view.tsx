@@ -1,0 +1,5 @@
+import {forwardRef,type AnchorHTMLAttributes} from 'react';
+import Source from '../fidelity/kokonut/v0-button';import {FidelityScope} from '../fidelity/scope';import '../fidelity/styles/v0-button.css';
+export interface ExternalToolViewProps extends AnchorHTMLAttributes<HTMLAnchorElement>{href:string;onOpen?:(href:string)=>void;disabled?:boolean}
+/** Composition helper. The application supplies its URL and uses the KSF external-link mechanism. */
+export const ExternalToolView=forwardRef<HTMLAnchorElement,ExternalToolViewProps>(function ExternalToolView({href,onOpen,disabled=false,onClick,...props},ref){return <FidelityScope module="v0-button" inline><Source {...props} role={props.role??'link'} style={{...props.style,...(disabled?{opacity:.5,cursor:'not-allowed'}:{})}} href={disabled?undefined:href} ref={ref} aria-disabled={disabled||undefined} tabIndex={disabled?-1:props.tabIndex} onClick={event=>{if(disabled){event.preventDefault();return;}onClick?.(event);if(onOpen&&!event.defaultPrevented){event.preventDefault();onOpen(href);}}}/></FidelityScope>;});

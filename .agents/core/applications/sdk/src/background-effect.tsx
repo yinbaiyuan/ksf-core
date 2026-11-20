@@ -1,0 +1,16 @@
+import {forwardRef,type ReactNode} from 'react';
+import {FidelityScope} from './fidelity/scope';
+import Halftone from './fidelity/kokonut/halftone-background';
+import Shapes from './fidelity/kokonut/shape-hero';
+import Paths from './fidelity/kokonut/background-paths';
+import Dots from './fidelity/kokonut/dot-field';
+import Flow from './fidelity/kokonut/flow-field';
+import Topo from './fidelity/kokonut/topo-background';
+import Drape from './fidelity/kokonut/drape-background';
+import Ink from './fidelity/kokonut/ink-background';
+import Caustics from './fidelity/kokonut/caustics-background';
+import Rain from './fidelity/kokonut/rain-glass-background';
+export type BackgroundMode='halftone'|'shapes'|'paths'|'dots'|'flow'|'topography'|'drape'|'ink'|'caustics'|'rain';
+export interface BackgroundEffectProps {label:string;mode:BackgroundMode;children?:ReactNode;headline?:string;paused?:boolean;interactive?:boolean;density?:number;source?:string;onAction?:(action:string)=>void}
+const localLandscape=new URL('./fidelity/assets/landscape.svg',import.meta.url).href;
+export const BackgroundEffect=forwardRef<HTMLDivElement,BackgroundEffectProps>(function BackgroundEffect({label,mode,children,headline,paused=false,interactive=true,density=1,source,onAction},ref){const common={interactive},content=mode==='halftone'?<Halftone cell={9/Math.max(.35,density)} src={source} loupe={interactive}>{children}</Halftone>:mode==='shapes'?<Shapes title={headline} actions={children}/>:mode==='paths'?<Paths {...common} count={Math.round(42*Math.max(.35,density))}>{children}</Paths>:mode==='dots'?<Dots {...common} spacing={16/Math.max(.35,density)}>{children}</Dots>:mode==='flow'?<div style={{position:'relative',height:560,width:'100%',overflow:'hidden',background:'var(--ksf-color-surface)',color:'var(--ksf-color-foreground)'}}><Flow {...common} density={density}>{children??<div style={{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:24,textAlign:'center'}}><h2 style={{fontSize:48,lineHeight:1.1,fontWeight:600,letterSpacing:'-.025em'}}>Ship with the wind</h2><p style={{maxWidth:384,fontSize:16,color:'var(--ksf-color-muted-foreground)'}}>The air parts around your cursor and swirls in its wake. Click anywhere for a gust.</p></div>}</Flow></div>:mode==='topography'?<Topo {...common}>{children}</Topo>:mode==='drape'?<Drape {...common}>{children}</Drape>:mode==='ink'?<Ink {...common} text={headline} accent="var(--ksf-color-primary)">{children}</Ink>:mode==='caustics'?<Caustics {...common} title={headline}>{children}</Caustics>:<Rain {...common} src={source??localLandscape} title={headline}>{children}</Rain>;return <div ref={ref} role="group" aria-label={label} onClick={event=>{const target=(event.target as Element).closest('a,button');if(target){event.preventDefault();onAction?.(target.textContent?.trim()??'');}}} style={{width:'100%',minWidth:0}}><FidelityScope module={{halftone:"halftone-background",shapes:"shape-hero",paths:"background-paths",dots:"dot-field",flow:"flow-field",topography:"topo-background",drape:"drape-background",ink:"ink-background",caustics:"caustics-background",rain:"rain-glass-background"}[mode]} paused={paused}>{content}</FidelityScope></div>});

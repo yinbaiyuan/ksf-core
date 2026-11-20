@@ -1,0 +1,5 @@
+import {useState,useRef,useEffect} from 'react';
+import {Button} from '@ksf/sdk/button';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+import {Toast,useFeedback} from '@ksf/sdk/toast';
+export function ToastStatesExample(){const feedback=useFeedback(),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);useEffect(()=>()=>clearTimeout(timer.current),[]);return <div className='ksf-demo-stack'><div className='ksf-demo-row'><Button onClick={()=>{const id=feedback.show({id:'task',tone:'loading',heading:'正在保存',duration:0});clearTimeout(timer.current);timer.current=setTimeout(()=>feedback.update(id,{tone:'success',heading:'保存完成',description:'同一条消息已更新。',duration:3}),1200);}}>加载后更新</Button><Button onClick={()=>feedback.show({heading:'持续通知',description:'由用户明确关闭。',duration:0,actions:<Button size='small' onClick={()=>feedback.clear()}>已读并关闭</Button>})}>手动关闭</Button><Button onClick={feedback.clear}>清空</Button></div><Toast items={feedback.items} onDismiss={feedback.dismiss}/></div>;}

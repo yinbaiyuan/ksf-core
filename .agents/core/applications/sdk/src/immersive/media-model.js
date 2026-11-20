@@ -1,0 +1,5 @@
+const bound=(value,min,max,fallback=min)=>Math.max(min,Math.min(max,Number.isFinite(value)?value:fallback));
+export function normalizePoint(point){return {x:bound(point?.x,0,1,.5),y:bound(point?.y,0,1,.5)};}
+export function straightenScale(angle,aspect=1.6){const a=bound(angle,-45,45)*Math.PI/180,r=Number.isFinite(aspect)&&aspect>0?aspect:1.6;return Math.max(Math.cos(a)+Math.abs(Math.sin(a))*r,Math.cos(a)+Math.abs(Math.sin(a))/r);}
+export function normalizeTrim(start,end,duration,minLength=1){const max=Number.isFinite(duration)&&duration>0?duration:0;if(!max)return [0,0];const length=Math.min(max,Math.max(.01,Number.isFinite(minLength)?minLength:1)),a=bound(start,0,max-length),b=bound(end,a+length,max,max);return [a,b];}
+export function cropWindow(point,sourceAspect,targetAspect){const p=normalizePoint(point),s=Number.isFinite(sourceAspect)&&sourceAspect>0?sourceAspect:1,t=Number.isFinite(targetAspect)&&targetAspect>0?targetAspect:1;const width=t<s?t/s:1,height=t>s?s/t:1;return {x:(1-width)*p.x,y:(1-height)*p.y,width,height};}

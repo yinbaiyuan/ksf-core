@@ -59,13 +59,14 @@ export function encodeProject(current, input) {
   return { bytes, parsed: verified, changes: { metadata: fields, body: bodyChanged } };
 }
 
-export function planProjectWrite(current, { root, name, data, dryRun = false }, { metadataOnly = false } = {}) {
+export function planProjectWrite(current, { root, name, data, dryRun = false }, { metadataOnly = false, artifacts = null } = {}) {
   const encoded = encodeProject(current, data);
   const wouldChange = !current.snapshot || !encoded.bytes.equals(current.snapshot.bytes);
   const result = { name, scope: current.projectScope ?? 'current', path: portable(relative(root, current.target)), dryRun, changed: false, wouldChange,
     ...(!metadataOnly ? { created: false, wouldCreate: !current.snapshot, changes: encoded.changes } : {}),
     project: publicProject(root, name, encoded.parsed, 'all', current.projectScope) };
-  return { result, bytes: encoded.bytes, wouldChange };
+  if(artifacts)result.directoryChanges=artifacts.previous?[]:[{path:artifacts.path,action:'create'}];
+  return { result, bytes: encoded.bytes, wouldChange, artifacts };
 }
 
 export function planProjectRemoval(current, { root, name, dryRun = false }, entries = []) {

@@ -88,8 +88,9 @@ if (typeof window !== 'undefined') {
  *   fallback — backdrop-filter blur, for WebKit/Gecko with no known backdrop.
  */
 export class Surface {
-  constructor(host, { radius = 16, bleed = 16, optics: o = {}, owner = host } = {}) {
+  constructor(host, { radius = 16, bleed = 16, optics: o = {}, owner = host, geometryAnchor = null } = {}) {
     this.host = host;
+    this.geometryAnchor = geometryAnchor;
     this.owner = owner; // element carrying the backdrop attribute
     this.radius = radius;
     this.bleed = bleed;
@@ -174,7 +175,21 @@ export class Surface {
     if (W && H && this.mode === 'copy') {
       let sr = sources.get(this.source);
       if (!sr) { sr = this.source.getBoundingClientRect(); sources.set(this.source, sr); }
-      const lr = this.layer.getBoundingClientRect();
+      let lr;
+      const anchor = this.geometryAnchor;
+      if (anchor?.isConnected && anchor.contains(this.layer)) {
+        // Layout offsets deliberately exclude the card's perspective/tilt transform.
+        // The stable ancestor still includes the desktop grid's own position and scroll.
+        let x = 0, y = 0, node = this.layer;
+        while (node && node !== anchor) {
+          x += node.offsetLeft; y += node.offsetTop;
+          const parent = node.offsetParent;
+          if (parent) { x += parent.clientLeft - parent.scrollLeft; y += parent.clientTop - parent.scrollTop; }
+          node = parent;
+        }
+        if (node === anchor) { const rect = anchor.getBoundingClientRect(); lr = { left: rect.left + x, top: rect.top + y }; }
+      }
+      lr ??= this.layer.getBoundingClientRect();
       alignment = { width: sr.width, height: sr.height, x: sr.left - lr.left, y: sr.top - lr.top };
     }
     return { W, H, alignment, deferMap: [...resizing].some(root => root.contains(this.host)) };

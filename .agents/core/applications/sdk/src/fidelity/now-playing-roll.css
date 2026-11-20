@@ -1,0 +1,10 @@
+/* Fixed free MIT Kokonut UI 655ec61161aff87721e4c60c3cc4dc3329f3e80e. Copyright (c) 2025 kokonutUI; full notice is shipped. */
+@keyframes now-playing-in-up{from{transform:translateY(90%);opacity:0}to{transform:none;opacity:1}}
+@keyframes now-playing-out-up{from{transform:none;opacity:1}to{transform:translateY(-90%);opacity:0}}
+@keyframes now-playing-in-down{from{transform:translateY(-90%);opacity:0}to{transform:none;opacity:1}}
+@keyframes now-playing-out-down{from{transform:none;opacity:1}to{transform:translateY(90%);opacity:0}}
+@media (prefers-reduced-motion:reduce){.now-playing-roll{animation:none!important}.now-playing-roll-prev{display:none}}
+.now-playing-roll[data-ksf-disc-digit="in"][data-ksf-disc-direction="up"]{animation:now-playing-in-up 220ms cubic-bezier(.23,1,.32,1) both}
+.now-playing-roll[data-ksf-disc-digit="in"][data-ksf-disc-direction="down"]{animation:now-playing-in-down 220ms cubic-bezier(.23,1,.32,1) both}
+.now-playing-roll[data-ksf-disc-digit="out"][data-ksf-disc-direction="up"]{animation:now-playing-out-up 220ms cubic-bezier(.23,1,.32,1) both}
+.now-playing-roll[data-ksf-disc-digit="out"][data-ksf-disc-direction="down"]{animation:now-playing-out-down 220ms cubic-bezier(.23,1,.32,1) both}

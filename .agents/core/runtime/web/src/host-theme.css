@@ -1,0 +1,213 @@
+@import './window-toolbar.css';
+/* Host-owned surfaces only. These variables never recolor application content. */
+.host-theme-light {
+  color-scheme: light;
+  --host-ink:#1b1b1b; --host-muted:#5c5c5c; --host-panel:#f5f6f8; --host-panel-rgb:245 246 248; --host-chrome-wash:.78;
+  --host-raised:#fafbfc; --host-inset:#e7e9ec; --host-hover:#e1e4e9; --host-border:#b8bdc5;
+  --host-hairline:#ffffff45; --host-accent:#005fb8; --host-selected:#e0eaf3; --host-selected-ink:#005fb8;
+  --host-shadow:0 12px 32px #161c2626; --host-danger:#aa302e; --host-running:#717985;
+  --host-control-tint:rgb(255 255 255 / .24); --host-control-close-tint:rgb(224 0 0 / .82); --host-control-shine:.65;
+}
+.host-theme-dark {
+  color-scheme: dark;
+  --host-ink:#ffffff; --host-muted:#c5c5c5; --host-panel:#282828; --host-panel-rgb:40 40 40; --host-chrome-wash:.72;
+  --host-raised:#343941; --host-inset:#22262d; --host-hover:#3c424b; --host-border:#626973;
+  --host-hairline:#ffffff0d; --host-accent:#60cdff; --host-selected:#2e393e; --host-selected-ink:#60cdff;
+  --host-shadow:0 14px 36px #0c0f144d; --host-danger:#ffb1a9; --host-running:#a2a8b2;
+  --host-control-tint:rgb(255 255 255 / .1); --host-control-close-tint:rgb(224 0 0 / .82); --host-control-shine:.2;
+}
+.os-desktop { --desktop-dock-bottom:0px; color:var(--host-ink); }
+.os-desktop .host-frost { position:absolute; inset:0; z-index:-1; border-radius:inherit; pointer-events:none; background:rgb(var(--host-panel-rgb) / var(--host-opacity,.9)); backdrop-filter:blur(var(--host-blur,16px)); -webkit-backdrop-filter:blur(var(--host-blur,16px)); }
+.os-desktop .host-live-frost { background:var(--lg-tint); -webkit-backdrop-filter:var(--lg-fallback); backdrop-filter:var(--lg-fallback); box-shadow:inset 0 1px 0 rgb(255 255 255 / var(--lg-live-highlight)); }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.os-desktop .host-live-frost{background:var(--host-panel)}}
+.os-desktop .os-statusbar > :not(.glass-surface),.os-desktop .os-dock > :not(.glass-surface),.os-desktop .desktop-widget > :not(.glass-surface):not(.host-frost) { z-index:1; }
+.os-desktop :is(.os-statusbar,.os-dock,.desktop-widget) > .glass-surface { z-index:0; }
+.os-desktop :is(.os-statusbar,.os-dock) > .glass-reduced { background:var(--host-panel); }
+.os-desktop .desktop-widget > .glass-reduced { background:#eff4fa; }
+.os-desktop .os-statusbar { padding-inline:12px 18px; border-color:color-mix(in srgb,var(--host-border) 55%,transparent); box-shadow:none; color:var(--host-ink); font-weight:500; }
+/* A neutral wash stabilizes chrome contrast over any user wallpaper. The live
+   frost underneath still owns blur and every saved material parameter. */
+.os-desktop :is(.os-statusbar,.os-dock)::after { content:''; position:absolute; inset:0; z-index:0; background:rgb(var(--host-panel-rgb) / var(--host-chrome-wash)); pointer-events:none; }
+.os-desktop .status-right { font-size:12px; }
+.os-desktop.host-theme-dark .desktop-save { -webkit-text-stroke:.3px #17283dc0; paint-order:stroke fill; text-shadow:0 1px 2px #17283df2,0 0 1px #17283d; }
+.os-desktop .status-right time { -webkit-text-stroke:0; text-shadow:none; }
+.os-desktop .desktop-surface { inset:var(--desktop-statusbar-height) 28px calc(var(--desktop-dock-height) + 12px); }
+.os-desktop .desktop-motto { margin-left:0; }
+.os-desktop .desktop-heading h1 { color:var(--host-ink); text-shadow:0 1px 12px #ffffff70; }
+.os-desktop.host-theme-dark .desktop-heading h1 { text-shadow:0 1px 10px #07132280; }
+.os-desktop .desktop-heading p,.os-desktop .desktop-actions > span { color:var(--host-ink); font-size:13px; line-height:1.6; }
+.os-desktop .desktop-actions > button { border-radius:2px; background:var(--host-raised); color:var(--host-ink); border-color:var(--host-border); }
+.os-desktop .desktop-widget { border:1px solid color-mix(in srgb,var(--host-border) 65%,transparent); border-radius:2px; color:var(--host-ink); box-shadow:0 4px 14px #11294418; }
+.os-desktop .desktop-widget::after { border:0; }
+/* Cards provide their own content styling; only the containing frame is themed. */
+.os-desktop .widget-content { color:#1d304a; }
+.os-desktop.host-theme-dark .desktop-widget .host-frost { background:rgb(239 244 250 / var(--host-opacity,.9)); }
+.os-desktop .desktop-grid[data-glass-interacting] .desktop-widget { background:#eff4fa; }
+.os-desktop .desktop-grid-guides i,.os-desktop .desktop-grid .react-grid-placeholder { border-radius:2px; }
+.os-desktop .os-window { --window-inner-radius:max(0px,calc(var(--window-radius) - 1px)); border:1px solid var(--host-border); border-radius:var(--window-radius); background:transparent; box-shadow:var(--host-shadow); }
+.os-desktop .os-window.is-active { border-color:var(--host-accent); box-shadow:var(--host-shadow),0 0 0 .5px var(--host-hairline); }
+.os-desktop .os-window.is-maximized { --window-radius:0px; border-radius:0; }
+.os-desktop .os-window > .os-titlebar,.os-desktop .os-window.is-active > .os-titlebar { position:relative; isolation:isolate; background:transparent; color:var(--host-ink); border-bottom:1px solid var(--host-border); border-radius:var(--window-inner-radius) var(--window-inner-radius) 0 0; box-shadow:inset 0 1px var(--host-hairline); gap:10px; padding:0 10px 0 0; }
+.os-desktop .os-window > .os-app-root { border-radius:0 0 var(--window-inner-radius) var(--window-inner-radius); }
+.os-desktop .os-titlebar > :not(.glass-surface) { position:relative; z-index:1; }
+.os-desktop .window-lights { align-self:stretch; align-items:center; gap:0; }
+.os-desktop .window-lights button,.os-desktop .os-window:not(.is-active) .window-lights button { position:relative; isolation:isolate; width:34px; height:34px; border:0; border-radius:2px; background:transparent; color:var(--host-ink); box-shadow:none; }
+.os-desktop .window-lights button::before { content:''; position:absolute; inset:0; z-index:0; border-radius:inherit; pointer-events:none; opacity:0; background:var(--host-control-tint); box-shadow:inset 0 1px rgb(255 255 255 / calc(var(--host-control-shine)*var(--window-control-glass,1))),inset 0 0 0 1px rgb(255 255 255 / calc(.18*var(--window-control-glass,1))); transition:opacity 120ms ease; }
+.os-desktop .window-lights button:is(:hover,:focus-visible)::before { opacity:1; -webkit-backdrop-filter:blur(var(--window-control-blur,12px)) saturate(1.3); backdrop-filter:blur(var(--window-control-blur,12px)) saturate(1.3); }
+.os-desktop .window-lights button svg { position:relative; z-index:1; }
+.os-desktop .window-lights button svg { opacity:1; }
+.os-desktop .window-lights button:hover { background:transparent; }
+.os-desktop .os-window .window-lights button.light-close:is(:hover,:focus-visible) { background:transparent; color:#fff; }
+.os-desktop .window-lights .light-close:is(:hover,:focus-visible)::before { background:var(--host-control-close-tint); }
+.os-desktop .window-lights button:focus-visible { outline:2px solid var(--host-accent); outline-offset:-3px; }
+.os-desktop .os-app-root { color-scheme:light; color:#1d2d44; background:#fff; }
+/* Fill the edge, while the central group is constrained symmetrically. */
+.os-desktop .os-dock { left:0; right:0; bottom:0; width:100%; max-width:none; transform:none; border:0; border-top:1px solid color-mix(in srgb,var(--host-border) 55%,transparent); border-radius:0; padding:3px 12px; gap:0; box-shadow:none; color:var(--host-ink); }
+.os-desktop .taskbar-pages { display:flex; width:max-content; max-width:min(300px,24vw); flex:none; }
+.os-desktop .taskbar-tools { margin-left:auto; display:flex; gap:8px; align-items:center; flex:none; }
+.os-desktop .taskbar-center { position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:6px; width:max-content; max-width:calc(100% - 2 * var(--taskbar-side,180px)); min-width:0; }
+.os-desktop .dock-applications { min-width:0; overscroll-behavior-x:contain; }
+.os-desktop .dock-item { height:calc(var(--desktop-dock-height) - 5px); padding:0; border-radius:2px; }
+.os-desktop .dock-item:hover,.os-desktop .dock-item:focus-visible { background:transparent; }
+.os-desktop .dock-item:focus-visible { outline:2px solid var(--host-accent); outline-offset:1px; }
+.os-desktop .dock-item:hover .app-icon { transform:none; }
+.os-desktop .dock-item .dock-running { background:var(--host-running); width:8px; height:2px; border-radius:1px; box-shadow:none; transition:width 160ms ease,background-color 160ms ease; }
+.os-desktop .dock-item.is-active .dock-running { width:18px; background:var(--host-accent); }
+.os-desktop .dock-tooltip,body .dock-tooltip.host-surface { width:max-content; max-width:min(280px,calc(100vw - 16px)); white-space:normal; overflow-wrap:anywhere; text-align:center; font-size:12px; line-height:18px; background:var(--host-panel); color:var(--host-ink); border:1px solid var(--host-border); border-radius:2px; box-shadow:var(--host-shadow); }
+.os-desktop .launcher-icon { border-radius:2px; background:#526780; box-shadow:inset 0 1px #ffffff45; }
+.os-desktop .desktop-icon { background:none; box-shadow:none; color:inherit; display:grid; place-items:center; }
+.os-desktop .desktop-icon,.os-desktop .desktop-icon > svg { width:21px; height:21px; }
+.os-desktop .taskbar-tools .dock-item { width:36px; height:36px; padding:0; }
+.os-desktop .dock-divider { background:var(--host-border); }
+.os-desktop .desktop-sidebar { position:static; transform:none; display:flex; flex-direction:row; width:auto; min-width:0; max-width:100%; height:34px; max-height:34px; padding:0; background:transparent; border:0; box-shadow:none; backdrop-filter:none; color:inherit; }
+.os-desktop .desktop-group-list { flex-direction:row; width:auto; flex:0 1 auto; gap:2px; padding:1px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+.os-desktop .page-menu-trigger { display:none; }
+/* Body portals explicitly opt in; no selectors target app-owned UI. */
+body .host-surface { color:var(--host-ink); font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif; }
+body :is(.host-surface.sheet,.host-surface.dock-context-menu,.host-surface.os-application-dropdown,.host-surface.application-launcher,.host-surface.settings-confirm) { background:var(--host-panel); color:var(--host-ink); border:1px solid var(--host-border); border-radius:2px; box-shadow:var(--host-shadow),inset 0 1px var(--host-hairline); }
+body .host-surface.application-launcher { background:rgb(var(--host-panel-rgb) / .97); backdrop-filter:blur(16px); }
+body .host-surface.application-launcher::after { display:none; }
+body .host-surface :is(button,input,textarea,select,fieldset,article,details,pre,.settings-group-body,.settings-form-body,.settings-group-row,.settings-category-icon) { border-radius:2px; border-color:var(--host-border); }
+body .host-surface :is(button,summary) { color:inherit; }
+body .host-surface :is(h1,h2,h3,h4,strong,label,legend) { color:var(--host-ink); }
+body .host-surface :is(p,small,code,.settings-link-value,.settings-feedback,.settings-metadata,.settings-notice,.settings-description,.material-object-note,.material-range,.material-number,.settings-save-status,.dock-window-target) { color:var(--host-muted); }
+body .host-surface :is(input:not([type=radio]):not([type=checkbox]):not([type=range]):not([type=color]),textarea,select,pre) { background:var(--host-raised); color:var(--host-ink); border-color:var(--host-border); }
+body .host-surface :is(input,button,select,textarea):focus-visible { outline:2px solid var(--host-accent); outline-offset:2px; }
+body .host-surface :is(.settings-navigation,.settings-titlebar,.settings-layout,.settings-group-body,.settings-form-body,.settings-link,.settings-group-row,.widget-library article) { background:var(--host-panel); color:var(--host-ink); border-color:var(--host-border); }
+body .host-surface .settings-navigation { background:var(--host-inset); }
+body .host-surface :is(.settings-link:hover,.settings-tabs button:hover,.settings-close-button:hover,.settings-back-button:hover) { background:var(--host-hover); border-color:var(--host-border); color:var(--host-ink); }
+body .host-surface.application-launcher .launcher-application { background:transparent; border-color:transparent; box-shadow:none; }
+body .host-surface .settings-tabs button { background:transparent; color:var(--host-ink); border-radius:2px; }
+body .host-surface .settings-tabs button[aria-selected=true] { background:var(--host-selected); color:var(--host-selected-ink); box-shadow:inset 2px 0 var(--host-accent); }
+body .host-surface :is(.settings-editor-actions button:not([data-ksf-component="button"]),.configuration-actions button,.settings-button,.settings-form-actions button,.settings-desktop-actions button,.settings-add-group,.group-switch-actions button,.group-delete-confirm button,.widget-library button,.button):not([data-ksf-component="button"]) { background:var(--host-raised); color:var(--host-ink); border-color:var(--host-border); border-radius:2px; }
+body .host-surface :is(button.settings-primary,.os-primary) { background:var(--host-selected); color:var(--host-selected-ink); border-color:var(--host-accent); }
+body .host-surface :is(button.settings-danger,.is-danger) { color:var(--host-danger); }
+body :is(.host-surface.dock-context-menu,.host-surface.os-application-dropdown) button { color:var(--host-ink); border-radius:1px; }
+body :is(.host-surface.dock-context-menu,.host-surface.os-application-dropdown) button:is(:hover,:focus-visible,[aria-expanded=true],[aria-checked=true]):not(:disabled) { background:var(--host-selected); color:var(--host-selected-ink); }
+body .host-surface :is(.dock-window-target,.has-separator::before,hr) { border-color:var(--host-border); }
+body .host-surface.dock-context-menu h3 { color:var(--host-muted); }
+body .host-surface.launcher-context-menu button:disabled { color:var(--host-muted); opacity:.6; }
+body .host-surface.sidebar-tooltip { top:auto; transform:translateX(-50%); max-width:min(260px,calc(100vw - 16px)); z-index:2000; }
+body .host-surface.page-group-menu { width:min(280px,calc(100vw - 16px)); min-width:0; }
+.os-desktop .background-apps .os-menu > div { background:var(--host-panel); color:var(--host-ink); border:1px solid var(--host-border); border-radius:2px; }
+.os-desktop .background-apps .os-menu > div :is(button,h3,p) { color:inherit; border-radius:1px; }
+.os-desktop .background-apps .os-menu > div button:hover { color:var(--host-selected-ink); background:var(--host-selected); }
+.os-desktop :is(.ksf-system-trigger,.os-application-menubar > button,.os-menu summary) { border-radius:1px; }
+.os-desktop :is(.ksf-system-trigger:hover,.os-application-menubar > button:hover,.os-application-menubar > button[aria-expanded=true],.os-menu[open] summary) { background:var(--host-hover); }
+.os-desktop .os-application-menubar > button[aria-expanded=true] { box-shadow:inset 2px 0 var(--host-accent); }
+.os-desktop .status-layer-icon { display:block; width:18px; height:18px; object-fit:contain; filter:brightness(0); opacity:.85; }
+.os-desktop.host-theme-dark .status-layer-icon { filter:brightness(0) invert(1); }
+.os-desktop .background-apps summary .status-app-icon { filter:grayscale(1); }
+.host-theme-choices { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; padding:12px; border:1px solid var(--host-border); }
+.host-theme-choices legend { padding-inline:4px; font-weight:600; }
+.host-theme-choices label { display:flex; align-items:center; gap:7px; flex:1; min-width:100px; padding:10px 12px; background:var(--host-raised); border:1px solid var(--host-border); cursor:pointer; }
+.host-theme-choices label.is-selected { background:var(--host-selected); border-color:var(--host-accent); }
+.host-theme-choices input { accent-color:var(--host-accent); width:16px; height:16px; }
+.desktop-appearance-settings { margin:18px 0; padding:4px 16px 16px; border:1px solid var(--host-border); min-width:0; }
+.desktop-appearance-settings legend { padding-inline:4px; font-size:13px; font-weight:600; }
+.desktop-appearance-settings .material-object-note { margin:12px 0; }
+.desktop-appearance-settings > button { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.no-host-motion .desktop-grid .has-grid-motion > .desktop-tile.react-grid-item { transition:none; }
+.no-host-motion .window-lights button::before { transition:none; }
+@media(max-width:639px) {
+ .os-desktop .os-statusbar { padding-inline:6px; }
+ .os-desktop .status-right { gap:6px; margin-left:4px; font-size:12px; }
+ .os-desktop .status-right time { max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+ .os-desktop .status-left { gap:4px; }
+ .os-desktop .ksf-system-trigger { width:30px; }
+ .os-desktop .desktop-surface { left:16px; right:16px; }
+ .os-desktop .desktop-motto { margin-left:0; }
+ .os-desktop .desktop-heading { min-height:88px; }
+ .os-desktop .desktop-heading h1 { font-size:22px; }
+ .os-desktop .os-dock { padding-inline:8px; }
+ .os-desktop .taskbar-pages { width:48px; max-width:48px; }
+ .os-desktop .desktop-group-list { display:none; }
+ .os-desktop .page-menu-trigger { display:grid; }
+ .os-desktop .page-menu-trigger { width:44px; min-width:44px; }
+ .os-desktop .page-menu-trigger .group-menu-label { display:none; }
+ .os-desktop:not(.is-editing) .desktop-actions { display:none; }
+ .os-desktop .desktop-heading { min-height:80px; padding-block:16px; }
+ .os-desktop .taskbar-center > .dock-item { width:34px; height:34px; padding:0; }
+ .os-desktop .taskbar-center > .dock-item .launcher-icon { width:28px; height:28px; }
+ .os-desktop .taskbar-center > .dock-item .launcher-icon > svg { width:20px; height:20px; }
+ .os-desktop .taskbar-tools { gap:4px; }
+ .os-desktop .taskbar-tools .dock-item { width:30px; }
+ body .host-surface.sheet { max-width:calc(100vw - 16px); }
+ body .host-surface.settings-window { width:calc(100vw - 16px); height:calc(100dvh - 64px); }
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+ .os-desktop :is(.os-statusbar,.os-dock)::after { display:none; }
+ .os-desktop .window-lights button:is(:hover,:focus-visible)::before { background:var(--host-hover); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
+ .os-desktop .window-lights .light-close:is(:hover,:focus-visible)::before { background:rgb(224 0 0); }
+ .os-desktop .host-live-frost { background:var(--host-panel); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
+ .os-desktop .host-frost { background:var(--host-panel); backdrop-filter:none; }
+ .os-desktop .desktop-widget .host-frost { background:#eff4fa; }
+ body .host-surface.application-launcher { background:var(--host-panel); backdrop-filter:none; }
+}
+@media(forced-colors:active) {
+ .os-desktop :is(.os-statusbar,.os-dock)::after { display:none; }
+ .os-desktop .window-lights button:is(:hover,:focus-visible)::before { background:ButtonFace; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:inset 0 0 0 1px ButtonText; }
+ .os-desktop .window-lights .light-close:is(:hover,:focus-visible)::before { background:ButtonFace; }
+ .os-desktop .os-window .window-lights button.light-close:is(:hover,:focus-visible) { color:ButtonText; }
+ .os-desktop .host-live-frost { background:Canvas; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
+ .os-desktop,.host-surface { --host-ink:CanvasText; --host-muted:CanvasText; --host-panel:Canvas; --host-raised:Canvas; --host-inset:Canvas; --host-hover:Highlight; --host-border:CanvasText; --host-accent:Highlight; --host-selected:Highlight; --host-selected-ink:HighlightText; --host-shadow:none; }
+ .os-desktop .host-frost { background:Canvas; backdrop-filter:none; }
+ .os-desktop .dock-item .dock-running { background:CanvasText; box-shadow:none; forced-color-adjust:none; }
+ .os-desktop .dock-item.is-active .dock-running { background:Highlight; }
+}
+/* Settings has its own dense selectors. Override them at the host boundary,
+   including legacy material editors, without crossing into SDK app surfaces. */
+body .host-surface.sheet.system-settings.settings-window { border-radius:2px; background:var(--host-panel); color:var(--host-ink); border-color:var(--host-border); }
+body .host-surface.system-settings.settings-window :is(.settings-navigation,.settings-layout,.settings-titlebar,.settings-group-body,.settings-form-body,.configuration-migration,.material-settings-content,.settings-group-row) { background:var(--host-panel); color:var(--host-ink); border-color:var(--host-border); border-radius:2px; }
+body .host-surface.system-settings.settings-window .settings-navigation { background:var(--host-inset); border-radius:0; }
+body .host-surface.system-settings.settings-window :is(button,fieldset,details,pre,.settings-category-icon) { border-radius:2px; }
+body .host-surface.system-settings.settings-window :is(h2,h3,h4,strong,label,legend,.material-range,.material-number) { color:var(--host-ink); }
+body .host-surface.system-settings.settings-window :is(p,small,code,.settings-link-value,.settings-feedback,.settings-metadata,.settings-notice,.settings-description,.material-object-note,.settings-save-status,.settings-documentation-link) { color:var(--host-muted); }
+body .host-surface.system-settings.settings-window .settings-tabs button { background:transparent; color:var(--host-ink); }
+body .host-surface.system-settings.settings-window .settings-tabs button:hover { background:var(--host-hover); }
+body .host-surface.system-settings.settings-window .settings-tabs button[aria-selected=true] { background:var(--host-selected); color:var(--host-selected-ink); box-shadow:inset 2px 0 var(--host-accent); }
+body .host-surface.system-settings.settings-window :is(.settings-link,.settings-button,.settings-editor-actions button:not([data-ksf-component="button"]),.configuration-actions button,.settings-form-actions button,.settings-desktop-actions button,.settings-add-group,.button):not([data-ksf-component="button"]) { background:var(--host-raised); border-color:var(--host-border); color:var(--host-ink); }
+body .host-surface.system-settings.settings-window :is(.settings-link:hover,.settings-button:hover,.settings-close-button:hover,.settings-back-button:hover) { background:var(--host-hover); }
+body .host-surface.system-settings.settings-window .settings-page :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea) { background:var(--host-raised); color:var(--host-ink); border-color:var(--host-border); border-radius:2px; }
+body .host-surface.sheet.system-settings.settings-window .settings-page input[type=radio] { width:16px; height:16px; min-height:0; padding:0; margin:0; flex:none; }
+body .host-surface.system-settings.settings-window .host-theme-choices label { color:var(--host-ink); }
+body .host-surface.system-settings.settings-window .host-theme-choices span { white-space:nowrap; }
+body .host-surface.system-settings.settings-window .settings-page button.settings-primary { background:var(--host-selected); color:var(--host-selected-ink); border-color:var(--host-accent); }
+body .host-surface.system-settings.settings-window .settings-page button.settings-danger { background:var(--host-raised); color:var(--host-danger); }
+/* The shared toolbar sits in host chrome; its app body remains untouched. */
+.os-desktop .os-titlebar .window-toolbar-host { color:var(--host-ink); --ksf-toolbar-selection:var(--host-selected); --ksf-toolbar-selection-ink:var(--host-selected-ink); --ksf-toolbar-focus:var(--host-accent); --ksf-toolbar-panel:var(--host-panel); --ksf-toolbar-ink:var(--host-ink); --ksf-toolbar-muted:var(--host-muted); --ksf-toolbar-border:var(--host-border); }
+.os-desktop .os-titlebar .window-toolbar-host .app-breadcrumb { color:var(--host-ink); }
+.os-desktop .os-titlebar .window-toolbar-host :is(.window-toolbar,.window-navigation,.window-actions,.app-breadcrumb,.app-breadcrumb small,.breadcrumb,.window-command,.window-nav-button,button,a):not(:where(.window-command-menu *,[role=menu] *,[role=dialog] *,.ksf-ui-root *)) { color:var(--host-ink); }
+.os-desktop .os-titlebar .window-toolbar-host :is(button,.window-command):not(:where(.ksf-ui-root *)) { border-radius:2px; }
+.os-desktop .os-titlebar .window-toolbar-host :is(button:hover,button[aria-pressed=true]):not(:where(.ksf-ui-root *)) { background:var(--host-selected); color:var(--host-selected-ink); }
+.os-desktop .os-titlebar .window-toolbar-host button svg { color:inherit; }
+.os-desktop .os-application-menubar > button.is-application-name { flex:0 1 auto; min-width:0; }
+body .host-surface.system-settings.settings-window .settings-editor-actions { background:var(--host-panel); }
+.os-desktop .ksf-pairing-notifications { border-radius:2px; background:var(--host-panel); color:var(--host-ink); border-color:var(--host-border); box-shadow:var(--host-shadow); }
+.os-desktop .ksf-pairing-notifications :is(span,small) { color:var(--host-muted); }
+.os-desktop .ksf-pairing-notifications button { border-radius:2px; background:var(--host-raised); color:var(--host-ink); border-color:var(--host-border); }
+.os-desktop .ksf-pairing-notifications button.ksf-pairing-accept { background:var(--host-selected); color:var(--host-selected-ink); border-color:var(--host-accent); }
+
+/* A narrow desktop keeps the current task and commands readable. */
+.os-desktop .status-time{margin-inline-start:1em}
+@media(max-width:479px){.os-desktop .status-date{display:none}.os-desktop .status-time{margin-inline-start:0}.os-desktop .status-right time{overflow:visible}}

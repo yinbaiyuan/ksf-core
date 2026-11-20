@@ -78,6 +78,7 @@ export function validateMetadata(d){
   const refs=(a,k)=>{if(!Array.isArray(a)){add(k,'应为关联列表。');return;}const ids=new Set();for(const r of a){ref(r,k);if(ids.has(r?.id))add(k,'关联重复。');ids.add(r?.id);}};
   const criteria=()=>{if(!Array.isArray(m.criteria)){add('criteria','需要完成条件列表。');return;}const ids=new Set();for(const c of m.criteria){if(!object(c)||!identifier(c.id)||typeof c.text!=='string'||!c.text.trim()||ids.has(c.id))add('criteria','条件需要唯一id和明确text。');ids.add(c?.id);}};
   if(m.kind==='project'){
+    if(m.project_merge_history!==undefined&&(!Array.isArray(m.project_merge_history)||m.project_merge_history.some(e=>!object(e)||!identifier(e.operation_id)||!timestamp(e.at)||!identifier(e.source_id)||typeof e.source_path!=='string'||typeof e.snapshot_path!=='string'||!Array.isArray(e.moves))))add('project_merge_history','子项目合并历史格式无效。');
     if(m.task_numbering_history!==undefined&&(!Array.isArray(m.task_numbering_history)||m.task_numbering_history.some(e=>!object(e)||!identifier(e.operation_id)||!timestamp(e.at)||!Array.isArray(e.moves))))add('task_numbering_history','任务改号历史格式无效。');
     if(m.archive_history!==undefined&&(!Array.isArray(m.archive_history)||m.archive_history.some(e=>!object(e)||typeof e.operation_id!=='string'||!['archive','restore'].includes(e.action)||!timestamp(e.at)||typeof e.from!=='string'||typeof e.to!=='string'||typeof e.previous_status!=='string')))add('archive_history','归档历史须保留有效操作、时间、位置及原状态。');
     if(!['A','B','C','D'].includes(m.level))add('level','规模使用A/B/C/D。');
@@ -122,9 +123,16 @@ export function evidenceValid(root,e,overlay=new Map()){
     if(e.url){const u=new URL(e.url);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password&&typeof e.version==='string'&&!!e.version.trim();}
     if(typeof e.path!=='string'||!/^[a-f0-9]{64}$/.test(e.digest??''))return false;
     safePath(root,e.path,{missing:true,resource:true});
-    if(!overlay.has(e.path)&&!snapshot(root,e.path,{optional:true,resource:true}))return locateProjectResource(root,{path:e.path,digest:e.digest}).digest===e.digest;
-    const bytes=overlay.get(e.path)??snapshot(root,e.path,{resource:true}).bytes;
-    return hash(bytes)===e.digest||!!overlay.beforeVersions?.get(e.path+':'+e.digest)||!!historicalProjectBytes(root,e.path,e.digest,bytes);
+    if(overlay.resourceDigests?.has(e.path))return overlay.resourceDigests.get(e.path)===e.digest;
+    if(overlay.has(e.path)){
+      const bytes=overlay.get(e.path);
+      return hash(bytes)===e.digest||!!overlay.beforeVersions?.get(e.path+':'+e.digest)||!!historicalProjectBytes(root,e.path,e.digest,bytes,undefined,{mergeRecords:overlay.mergeRecords});
+    }
+    const path=safePath(root,e.path,{missing:true,resource:true});let current;
+    try{current=readSnapshot(path,{digestOnly:true});}
+    catch(error){if(error.code!=='FILE_NOT_FOUND')throw error;return locateProjectResource(root,{path:e.path,digest:e.digest,digestOnly:true},{mergeRecords:overlay.mergeRecords}).digest===e.digest;}
+    if(current.digest===e.digest||overlay.beforeVersions?.get(e.path+':'+e.digest))return true;
+    return current.stat.size<=2*1024*1024&&!!historicalProjectBytes(root,e.path,e.digest,readSnapshot(path).bytes,undefined,{mergeRecords:overlay.mergeRecords});
   }catch{return false;}
 }
 export function verificationIssues(root,subject,verification,overlay=new Map()){

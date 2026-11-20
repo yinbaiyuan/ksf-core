@@ -1,9 +1,52 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DESKTOP_KEY, LEGACY_DESKTOP_KEY, SQUARE_GRID, squareGridMetrics, fitWidgetLayout, appendWidget, currentGroup, groupNameError, moveGroup, removeGroup, sameLayout, moveWidgetPositions, withGroupLayout, adjustWidgetLayout, defaultDesktop, defaultLayout, fitBounds, isDeepLink, parseDesktop, patchSearch, readDesktop, saveDesktop, tiledBounds } from '../src/desktop-model.ts';
+import { DESKTOP_KEY, LEGACY_DESKTOP_KEY, SQUARE_GRID, DOCK_SIZE, dockIconSize, setDockPinned, dockApplicationIds, reorderDockPins, squareGridMetrics, fitWidgetLayout, appendWidget, currentGroup, groupNameError, moveGroup, removeGroup, sameLayout, moveWidgetPositions, settleWidgetDrop, withGroupLayout, adjustWidgetLayout, defaultDesktop, defaultLayout, fitBounds, isDeepLink, parseDesktop, patchSearch, readDesktop, saveDesktop, tiledBounds } from '../src/desktop-model.ts';
 import { parseMaterialSettings } from '../src/material-settings.ts';
 import { createRemoteCache } from '../src/remote-cache.ts';
 import { createOverlayCoordinator } from '../src/overlay-coordinator.ts';
+
+test('optional Dock size survives desktop roundtrips without changing legacy layouts or other groups',()=>{
+  const original=defaultDesktop(),snapshot=structuredClone(original);
+  assert.equal(dockIconSize(original.dock?.iconSize),44);
+  assert.deepEqual(parseDesktop(original),snapshot);
+  const customized={...original,dock:{iconSize:64}};
+  assert.deepEqual(parseDesktop(JSON.parse(JSON.stringify(customized))),customized);
+  assert.deepEqual(withGroupLayout(customized,currentGroup(customized).layout).dock,{iconSize:64});
+  assert.equal(dockIconSize(-100),DOCK_SIZE.min);assert.equal(dockIconSize(100),DOCK_SIZE.max);assert.equal(dockIconSize(NaN),DOCK_SIZE.default);
+  assert.deepEqual(parseDesktop({...original,dock:{iconSize:999}}).dock,{iconSize:72});
+  assert.deepEqual(original,snapshot);
+});
+
+test('Dock pins survive close/reopen and roundtrips without duplicating running apps or changing layouts',()=>{
+  const original={...defaultDesktop(),dock:{iconSize:28}},snapshot=structuredClone(original);
+  let pinned=setDockPinned(original,'com.ksf.markdown',true);
+  pinned=setDockPinned(pinned,'com.ksf.projects',true);
+  assert.equal(setDockPinned(pinned,'com.ksf.markdown',true),pinned);
+  assert.deepEqual(dockApplicationIds(pinned.dock?.pinnedAppIds,['com.ksf.projects','com.ksf.projects','com.ksf.git']),['com.ksf.markdown','com.ksf.projects','com.ksf.git']);
+  assert.deepEqual(dockApplicationIds(pinned.dock?.pinnedAppIds,[]),['com.ksf.markdown','com.ksf.projects']);
+  assert.deepEqual(parseDesktop(JSON.parse(JSON.stringify(pinned))),pinned);
+  const unpinned=setDockPinned(pinned,'com.ksf.markdown',false);
+  assert.deepEqual(dockApplicationIds(unpinned.dock?.pinnedAppIds,['com.ksf.markdown']),['com.ksf.projects','com.ksf.markdown']);
+  assert.deepEqual(dockApplicationIds(unpinned.dock?.pinnedAppIds,[]),['com.ksf.projects']);
+  assert.equal(unpinned.dock?.iconSize,28);assert.deepEqual(unpinned.groups,snapshot.groups);assert.deepEqual(original,snapshot);
+  assert.deepEqual(setDockPinned(unpinned,'com.ksf.projects',false).dock,{iconSize:28,pinnedAppIds:[]});
+});
+
+test('Dock pin parsing filters corrupt entries while legacy desktops remain unchanged',()=>{
+  const value=defaultDesktop();assert.deepEqual(parseDesktop(value),value);
+  assert.deepEqual(parseDesktop({...value,dock:{iconSize:72,pinnedAppIds:['com.ksf.markdown',null,7,'',' ', 'com.ksf.markdown','com.ksf.projects']}}).dock,{iconSize:72,pinnedAppIds:['com.ksf.markdown','com.ksf.projects']});
+  assert.equal(setDockPinned(value,' ',true),value);
+  assert.deepEqual(setDockPinned(value,'com.ksf.markdown',true).dock,{iconSize:44,pinnedAppIds:['com.ksf.markdown']});
+});
+
+test('Dock pin reordering inserts in either direction and survives persistence without changing unpinned running apps',()=>{
+  const ids=['com.ksf.markdown','com.ksf.projects','com.ksf.app-store','com.ksf.ability-store'],snapshot=[...ids];
+  const last=reorderDockPins(ids,ids[0],ids[3]);assert.deepEqual(last,[ids[1],ids[2],ids[3],ids[0]]);
+  assert.deepEqual(reorderDockPins(last,ids[0],ids[1]),ids);
+  assert.equal(reorderDockPins(ids,ids[0],ids[0]),ids);assert.equal(reorderDockPins(ids,'missing',ids[1]),ids);assert.equal(reorderDockPins(ids,ids[0],'missing'),ids);
+  const value={...defaultDesktop(),dock:{iconSize:72,pinnedAppIds:last}},parsed=parseDesktop(JSON.parse(JSON.stringify(value)));
+  assert.deepEqual(parsed,value);assert.deepEqual(dockApplicationIds(parsed.dock?.pinnedAppIds,['com.ksf.markdown','com.ksf.git']),[...last,'com.ksf.git']);assert.deepEqual(ids,snapshot);
+});
 
 test('window bounds and half screens fit all four desktop sizes', () => {
   for (const [width, height] of [[1024,768],[1280,800],[1440,900],[1920,1080]]) {
@@ -72,13 +115,78 @@ test('a hidden document starts no remote request', () => {
 });
 
 
-test('keyboard movement and resize push adjacent cards without overlap or mutating the saved layout', () => {
+test('keyboard movement and resize resolve collisions without overlap or mutating the saved layout', () => {
   const saved = [...defaultLayout(), { i: 'example', x: 4, y: 0, w: 3, h: 2 }], copy = structuredClone(saved);
   for (const moved of [adjustWidgetLayout(saved,'work-stats',1,0),adjustWidgetLayout(saved,'work-stats',1,1,true)]) {
     assert.equal(moved[0].x + moved[0].w <= 12,true);
     for (let a=0;a<moved.length;a++) for (let b=a+1;b<moved.length;b++) { const x=moved[a],y=moved[b]; assert.equal(x.x < y.x+y.w && x.x+x.w > y.x && x.y < y.y+y.h && x.y+x.h > y.y,false); }
   }
+  assert.deepEqual(adjustWidgetLayout(saved,'work-stats',1,1,true),saved);
   assert.deepEqual(saved,copy);
+});
+
+const shortcut = (i: string, x: number, y = 0) => ({ i, kind: 'app' as const, appId: `example.${i}`, name:i, x, y, w: 1, h: 1, minW: 1, minH: 1 });
+test('drop swaps only the source and destination icons in either direction, preserving metadata and serialization', () => {
+  const layout = [shortcut('a',0),shortcut('b',1),shortcut('c',2),shortcut('d',3)], snapshot = structuredClone(layout);
+  for (const [source,target] of [['a','d'],['d','a']]) {
+    const destination = layout.find(item=>item.i===target)!;
+    const result = settleWidgetDrop(layout,layout,source,destination,12);
+    assert.deepEqual(result.map(({i,x,y})=>({i,x,y})), [{i:'a',x:3,y:0},{i:'b',x:1,y:0},{i:'c',x:2,y:0},{i:'d',x:0,y:0}]);
+    const saved=withGroupLayout(defaultDesktop(),result);
+    assert.deepEqual(currentGroup(parseDesktop(JSON.parse(JSON.stringify(saved)))).layout,result);
+  }
+  assert.deepEqual(layout,snapshot);
+  assert.deepEqual(adjustWidgetLayout(layout,'a',1,0),settleWidgetDrop(layout,layout,'a',layout[1],12));
+});
+test('empty destinations move one icon, and invalid or unchanged drops keep the original layout', () => {
+  const layout=[shortcut('a',0),shortcut('b',1)];
+  const moved=settleWidgetDrop(layout,layout,'a',{x:5,y:3},12);
+  assert.deepEqual(moved,[{...layout[0],x:5,y:3},layout[1]]);
+  assert.equal(settleWidgetDrop(layout,layout,'a',layout[0],12),layout);
+  assert.equal(settleWidgetDrop(layout,layout,'missing',{x:3,y:0},12),layout);
+  assert.equal(settleWidgetDrop(layout,layout,'a',{x:NaN,y:0},12),layout);
+});
+test('cards swap only when both footprints fit; blocked swaps and resizes leave every bystander fixed', () => {
+  const card={i:'wide',appId:'example.cards',cardId:'wide',config:{id:42},x:0,y:0,w:2,h:1,minW:1,minH:1};
+  const layout=[card,shortcut('a',4),shortcut('b',5)];
+  assert.deepEqual(settleWidgetDrop(layout,layout,'wide',{x:4,y:0},12),[{...card,x:4},{...layout[1],x:0},{...layout[2],x:1}]);
+  assert.equal(settleWidgetDrop(layout,layout,'a',{x:0,y:0},12),layout);
+  const roomy=[card,shortcut('a',4),shortcut('b',8)];
+  const swapped=settleWidgetDrop(roomy,roomy,'a',{x:0,y:0},12);
+  assert.deepEqual(swapped,[{...card,x:4},{...roomy[1],x:0},roomy[2]]);
+  assert.equal(settleWidgetDrop(layout,layout,'wide',{x:0,y:0,w:5,h:1},12,true),layout);
+  const resized=settleWidgetDrop(roomy,roomy,'wide',{x:0,y:0,w:3,h:2},12,true);
+  assert.deepEqual(resized,[{...card,w:3,h:2},roomy[1],roomy[2]]);
+});
+test('large cards exchange multiple target items and repack partial intersections into the vacated space', () => {
+  const card={i:'large',appId:'example.cards',cardId:'large',config:{preserve:42},x:0,y:0,w:2,h:2,minW:1,minH:1};
+  const bar={i:'bar',appId:'example.cards',cardId:'bar',config:{independent:true},x:3,y:0,w:2,h:1,minW:1,minH:1};
+  const layout=[card,bar,shortcut('a',5,1),shortcut('b',8)];
+  const result=settleWidgetDrop(layout,layout,'large',{x:4,y:0},12);
+  assert.deepEqual(result,[{...card,x:4},{...bar,x:0},{...layout[2],x:1,y:1},layout[3]]);
+  assert.deepEqual(fitWidgetLayout(result,12),result);
+  const oversized=[{...card,h:1},{...bar,x:4,w:3},shortcut('a',7),layout[3]];
+  assert.equal(settleWidgetDrop(oversized,oversized,'large',{x:6,y:0},12),oversized);
+});
+test('previewing successive targets from the same snapshot restores earlier targets and commits only the final swap', () => {
+  const layout=[shortcut('a',0),shortcut('b',1),shortcut('c',2),shortcut('d',5)];
+  const first=settleWidgetDrop(layout,layout,'a',{x:1,y:0},12);
+  assert.equal(first[1].x,0);
+  const second=settleWidgetDrop(layout,layout,'a',{x:2,y:0},12);
+  assert.deepEqual(second,[{...layout[0],x:2},layout[1],{...layout[2],x:0},layout[3]]);
+  assert.deepEqual(settleWidgetDrop(layout,layout,'a',{x:3,y:1},12),[{...layout[0],x:3,y:1},...layout.slice(1)]);
+  assert.equal(settleWidgetDrop(layout,layout,'a',{x:0,y:0},12),layout);
+});
+test('narrow drops preserve stored sizes and reject changes that would repack unrelated cards', () => {
+  const icons=[shortcut('a',8),shortcut('b',10),shortcut('c',11)];
+  const projected=fitWidgetLayout(icons,2);
+  const swapped=settleWidgetDrop(icons,projected,'a',projected[1],2);
+  assert.deepEqual(swapped,[{...icons[0],x:10},{...icons[1],x:8},icons[2]]);
+  const layout=[{i:'wide',x:4,y:0,w:4,h:2},shortcut('a',0)];
+  const narrow=fitWidgetLayout(layout,2);
+  assert.equal(settleWidgetDrop(layout,narrow,'a',{x:0,y:1},2),layout);
+  const moved=settleWidgetDrop(layout,narrow,'wide',{x:0,y:4},2);
+  assert.deepEqual(moved,[{...layout[0],x:0,y:4},layout[1]]);
 });
 
 test('v1 migration converts grid units once, preserves bounds and leaves the legacy storage intact', () => {
@@ -136,16 +244,27 @@ test('broken v2 storage recovers legacy data and edit comparison ignores grid me
 });
 
 
-test('square cells divide the entire available width with equal gutters and no unused remainder', () => {
-  for (const [available, cols] of [[224,2],[733,6],[1136,9],[1776,12],[2416,12],[3696,12]]) {
+test('square cells stay at 96px across viewport widths with equal gutters', () => {
+  for (const [available, cols] of [[224,2],[733,5],[1136,9],[1776,12],[2416,12],[3696,12]]) {
     const metrics=squareGridMetrics(available);
-    assert.equal(metrics.cols,cols); assert.equal(metrics.gap,24);
-    assert.equal(metrics.width,available); assert.ok(metrics.cell>=96);
-    assert.ok(Math.abs(cols*metrics.cell+(cols-1)*metrics.gap-available)<1e-8);
+    assert.equal(metrics.cols,cols); assert.equal(metrics.gap,32);
+    assert.equal(metrics.cell,96); assert.ok(metrics.width<=available);
+    assert.equal(metrics.width,cols*96+(cols-1)*32);
     assert.equal((metrics.width-(cols-1)*metrics.gap)/cols,metrics.cell);
     const lastCellRight=(cols-1)*(metrics.cell+metrics.gap)+metrics.cell;
-    assert.ok(Math.abs(lastCellRight-available)<1e-8);
+    assert.equal(lastCellRight,metrics.width);
   }
+  assert.deepEqual(squareGridMetrics(64),{cols:1,cell:64,gap:32,width:64});
+});
+test('custom desktop sizes retain equal icon/card insets without mutating stored layout',()=>{
+  const layout=defaultLayout(),before=structuredClone(layout);
+  for(const iconSize of [48,72,96])for(const gap of [16,32,64])for(const available of [288,712,1384,1864]){
+    const metrics=squareGridMetrics(available,{cell:iconSize+24,gap});
+    assert.equal(metrics.cell,iconSize+24);assert.equal(metrics.gap,gap);
+    assert.equal((metrics.cell-iconSize)/2,12);assert.ok(metrics.width<=available);
+    fitWidgetLayout(layout,metrics.cols);
+  }
+  assert.deepEqual(layout,before);
 });
 test('narrow projection packs overflowing cards without overlap or changing the stored spans', () => {
   const original=[{i:'example-a',x:0,y:0,w:2,h:2,minW:1,minH:1},{i:'example-b',x:2,y:0,w:4,h:3,minW:1,minH:1},{i:'example-c',x:6,y:0,w:2,h:2,minW:1,minH:1}], copy=structuredClone(original);

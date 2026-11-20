@@ -1,5 +1,6 @@
 import {readdirSync,lstatSync} from 'node:fs';
 import {join,dirname} from 'node:path';
+import {confirmationValid} from './confirmation.js';
 import {taskCode,codeOf} from './task-codes.js';
 import {documentKind} from './layout.js';
 import {MAIN_STATES,unified,activeStates,initialStates} from './states.js';
@@ -89,7 +90,11 @@ export function checkGraph(root,graph,{start,changedPaths=null}={}){
     if(m.kind==='task'){
       const p=resolve(d,m.project,'project'),mstone=resolve(d,m.milestone,'milestone');
       if(mstone){if(!contains(mstone.metadata.tasks,d))add(d,'里程碑没有反向列出任务。');if(documentKind(d.path)!=='task'||dirname(dirname(d.path))!==dirname(mstone.path))add(d,'请将 字母阶段及任务号-名称/task.md 直接放在里程碑目录并更新引用。');if(m.task_code&&d.path.split('/').at(-2).split('-')[0]!==m.task_code)add(d,'目录编号与task_code不一致。','task_code');if(mstone.metadata.project?.id!==p?.metadata.id)add(d,'任务与里程碑的项目不一致。');}
-      for(const r of [...(m.context_refs??[]),...(m.result_refs??[])]){try{if(r.path&&!graph.overlay.has(r.path)&&!snapshot(root,r.path,{optional:true,resource:true}))warnings.push({path:d.path,message:'上下文入口缺失：'+r.path});}catch(e){add(d,e.message,'context_refs','PROJECT_GOVERNANCE_PATH');}}
+      for(const r of [...(m.context_refs??[]),...(m.result_refs??[])]){
+        if(!r.path||graph.overlay.has(r.path))continue;
+        try{const path=safePath(root,r.path,{missing:true,resource:true});if(!lstatSync(path).isFile())add(d,'引用须指向普通文件。','context_refs','PROJECT_GOVERNANCE_PATH');}
+        catch(e){if(e.code==='ENOENT')warnings.push({path:d.path,message:'上下文入口缺失：'+r.path});else add(d,e.message,'context_refs','PROJECT_GOVERNANCE_PATH');}
+      }
       if((unified(m)?['active','review']:['ready','in_progress']).includes(m.status)&&m.commitment==='candidate')add(d,'可开始/在制任务必须纳入承诺。');
       if(unified(m)&&p&&p.metadata.governance_schema!==m.governance_schema)add(d,'任务和项目的治理格式不一致。');
       if(unified(m)&&mstone&&mstone.metadata.governance_schema!==m.governance_schema)add(d,'任务和里程碑的治理格式不一致。');
@@ -119,6 +124,7 @@ export function checkGraph(root,graph,{start,changedPaths=null}={}){
           if(children.some(r=>!terminal(graph.docs.get(r.path)?.metadata.status)))add(d,'仍有未结束的下级工作，不能完成。');
         }
         const issues=verificationIssues(root,d,v,graph.overlay);
+        if(m.kind==='milestone'&&v?.user_confirmation&&!confirmationValid(d,resolve(d,m.review_ref,'review'),graph))issues.push('用户阶段确认范围已变化，须重新核对。');
         if(issues.length){stale.add(m.id);for(const message of issues){if(changedPaths?.has(d.path))add(d,message,'verification','PROJECT_GOVERNANCE_ACCEPTANCE');else warnings.push({path:d.path,message});}}
       }
     }

@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,readFile,writeFile,rm,copyFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {mkdtemp,mkdir,readFile,writeFile,rm,copyFile,cp} from 'node:fs/promises';
+import {join,dirname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createApplicationManager} from '../../../runtime/src/applications/manager.js';
 import {DEFAULT_APPLICATIONS,decodePackage,assertCompatible,checksum} from '../../../runtime/src/applications/protocol.js';
+import {reconcileCoreApplications} from '../../../runtime/src/applications/core-upgrade.js';
 import {managedPath} from '../../../runtime/src/distribution/paths.js';
 import {project} from '../../../runtime/src/services/projects.js';
 import {projectManagement} from '../../../runtime/src/services/project-management.js';
@@ -12,10 +13,19 @@ import {projectGovernance} from '../../../runtime/src/services/project-governanc
 import {fixture} from '../../../runtime/tests/helpers/governance-fixture.js';
 import {buildApplication} from '../../sdk/build.mjs';
 import {fileURLToPath} from 'node:url';
+import {uiRuntimeFixture} from '../../../runtime/tests/helpers/ui-runtime-fixture.js';
 
-const sourceStore=new URL('../../store/',import.meta.url);
+const sourceStore=new URL('../../builtin/',import.meta.url);
 const releaseURL=e=>e.package.url.startsWith('fixture-projects-')?new URL('./fixtures/'+e.package.url,import.meta.url):new URL(e.package.url,sourceStore);
 async function historicalProject(version){const url='fixture-projects-'+version+'.ksfapp',bytes=await readFile(new URL('./fixtures/'+url,import.meta.url));return {manifest:decodePackage(bytes).manifest,package:{url,size:bytes.length,sha256:checksum(bytes)}};}
+async function upgradeCore(root,store,{ui}={}){
+  const target=join(root,'core-candidate'),builtin=join(target,'applications/builtin');await mkdir(builtin,{recursive:true});
+  for(const name of ['build.json','data-compatibility.json'])await copyFile(new URL('../../../'+name,import.meta.url),join(target,name));
+  if(ui){const build=JSON.parse(await readFile(join(target,'build.json'),'utf8'));build.version='0.6.0';await writeFile(join(target,'build.json'),JSON.stringify(build));await cp(dirname(ui.web),join(target,'runtime'),{recursive:true});}
+  const index=JSON.parse(await readFile(join(store,'index.json'),'utf8'));
+  for(const entry of index.apps)await copyFile(join(store,entry.package.url),join(builtin,entry.package.url));
+  await writeFile(join(builtin,'index.json'),JSON.stringify(index));await reconcileCoreApplications(root,target);
+}
 test('Core project source is distributable; bundled package upgrades the old identity and installs offline by default',async t=>{
   assert(DEFAULT_APPLICATIONS.includes('com.ksf.projects'));
   assert(managedPath('.agents/core/applications/projects/backend.mjs'));
@@ -36,13 +46,14 @@ test('Core project source is distributable; bundled package upgrades the old ide
   const start=()=>createApplicationManager(root,{storeDirectory:store,defaultSource:null,services:{projects:{managementRead:input=>projectManagement({root,operation:'read',...input}),managementWrite:input=>projectManagement({root,operation:'write',...input}),managementCheck:input=>projectManagement({root,operation:'check',...input}),list:input=>project({root,operation:'list',scope:input.scope}),read:input=>project({root,operation:'read',...input})}},fetcher:async()=>{throw Error('Network forbidden');}});
   await publish([previous]);manager=start();let snapshot=await manager.snapshot();assert(snapshot.installed.some(a=>a.id==='com.ksf.projects'));
   let instance=await manager.launch('com.ksf.projects',previous.package.sha256);await manager.call(instance.id,'preferences.save',{selected:'current:示例',tab:'tasks'});await manager.release(instance.id);await manager.close();
-  await publish([previous,current]);manager=start();await manager.install({trusted:true,sourceId:'builtin',appId:current.manifest.id,version:current.manifest.version,digest:current.package.sha256});
+  await publish([previous,current]);await upgradeCore(root,store);manager=start();
   instance=await manager.launch(current.manifest.id,current.package.sha256);assert.equal((await manager.call(instance.id,'preferences.read')).tab,'tasks');assert.equal((await manager.call(instance.id,'list')).projects[0].name,'示例');
   const detail=await manager.call(instance.id,'detail',{name:'示例',scope:'current'});assert.equal(detail.title,'示例');const management=await manager.call(instance.id,'management.read',{name:'示例',scope:'current'});assert.equal(management.state,'missing');management.plan.purpose='离线安装后保存';const saved=await manager.call(instance.id,'management.write',{name:'示例',scope:'current',data:{plan:management.plan,ifMatch:management.etag,operationId:'install-test-save'}});assert.equal(saved.revision,1);assert.equal(JSON.parse(await readFile(join(root,'项目/示例/项目管理.json'),'utf8')).plan.purpose,'离线安装后保存');await manager.release(instance.id);await manager.close();
   const fresh=await mkdtemp(join(tmpdir(),'ksf-core-projects-fresh-'));t.after(()=>rm(fresh,{recursive:true,force:true}));manager=createApplicationManager(fresh,{storeDirectory:store,defaultSource:null,fetcher:async()=>{throw Error('Network forbidden');}});snapshot=await manager.snapshot();const installed=snapshot.installed.find(a=>a.id===current.manifest.id);assert.equal(installed.active.manifest.version,current.manifest.version);assert.equal(installed.active.manifest.name,'KSF项目');assert.equal(await readFile(join(root,'项目/示例/project.md'),'utf8'),projectText);
 });
 
 test('matching packaged app opens migrated Markdown projects after upgrade and preserves legacy access',async t=>{
+  const ui=uiRuntimeFixture(t);
   const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);
   const material=f.pp.replace('project.md','P10-包/原件.md');
   assert.deepEqual(f.apply([{path:material,ifMatch:'missing',body:'# 编号原件\n'}]).errors,[]);
@@ -55,11 +66,11 @@ test('matching packaged app opens migrated Markdown projects after upgrade and p
   const legacy='---\nname: 旧项目\nstatus: active\n---\n# 旧项目\n';
   await writeFile(join(f.root,'项目/旧项目/project.md'),legacy);
   const original=await readFile(join(f.root,f.pp));
-  const manager=createApplicationManager(f.root,{storeDirectory:store,defaultSource:null,fetcher:async()=>{throw Error('Network forbidden');},services:{projects:{
+  let manager=createApplicationManager(f.root,{storeDirectory:store,defaultSource:null,fetcher:async()=>{throw Error('Network forbidden');},services:{projects:{
     read:input=>project({root:f.root,operation:'read',...input}),
     list:input=>project({root:f.root,operation:'list',...input}),
     managementRead:input=>projectManagement({root:f.root,operation:'read',...input}),
-    governanceRead:input=>projectGovernance({root:f.root,operation:'read',...input}),
+    governanceRead:input=>projectGovernance({root:f.root,operation:'read',...input}),governanceCheck:(input,caller)=>projectGovernance({root:f.root,operation:'check',...input},{caller}),governanceApply:(input,caller)=>projectGovernance({root:f.root,operation:'apply',...input},{caller}),
     governanceContextList:input=>projectGovernance({root:f.root,operation:'context-list',...input}),
     archive:input=>project({root:f.root,operation:'archive',...input}),
     restore:input=>project({root:f.root,operation:'restore',...input}),
@@ -78,9 +89,10 @@ test('matching packaged app opens migrated Markdown projects after upgrade and p
   await buildApplication(fileURLToPath(new URL('../',import.meta.url)),{...options,storeDirectory:candidateStore,quiet:true});
   const candidates=JSON.parse(await readFile(join(candidateStore,'index.json'),'utf8'));
   const current=candidates.apps.find(e=>e.manifest.id===old.manifest.id);assert(current);
+  assert.throws(()=>assertCompatible(current.manifest,{coreVersion:'0.5.7',uiRuntime:ui.info.uiRuntime}),{code:'APP_CORE_INCOMPATIBLE'});
   await copyFile(join(candidateStore,current.package.url),join(store,current.package.url));
   await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[old,current]}));
-  await manager.install({trusted:true,sourceId:'builtin',appId:current.manifest.id,version:current.manifest.version,digest:current.package.sha256},{bundled:true});
+  await manager.close();await upgradeCore(f.root,store,{ui});manager=createApplicationManager(f.root,{coreVersion:'0.6.0',uiRuntime:ui.info.uiRuntime,storeDirectory:store,defaultSource:null,fetcher:async()=>{throw Error('Network forbidden');},services:{projects:{read:input=>project({root:f.root,operation:'read',...input}),list:input=>project({root:f.root,operation:'list',...input}),managementRead:input=>projectManagement({root:f.root,operation:'read',...input}),governanceRead:input=>projectGovernance({root:f.root,operation:'read',...input}),governanceCheck:(input,caller)=>projectGovernance({root:f.root,operation:'check',...input},{caller}),governanceApply:(input,caller)=>projectGovernance({root:f.root,operation:'apply',...input},{caller}),governanceContextList:input=>projectGovernance({root:f.root,operation:'context-list',...input}),archive:input=>project({root:f.root,operation:'archive',...input}),restore:input=>project({root:f.root,operation:'restore',...input}),resolve:input=>project({root:f.root,operation:'locate',name:input.path,source:input.source,digest:input.digest})}}});
   instance=await manager.launch(current.manifest.id,current.package.sha256);
   assert.equal((await manager.call(instance.id,'preferences.read')).tab,'plan');
   const detail=await manager.call(instance.id,'detail',params);
@@ -99,6 +111,13 @@ test('matching packaged app opens migrated Markdown projects after upgrade and p
   const legacyParams={name:'旧项目',scope:'current'};
   assert.equal((await manager.call(instance.id,'detail',legacyParams)).governance,undefined);
   assert.equal((await manager.call(instance.id,'management.read',legacyParams)).state,'missing');
+  // Exercise provenance through the real application child and Core service adapter.
+  const proofPath=f.tp.replace('task.md','10-阶段证据.txt'),proofText='包安装及数据接续已核对',reviewPath=f.mp.replace('milestone.md','复盘.md');
+  const stateBefore=f.read(),stage=stateBefore.documents.find(d=>d.path===f.mp).metadata;
+  assert.deepEqual(f.apply([{path:proofPath,ifMatch:'missing',body:proofText},f.change(f.tp,{status:'completed',next_action:null,verification:f.proof(f.task,proofPath,proofText)}),f.change(f.mp,{status:'review',review_ref:{id:'transport-review',path:reviewPath}}),{path:reviewPath,ifMatch:'missing',metadata:{governance_schema:2,kind:'review',id:'transport-review',name:'阶段复盘',status:'draft',owner:'Agent',updated:new Date().toISOString(),next_action:null,subject:{id:stage.id,path:f.mp},outcome:'pending',basis_digest:f.proof(stage,proofPath,proofText).basis_digest,criterion_results:f.proof(stage,proofPath,proofText).results},body:'# 预检'}]).errors,[]);
+  const state=await manager.call(instance.id,'governance.read',params),request={operationId:'installed-window-confirm',ifMatch:state.etag,confirmMilestone:{subject:{id:stage.id,path:f.mp},scope_digest:state.confirmationScopes[stage.id],source:{kind:'workbench'}},changes:[f.change(f.mp,{status:'completed',next_action:null}),f.change(reviewPath,{status:'completed',outcome:'passed'})]};
+  await assert.rejects(manager.invoke('com.ksf.projects','governance.check',{...params,data:request}),e=>e.code==='PROJECT_CONFIRMATION_SOURCE');
+  const confirmed=await manager.call(instance.id,'governance.apply',{...params,data:request});assert.equal(confirmed.documents.find(d=>d.path===reviewPath).metadata.user_confirmation.source.kind,'workbench');
   await manager.release(instance.id);
   assert.deepEqual(await readFile(join(f.root,f.pp)),original);
   assert.equal(await readFile(join(f.root,'项目/旧项目/project.md'),'utf8'),legacy);

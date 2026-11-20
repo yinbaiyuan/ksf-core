@@ -13,7 +13,7 @@ async function fixture(t,execute=async()=>({text:'完成'})){
   const manifest={schemaVersion:1,minCoreVersion:'0.3.0',dataStores:[],sdkVersion:1,id:'com.example.ai',version:'1.0.0',name:'AI acceptance',description:'Synthetic service bridge acceptance',window:{entry:'frontend/index.js'},backend:{runtime:'node',lifecycle:'on-demand',entry:'backend/index.mjs'},permissions:[]};
   const bytes=encodePackage(manifest,{'frontend/index.js':file('export function mount(){}'),'backend/index.mjs':file("export function activate(ctx){return{call(method,params){return ctx.services.call('ai',method,params)}}}")});
   const entry={manifest,package:{url:'com.example.ksfapp',sha256:checksum(bytes),size:bytes.length}};await writeFile(join(store,'com.example.ksfapp'),bytes);await writeFile(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[entry]}));
-  const wb=createWorkbenchHTTP(root,{applications:{storeDirectory:store},ai:{pollMs:10,executors:{'openai-responses-v1':{execute}}}});
+  const wb=createWorkbenchHTTP(root,{applications:{storeDirectory:store,defaultSource:null},ai:{pollMs:10,executors:{'openai-responses-v1':{execute}}}});
   const server=createServer((req,res)=>{void wb.handle(req,new URL(req.url,'http://localhost'),(status,body,type)=>{res.writeHead(status,{'content-type':type??'application/json'});res.end(body);}).then(handled=>{if(!handled){res.writeHead(404);res.end();}});});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   t.after(async()=>{await new Promise(resolve=>server.close(resolve));await wb.close();await rm(root,{recursive:true,force:true});});
   const url=`http://127.0.0.1:${server.address().port}`;

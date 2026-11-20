@@ -1,26 +1,42 @@
-import { useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { createPortal } from 'react-dom';
-import { BookOpen, Briefcase, Code2, Home, LayoutGrid, Pencil, Plus, Star } from 'lucide-react';
-import type { DesktopGroup, GroupIcon } from '../desktop-model';
+import {useEffect,useRef,useState,type KeyboardEvent} from 'react';
+import {createPortal} from 'react-dom';
+import {BookOpen,Briefcase,ChevronDown,Code2,Home,LayoutGrid,Star} from 'lucide-react';
+import type {DesktopGroup,GroupIcon} from '../desktop-model';
+import {useHostTheme} from '../components/host-theme';
+import {useMaterial} from '../components/material-provider';
+import {GradientButtonGroup} from '../components/gradient-button-group';
 
-export const groupIconComponents = { home: Home, grid: LayoutGrid, briefcase: Briefcase, book: BookOpen, star: Star, code: Code2 };
-export const groupIconNames: Record<GroupIcon, string> = { home: '主页', grid: '网格', briefcase: '工作', book: '阅读', star: '收藏', code: '代码' };
-export function DesktopSidebar({ groups, activeId, select, create, edit, editing }: { groups: DesktopGroup[]; activeId: string; select: (id: string) => void; create: () => void; edit: () => void; editing: boolean }) {
-  const [tip, setTip] = useState<{ name: string; top: number } | null>(null);
-  const show = (node: HTMLElement, name: string) => { const rect = node.getBoundingClientRect(); setTip({ name, top: rect.top + rect.height / 2 }); };
-  const key = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('button')], index = buttons.indexOf(event.target as HTMLButtonElement);
-    const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (index + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
-    buttons[next]?.focus(); buttons[next]?.scrollIntoView({ block: 'nearest' });
+export const groupIconComponents={home:Home,grid:LayoutGrid,briefcase:Briefcase,book:BookOpen,star:Star,code:Code2};
+export const groupIconNames:Record<GroupIcon,string>={home:'主页',grid:'网格',briefcase:'工作',book:'阅读',star:'收藏',code:'代码'};
+export function DesktopSidebar({groups,activeId,select}:{groups:DesktopGroup[];activeId:string;select:(id:string)=>void}) {
+  const {settings}=useMaterial();
+  const theme=useHostTheme(),trigger=useRef<HTMLButtonElement>(null),menu=useRef<HTMLDivElement>(null);
+  const [tip,setTip]=useState<{name:string;left:number;bottom:number}|null>(null),[menuBottom,setMenuBottom]=useState<number|null>(null);
+  const active=groups.find(group=>group.id===activeId)??groups[0],Icon=groupIconComponents[active.icon];
+  const dismiss=(focus=false)=>{setMenuBottom(null);if(focus)trigger.current?.focus({preventScroll:true});};
+  useEffect(()=>{
+    if(menuBottom===null)return;
+    menu.current?.querySelector<HTMLButtonElement>('[aria-checked=true]')?.focus({preventScroll:true});
+    const outside=(event:PointerEvent)=>{if(!menu.current?.contains(event.target as Node)&&!trigger.current?.contains(event.target as Node))dismiss();};
+    const resize=()=>{dismiss();setTip(null);};
+    document.addEventListener('pointerdown',outside);window.addEventListener('resize',resize);
+    return()=>{document.removeEventListener('pointerdown',outside);window.removeEventListener('resize',resize);};
+  },[menuBottom]);
+  useEffect(()=>{const hide=()=>setTip(null);window.addEventListener('resize',hide);window.addEventListener('scroll',hide,true);return()=>{window.removeEventListener('resize',hide);window.removeEventListener('scroll',hide,true);};},[]);
+  const show=(node:HTMLElement,name:string)=>{const box=node.getBoundingClientRect(),half=Math.min(260,innerWidth-16)/2;setTip({name,left:Math.max(half+8,Math.min(box.left+box.width/2,innerWidth-half-8)),bottom:innerHeight-box.top+10});};
+  const key=(event:KeyboardEvent<HTMLDivElement>,vertical=false)=>{
+    if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dismiss(true);return;}
+    if(event.key==='Tab'&&vertical){dismiss();return;}
+    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
+    event.preventDefault();const items=[...event.currentTarget.querySelectorAll<HTMLButtonElement>('button')],index=items.indexOf(event.target as HTMLButtonElement);
+    const next=event.key==='Home'?0:event.key==='End'?items.length-1:(index+(['ArrowRight','ArrowDown'].includes(event.key)?1:-1)+items.length)%items.length;
+    items[next]?.focus({preventScroll:true});items[next]?.scrollIntoView({block:'nearest',inline:'nearest'});
   };
-  const hint = (name: string) => ({ onPointerEnter: (e: React.PointerEvent<HTMLButtonElement>) => show(e.currentTarget, name), onFocus: (e: React.FocusEvent<HTMLButtonElement>) => show(e.currentTarget, name), onPointerLeave: () => setTip(null), onBlur: () => setTip(null) });
-  return <aside className="desktop-sidebar" aria-label="桌面侧栏" style={{ '--sidebar-groups': groups.length } as CSSProperties}>
-    <div className="desktop-group-list" role="toolbar" aria-label="桌面分组" aria-orientation="vertical" onKeyDown={key} onScroll={() => setTip(null)}>
-      {groups.map(group => { const Icon = groupIconComponents[group.icon]; return <button key={group.id} type="button" aria-label={group.name} aria-pressed={group.id === activeId} tabIndex={group.id === activeId ? 0 : -1} className={'sidebar-button ' + (group.id === activeId ? 'selected' : '')} {...hint(group.name)} onClick={() => { setTip(null); select(group.id); }}><Icon size={21} aria-hidden="true" /></button>; })}
-    </div>
-    <div className="sidebar-bottom"><button type="button" className="sidebar-button" aria-label="新增分组" {...hint('新增分组')} onClick={() => { setTip(null); create(); }}><Plus size={22} /></button><button type="button" className={'sidebar-button ' + (editing ? 'selected' : '')} aria-label="编辑卡片" aria-pressed={editing} {...hint('编辑卡片')} onClick={() => { setTip(null); edit(); }}><Pencil size={21} /></button></div>
-    {tip && createPortal(<span className="sidebar-tooltip" role="tooltip" style={{ top: tip.top }}>{tip.name}</span>, document.body)}
+  const choose=(action:()=>void)=>{dismiss(true);setTip(null);action();};
+  return <aside className="desktop-sidebar" aria-label="桌面分组导航">
+    <button ref={trigger} type="button" className="page-menu-trigger group-menu-trigger" aria-label={`桌面分组：${active.name}`} aria-haspopup="menu" aria-expanded={menuBottom!==null} onPointerEnter={event=>{const label=event.currentTarget.querySelector<HTMLElement>('.group-menu-label');if(label&&label.scrollWidth>label.clientWidth)show(event.currentTarget,active.name);}} onFocus={event=>{const label=event.currentTarget.querySelector<HTMLElement>('.group-menu-label');if(label&&label.scrollWidth>label.clientWidth)show(event.currentTarget,active.name);}} onPointerLeave={()=>setTip(null)} onBlur={()=>setTip(null)} onClick={()=>{setTip(null);setMenuBottom(value=>value===null?innerHeight-(trigger.current?.getBoundingClientRect().top??0)+8:null);}}><span className="group-menu-ring" aria-hidden="true"><span className="group-gradient-spin"/></span><span className="group-menu-content"><Icon size={16} aria-hidden="true"/><span className="group-menu-label">{active.name}</span><ChevronDown size={10} aria-hidden="true"/></span></button>
+    <GradientButtonGroup items={groups.map(group=>{const GroupIcon=groupIconComponents[group.icon];return{id:group.id,label:group.name,icon:<GroupIcon size={16}/>};})} value={activeId} onValueChange={select} enabled={settings.motion} onHint={show} onHideHint={()=>setTip(null)}/>
+    {tip&&createPortal(<span className={`sidebar-tooltip host-surface ${theme}`} role="tooltip" style={{left:tip.left,bottom:tip.bottom}}>{tip.name}</span>,document.body)}
+    {menuBottom!==null&&createPortal(<div ref={menu} className={`page-group-menu dock-context-menu host-surface ${theme}`} role="menu" aria-label="桌面分组" style={{left:8,bottom:menuBottom,width:'min(300px, calc(100vw - 16px))',maxHeight:`calc(100dvh - ${menuBottom+40}px)`}} onKeyDown={event=>key(event,true)}>{groups.map(group=>{const GroupIcon=groupIconComponents[group.icon];return <button key={group.id} role="menuitemradio" aria-checked={group.id===activeId} onClick={()=>choose(()=>select(group.id))}><GroupIcon size={18} aria-hidden="true"/><span>{group.name}</span></button>;})}</div>,document.body)}
   </aside>;
 }

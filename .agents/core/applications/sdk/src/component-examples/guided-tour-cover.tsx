@@ -1,0 +1,5 @@
+import {Button} from '@ksf/sdk/button';
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {GuidedTour} from '@ksf/sdk/guided-tour';import {mediaSamples} from '@ksf/sdk/component-examples/media-samples';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function GuidedTourCoverExample(){const first=useRef<HTMLButtonElement>(null),second=useRef<HTMLButtonElement>(null),[open,setOpen]=useState(false),[count,setCount]=useState(0);return <div className='ksf-demo-row'><Button ref={first} onClick={()=>setCount(count+1)}>目标操作 {count}</Button><Button ref={second}>资料入口</Button><Button onClick={()=>setOpen(true)}>开始引导</Button><GuidedTour open={open} onClose={()=>setOpen(false)}  steps={[{id:'a',target:first,cover:<img src={mediaSamples[0].src} alt='空间示意' style={{width:'100%'}}/>,heading:'认识操作入口',description:'这是第一步说明。'},{id:'b',target:second,heading:'查看资料',description:'引导结束后可继续操作。'}]}/></div>;}
