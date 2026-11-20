@@ -1,8 +1,8 @@
 import { replaceFileSync as renameSync } from '../platform/index.js';
-import { constants, realpathSync, accessSync } from 'node:fs';
+import { constants, realpathSync, accessSync,lstatSync } from 'node:fs';
 import { dirname, basename, join } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
-import { readFileSnapshot, sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';
+import { readFileSnapshot,readFileDigestSnapshot, sameIdentity, withExclusiveLock, withTemporaryFile } from '../shared/files.js';
 import { MetadataError } from './errors.js';
 
 function fileError(error, target, write = false) {
@@ -11,9 +11,9 @@ function fileError(error, target, write = false) {
     error.code === 'ENOENT' ? 'File or parent directory does not exist.' : write ? 'Cannot update file.' : 'Cannot read file.', { target });
 }
 
-export function readSnapshot(target) {
+export function readSnapshot(target,{digestOnly=false}={}) {
   try {
-    return readFileSnapshot(target, {
+    return (digestOnly?readFileDigestSnapshot:readFileSnapshot)(target, {
       validateEntry(entry) {
         if (entry.isSymbolicLink()) throw new MetadataError('FILE_UNSUPPORTED', 'Target symbolic links are not supported.', { target });
         if (!entry.isFile()) throw new MetadataError('FILE_UNSUPPORTED', 'Target must be a regular file.', { target });
@@ -22,7 +22,7 @@ export function readSnapshot(target) {
         if (!stat.isFile() || stat.dev !== entry.dev || stat.ino !== entry.ino) throw new MetadataError('FILE_CONFLICT', 'File changed while opening.', { target });
       },
       validateRead(before, after) {
-        if (!sameIdentity(before, after)) throw new MetadataError('FILE_CONFLICT', 'File changed while reading.', { target });
+        if (!sameIdentity(before, after)||digestOnly&&!sameIdentity(after,lstatSync(target))) throw new MetadataError('FILE_CONFLICT', 'File changed while reading.', { target });
       },
     });
   } catch (error) { throw fileError(error, target); }

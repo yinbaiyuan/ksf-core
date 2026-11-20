@@ -4,7 +4,9 @@ export { readingPositions, cloneWindowSession, releaseWindowSession } from './wi
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from 'react';
 export interface WindowObject { title:string; detail?:string }
 export interface WindowBridge { get(key:string):unknown; set(key:string,value:unknown):void }
-export const WindowContext = createContext({ id: 'standalone', active: true, enabled: true, root: null as RefObject<HTMLDivElement | null> | null, toolbarHost: null as HTMLDivElement | null, overlayHost: null as HTMLElement | null, contentHost: null as HTMLElement | null, registerMenu:undefined as ((items:ApplicationMenuItem[])=>ApplicationMenuRegistration)|undefined, registerSettings:undefined as ((handler:()=>void|Promise<void>)=>()=>void)|undefined, setObject:null as ((object:WindowObject|null)=>void)|null, session:undefined as WindowBridge|undefined, overlays:undefined as import('./overlay-coordinator').OverlayCoordinator|undefined });
+const initialWindowContext = { id: 'standalone', active: true, enabled: true, root: null as RefObject<HTMLDivElement | null> | null, toolbarHost: null as HTMLDivElement | null, overlayHost: null as HTMLElement | null, contentHost: null as HTMLElement | null, registerMenu:undefined as ((items:ApplicationMenuItem[])=>ApplicationMenuRegistration)|undefined, registerSettings:undefined as ((handler:()=>void|Promise<void>)=>()=>void)|undefined, setObject:null as ((object:WindowObject|null)=>void)|null, session:undefined as WindowBridge|undefined, overlays:undefined as import('./overlay-coordinator').OverlayAccess|undefined,commands:undefined as import('./controllers/command-registry').ApplicationCommands|undefined };
+export type WindowContextValue=Omit<typeof initialWindowContext,'commands'>&{commands?:import('./controllers/command-registry').ApplicationCommands;styleNonce?:string};
+export const WindowContext=createContext<WindowContextValue>(initialWindowContext);
 export const useWindowContext = () => useContext(WindowContext);
 
 export function useWindowState<T>(key: string, initial: T | (() => T)) {

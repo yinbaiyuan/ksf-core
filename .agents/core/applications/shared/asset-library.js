@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import './asset-library.css';
+import {mountAbilityPackage} from './ability-package.js';
 
 const typeNames = { cooperation: '协同', partner: '搭档', competency: '基本功', 'data-package': '数据包' };
 const stateNames = { draft: '草稿', active: '参与使用', archived: '已归档' };
@@ -16,6 +17,14 @@ export async function mountLibrary(container, sdk, kind) {
   let alive = true, generation = 0, listGeneration = 0, rows = [], file = null, selected = '', type = 'partner', source = 'effective', folder = '知识';
   let query = '', editing = false, draft = null, creation = false, preview = null, message = '', error = '', busy = false, links = [], check = null, lookupPath = '', related = null, needsMerge = false, draftBaseVersion = null;
   let draftPrefix = sdk.appId + ':';
+  let packaging=false,packageView=null;
+  async function openPackage(initial){
+    if(busy)return;
+    if(editing){notify('请先保存或取消编辑，再打包已保存的能力。',true);return;}
+    packaging=true;root.classList.add('is-packaging');
+    for(const node of side.querySelectorAll('button,input,select'))node.disabled=true;
+    packageView=await mountAbilityPackage(main,sdk,()=>{packageView?.dispose();packageView=null;packaging=false;root.classList.remove('is-packaging');render();},initial);
+  }
   try { draftPrefix += (await sdk.getSession()).instanceId + ':'; } catch { draftPrefix += location.origin + ':'; }
   const call = (method, params = {}) => sdk.call(method, params);
   const storageKey = () => draftPrefix + selected;
@@ -101,6 +110,7 @@ export async function mountLibrary(container, sdk, kind) {
   side.append(controls);
   const list = el('nav', 'ka-list'), footer = el('div', 'ka-footer'); list.setAttribute('aria-label', ability ? '能力列表' : '知识文件'); side.append(list, footer);
   footer.append(button(ability ? '新建能力' : '新建记录', () => startNew()), button('刷新', () => void reload()));
+  if(ability)footer.append(button('打包能力',()=>void openPackage()));
   const domains = el('nav', 'ka-domain-nav'); domains.setAttribute('aria-label', '四个核心应用');
   for (const [id, name] of [['com.ksf.projects', '项目'], ['com.ksf.abilities', '能力'], ['com.ksf.knowledge', '知识'], ['com.ksf.conversations', '飞轮']]) domains.append(button(name, () => sdk.openApp(id), 'ka-quiet'));
   side.append(domains);
@@ -154,13 +164,14 @@ export async function mountLibrary(container, sdk, kind) {
     }
   }
   function render() {
-    if (!alive) return;for(const node of side.querySelectorAll('button,input,select'))node.disabled=busy;main.replaceChildren();
+    if (!alive||packaging) return;for(const node of side.querySelectorAll('button,input,select'))node.disabled=busy;main.replaceChildren();
     if (message || error) { const banner = el('div', 'ka-banner' + (error ? ' ka-error' : ''), error || message); banner.setAttribute('role', error ? 'alert' : 'status'); main.append(banner); }
     const heading = el('header', 'ka-heading'), title = el('div'); title.append(el('p', 'ka-eyebrow', editing ? creation ? 'Create' : 'Revise' : ability ? 'Capability definition' : 'Knowledge original'), el('h1', '', editing ? creation ? ability ? '建立一项能力' : '写下一条记录' : '修订现有内容' : file ? ability ? file.metadata.name : file.text.match(/^#\s+(.+)$/m)?.[1] ?? file.path.split('/').at(-1).replace(/\.md$/i, '') : ability ? '方法有出处，使用有边界' : '从原文，走到自己的认识'));
     const actions = el('div', 'ka-actions'); heading.append(title, actions); main.append(heading);
     if (editing && draft) { renderEditor(actions); return; }
     if (!file) { main.append(el('p', 'ka-empty', ability ? '从左侧选择协同、搭档、基本功或数据包。查看有效来源、定义和依赖，也可以建立用户能力。' : '沿左侧目录打开知识原文，或搜索当前范围。内容、组织规则和来源仍保存在现有 Markdown 中。')); return; }
     const readonly = ability && (file.protected || !['user', 'system'].includes(file.source));
+    if(ability&&!file.protected)actions.append(button('打包此能力',()=>void openPackage({id:file.id,name:file.metadata.name,source:file.source,version:file.version})));
     actions.append(button('修订', startEdit)); actions.lastChild.disabled = readonly || busy;
     actions.append(button('核对', () => void run(async () => { check = await call(ability ? 'checkObject' : 'checkKnowledge', ability ? { type, ref: file.id, source: file.source } : { path: file.path }); })));
     if(!ability||['user','system'].includes(file.source))actions.append(button('查看原件', () => sdk.openApp('com.ksf.markdown', new URLSearchParams({ path: file.path, mode: 'read' }).toString())));else main.append(el('p','ka-muted','能力原件位于：'+file.path));
@@ -215,5 +226,5 @@ export async function mountLibrary(container, sdk, kind) {
   const beforeClose = sdk.onBeforeClose(() => { if (draft) stash(); return true; });
   render(); await reload();
   if(ability&&initialSearch.get('ref'))await openReference(initialSearch);else if (initial) await openPath(initial); else if (!ability && rows.some(r => r.path === '知识/knowledge.md')) await readRow({ path: '知识/knowledge.md' });
-  return { dispose() { alive = false; generation++; listGeneration++; if (draft) stash(); unsubscribe?.(); beforeClose?.(); root.remove(); } };
+  return { dispose() { alive = false; generation++; listGeneration++; packageView?.dispose(); if (draft) stash(); unsubscribe?.(); beforeClose?.(); root.remove(); } };
 }

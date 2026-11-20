@@ -1,0 +1,18 @@
+{
+  "name": "@ksf/component-library",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node ../sdk/scripts/ksf-app.mjs check . && node check-example-sources.mjs",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "1.61.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@ksf/sdk": "file:../sdk"
+  }
+}

@@ -1,0 +1,1 @@
+import {LightboxGallery} from '@ksf/sdk/lightbox-gallery';import {lightboxPhotos} from '@ksf/sdk/component-examples/lightbox-demo-images';export default function Example(){return <LightboxGallery label="本地图片集" items={lightboxPhotos}/>;}

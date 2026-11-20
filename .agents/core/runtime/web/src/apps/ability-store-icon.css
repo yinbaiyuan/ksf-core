@@ -1,0 +1,8 @@
+.ability-store-mark { display:block; flex:none; }
+@media(forced-colors:active) {
+  .ability-store-mark .ability-store-plate { fill:ButtonFace; stroke:ButtonText; stroke-width:2px; }
+  .ability-store-mark .ability-store-rim { stroke:none; }
+  .ability-store-mark .ability-store-handle { stroke:ButtonText; }
+  .ability-store-mark .ability-store-bag { fill:ButtonText; }
+  .ability-store-mark .ability-store-piece { fill:ButtonFace; }
+}

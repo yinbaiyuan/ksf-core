@@ -1,0 +1,1160 @@
+/* Generated per module from fixed free Kokonut source; MIT notice is shipped with the SDK. */
+/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
+@property --tw-animation-delay {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0s;
+}
+@property --tw-animation-direction {
+  syntax: "*";
+  inherits: false;
+  initial-value: normal;
+}
+@property --tw-animation-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-animation-fill-mode {
+  syntax: "*";
+  inherits: false;
+  initial-value: none;
+}
+@property --tw-animation-iteration-count {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card {
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  --color-red-500: var(--ksf-color-danger);
+  --color-red-900: var(--ksf-color-danger);
+  --color-zinc-50: oklch(98.5% 0 none);
+  --color-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-zinc-200: oklch(92% 0.004 286.32);
+  --color-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-zinc-700: oklch(37% 0.013 285.805);
+  --color-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-zinc-900: oklch(21% 0.006 285.885);
+  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-black: #000;
+  --color-white: #fff;
+  --spacing: 4px;
+  --container-sm: 384px;
+  --text-xs: 12px;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 14px;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 16px;
+  --text-base--line-height: calc(1.5 / 1);
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-wider: 0.05em;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-3xl: 24px;
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .\@container\/now-playing {
+    container-type: inline-size;
+    container-name: now-playing;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .pointer-events-none {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .visible {
+    visibility: visible;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .absolute {
+    position: absolute;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fixed {
+    position: fixed;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .relative {
+    position: relative;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .inset-0 {
+    inset: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .-top-1 {
+    top: calc(var(--spacing) * -1);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .-right-4 {
+    right: calc(var(--spacing) * -4);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .isolate {
+    isolation: isolate;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .-z-10 {
+    z-index: calc(10 * -1);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .z-10 {
+    z-index: 10;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .z-50 {
+    z-index: 50;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .-my-2 {
+    margin-block: calc(var(--spacing) * -2);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .mt-2 {
+    margin-top: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .mt-3 {
+    margin-top: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .mt-5 {
+    margin-top: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .block {
+    display: block;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .flex {
+    display: flex;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .hidden {
+    display: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .inline {
+    display: inline;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .inline-block {
+    display: inline-block;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .inline-flex {
+    display: inline-flex;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .size-5 {
+    width: calc(var(--spacing) * 5);
+    height: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .size-10 {
+    width: calc(var(--spacing) * 10);
+    height: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .size-12 {
+    width: calc(var(--spacing) * 12);
+    height: calc(var(--spacing) * 12);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .size-28 {
+    width: calc(var(--spacing) * 28);
+    height: calc(var(--spacing) * 28);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .size-full {
+    width: 100%;
+    height: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-1\.5 {
+    height: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-3\.5 {
+    height: calc(var(--spacing) * 3.5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-9 {
+    height: calc(var(--spacing) * 9);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-10 {
+    height: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-11 {
+    height: calc(var(--spacing) * 11);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-\[1lh\] {
+    height: 1lh;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-\[80\%\] {
+    height: 80%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .h-full {
+    height: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .min-h-\[80px\] {
+    min-height: 80px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .w-10 {
+    width: calc(var(--spacing) * 10);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .w-\[3px\] {
+    width: 3px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .w-auto {
+    width: auto;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .w-full {
+    width: 100%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .max-w-sm {
+    max-width: var(--container-sm);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .min-w-0 {
+    min-width: 0px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .min-w-\[8rem\] {
+    min-width: 128px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .flex-1 {
+    flex: 1;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shrink-0 {
+    flex-shrink: 0;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .origin-\[77\.5\%_10\%\] {
+    transform-origin: 77.5% 10%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .origin-bottom {
+    transform-origin: bottom;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .origin-left {
+    transform-origin: 0;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .translate-x-px {
+    --tw-translate-x: 1px;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .transform {
+    transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .cursor-default {
+    cursor: default;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .cursor-grab {
+    cursor: grab;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .cursor-pointer {
+    cursor: pointer;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .touch-none {
+    touch-action: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .items-center {
+    align-items: center;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .items-end {
+    align-items: flex-end;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .justify-between {
+    justify-content: space-between;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .justify-center {
+    justify-content: center;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .gap-0\.5 {
+    gap: calc(var(--spacing) * 0.5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .gap-3 {
+    gap: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .gap-5 {
+    gap: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .overflow-hidden {
+    overflow: hidden;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-3xl {
+    border-radius: var(--radius-3xl);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-\[1px\] {
+    border-radius: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-\[inherit\] {
+    border-radius: inherit;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-full {
+    border-radius: calc(infinity * 1px);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-md {
+    border-radius: var(--radius-md);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .border-zinc-200 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-\(--now-playing-accent\) {
+    background-color: var(--now-playing-accent);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-red-500 {
+    background-color: var(--color-red-500);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-white {
+    background-color: light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-white\/40 {
+    background-color: color-mix(in srgb, #fff 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 40%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-white\/50 {
+    background-color: color-mix(in srgb, #fff 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground)) 50%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-zinc-100 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-zinc-200 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-\(--now-playing-accent\) {
+    fill: var(--now-playing-accent);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-\[\#18181b\] {
+    fill: #18181b;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-\[\#f4f4f5\] {
+    fill: #f4f4f5;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-none {
+    fill: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-white {
+    fill: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-zinc-200 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-zinc-400 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-zinc-600 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 68%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .fill-zinc-900 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .stroke-white\/\[0\.08\] {
+    stroke: color-mix(in srgb, #fff 8%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      stroke: color-mix(in oklab, var(--color-white) 8%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .stroke-white\/\[0\.16\] {
+    stroke: color-mix(in srgb, #fff 16%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      stroke: color-mix(in oklab, var(--color-white) 16%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .stroke-zinc-300 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 17%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .stroke-zinc-400 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .p-1 {
+    padding: var(--spacing);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .p-5 {
+    padding: calc(var(--spacing) * 5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .p-6 {
+    padding: calc(var(--spacing) * 6);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .p-8 {
+    padding: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .px-2 {
+    padding-inline: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .px-4 {
+    padding-inline: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .px-8 {
+    padding-inline: calc(var(--spacing) * 8);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .py-1\.5 {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .py-2 {
+    padding-block: calc(var(--spacing) * 2);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-left {
+    text-align: left;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .font-mono {
+    font-family: var(--font-mono);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-xs {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-\[11px\] {
+    font-size: 11px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .font-medium {
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .font-semibold {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .tracking-wider {
+    --tw-tracking: var(--tracking-wider);
+    letter-spacing: var(--tracking-wider);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .whitespace-nowrap {
+    white-space: nowrap;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-white {
+    color: light-dark(var(--ksf-color-on-primary),var(--ksf-color-foreground));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 2%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 36%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 56%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-600 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 68%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .text-zinc-950 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .uppercase {
+    text-transform: uppercase;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .tabular-nums {
+    --tw-numeric-spacing: tabular-nums;
+    font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .underline-offset-4 {
+    text-underline-offset: 4px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow {
+    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow-\[0_0_6px_rgba\(0\,0\,0\,0\.03\)\,0_2px_6px_rgba\(0\,0\,0\,0\.08\)\,inset_3px_3px_0\.5px_-3px_rgba\(0\,0\,0\,0\.9\)\,inset_-3px_-3px_0\.5px_-3px_rgba\(0\,0\,0\,0\.85\)\,inset_1px_1px_1px_-0\.5px_rgba\(0\,0\,0\,0\.6\)\,inset_-1px_-1px_1px_-0\.5px_rgba\(0\,0\,0\,0\.6\)\,inset_0_0_6px_6px_rgba\(0\,0\,0\,0\.12\)\,inset_0_0_2px_2px_rgba\(0\,0\,0\,0\.06\)\,0_0_12px_rgba\(255\,255\,255\,0\.15\)\] {
+    --tw-shadow: 0 0 6px var(--tw-shadow-color, rgba(0,0,0,0.03)), 0 2px 6px var(--tw-shadow-color, rgba(0,0,0,0.08)), inset 3px 3px 0.5px -3px var(--tw-shadow-color, rgba(0,0,0,0.9)), inset -3px -3px 0.5px -3px var(--tw-shadow-color, rgba(0,0,0,0.85)), inset 1px 1px 1px -0.5px var(--tw-shadow-color, rgba(0,0,0,0.6)), inset -1px -1px 1px -0.5px var(--tw-shadow-color, rgba(0,0,0,0.6)), inset 0 0 6px 6px var(--tw-shadow-color, rgba(0,0,0,0.12)), inset 0 0 2px 2px var(--tw-shadow-color, rgba(0,0,0,0.06)), 0 0 12px var(--tw-shadow-color, rgba(255,255,255,0.15));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow-\[0_6px_16px_-6px_rgba\(0\,0\,0\,0\.45\)\] {
+    --tw-shadow: 0 6px 16px -6px var(--tw-shadow-color, rgba(0,0,0,0.45));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow-md {
+    --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow-sm {
+    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .shadow-xs {
+    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.05));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .ring-zinc-400 {
+    --tw-ring-color: var(--color-zinc-400);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .ring-offset-2 {
+    --tw-ring-offset-width: 2px;
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .ring-offset-white {
+    --tw-ring-offset-color: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .backdrop-blur-\[2px\] {
+    --tw-backdrop-blur: blur(2px);
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .backdrop-filter {
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .transition {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .transition-colors {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .transition-transform {
+    transition-property: transform, translate, scale, rotate;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .duration-150 {
+    --tw-duration: 150ms;
+    transition-duration: 150ms;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .duration-500 {
+    --tw-duration: 500ms;
+    transition-duration: 500ms;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .ease-\[cubic-bezier\(0\.23\,1\,0\.32\,1\)\] {
+    --tw-ease: cubic-bezier(0.23,1,0.32,1);
+    transition-timing-function: cubic-bezier(0.23,1,0.32,1);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .ease-\[cubic-bezier\(0\.77\,0\,0\.175\,1\)\] {
+    --tw-ease: cubic-bezier(0.77,0,0.175,1);
+    transition-timing-function: cubic-bezier(0.77,0,0.175,1);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .group-focus-visible\/seek\:ring-2:is(:where(.group\/seek):focus-visible *) {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-red-500\/90:hover {
+      background-color: color-mix(in srgb, oklch(63.7% 0.237 25.331) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-red-500\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-500) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-100:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-100\/80:hover {
+      background-color: color-mix(in srgb, oklch(96.7% 0.001 286.375) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-100\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-700:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 75%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:bg-zinc-900\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:text-zinc-900:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .hover\:underline:hover {
+      text-decoration-line: underline;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus\:bg-zinc-100:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus\:text-zinc-900:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 90%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:ring-2:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:ring-zinc-400:focus-visible {
+    --tw-ring-color: var(--color-zinc-400);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:ring-zinc-950:focus-visible {
+    --tw-ring-color: var(--color-zinc-950);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:ring-offset-2:focus-visible {
+    --tw-ring-offset-width: 2px;
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:ring-offset-white:focus-visible {
+    --tw-ring-offset-color: var(--color-white);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:outline-hidden:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .focus-visible\:outline-none:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .active\:cursor-grabbing:active {
+    cursor: grabbing;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .active\:bg-zinc-200:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .active\:bg-zinc-600:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 68%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .disabled\:pointer-events-none:disabled {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .disabled\:opacity-50:disabled {
+    opacity: 50%;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[side\=bottom\]\:slide-in-from-top-2[data-side="bottom"] {
+    --tw-enter-translate-y: calc(2*var(--spacing)*-1);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[side\=top\]\:slide-in-from-bottom-2[data-side="top"] {
+    --tw-enter-translate-y: calc(2*var(--spacing));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=closed\]\:animate-out[data-state="closed"] {
+    animation: exit var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=closed\]\:fade-out-0[data-state="closed"] {
+    --tw-exit-opacity: calc(0/100);
+    --tw-exit-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=closed\]\:zoom-out-95[data-state="closed"] {
+    --tw-exit-scale: calc(95*1%);
+    --tw-exit-scale: .95;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=open\]\:animate-in[data-state="open"] {
+    animation: enter var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=open\]\:fade-in-0[data-state="open"] {
+    --tw-enter-opacity: calc(0/100);
+    --tw-enter-opacity: 0;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .data-\[state\=open\]\:zoom-in-95[data-state="open"] {
+    --tw-enter-scale: calc(95*1%);
+    --tw-enter-scale: .95;
+  }
+@media (prefers-reduced-motion: reduce) {
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .motion-reduce\:transition-none {
+      transition-property: none;
+    }
+  }
+@container now-playing (width >= 352px) {
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card .\@\[22rem\]\/now-playing\:size-32 {
+      width: calc(var(--spacing) * 32);
+      height: calc(var(--spacing) * 32);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:border-zinc-800 {
+    border-color: var(--ksf-color-border);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-red-900 {
+    background-color: var(--color-red-900);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-50 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-100 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-800 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-900 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-900\/50 {
+    background-color: color-mix(in srgb, oklch(21% 0.006 285.885) 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background)) 50%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-950 {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:bg-zinc-950\/40 {
+    background-color: color-mix(in srgb, oklch(14.1% 0.005 285.823) 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 4%,var(--ksf-color-background)) 40%, transparent);
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:fill-black {
+    fill: var(--color-black);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:fill-zinc-300 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 83%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:fill-zinc-700 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 25%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:fill-zinc-900 {
+    fill: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:stroke-zinc-500 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:stroke-zinc-600 {
+    stroke: color-mix(in srgb,var(--ksf-color-foreground) 32%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:text-zinc-50 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:text-zinc-400 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 64%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:text-zinc-500 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 44%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:text-zinc-900 {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 10%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:shadow-\[0_0_8px_rgba\(0\,0\,0\,0\.03\)\,0_2px_6px_rgba\(0\,0\,0\,0\.08\)\,inset_3px_3px_0\.5px_-3\.5px_rgba\(255\,255\,255\,0\.09\)\,inset_-3px_-3px_0\.5px_-3\.5px_rgba\(255\,255\,255\,0\.85\)\,inset_1px_1px_1px_-0\.5px_rgba\(255\,255\,255\,0\.6\)\,inset_-1px_-1px_1px_-0\.5px_rgba\(255\,255\,255\,0\.6\)\,inset_0_0_6px_6px_rgba\(255\,255\,255\,0\.12\)\,inset_0_0_2px_2px_rgba\(255\,255\,255\,0\.06\)\,0_0_12px_rgba\(0\,0\,0\,0\.15\)\] {
+    --tw-shadow: 0 0 8px var(--tw-shadow-color, rgba(0,0,0,0.03)), 0 2px 6px var(--tw-shadow-color, rgba(0,0,0,0.08)), inset 3px 3px 0.5px -3.5px var(--tw-shadow-color, rgba(255,255,255,0.09)), inset -3px -3px 0.5px -3.5px var(--tw-shadow-color, rgba(255,255,255,0.85)), inset 1px 1px 1px -0.5px var(--tw-shadow-color, rgba(255,255,255,0.6)), inset -1px -1px 1px -0.5px var(--tw-shadow-color, rgba(255,255,255,0.6)), inset 0 0 6px 6px var(--tw-shadow-color, rgba(255,255,255,0.12)), inset 0 0 2px 2px var(--tw-shadow-color, rgba(255,255,255,0.06)), 0 0 12px var(--tw-shadow-color, rgba(0,0,0,0.15));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:ring-offset-zinc-900 {
+    --tw-ring-offset-color: var(--color-zinc-900);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:ring-offset-zinc-950 {
+    --tw-ring-offset-color: var(--color-zinc-950);
+  }
+@media (hover: hover) {
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+      background-color: color-mix(in srgb, oklch(39.6% 0.141 25.723) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-red-900\/90:hover {
+        background-color: color-mix(in oklab, var(--color-red-900) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-white:hover {
+      background-color: light-dark(var(--ksf-color-surface-raised),var(--ksf-color-foreground));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+      background-color: color-mix(in srgb, oklch(98.5% 0 none) 90%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-50\/90:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background)) 90%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800:hover {
+      background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+      background-color: color-mix(in srgb, oklch(27.4% 0.006 286.033) 80%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:bg-zinc-800\/80:hover {
+        background-color: color-mix(in oklab, color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background)) 80%, transparent);
+      }
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:text-zinc-50:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+    }
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:hover\:text-zinc-100:hover {
+      color: color-mix(in srgb,var(--ksf-color-foreground) 96%,var(--ksf-color-background));
+    }
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:focus\:bg-zinc-800:focus {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 16%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:focus\:text-zinc-50:focus {
+    color: color-mix(in srgb,var(--ksf-color-foreground) 98%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:focus-visible\:ring-zinc-300:focus-visible {
+    --tw-ring-color: var(--color-zinc-300);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:focus-visible\:ring-offset-zinc-900:focus-visible {
+    --tw-ring-offset-color: var(--color-zinc-900);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:active\:bg-zinc-300:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 83%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card[data-ksf-reference-theme="dark"] .dark\:active\:bg-zinc-700:active {
+    background-color: color-mix(in srgb,var(--ksf-color-foreground) 25%,var(--ksf-color-background));
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .\[\&_svg\]\:pointer-events-none svg {
+    pointer-events: none;
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .\[\&_svg\]\:size-4 svg {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .\[\&_svg\]\:shrink-0 svg {
+    flex-shrink: 0;
+  }
+@property --tw-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-rotate-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-z {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ordinal {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-slashed-zero {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-figure {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-spacing {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-fraction {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-inset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-offset-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tw-ring-offset-color {
+  syntax: "*";
+  inherits: false;
+  initial-value: #fff;
+}
+@property --tw-ring-offset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-backdrop-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity,1);
+    transform: translate3d(var(--tw-enter-translate-x,0),var(--tw-enter-translate-y,0),0)scale3d(var(--tw-enter-scale,1),var(--tw-enter-scale,1),var(--tw-enter-scale,1))rotate(var(--tw-enter-rotate,0));
+    filter: blur(var(--tw-enter-blur,0));
+  }
+}
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity,1);
+    transform: translate3d(var(--tw-exit-translate-x,0),var(--tw-exit-translate-y,0),0)scale3d(var(--tw-exit-scale,1),var(--tw-exit-scale,1),var(--tw-exit-scale,1))rotate(var(--tw-exit-rotate,0));
+    filter: blur(var(--tw-exit-blur,0));
+  }
+}
+@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    .ksf-kokonut.ksf-kokonut--liquid-glass-card *,.ksf-kokonut.ksf-kokonut--liquid-glass-card ::before,.ksf-kokonut.ksf-kokonut--liquid-glass-card ::after,.ksf-kokonut.ksf-kokonut--liquid-glass-card ::backdrop {
+      --tw-animation-delay: 0s;
+      --tw-animation-direction: normal;
+      --tw-animation-duration: initial;
+      --tw-animation-fill-mode: none;
+      --tw-animation-iteration-count: 1;
+      --tw-enter-blur: 0;
+      --tw-enter-opacity: 1;
+      --tw-enter-rotate: 0;
+      --tw-enter-scale: 1;
+      --tw-enter-translate-x: 0;
+      --tw-enter-translate-y: 0;
+      --tw-exit-blur: 0;
+      --tw-exit-opacity: 1;
+      --tw-exit-rotate: 0;
+      --tw-exit-scale: 1;
+      --tw-exit-translate-x: 0;
+      --tw-exit-translate-y: 0;
+      --tw-translate-x: 0;
+      --tw-translate-y: 0;
+      --tw-translate-z: 0;
+      --tw-rotate-x: initial;
+      --tw-rotate-y: initial;
+      --tw-rotate-z: initial;
+      --tw-skew-x: initial;
+      --tw-skew-y: initial;
+      --tw-border-style: solid;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
+      --tw-ordinal: initial;
+      --tw-slashed-zero: initial;
+      --tw-numeric-figure: initial;
+      --tw-numeric-spacing: initial;
+      --tw-numeric-fraction: initial;
+      --tw-shadow: 0 0 #0000;
+      --tw-shadow-color: initial;
+      --tw-shadow-alpha: 100%;
+      --tw-inset-shadow: 0 0 #0000;
+      --tw-inset-shadow-color: initial;
+      --tw-inset-shadow-alpha: 100%;
+      --tw-ring-color: initial;
+      --tw-ring-shadow: 0 0 #0000;
+      --tw-inset-ring-color: initial;
+      --tw-inset-ring-shadow: 0 0 #0000;
+      --tw-ring-inset: initial;
+      --tw-ring-offset-width: 0px;
+      --tw-ring-offset-color: #fff;
+      --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
+      --tw-backdrop-blur: initial;
+      --tw-backdrop-brightness: initial;
+      --tw-backdrop-contrast: initial;
+      --tw-backdrop-grayscale: initial;
+      --tw-backdrop-hue-rotate: initial;
+      --tw-backdrop-invert: initial;
+      --tw-backdrop-opacity: initial;
+      --tw-backdrop-saturate: initial;
+      --tw-backdrop-sepia: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+    }
+  }
+/* Fixed free MIT Kokonut UI 655ec61161aff87721e4c60c3cc4dc3329f3e80e. Copyright (c) 2025 kokonutUI; full notice is shipped. */
+@keyframes now-playing-in-up{from{transform:translateY(90%);opacity:0}to{transform:none;opacity:1}}
+@keyframes now-playing-out-up{from{transform:none;opacity:1}to{transform:translateY(-90%);opacity:0}}
+@keyframes now-playing-in-down{from{transform:translateY(-90%);opacity:0}to{transform:none;opacity:1}}
+@keyframes now-playing-out-down{from{transform:none;opacity:1}to{transform:translateY(90%);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll{animation:none!important}.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll-prev{display:none}}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll[data-ksf-disc-digit="in"][data-ksf-disc-direction="up"]{animation:now-playing-in-up 220ms cubic-bezier(.23,1,.32,1) both}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll[data-ksf-disc-digit="in"][data-ksf-disc-direction="down"]{animation:now-playing-in-down 220ms cubic-bezier(.23,1,.32,1) both}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll[data-ksf-disc-digit="out"][data-ksf-disc-direction="up"]{animation:now-playing-out-up 220ms cubic-bezier(.23,1,.32,1) both}
+.ksf-kokonut.ksf-kokonut--liquid-glass-card .now-playing-roll[data-ksf-disc-digit="out"][data-ksf-disc-direction="down"]{animation:now-playing-out-down 220ms cubic-bezier(.23,1,.32,1) both}

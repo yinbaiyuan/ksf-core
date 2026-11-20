@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { digest, assert, problem } from './workbench-common.js';
 
 import {workspaceFileSkip as SKIP,filePolicy} from '../shared/file-policy.js';
+import {createDurableFile,publishTemporary} from '../shared/durable-files.js';
 export {filePolicy};
 
 // Root navigation only: keep this ordered list as the single place to add entries.
@@ -90,7 +91,7 @@ export function createWorkspaceFiles(root, coordinator) {
         const latest = await snapshot(path);
         assert(latest.version === version && latest.stat.ino === before.stat.ino, 'WORKSPACE_CONFLICT', '发布前文件发生变化，已保留编辑草稿。', 409);
         await locate(path);
-        await fs.rename(temp, item.target);
+        await publishTemporary(temp,item.target,{replace:true});
         return read(path);
       } finally { await fs.unlink(temp).catch(e => { if (e.code !== 'ENOENT') throw e; }); }
     };
@@ -102,7 +103,7 @@ export function createWorkspaceFiles(root, coordinator) {
       const item = await locate(path, { missing: true });
       assert(item.path && !item.stat, 'WORKSPACE_EXISTS', '目标已存在。', 409); editable(item.path);
       if (kind === 'directory') await fs.mkdir(item.target);
-      else await fs.writeFile(item.target, text, { flag: 'wx', mode: 0o644 });
+      else await createDurableFile(item.target,text);
       return { path: item.path, kind };
     };
     return alreadyLocked ? publish() : coordinator.run(await lockKey(path), publish);
@@ -203,7 +204,7 @@ export function createWorkspaceFiles(root, coordinator) {
     const extension = name.split('.').pop().toLowerCase(), imagePath = posix.join(folder, `${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`);
     const bytes = Buffer.from(base64, 'base64'); assert(bytes.length > 0 && bytes.length <= 20 * 1024 * 1024, 'WORKSPACE_TOO_LARGE', '图片超过 20 MiB。', 413);
     const target = await locate(imagePath, { missing: true }); editable(imagePath);
-    await fs.writeFile(target.target, bytes, { flag: 'wx', mode: 0o644 });
+    await createDurableFile(target.target,bytes);
     return { path: imagePath, relativePath: posix.relative(posix.dirname(file.path), imagePath) };
     });
   }

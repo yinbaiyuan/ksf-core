@@ -1,0 +1,5 @@
+import {useState,useRef} from 'react';
+import {Cascader} from '@ksf/sdk/cascader';
+import {Button} from '@ksf/sdk/button';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function CascaderStatesExample(){return <div className='ksf-demo-stack'><Cascader label='默认路径' options={[{value:'office',label:'办公区',children:[{value:'meeting',label:'会议室',children:[{value:'a',label:'A 室'},{value:'b',label:'B 室'}]},{value:'studio',label:'工作室'}]},{value:'home',label:'居家区',children:[{value:'living',label:'客厅'},{value:'study',label:'书房'}]},{value:'later',label:'待开放',disabled:true}]} defaultValue={['office','meeting','a']}/><Cascader label='禁用级联' options={[{value:'office',label:'办公区',children:[{value:'meeting',label:'会议室',children:[{value:'a',label:'A 室'},{value:'b',label:'B 室'}]},{value:'studio',label:'工作室'}]},{value:'home',label:'居家区',children:[{value:'living',label:'客厅'},{value:'study',label:'书房'}]},{value:'later',label:'待开放',disabled:true}]} disabled/><Cascader label='空级联' options={[]}/></div>;}

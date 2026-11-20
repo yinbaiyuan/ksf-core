@@ -1,0 +1,3 @@
+@import './theme.css';
+kbd.ksf-kbd {box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:24px;padding:1px 6px;vertical-align:baseline;white-space:nowrap;font:12px/20px ui-monospace,SFMono-Regular,Consolas,monospace;color:inherit;background:var(--ksf-color-surface-raised);border:1px solid var(--ksf-color-border-strong);border-radius:4px;box-shadow:0 1px 0 var(--ksf-color-border)}
+@media (forced-colors:active) {kbd.ksf-kbd {border-color:CanvasText;box-shadow:none}}

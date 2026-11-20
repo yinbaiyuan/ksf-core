@@ -1,0 +1,1 @@
+import {VoiceInput} from '@ksf/sdk/voice-input';export default function Example(){return <div style={{width:'100%'}}><VoiceInput label="禁用录音" status="idle" disabled/><VoiceInput label="就绪波形" status="ready" elapsed={14} duration={14} samples={[.2,.7,.5,.9,.3,.5]} disabled/></div>;}

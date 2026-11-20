@@ -1,5 +1,14 @@
-import type {ApplicationSDK} from './application-sdk';
-/** App-owned files only. Backend file.export returns path, name, sha256; host verifies ownership and bytes. */
-export function createApplicationFileClient(sdk:Pick<ApplicationSDK,'instanceId'>){return {
- downloadURL(params:Record<string,unknown>):string{return '/api/apps/file-read?'+new URLSearchParams({instanceId:sdk.instanceId,params:JSON.stringify(params)});},
-};}
+export {pickerLocation,withinPickerRoot} from './file-navigation.ts';
+/** Public legacy client. Transport is shared; bundled pickers retain their private renderer boundary. */
+import {createFileTransport,type FilePickerOptions} from './file-client.ts';
+export type * from './file-client.ts';
+export {createBackendFileClient,createApplicationFileClient} from './file-client.ts';
+export function createFileClient(sdk:Parameters<typeof createFileTransport>[0],fetcher:typeof fetch=fetch){
+ const files=createFileTransport(sdk,fetcher);
+ return {...files,
+  async pickFile(options:FilePickerOptions={}){return (await import('./file-dialogs')).pickFile(sdk,files,'file',options);},
+  async pickDirectory(options:FilePickerOptions={}){return (await import('./file-dialogs')).pickFile(sdk,files,'directory',options);},
+  async pickSaveTarget(options:FilePickerOptions={}){return (await import('./file-dialogs')).pickFile(sdk,files,'save',options);},
+  async manage(options:FilePickerOptions={}){return (await import('./file-manager')).manageFiles(sdk,files,options);},
+ };
+}

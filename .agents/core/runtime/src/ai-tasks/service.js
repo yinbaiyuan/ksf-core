@@ -71,12 +71,13 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
   }
   async function describe(caller){
     callerCheck(caller);await start();const profiles=await readConfig(store.home,'profiles'),connections=await readConfig(store.home,'connections');
-    return {contractVersion:'ai-task-v1',limits:{requestBytes:768*1024,textMaterialBytes:512*1024,uploadBytes:128*1024*1024},profiles:profiles.items.filter(profile=>profile.enabled&&connections.items.some(c=>c.id===profile.executorId&&c.enabled&&executors[c.kind==='codex'?'codex':c.protocolId])).map(profile=>{
+    return {contractVersion:'ai-task-v1',features:['request-lookup-v1'],limits:{requestBytes:768*1024,textMaterialBytes:512*1024,uploadBytes:128*1024*1024},profiles:profiles.items.filter(profile=>profile.enabled&&connections.items.some(c=>c.id===profile.executorId&&c.enabled&&executors[c.kind==='codex'?'codex':c.protocolId])).map(profile=>{
       const connection=connections.items.find(c=>c.id===profile.executorId);
       return {id:profile.id,executorId:connection.id,kind:connection.kind,...(connection.protocolId?{protocolId:connection.protocolId}:{}),model:profile.model??null,capabilities:connection.protocolId==='openai-transcription-v1'?['audio-transcription','json']:['text','json'],limits:{maxInputBytes:profile.maxInputBytes,maxOutputBytes:profile.maxOutputBytes,timeoutMs:profile.timeoutMs,maxAttempts:profile.maxAttempts}};
     })};
   }
   async function get(caller, id) { callerCheck(caller); await start(); return view(own(caller, id)); }
+  async function lookup(caller,idempotencyKey){callerCheck(caller);identifier(idempotencyKey);await start();const found=[...store.tasks.values()].find(task=>task.appId===caller.appId&&task.request.idempotencyKey===idempotencyKey);return found?view(found):null;}
   async function readResult(caller,id){callerCheck(caller);await start();const task=own(caller,id);requireAI(task.status==='succeeded','AI_RESULT_UNAVAILABLE','任务尚无可采用的成功结果。');const artifact=await readJSON(join(store.home,'results',id+'.json'));requireAI(artifact.schemaVersion===1&&artifact.aiTaskId===id&&sha256(canonical(artifact.value))===task.output.artifacts[0].sha256,'AI_STORAGE_INVALID','结果摘要校验失败。');return{resultId:id,format:artifact.format,value:artifact.value,sha256:task.output.artifacts[0].sha256,...(artifact.executionFiles?{executionFiles:artifact.executionFiles}: {})};}
   async function adminGet(id){identifier(id);await start();const task=store.tasks.get(id);requireAI(task,'AI_TASK_NOT_FOUND','任务不存在。',{status:404});return view(task);}
   async function events(caller, id, afterSeq = 0) { callerCheck(caller); await start(); requireAI(Number.isSafeInteger(afterSeq) && afterSeq >= 0, 'AI_REQUEST_INVALID', '事件游标无效。'); const task = own(caller, id); const items = task.events.filter(e => e.seq > afterSeq).slice(0, 100); return { events: clone(items), afterSeq: items.at(-1)?.seq ?? afterSeq, hasMore:task.events.some(e=>e.seq>(items.at(-1)?.seq??afterSeq)), snapshot: view(task) }; }
@@ -203,5 +204,5 @@ export function createAITaskService(root, { executors = {}, now = Date.now, poll
     }),owners:all.filter(live).flatMap(t=>{const a=t.attempts.at(-1);return a?.workerPid?[{id:'ai:'+t.aiTaskId,pid:a.workerPid}]:[];})};
   }
   async function monitorCancel(id,version){requireAI(store?.tasks.has(id),'AI_TASK_NOT_FOUND','AI 任务不存在。',{status:404});return cancel({appId:store.tasks.get(id).appId},id,version);}
-  return { executionRules:caller=>coordinator.run('execution-grants',()=>grants.read(caller)),configureExecution, monitorSnapshot,monitorCancel,runtimeStatus,pauseDispatch,resumeDispatch,start, describe, submit, get, readResult,adminGet,cancel, events, config, inspect, checkConnection,register, upload, close, tick };
+  return { executionRules:caller=>coordinator.run('execution-grants',()=>grants.read(caller)),configureExecution, monitorSnapshot,monitorCancel,runtimeStatus,pauseDispatch,resumeDispatch,start, describe, submit, get,lookup, readResult,adminGet,cancel, events, config, inspect, checkConnection,register, upload, close, tick };
 }

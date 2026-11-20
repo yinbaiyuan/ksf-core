@@ -41,11 +41,11 @@
 .desktop-grid-guides i { border-radius: 12px; background: #ffffff1c; }
 .desktop-grid > .react-grid-layout { position: relative; z-index: 1; }
 .desktop-tile { z-index: 1; color: #1d304a; }
-.desktop-widget { position: absolute; inset: 0; overflow: hidden; isolation: isolate; border-radius: var(--card-radius,24px); color: #1d304a; border: .5px solid #ffffff8f; box-shadow: inset 0 1px #ffffffa8; }
+.desktop-widget { position: absolute; inset: var(--desktop-tile-inset,12px); overflow: hidden; isolation: isolate; border-radius: var(--card-radius,24px); color: #1d304a; border: .5px solid #ffffff8f; box-shadow: inset 0 1px #ffffffa8; }
 .desktop-widget::after { content: ''; position: absolute; inset: 1px; border: 1px solid #ffffff38; border-radius: inherit; pointer-events: none; }
 .widget-content { height: 100%; padding: 17px 18px; overflow: auto; scrollbar-width: thin; }
 .widget-content.is-compact { padding: 8px; }
-.widget-caption { position: absolute; top: 100%; left: 0; right: 0; display: flex; justify-content: center; padding-top: 3px; line-height: 18px; font-size: 12px; font-weight: 600; color: #fff; user-select: none; }
+.widget-caption { position: absolute; top: calc(100% - var(--desktop-tile-inset,12px)); left: 0; right: 0; display: flex; justify-content: center; padding-top: 8px; line-height: 18px; font-size: 12px; font-weight: 600; color: #fff; user-select: none; }
 .widget-caption > span { min-width: 0; max-width: 100%; padding-inline: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-text-stroke: .3px #13243c80; paint-order: stroke fill; text-shadow: 0 1px 2px #071528e6,0 0 1px #071528,0 0 6px #07152880; }
 @media (prefers-contrast: more) { .widget-caption > span { -webkit-text-stroke: .5px #071528; text-shadow: 0 1px 2px #000; } }
 @media (forced-colors: active) { .widget-caption > span { color: CanvasText; background: Canvas; -webkit-text-stroke: 0; text-shadow: none; } }
@@ -57,7 +57,7 @@
 .desktop-widget > .widget-size { position: absolute; left: 8px; bottom: 6px; z-index: 3; padding: 1px 5px; border-radius: 5px; background: #edf4fcf2; color: #26445f; font-size: 10px; pointer-events: none; }
 .widget-drag-handle { cursor: grab; }
 .react-draggable-dragging .widget-drag-handle { cursor: grabbing; }
-.is-editing .desktop-grid > .react-grid-layout, .is-editing .desktop-tile.react-grid-item, .is-editing .react-grid-placeholder { transition: none; }
+.is-editing .desktop-grid > .react-grid-layout, .is-editing .react-grid-placeholder { transition: none; }
 .desktop-grid[data-glass-interacting] .desktop-widget { background: #eff4fbf2; }
 .desktop-grid[data-glass-interacting] .glass-surface { visibility: hidden; }
 
@@ -65,7 +65,11 @@
 .is-editing .desktop-widget:focus-visible { outline: 2px solid #0755b8; }
 .desktop-grid .react-grid-item.react-grid-placeholder { z-index: 0; opacity: 1; background: #d9e2eb73; border: 0; outline: 0; border-radius: var(--card-radius,24px); box-shadow: none; transition: none; pointer-events: none; }
 .react-grid-item { transition: none; }
+.desktop-grid .has-grid-motion > .desktop-tile.react-grid-item { transition: transform 180ms cubic-bezier(.2,.8,.2,1); }
+.desktop-grid .desktop-tile.react-grid-item.react-draggable-dragging,
+.desktop-grid .desktop-tile.react-grid-item.resizing { transition: none; }
 .react-grid-item > .react-resizable-handle { z-index: 3; width: 22px; height: 22px; bottom: 6px; right: 6px; }
+.desktop-grid .desktop-tile:not(.is-application) > .react-resizable-handle { bottom:calc(var(--desktop-tile-inset,12px) + 6px); right:calc(var(--desktop-tile-inset,12px) + 6px); }
 .react-resizable-handle::after { border-color: #24466c88 !important; }
 /* Prebundled react-draggable selection hack; external CSS marker in build.mjs. */
 .react-draggable-transparent-selection *::-moz-selection { all: inherit; }
@@ -79,7 +83,7 @@
 .os-titlebar { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: 40px; min-height: 40px; gap: 14px; padding: 0 14px; overflow: visible; border-bottom: .5px solid #28496e12; cursor: grab; border-radius: var(--window-radius) var(--window-radius) 0 0; user-select: none; }
 /* Window controls alone stay compact. Expand only for application controls in
    the shared toolbar slot; empty wrappers and plain context text do not count. */
-.os-titlebar:has(.window-toolbar-host :is(button, a[href], input, select, textarea, summary, [role="button"], [role="tab"], [role="checkbox"], [role="switch"], [role="combobox"], [role="slider"], [role="spinbutton"], [contenteditable="true"])) { height: 68px; min-height: 68px; }
+.os-titlebar:has(.window-toolbar-host :is(button, a[href], input, select, textarea, summary, [role="button"], [role="tab"], [role="checkbox"], [role="switch"], [role="combobox"], [role="slider"], [role="spinbutton"], [contenteditable="true"])) { height: 56px; min-height: 56px; }
 .window-toolbar-host { flex: 1; min-width: 0; align-self: stretch; display: flex; }
 .os-titlebar:active { cursor: grabbing; }
 .window-lights { display: flex; gap: 8px; width: auto; flex: none; }
@@ -87,41 +91,68 @@
 .light-close { background: #fc625b; }.light-min { background: #fcbd31; }.light-max { background: #34c749; }
 .window-lights button svg { opacity: 0; }.window-lights:hover svg,.window-lights button:focus-visible svg { opacity: 1; }
 .os-window:not(.is-active) .window-lights button { background: #c3cbd1; }
-.window-title { display: flex; align-items: center; gap: 7px; flex: none; font-size: 13px; font-weight: 600; color: #263f5b; max-width: 150px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .os-app-root { container-type: inline-size; container-name: app; flex: 1; min-height: 0; position: relative; contain: layout style; border-radius: 0 0 var(--window-radius) var(--window-radius); }
 .os-app-content { width:100%; height:100%; min-width:0; min-height:0; overflow:auto; overscroll-behavior:contain; border-radius:inherit; }
 .os-app-overlays { position:absolute; inset:0; z-index:100; pointer-events:none; overflow:hidden; isolation:isolate; contain:layout style; border-radius:inherit; }
 .os-app-overlays > * { pointer-events:auto; }
-.os-dock { position: absolute; bottom: var(--desktop-dock-bottom); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; height: var(--desktop-dock-height); max-width: calc(100vw - 16px); padding: 7px 13px; z-index: 1000; border-radius: var(--glass-dock-radius,26px); isolation: isolate; border: .5px solid #ffffff91; box-shadow: inset 0 1px #ffffff91; }
-.dock-item { width: 49px; height: 54px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; background: none; border: 0; padding: 0 0 4px; }
-.dock-applications { display: flex; align-items: center; gap: 10px; min-width: 0; overflow-x: auto; padding-block: 7px; margin-block: -7px; scrollbar-width: none; }
+.os-dock { position: absolute; bottom: var(--desktop-dock-bottom); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; height: var(--desktop-dock-height); max-width: calc(100vw - 16px); padding: 4px 6px; z-index: 1000; border-radius: var(--glass-dock-radius,26px); isolation: isolate; border: .5px solid #ffffff91; box-shadow: inset 0 1px #ffffff91; }
+.dock-item { width: var(--dock-icon-size,44px); height: calc(var(--dock-icon-size,44px) + 6px); flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; background: none; border: 0; padding: 0 0 6px; }
+.dock-applications { position:relative; display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; padding-block: 6px; margin-block: -6px; scrollbar-width: none; }
 .launcher-icon { color: #fff; background: linear-gradient(145deg,#8799b6,#546988); }
 .app-icon { display: grid; place-items: center; width: 45px; height: 45px; border-radius: 13px; color: #fff; box-shadow: inset 0 1px 1px #ffffff9c, inset 0 -1px 1px #152d5550, 0 3px 7px #133b6b29; transition: transform 160ms ease; }
+.os-dock .app-icon { width: var(--dock-icon-size,44px); height: var(--dock-icon-size,44px); border-radius: calc(var(--dock-icon-size,44px) * .28); }
+.os-dock .launcher-icon > svg,.os-dock .desktop-icon > svg { width: 60%; height: 60%; }
 .dock-item:hover .app-icon { transform: translateY(-5px); }.dock-item:active .app-icon { transform: translateY(0); }
 .conversation-icon { background: linear-gradient(145deg,#74c6ff,#317cf2 60%,#1450c5); }
 .desktop-icon { color: #2c6db8; background: linear-gradient(145deg,#f8fcff,#dceafb); }
-.dock-tooltip { pointer-events: none; opacity: 0; position: absolute; bottom: 69px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; padding: 6px 10px; border-radius: 7px; background: #f8fbfff0; color: #294362; box-shadow: 0 3px 15px #142e4d26; }
+.dock-tooltip { pointer-events: none; opacity: 0; position: absolute; bottom: calc(var(--dock-icon-size,44px) + 14px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; padding: 6px 10px; border-radius: 7px; background: #f8fbfff0; color: #294362; box-shadow: 0 3px 15px #142e4d26; }
 .dock-item:hover .dock-tooltip,.dock-item:focus-visible .dock-tooltip { opacity: 1; }
-.dock-item .dock-running { position: absolute; bottom: 0; height: 3px; width: 3px; border-radius: 50%; background: #244669; }
+.dock-tooltip.is-floating { position: fixed; opacity: 1; z-index: 2000; }
+.dock-item .dock-running { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 2; height: 4px; width: 4px; border-radius: 50%; background: #24364b; box-shadow: 0 0 1.5px .5px #ffffffe0; pointer-events: none; }
 .dock-context-menu { position: fixed; width: 260px; max-width: calc(100vw - 16px); max-height: min(420px, calc(100dvh - 120px)); overflow-y: auto; z-index: 2000; }
 .dock-context-menu button > span { min-width: 0; overflow-wrap: anywhere; }
 .dock-context-menu button > svg { flex-shrink: 0; }
 .dock-context-menu button:focus-visible { outline: 2px solid #0755b8; outline-offset: -2px; }
-.dock-divider { width: 1px; height: 37px; flex-shrink: 0; background: #24466c24; margin-inline: 2px; }
+.dock-divider { width: 1px; height: calc(var(--dock-icon-size,44px) - 8px); flex-shrink: 0; background: #24466c24; margin-inline: 2px; }
+.dock-size-setting { padding: 14px 16px; }
+.dock-size-setting > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.dock-size-setting output,.dock-size-labels { color: #7b8798; font-variant-numeric: tabular-nums; }
+.dock-size-setting input { width: 100%; margin: 12px 0 7px; accent-color: #176ddd; cursor: pointer; }
 .desktop-empty { text-align: center; color: #2c4d72; padding: 40px; }.desktop-empty button { border: 1px solid white; background: #ffffffbb; border-radius: 8px; padding: 8px 14px; }
 .sheet { z-index: 2200; }.sheet-overlay { z-index: 2100; }.drawer-material-stage { z-index: 2200; }
 /* Application grid opens directly above its permanent Dock button. */
 .application-launcher { position: fixed; z-index: 2000; display: flex; padding: 12px; box-sizing: border-box; border: 1px solid #cbd5e2; border-radius: 20px; background: #f7f9fc; color: #263c56; box-shadow: 0 12px 40px #142e4d40,0 2px 6px #142e4d1a; }
 .application-launcher::after { content: ''; position: absolute; left: var(--launcher-arrow-left); bottom: -8px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg); border-right: 1px solid #cbd5e2; border-bottom: 1px solid #cbd5e2; background: #f7f9fc; pointer-events: none; }
-.launcher-applications { display: grid; grid-template-columns: repeat(auto-fill,minmax(84px,1fr)); align-content: start; gap: 6px; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 4px; scrollbar-width: thin; }
+.launcher-applications { display: grid; grid-template-columns: repeat(auto-fill,minmax(var(--launcher-cell-min,84px),1fr)); align-content: start; gap: 6px; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 8px 4px; scrollbar-width: thin; }
 .launcher-application { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; padding: 10px 4px; border: 1px solid transparent; border-radius: 13px; background: transparent; color: inherit; cursor: pointer; }
-.launcher-application:hover { border-color: #d5dfeb; background: #e8eef6; }
 .launcher-application:focus-visible { outline: 2px solid #1769bd; outline-offset: -2px; }
-.launcher-application .desktop-app-icon { width: 56px; height: 56px; border-radius: 13px; }
+.launcher-application .desktop-layer-anchor { width:var(--launcher-icon-size,64px); height:var(--launcher-icon-size,64px); flex-shrink:0; }
+.launcher-application .desktop-app-icon { width:100%; height:100%; }
 .launcher-application-name { max-width: 100%; font-size: 12px; line-height: 1.5; text-align: center; overflow-wrap: anywhere; }
 .launcher-context-menu { z-index: 2050; width: 232px; min-width: 0; max-height: calc(100dvh - 16px); }
 .launcher-context-menu button:disabled { color: #718096; cursor: default; }
 .launcher-context-menu button:disabled:hover { color: #718096; background: transparent; }
+.dock-applications [data-dock-pinned="true"] { cursor:grab; touch-action:pan-y; }
+.dock-applications.is-sorting { user-select:none; }
+.dock-applications .dock-item.is-dragging { cursor:grabbing; opacity:.55; }
+.dock-app-menu,.launcher-context-menu { max-height:none; overflow:visible; }
+.dock-menu-window-list { display:contents; }
+.dock-app-menu.is-compact { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:min(480px,calc(100vw - 16px)); gap:2px; }
+.dock-app-menu.is-compact > h3,.dock-app-menu.is-compact .dock-window-target,.dock-app-menu.is-compact .dock-window-pagination { grid-column:1 / -1; }
+.dock-app-menu.is-compact button { min-width:0; padding:6px; gap:6px; }
+.dock-app-menu.is-dense button { min-height:26px; padding:4px 6px; font-size:11px; line-height:16px; }
+.dock-app-menu.is-dense button > svg { width:13px; height:13px; }
+.dock-app-menu .dock-window-target { overflow-wrap:anywhere; }
+.dock-window-pagination { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:2px 4px; }
+.dock-window-pagination > span { white-space:nowrap; font-size:11px; }
+.dock-context-menu .dock-window-pagination > button { justify-content:center; width:auto; min-height:26px; padding:4px 6px; font-size:11px; }
+.dock-window-pagination > button:disabled { opacity:.4; cursor:default; }
+.dock-main-menu { width:220px; min-width:0; }
+.dock-submenu-chevron { margin-left:auto; }
+.dock-window-submenu { z-index:2010; }
+.dock-window-submenu > h3 { justify-content:flex-start; gap:6px; }
+.dock-context-menu .dock-submenu-back { flex:none; width:24px; min-height:22px; padding:2px; justify-content:center; }
+.dock-app-menu button:disabled { opacity:.45; cursor:default; }
 @media (forced-colors: active) { .application-launcher,.application-launcher::after { background: Canvas; color: CanvasText; border-color: CanvasText; } }
 
 .widget-library { display: grid; gap: 12px; margin: 24px 0; }.widget-library article { display: flex; align-items: center; gap: 12px; background: #fff9; border: 1px solid #ffffff; border-radius: 14px; padding: 16px; }.widget-library article > span { display: grid; place-items: center; color: #4672a8; background: #e2edfa; border-radius: 12px; width: 46px; height: 46px; flex-shrink: 0; }.widget-library h3 { font-size: 14px; margin: 0 0 5px; }.widget-library p { font-size: 11px; margin: 0; color: #526b87; line-height: 1.6; }.widget-library button { display: flex; gap: 4px; align-items: center; margin-left: auto; padding: 6px 8px; border: 1px solid #cbdcf0; background: #fff; border-radius: 8px; color: #185da8; font-size: 11px; white-space: nowrap; }
@@ -159,7 +190,7 @@
 .app-workbench.compact-rounds .round-workspace:has(.turn-updates) { grid-template-rows: auto auto auto auto minmax(0,1fr); }.app-workbench.compact-rounds .turn-updates { grid-row: 4; }.app-workbench.compact-rounds .round-workspace:has(.turn-updates) .round-scroll { grid-row: 5; }
 .app-workbench.compact-rounds .turn-document { padding: 18px; }.app-workbench.compact-rounds .reader-actions { flex-direction: column; }.app-workbench.compact-rounds .record-info-link { font-size: 10px; }.app-workbench.compact-rounds .material-settings-trigger { font-size: 10px; padding-inline: 8px; }.app-workbench.compact-rounds .breadcrumb { font-size: 11px; }
 .app-workbench .route-map { grid-template-columns: minmax(0,1fr); }.app-workbench .route-connector { display: none; }
-@media (max-width: 1100px) { .desktop-motto { margin-left: -56px; }.desktop-heading h1 { font-size: 22px; }.desktop-actions > span:not(.desktop-save) { max-width: 150px; font-size: 10px; }.window-title small { display: none; } }
+@media (max-width: 1100px) { .desktop-motto { margin-left: -56px; }.desktop-heading h1 { font-size: 22px; }.desktop-actions > span:not(.desktop-save) { max-width: 150px; font-size: 10px; }}
 @media (prefers-reduced-motion: reduce) { .os-desktop *, .os-desktop *::before,.os-desktop *::after { animation: none !important; transition: none !important; }.dock-item:hover .app-icon { transform: none; } }
 @media (prefers-reduced-transparency: reduce),(prefers-contrast: more) { .os-desktop { background: #cfdaea; }.os-statusbar,.os-dock,.desktop-widget,.os-window { background: #eff4fa; }.desktop-heading h1 { text-shadow: none; } }
 @media (forced-colors: active) { .os-statusbar,.os-dock,.desktop-widget,.os-window { background: Canvas; border: 1px solid CanvasText; }.app-icon,.window-lights button { background: ButtonFace; color: ButtonText; border: 1px solid ButtonText; } }
@@ -174,6 +205,7 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 .widget-content:has(.capture-card) { padding-block: 7px; }.capture-card p { margin-block: 3px; }.capture-card small { display: block; line-height: 1.35; }
 /* Optical foreground stacking must not turn the resize span into an inline box. */
 .desktop-tile.react-grid-item > .react-resizable-handle { position: absolute; display: block; z-index: 3; }
+.os-desktop:not(.is-editing) .desktop-tile.react-grid-item > .react-resizable-handle { display: none; pointer-events: none; }
 /* Application windows are opaque; glass remains on the desktop surfaces. */
 .os-window { background: #EEF2F6; border: 1px solid #BEC8D4; }
 .os-window > .os-titlebar { background: #E9EEF4; border-bottom: 1px solid #D2DAE4; }
@@ -296,14 +328,19 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 .settings-documentation-link{margin:12px 16px 0;padding:8px 10px;text-align:left;border:1px solid var(--border,#dbe2ec);border-radius:7px;background:transparent;color:inherit;font-size:12px}.settings-documentation-link:disabled{opacity:.5;cursor:default}
 
 /* Launchers share the grid with cards, without mounting an application surface. */
-.desktop-application { position:absolute; inset:0; display:grid; place-items:center; }
-.application-shortcut-launch { width:100%; height:100%; display:grid; place-items:center; border-radius:18px; outline-offset:-3px; }
-.application-shortcut-launch:hover { background:#ffffff26; }
+.desktop-application { position:absolute; inset:var(--desktop-tile-inset,12px); display:grid; place-items:center; }
+.application-shortcut-launch { width:100%; height:100%; display:grid; place-items:center; border-radius:2px; outline-offset:-3px; }
+/* The visual slot must fill the launch target before artwork resolves its percentages. */
+.application-shortcut-launch > .ksf-app-icon-visual { display:block; width:100%; height:100%; min-width:0; min-height:0; }
+.application-shortcut-launch:hover { background:transparent; }
 .application-shortcut-launch:focus-visible { outline:2px solid #0865c9; }
+.os-desktop .desktop-application .application-shortcut-launch:is(:hover,:focus-visible) { background:transparent; }
+.os-desktop .desktop-application .application-shortcut-launch:focus-visible { outline:2px solid var(--host-accent); outline-offset:3px; border-radius:var(--window-radius,6px); }
 .application-shortcut-launch[aria-disabled=true] { opacity:.55; }
 .is-editing .application-shortcut-launch { opacity:1; outline:1px dashed #ffffffdb; }
 .is-editing .application-shortcut-launch:focus-visible { outline:2px solid #0865c9; }
 .desktop-app-icon { width:64px; height:64px; border-radius:15px; box-shadow:0 4px 12px #16314e22,inset 0 0 0 .5px #ffffff70; }
+.desktop-grid .desktop-app-icon { width:100%; height:100%; }
 .desktop-application > .widget-edit-tools { position:absolute; right:0; top:0; z-index:4; display:flex; gap:3px; }
 .shortcut-error { color:#963c29; font-size:12px; }
 .status-app-icon { width:20px; height:20px; border-radius:5px; }
@@ -317,3 +354,5 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 .status-right time { white-space:nowrap; }
 @media(max-width:639px){.os-statusbar{padding-right:8px}.status-right{gap:8px}.status-left,.status-right{column-gap:8px}.desktop-app-icon{width:60px;height:60px}}
 @media(forced-colors:active){.application-shortcut-launch:focus-visible{outline-color:Highlight}.desktop-app-icon,.status-app-icon{border:1px solid ButtonText}.background-apps .os-menu>div{background:Canvas;color:CanvasText}}
+
+.window-close-feedback{flex:none;padding:8px 12px;font-size:12px;line-height:1.5;background:var(--host-bg);border-bottom:1px solid var(--host-border);color:var(--host-muted);overflow-wrap:anywhere}.window-close-feedback.is-error{color:var(--destructive,#b42318)}.window-lights button:disabled{cursor:wait;opacity:.5}

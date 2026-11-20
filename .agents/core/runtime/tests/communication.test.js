@@ -9,7 +9,7 @@ import {createCommunicationService} from '../src/communication/service.js';
 import {createCommunicationStore} from '../src/communication/store.js';
 import {sha256} from '../src/communication/contracts.js';
 
-async function pair(t,{applications}={}){const roots=await Promise.all([1,2].map(()=>mkdtemp(join(tmpdir(),'ksf-comm-')))),services=await Promise.all(roots.map((root,index)=>createCommunicationService(root,index===1?{applications}:{})));t.after(async()=>{await Promise.all(services.map(s=>s.close()));await Promise.all(roots.map(root=>rm(root,{recursive:true,force:true})));});const [a,b]=services;await Promise.all(services.map(s=>s.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false})));const [sa,sb]=await Promise.all(services.map(s=>s.snapshot()));await a.trust({identity:sb.identity,fingerprint:sb.identity.fingerprint,host:'127.0.0.1',port:sb.listener.port});await b.trust({identity:sa.identity,fingerprint:sa.identity.fingerprint,host:'127.0.0.1',port:sa.listener.port});const from=await a.openEndpoint({key:'sender',channels:['message.v1'],peers:[sb.identity.nodeId]}),to=await b.openEndpoint({key:'receiver',channels:['message.v1'],peers:[sa.identity.nodeId]});return {a,b,roots,from:from.endpoint,to:to.endpoint,fromToken:from.accessToken,toToken:to.accessToken,sa,sb};}
+async function pair(t,{applications,localOptions={}}={}){const roots=await Promise.all([1,2].map(()=>mkdtemp(join(tmpdir(),'ksf-comm-')))),services=await Promise.all(roots.map((root,index)=>createCommunicationService(root,index===1?{applications}:localOptions)));t.after(async()=>{await Promise.all(services.map(s=>s.close()));await Promise.all(roots.map(root=>rm(root,{recursive:true,force:true})));});const [a,b]=services;await Promise.all(services.map(s=>s.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false})));const [sa,sb]=await Promise.all(services.map(s=>s.snapshot()));await a.trust({identity:sb.identity,fingerprint:sb.identity.fingerprint,host:'127.0.0.1',port:sb.listener.port});await b.trust({identity:sa.identity,fingerprint:sa.identity.fingerprint,host:'127.0.0.1',port:sa.listener.port});const from=await a.openEndpoint({key:'sender',channels:['message.v1'],peers:[sb.identity.nodeId]}),to=await b.openEndpoint({key:'receiver',channels:['message.v1'],peers:[sa.identity.nodeId]});return {a,b,roots,from:from.endpoint,to:to.endpoint,fromToken:from.accessToken,toToken:to.accessToken,sa,sb};}
 async function terminal(service,caller,id,{timeoutMs=5000}={}){const deadline=performance.now()+timeoutMs;let op;do{op=await service.getOperation(caller,id);if(['delivered','failed','cancelled','unconfirmed'].includes(op.status))return op;await new Promise(r=>setTimeout(r,25));}while(performance.now()<deadline);assert.fail('operation did not settle: '+JSON.stringify(op));}
 async function send(f,bytes=Buffer.from('hello 内网'),wait){const material=await f.a.registerMaterial(f.from,Readable.from([bytes]),{name:'文本.md',mediaType:'text/markdown'});const input={operationId:randomUUID(),to:{nodeId:f.sb.identity.nodeId,endpoint:f.to},channel:'message.v1',payloadPartId:'body',parts:[{partId:'body',materialId:material.materialId}]};const op=await f.a.send(f.from,input);return {op,input,bytes,final:await terminal(f.a,f.from,op.operationId,wait)};}
 test('migrated app reads original legacy-addressed messages only while its installation owns the alias',async t=>{
@@ -56,4 +56,59 @@ test('draining rejects new incoming sessions while an admitted transfer reaches 
  const first=send(f);await entered.promise;f.b.pauseDispatch();assert.equal(f.b.runtimeStatus().accepting,false);assert(f.b.runtimeStatus().receiving>0);assert(f.b.runtimeStatus().active>0);
  try{const rejected=await send(f);assert.equal(rejected.final.status,'failed');assert.equal(rejected.final.error.code,'COMM_DRAINING');}finally{release.resolve();}
  assert.equal((await first).final.status,'delivered');assert.equal(f.b.runtimeStatus().receiving,0);f.b.resumeDispatch();assert.equal((await send(f)).final.status,'delivered');
+});
+
+
+test('a stale local address remains inspectable and can be explicitly re-announced without replacing identity',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-network-stale-'));let service;
+ t.after(async()=>{await service?.close();await rm(root,{recursive:true,force:true});});
+ service=await createCommunicationService(root);const identity=await service.identityExport();
+ await service.store.update(cfg=>Object.assign(cfg,{enabled:true,host:'192.0.2.254',port:0,discovery:false}));
+ await service.close();service=undefined;
+ service=await createCommunicationService(root);
+ const before=await service.snapshot();assert.equal(before.network.state,'network-changed');assert.equal(before.listener,null);assert.equal(before.config.enabled,true);assert(before.interfaces.some(i=>i.address==='127.0.0.1'));assert.deepEqual(before.identity,identity);
+ const after=await service.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false});
+ assert.equal(after.network.state,'online');assert.equal(after.network.requiresOnline,false);assert.equal(after.listener.host,'127.0.0.1');assert.deepEqual(after.identity,identity);
+});
+
+test('network loss withdraws listeners and requires a new declaration while paired authenticated delivery survives',async t=>{
+ let present=true;const getInterfaces=()=>present?[{name:'test-loopback',address:'127.0.0.1',netmask:'255.0.0.0',internal:true}]:[];
+ const f=await pair(t,{localOptions:{getInterfaces,networkCheckInterval:0}}),identity=(await f.a.snapshot()).identity,peers=JSON.stringify((await f.a.store.config()).peers);
+ present=false;await f.a.checkNetwork();const lost=await f.a.snapshot();assert.equal(lost.network.state,'network-changed');assert.equal(lost.listener,null);assert.equal(lost.pairingListener,null);assert.equal(lost.network.requiresOnline,true);assert.deepEqual(lost.identity,identity);assert.equal(JSON.stringify((await f.a.store.config()).peers),peers);
+ present=true;assert.equal((await f.a.peerDirectory()).local.online,false,'an interface returning must not silently announce on a new network');
+ await f.a.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false});assert.deepEqual((await f.a.snapshot()).identity,identity);assert.equal(JSON.stringify((await f.a.store.config()).peers),peers);
+ const sent=await send(f);assert.equal(sent.final.status,'delivered',JSON.stringify(sent.final.error));
+ await f.a.configure({enabled:false});assert.equal((await f.a.peerDirectory()).local.online,false);assert.equal((await f.a.snapshot()).network.state,'offline');assert.equal(JSON.stringify((await f.a.store.config()).peers),peers);
+});
+
+test('a busy listener port is recoverable and an unchanged-config retry clears failed application status',async t=>{
+ const {createServer}=await import('node:net'),{createConfigurationService}=await import('../src/services/configuration.js');
+ const root=await mkdtemp(join(tmpdir(),'ksf-network-port-')),occupied=createServer();let service;
+ await new Promise(resolve=>occupied.listen(0,'127.0.0.1',resolve));const port=occupied.address().port;
+ t.after(async()=>{await service?.close();await new Promise(resolve=>occupied.close(()=>resolve()));await rm(root,{recursive:true,force:true});});
+ service=await createCommunicationService(root);const identity=await service.identityExport();await service.store.update(cfg=>Object.assign(cfg,{enabled:true,host:'127.0.0.1',port,discovery:false}));await service.close();service=undefined;
+ service=await createCommunicationService(root);const failed=await service.snapshot();assert.equal(failed.network.state,'failed');assert.equal(failed.network.error.code,'EADDRINUSE');assert.equal(failed.listener,null);
+ const configuration=createConfigurationService(root,{communication:Promise.resolve(service)}),initial=await configuration.read('communication');
+ const attempt=await configuration.perform('communication','apply',{ifMatch:initial.etag});assert.equal(attempt.application.state,'failed');assert.equal(attempt.saved,true);
+ await new Promise(resolve=>occupied.close(resolve));
+ const retried=await configuration.perform('communication','apply',{ifMatch:attempt.etag});assert.equal(retried.application.state,'immediate');assert.equal(retried.effective.listener.port,port);assert.equal(retried.effective.network.state,'online');assert.deepEqual((await service.snapshot()).identity,identity);
+});
+
+test('discovery startup failure stays editable and an explicit declaration retries publication',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-network-discovery-'));let fail=true,published=0,withdrawn=0;
+ const service=await createCommunicationService(root,{discoveryFactory:()=>{if(fail)throw Object.assign(Error('multicast unavailable'),{code:'TEST_DISCOVERY_FAILED'});return {publish(){published++;return {stop(){withdrawn++;}};},find(){return {stop(){},on(){}};},destroy(done){done();}};}});
+ t.after(async()=>{await service.close();await rm(root,{recursive:true,force:true});});
+ const failed=await service.configure({enabled:true,host:'127.0.0.1',port:0,discovery:true});assert.equal(failed.network.state,'degraded');assert.equal(failed.network.online,false);assert.equal(failed.discoveryError.code,'TEST_DISCOVERY_FAILED');assert(failed.listener);
+ fail=false;const recovered=await service.configure({enabled:true});assert.equal(recovered.network.state,'online');assert.equal(recovered.discoveryError,null);assert.equal(published,1);
+ await service.configure({enabled:false});assert.equal(withdrawn,1);assert.equal((await service.snapshot()).network.state,'offline');
+});
+
+test('the background monitor withdraws a lost interface and serializes concurrent status checks and re-announcement',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'ksf-network-monitor-'));let present=true,reads=0;
+ const service=await createCommunicationService(root,{getInterfaces:()=>{reads++;return present?[{name:'loopback-test',address:'127.0.0.1',netmask:'255.0.0.0',internal:true}]:[];},networkCheckInterval:10});
+ t.after(async()=>{await service.close();await rm(root,{recursive:true,force:true});});
+ await service.configure({enabled:true,host:'127.0.0.1',port:0,discovery:false});const initialReads=reads;present=false;
+ for(let n=0;n<100&&reads===initialReads;n++)await new Promise(resolve=>setTimeout(resolve,10));
+ assert(reads>initialReads,'monitor must inspect interfaces without a user query');assert.equal((await service.snapshot()).network.state,'network-changed');
+ present=true;await Promise.all([service.checkNetwork(),service.configure({enabled:true}),service.checkNetwork()]);assert.equal((await service.snapshot()).network.state,'online');
 });

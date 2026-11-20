@@ -1,0 +1,13 @@
+@import '../theme.css';
+.ksf-border-beam{position:relative;isolation:isolate;min-width:0}
+.ksf-border-beam-track{display:none;position:absolute;inset:var(--ksf-beam-inset,0);z-index:1;overflow:hidden;box-sizing:border-box;border-radius:inherit;padding:var(--ksf-beam-width,1px);pointer-events:none;user-select:none}
+@supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)){
+ @supports(offset-path:rect(0 auto auto 0 round 1px)){
+  .ksf-border-beam-track{display:block;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+  .ksf-border-beam-track::before{content:'';position:absolute;top:0;left:0;box-sizing:border-box;width:var(--ksf-beam-length,100px);aspect-ratio:1;opacity:.95;background-image:var(--ksf-beam-background);offset-anchor:90% 50%;offset-distance:0%;offset-path:rect(0 auto auto 0 round var(--ksf-beam-length,100px));offset-rotate:auto;animation:ksf-border-beam-move var(--ksf-beam-duration,6s) linear var(--ksf-beam-delay,0s) infinite;animation-play-state:paused;will-change:auto}
+  .ksf-border-beam[data-motion-active=true]:not([data-hover-only])>.ksf-border-beam-track::before,.ksf-border-beam[data-motion-active=true][data-hover-only]:is(:hover,:focus-within)>.ksf-border-beam-track::before{animation-play-state:running;will-change:offset-distance}
+ }
+}
+.ksf-border-beam[data-hover-only]>.ksf-border-beam-track{opacity:0}.ksf-border-beam[data-hover-only]:is(:hover,:focus-within)>.ksf-border-beam-track{opacity:1}
+@keyframes ksf-border-beam-move{from{offset-distance:0%}to{offset-distance:100%}}
+@media(prefers-reduced-motion:reduce){.ksf-border-beam-track{display:none!important}.ksf-border-beam-track::before{animation:none;will-change:auto}}

@@ -1,6 +1,7 @@
 /* The host owns the viewport; installed applications own their inner scrollers.
    Keep every mount in the percentage-height chain, including vanilla DOM apps. */
 .external-application,
+.external-card,
 .external-application-content,
 .external-application-mount {
   width: 100%;
@@ -19,3 +20,7 @@
 }
 .app-platform-error { padding: 30px; line-height: 1.8; color: #955344; }
 .app-platform-error button { padding: 6px 12px; border: 1px solid #d6e0ec; background: #fff; border-radius: 6px; color: #43678e; }
+
+/* Cards are independent input/overlay owners, using the document coordinator. */
+.external-card{position:relative;isolation:isolate}
+.external-card-overlays{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:100;contain:layout style;isolation:isolate}

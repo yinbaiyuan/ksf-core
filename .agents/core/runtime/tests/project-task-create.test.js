@@ -90,3 +90,35 @@ test('new task index remains naturally grouped and no sibling stage is implicitl
 test('an occupied folder appearing after allocation is preserved and rejected before publication',t=>{
  const f=setup(t),r=request(f),folder=join(f.root,dirname(r.preview.data.task.path));const out=projectGovernance({root:f.root,name:f.name,operation:'create-task',data:r.data},{beforeCheck:()=>{mkdirSync(folder);writeFileSync(join(folder,'用户资料.txt'),'后续内容');}});assert(out.errors.some(e=>e.code==='PROJECT_GOVERNANCE_CONFLICT'));assert.equal(readFileSync(join(folder,'用户资料.txt'),'utf8'),'后续内容');assert(!existsSync(join(folder,'task.md')));assert.equal(f.read().documents.filter(d=>d.metadata.kind==='task').length,1);
 });
+
+
+test('automatic task bodies have compact result sections without inventing progress or changing explicit content',t=>{
+ const f=setup(t),created=f.call('create-task',request(f).data).data;
+ const task=created.documents.find(d=>d.metadata.id===created.task.id);
+ assert.equal(task.body,'# 验证自动建档\n\n## 目标\n\n## 当前结果\n\n## 未决与缺口\n');
+ const body='# 用户原文\n保留全部内容';
+ const explicit=f.call('create-task',request(f,{name:'保留原文',body}).data).data;
+ assert.equal(explicit.documents.find(d=>d.metadata.id===explicit.task.id).body,body);
+ assert.equal(task.metadata.status,'planned');assert.equal(task.metadata.commitment,'candidate');
+});
+
+
+test('a current task can progress, pause, resume and close with evidence while the next task stays untouched',t=>{
+ const f=setup(t),r=request(f,{commitment:'now'}),created=f.call('create-task',r.data).data.task;
+ const nextBefore=f.read().documents.find(d=>d.path===f.tp);
+ assert.deepEqual(f.apply([f.change(created.path,{status:'active'})]).errors,[]);
+ assert.deepEqual(f.apply([f.change(created.path,{status:'paused',status_reason:'等待样本',resume_status:'active',resume_condition:'样本可用'})]).errors,[]);
+ assert.deepEqual(f.apply([f.change(created.path,{status:'active',status_reason:null,resume_status:null,resume_condition:null})]).errors,[]);
+ assert.deepEqual(f.apply([f.change(created.path,{status:'review',next_action:'核对实际结果'})]).errors,[]);
+ assert(f.apply([f.change(created.path,{status:'completed',next_action:null})]).errors.length);
+ const evidence='项目/'+f.name+'/P90-已核验结果.txt',text='实际样本验证通过';
+ assert.deepEqual(f.apply([{path:evidence,ifMatch:'missing',body:text}]).errors,[]);
+ const current=f.read().documents.find(d=>d.path===created.path);
+ const out=f.apply([f.change(created.path,{status:'completed',next_action:null,verification:f.proof(current.metadata,evidence,text)}),f.change(f.mp,{next_action:'建议推进已有验证任务，因为阶段还缺独立验证；等待用户选择。'})]);
+ assert.deepEqual(out.errors,[]);
+ const state=f.read(),done=state.documents.find(d=>d.path===created.path),next=state.documents.find(d=>d.path===f.tp);
+ assert.equal(done.metadata.status,'completed');assert.equal(done.metadata.next_action,null);
+ assert.deepEqual(next.metadata,nextBefore.metadata);
+ assert.equal(state.documents.find(d=>d.path===f.mp).metadata.status,'active');
+ assert.equal(state.projection.activeCount,0);
+});

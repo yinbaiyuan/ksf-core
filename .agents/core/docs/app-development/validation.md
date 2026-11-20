@@ -1,5 +1,7 @@
 # 验证、诊断与交付清单
 
+应用验收流程、分项结论和交付标准由[应用验收基本功](../../abilities/competencies/app-acceptance/competency.md)持有，实际安装按[安装与更新基本功](../../abilities/competencies/app-installation/competency.md)办理。本页解释接口检查点与排障，不替代本次目标、候选身份及真实执行证据。
+
 ## 自动检查
 
 遵循[统一测试规范](../testing.md)。首次准备、锁文件变化或环境失效时运行 npm ci；按本次输入变化执行必要的 typecheck、check 和 build。第一方应用使用 `ksf test --component app:<应用ID>`，风险变更显式补齐 `--suite full`。check的error阻断交付；warning是需要人工复核的直连模型、凭据或全局CSS线索，不是沙箱或完整安全扫描。打包器额外检查包容量、静态依赖与资源。原生二进制需验证target和实际运行，不以文件存在证明兼容。

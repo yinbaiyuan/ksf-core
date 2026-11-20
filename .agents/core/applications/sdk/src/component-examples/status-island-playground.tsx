@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/status-island';import {StatusIsland} from '../status-island';import {FidelityScope} from '../fidelity/scope';
+/** Fixed free source fictional tasks, rendered with the public KSF controlled surface. */
+export function StatusIslandPlayground(){return <FidelityScope module="status-island"><Source renderIsland={({tasks,onDismiss})=><StatusIsland label="Background work (local simulation)" tasks={tasks.map(t=>({...t,progress:t.progress===undefined?undefined:t.progress*100,action:t.action?{label:t.action.label,onAction:t.action.onClick}:undefined}))} onDismiss={onDismiss}/>}/></FidelityScope>;}

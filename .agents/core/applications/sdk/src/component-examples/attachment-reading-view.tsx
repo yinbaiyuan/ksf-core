@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-attachment';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function AttachmentReadingView({state,uploaded=.42,pagesRead=3}:{state?:'uploading'|'reading'|'done'|'error';uploaded?:number;pagesRead?:number}={}){return <FidelityScope module="ai-attachment" style={{maxWidth:448,marginInline:"auto"}}><Source status={state} uploaded={state?Math.max(0,Math.min(1,uploaded)):undefined} pagesRead={state?Math.max(0,Math.min(12,Math.floor(pagesRead))):undefined} error={state==="error"?"模拟读取失败，未发送文件。":undefined}/></FidelityScope>;}

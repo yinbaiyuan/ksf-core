@@ -18,7 +18,7 @@ export function routeHelp() {
     `Abilities: {ref:"type.namespace.name@version", source, stage, definitionDigest?}.\n` +
     `Read/adopted stages require definitionDigest from object read's definition_digest.\n` +
     `Statuses: preparing|working|waiting|blocked|completed|paused|cancelled.\n` +
-    `Identity defaults to CODEX_THREAD_ID; other hosts use stdin {identity:{host,sessionId}}.\n` +
+    `Identity defaults to KSF_SESSION_HOST+KSF_SESSION_ID, CODEX_THREAD_ID or CLAUDE_CODE_SESSION_ID; stdin {identity:{host,sessionId}} overrides.\n` +
     `Raw native session IDs are never accepted in argv or saved to records.\n` +
     `Updates are full snapshots. start returns accepted.roundId; use record.revision for the next write.\n` +
     `--no-save or KSF_ROUTE_NO_SAVE=1 suppresses writes; settings.routing.enabled defaults to true.\n` +

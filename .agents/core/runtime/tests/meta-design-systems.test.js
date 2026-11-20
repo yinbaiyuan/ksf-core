@@ -50,9 +50,12 @@ test('Core diagnosis keeps the pinned upstream bytes and the entire method excep
   assert.equal(content.slice(content.indexOf('# 能力诊断')),upstream.slice(upstream.indexOf('# Better Skill ·')).replace('# Better Skill · Skill 工艺定版标准（技能医生）','# 能力诊断'));
 });
 
-test('three design packages resolve their resources independently and do not eagerly expand diagnosis',()=>{
+test('three design packages resolve their resources independently and do not eagerly expand diagnosis',t=>{
+  // A clean Core checkout has no instance-owned ability scopes.
+  const instance=fixture(t);
+  assert.deepEqual(catalog(instance.root).errors,[]);
   for(const name of designs) {
-    const id='competency.ksf.'+name,query=read(repo,id);
+    const id='competency.ksf.'+name,query=read(instance.root,id);
     assert.deepEqual(query.errors,[]);assert.equal(query.data.object.version,'0.2.0');
     assert.equal(query.data.expanded,undefined);
     assert.deepEqual(query.data.references.map(r=>r.id),[diagnosis]);
@@ -80,7 +83,7 @@ test('manager expands only diagnosis and retired identities are absent from the 
   assert.deepEqual(query.data.expanded.map(x=>x.object.id),[diagnosis]);
   assert.equal(read(f.root,'partner.ksf.ability-manager','metadata').data.expanded,undefined);
   const c=catalog(f.root);assert.deepEqual(c.errors,[]);
-  assert.equal(c.rows.filter(r=>r.source==='system').length,35);
+  assert.equal(c.rows.filter(r=>r.source==='system').length,40);
   assert.ok(c.rows.some(r=>r.id==='competency.ksf.project-definition'&&r.source==='system'));
   for(const row of c.rows)assert.deepEqual(referenceResults(c,row).filter(r=>r.error),[],row.id);
   for(const id of ['competency.ksf.capability-validation','competency.yinbaiyuan.better-skill'])
@@ -150,6 +153,8 @@ test('selected manager, design and method resource switch incrementally and rest
 });
 
 test('complete creation examples form a resolvable isolated graph without registering example objects in Core',t=>{
+  const repo=fixture(t).root;
+  assert.deepEqual(catalog(repo).errors,[]);
   const f=fixture(t),inputs=[
     ['competency-design','examples/quote-check.md'],
     ['partner-design','examples/delivery-planner.md'],

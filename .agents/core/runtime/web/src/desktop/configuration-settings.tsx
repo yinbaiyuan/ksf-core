@@ -1,10 +1,10 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
+import {SaveController,createConfigurationMutationSaveAdapter} from '../../../../applications/sdk/src/controllers';
 import {request} from '../apps/client';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import {desktopPreferences,appearancePreferences,useInstancePreferences,preferenceStatus} from '../instance-preferences';
 import type {ConfigurationPreferences} from '../configuration-preferences';
 import {settingsError,SettingsGroup,SettingsLink,SettingsStatus,SettingsActions,SettingsEmpty,SettingsTechnical,useSettingsDraft,useSettingsDetail,useSettingsNavigation} from './settings-controls';
+import {Field,Input,Textarea,Switch,NumberInput,Button,Form,ContentState,ContentPreview,SaveStatus,Surface,InlineAlert,Badge,AlertDialog} from '../internal-ui/index';
 import './configuration-settings.css';
 
 type Field={name:string;label:string;type:string};
@@ -22,52 +22,66 @@ function AbilityFields({raw,change}:{raw:string;change:(value:string)=>void}){
  <details className="settings-technical" open={advanced} onToggle={event=>setAdvanced(event.currentTarget.open)}><summary>编辑高级配置</summary><div><p className="settings-description">修改 JSON 对象；按顶层字段更新，嵌套值整体替换。</p><label className="settings-field is-wide"><span>配置 JSON</span><textarea className="settings-code" rows={12} value={raw} spellCheck={false} onChange={e=>change(e.target.value)}/></label></div></details></>;
 }
 export function DomainEditor({domain,only,hideTitle=false}:{domain:string;only?:string[];hideTitle?:boolean}){
- const [record,setRecord]=useState<RecordValue|null>(null),[draft,setDraft]=useState<Record<string,unknown>>({}),[raw,setRaw]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[preview,setPreview]=useState(false),[dirty,setDirty]=useState(false),[reset,setReset]=useState(false);
- const markdown=domain.startsWith('collaboration.'),arbitrary=domain.startsWith('ability:'),navigate=useSettingsNavigation();
- useSettingsDraft(dirty,busy&&record!==null,()=>{if(record)accept(record);});
- function accept(value:RecordValue){setRecord(value);const next=value.effective??{...value.defaults,...value.values};setDraft(next);setRaw(arbitrary?JSON.stringify(value.values,null,2):String(next.text??''));setDirty(false);}
- async function load(){setBusy(true);try{const value=await request<RecordValue>('/api/config/'+encodeURIComponent(domain));accept(value);setError('');setNotice('');}catch(e){setError(message(e));}finally{setBusy(false);}}
- useEffect(()=>{void load();},[domain]);
- function field(name:string,value:unknown){setDraft(current=>({...current,[name]:value}));setDirty(true);setNotice('');}
- async function act(operation:'write'|'check'|'reset'|'apply'){
-  if(!record)return;setBusy(true);setError('');setNotice('');
-  try{
-   const values=operation==='write'||operation==='check'?(markdown?{text:raw}:arbitrary?JSON.parse(raw):only?Object.fromEntries(only.map(key=>[key,draft[key]])):draft):undefined;
-   const value=await request<RecordValue&{valid?:boolean;dryRun?:boolean}>('/api/config/'+encodeURIComponent(domain),{operation,ifMatch:record.etag,...(operation==='reset'&&only?{fields:only}:{}),...(operation==='write'||operation==='check'?{values}:{})});
-   if(operation==='check'){setNotice('校验通过，尚未保存。');return;}
-   accept(value);setReset(false);setNotice(operation==='reset'?'已恢复默认。':operation==='apply'?'已重新应用保存的配置。':'设置已保存。');
-   window.dispatchEvent(new Event('ksf:config-change'));
-   if(value.application.error)setError(value.application.error.message);
-  }catch(e){setError(settingsError(e,true));}finally{setBusy(false);}
+ type Draft={fields:Record<string,unknown>;raw:string;reset:boolean;numericPaths:string[][]};
+ const [record,setRecord]=useState<RecordValue|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[acting,setActing]=useState(false),[preview,setPreview]=useState(false),[reset,setReset]=useState(false);
+ const markdown=domain.startsWith('collaboration.'),arbitrary=domain.startsWith('ability:'),navigate=useSettingsNavigation(),onlyKey=only?.join('|')??'';
+ const currentDomain=useRef(domain+'|'+onlyKey);currentDomain.current=domain+'|'+onlyKey;
+ function values(value:Draft){
+  if(markdown)return {text:value.raw};
+  if(arbitrary){const parsed:unknown=JSON.parse(value.raw);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw Error('配置需要有效的JSON对象。');return parsed as Record<string,unknown>;}
+  const fields=structuredClone(value.fields);
+  for(const path of value.numericPaths){let parent=fields;for(const key of path.slice(0,-1)){if(!parent[key]||typeof parent[key]!=='object'||Array.isArray(parent[key]))throw Error('数值分组暂不可用。');parent=parent[key] as Record<string,unknown>;}const key=path.at(-1)!;if(!Object.hasOwn(parent,key))continue;const text=String(parent[key]).trim();if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text)||!Number.isFinite(Number(text)))throw Error('请填写有效的有限数值。');parent[key]=Number(text);}
+  return onlyKey?Object.fromEntries(onlyKey.split('|').map(key=>[key,fields[key]])):fields;
  }
- const body=<>
-  {!record&&!error&&<SettingsStatus>正在读取设置…</SettingsStatus>}
-  {record?.capabilities.includes('write')&&(arbitrary?<AbilityFields raw={raw} change={value=>{setRaw(value);setDirty(true);setNotice('');}}/>:markdown?<><div className="settings-form-body"><label className="settings-field is-wide"><span>协作原文</span><textarea className="configuration-prose" rows={16} value={raw} spellCheck={false} onChange={event=>{setRaw(event.target.value);setDirty(true);setNotice('');}}/></label></div><SettingsActions><button className="settings-button" type="button" onClick={()=>setPreview(!preview)}>{preview?'收起预览':'预览原文'}</button></SettingsActions>{preview&&<div className="configuration-preview"><ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>{raw}</ReactMarkdown></div>}</>:<div className="settings-form-body">{record.fields.filter(item=>!only||only.includes(item.name)).map(item=>{
-   if(domain==='program'&&item.name==='routing')return <label className="settings-checkbox" key={item.name}><span>记录 Agent 路由安排</span><input type="checkbox" role="switch" checked={(draft.routing as {enabled?:boolean})?.enabled!==false} onChange={e=>field('routing',{enabled:e.target.checked})}/></label>;
-   if(domain==='program'&&item.name==='updates'){const values=draft.updates as Record<string,number>;return <div key={item.name}>{[['check_interval_seconds','显式检查间隔（秒）'],['request_timeout_seconds','请求超时（秒）']].map(([key,label])=><label className="settings-field" key={key}><span>{label}</span><input type="number" value={values?.[key]??''} onChange={e=>field('updates',{...values,[key]:e.target.valueAsNumber})}/></label>)}</div>;}
-   return <label key={item.name} className={item.type==='boolean'?'settings-checkbox':'settings-field'}><span>{item.label}</span>{item.type==='boolean'?<input type="checkbox" role="switch" checked={draft[item.name]===true} onChange={e=>field(item.name,e.target.checked)}/>:<input type={item.type==='number'?'number':'text'} value={String(draft[item.name]??'')} onChange={e=>field(item.name,item.type==='number'?e.target.valueAsNumber:e.target.value)}/>}</label>;
-  })}</div>)}
-  {record&&!record.capabilities.includes('write')&&(domain==='sources'?<div className="settings-group-body"><dl className="settings-metadata">{((record.values.entries??[]) as {id:string;path:string}[]).map(item=><div key={item.id}><dt>{item.id}</dt><dd>{item.path}</dd></div>)}</dl>{!(record.values.entries as unknown[])?.length&&<SettingsEmpty>尚未关联能力源。</SettingsEmpty>}</div>:<SettingsTechnical><pre>{JSON.stringify(record.values,null,2)}</pre></SettingsTechnical>)}
-  {record&&<div className="configuration-effect"><span>{record.scope==='device'?'仅当前设备':record.scope==='mixed'?'实例配置，含本机路径':'当前 KSF 实例'}</span><span className={'settings-status-badge '+(record.application.state==='failed'?'is-error':'')}>{effects[record.application.state]??record.application.state}</span>{record.state==='missing'&&<span>使用默认设置</span>}</div>}
-  {domain==='capture'&&record&&<SettingsTechnical title="归档接入状态"><p>轮次追踪：{record.details?.trackingEnabled?'已接入':'未接入'}；Hooks：{record.details?.hookConfigured?'已配置':'未配置'}。宿主信任状态以 Codex 审核为准。</p><p>关闭正文归档保留历史和逐聊天隐私规则。</p></SettingsTechnical>}
-  {dirty&&<SettingsStatus>有尚未保存的修改</SettingsStatus>}{notice&&<SettingsStatus>{notice}</SettingsStatus>}{error&&<SettingsStatus error>{error}</SettingsStatus>}
-  {reset&&<div className="settings-reset-confirm"><p>清除这项设置的覆盖值并恢复默认？</p><SettingsActions><button type="button" disabled={busy} onClick={()=>setReset(false)}>取消</button><button type="button" className="settings-danger" disabled={busy} onClick={()=>void act('reset')}>确认恢复默认</button></SettingsActions></div>}
-  <SettingsActions>
-   {record?.capabilities.includes('reset')&&<button disabled={busy} className="settings-reset-button" onClick={()=>setReset(true)}>恢复默认</button>}
-   {record?.capabilities.includes('apply')&&record.application.state==='failed'&&<button disabled={busy||dirty} onClick={()=>void act('apply')}>重试应用</button>}
-   <button disabled={busy} onClick={()=>navigate(()=>void load())}>{dirty?'重新读取':'刷新'}</button>
-   {record?.capabilities.includes('write')&&<><button disabled={busy} onClick={()=>void act('check')}>校验</button><button className="settings-primary" disabled={busy} onClick={()=>void act('write')}>{busy?'处理中…':'保存'}</button></>}
-  </SettingsActions>
- </>;
- return <section className="configuration-domain">{!hideTitle&&<div className="settings-group-heading"><div><h4>{domain==='program'&&only?.includes('routing')?'Agent 路由记录':record?.label??domainNames[domain]??'设置'}</h4>{record?.description&&<p>{domain==='program'&&only?.includes('routing')?'保存 Agent 明确报告的项目归属与能力安排。':record.description}</p>}</div></div>}{hideTitle&&record?.description&&<p className="settings-description">{record.description}</p>}<fieldset className="settings-domain-fields" disabled={busy}>{body}</fieldset></section>;
+ const store=useMemo(()=>new SaveController(createConfigurationMutationSaveAdapter<Draft>({request,domain,valueReconciliation:true,
+  select:value=>{if(currentDomain.current===domain+'|'+onlyKey)setRecord(value as RecordValue);const fields={...value.defaults,...value.values},schema=(value as RecordValue).fields??[],numericPaths=schema.filter(item=>item.type==='number').map(item=>[item.name]);if(domain==='program')for(const key of ['check_interval_seconds','request_timeout_seconds'])numericPaths.push(['updates',key]);return {fields,raw:arbitrary?JSON.stringify(value.values,null,2):String(fields.text??''),reset:false,numericPaths};},
+  values,intent:value=>value.reset?{operation:'reset',...(onlyKey?{fields:onlyKey.split('|')}:{}),...(domain==='capture'?{confirmation:'value' as const}:{})}:{operation:'write'},
+ }),{initial:{fields:{},raw:'',reset:false,numericPaths:[]}}),[domain,onlyKey,markdown,arbitrary]);
+ const state=useSyncExternalStore(store.subscribe,store.getSnapshot),draft=state.value.fields,raw=state.value.raw,dirty=state.dirty,busy=acting||state.status==='saving';
+ const save=async()=>{await act('write');const latest=store.getSnapshot();return latest.status==='saved'&&!latest.dirty&&!latest.pending;};
+ useSettingsDraft(dirty||!!state.pending,busy&&record!==null,()=>store.discard(),save,!!state.pending);
+ async function load(){await store.refresh();if(currentDomain.current===domain+'|'+onlyKey){setError('');setNotice('');}}
+ useEffect(()=>{setRecord(null);void load();},[store]);
+ function field(name:string,value:unknown){store.update(current=>({...current,fields:{...current.fields,[name]:value},reset:false}));setNotice('');}
+ function changeRaw(value:string){store.update(current=>({...current,raw:value,reset:false}));setNotice('');}
+ function stageDefaults(){if(!record||state.pending)return;store.update({fields:structuredClone(record.defaults),raw:arbitrary?JSON.stringify(record.defaults,null,2):String(record.defaults.text??''),numericPaths:state.value.numericPaths,reset:true});setReset(false);setNotice('默认草稿已准备，保存后生效。');}
+ async function act(operation:'write'|'check'|'apply'){
+  if(!record)return;setActing(true);setError('');setNotice('');const version=state.draftVersion;
+  try{
+   if(operation==='write'){await store.save();const result=store.getSnapshot();if(result.status==='saved'||result.status==='pending'&&!result.pending){setNotice(result.dirty?'上次提交已保存；新修改仍待保存。':'设置已保存。');window.dispatchEvent(new Event('ksf:config-change'));}return;}
+   if(state.pending)throw Error('请先核对原提交结果。');
+   const input=operation==='check'?(state.value.reset?{operation:'reset',dryRun:true,ifMatch:state.committed?.revision,...(onlyKey?{fields:onlyKey.split('|')}:{})}:{operation:'check',ifMatch:state.committed?.revision,values:values(state.value)}):{operation:'apply',ifMatch:state.committed?.revision};
+   const value=await request<RecordValue>('/api/config/'+encodeURIComponent(domain),input);
+   if(operation==='check'){setNotice(store.getSnapshot().draftVersion===version?'校验通过，尚未保存。':'上次草稿校验通过；新修改仍需核对。');return;}
+   await store.discard();setNotice('已重新应用保存的配置。');window.dispatchEvent(new Event('ksf:config-change'));if(value.application.error)setError(value.application.error.message);
+  }catch(issue){setError(settingsError(issue,true));}finally{setActing(false);}
+ }
+ const editor=record?.capabilities.includes('write')?<fieldset className="settings-domain-fields" disabled={state.value.reset}>
+  {arbitrary?<AbilityFields raw={raw} change={changeRaw}/>:markdown?<><Field label="协作原文"><Textarea className="configuration-prose" rows={16} value={raw} spellCheck={false} onValueChange={changeRaw}/></Field><Button onActivate={()=>setPreview(!preview)}>{preview?'收起预览':'预览原文'}</Button>{preview&&<ContentPreview content={raw} format="markdown"/>}</>:<div className="ksf-settings-field-stack">{record.fields.filter(item=>!only||only.includes(item.name)).map(item=>{
+   if(domain==='program'&&item.name==='routing')return <Field key={item.name} label="记录 Agent 路由安排" layout="inline"><Switch checked={(draft.routing as {enabled?:boolean})?.enabled!==false} onCheckedChange={enabled=>field('routing',{enabled})}/></Field>;
+   if(domain==='program'&&item.name==='updates'){const current=draft.updates as Record<string,unknown>;return <Surface key={item.name} title="更新检查参数">{[['check_interval_seconds','显式检查间隔（秒）'],['request_timeout_seconds','请求超时（秒）']].map(([key,label])=><Field key={key} label={label}><NumberInput draft={String(current?.[key]??'')} onDraftChange={text=>field('updates',{...current,[key]:text})}/></Field>)}</Surface>;}
+   return <Field key={item.name} label={item.label} layout={item.type==='boolean'?'inline':'stacked'}>{item.type==='boolean'?<Switch checked={draft[item.name]===true} onCheckedChange={checked=>field(item.name,checked)}/>:item.type==='number'?<NumberInput draft={String(draft[item.name]??'')} onDraftChange={text=>field(item.name,text)}/>:<Input value={String(draft[item.name]??'')} onValueChange={text=>field(item.name,text)}/>}</Field>;
+  })}</div>}
+ </fieldset>:record?<ContentPreview content={record.values} format="structured-summary"/>:null;
+ return <section className="configuration-domain"><Surface title={hideTitle?undefined:domain==='program'&&only?.includes('routing')?'Agent 路由记录':record?.label??domainNames[domain]??'设置'} description={record?.description}>
+  <ContentState state={!record?(state.status==='loading'?'loading':'error'):'ready'} description={state.error?.message} onRetry={()=>void load()}><Form noValidate className="ksf-settings-field-stack" busy={busy} onSubmitIntent={()=>void save()}>
+   {state.value.reset&&<InlineAlert title="默认草稿待保存" description="此草稿保存后移除相应覆盖值。保存或放弃默认草稿后可继续自定义编辑。"/>}{editor}
+   {record&&<div className="configuration-effect"><Badge>{record.scope==='device'?'仅当前设备':record.scope==='mixed'?'实例配置，含本机路径':'当前 KSF 实例'}</Badge><Badge tone={record.application.state==='failed'?'danger':'info'}>{effects[record.application.state]??record.application.state}</Badge>{record.state==='missing'&&<Badge>使用默认设置</Badge>}</div>}
+   {domain==='capture'&&record&&<SettingsTechnical title="归档接入状态"><p>轮次追踪：{record.details?.trackingEnabled?'已接入':'未接入'}；Hooks：{record.details?.hookConfigured?'已配置':'未配置'}。宿主信任状态以 Codex 审核为准。</p><p>关闭正文归档保留历史和逐聊天隐私规则。</p></SettingsTechnical>}
+   <SaveStatus view={state} variant="detailed" onReconcile={()=>void store.reconcile()} onRetry={()=>void store.retry()} onResolve={()=>setNotice('请比较草稿和最新实例值。')}/>
+   {state.status==='conflict'&&state.remote&&<Surface title="比较草稿与实例值"><ContentPreview format="structured-summary" content={{draft:state.value,latest:state.remote.value}}/><Button onActivate={()=>store.merge(state.value)}>保留草稿并采用此实例版本</Button><Button onActivate={()=>void store.discard()}>采用最新实例值</Button></Surface>}
+   {notice&&<InlineAlert title={notice}/>} {error&&<InlineAlert tone="danger" title="设置尚未完成" description={error}/>}
+   <div className="settings-editor-actions">{record?.capabilities.includes('reset')&&<Button disabled={busy||!!state.pending} onActivate={()=>setReset(true)}>恢复默认</Button>}{record?.capabilities.includes('apply')&&record.application.state==='failed'&&<Button disabled={busy||dirty||!!state.pending} onActivate={()=>void act('apply')}>重试应用</Button>}<Button disabled={busy} onActivate={()=>navigate(()=>void load())}>刷新</Button>{record?.capabilities.includes('write')&&<><Button disabled={busy||!!state.pending||!dirty} onActivate={()=>void store.discard()}>放弃修改</Button><Button disabled={busy||!!state.pending} onActivate={()=>void act('check')}>校验</Button><Button type="submit" variant="primary" busy={state.status==='saving'} disabled={acting||!!state.pending||state.status==='conflict'||!dirty}>保存</Button></>}</div>
+  </Form></ContentState>
+ </Surface><AlertDialog open={reset} onOpenChange={setReset} title="采用默认草稿？" description="替换当前草稿；相应覆盖值会在随后保存时移除。" confirmLabel="采用默认草稿" cancelLabel="取消" danger={false} confirmDisabled={!!state.pending||busy} onConfirmIntent={stageDefaults}/></section>;
 }
 function PreferenceMigration<T>({store,label}:{store:ConfigurationPreferences<T>;label:string}){
  const state=useInstancePreferences(store);
- if(state.legacy===null&&!['failed','conflict'].includes(state.status))return null;
- return <section className="configuration-migration settings-group-body">{['failed','conflict'].includes(state.status)&&<SettingsStatus>{preferenceStatus(state.status)}</SettingsStatus>}{state.error&&<SettingsStatus error>{state.error}</SettingsStatus>}
-  {state.legacy!==null&&<><h4>发现浏览器旧{label}</h4><p>导入会替换实例的这项设置；旧浏览器原件保留。</p><SettingsTechnical title="比较迁移内容"><h5>当前实例</h5><pre>{JSON.stringify(state.value,null,2)}</pre><h5>浏览器旧设置</h5><pre>{JSON.stringify(state.legacy,null,2)}</pre></SettingsTechnical><SettingsActions><button disabled={!state.ready||state.status==='saving'} onClick={()=>void store.importLegacy()}>导入浏览器{label}</button><button onClick={store.keepInstance}>保留实例设置</button></SettingsActions></>}
-  {state.dirty&&['failed','conflict'].includes(state.status)&&<SettingsTechnical title="查看保留的本地草稿"><pre>{JSON.stringify(state.value,null,2)}</pre></SettingsTechnical>}
-  {['failed','conflict'].includes(state.status)&&<SettingsActions><button onClick={()=>void store.reload()}>读取实例设置</button>{state.status!=='conflict'&&state.ready&&<button onClick={()=>void store.retry()}>核对后重试保存</button>}</SettingsActions>}
+ if(state.legacy===null&&!['failed','conflict','unknown'].includes(state.status))return null;
+ return <section className="configuration-migration settings-group-body">{['failed','conflict','unknown'].includes(state.status)&&<SettingsStatus>{preferenceStatus(state.status)}</SettingsStatus>}{state.error&&<SettingsStatus error>{settingsError(state.error,true)}</SettingsStatus>}
+  {state.legacy!==null&&<><h4>发现浏览器旧{label}</h4><p>导入会替换实例的这项设置；旧浏览器原件保留。</p><SettingsTechnical title="比较迁移内容"><h5>当前实例</h5><pre>{JSON.stringify(state.value,null,2)}</pre><h5>浏览器旧设置</h5><pre>{JSON.stringify(state.legacy,null,2)}</pre></SettingsTechnical><SettingsActions><button disabled={!state.ready||['saving','unknown','conflict'].includes(state.status)} onClick={()=>void store.importLegacy()}>导入浏览器{label}</button><button onClick={store.keepInstance}>保留实例设置</button></SettingsActions></>}
+  {state.dirty&&['failed','conflict','unknown'].includes(state.status)&&<SettingsTechnical title="查看保留的本地草稿"><pre>{JSON.stringify(state.value,null,2)}</pre></SettingsTechnical>}
+  {['failed','conflict','unknown'].includes(state.status)&&<SettingsActions><button onClick={()=>void store.reload()}>{state.status==='unknown'?'核对保存结果':'读取实例设置'}</button>{state.status!=='conflict'&&state.ready&&<button onClick={()=>void store.retry()}>核对后重试保存</button>}</SettingsActions>}
  </section>;
 }
 export function DesktopMigration(){return <PreferenceMigration store={desktopPreferences} label="桌面布局"/>;}

@@ -132,7 +132,7 @@
       }
     ]
   },
-  "minCoreVersion": "0.5.5",
+  "minCoreVersion": "0.5.7",
   "dataStores": [
     {
       "name": "messages.json",
@@ -144,6 +144,6 @@
       ]
     }
   ],
-  "sdkApiVersion": "1.1.0",
-  "builtWithSdkVersion": "1.1.0"
+  "sdkApiVersion": "1.2.0",
+  "builtWithSdkVersion": "1.2.0"
 }

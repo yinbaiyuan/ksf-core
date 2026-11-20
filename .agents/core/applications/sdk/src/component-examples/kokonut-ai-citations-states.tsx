@@ -1,0 +1,1 @@
+import {Citation} from '@ksf/sdk/citation';import {CitedAnswer} from '@ksf/sdk/cited-answer';export default function Example(){return <div style={{display:'grid',gap:20}}><CitedAnswer parts={[{text:'没有来源时保留完整回答。',sourceIds:['missing']}]} sources={[]}/><Citation sources={[]} label="通用引用按钮"/></div>;}

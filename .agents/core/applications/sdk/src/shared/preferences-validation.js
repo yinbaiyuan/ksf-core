@@ -1,11 +1,19 @@
-import {defaultDesktop, groupIcons, SQUARE_GRID} from './desktop-model.js';
-import {defaultMaterialSettings, profileNames, profileLimits, backdropLimits} from './material-settings.js';
+import {defaultDesktop, groupIcons, SQUARE_GRID, DOCK_SIZE} from './desktop-model.js';
+import {defaultMaterialSettings, profileNames, profileLimits, backdropLimits, desktopAppearanceLimits, sideRaysIntensityLimits, barGlassIntensityLimits, cardGlassIntensityLimits, desktopIconGlassIntensityLimits, desktopIconTiltLimits, dockIconGlassIntensityLimits, dockIconTiltLimits} from './material-settings.js';
 
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const requireValue = (ok, message) => { if (!ok) throw Object.assign(new Error(message), {code:'PREFERENCES_INVALID'}); };
 const exact = (value, keys) => requireValue(object(value) && Object.keys(value).every(key => keys.includes(key)), '设置包含未知字段或不是普通对象。');
 export function validateDesktop(value) {
-  exact(value, ['version','grid','groups','activeGroupId','bounds','shortcuts']);
+  exact(value, ['version','grid','groups','activeGroupId','bounds','shortcuts','dock']);
+  if (value.dock !== undefined) {
+    exact(value.dock, ['iconSize','pinnedAppIds']);
+    requireValue(Number.isSafeInteger(value.dock.iconSize) && value.dock.iconSize >= DOCK_SIZE.min && value.dock.iconSize <= DOCK_SIZE.max, 'Dock 图标大小超出范围。');
+    if (value.dock.pinnedAppIds !== undefined) {
+      const ids = value.dock.pinnedAppIds;
+      requireValue(Array.isArray(ids) && ids.length <= 1000 && ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 80 && id.trim() === id) && new Set(ids).size === ids.length, 'Dock 固定应用列表无效或重复。');
+    }
+  }
   if (value.shortcuts !== undefined) {
     exact(value.shortcuts,['initialized','homeGroupId','installations']);
     requireValue(value.shortcuts.initialized === true && typeof value.shortcuts.homeGroupId === 'string' && value.shortcuts.homeGroupId.length <= 200 && object(value.shortcuts.installations), '应用图标同步记录无效。');
@@ -40,7 +48,24 @@ export function validateDesktop(value) {
   return value;
 }
 export function validateAppearance(value) {
-  exact(value, ['version','motion','backdrop','profiles']);
+  exact(value, ['version','themeMode','backgroundMode','sideRaysIntensity','windowTitlebarGlassIntensity','barGlassIntensity','cardGlassIntensity','desktopIconGlassIntensity','desktopIconTilt','dockIconGlassIntensity','dockIconTilt','desktop','motion','backdrop','profiles']);
+  for (const [key,limits] of [['desktopIconGlassIntensity',desktopIconGlassIntensityLimits],['desktopIconTilt',desktopIconTiltLimits],['dockIconGlassIntensity',dockIconGlassIntensityLimits],['dockIconTilt',dockIconTiltLimits]])
+    requireValue(value[key] === undefined || (Number.isFinite(value[key]) && value[key] >= limits[0] && value[key] <= limits[1]), '桌面图标效果参数超出范围：' + key);
+  requireValue(value.cardGlassIntensity === undefined || (Number.isFinite(value.cardGlassIntensity) && value.cardGlassIntensity >= cardGlassIntensityLimits[0] && value.cardGlassIntensity <= cardGlassIntensityLimits[1]), '桌面卡片玻璃强度超出范围。');
+  requireValue(value.windowTitlebarGlassIntensity === undefined || (Number.isFinite(value.windowTitlebarGlassIntensity) && value.windowTitlebarGlassIntensity >= barGlassIntensityLimits[0] && value.windowTitlebarGlassIntensity <= barGlassIntensityLimits[1]), '应用顶部栏玻璃强度超出范围。');
+  if (value.barGlassIntensity !== undefined) {
+    exact(value.barGlassIntensity, ['statusbar','dock']);
+    for (const key of ['statusbar','dock'])
+      requireValue(Number.isFinite(value.barGlassIntensity[key]) && value.barGlassIntensity[key] >= barGlassIntensityLimits[0] && value.barGlassIntensity[key] <= barGlassIntensityLimits[1], '液态玻璃强度超出范围：' + key);
+  }
+  requireValue(value.sideRaysIntensity === undefined || (Number.isFinite(value.sideRaysIntensity) && value.sideRaysIntensity >= sideRaysIntensityLimits[0] && value.sideRaysIntensity <= sideRaysIntensityLimits[1]), '光线强度超出范围。');
+  requireValue(value.backgroundMode === undefined || ['mountain','side-rays','drape','aero-shards'].includes(value.backgroundMode), '桌面背景模式无效。');
+  if (value.desktop !== undefined) {
+    exact(value.desktop, Object.keys(desktopAppearanceLimits));
+    for (const [key,[min,max]] of Object.entries(desktopAppearanceLimits))
+      requireValue(Number.isSafeInteger(value.desktop[key]) && value.desktop[key] >= min && value.desktop[key] <= max, '桌面排列参数超出范围：' + key);
+  }
+  requireValue(value.themeMode === undefined || ['system','light','dark'].includes(value.themeMode), '主题模式无效。');
   requireValue(value.version === 1 && typeof value.motion === 'boolean', '外观设置版本或动效开关无效。');
   exact(value.backdrop, Object.keys(backdropLimits));
   for (const [key, [min,max]] of Object.entries(backdropLimits)) requireValue(Number.isFinite(value.backdrop[key]) && value.backdrop[key] >= min && value.backdrop[key] <= max, '背景参数超出范围：' + key);

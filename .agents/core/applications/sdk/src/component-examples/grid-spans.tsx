@@ -1,0 +1,2 @@
+import {Grid,GridItem} from '@ksf/sdk/grid';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function GridSpansExample(){return <Grid columns={4} gap={12} aria-label="跨列网格"><GridItem columnSpan={4} className="ksf-demo-box" data-highlight>完整宽度</GridItem><GridItem columnSpan={2} className="ksf-demo-box">跨两列</GridItem><GridItem columnSpan={2} className="ksf-demo-box">跨两列</GridItem>{['A','B','C','D'].map(name=><GridItem key={name} className="ksf-demo-box">{name}</GridItem>)}</Grid>;}

@@ -1,4 +1,4 @@
-const objectMethods = new Set(['listObjects', 'readObject', 'checkObject', 'writeObject', 'links', 'related']);
+const objectMethods = new Set(['listObjects', 'readObject', 'checkObject', 'writeObject', 'links', 'related', 'previewAbilityPackage', 'downloadAbilityPackage']);
 const knowledgeMethods = new Set(['knowledgeTree', 'readKnowledge', 'saveKnowledge', 'createKnowledge', 'searchKnowledge', 'checkKnowledge', 'links', 'related']);
 export function activateAssets(context, kind) {
   const methods = kind === 'abilities' ? objectMethods : knowledgeMethods;

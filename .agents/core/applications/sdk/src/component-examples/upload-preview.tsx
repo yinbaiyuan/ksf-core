@@ -1,0 +1,5 @@
+import {Button} from '@ksf/sdk/button';
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {Upload,useUploadQueue} from '@ksf/sdk/upload';import {simulateUpload} from '@ksf/sdk/component-examples/upload-demo-transport';import {Checkbox} from '@ksf/sdk/checkbox';import {mediaSamples} from '@ksf/sdk/component-examples/media-samples';import {Lightbox} from '@ksf/sdk/lightbox';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function UploadPreviewExample(){const queue=useUploadQueue({transfer:simulateUpload}),[index,setIndex]=useState(0),[open,setOpen]=useState(false);return <div className='ksf-demo-stack'><Button onClick={()=>queue.add(mediaSamples.map(item=>({id:item.id,name:item.alt+'.svg',thumbnail:item.src,url:item.src})))}>添加图片示例</Button><Upload queue={queue} layout='picture-card' onPreview={item=>{setIndex(Math.max(0,mediaSamples.findIndex(i=>i.id===item.id)));setOpen(true);}}/><Lightbox open={open} onClose={()=>setOpen(false)} items={mediaSamples} index={index} onIndexChange={setIndex}/></div>;}

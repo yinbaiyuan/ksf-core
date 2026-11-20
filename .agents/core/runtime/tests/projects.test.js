@@ -111,7 +111,7 @@ test('dry-run creation, updates and removal do not create locks, folders or chan
   f.run('write', '测试 甲', { data: { body: '# 新内容' }, dryRun: true });
   const removal = f.run('remove', '测试 甲', { dryRun: true });
   assert.equal(removal.data.wouldChange, true); assert.equal(removal.data.removed, false);
-  assert.deepEqual(removal.data.entries, ['project.md']);
+  assert.deepEqual(removal.data.entries, ['project.md', '成果']);
   assert.deepEqual(readFileSync(f.file()), before);
   assert.deepEqual(readdirSync(join(f.root, '.agents/runtime-data/projects')), []);
 });
@@ -168,7 +168,7 @@ test('project updates honor the metadata lock and detect concurrent root-card ed
     beforeCheck: () => writeFileSync(f.file(), '# 另一编辑者\n'),
   }), { code: 'FILE_CONFLICT' });
   assert.equal(readFileSync(f.file(), 'utf8'), '# 另一编辑者\n');
-  assert.deepEqual(readdirSync(join(f.root, '项目/测试 甲')), ['project.md']);
+  assert.deepEqual(readdirSync(join(f.root, '项目/测试 甲')), ['project.md', '成果']);
 });
 
 test('new root-card publication does not overwrite a concurrent creator and preserves existing resources', t => {
@@ -207,7 +207,7 @@ test('failed publication preserves a concurrently replaced project directory', t
 
 test('remove previews and deletes the full explicit project only; missing root cards are a no-op', t => {
   const f = fixture(t); f.create(); f.create('保留');
-  mkdirSync(join(f.root, '项目/测试 甲/成果'));
+  assert.equal(existsSync(join(f.root, '项目/测试 甲/成果')), true);
   writeFileSync(join(f.root, '项目/测试 甲/成果', '方案.md'), '方案');
   const removal = f.run('remove', '测试 甲', { dryRun: true });
   assert.ok(removal.data.entries.includes('成果/方案.md'));

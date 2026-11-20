@@ -1,0 +1,54 @@
+.ksf-ui-root .ksf-ai-panel{min-width:0;padding:var(--ksf-surface-padding);border:1px solid var(--ksf-border-subtle);border-radius:var(--ksf-radius-surface);background:var(--ksf-surface-raised);color:var(--ksf-text-primary);display:grid;gap:var(--ksf-space-3)}
+.ksf-ui-root .ksf-ai-heading{display:flex;align-items:center;flex-wrap:wrap;gap:var(--ksf-space-2);min-width:0}
+.ksf-ui-root .ksf-ai-heading h3{margin:0;margin-inline-end:auto;font-size:var(--ksf-font-body);font-weight:600;line-height:1.5}
+.ksf-ui-root .ksf-ai-actions,.ksf-ui-root .ksf-ai-suggestions{display:flex;align-items:center;flex-wrap:wrap;gap:var(--ksf-space-2);min-width:0}
+.ksf-ui-root .ksf-ai-action-spacer{flex:1}
+.ksf-ui-root .ksf-prompt-composer form{display:grid;gap:var(--ksf-space-3)}
+.ksf-ui-root .ksf-prompt-composer textarea{width:100%;resize:vertical}
+.ksf-ui-root .ksf-ai-description{color:var(--ksf-text-secondary);font-size:.857143em;line-height:1.6;margin:0;overflow-wrap:anywhere}
+.ksf-ui-root .ksf-run-axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:var(--ksf-space-3);margin:0}
+.ksf-ui-root .ksf-run-axes>div{min-width:0;display:grid;gap:var(--ksf-space-1)}
+.ksf-ui-root .ksf-run-axes dt{color:var(--ksf-text-secondary);font-size:.857143em}
+.ksf-ui-root .ksf-run-axes dd{margin:0;line-height:1.6;overflow-wrap:anywhere}
+.ksf-ui-root .ksf-tool-list{list-style:none;padding:0;margin:0;display:grid;gap:var(--ksf-space-2)}
+.ksf-ui-root .ksf-tool-heading{display:flex;flex:1;align-items:center;justify-content:space-between;gap:var(--ksf-space-2);min-width:0;overflow-wrap:anywhere}
+.ksf-ui-root .ksf-ai-decisions{display:flex;flex-wrap:wrap;gap:var(--ksf-space-3)}
+.ksf-ui-root .ksf-ai-decisions>div{display:grid;gap:var(--ksf-space-1);min-width:0}
+.ksf-ui-root .ksf-ai-decisions small{max-width:36ch;color:var(--ksf-text-secondary);overflow-wrap:anywhere}
+.ksf-ui-root .ksf-ai-impact{line-height:1.65;overflow-wrap:anywhere}
+.ksf-ui-root .ksf-ai-result-meta{display:flex;flex-wrap:wrap;gap:var(--ksf-space-2);color:var(--ksf-text-secondary);font-size:.857143em;overflow-wrap:anywhere;margin-bottom:var(--ksf-space-3)}
+.ksf-ui-root .ksf-ai-history-result+.ksf-ai-history-result{border-top:1px solid var(--ksf-border-subtle);padding-top:var(--ksf-space-3);margin-top:var(--ksf-space-3)}
+
+.ksf-ui-root .ksf-prompt-composer[data-variant="plain"]{padding:0;border:0;background:transparent}
+
+/* One composed input surface: editing, references and actions belong together. */
+.ksf-ui-root .ksf-prompt-composer {
+ padding:0; overflow:hidden; border-color:var(--ksf-edge-soft); background:var(--ksf-surface-content);
+ box-shadow:var(--ksf-surface-shadow),inset 0 1px 0 var(--ksf-control-highlight);
+ transition:border-color var(--ksf-duration-standard),box-shadow var(--ksf-duration-standard);
+}
+.ksf-ui-root .ksf-prompt-composer:focus-within { border-color:var(--ksf-focus); box-shadow:0 0 0 3px var(--ksf-focus-halo),var(--ksf-surface-shadow); }
+.ksf-ui-root .ksf-prompt-composer form { gap:12px; padding:16px; }
+.ksf-ui-root .ksf-prompt-composer [data-ksf-component="field"] { gap:8px; }
+.ksf-ui-root .ksf-prompt-composer .ksf-field-heading label { font-size:12px; color:var(--ksf-text-secondary); font-weight:500; }
+.ksf-ui-root .ksf-prompt-composer [data-ksf-component="textarea"] { padding:0; min-height:56px; resize:none; border:0; border-radius:0; background:transparent; box-shadow:none; line-height:1.8; outline:0; }
+.ksf-ui-root .ksf-prompt-composer [data-ksf-component="textarea"]:focus-visible { outline:0; box-shadow:none; }
+.ksf-ui-root .ksf-prompt-composer .ksf-ai-actions { padding-top:12px; border-top:1px solid var(--ksf-edge-soft); gap:8px; }
+.ksf-ui-root .ksf-prompt-composer .ksf-ai-actions>[data-ksf-component="button"][data-variant="ghost"] { padding-inline:8px; color:var(--ksf-text-secondary); }
+.ksf-ui-root .ksf-prompt-composer[data-state="unknown"] { border-color:var(--ksf-warning); }
+.ksf-ui-root .ksf-prompt-composer[data-variant="plain"] { box-shadow:none; overflow:visible; }
+.ksf-ui-root .ksf-prompt-composer[data-variant="plain"] form { padding:0; }
+/* Compact references keep source/read-only facts and original remove intents. */
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] [data-ksf-component="data-list"] ul { display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] li { min-width:0; max-width:100%; border:1px solid var(--ksf-edge-soft); border-radius:var(--ksf-radius-control); background:var(--ksf-surface-raised); }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row { position:relative; min-height:40px; padding:6px 6px 6px 34px; gap:8px; border:0; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row-content { gap:2px; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row-content>strong { font-size:12px; line-height:1.4; font-weight:550; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-resource-details { font-size:10px; gap:5px; line-height:1.4; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-resource-details>[data-ksf-component="badge"] { padding:0; background:transparent; border:0; font:inherit; color:inherit; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-resource-chip-icon { position:absolute; top:10px; left:10px; width:16px; height:16px; color:var(--ksf-action-primary); }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row-actions>[data-ksf-component="button"] { min-width:var(--ksf-control-min); min-height:var(--ksf-control-min); padding:4px; }
+@media(forced-colors:active) { .ksf-ui-root .ksf-prompt-composer { border-color:ButtonText; box-shadow:none; } }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] li { width:max-content; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row { flex-wrap:nowrap; }
+.ksf-ui-root [data-ksf-component="resource-list"][data-variant="chips"] .ksf-data-row-content { flex:0 1 auto; }

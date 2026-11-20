@@ -1,0 +1,5 @@
+@container (max-width:320px){
+ .ksf-kokonut.ksf-kokonut--smooth-tab [role=tablist]>button,.ksf-kokonut.ksf-kokonut--smooth-tab [role=tablist]>[aria-hidden=true]>span{padding-inline:8px;font-size:12px;gap:4px}
+ .ksf-kokonut.ksf-kokonut--morphic-navbar.ksf-kokonut--morphic-navbar nav{padding-inline:0}
+ .ksf-kokonut.ksf-kokonut--morphic-navbar.ksf-kokonut--morphic-navbar nav a{padding-inline:8px;font-size:12px}
+}

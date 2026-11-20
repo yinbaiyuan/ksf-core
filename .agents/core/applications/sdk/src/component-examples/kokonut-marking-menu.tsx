@@ -1,0 +1,1 @@
+import {RadialMenu} from '@ksf/sdk/radial-menu';import {radialDemoItems} from '@ksf/sdk/component-examples/navigation-demo-data';export default function Example(){return <RadialMenu label="Radial commands" items={radialDemoItems} onAction={()=>{}}/>;}

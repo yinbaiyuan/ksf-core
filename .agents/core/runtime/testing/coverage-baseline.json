@@ -279,7 +279,7 @@
         "win32"
       ],
       "contractUpdate": {
-        "hash": "330b05596d2074b5dcac2e954c64d7f77cfd4eb52a7d7ce32602eebec405ac8e",
+        "hash": "f0f68a9650e1069cc25806bcf5a98afe591a0195f6f4cf6d89789055e3710b01",
         "originalAssertions": [
           "367206c83ef50f9c2069dc2a97b30ad45ec5de6df424766b6332fff0fe240b2d",
           "cb35946b8396820993db2e63143706d56f4dd70bd4a0493b9ff501bc91d0e7ab",
@@ -295,7 +295,7 @@
           "4edd0b4544b98b4d0e8434f55fa8c7206eb09453fed9000ae50dc2eeb7351043",
           "365df7e7ab6022bd876b6bbf7d020ae4c10932c090536ecd07362e0f94e93384"
         ],
-        "reason": "Core随包只保留最新统一包，旧业务后端移到独立测试夹具，继续核验真实旧偏好和项目迁移；发行包下限断言由0.5.2提升为0.5.5，拒绝0.5.4，其余数据保全、许可及离线断言不变。",
+        "reason": "Core随包只保留最新统一包，旧业务后端移到独立测试夹具，继续核验真实旧偏好和项目迁移；发行包下限断言由0.5.2提升为0.5.5，拒绝0.5.4，其余数据保全、许可及离线断言不变。 M4 Core-owned payload now uses applications/builtin and Core reconciliation, preserving all prior business/data assertions; additive provenance checks keep native platform obligations.",
         "assertionUpdates": [
           {
             "before": "cb35946b8396820993db2e63143706d56f4dd70bd4a0493b9ff501bc91d0e7ab",
@@ -672,7 +672,39 @@
       "path": ".agents/core/applications/sdk/tests/styles.test.mjs",
       "hash": "64f09bc4a4bf1e1a04b2e077eac9c2e5c9222057d065dc1e7a24018b379c4177",
       "title": "'application CSS is isolated by ID/version, including portal roots and animation names'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "7fedb460ad2fd3cd2fe065025854e374ae41a86931be7a5eccae7f531310999c",
+        "reason": "Application CSS now repeats the application scope to outrank default SDK selectors; ID/version, portal roots and animation isolation remain required.",
+        "originalAssertions": [
+          "c7e15a953dc12ff2f1f6a0c609d58146001abe7914ea89cf77f7c4bf07b272c2",
+          "3a87d0d4b57cb48f08c2321e34645152924f0fb1240c1ae7c5646d1bfe3e9b14",
+          "afae30a9c169a3bb3ffd2d7f81d4c20b133448e0774040c03b0c7f21047b56a6",
+          "bbade35474b1ba927ff3c55fcc18c20a466428a40027abcc390558642297a644",
+          "5852a12e4be21c516729dc30828b0acda1c2d0f2263afa46678a09da8034d19f",
+          "af63fbfe3fcd2e738b9e499e56a796baf257bb4d22202c7c1eeec4aca882489e"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "c7e15a953dc12ff2f1f6a0c609d58146001abe7914ea89cf77f7c4bf07b272c2",
+            "after": [
+              "11c5a42e468be9cf9aebbea7c83d4d18b99c2f38ef5b226195776c1406eca758"
+            ]
+          },
+          {
+            "before": "3a87d0d4b57cb48f08c2321e34645152924f0fb1240c1ae7c5646d1bfe3e9b14",
+            "after": [
+              "66414b630de976aacdd3b6a93b15e088fc57891152f152628c9fe54c515c6dcb"
+            ]
+          },
+          {
+            "before": "5852a12e4be21c516729dc30828b0acda1c2d0f2263afa46678a09da8034d19f",
+            "after": [
+              "d4bd1f4d898a1d0c3409ac06ed8cc0dfe06399189a2d6aa37b8d10e1eea8b0aa"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/ai-deepseek.test.js",
@@ -1154,7 +1186,26 @@
       "path": ".agents/core/runtime/tests/application-cards.test.js",
       "hash": "db8d8c90f6c980c36c23429205c999110a359136c09e5005ee2c0d4ad79a4b5d",
       "title": "'bundled defaults install once and respect disable/uninstall across manager restarts'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "831b57180a966e79b4a31e6dfbcee04fe70272ea884a6dc607252a4eebb0f1aa",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
+        "originalAssertions": [
+          "05c959d401b9774bfdf8aaa0b74be79d075fde37c4d33bd078ee68b90fd11413",
+          "d91affa5fb450603f598830902b2166edcc0b4f90c26a3e005948d6134e3d198",
+          "5373faf6f0d04cebbdc4990d17897952629958d8d07d768998b4577b6f029912"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "5373faf6f0d04cebbdc4990d17897952629958d8d07d768998b4577b6f029912",
+            "after": [
+              "a6f5a877f1c199d33c6fc2ba2b56a414c81bbcc56266a542bd45d19ef6068ff0",
+              "0f02a009a19222eb2a892f21fb119fdec45b1ffc273c2b5efd416f300b4bbe72",
+              "65f4c6562152bfef6d666128825b113c7e5bf05bf3dc9e4603cab2c419451c14"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-cards.test.js",
@@ -1487,7 +1538,32 @@
       "path": ".agents/core/runtime/tests/application-default-source.test.js",
       "hash": "d38b99a623017a2a78c16c8fe819ecd47294169a5f7206fb8c928643e1875e67",
       "title": "'a failed public registry leaves the bundled catalog and installed state available'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "419b22a124b8c30e29c96aebe8ab65d6aa79f6a811c25a12a0c9eb5a8b666da3",
+        "reason": "M4 A1/A8 explicitly remove bundled official-source fallback; an unreachable uncached source must report an error and no catalog, while installed state remains available.",
+        "originalAssertions": [
+          "c3745155c26cda1a1da7d3cee75615c853cda212b35a2887506950a6ca2cb2d1",
+          "9b125e413119f387f168e797a5dc18f7823126c8cd4f005541987d3f0e355f94",
+          "2c207c99a4e883c2db7aa6ecdaf2f32bda7a9dc45718ec0d9891c929a0c96d04"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "c3745155c26cda1a1da7d3cee75615c853cda212b35a2887506950a6ca2cb2d1",
+            "after": [
+              "705782643f68d201d6e89ead050ec66131d37b87919b5340c3088bfd7da68eca",
+              "cae23c61cb6ab05421c0218871456364d094e4e82c8f7ab3047085255d6e1b0b"
+            ]
+          },
+          {
+            "before": "9b125e413119f387f168e797a5dc18f7823126c8cd4f005541987d3f0e355f94",
+            "after": [
+              "7a59d320b9f0bec12acfbf70fa993b827e686c51f7ab0ed0b793107b10b459db",
+              "4a6fd866e20b6aeee6a514391d4c3aedc2828d203e5a3bcdd1986e63d9dd6d3d"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-default-source.test.js",
@@ -1537,11 +1613,11 @@
       "title": "'runtime manager and generated protocol run without SDK or external dependencies'",
       "nativePlatforms": [],
       "amendment": {
-        "hash": "d1c40cfe318ee0717081373be8aeee1ca3795abd35ed55a94af850dff85f947b",
+        "hash": "1fb93caf9da0d0dc6e13056d32acc37d605a499b4a10effbd71fd69ea920bf27",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
         "originalAssertions": [
           "463a841f2e3c635de4435e7baeb3ecca88db0523672b8ae6b0d72f2b6f457224"
-        ],
-        "reason": "隔离运行时夹具补齐新增的纯Node分片模块，保留无SDK依赖的原执行断言。"
+        ]
       }
     },
     {
@@ -1729,8 +1805,9 @@
       "hash": "7fa71ba374449f72a8cf8fd59d253520287d7c797a1e960e82685cb7ab970702",
       "title": "'canonical remote package paths resolve to equal-digest offline bytes and newer remote upgrades'",
       "nativePlatforms": [],
-      "amendment": {
-        "hash": "fab53531605a566dd450d07c010c2c77c37be140ec5f42525ec3564068f94ead",
+      "contractUpdate": {
+        "hash": "f8898b0943642a12f829882639e304ce96f4043ef20fb291e997752fb9a07245",
+        "reason": "M4 A1/A8 scene packages must be downloaded and verified from their selected source; a bundled mirror no longer substitutes remote downloads. Preserve newer-version and reserved-namespace protections.",
         "originalAssertions": [
           "07edb48c90a5291530f7e0137ce4afdea1d735e6d5a5550d9c9ac5692de96c07",
           "06604b6691dea91e58db1d94a93d37bc3f9b6a1cfa51066b675b8e2bfe9e15af",
@@ -1738,14 +1815,40 @@
           "a3aaaa965a6553fa589925b2ab476bacb6fae9089ac651c81e7270d59b9ee9b4",
           "3fc68be5bf97ea7e31a6cd611ad4596720d823e2002b254b934270ba2a0319f3"
         ],
-        "reason": "分页目录只返回摘要，转为定向详情及显式刷新检查；原来源、离线摘要与安装断言全部保留。"
+        "assertionUpdates": [
+          {
+            "before": "07edb48c90a5291530f7e0137ce4afdea1d735e6d5a5550d9c9ac5692de96c07",
+            "after": [
+              "c26f5a5a61631c6ad4ee12e5c41e692f820a708da95a92d14df496f37ea5ca3c"
+            ]
+          }
+        ]
       }
     },
     {
       "path": ".agents/core/runtime/tests/application-offline-origin.test.js",
       "hash": "916ac723dcd7f4942ff69f1ebc3afdacd3481b8573d276d5ea54653e5df42715",
       "title": "'an installed historical messenger prevents both default and manual duplicate cooperation installs'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "28c9ccbac0624ca61b4ebfd825633e6919357256ea1e0f896df774362a64409d",
+        "reason": "M4 A8 cooperation-center is Core-owned and cannot be installed through a scene source. Preserve historical messenger identity, disabled state and duplicate-prevention checks.",
+        "originalAssertions": [
+          "189457828bae25ce004c0b790121f3cf5813241ef0e09665cdd588871ee21a3d",
+          "8ff25685a73ca07644f7b963ae5363ba21602052faf0021d5e1e8942a1c125e9",
+          "0d5865bf732a816316bd2676c723c4ec016452e0bd47c700ad69f57346803c5a",
+          "4ea23b2f5d9c3495a5a867fb02886b4ccbfd348616745557474b166f440467dc",
+          "a52b31041ec3fd36a70dfbccf269396351e7e69b39b1ceeb909d32d204d227b1"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "a52b31041ec3fd36a70dfbccf269396351e7e69b39b1ceeb909d32d204d227b1",
+            "after": [
+              "b1451419e0635d7bc2245b1fec0901d363b6f3dc68d4fd4f3b76d93b2cf20619"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-registry.test.js",
@@ -2052,8 +2155,8 @@
         "win32"
       ],
       "amendment": {
-        "hash": "1da04d87334e978c1bcd7528b509138e98b825cce817877612528aa03485ac70",
-        "reason": "采用分片目录定向预览和统一包内素材的真实夹具；原平台、来源绑定、PTY、摘要、HTTP和资源读取断言保留。",
+        "hash": "859a77bea864a93da5094cb68a13a7aecca203cda2d86479cfa2b9ce31983d2f",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
         "originalAssertions": [
           "f4026ed1c3ae623f46710bafe67f8eba4df036188e1a54bba54ae0fa9472a63b",
           "3d9a7cc9e10b1d2497112d9dc95944515778fbc88581ca60fb660084c5dff53f",
@@ -2134,8 +2237,9 @@
         "win32",
         "linux"
       ],
-      "amendment": {
-        "hash": "22510d8380cdfd1beede33c6fd74809732b83ef6d1cd9bb22f2121728f1376b2",
+      "contractUpdate": {
+        "hash": "bed6ba200b9491ee7ee96e01d58d1e6c39566c90e4caafd4de5e224bdb1df36d",
+        "reason": "Unavailable frontend navigation now returns a 503 HTML recovery surface instead of a JSON error; health and local application control remain available.",
         "originalAssertions": [
           "ce9bf415028c6716fb8a50b341c6e48d61a046ef571299912834ceacc28d53b7",
           "f9efd8857ae5397022e941559bb1a37d567b875dc2778dc4d2f8cb97bdf2ac17",
@@ -2147,7 +2251,15 @@
           "4c45096a465b6c3e0085dad69c78e6d5a83d9677dc8b20ecdbc4e369aa9a613c",
           "2ccc9d7fc78e23a220c5c6ea71846163f954cf4e37beff8fa92dcb9733c06096"
         ],
-        "reason": "Use an explicitly empty fixture registry so the frontend-unavailable health/control scenario does not reconcile unrelated bundled applications. All nine original assertions remain."
+        "assertionUpdates": [
+          {
+            "before": "f9efd8857ae5397022e941559bb1a37d567b875dc2778dc4d2f8cb97bdf2ac17",
+            "after": [
+              "c84ec8ad50872e1745b52f41878f464599f1a90229fff720e38dc2fb2bbc2b8d",
+              "9b6ca6c2c7ebf9db165a5d6ef8ecd9c6295f9b1bb47322c7bebf9f6e35f785fa"
+            ]
+          }
+        ]
       }
     },
     {
@@ -2168,7 +2280,24 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "699c1ccc7de507cf1947480f24c7630ed605b05205a5ba43e93a7ec79994e82e",
+        "originalAssertions": [
+          "4c2aa60e0ed9d39283edd736d86193fc68293ac241fb6000418565b04c177a4f",
+          "301c37954c2bd3c3c1953f20f249fc2ae2b0a523bd5876f4b2601dadde1d9e31"
+        ],
+        "reason": "M4 removes the offline official-source mirror. A valid empty remote catalog must remain empty after the delayed bodyless GET, while HTTP 200 and a clean remote decoding result prove the body deadline did not terminate it.",
+        "assertionUpdates": [
+          {
+            "before": "301c37954c2bd3c3c1953f20f249fc2ae2b0a523bd5876f4b2601dadde1d9e31",
+            "after": [
+              "0ff084ecbc6685985dac28a296678652d6e2d5593ce0090be67921b1faaa5d4e",
+              "e37919c72492f9f990eccccadf1406247a17920df75eb634fc68db84b3b29944"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/background-service.test.js",
@@ -2745,14 +2874,14 @@
         "win32"
       ],
       "amendment": {
-        "hash": "828bb7df424f4151e50ac9ab3b38a20614bd78a5ef901b4cf1abbfc4373b3cb0",
+        "hash": "5b98c833a838c12cf7b48cfb47c85ac8f872499e0981bf81a438f30661bf6843",
+        "reason": "M4 A8 moves Terminal out of the Core payload; assemble a v1 compatibility fixture and preserve every PTY assertion and native obligation.",
         "originalAssertions": [
           "fc7c0028c6f5be7da9b3facb7bec0a71ef7769f61a90564198bdd6764f720c4b",
           "8b8181e5b7bd5e7bdd80fa9a958457f9cdf715c4f1935465806df2a2e15de7f0",
           "27732257669f5eb99a51ba0fc480502a0f773d6d77081f3803457db392d61b25",
           "56453c2510215fcfb1c95d6bb5fb9dd62b46759f2a113e990cc0b1d23253181c"
-        ],
-        "reason": "目录以摘要分页返回，夹具改为定向预览或隔离离线输入；保留全部原执行、数据与权限断言。"
+        ]
       }
     },
     {
@@ -2915,7 +3044,18 @@
       "path": ".agents/core/runtime/tests/chat.test.js",
       "hash": "1125dfb3c8b0c9f12abb96072ae0a578e62f1244e968c300a25d7d5dde7fcba7",
       "title": "'CAS, publication races and live locks preserve current data'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "2db98c47dd877d5110f3bbf354d74f0c70dfd28d7e864021c28d1c58956e907f",
+        "originalAssertions": [
+          "83c4da5817cbfbb9ebc731b10ecd117dcafdb47beb0092738fcb01d1ee4e2b6e",
+          "4c9139ece3a4e95cb31b4f56adbe3983f3bb15717c1bfba9af4295c46b2ca7c0",
+          "8c0ffaa0de6ca695069dafaff4547b3f6e9f0f79be02c1328dada162e0d58db1",
+          "b6298ed6fdc8ac47e6ae13de27e606d990e8d79ee4a5a41b12b7445e1161286b",
+          "50b85d81ed5068177444a272db70f75aae01b806fb2a25632c0d44d24dbda8fb"
+        ],
+        "reason": "Review the committed dead-owner recovery extension: all five baseline CAS, publication-race and live-lock assertions are retained; two additive assertions verify reclaiming a genuinely exited child PID and removing its stale lock. Original baseline hash and native obligations remain."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/chat.test.js",
@@ -3702,7 +3842,16 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "a43520bce63bce423a92a1af14816db210fde80fee77e342f10fff378151a22e",
+        "originalAssertions": [
+          "7c5c81da0652c49099b51fba2b4314551864611f2b207b6eb7245426d0de16c1",
+          "31efb40a825eea1cf3e6cfc64dd3d634457a26a8a4fde46f3aed3a30488724ee",
+          "2f7f792fcf6f6f3d82b4fe3400699456c5fd4b2aa5fe79b50c17ac88c560f2eb"
+        ],
+        "reason": "The parallel desktop dock setting adds six persistence, group-preservation and invalid-size/unknown-field/CAS assertions. All three original appearance/card-configuration assertions and original native platform obligations remain unchanged."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/configuration.test.js",
@@ -3794,7 +3943,8 @@
         "linux"
       ],
       "amendment": {
-        "hash": "70adf0b2cb0f55b154002441a303a482c00f6695de8b66d7fd65216013695846",
+        "hash": "ac6b8b97e31d1ff1b43293803096bae2a1a0d47dcb1468e617699c552b26449c",
+        "reason": "Headless CLI fixtures include the session contract and bundled application source after retirement of the store directory; every original configuration assertion is retained.",
         "originalAssertions": [
           "01526029b97f617194132f891709831e12142f74b3558c4c7a74bef819087618",
           "06e60671d5a342c40506af4e60e1bf864473c24c321c9daff11c977eab59fd95",
@@ -3802,8 +3952,7 @@
           "c27666e71ed3510271d15fdcc137d49e9f151bd2b7caa7209ecea03495e1e018",
           "887020ac72c2ce69ed8e6cac081f34fb04312c7f2dffc7d927c766b2afbd993f",
           "cb6ab2292818ecd7dea48f3225924edaef367b3de3b5f84bf18f9ef4c43c6402"
-        ],
-        "reason": "Provide an empty application registry in the isolated managed-backend fixture; the six AI configuration and cold-start assertions remain unchanged."
+        ]
       }
     },
     {
@@ -4199,7 +4348,18 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "2216de00f3d6c3377ee44a4f791cf99d1770b9d8d78b4c0740baeebbc1904bc0",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
+        "originalAssertions": [
+          "9eeee8932adccf09436e72b9a42bcf69a47733f94bc8e25e8d5e222722446ad1",
+          "328412c259cc0221ade98c3329d42714b02f2ebbffcfe9d0dbf6f37ed3a75e19",
+          "718fd530b3e06192d913a3c78fddc106120a5e8a918f5a628a85385cfe8c2b0b",
+          "fc01f71b5d69218377acc677b6a6635f4c959a815b63d71d3da78322f0f22c10",
+          "6a8703939792f36e1351b1ec7f9ba02f249e4b77252d422dea0a9faeed0f98c6"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/conversation-review.test.js",
@@ -4865,7 +5025,27 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "1d9d8185a34e0fb93aab98ad55ddda3bf64b878904e44e63b4e4eea6dca361f6",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
+        "originalAssertions": [
+          "723d4ee8cd4f0ca1e4ff6d40df9fe2140ac598c5e652de8775558d0c15922706",
+          "c43180ff4427b8d270d1db9db0269be1739227d469b8e8ac393afe2dbe82d83c",
+          "c163bfffd4ae3ec4c24a013eba3dda036c8c4a61c63995a92005daa7a1ddcaf3",
+          "cce74b0e8cca4c29776630702b2622e8824e3e5f66f89ac681d46f4d93cde70f",
+          "cf4ded2500cb0bd893ba4d030f14e8b1ef47765acc95e3f165a6ebb7ab67071e"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "cf4ded2500cb0bd893ba4d030f14e8b1ef47765acc95e3f165a6ebb7ab67071e",
+            "after": [
+              "8685e1ac3ab8c5be478823a4d7f9bdd54d0054c55d4e30f39082a2e48269b11d",
+              "cce74b0e8cca4c29776630702b2622e8824e3e5f66f89ac681d46f4d93cde70f"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/documentation.test.js",
@@ -5515,7 +5695,17 @@
       "path": ".agents/core/runtime/tests/host-services.test.js",
       "hash": "6893c788d75f92f40fe17a9d3438a982464f1f25807675a72bb76c4d539527e6",
       "title": "'latest Terminal and Git use universal packages and contain no native platform implementation'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "3d2ad24030f5365e6b57d0667ae417c025dd858c316b64628639756b4cd0bc0c",
+        "reason": "M4 removes bundled scene-source mirrors: native PTY assertions use a synthetic optional package, runtime-only copies include their real modules, Core readers remain disabled across restarts and reject standalone uninstall; optional app removal remains independently asserted. Ability resource checks inspect complete v2 source groups. All original platform obligations retained.",
+        "originalAssertions": [
+          "54cc8059c94919feab8b7219617f0addabe5a67b8396c45a00d7c1fab9d37898",
+          "871eb1c882c65c6aed07a40306de20a5b1e781f0dd0aa7b9c9867d36396c1c59",
+          "48579edb9ec32b66250a62dafd69df28f26e18484e69401f3299a924d8463d19",
+          "3cb6abc2ee7e5f31473941e2269ff7f320c62c8bb5c360f151d5e8f88afbdeb3"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/host-services.test.js",
@@ -6916,7 +7106,17 @@
         "darwin",
         "win32",
         "linux"
-      ]
+      ],
+      "amendment": {
+        "hash": "d31610bf30ffacb97e23477621dbdf575e72a254e670f90030f82b0e0b0ee8b2",
+        "reason": "A trailing slash resolves to the same startup owner; all other-instance and ambiguous launch-agent assertions remain required.",
+        "originalAssertions": [
+          "be0fd7bdd36ff400186325c636af565d7fa921ad7546aab92356583391b0c72e",
+          "b03085430e977f180f8410b38e021e3d473c8a2e8f4345df673259299d5f4a03",
+          "d88332c4391bde29a99846b302e80fddad2e4b932b0b692c053eb70227ed9186",
+          "5a580ca5eb422ea7cb75188f2524bdf2426d8b5ca6e50888ad1c2f9f5cc27346"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/platform.test.js",
@@ -7853,7 +8053,31 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "4f6583452134cbb8d5aef7e45e934087acea6a23582e53aff3d1dac8303afe92",
+        "originalAssertions": [
+          "21c22d0b55d8267f436e5bb04bfa9d08b77f02f1d3c263b72bb0f1ec4cc7eeb8",
+          "e55f0f811009d2487ad1d8ff0483af1df64c7b5538f67c12934c384930c40e52",
+          "fcc9c066c7089227b57ce1d24ff8b9d32cfab5fc0b760b3f85bd1dc982076003",
+          "de9685af5e48382af33de1248bd65b6584096ac561a2834547b7306839ece51e",
+          "a85baad3895ecf7746417c365e33449e0dd61482fca707af0e793be1d3a4030a",
+          "8ed7aee64a3af440425a133fa4be22fd20cd82128c0456ded6a5b8dee4229a3a",
+          "34758fb851270caa9202343560148242f81e30d5157c564807b9ea34897b6f2d",
+          "2dcd7cf3bea3f672b77ef573baf381d50d5f773b49b41f164d625dc86c320eae",
+          "1ea597ad4bb934d42ea34a8e019477ca393ff19b0699283cde1840de6638bc70",
+          "f397b891062833e0f0a225eff6ae450172ccf9080dbdeb94edfe76ef8ffc008b"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "2dcd7cf3bea3f672b77ef573baf381d50d5f773b49b41f164d625dc86c320eae",
+            "after": [
+              "cfc777927aec6e235f87358fac7f7e869f068f89bc52a95d820d47c18e7db272"
+            ]
+          }
+        ],
+        "reason": "Project creation now owns one empty 成果 directory. Only exact directory inventories include that directory; preview nonmutation, locking, CAS, removal scope and concurrent edits remain asserted."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/projects.test.js",
@@ -7889,7 +8113,27 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "b00325a4d9bce7c69af7d2f1fdf5656ea8abc5a60c7520dbdf57dfe1fecf03fa",
+        "originalAssertions": [
+          "ff766cf9d187641fedf5be71b389381d16812511e46f03b9e896a8e7d1ea8df5",
+          "055c33ea56e39161f9dd5fd9afd2c8c67e71db2cd6359fe1cb359943031f0a2e",
+          "1ea597ad4bb934d42ea34a8e019477ca393ff19b0699283cde1840de6638bc70",
+          "a8acf6319610eed0af2ff26f94296a97145cf9a81270c22008c6e86ad0bc662f",
+          "5503ab534a8f64782c95f81929b6be0fa4a519202321fd7aa9c8a199609257f5",
+          "dee55d7c71d653b91187db7eb3f653b0fc5e521d67c49a87e19a3c5382c8789e"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "dee55d7c71d653b91187db7eb3f653b0fc5e521d67c49a87e19a3c5382c8789e",
+            "after": [
+              "b1b558d4767cf6891c55ef020cf673cac05457963ddbc3557ed3725ea960126d"
+            ]
+          }
+        ],
+        "reason": "Project creation now owns one empty 成果 directory. Only exact directory inventories include that directory; preview nonmutation, locking, CAS, removal scope and concurrent edits remain asserted."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/projects.test.js",
@@ -7925,7 +8169,21 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "c86a47079218fe4faa9fc0a948ef5aa86e643f57abb704d357a6d05f64a0f1ce",
+        "originalAssertions": [
+          "5f7dfc9cfdd3c4dea3267c069cbddac79d6f7b7bbb9d4c3ef844d356b9240e47",
+          "9731725392ac3aac3520cfa228e70c1692d009d65fbf1a4b77c0cf7f95767171",
+          "6555a74efa7a5be72f867d9bdf361a3edd0e2e7f80f4ba0bdc4c385a8fbb1e20",
+          "8e2fef95797261377a226b0cf219cbbcd7f1940dd50e6151a065354b321d9911",
+          "4bdf77925cf2de35011c80be70aebc589a8436bd2db3673e72bfba8361602a70",
+          "40d6bf3ada9c0e812557596d50b5651f2ccc7260160a03c41fe4bc8f30656c0f",
+          "2b7bd1ee5a3f434956e44658ecaf107590025c2f6dea917131c6f8346e36e39f",
+          "ac1d1a82fabf1062493eaefe50a3dda3bb75abfd6698afcbd24b4edcabf84f47"
+        ],
+        "reason": "Project creation now owns one empty 成果 directory. Only exact directory inventories include that directory; preview nonmutation, locking, CAS, removal scope and concurrent edits remain asserted."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/projects.test.js",
@@ -8466,7 +8724,15 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "5eeb03bbb35d40377a5d54826e6459ab9efb7bda5fe315eb572cd4f5b0101e1e",
+        "originalAssertions": [
+          "5a4f8140be54f585d3a61678266a1b1df018d1fb7b86430c514b04da9778988d",
+          "56cebc1886176b3780c421875aed6fef47ff0b3926fa6f9ab4a9ada37b9dd8fa"
+        ],
+        "reason": "The fixture now uses realpath(root), matching the persisted migration writer schema on macOS /var symlink paths; both original retention assertions remain unchanged."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/runtime-retention.test.js",
@@ -9902,8 +10168,7 @@
         "win32"
       ],
       "contractUpdate": {
-        "hash": "1734dc1080c5a4c7ce62aa331fd178e3278a7616d8402718c4bf8663408ad05e",
-        "reason": "The guarded about endpoint adds SDK range and installed/candidate metadata. Preserve all request guards and explicitly allowlist response fields.",
+        "hash": "dd218a6a24275f748292a56be6685510c465cad7d67a37bf08e054402d6572ea",
         "originalAssertions": [
           "cb93ca50506404667bc996eada9a5174387c77c20b3077a97c49968efd3df03a",
           "9378e48de248b80eb4d64d27dd19e3759b58743e4b84a3f5656a7c3af17bc066",
@@ -9921,11 +10186,12 @@
               "9ce9e9e831e6c9daa089d6ea5ade4b8800646c8445e604eed39978cdc3b52769",
               "c31ec1c28c15f2db9de00b4a5c48e8f856cb796af07b07e264b31e02550247bd",
               "13fd386e786aaef35a225cf000bdd0970ad455c32a2bcc89268a2a1024dfcbc2",
-              "53b52dfcfe4138e7365d300a7ef20850e37e4a7732de15f4f9df77abc0df2c44",
+              "b3178ae9a9fede471a3c7388199eec527f4ab635a717525aff2baebc4cd6bad7",
               "e4efe5bc9498d81e99f3ca3494842ed1314f6bfed9b0352bdaa0e872966d7f0d"
             ]
           }
-        ]
+        ],
+        "reason": "The SDK is now 1.2.0. /api/about must match the actual SDK package version while retaining the 1.0.0 compatibility floor and every method, session, field-whitelist and read-only assertion. This replaces only the stale 1.1.0 version constant; it does not relax runtime SDK checks. Sequential reviewed replacements are flattened to their original assertion identities; intermediate hashes are not treated as original assertions."
       }
     },
     {
@@ -9935,7 +10201,32 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "3dc700e54313d4b12712c57d72ea2fbc62bf1505d63cca86c0c1ee6b8be95029",
+        "reason": "The document-scoped SDK import map requires its exact CSP SHA-256 hash; all other restrictive script, style, image and connection policies remain required.",
+        "originalAssertions": [
+          "10e436a073b4215b89e932741659c0320c54c67369383ccd45c25a668c25ccb3",
+          "bb23345aad980f92ea38c52360c8d87b26ab997ac6eb28bb8159e5e91954ba9f",
+          "5bfb087a8ad6b39578991d8c951f9ca41740a6aa8192c9528272551615082b63",
+          "f7c16f9363c4e06879ce3e0328d9306a0d26ee0d5b9ab15c148ba8af03422104",
+          "3faae3648d93fc008f13c7094c8ce41bfc6b457d02615142c40c0ab8880239c7",
+          "5f875227322c4b37afcb1fc86ed2c89a89560ca7d207e5e9b7c1beb75c734dfb",
+          "06751f35f351c30ff4bf7c71bc8b07ac0f7c1d87e615ae3ebcc3be4d488fbaff",
+          "75e1b9264d382ea1992cf3e2f26c0080ed6658d033e4e3146260a466bf74c98b",
+          "8d2b568c30500f4d243ecda65ec8050e02d258b659047ebe8398560d17fe5751",
+          "c0dc79e67f2f2627927783b12351591af6d0307001540c895546f9aa9d38039f"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "3faae3648d93fc008f13c7094c8ce41bfc6b457d02615142c40c0ab8880239c7",
+            "after": [
+              "36046707e28a271791ce6e892c552c4705a0697835e8cf5358104c329a8f9b8a",
+              "72a0eededc1318df7ae6243eae57c1736756b588ed23dc412fd1f33a3946d56f"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web.test.js",
@@ -9953,7 +10244,22 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "a6bb8ff4def3c7a3bce47e3b7aee68c5ebddddc140f0a198d500866c944e305f",
+        "reason": "The loopback ksf.localhost address is accepted only at the bound port while forged subdomains, suffixes and foreign origins remain rejected.",
+        "originalAssertions": [
+          "3a48b407ee3e3292a9b56dda277537e570c3299840f5ce5c61b569afffb7d18a",
+          "53d8654a5606bc5a3d8083b35466ddfde381098b60337e40dfce658eecb0e907",
+          "7461d752448856150d59a13fce5a0b8832f9decc6f8fbc0ce2836e959e625cc4",
+          "2d0f6cfce41d67b05f508f7525890645bad00da1f5d1fefb3343fa094852c93a",
+          "5ec0eb239b10e756d2f7b1fcb1f26f11a9b485a243f09f7708dea412e77926a0",
+          "c66e265abd8a653535b6241735e1a2ac8fc4e8dd1514587f02280405549a1a45",
+          "8b898f29e5ca42042d03fb85dd0ec2d4396823d63715765c7dfc871053fc68ff",
+          "55cc9c164e120bd8b602c7dd0598d60165c763dd4cd080c482ec68d280f2b4aa",
+          "9e626fe04c01ec19495ae4b437c49d007ab0e59e615719b83f6c28373111cc86"
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web.test.js",
@@ -9988,7 +10294,28 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "1d8b24898ea94801999bd38a69e46873c3e67f541964d9afe3a0b7c270c3d6e9",
+        "reason": "CLI help now documents the loopback ksf.localhost entry in place of the legacy ksf.ai URL; option validation is unchanged.",
+        "originalAssertions": [
+          "94daf9af958927e3cdc6c5c91f4ba0d91611cd3aee3442e481724741573c251e",
+          "4f3f9e38ae3926f562ab690e84a4398391a9d226830041392e9bb39efe4866ce",
+          "22cf59ba54c9a02c4d92590b82efbafe90ac931689adb10029304ad8b709e23e",
+          "bef6e5dfec23a0165d9594e6a7c8c41ee6dffd1d0a11cc3363ae81e663bfd312",
+          "31da3476ad02275bb4da2a19382c4561ac0d0c6caffdd2ccd798096c64fb2049",
+          "b17f9a33551cd7e3a01a9a313b6699cff4264458abffd7f4ff226d70ca6149b9",
+          "c84876734ceccc5ff4a20642e953dbd249a9e8bae87b54efb4db3b1986a77452"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "22cf59ba54c9a02c4d92590b82efbafe90ac931689adb10029304ad8b709e23e",
+            "after": [
+              "7dd8fb5fb14ff8cdc56e84fdf4d6350d3e4b0d9b10d1b1cdb80c0d1748a4cb82"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/web.test.js",
@@ -10006,7 +10333,31 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "contractUpdate": {
+        "hash": "f808b9fc0cf13a6fb8c883e52b5fb053151eb91572290b4d2ac22cc0e2195e94",
+        "reason": "Launcher output now consistently reports its ksf.localhost loopback URL; bundled runtime, readiness, HTTP health and termination assertions remain required.",
+        "originalAssertions": [
+          "68cf8d8b0a881549f2b8487cf67e6b79b4d58e919ef79529ada5a671b5fa87eb",
+          "3a9f2373274aae541d26ff0beb6a9e134d4b8f1c754340270bf7f7d4d9ace77c",
+          "4992a500965fa8804a004a3d1efd54cc040a8cb7a538eb05d7d24e7f85f148d8",
+          "7363c5e1fdf7efbe7e5f5de028e885be051639697ed5c51b176b8ec062c66224",
+          "571551679a0c01fc010e8303af6b5240a2ce7126b7191e899e4e5b676a1f2331",
+          "80f968a5495dea9f70f57c6ff4a294e159033cc804e98ec56753d7c10a28ad97",
+          "1fd8a6ce76285e191280b6eb4e964aea2f97c414ae591b2091110167d464236e",
+          "9fdbb7e3d87934d626f0d6e00dce54cf77d043ea69e4e50d79b7c36ae0f36b43",
+          "7650daaa94723c200fffe1d57c9f421fab8cb41daefd7902c232adc25850734b",
+          "39138e84ca2302498ab6db522ee788c794cdd2bc75a605cf8498be7f2dc1bb5e"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "1fd8a6ce76285e191280b6eb4e964aea2f97c414ae591b2091110167d464236e",
+            "after": [
+              "bd14f53fce12444f25d569e77350da004ba0022bc759096d404e711b927ce121"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/tests/work-stats.test.js",
@@ -10390,7 +10741,24 @@
       "path": ".agents/core/runtime/web/tests/configuration-preferences.test.ts",
       "hash": "9d239bafbfbc77b824dd2c52e51f7aa90a709055c80171247be28c262515fa89",
       "title": "'unavailable backend leaves a visible unsaved draft without automatic retry'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "b524ce7ded14e6f74c839569c945dca4aed68b9068d45a8e4f99b0416b64088e",
+        "reason": "An unreachable save has an unknown outcome rather than a confirmed failure; the dirty draft remains visible without automatic retry or additional submissions.",
+        "originalAssertions": [
+          "81bb0b6278c8b87e26e95e928fcc7f0850f717cefc2ee52a07cfdcf96205f105",
+          "3a03d09851c24d06b0021c04b0b73adb99f5021d2bb28b2cf9396b9276445f94",
+          "afeb67154aa742dc6478d1be0cbcee2254cb2d26ae227e7f15d0a72b464ea535"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "81bb0b6278c8b87e26e95e928fcc7f0850f717cefc2ee52a07cfdcf96205f105",
+            "after": [
+              "5f77fc49c03934e8134ae18570913a6c931b60c0c969d65b1bd6b92d5652a11d"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/web/tests/configuration-preferences.test.ts",
@@ -10408,7 +10776,26 @@
       "path": ".agents/core/runtime/web/tests/configuration-preferences.test.ts",
       "hash": "46dd9c977bf4a8261c6ec28bc94e06fb9443d3c69807fc78cfdb65853f973200",
       "title": "'failed automatic saves remain unconfirmed and are recomputed after reconnection'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "3742b3164f4bb55151e45e81951f3d972d23f2c0d21d300330792d0a38969e67",
+        "reason": "Automatic save reconciliation retains an unknown submission and recomputes after reconnecting; the original saved value and single-submission assertions remain required.",
+        "originalAssertions": [
+          "81bb0b6278c8b87e26e95e928fcc7f0850f717cefc2ee52a07cfdcf96205f105",
+          "afeb67154aa742dc6478d1be0cbcee2254cb2d26ae227e7f15d0a72b464ea535",
+          "03d36b08c6cec12196a08c2e0c8c9539c79f6b7a343a34a07583cc20deb27a57",
+          "b318eddbd405429e28af9c7d6a2a6b07dd5b73a5a624b3c8d42744ad51361517",
+          "f39449d7ff84d64e3e6711084a3556268ffa8138b46a7e7001ceb68add615fc6"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "81bb0b6278c8b87e26e95e928fcc7f0850f717cefc2ee52a07cfdcf96205f105",
+            "after": [
+              "5f77fc49c03934e8134ae18570913a6c931b60c0c969d65b1bd6b92d5652a11d"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/web/tests/context-menu.test.ts",
@@ -10498,7 +10885,16 @@
       "path": ".agents/core/runtime/web/tests/desktop.test.ts",
       "hash": "21655fd904dd82d9c64592fa54b5f1664ce614b14d9c2401cbdc8d8289dbb4d4",
       "title": "'keyboard movement and resize push adjacent cards without overlap or mutating the saved layout'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "amendment": {
+        "hash": "11a239c31b08f67fc9c5e2a96271f5e46d3f371d23a73bebac6eb893fa20dfed",
+        "originalAssertions": [
+          "09d6e39d22f1e1ea214fe442e7aa84480433ce0f8f2c5ad4e09277e79313c453",
+          "6caa0bf9a5e37d6330a354a42893b97a6087901c1aa674fc2a2dcb3ea70a3584",
+          "0632fe2e7d749b38cb18a8925ce9a830f47e82a6f6aba5da95dadb69c9049c03"
+        ],
+        "reason": "B5 completed the collision/swap behavior: the renamed keyboard scenario retains all original bounds, no-overlap and saved-layout immutability assertions and adds an explicit rejected-resize unchanged-layout assertion."
+      }
     },
     {
       "path": ".agents/core/runtime/web/tests/desktop.test.ts",
@@ -10534,7 +10930,52 @@
       "path": ".agents/core/runtime/web/tests/desktop.test.ts",
       "hash": "793c939209896b646b6a2549a891357efe6efb3ab7a345c178921d54610873fd",
       "title": "'square cells divide the entire available width with equal gutters and no unused remainder'",
-      "nativePlatforms": []
+      "nativePlatforms": [],
+      "contractUpdate": {
+        "hash": "1d058888096ae099a899f966fab181c9324ff210f14cd541dda83b666a9c3558",
+        "reason": "Desktop cells remain 96px with 32px gutters to preserve icon legibility instead of stretching across the viewport; bounded width, exact geometry and a narrow viewport fallback are asserted.",
+        "originalAssertions": [
+          "9826ae009368a39dea3e2e043d0f5b9bdc44f5270391cf2e568f98fa336619c4",
+          "8be85fdb1bf8c3059737cfe38c2c2a158c616b7322f074bf3d9700a41b40b34e",
+          "6cdfac8a5e1fc34fc660b1cc3f69d1e946f8b7124224d47d1e08b7bacd069756",
+          "d376bbc6e43ef1ee06b42d90f67d18de3fe8843f5a5026a9a2e9ab736cfab415",
+          "c27e3f675dc6a014d574b9b5f56bb882de1ee94b3d903f147778f1ee8988c9c0",
+          "2795194763cdf7cb2cd97afe0e4a08559705e5a1a55e010d34d06a212cbbd907",
+          "1195a299cb5293b3d4a06b4b82835c6286a634bdcaa6c685bba1fd5936e13f10"
+        ],
+        "assertionUpdates": [
+          {
+            "before": "8be85fdb1bf8c3059737cfe38c2c2a158c616b7322f074bf3d9700a41b40b34e",
+            "after": [
+              "118e6ef10fb3d22fc96d26bb266e53870fdbabf194351af88e601571167a517c"
+            ]
+          },
+          {
+            "before": "6cdfac8a5e1fc34fc660b1cc3f69d1e946f8b7124224d47d1e08b7bacd069756",
+            "after": [
+              "cbeb50e5d0e3b92adcfee7ad7f59623c4abe0977c09ea358f7ff17e0d55e5bf6"
+            ]
+          },
+          {
+            "before": "d376bbc6e43ef1ee06b42d90f67d18de3fe8843f5a5026a9a2e9ab736cfab415",
+            "after": [
+              "561f4e573f2f0c73a3a299a54bbbd75372366bdf975dbc1e4025ff71aec44355"
+            ]
+          },
+          {
+            "before": "c27e3f675dc6a014d574b9b5f56bb882de1ee94b3d903f147778f1ee8988c9c0",
+            "after": [
+              "bb9b310dd581f10ce982b1e0f1c79aa6450b30198460b9459981c297167c4048"
+            ]
+          },
+          {
+            "before": "1195a299cb5293b3d4a06b4b82835c6286a634bdcaa6c685bba1fd5936e13f10",
+            "after": [
+              "be59a26389573b420934d516492fd1876f50e18f49b1287c6fe3545aed1ed590"
+            ]
+          }
+        ]
+      }
     },
     {
       "path": ".agents/core/runtime/web/tests/desktop.test.ts",
@@ -11181,7 +11622,17 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "9b58d6ccaf32ecd0fe88e8b0fb3fc7a22738e552dddefcfd184e5e672e9c60ac",
+        "originalAssertions": [
+          "ffbc544ea94f5cb4db91c481b628049a11952f366699a58ccac8814b9f7f309b",
+          "c5a55c18e85b23b398b7b8bdb890696e366e646c6e32de8407c89fd2a18e4379",
+          "9f720687f430c4003b231cd02792fb8c71cdddf8379584e03811a715f7b28f9d",
+          "24e18d2e9e0c4f6e6fd48c438bab75197ae4d1258c2819a9a46e127aeb3f65e2"
+        ],
+        "reason": "Two additive assertions check the explicit ability-package bridge and reject that method from the knowledge facade; all four original per-asset operation boundaries remain."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/assets.test.js",
@@ -11332,7 +11783,8 @@
           "win32"
         ],
         "amendment": {
-          "hash": "56c2c563452214bbe6bb49dff1691a0651b91aba9301d2a66d22631de411ddc1",
+          "hash": "e0783d1ca219b497868d56d4643b45e5e0d955d7b533c2abcffe6ecc9a16d95a",
+          "reason": "Packaged project migration uses the Core 0.6 document-scoped UI runtime and preserves all original Markdown, legacy access and byte-preservation assertions while adding confirmation provenance checks.",
           "originalAssertions": [
             "3a2cb9dae7fd35a591c832543ccbfda4b4746423dcaf71b838401db2c826ed88",
             "8b48047d9f6b0b5c3adf479d6cc02dbac3ddf9583b46c1b17a078a37ccdfdc1c",
@@ -11351,8 +11803,7 @@
             "8fa41c44af553d8ae6cf78b19b2cdb81b1c90262e3b4e4f88c112d056d68f562",
             "9fe7e93b0b421d378e07b1c7990f5be9e5b635ad31b72d4758a6c4e8a1254e0e",
             "b7f41abfa128f79f0389d239c0c66e9c80b8c41cbf117eb5b227e42a8414a80d"
-          ],
-          "reason": "目录以摘要分页返回，夹具改为定向预览或隔离离线输入；保留全部原执行、数据与权限断言。"
+          ]
         }
       },
       {
@@ -11377,14 +11828,28 @@
         "hash": "e48bf9ea59610a2f8b19bce102ed8ac1e7fd20472b0164f759b31be8d261ebed",
         "title": "'newer local Core baseline is not mislabeled as an online published version'",
         "nativePlatforms": [],
-        "amendment": {
-          "hash": "8b56f7586a8e7f3a1f8af471e398f0cd9d9a82f838656484e99b0cf19ee142ed",
+        "contractUpdate": {
+          "hash": "84bf3b147edac00e8882b96b36369881a1d0aa0b4d21f7a93d1a8534ac0750e0",
+          "reason": "M4 A1/A8 no longer merge a local official mirror with a live source. Only the published remote version is a candidate and has live freshness.",
           "originalAssertions": [
             "4daad9a242190adedaf69a59417b88c84b6b2e3414366b0f5ab4731879dccada",
             "572151a83c23d78e6c279e23eb6ed9342c10fea82811279516cee932dccb69c8",
             "69512630dc10d5e04b0cce95bae5558b44d9a297d975f9852d2042a7d5abb0e8"
           ],
-          "reason": "分页目录只返回摘要，转为定向详情及显式刷新检查；原来源、离线摘要与安装断言全部保留。"
+          "assertionUpdates": [
+            {
+              "before": "4daad9a242190adedaf69a59417b88c84b6b2e3414366b0f5ab4731879dccada",
+              "after": [
+                "646ad752dc02dcc36e4a2c06e86847211d64eb2feadfee8ab24a05b493cb3cf0"
+              ]
+            },
+            {
+              "before": "572151a83c23d78e6c279e23eb6ed9342c10fea82811279516cee932dccb69c8",
+              "after": [
+                "3e0f79659d2af7e720ac5532fd1a7fb05036274e8198bcaa7289e56b5d959164"
+              ]
+            }
+          ]
         }
       },
       {
@@ -11405,7 +11870,7 @@
         "title": "'builder stamps actual SDK and protects old hosts without mutating source'",
         "nativePlatforms": [],
         "contractUpdate": {
-          "hash": "93f6c1c10b4342596d07e71ecb7746720e56bbd7a5b9a63a50697e69523bb1bd",
+          "hash": "dc328a3bf10afb2e611342113083140fc67bced54b3dba6584294cd1e6ddf662",
           "originalAssertions": [
             "799065684e899f491491dd4d28bfb0a57c6c7e50aade8d63b4ca25d2e3cffc57",
             "84a2ce6bed42875c4fde22e6c38698cd940de0d560c44b25e448f68a709a582d",
@@ -11414,23 +11879,52 @@
             "12c227b0ef7167c3cb992fdfaf16030ad94523688292468048abbb19077a3a58",
             "c1508bf14ce0f5052a0d41bfb2db2479b8d21619ce06729926b801287c550728"
           ],
-          "reason": "统一包的Core下限从0.5.3提升为0.5.5，同时验证0.5.4宿主拒绝该包；SDK边界和源Manifest保全断言不变。",
           "assertionUpdates": [
             {
               "before": "7f5daba9157e70121716f32c06a196be18f99aabbb2013b397fd60e8c26b6759",
               "after": [
-                "8d5c9c92bcf7d07d021888f61dc110d1f77f0c9ad7437d9aceee1e96a3ffc772",
+                "00e9ee7ce589c5716989f4521b8a6270a7c1bbf36ae4c0bd3ac5ff5835fd9802",
                 "246c3c9087d4071a8a20f1e6653610a4ed02d1d5af66e2b497f363b33a4b2b32"
               ]
+            },
+            {
+              "before": "799065684e899f491491dd4d28bfb0a57c6c7e50aade8d63b4ca25d2e3cffc57",
+              "after": [
+                "fe8725cfba31205a7932c302bd7199e51d82c9045e8be93b7a3428b57921d801"
+              ]
+            },
+            {
+              "before": "84a2ce6bed42875c4fde22e6c38698cd940de0d560c44b25e448f68a709a582d",
+              "after": [
+                "2bb2bb96914caa9e2dc2d49562936965f0239018620818477fdabf1d59272715"
+              ]
             }
-          ]
+          ],
+          "reason": "SDK1.2 now requires Core0.5.7. Only the exact SDK stamps and Core floor change, retaining old-host rejection, source immutability, build mismatch and explicit target-host compatibility checks."
         }
       },
       {
         "path": ".agents/core/runtime/tests/application-sdk-compatibility.test.js",
         "hash": "e91047da332a65bd39969f087cb886cd7d6b3332a63576de39ccacd525644618",
         "title": "'target host contract wins over the checker own SDK version'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "contractUpdate": {
+          "hash": "569de2db56234738f238c0d69c80dbebd5c2e30122fe2cc7a92fc0de6548bf47",
+          "originalAssertions": [
+            "3ce3421c1de2f42383a8f3d7d5f94255af5afc52cf5095612e3c95baacca38d7",
+            "647206ac12d10cb737151e18e5f08c4d95d0e8547d4316330183975e9e0592bf",
+            "5ae8cfd1ffcb31b8bfe5c6c3e985a4deefccf60e3f16c3e2b35a8818e8b18d2d"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "3ce3421c1de2f42383a8f3d7d5f94255af5afc52cf5095612e3c95baacca38d7",
+              "after": [
+                "d1674e4da665f569ba7dc27aff54f463d74adc3becca7f497861112ee791f055"
+              ]
+            }
+          ],
+          "reason": "SDK1.2 now requires Core0.5.7. Only the exact SDK stamps and Core floor change, retaining old-host rejection, source immutability, build mismatch and explicit target-host compatibility checks."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/background-service.test.js",
@@ -11676,7 +12170,29 @@
         "path": ".agents/core/runtime/tests/core-application-plan.test.js",
         "hash": "ce9874f73ecca076ef632d20ee87b439988b2eb31d1add9ce8103b7ca8d333c0",
         "title": "'newer compatible pending version beats Core baseline and rollback preserves later store upgrade'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "contractUpdate": {
+          "hash": "287b50c98ca230ed501bb705f31505bdbb10de7c871a3d84ab822022ac049501",
+          "reason": "M4 A8 requires the declared Core builtin payload; a newer pending builtin blocks and preserves state. Independent later Terminal changes are covered by the added Core upgrade/rollback test.",
+          "originalAssertions": [
+            "c36e0cf6b6c8956e3fdb44b394998ffb5ff96b8e0cfec8370fe2f48be004038a",
+            "a18f0eb74aa134a955dcce48ebdc60582ad7e9376fcff940b0aac4e0c94e68eb"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "c36e0cf6b6c8956e3fdb44b394998ffb5ff96b8e0cfec8370fe2f48be004038a",
+              "after": [
+                "a4b20f89a6978f925450f37e7c43ce7ffaf786b23c17dbdb34262988efe85a69"
+              ]
+            },
+            {
+              "before": "a18f0eb74aa134a955dcce48ebdc60582ad7e9376fcff940b0aac4e0c94e68eb",
+              "after": [
+                "05e119c8471ad18aa52ada519cbd7139301bc9a378b73ffd12268bf9bd6c386b"
+              ]
+            }
+          ]
+        }
       },
       {
         "path": ".agents/core/runtime/tests/core-application-plan.test.js",
@@ -11888,7 +12404,36 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "09246a8a8ee56f988035f3b1df0e3b624fd688e2c4457af9f1374b999a554e81",
+          "originalAssertions": [
+            "93022a4cf88ad2a791e86af416646307fbbefb4d79b9783d9a897dcb4f92543c",
+            "6fa52257d29d8dbdcdf2f25aaa2c9979d707999c33053f064d5f91ec06844c96",
+            "3e9405dab06fd57f486e803b78b6def0f66a12c115438258feb38518f95974b4",
+            "da8dbbe196affd9fc75e77228bc7c98c445f655f8253382e5381e924fd7400c4",
+            "c447d5d2f2d952e9fc8f076fc60e370aa6df93661861d7168954cbd8e41a4b9a",
+            "d71c669da8f4cbdc155d82ef6091b759db7ba6767cb0a78c30e343a45e693979",
+            "f8cce529dc3cac62450e60b23dc5f05127542a26293924500b9a8df9b13ec26e",
+            "6d4adf805669bbbcd1b3e93edd24cf68dde1f327953e1917c8590c51bb7930ac",
+            "add24cc477005989a35faa1473f2562b1f425c8c4d6214a59752fc06dc59f2cf"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "6fa52257d29d8dbdcdf2f25aaa2c9979d707999c33053f064d5f91ec06844c96",
+              "after": [
+                "d8202c9bf208e327bb96d5eb84246aef8c774c0514b7940ab646181696fd78c0"
+              ]
+            },
+            {
+              "before": "3e9405dab06fd57f486e803b78b6def0f66a12c115438258feb38518f95974b4",
+              "after": [
+                "98e3028453f7cfeb469d1dd0685b7f69101283d2e70e5704f7fdb5373a957fec"
+              ]
+            }
+          ],
+          "reason": "The current foundational Core ships 40 objects (1 cooperation, 11 partners, 28 competencies). Update exact inventories and candidate totals while retaining all four protected entries, closed references, parser compatibility, retired-ID exclusion and no orphan checks."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
@@ -11897,7 +12442,23 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "b93ca8963d9ec2f60a36ad44291ccf39d2c5786b0d16c986e3718adeee825e3d",
+          "originalAssertions": [
+            "56f5947bca86e9097337e73a208b6fb8498cdbbd62d1400f48b52e7c52934427",
+            "f35bc13dd7294c25a4ff2fae8b644e2b8ee5ed3e9ea6f2c6956fe43856f54c57"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "f35bc13dd7294c25a4ff2fae8b644e2b8ee5ed3e9ea6f2c6956fe43856f54c57",
+              "after": [
+                "175228c16d25d11bb3d35a59fd8f2520f034a6e7ab19d231405eb89f84bc44f3"
+              ]
+            }
+          ],
+          "reason": "The current foundational Core ships 40 objects (1 cooperation, 11 partners, 28 competencies). Update exact inventories and candidate totals while retaining all four protected entries, closed references, parser compatibility, retired-ID exclusion and no orphan checks."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/runtime-management-refactor.test.js",
@@ -12128,7 +12689,29 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "a1067ca46c8af2cf3362605530c2c41c3d2f90cc2778c56ebf1016b1fee05b8f",
+          "reason": "M4 A6/A8 prohibit installing or rolling back Core-owned apps through a scene source; retain installation identity, disabled state, business files and Core rollback assertions.",
+          "originalAssertions": [
+            "44ba7231b1e83da40314c405663e4832c58f40e5f595d22c6a3e623ccbb2ffbb",
+            "4f4ef80b32d3e6a7d9ad0bdb9ccaf85ecfcb744c133a46d67bf47a5f210f275b",
+            "f74f5ae9d6e31d6ef2f3713c8c69b4ce2934f50b138aabccb20c83bcf76a92bc",
+            "57f2b44ee1b46966d04533ef03d9896eb3369a42cd7b6c5c4e282a234a226bee",
+            "cf08afb34163221bfbecbc92f95cef7e2d183f46711947beb60db84f1ad0bf42",
+            "0036b64870a423e77f9fc21e3086857a7fb3b5c7be5d83108d32d51cda0d580f",
+            "8fd1fad31cbd3afb7bb08869363a7f1c30e1d3ecf22fcdb02469d2fb6c35420c"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "f74f5ae9d6e31d6ef2f3713c8c69b4ce2934f50b138aabccb20c83bcf76a92bc",
+              "after": [
+                "118d4312cd6b31d504f4537f80c732bb5e90676c03fccd850e54d1f24f06e573",
+                "0ebddba739a25cac4b0e92db5ad6d005c9bd2507f73b02ba5a23f87c3cc0d9b1"
+              ]
+            }
+          ]
+        }
       },
       {
         "path": ".agents/core/runtime/tests/system-update-applications.test.js",
@@ -12146,7 +12729,18 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "amendment": {
+          "hash": "d1e30b3d97df247f459110a0ca52343c1ad269aa4abfcc6cfaeb8b055a553ecf",
+          "reason": "M4 A8 reads builtin payloads from applications/builtin; retain every data migration and recovery assertion.",
+          "originalAssertions": [
+            "101d6af7c452ff2137df7c1b93948c6a07e44f0e974f1eb9588eb7eb6c45544a",
+            "fe4b57ed4f2fc987183a298565bf892c1a231a225dad6139e98bf9a3f4f795cf",
+            "b7e6f1322e12f50d2d981c4dcc143d05e687062e3120b34589745b725706eb9f",
+            "f8583b007829cd46f65b3d05cd1728c8af8c3e14fe76998eb981d8f604723b0c",
+            "e9fdbd9e9a29b3ff2feeff9128bbdb485c62a1795fc0b4f8565627aac61462b4"
+          ]
+        }
       },
       {
         "path": ".agents/core/runtime/tests/system-update-applications.test.js",
@@ -12212,13 +12806,53 @@
         "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
         "hash": "d5f55e9a8ff5721923f883ab3620a074277486b9d1e019a04d54228448a29b06",
         "title": "'three design packages resolve their resources independently and do not eagerly expand diagnosis'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "amendment": {
+          "hash": "2113ba1adbf1056b863a3ef3b1030c24ca7ec8ec9d16dbb666cb87b295164ecc",
+          "originalAssertions": [
+            "cc8337b35d0ebf841c1f791093af59422f5027ea5df590826c9c270448d01576",
+            "75360f6bd2f8d465f91e6b37237e15495f3fa9c1ad9aac51e34d21d504ce7ca0",
+            "c59ae1db7f2054531eb2a3fcd2ea93870c0476aba6cd422869872ce6c5bc92a5",
+            "31e8481e899483cb5a1b689325540ed68cbb1ae6a1e6a4e5f37b71fdeaa746a1",
+            "bdac9d146b1a2ccbfd391928c26a7fb0c85a5e26acc72b972e43daae59e08b43",
+            "d52a5eac7cece04cd68cf7af8be84e3c9c4605db3dfeec6850b074de359d9725",
+            "232cd1e0018ad433c78fbeb5bd70f1337ad2e730a85af9f0664a2fd3979c5c19",
+            "289148d8e326550be43200fd75e771cfdca10ce1902c16be4ffd20cb12b3c3a7",
+            "a53e57a028c64a4ea1491064ec0a4d0ca9a7d63f0c54c7e51c31e486bc56b3d6"
+          ],
+          "reason": "Resolve shipped Core resources and capture the original Core graph inside self-contained fixtures with explicit empty user scopes. A clean checkout and a developer instance now test the same shipped bytes; personal examples cannot alter the Core-registration assertion. All original expansion, link, version and example-graph assertions remain; catalog completeness is additionally checked. Resolve the object in a minimal instance with no docs, while checking support links against the actual shipped Core directory; explanatory docs are not turned into runtime dependencies."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
         "hash": "2b1511034ae8b2f199a96e250cd8f4465b627349c66dfb9307068ccb3bbfbd2d",
         "title": "'manager expands only diagnosis and retired identities are absent from the effective graph'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "contractUpdate": {
+          "hash": "b53ac7c84cede8d9de994c72e4d40581a4c12534e03f1c59a6bc3f2a4f0fb6de",
+          "originalAssertions": [
+            "cc8337b35d0ebf841c1f791093af59422f5027ea5df590826c9c270448d01576",
+            "75360f6bd2f8d465f91e6b37237e15495f3fa9c1ad9aac51e34d21d504ce7ca0",
+            "6645c91cd47351760da4e454e9e6e9544334b070c6f826c67afff25ec8e93300",
+            "bbbaab5bd7a806282ae598aaf3f61a85a85733ee4c4a97c3cab97e1c70751a8b",
+            "93022a4cf88ad2a791e86af416646307fbbefb4d79b9783d9a897dcb4f92543c",
+            "d73d5d1d211682aa307b50ec927e1b968cd9af8990ec183dda06ea65225f29e0",
+            "66d6e9920d79436dcad1c4726880a1620ce3075e8c7d2cc7e38d61e2686d4b1a",
+            "eb73e99f1732c8c05280fe4b87a931d972840bc0f488172f90deccb7489df392",
+            "da60acebec107cfa316f86bac36ea6621c4cff9e0edb8b5d98377698068b4f49",
+            "6d4adf805669bbbcd1b3e93edd24cf68dde1f327953e1917c8590c51bb7930ac",
+            "b476ff6b866389cda4f3ee9d6cbe378c39567f25b14906b2a99cca2eda52162e"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "d73d5d1d211682aa307b50ec927e1b968cd9af8990ec183dda06ea65225f29e0",
+              "after": [
+                "1ac346c4a971e4e9d10744fed5dcecd9b0bbf7fb911027993a43e0746a700da5"
+              ]
+            }
+          ],
+          "reason": "Only the exact foundational system-object total changes from35 to40, consistent with the current shipped Core; manager expansion, protected ownership, retired identities, closed references and orphan checks remain."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
@@ -12236,7 +12870,20 @@
         "path": ".agents/core/runtime/tests/meta-design-systems.test.js",
         "hash": "fae919ed3d42ec09e2174cab2ded5a6f012e8115efb5bddfa92aaecf2d128a03",
         "title": "'complete creation examples form a resolvable isolated graph without registering example objects in Core'",
-        "nativePlatforms": []
+        "nativePlatforms": [],
+        "amendment": {
+          "hash": "0bacead8d7aae71b99a9029cb6682b1c5fae46d40a8f122c5097342e73642ec9",
+          "originalAssertions": [
+            "0f39736b9d5fa54faa921d40907651d1acfebfd61f279bb8e74489e7e431e70a",
+            "8f420dee27b5d00a016d99c959a2f8dabef285826fadfef3c16272bb72a064cb",
+            "4bbd1a2ee5200869f0e0f60c16e24f646beac11b23147ca1b58629477049ab07",
+            "bcdabf4b2fc5eb1c5fcee6755997f64c23e3744cc5ccda1a96435ad255df5a36",
+            "cc8337b35d0ebf841c1f791093af59422f5027ea5df590826c9c270448d01576",
+            "fe1a40d3df36227d7026277c04f5ca657ac8c494d858d025d8d54ef3e7116ccd",
+            "545e4e1f22f84a4eb470beb9c117bca414b1c92ea280dce0e386d41584656805"
+          ],
+          "reason": "Resolve shipped Core resources and capture the original Core graph inside self-contained fixtures with explicit empty user scopes. A clean checkout and a developer instance now test the same shipped bytes; personal examples cannot alter the Core-registration assertion. All original expansion, link, version and example-graph assertions remain; catalog completeness is additionally checked."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/task-capture-correctness.test.js",
@@ -12542,7 +13189,27 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "0a3e32371d8dc7309e28ed6e0281ef94bf64494b9665c92d7a1e2e455f1ba3b5",
+          "originalAssertions": [
+            "3a2cb9dae7fd35a591c832543ccbfda4b4746423dcaf71b838401db2c826ed88",
+            "68f3e3b7a415345fc508168d30058913f21db82897336a9b39a8c7d1c3e4bb12",
+            "0ea417da3cbfa93facfb68a237db7a4d3b359413fc4e32121d3c8eacb60a9637",
+            "95198cb770c9b44f1aad01bfcf0cdb240d6d76c773fabc62bb7e38e8cdcad2a0",
+            "e8f96e1439134d663e1308d112aeed13e253a2afadf159e6d85486d448441ec1",
+            "243b2021f9b229b70aa14c2e2750055588ffff360815f2005109d57e949acd4a"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "0ea417da3cbfa93facfb68a237db7a4d3b359413fc4e32121d3c8eacb60a9637",
+              "after": [
+                "7b86adc946f69871af68493e3269e9846f6de3296afdfaafa36f79001fad0266"
+              ]
+            }
+          ],
+          "reason": "Stage completion now uses the real confirmation helper rather than generic apply. Preserve the complete change set, result and evidence semantics while exercising the stricter same-transaction confirmation source."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/project-governance.test.js",
@@ -12632,7 +13299,23 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "0038cf0e035904dcd0c40b9e16c548fc50d2ab67bba20f0773d9025b4f646821",
+          "originalAssertions": [
+            "05ed1cee82e08764df46e92028b09c73ac3f1c77fe5137fc7e1f6613cda8c710",
+            "17a085afe59b4df820fec36f000c00106a3875d58f640f0882ccaada6a5579f3"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "17a085afe59b4df820fec36f000c00106a3875d58f640f0882ccaada6a5579f3",
+              "after": [
+                "693d61dc5eec626a758765cc3573435de0c07ad48cdc37977e7a999f574b5371"
+              ]
+            }
+          ],
+          "reason": "Stage completion now uses the real confirmation helper rather than generic apply. Preserve the complete change set, result and evidence semantics while exercising the stricter same-transaction confirmation source."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/project-governance.test.js",
@@ -12713,7 +13396,26 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "58dd937b48ed873e0fd058c61f025bb8234c6c1a94c4783333c6d2636b450a2c",
+          "originalAssertions": [
+            "f911103c2d31ad1956fae81f4b5cd1c9bbc205a8c18c16b7f94a329457f79f15",
+            "3a2cb9dae7fd35a591c832543ccbfda4b4746423dcaf71b838401db2c826ed88",
+            "68f3e3b7a415345fc508168d30058913f21db82897336a9b39a8c7d1c3e4bb12",
+            "22ecd341fad3977bd472fc37d4bb89cac431a4ed1ac11672344ca013518235ca",
+            "70a66aefdfaa49e91547046624e2799e274a310b3eb4a736bb62b2afeec340ea"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "22ecd341fad3977bd472fc37d4bb89cac431a4ed1ac11672344ca013518235ca",
+              "after": [
+                "cf8fb4ca2af030f65fd9b5e3e138d75ede5dca51fe5f0918157c8a12b422e43f"
+              ]
+            }
+          ],
+          "reason": "Stage completion now uses the real confirmation helper rather than generic apply. Preserve the complete change set, result and evidence semantics while exercising the stricter same-transaction confirmation source."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",
@@ -12848,7 +13550,25 @@
         "nativePlatforms": [
           "darwin",
           "win32"
-        ]
+        ],
+        "contractUpdate": {
+          "hash": "9d30d7ad882e72437c9783a4cc1c57edb2be5616c9379ba37d7cf2b550e86230",
+          "originalAssertions": [
+            "3960e30b2ac05d5fd32e7853872cc7c9eaeadde398a08b15fc9677db96895e11",
+            "fe1f76f197a06eded7368f246989e750505845e32234f967471f8f319ca022f6",
+            "b21940d2a4037f87fb44292d40e8c314773b4d57b9f81955ea0e04c9f2d1bcb4",
+            "19d18e4960b2759c450a56674f01e6a14d0b49d117ce62274d6f67691e848649"
+          ],
+          "assertionUpdates": [
+            {
+              "before": "3960e30b2ac05d5fd32e7853872cc7c9eaeadde398a08b15fc9677db96895e11",
+              "after": [
+                "471159c4465f0631061bdab110fb7df8b6f6dc932818ec44e86b405d668467c4"
+              ]
+            }
+          ],
+          "reason": "Use the stricter confirmation transaction for the same completed project/stage and relocated evidence; all archive pinning and later-edit invalidation assertions remain."
+        }
       },
       {
         "path": ".agents/core/runtime/tests/project-governance-transactions.test.js",

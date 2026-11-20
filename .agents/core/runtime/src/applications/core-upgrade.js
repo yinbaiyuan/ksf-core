@@ -4,8 +4,8 @@ import {randomUUID} from 'node:crypto';
 import {assert} from '../services/workbench-common.js';
 import {writeAtomic,readRegular,checkedPath} from '../distribution/files.js';
 import {createApplicationStorage} from '../services/application-storage.js';
-import {DEFAULT_APPLICATION_SOURCE,migrateApplicationOrigins} from './default-source.js';
-import {DEFAULT_APPLICATIONS,OFFICIAL_APPLICATIONS,SDK_COMPATIBILITY,validateSDKCompatibility,assertCompatible,validateManifest,decodePackage,checksum,compareVersions,sameManifest,validPath} from './protocol.js';
+import {DEFAULT_APPLICATION_SOURCE,CORE_APPLICATION_SOURCE,migrateApplicationOrigins} from './default-source.js';
+import {DEFAULT_APPLICATIONS,SDK_COMPATIBILITY,validateSDKCompatibility,assertCompatible,validateManifest,decodePackage,checksum,compareVersions,sameManifest,validPath} from './protocol.js';
 
 export const applicationStatePath='.agents/user-data/applications/state.json';
 const json=path=>JSON.parse(readFileSync(path,'utf8'));
@@ -35,7 +35,7 @@ export function targetSDK(targetCore){
 function releaseLocation(root,release){
   validateManifest(release.manifest);
   assert(/^[a-f0-9]{64}$/.test(release.digest),'APP_PACKAGE_INTEGRITY','应用摘要无效。');
-  const path=`.agents/user-data/applications/packages/${release.manifest.id}/${release.digest}`;
+  const path=`.agents/user-data/applications/${release.localBuild?'local/packages':release.localDevelopment?'development/packages':'packages'}/${release.manifest.id}/${release.digest}`;
   return {path,directory:checkedPath(root,path)};
 }
 export function verifyInstalledRelease(root,release){
@@ -73,11 +73,13 @@ export function stageApplicationPackages(root,plan){
     verifyInstalledRelease(root,release);
   }
 }
+function coreApplicationDirectory(targetCore){const builtin=join(targetCore,'applications/builtin');return existsSync(join(builtin,'index.json'))?builtin:join(targetCore,'applications/store');}
 export async function planCoreApplications(root,targetCore,{rollbackRecord,environment={}}={}){
   const {raw,state}=readApplicationState(root),next=structuredClone(state),version=json(join(targetCore,'build.json')).version,sdkCompatibility=targetSDK(targetCore);
   const storage=createApplicationStorage(root),entries=[],packages=[],changes={},blocked=[];
   function block(id,error){entries.push({appId:id,action:'block',from:state.installed[id]?.active?.manifest.version??null,to:null,reason:error.message});blocked.push({appId:id,error});}
-  const check=release=>assertCompatible(release.manifest,{coreVersion:version,sdkCompatibility,...environment});
+  const localSupport=json(join(targetCore,'data-compatibility.json')).localApplications===1;
+  const check=release=>{assert(!release.localBuild||localSupport,'APP_CORE_INCOMPATIBLE','目标 Core 不支持当前本地应用安装，请使用支持本地应用的 Core。',409);assertCompatible(release.manifest,{coreVersion:version,sdkCompatibility,...environment});};
   async function data(release,rollback=false){const result=await storage.inspectAll({appId:release.manifest.id,dataStores:release.manifest.dataStores,releaseDigest:release.digest});assert(rollback?result.compatible:result.canPrepare,'APP_DATA_INCOMPATIBLE','当前业务数据无法用于目标应用版本。',409,result);}
   function publish(id,record,action,reason){
     const old=state.installed[id]??null;
@@ -89,6 +91,7 @@ export async function planCoreApplications(root,targetCore,{rollbackRecord,envir
   }
   if(rollbackRecord){
     for(const [id,change] of Object.entries(rollbackRecord.changes)){
+      if(!DEFAULT_APPLICATIONS.includes(id))continue;
       const current=state.installed[id]??null;
       const untouched=sameManifest(current?.active,change.after?.active)&&sameManifest(current?.pending??null,change.after?.pending??null);
       if(!untouched){publish(id,current,'keep','升级后应用已有独立变更，保留并检查目标Core兼容性。');continue;}
@@ -98,11 +101,13 @@ export async function planCoreApplications(root,targetCore,{rollbackRecord,envir
       if(!restored&&!(rollbackRecord.defaultsBefore??[]).includes(id))next.defaults=(next.defaults??[]).filter(value=>value!==id);
     }
   }else{
-    const store=join(targetCore,'applications/store'),index=json(join(store,'index.json'));
+    const store=coreApplicationDirectory(targetCore),index=json(join(store,'index.json'));
     assert(index.protocol==='ksf-app-registry-v1'&&Array.isArray(index.apps),'APP_SOURCE_INVALID','随包应用索引无效。');
-    for(const id of OFFICIAL_APPLICATIONS){
+    for(const id of DEFAULT_APPLICATIONS){
       const old=state.installed[id];
       try{
+      if(old)for(const release of [old.active,old.pending,old.previous].filter(Boolean))verifyInstalledRelease(root,release);
+      if([old?.active,old?.pending].some(release=>['local-app','local-import'].includes(release?.source.id))){publish(id,old,'keep','保留本地应用的安装来源和当前构建。');continue;}
       if(!old&&(!DEFAULT_APPLICATIONS.includes(id)||state.defaults?.includes(id))){entries.push({appId:id,action:'skip',from:null,to:null,reason:'保留未安装或卸载意图。'});continue;}
       if(id==='com.ksf.cooperation-center'&&Object.keys(state.installed).some(key=>['com.yinbaiyuan.lan-messenger','yinbaiyuan.lan-messenger'].includes(key))){entries.push({appId:id,action:'skip',from:null,to:null,reason:'旧合作身份需显式迁移。'});continue;}
       const candidates=index.apps.filter(e=>e.manifest.id===id).filter(e=>{try{check({manifest:e.manifest});return true;}catch{return false;}}).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version)||Number(!!b.manifest.target)-Number(!!a.manifest.target)||Number(!!b.manifest.nodeAbi)-Number(!!a.manifest.nodeAbi));
@@ -113,17 +118,18 @@ export async function planCoreApplications(root,targetCore,{rollbackRecord,envir
       assert(archive.length===baseline.package.size&&checksum(archive)===baseline.package.sha256,'APP_PACKAGE_INTEGRITY','随包应用包摘要不一致。');
       const decoded=decodePackage(archive);assert(sameManifest(decoded.manifest,baseline.manifest),'APP_PACKAGE_INTEGRITY','随包清单与应用包不一致。');
       immutableHistory(root,baseline.manifest,baseline.package.sha256);
-      if(old&&old.active.source.id!=='ksf-apps'){publish(id,old,'keep','保留原安装来源。');continue;}
-      const installed=[old?.active,old?.pending].filter(Boolean).filter(release=>{try{check(release);return true;}catch{return false;}}).sort((a,b)=>compareVersions(b.manifest.version,a.manifest.version));
-      let selected=installed[0];
-      if(!selected||compareVersions(baseline.manifest.version,selected.manifest.version)>0){selected={manifest:baseline.manifest,listing:decodePackage(archive).listing,digest:baseline.package.sha256,source:{id:DEFAULT_APPLICATION_SOURCE.id,name:DEFAULT_APPLICATION_SOURCE.name,url:DEFAULT_APPLICATION_SOURCE.url},installedAt:new Date().toISOString()};packages.push({release:selected,archive});}
-      else if(compareVersions(baseline.manifest.version,selected.manifest.version)===0&&baseline.manifest.target===selected.manifest.target&&baseline.manifest.nodeAbi===selected.manifest.nodeAbi)assert(selected.digest===baseline.package.sha256,'APP_VERSION_REUSED','已安装包与随包同版本摘要冲突。');
-      assert(!old||compareVersions(selected.manifest.version,old.active.manifest.version)>=0,'APP_CORE_INCOMPATIBLE','目标Core要求应用降级，请先显式处理应用兼容性。',409);
+      assert(!old||old.active.source.id===CORE_APPLICATION_SOURCE.id,'APP_CORE_ID_CONFLICT','Core 内置应用标识被其他来源占用，需显式处理来源冲突。',409);
+      for(const installed of [old?.active,old?.pending].filter(Boolean)){
+        assert(compareVersions(installed.manifest.version,baseline.manifest.version)<=0,'APP_CORE_INCOMPATIBLE','已安装或待生效的内置版本高于目标 Core 载荷，请显式处理后重试。',409);
+        if(installed.manifest.version===baseline.manifest.version&&installed.manifest.target===baseline.manifest.target&&installed.manifest.nodeAbi===baseline.manifest.nodeAbi)assert(installed.digest===baseline.package.sha256,'APP_VERSION_REUSED','已安装包与 Core 同版本摘要冲突。');
+      }
+      const selected={manifest:baseline.manifest,listing:decoded.listing,digest:baseline.package.sha256,source:{...CORE_APPLICATION_SOURCE},installedAt:old?.active.digest===baseline.package.sha256?old.active.installedAt:new Date().toISOString()};
+      packages.push({release:selected,archive});
       check(selected);await data(selected);
       const changed=!old||old.active.digest!==selected.digest;
       if(!packages.some(p=>p.release.digest===selected.digest))verifyInstalledRelease(root,selected);
       const record=old?{...old,active:selected,previous:changed?old.active:old.previous??null,pending:null}:{installationId:randomUUID(),enabled:true,active:selected,previous:null,pending:null};
-      publish(id,record,changed?(old?'update':'install'):'keep',changed?'采用目标Core兼容的最新已安装或随包版本。':'保留较新或相同的兼容版本。');
+      publish(id,record,changed?(old?'update':'install'):'keep',changed?'采用目标 Core 声明的内置版本。':'内置版本已与目标 Core 一致。');
       if(!next.defaults?.includes(id)&&DEFAULT_APPLICATIONS.includes(id))next.defaults=[...(next.defaults??[]),id];
       }catch(error){block(id,error);}
     }
@@ -131,10 +137,10 @@ export async function planCoreApplications(root,targetCore,{rollbackRecord,envir
   // Independently installed business applications also constrain Core changes.
   for(const [id,app] of Object.entries(next.installed)){
     if(blocked.some(item=>item.appId===id))continue;
-    try{for(const release of [app.active,app.pending].filter(Boolean)){check(release);if(!packages.some(item=>item.release.digest===release.digest))verifyInstalledRelease(root,release);await data(release,!!rollbackRecord);}}catch(error){block(id,error);}
+    try{assert(!app.legacyIds?.includes('com.ksf.terminal')||existsSync(join(targetCore,'runtime/src/applications/optional-migration.js')),'APP_CORE_INCOMPATIBLE','目标 Core 不支持迁移后的终端历史身份，请保留当前 Core。',409);for(const release of [app.active,app.pending].filter(Boolean)){check(release);if(!packages.some(item=>item.release.digest===release.digest))verifyInstalledRelease(root,release);await data(release,!!rollbackRecord);}}catch(error){block(id,error);}
   }
   if(blocked.length){const error=blocked[0].error;error.data={...error.data,applications:entries,blocked:blocked.map(({appId,error})=>({appId,code:error.code??'APP_CORE_INCOMPATIBLE',message:error.message}))};throw error;}
-  const changed=Object.keys(changes).length>0;
+  const changed=Object.keys(changes).length>0||!sameManifest(raw?JSON.parse(raw):null,next);
   if(changed)next.revision=state.revision+1;
   return {before:raw,after:changed?bytes(next):raw,state:next,entries,packages,changed,record:{schemaVersion:1,changes,defaultsBefore:state.defaults??[]}};
 }
@@ -143,7 +149,7 @@ export function writeApplicationPlan(root,plan){assertApplicationBaseline(root,p
 
 /** One-time bridge for old Core updaters. No network and no application code. */
 export async function reconcileCoreApplications(root,targetCore){
-  if(!existsSync(join(targetCore,'build.json'))||!existsSync(join(targetCore,'applications/store/index.json')))return;
+  if(!existsSync(join(targetCore,'build.json'))||!existsSync(join(coreApplicationDirectory(targetCore),'index.json')))return;
   const build=json(join(targetCore,'build.json'));
   if(compareVersions(build.version,'0.5.3')<0)return;
   const home=checkedPath(root,'.agents/runtime-data/applications'),marker=join(home,'core-baseline.json'),journal=join(home,'core-reconcile.json');
@@ -151,7 +157,7 @@ export async function reconcileCoreApplications(root,targetCore){
   const receiptMatches=!existsSync(receiptPath)||json(receiptPath).version===build.version;
   const epochs=receiptMatches&&existsSync(backupsPath)?readdirSync(backupsPath).sort().reverse().filter(name=>/^[A-Za-z0-9._-]+$/.test(name)&&existsSync(join(backupsPath,name,'committed'))&&existsSync(join(backupsPath,name,'meta.json'))&&json(join(backupsPath,name,'meta.json')).to===build.version):[];
   const epoch=receiptMatches?(epochs[0]??'initial'):'candidate:'+checksum(readFileSync(receiptPath));
-  const fingerprint=checksum(bytes({epoch,version:build.version,sdk:targetSDK(targetCore),store:checksum(readFileSync(join(targetCore,'applications/store/index.json')))}));
+  const fingerprint=checksum(bytes({epoch,version:build.version,sdk:targetSDK(targetCore),store:checksum(readFileSync(join(coreApplicationDirectory(targetCore),'index.json')))}));
   if(existsSync(marker)&&json(marker).fingerprint===fingerprint&&!existsSync(journal))return;
   const unlock=lockApplicationState(root);
   try{

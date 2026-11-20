@@ -1,0 +1,3 @@
+import {QRCode} from '@ksf/sdk/qr-code';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function QrCodeSizesExample(){return <div style={{display:'flex',alignItems:'flex-start',gap:24,flexWrap:'wrap'}}>{[96,160,224].map(size=><div key={size} style={{display:'grid',gap:8,justifyItems:'center'}}><QRCode value="https://ksf.localhost/components" size={size}/><span className="ksf-demo-muted">{size}px</span></div>)}<div style={{display:'grid',gap:8,justifyItems:'center'}}><QRCode value="https://ksf.localhost/components" bordered={false}/><span className="ksf-demo-muted">无边框</span></div></div>;}

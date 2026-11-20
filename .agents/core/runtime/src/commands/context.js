@@ -81,8 +81,10 @@ export function runContextCommand(args, root, options = {}) {
     if (parsed.operation === 'entry') {
       const data=contextEntry(root);
       if (data.mode === 'runtime' && data.complete) {
+        // Entry stays usable without native identity or optional work state, but
+        // says why no delivery was offered instead of omitting it silently.
         try { const delivery=entryWorkDelivery({root,env:options.env},data); if(delivery)data.delivery=delivery; }
-        catch { /* Entry remains usable without native identity or optional work state. */ }
+        catch (error) { data.deliveryIssue={ code: typeof error.code === 'string' ? error.code : 'CONTEXT_DELIVERY_UNAVAILABLE', message: error.message }; }
       }
       response={data,errors:data.context?.errors ?? []};
     }

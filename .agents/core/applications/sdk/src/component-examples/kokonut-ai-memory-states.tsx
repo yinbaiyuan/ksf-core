@@ -1,0 +1,1 @@
+import {MemoryWorkspace} from '@ksf/sdk/memory-workspace';export default function Example(){return <MemoryWorkspace label="空记忆与失败反馈" memories={[]} messages={[{id:'error',role:'assistant',text:'模拟回复失败，原草稿由应用保留。',error:true}]} draft="未发送草稿" enabled={false} onDraftChange={()=>{}} onEnabledChange={()=>{}} onSend={()=>{}} onEdit={()=>{}} onForget={()=>{}} onUndo={()=>{}}/>;}

@@ -1,0 +1,18 @@
+.os-desktop .taskbar-center.dock-presence-center { gap:0; }
+.os-desktop .dock-presence-rail { gap:0; transition:padding-inline .22s cubic-bezier(.22,1,.36,1); }
+.os-desktop .dock-presence-rail.is-empty { padding-inline:0; }
+.dock-icon-slot { position:relative; flex:0 0 auto; height:calc(var(--desktop-dock-height) - 5px); }
+.dock-icon-slot > .dock-item { position:absolute; left:0; top:0; }
+.dock-icon-slot[aria-hidden="true"] { pointer-events:none; }
+.os-desktop .dock-presence-rail.is-static { transition:none; }
+@media (prefers-reduced-motion:reduce) { .os-desktop .dock-presence-rail { transition:none; } }
+
+/* The slot yields in 220ms; only the grabbed button follows the pointer. */
+.os-desktop .dock-icon-slot > .dock-item { transform:translateX(var(--dock-drag-x,0px)); }
+.os-desktop .dock-icon-slot > .dock-item.is-settling { transition:transform .22s cubic-bezier(.22,1,.36,1); }
+.os-desktop .dock-icon-slot > .dock-item.is-dragging { transition:none; opacity:1; }
+.dock-icon-slot:has(.is-dragging,.is-settling) { z-index:2; }
+@media (prefers-reduced-motion:reduce) { .os-desktop .dock-icon-slot > .dock-item.is-settling { transition:none; } }
+
+.os-desktop .dock-presence-rail.is-static .dock-icon-slot { transform:none!important; }
+@media (prefers-reduced-motion:reduce) { .os-desktop .dock-icon-slot { transform:none!important; } }

@@ -1,0 +1,7 @@
+import {forwardRef,type HTMLAttributes} from 'react';
+import Source from './fidelity/kokonut/lightbox-grid';
+import {FidelityScope} from './fidelity/scope';
+import {EmptyState} from './empty-state';
+export interface LightboxPhoto {src:string;alt:string;width:number;height:number;caption?:string}
+export interface LightboxGalleryProps extends HTMLAttributes<HTMLDivElement>{label:string;items:readonly LightboxPhoto[];disabled?:boolean}
+export const LightboxGallery=forwardRef<HTMLDivElement,LightboxGalleryProps>(function LightboxGallery({label,items,disabled=false,...props},ref){const photos=items.filter(i=>i.src&&i.width>0&&i.height>0&&Number.isFinite(i.width)&&Number.isFinite(i.height));return <div {...props} ref={ref} role="group" aria-label={label} aria-disabled={disabled||undefined} onClickCapture={e=>{props.onClickCapture?.(e);if(disabled){e.preventDefault();e.stopPropagation();}}} onKeyDownCapture={e=>{props.onKeyDownCapture?.(e);if(disabled&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();}}} style={{width:'100%',maxWidth:576,minWidth:0,...props.style}}><FidelityScope module="lightbox-grid" paused={disabled}>{photos.length?<Source key={photos.map(i=>[i.src,i.width,i.height,i.alt,i.caption].join(":")).join("\0")} disabled={disabled} images={photos.map(i=>({...i}))}/>:<EmptyState heading="暂无图片" description="由应用提供可访问的本地素材与尺寸。"/>}</FidelityScope></div>;});

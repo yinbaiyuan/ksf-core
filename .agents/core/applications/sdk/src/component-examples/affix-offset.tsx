@@ -1,0 +1,2 @@
+import {Affix} from '@ksf/sdk/affix';import {ScrollArea} from '@ksf/sdk/scroll-area';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function AffixOffsetExample(){return <ScrollArea label="带偏移的吸附示例" style={{height:220,padding:16}} className="ksf-demo-frame"><p>向下滚动查看偏移。</p><Affix offset={12} className="ksf-demo-box" style={{background:'var(--ksf-color-primary-surface)'}}>距当前滚动区域顶部 12px</Affix>{Array.from({length:10},(_,i)=><p key={i}>资料段落 {i+1}</p>)}</ScrollArea>;}

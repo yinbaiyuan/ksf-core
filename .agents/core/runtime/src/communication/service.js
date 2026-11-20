@@ -19,17 +19,23 @@ import {DEFAULTS,ensure,error,uuid,hash,label,endpoint,endpointKey,sha256,serial
 const canonical=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 const publicConfig=value=>({...value,endpoints:Object.fromEntries(Object.entries(value.endpoints).map(([id,item])=>[id,Object.fromEntries(Object.entries(item).filter(([key])=>key!=='tokenHash'))]))});
 const interfaces=()=>Object.entries(networkInterfaces()).flatMap(([name,rows])=>rows.filter(row=>row.family==='IPv4').map(row=>({name,address:row.address,netmask:row.netmask,internal:row.internal})));
-export async function createCommunicationService(root,{applications,now=Date.now,discoveryFactory=options=>new Bonjour(options)}={}){
+export async function createCommunicationService(root,{applications,now=Date.now,discoveryFactory=options=>new Bonjour(options),getInterfaces=interfaces,networkCheckInterval=2000}={}){
  const device=await createDeviceProfile(root),profileChecks=new Map(),profileTasks=new Set();
  const store=await createCommunicationStore(root,{now}),outgoing=new Map(),discoveries=new Map(),delivering=new Set(),uploads=new Map(),incoming=new Set(),tlsErrors=[],pendingMessages=new Set();
  let identity,identityPromise,server,bonjour,browser,announcement,closed=false,dispatching=false,paused=false,discoveryError=null,dispatchError=null,pairingError=null;
+ let networkState='offline',listenerError=null,binding=null,requiresOnline=false,networkCheck;
+ const listener=()=>{const address=server?.address();return address&&typeof address==='object'?{host:address.address,port:address.port}:null;};
+ function networkStatus(cfg){
+  const active=listener(),state=networkState==='online'&&(discoveryError||pairingError)?'degraded':networkState;
+  return {state,online:state==='online'&&!!active,requiresOnline,configuredHost:cfg.host,listener:active,interface:binding?.name??null,error:listenerError??discoveryError??pairingError};
+ }
  const resolveAppId=async id=>await applications?.resolveApplicationId?.(id)??id;
  const historyKey=(value,aliases)=>endpointKey(value.kind==='app'?{...value,id:Object.hasOwn(aliases,value.id)?aliases[value.id]:value.id}:value);
  const receiving=new Map();
  const pauseDispatch=()=>{paused=true;};const resumeDispatch=()=>{paused=false;void dispatch().catch(()=>{});};
  function runtimeStatus(){for(const [id,expiresAt] of receiving)if(expiresAt<=now())receiving.delete(id);return {accepting:!closed&&!paused,outgoing:outgoing.size,receiving:receiving.size,handlers:incoming.size,deliveries:delivering.size,active:outgoing.size+receiving.size+incoming.size+delivering.size+(dispatching?1:0)};}
  const getIdentity=async()=>{if(identity)return identity;if(!identityPromise)identityPromise=(async()=>{await store.init();return identity=await loadIdentity(root,{create:true});})().catch(e=>{identityPromise=undefined;throw e;});return identityPromise;};
- const pairing=createPairingService({store,getIdentity,getLocal:()=>({device:device.get(),listener:server?{port:server.address().port}:null}),discoveries,applications,interfaces,now,onTrustChanged:()=>restart()});
+ const pairing=createPairingService({store,getIdentity,getLocal:()=>({device:device.get(),listener:listener()}),discoveries,applications,interfaces:getInterfaces,now,onTrustChanged:()=>restart()});
  async function checkRoute(manifest){const cfg=await store.config(),target=manifest.to.endpoint,source=manifest.from.nodeId;
   if(target.kind==='agent'){const box=cfg.endpoints[target.id];ensure(box?.enabled&&box.channels.includes(manifest.channel)&&(box.peers.includes(source)||box.peers.includes('*')),'COMM_ENDPOINT_UNAVAILABLE','Agent 收件端点未启用或来源未授权。',403);return;}
   const appId=await resolveAppId(target.id),route=await applications?.messageRoute(appId,manifest.channel),grant=cfg.grants[appId+'|'+manifest.channel];
@@ -54,7 +60,7 @@ export async function createCommunicationService(root,{applications,now=Date.now
    if(options.ifMatch!==undefined){const values=Object.fromEntries(allowed.filter(key=>Object.hasOwn(cfg,key)).map(key=>[key,cfg[key]]));expectConfig({etag:cfg.revision===0?'missing':valueVersion(values)},options.ifMatch);}
    const next={...cfg,...input};validateCommunicationConfiguration(next);Object.assign(cfg,input);
   });
-  try{if((await store.config()).enabled)await getIdentity();await restart();return await snapshot();}
+  try{if((await store.config()).enabled)await getIdentity();await restart({explicit:true});if(listenerError)throw Object.assign(error(listenerError.code,listenerError.message,409),{data:{saved:true}});return await snapshot();}
   catch(error){error.data={...error.data,saved:true};throw error;}
  }
 
@@ -103,13 +109,37 @@ export async function createCommunicationService(root,{applications,now=Date.now
  else if(request.method==='GET'&&!action)json(200,await store.status(id,source));else throw error('COMM_METHOD_INVALID','此路由不支持该方法。',405);
  }catch(e){if(!response.headersSent&&!response.destroyed)json(e.status??500,e,true);else response.destroy();}}
  async function stopDiscovery(){browser?.stop();announcement?.stop();if(bonjour)await new Promise(resolve=>bonjour.destroy(resolve));bonjour=browser=announcement=undefined;}
- async function stopListener(){await stopDiscovery();if(server){const old=server;server=undefined;old.closeAllConnections();await new Promise(resolve=>old.close(resolve));}}
- async function restart(){return store.locks.run('listener',async()=>{const previousPort=server?.address()?.port;await stopListener();const cfg=await store.config();if(!cfg.enabled||closed){await pairing.stop();return;}const me=await getIdentity();const next=createServer({key:me.privateKey,cert:me.certificate,ca:Object.values(cfg.peers).map(p=>p.certificate),requestCert:true,rejectUnauthorized:true,minVersion:'TLSv1.2',headersTimeout:10000,requestTimeout:0},(request,response)=>{const task=handlePeer(request,response);incoming.add(task);void task.finally(()=>incoming.delete(task));});await new Promise((resolve,reject)=>{next.once('error',reject);next.listen(cfg.port||previousPort||0,cfg.host,resolve);});server=next;server.on('tlsClientError',(e,socket)=>{tlsErrors.push({...serialize(e),remoteAddress:socket?.remoteAddress,at:now()});if(tlsErrors.length>8)tlsErrors.shift();});server.on('error',e=>{discoveryError=serialize(e);});
- try{await pairing.start(me,cfg);pairingError=null;}catch(e){pairingError=serialize(e);}
- await startDiscovery(cfg,me);
+ async function stopListener(){await stopDiscovery();binding=null;if(server){const old=server;server=undefined;old.closeAllConnections();await new Promise(resolve=>old.close(resolve));}}
+ async function restart({explicit=false}={}){return store.locks.run('listener',async()=>{
+  const previousPort=listener()?.port;await stopListener();if(explicit)discoveries.clear();
+  const cfg=await store.config();
+  if(!cfg.enabled||closed){await pairing.stop();discoveries.clear();networkState='offline';listenerError=discoveryError=pairingError=null;requiresOnline=false;return;}
+  if(requiresOnline&&!explicit){await pairing.stop();return;}
+  listenerError=discoveryError=pairingError=null;networkState='starting';
+  const selected=getInterfaces().find(item=>item.address===cfg.host);
+  if(!selected){await pairing.stop();discoveries.clear();networkState='network-changed';requiresOnline=true;listenerError={code:'COMM_NETWORK_CHANGED',message:'上次使用的网络地址已不可用，请选择当前网络后重新声明在线。'};return;}
+  const me=await getIdentity();
+  const next=createServer({key:me.privateKey,cert:me.certificate,ca:Object.values(cfg.peers).map(p=>p.certificate),requestCert:true,rejectUnauthorized:true,minVersion:'TLSv1.2',headersTimeout:10000,requestTimeout:0},(request,response)=>{const task=handlePeer(request,response);incoming.add(task);void task.finally(()=>incoming.delete(task));});
+  try{await new Promise((resolve,reject)=>{const failed=e=>reject(e);next.once('error',failed);next.listen(cfg.port||previousPort||0,cfg.host,()=>{next.removeListener('error',failed);resolve();});});}
+  catch(e){next.close();await pairing.stop();discoveries.clear();networkState=e.code==='EADDRNOTAVAIL'?'network-changed':'failed';requiresOnline=true;listenerError={...serialize(e),message:e.code==='EADDRINUSE'?'通信端口已被占用，请调整端口后重试上线。':e.code==='EADDRNOTAVAIL'?'网络地址已变化，请重新选择网络并声明在线。':'通信监听启动失败，请检查网络设置后重试。'};return;}
+  server=next;binding={...selected};requiresOnline=false;networkState='online';
+  server.on('tlsClientError',(e,socket)=>{tlsErrors.push({...serialize(e),remoteAddress:socket?.remoteAddress,at:now()});if(tlsErrors.length>8)tlsErrors.shift();});server.on('error',e=>{listenerError=serialize(e);networkState='failed';requiresOnline=true;});
+  try{await pairing.start(me,cfg);}catch(e){await pairing.stop();pairingError=serialize(e);}
+  await startDiscovery(cfg,me);
  });}
+ async function checkNetwork(){
+  if(closed||!server||!binding)return;
+  if(networkCheck)return networkCheck;
+  networkCheck=store.locks.run('listener',async()=>{
+   if(closed||!server||!binding)return;
+   const stillPresent=getInterfaces().some(item=>item.address===binding.address&&item.name===binding.name&&item.netmask===binding.netmask);
+   if(stillPresent)return;
+   await stopListener();await pairing.stop();discoveries.clear();networkState='network-changed';requiresOnline=true;discoveryError=pairingError=null;
+   listenerError={code:'COMM_NETWORK_CHANGED',message:'网络已变化，已停止使用旧地址。请选择当前网络后重新声明在线。'};
+  }).finally(()=>{networkCheck=undefined;});return networkCheck;
+ }
  async function startDiscovery(cfg,me){
- if(cfg.discovery)try{bonjour=discoveryFactory({interface:cfg.host,bind:'0.0.0.0',reuseAddr:true});bonjour.on?.('error',e=>{discoveryError=serialize(e);});announcement=bonjour.publish({name:'KSF-'+me.nodeId.slice(0,16)+'-'+randomBytes(4).toString('hex'),type:'ksf-peer',protocol:'tcp',host:'ksf-'+me.nodeId.slice(0,20)+'.local',port:server.address().port,disableIPv6:true,txt:{nodeId:me.nodeId,protocol:'ksf-message-v1',pairingPort:String(pairing.listener?.port??0),name:device.get().name}});browser=bonjour.find({type:'ksf-peer',protocol:'tcp'},service=>{const nodeId=service.txt?.nodeId,selected=interfaces().find(i=>i.address===cfg.host),ipv4=a=>a.split('.').reduce((n,v)=>(n*256+Number(v))>>>0,0),host=service.addresses?.find(a=>ipVersion(a)===4&&selected&&((ipv4(a)&ipv4(selected.netmask))===(ipv4(cfg.host)&ipv4(selected.netmask)))),sameSubnet=!!host;if(hash(nodeId)&&nodeId!==me.nodeId&&sameSubnet&&Number.isInteger(service.port))discoveries.set(nodeId,{nodeId,serviceName:service.name,host,port:service.port,pairingPort:Number(service.txt?.pairingPort)||undefined,name:String(service.txt?.name??service.name).slice(0,80),seenAt:now()});});browser.on?.('down',service=>{if(discoveries.get(service.txt?.nodeId)?.serviceName===service.name)discoveries.delete(service.txt?.nodeId);});}catch(e){discoveryError=serialize(e);}
+ if(cfg.discovery)try{bonjour=discoveryFactory({interface:cfg.host,bind:'0.0.0.0',reuseAddr:true});bonjour.on?.('error',e=>{discoveryError=serialize(e);});announcement=bonjour.publish({name:'KSF-'+me.nodeId.slice(0,16)+'-'+randomBytes(4).toString('hex'),type:'ksf-peer',protocol:'tcp',host:'ksf-'+me.nodeId.slice(0,20)+'.local',port:server.address().port,disableIPv6:true,txt:{nodeId:me.nodeId,protocol:'ksf-message-v1',pairingPort:String(pairing.listener?.port??0),name:device.get().name}});browser=bonjour.find({type:'ksf-peer',protocol:'tcp'},service=>{const nodeId=service.txt?.nodeId,selected=getInterfaces().find(i=>i.address===cfg.host),ipv4=a=>a.split('.').reduce((n,v)=>(n*256+Number(v))>>>0,0),host=service.addresses?.find(a=>ipVersion(a)===4&&selected&&((ipv4(a)&ipv4(selected.netmask))===(ipv4(cfg.host)&ipv4(selected.netmask)))),sameSubnet=!!host;if(hash(nodeId)&&nodeId!==me.nodeId&&sameSubnet&&Number.isInteger(service.port))discoveries.set(nodeId,{nodeId,serviceName:service.name,host,port:service.port,pairingPort:Number(service.txt?.pairingPort)||undefined,name:String(service.txt?.name??service.name).slice(0,80),seenAt:now()});});browser.on?.('down',service=>{if(discoveries.get(service.txt?.nodeId)?.serviceName===service.name)discoveries.delete(service.txt?.nodeId);});}catch(e){discoveryError=serialize(e);}
  }
  async function setDevice(input){return store.locks.run('listener',async()=>{const result=await device.set(input);try{await stopDiscovery();if(server)await startDiscovery(await store.config(),await getIdentity());return result;}catch(error){error.data={...error.data,saved:true};throw error;}});}
  // Discovery names are hints; persist paired names only after authenticating their TLS key.
@@ -121,13 +151,14 @@ export async function createCommunicationService(root,{applications,now=Date.now
   })().catch(()=>{});profileTasks.add(task);void task.finally(()=>profileTasks.delete(task));
  }}
  const namedPeers=cfg=>Object.values(cfg.peers).map(peer=>({...peer,name:peer.deviceName??peer.name}));
- async function peerDirectory({appId}={}){const cfg=await store.config();refreshNames(cfg);return {pairingRequests:await pairing.list(appId),paired:namedPeers(cfg),discovered:[...discoveries.values()],local:{device:device.get(),identity:identity?publicIdentity(identity):publicIdentity(await loadIdentity(root)),enabled:cfg.enabled,discovery:cfg.discovery,listener:server?{host:cfg.host,port:server.address().port}:null,limits:{maxMessageBytes:cfg.maxMessageBytes,maxParts:cfg.maxParts},discoveryError,pairingListener:pairing.listener,pairingError}};}
- async function snapshot(){const cfg=await store.config();refreshNames(cfg);return {device:device.get(),config:publicConfig({...cfg,peers:Object.fromEntries(namedPeers(cfg).map(p=>[p.nodeId,p]))}),identity:identity?publicIdentity(identity):publicIdentity(await loadIdentity(root)),listener:server?{host:cfg.host,port:server.address().port}:null,pairingListener:pairing.listener,pairingError,pairingRequests:await pairing.list(),interfaces:interfaces(),discovered:[...discoveries.values()],discoveryError,dispatchError,tlsErrors:[...tlsErrors],deliveries:(await store.listRecords()).filter(v=>v.status==='received').map(v=>({messageId:v.manifest.messageId,to:v.manifest.to,delivery:v.delivery}))};}
+ async function peerDirectory({appId}={}){await checkNetwork();const cfg=await store.config(),network=networkStatus(cfg);refreshNames(cfg);return {pairingRequests:await pairing.list(appId),paired:namedPeers(cfg),discovered:[...discoveries.values()],local:{device:device.get(),identity:identity?publicIdentity(identity):publicIdentity(await loadIdentity(root)),enabled:cfg.enabled,online:network.online,network,discovery:cfg.discovery,listener:listener(),limits:{maxMessageBytes:cfg.maxMessageBytes,maxParts:cfg.maxParts},discoveryError,pairingListener:pairing.listener,pairingError}};}
+ async function snapshot(){await checkNetwork();const cfg=await store.config();refreshNames(cfg);return {device:device.get(),network:networkStatus(cfg),config:publicConfig({...cfg,peers:Object.fromEntries(namedPeers(cfg).map(p=>[p.nodeId,p]))}),identity:identity?publicIdentity(identity):publicIdentity(await loadIdentity(root)),listener:listener(),pairingListener:pairing.listener,pairingError,pairingRequests:await pairing.list(),interfaces:getInterfaces(),discovered:[...discoveries.values()],discoveryError,dispatchError,tlsErrors:[...tlsErrors],deliveries:(await store.listRecords()).filter(v=>v.status==='received').map(v=>({messageId:v.manifest.messageId,to:v.manifest.to,delivery:v.delivery}))};}
  async function retryDelivery(id){await store.delivery(id,value=>{value.delivery.state='pending';value.delivery.attempts=0;value.delivery.nextAttemptAt=0;});pendingMessages.add(id);void dispatch();return {queued:true};}
  const timer=setInterval(()=>{void dispatch().catch(()=>{});},1000);timer.unref();const sweeper=setInterval(()=>{void store.sweep().catch(()=>{});},60000);sweeper.unref();
  for(const op of await store.listOperations())if(['preparing','sending','confirming'].includes(op.status))await patchOperation(op.operationId,{status:op.status==='confirming'?'unconfirmed':'failed',error:{code:'COMM_INTERRUPTED',message:'后端已重启，请核对原操作。'}});
  for(const row of await store.listRecords())if(row.status==='received'&&row.manifest.to.endpoint.kind==='app'&&!['acknowledged','parked'].includes(row.delivery.state))pendingMessages.add(row.manifest.messageId);
  await restart();
- async function close(){closed=true;clearInterval(timer);clearInterval(sweeper);for(const active of outgoing.values())active.controller.abort();await Promise.allSettled([...outgoing.values()].map(v=>v.promise));await pairing.close();await stopListener();await Promise.allSettled([...incoming]);while(delivering.size||dispatching)await new Promise(resolve=>setTimeout(resolve,10));await Promise.allSettled([...profileTasks]);await store.close();}
- return {runtimeStatus,pauseDispatch,resumeDispatch,store,pairing,setDevice,identityExport,configure,snapshot,peerDirectory,trust,untrust,grant,openEndpoint,closeEndpoint,configureEndpoint,authenticateToken,registerMaterial:(caller,chunks,metadata)=>store.registerMaterial(caller,chunks,metadata),send,getOperation,reconcile,cancel,inbox,readMessage,readPart,ack,retryDelivery,checkRoute,dispatch,close,requestPeer};
+ const networkTimer=networkCheckInterval>0?setInterval(()=>{void checkNetwork().catch(e=>{listenerError=serialize(e);networkState='failed';requiresOnline=true;});},networkCheckInterval):undefined;networkTimer?.unref();
+ async function close(){closed=true;clearInterval(timer);clearInterval(sweeper);clearInterval(networkTimer);await networkCheck;for(const active of outgoing.values())active.controller.abort();await Promise.allSettled([...outgoing.values()].map(v=>v.promise));await pairing.close();await stopListener();await Promise.allSettled([...incoming]);while(delivering.size||dispatching)await new Promise(resolve=>setTimeout(resolve,10));await Promise.allSettled([...profileTasks]);await store.close();}
+ return {runtimeStatus,pauseDispatch,resumeDispatch,store,pairing,checkNetwork,setDevice,identityExport,configure,snapshot,peerDirectory,trust,untrust,grant,openEndpoint,closeEndpoint,configureEndpoint,authenticateToken,registerMaterial:(caller,chunks,metadata)=>store.registerMaterial(caller,chunks,metadata),send,getOperation,reconcile,cancel,inbox,readMessage,readPart,ack,retryDelivery,checkRoute,dispatch,close,requestPeer};
 }

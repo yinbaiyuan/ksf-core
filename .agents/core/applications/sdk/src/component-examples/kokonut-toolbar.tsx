@@ -1,0 +1,1 @@
+import {DockToolbar} from '@ksf/sdk/dock-toolbar';import {dockDemoTools} from '@ksf/sdk/component-examples/navigation-demo-data';export default function Example(){return <DockToolbar label="Tools" items={dockDemoTools}/>;}

@@ -1,0 +1,3 @@
+import type {Attachment,UploadTransferContext} from '@ksf/sdk/upload';
+/** Simulated transfer for the showcase. Does not write or send any file. */
+export function simulateUpload(item:Attachment,{signal,onProgress}:UploadTransferContext,fail=false):Promise<string>{return new Promise((resolve,reject)=>{if(signal.aborted){reject(new DOMException('已取消','AbortError'));return;}let progress=0;const stop=()=>{clearInterval(timer);signal.removeEventListener('abort',abort);},abort=()=>{stop();reject(new DOMException('已取消','AbortError'));},timer=setInterval(()=>{progress+=10;onProgress(progress);if(progress>=100){stop();if(fail)reject(Error('模拟传输失败，请关闭失败开关后重试。'));else resolve(item.name);}},150);signal.addEventListener('abort',abort,{once:true});});}

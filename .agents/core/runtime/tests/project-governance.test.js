@@ -97,7 +97,7 @@ test('task completion requires current evidence; negative research outcome may p
 test('milestone and project reviews have their own outcomes and evidence; no automatic close or aggregate deliverable',t=>{
   const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);const ev=dirname(f.tp)+'/10-结果.txt',text='结果';assert.deepEqual(f.apply([{path:ev,ifMatch:'missing',body:text},f.change(f.tp,{status:'completed',next_action:null,verification:f.proof(f.task,ev,text)})]).errors,[]);
   const rp=dirname(f.mp)+'/复盘.md',review={...defaultMetadata('review','r1','阶段复盘'),subject:{id:'m1',path:f.mp},status:'completed',outcome:'passed',basis_digest:criteriaDigest(f.m),criterion_results:f.proof(f.m,ev,text).results};
-  assert.deepEqual(f.apply([f.change(rp,review,'# 复盘\n实际结果达成；保留下次改进行动。'),f.change(f.mp,{status:'completed',next_action:null,review_ref:{id:'r1',path:rp}})]).errors,[]);assert.equal(f.read().project.metadata.status,'active');
+  assert.deepEqual(f.confirm([f.change(rp,review,'# 复盘\n实际结果达成；保留下次改进行动。'),f.change(f.mp,{status:'completed',next_action:null,review_ref:{id:'r1',path:rp}})]).errors,[]);assert.equal(f.read().project.metadata.status,'active');
   const pr=dirname(f.pp)+'/项目复盘.md',pv={...defaultMetadata('review','pr1','项目复盘'),subject:{id:'p1',path:f.pp},status:'completed',outcome:'passed',basis_digest:criteriaDigest(f.p),criterion_results:f.proof(f.p,ev,text).results};
   assert.deepEqual(f.apply([f.change(pr,pv,'# 项目复盘\n完成整体目标；改进动作留给下一轮。'),f.change(f.pp,{status:'completed',next_action:null,review_ref:{id:'pr1',path:pr}})]).errors,[]);assert.equal(f.read().project.metadata.status,'completed');assert(!existsSync(join(f.root,'项目/示例/成果')));
 });
@@ -182,7 +182,7 @@ test('cross-project milestone prerequisites gate child starts, stale evidence an
   assert(f.apply([f.change(mp,{depends_on:[{id:'t1',path:f.tp}]})]).errors.length);
   const ev=dirname(f.tp)+'/10-前置证据.txt',text='实际前置结果',rp=dirname(mp)+'/复盘.md';
   const review={...defaultMetadata('review','r2','前置复盘'),subject:{id:'m2',path:mp},status:'completed',outcome:'passed',basis_digest:criteriaDigest(m),criterion_results:f.proof(m,ev,text).results};
-  assert.deepEqual(f.apply([{path:ev,ifMatch:'missing',body:text},f.change(rp,review,'# 前置复盘'),f.change(mp,{status:'completed',next_action:null,review_ref:{id:'r2',path:rp}})]).errors,[]);
+  assert.deepEqual(f.confirm([{path:ev,ifMatch:'missing',body:text},f.change(rp,review,'# 前置复盘'),f.change(mp,{status:'completed',next_action:null,review_ref:{id:'r2',path:rp}})],mp).errors,[]);
   assert(f.read().projection.ready.includes('t1'));
   writeFileSync(join(f.root,ev),'依据被修订');assert(!f.read().projection.ready.includes('t1'));
   assert(f.apply([f.change(f.tp,{status:'active'})]).errors.length);
@@ -274,6 +274,6 @@ test('business definitions and templates are owned outside docs, and the lifecyc
   assert.deepEqual(f.apply([{path:ev,ifMatch:'missing',body:text},f.change(f.tp,{status:'completed',next_action:null,verification:f.proof(f.task,ev,text)})]).errors,[]);
   const review=(subject,path,id)=>{const m=f.read().documents.find(d=>d.path===subject).metadata,v=f.proof(m,ev,text);return f.change(path,{...defaultMetadata('review',id,'复盘'),subject:{id:m.id,path:subject},status:'completed',outcome:'passed',basis_digest:v.basis_digest,criterion_results:v.results},'# 复盘');};
   const mr=dirname(f.mp)+'/复盘.md',pr=dirname(f.pp)+'/项目复盘.md';
-  assert.deepEqual(f.apply([review(f.mp,mr,'mr'),f.change(f.mp,{status:'completed',next_action:null,review_ref:{id:'mr',path:mr}})]).errors,[]);
+  assert.deepEqual(f.confirm([review(f.mp,mr,'mr'),f.change(f.mp,{status:'completed',next_action:null,review_ref:{id:'mr',path:mr}})]).errors,[]);
   assert.deepEqual(f.apply([review(f.pp,pr,'pr'),f.change(f.pp,{status:'completed',next_action:null,review_ref:{id:'pr',path:pr}})]).errors,[]);assert(f.read().valid);assert(!existsSync(join(f.root,'.agents/core/docs')));
 });

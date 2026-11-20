@@ -84,3 +84,28 @@ test('schema 3 published records reconcile read-only and still verify the frozen
   s.api.commit.message = 'Changed schema-3 message';
   await assert.rejects(publish(s.f, old, s.api), { code: 'CONTRIBUTION_BRANCH_CHANGED' });
 });
+
+test('unrelated historical paths retain their records without bypassing checks for a related contribution', async t => {
+  const f = await fixture(t); edit(f); const first = await prepare(f);
+  const path = join(f.workspace, `.agents/runtime-data/contributions/${first.id}/plan.json`);
+  const attemptedPath = join(f.workspace, `.agents/runtime-data/contributions/${first.id}/attempted.json`);
+  const {digest, ...historical} = first;
+  for (const key of ['dryRun','warnings','reviewPath']) delete historical[key];
+  historical.core = {...first.core, revision:'b'.repeat(40)};
+  historical.sourceCommit = 'c'.repeat(40);
+  historical.changes[0] = {...historical.changes[0], workspace_path:'.agents/core/applications/store/retired.txt', source_path:'.agents/core/applications/store/retired.txt'};
+  const save = () => {
+    const stored = {...historical, digest:digestObject(historical)};
+    writeAtomic(path, stableJSON(stored));
+    writeAtomic(attemptedPath, stableJSON({id:first.id,digest:stored.digest}));
+  };
+  save(); const before = readFileSync(path), intent = readFileSync(attemptedPath);
+  assert.equal((await prepare(f)).warnings.length,0);
+  assert.deepEqual(readFileSync(path),before); assert.deepEqual(readFileSync(attemptedPath),intent);
+  historical.core = {...first.core}; save();
+  await assert.rejects(prepare(f),{code:'CONTRIBUTION_INVALID'});
+  historical.core = {...first.core,revision:'b'.repeat(40)}; historical.sourceCommit = first.sourceCommit; save();
+  await assert.rejects(prepare(f),{code:'CONTRIBUTION_INVALID'});
+  const tampered = JSON.parse(readFileSync(path)); tampered.core.revision = 'd'.repeat(40); writeAtomic(path,stableJSON(tampered));
+  await assert.rejects(prepare(f),{code:'CONTRIBUTION_TAMPERED'});
+});

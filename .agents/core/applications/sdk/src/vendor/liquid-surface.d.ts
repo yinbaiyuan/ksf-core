@@ -1,6 +1,6 @@
 import type { GlassOptions } from './liquid-glass';
 export class Surface {
-  constructor(host: HTMLElement, options?: { radius?: number; bleed?: number; owner?: HTMLElement; optics?: GlassOptions });
+  constructor(host: HTMLElement, options?: { radius?: number; bleed?: number; owner?: HTMLElement; geometryAnchor?: HTMLElement; optics?: GlassOptions });
   root: HTMLElement;
   attach(): void; detach(): void; update(): void;
   setDelta(delta: { x?: number; y?: number; w?: number; h?: number }): void;

@@ -1,0 +1,19 @@
+import {forwardRef,useEffect,useLayoutEffect,useRef,useState,type CSSProperties} from 'react';
+import {useElementRef} from '../primitives/state';
+import {useWindowContext} from '../window-context';
+import type {AffixProps} from './primitives';
+interface Position {top:number;left:number;width:number;height:number}
+export const Affix=forwardRef<HTMLDivElement,AffixProps>(function Affix({offset=0,edge='top',container,onPinnedChange,children,style,className='',...props},ref){
+ const [root,assign]=useElementRef(ref),holder=useRef<HTMLDivElement>(null),context=useWindowContext(),available=context.active&&context.enabled,[position,setPosition]=useState<Position|null>(null),callback=useRef(onPinnedChange),notified=useRef(false);callback.current=onPinnedChange;
+ useEffect(()=>{if(notified.current!==!!position){notified.current=!!position;callback.current?.(!!position);}},[!!position]);
+ useLayoutEffect(()=>{const placeholder=holder.current,node=root.current,view=placeholder?.ownerDocument.defaultView;if(!placeholder||!node||!view||!available){setPosition(null);return;}const doc=placeholder.ownerDocument,boundary=context.root?.current??context.contentHost??placeholder.closest<HTMLElement>('.ksf-sdk-surface');let target=container?.current??null;
+  if(target&&boundary&&target!==boundary&&!boundary.contains(target))target=null;
+  if(!target){for(let ancestor=placeholder.parentElement;ancestor;ancestor=ancestor.parentElement){const css=view.getComputedStyle(ancestor);if(/auto|scroll|hidden|clip/.test(css.overflowY)){target=ancestor;break;}if(ancestor===boundary)break;}target??=boundary;}
+  let frame=0,disposed=false;const measure=()=>{frame=0;if(disposed||!placeholder.isConnected||!placeholder.getClientRects().length)return;const box=placeholder.getBoundingClientRect(),bounds=target?.getBoundingClientRect()??{top:0,bottom:view.innerHeight},height=node.offsetHeight,limit=Number.isFinite(offset)?offset:0,pinned=edge==='top'?Math.round(bounds.top)>Math.round(box.top)-limit:Math.round(bounds.bottom)<Math.round(box.top+height)+limit;
+   if(!pinned){setPosition(previous=>previous===null?previous:null);return;}const top=edge==='top'?bounds.top+limit:bounds.bottom-limit-height;setPosition(previous=>previous&&Math.abs(previous.top-top)<.1&&Math.abs(previous.left-box.left)<.1&&Math.abs(previous.width-box.width)<.1&&previous.height===height?previous:{top,left:box.left,width:box.width,height});};
+  const schedule=()=>{if(!frame)frame=view.requestAnimationFrame(measure);},scroll=(event:Event)=>{const source=event.target;if(source===doc||source===target||source instanceof view.HTMLElement&&source.contains(target??placeholder))schedule();};
+  measure();const observer=new ResizeObserver(schedule);observer.observe(placeholder);observer.observe(node);if(target)observer.observe(target);doc.addEventListener('scroll',scroll,true);view.addEventListener('resize',schedule);return()=>{disposed=true;if(frame)view.cancelAnimationFrame(frame);observer.disconnect();doc.removeEventListener('scroll',scroll,true);view.removeEventListener('resize',schedule);};
+ },[available,context.root,context.contentHost,container,offset,edge]);
+ useLayoutEffect(()=>{const node=root.current;if(!node||!position)return;node.style.left='0px';node.style.top='0px';const origin=node.getBoundingClientRect();node.style.left=`${position.left-origin.left}px`;node.style.top=`${position.top-origin.top}px`;},[position]);
+ const fixed=available&&position;return <div ref={holder} className="ksf-affix-placeholder" style={fixed?{height:fixed.height}:undefined}><div {...props} ref={assign} className={`ksf-affix ksf-affix-content ${className}`.trim()} data-pinned={!!fixed||undefined} style={{...style,...(fixed?{boxSizing:'border-box',position:'fixed',zIndex:10,left:0,top:0,width:fixed.width} as CSSProperties:undefined)}}>{children}</div></div>;
+});

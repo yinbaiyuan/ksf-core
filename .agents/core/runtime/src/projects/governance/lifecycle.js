@@ -2,7 +2,7 @@ import {mkdirSync,renameSync,unlinkSync,realpathSync} from 'node:fs';
 import {join,dirname,relative,resolve} from 'node:path';
 import {inventory} from '../../services/project-transitions.js';
 import {directory,stat,withProjectLock,assertNoPending,validateName} from '../storage.js';
-import {publishFile} from '../../metadata/files.js';
+import {publishFile,readSnapshot} from '../../metadata/files.js';
 import {hash,digest,fail,snapshot,encodeDocument,safePath,terminal} from './model.js';
 import {loadGraph,checkGraph} from './graph.js';
 import {projectPath,readGovernance,governanceJournal as journal} from './store.js';
@@ -56,7 +56,7 @@ function prepare(root,q){
   return {graph,trees,blockers,warnings,ifMatch:baseline};
 }
 function candidate(root,q,p,at){
-  const files=[],overlay=new Map();overlay.beforeVersions=new Map();overlay.lifecycle=true;
+  const files=[],overlay=new Map();overlay.beforeVersions=new Map();overlay.resourceDigests=new Map();overlay.lifecycle=true;
   for(const d of p.graph.docs.values()){
     const path=movePath(d.path,q.moves),metadata=relocate(d.metadata,q.moves),own=q.moves.find(m=>d.path===m.from+'/project.md');
     if(own){
@@ -68,8 +68,17 @@ function candidate(root,q,p,at){
     metadata.updated=at;const before=snapshot(root,d.path).bytes,after=encodeDocument(before,{path,metadata});
     const f={path,originalPath:d.path,before:before.toString('base64'),after:after.toString('base64'),beforeHash:hash(before),afterHash:hash(after)};files.push(f);overlay.set(path,after);overlay.beforeVersions.set(path+':'+f.beforeHash,before);if(path!==d.path)overlay.set(d.path,null);
   }
-  // A preview uses the actual bytes at their proposed locations, without writing them.
-  for(const tree of p.trees)for(const e of tree.entries)if(e.type==='file'){const old=tree.from+'/'+e.path,path=tree.to+'/'+e.path;if(!overlay.has(path))overlay.set(path,snapshot(root,old,{resource:true}).bytes);overlay.set(old,null);}
+  // Managed documents keep their bytes; unchanged resources need only their
+  // streamed digest at the proposed location. A preview never copies artifacts.
+  for(const tree of p.trees)for(const e of tree.entries)if(e.type==='file'){
+    const old=tree.from+'/'+e.path,path=tree.to+'/'+e.path;
+    if(!overlay.has(path)){
+      const current=readSnapshot(safePath(root,old,{resource:true}),{digestOnly:true});
+      if(current.digest!==e.sha256)fail('PROJECT_GOVERNANCE_CONFLICT','预演期间资源发生变化。',{target:old});
+      overlay.set(path,Buffer.alloc(0));overlay.resourceDigests.set(path,current.digest);
+    }
+    overlay.set(old,null);
+  }
   const graph=loadGraph(root,overlay);
   for(const move of q.moves){const checked=checkGraph(root,graph,{start:move.to+'/project.md'});if(!checked.valid)fail('PROJECT_GOVERNANCE_INVALID','重定位后关联不完整。',{issues:checked.errors});if(q.operation==='archive'&&p.graph.docs.get(move.from+'/project.md').metadata.status==='completed'&&checked.stale.length)fail('PROJECT_ARCHIVE_ACCEPTANCE','重定位后证据版本需要复核。',{issues:checked.warnings});}
   return files;

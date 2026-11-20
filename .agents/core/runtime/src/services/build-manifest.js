@@ -63,10 +63,10 @@ function readConfig(root) {
   if(existsSync(sdkPackage)&&existsSync(sdkContract)){
     const sdk=JSON.parse(readFileSync(sdkPackage)),compatibility=JSON.parse(readFileSync(sdkContract)).sdkCompatibility;
     if(compatibility){
-      if(sdk.version!==compatibility.version||!exactVersion.test(compatibility.minCompatibleVersion))fail('SDK_CONTRACT_MISMATCH','SDK package and host compatibility declaration differ.');
+      if(!exactVersion.test(sdk.version)||!exactVersion.test(compatibility.version)||!exactVersion.test(compatibility.minCompatibleVersion))fail('SDK_CONTRACT_MISMATCH','SDK toolkit version or host compatibility declaration is invalid.');
       for(const path of ['applications/sdk/server/protocol.js','applications/sdk/src/index.ts','runtime/src/applications/protocol.js']){
         const source=readFileSync(join(root,'.agents/core',path),'utf8'),api=source.match(/SDK_API_VERSION\s*=\s*['"]([^'"]+)/)?.[1],floor=source.match(/SDK_COMPATIBILITY\s*=[^;]*minCompatibleVersion:\s*['"]([^'"]+)/)?.[1];
-        if(api!==sdk.version||floor!==compatibility.minCompatibleVersion)fail('SDK_CONTRACT_MISMATCH',`SDK API range differs from host declaration: ${path}`);
+        if(api!==compatibility.version||floor!==compatibility.minCompatibleVersion)fail('SDK_CONTRACT_MISMATCH',`SDK API range differs from host declaration: ${path}`);
       }
     }
   }

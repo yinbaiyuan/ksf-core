@@ -1,0 +1,2 @@
+import {useState} from 'react';import Source from '../fidelity/kokonut/location-picker';import {FidelityScope} from '../fidelity/scope';
+export function PickupLocationView(){const [message,setMessage]=useState("");return <FidelityScope module="location-picker" style={{maxWidth:384,marginInline:'auto'}}><><Source onConfirm={p=>setMessage(`本地选择：${p.address} (${p.x.toFixed(1)}, ${p.y.toFixed(1)})；未请求定位。`)}/>{message&&<output>{message}</output>}</></FidelityScope>;}

@@ -2,6 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { APIError, createWorkbenchClient } from '../src/apps/request-client.ts';
 
+test('a document boot nonce remains authoritative even when its first session is acquired after a backend restart',async()=>{
+ const client=createWorkbenchClient(async()=>new Response(JSON.stringify({ok:true,data:{instanceId:'instance-a',token:'new-token',nonce:'new-server-nonce',sessionId:'new-session'}})),{styleNonce:'original-document-nonce'});
+ const session=await client.getSession();assert.equal(session.nonce,'original-document-nonce');assert.equal(session.token,'new-token');
+});
+
 const session = (token: string, instanceId = 'instance-a') => ({ instanceId, token, nonce: token, sessionId: token });
 const reply = (data: unknown, status = 200, code?: string) => new Response(JSON.stringify(code ? { ok: false, error: { code, message: code }, data } : { ok: true, data }), { status });
 const deferred = <T,>() => { let resolve!: (value: T) => void; const promise = new Promise<T>(done => { resolve = done; }); return { promise, resolve }; };
@@ -101,4 +106,10 @@ test('aborted requests do not refresh or replay after auth rejection', async () 
   });
   await assert.rejects(client.request('/save', {}, controller.signal), { name: 'AbortError' });
   assert.equal(sessions, 1); assert.equal(writes, 1);
+});
+
+
+test('explicit null/false/zero service values retain their meaning while unwrapped legacy bodies remain supported',async()=>{
+ for(const value of [null,false,0,'']){const client=createWorkbenchClient(async()=>reply(value));assert.equal(await client.request('/read'),value);}
+ const old=createWorkbenchClient(async()=>new Response(JSON.stringify({legacy:'value'})));assert.deepEqual(await old.request('/read'),{legacy:'value'});
 });

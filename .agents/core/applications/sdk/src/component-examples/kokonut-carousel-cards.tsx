@@ -1,0 +1,3 @@
+import {useState} from 'react';
+import {MomentumCarousel} from '@ksf/sdk/momentum-carousel';
+export default function Example(){const [active,setActive]=useState<string>(),[detail,setDetail]=useState('');const [favorites,setFavorites]=useState<string[]>([]);return <div style={{width:'100%'}}><MomentumCarousel label="Weekend escapes" eyebrow="Picked for this autumn" activeId={active} onActiveChange={setActive} favoriteIds={favorites} onFavoriteChange={(id,on)=>setFavorites(v=>on?[...v,id]:v.filter(x=>x!==id))} onInspect={setDetail}/><output aria-live="polite">{detail?'所选目的地 '+detail:'鼠标轻甩，触控滑动，或用方向键浏览。'} 已收藏 {favorites.length} 项</output></div>;}

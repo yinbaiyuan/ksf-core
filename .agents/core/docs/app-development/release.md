@@ -1,10 +1,13 @@
 # 发布、升级与兼容
 
+应用发布流程由[应用发布基本功](../../abilities/competencies/app-publishing/competency.md)持有，安装来源、数据保留及实际更新按[安装与更新基本功](../../abilities/competencies/app-installation/competency.md)办理。本文说明 SDK/宿主工具、包与源的契约；工具产物不自动等于已安装或公开上线。
+
+
 ## 应用源与版本
 
 KSF 固定启用[公共默认应用源](https://yinbaiyuan.github.io/ksf-apps/index.json)，由 [ksf-apps 仓库](https://github.com/yinbaiyuan/ksf-apps)通过 GitHub Pages 发布。此源不能通过界面或公共 API 改名、改地址、停用或移除；服务端返回 `APP_SOURCE_LOCKED`（403）。这是宿主配置规则，不是操作系统级文件保护。
 
-Core 自带应用由Core随包和固定公用应用源（ksf-apps）双渠道升级，保持同一来源身份和安装记录。Core更新会更新较旧的随包应用，保留较新兼容版本、用户设置和卸载意图；商店可独立更新。断网使用经过验证的缓存或随包基线，同版本摘要冲突会阻止安装。完整版本选择、SDK API、旧更新器桥接及回退规则见[SDK兼容与双渠道升级](sdk-compatibility.md)。应用贡献见仓库的CONTRIBUTING.md；本地准备不代表线上已发布。
+Core 内置九项应用随 Core 更新，归属为 `core`，不再由官方源独立更新；场景应用由已选源维护。Core 不携带官方源离线副本；断网可使用已装副本和已验证请求缓存。旧九项安装仅在可信来源核对后迁移，local 构建和其他来源保留。见 [M4 分发工具](../distribution-m4.md)及[SDK兼容与分层升级](sdk-compatibility.md)。
 
 用户可在应用商店直接导入 `.ksfapp`，无需索引或联网。手动安装与应用源安装共用包校验、不可变版本、数据目录、任务租约和延迟切换；操作方式见[快速开始](quickstart.md#分享应用包并手动安装)。手动来源不检查远程更新，升级由用户导入新版包；源安装与手动安装之间不自动换源。离线包只能与本机已知兼容版本比较，不能据此确认开发者全球最新版本。
 
@@ -12,7 +15,7 @@ Core 自带应用由Core随包和固定公用应用源（ksf-apps）双渠道升
 
 必须在执行包或Manifest变更时递增版本；商店文案或图片变化也须递增版本并重打包，见[商店资料](store-listing.md)。打包器及安装器拒绝同版本换内容（包含pending、可回退及卸载后保留的历史包）；不可通过覆盖同名包让用户绕过版本核对。自建源的并发构建通过写锁合并索引，先完成包和校验再原子发布索引。
 
-应用ID稳定，卡片类型ID稳定；改名不改ID。com.ksf 命名空间受宿主保护，只接受固定公用源或内部离线资源。第三方包不得冒用官方ID，也不能宣称SHA256等价于签名认证。
+应用ID稳定，卡片类型ID稳定；改名不改ID。ksf 命名空间归 Core 基础对象；历史场景包仅保留历史，新场景发布使用本人 GitHub 用户名。第三方包不得冒用官方ID，也不能宣称SHA256等价于签名认证。
 
 应用ID统一为 `com.<发布者>.<应用名>`，规则见[清单](manifest.md)。旧两段/短ID只允许在本次登记的实例身份迁移中出现，不允许继续打包或安装；显示名称相同不代表同一应用。旧链接可定位登记的新ID，不能据此申请其他应用权限。
 
@@ -51,3 +54,17 @@ CLI 实现、命令描述、文档及依赖同包交付和切换；既有执行�
 清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1；SDK工具包和API语义版本遵循[兼容契约](sdk-compatibility.md)。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
 
 构建依赖未包含在 SDK 通用许可证中的应用，应在应用根准备 `THIRD_PARTY_NOTICES.txt`；构建器会将其附加到随包的许可证说明。KSF项目的构建脚本从锁定依赖收集 marked、DOMPurify 与 YAML 许可证，缺失时拒绝构建。该文件不是运行入口。
+
+## 本地应用与源安装应用
+
+应用按安装来源区分。源安装应用从原应用源更新；本地应用从本机应用包安装和更新。直接导入 .ksfapp 即可安装本地应用，源码目录、KSF 项目和 Git 仓库均为可选关联。本地应用详情可管理这些关联；窗口、菜单与 Dock 只显示正常应用名，没有开发模式开关。
+
+SDK `ksf-app local <应用目录> --workspace <KSF根>` 构建并安装本机；`--build-only` 只构建。workspace 可由应用目录的 ksf-local.json 指定，相对应用目录解析；project 为当前 KSF 的项目目录名，repository 为 Git 根目录，两者可省略。输出在 `.ksf-local/packages/<摘要>.ksfapp` 与 latest.json，不写 release store。同一版本允许多次本地构建。
+
+宿主提供 `ksf app local status <appId> --json`（只读），以及 `ksf app local install|link <appId> --from -|file --json`。install 需要 packagePath 与 trusted:true，可选 digest、appDirectory、project、repository；无 packagePath 时读取已关联源码目录的 .ksf-local/latest.json。link 保存或清空可选关联。包会复制入实例，原包或源码之后不可访问仍可运行。内部 active.source 为 local-app（新本地构建）或 local-import（导入包），active.localBuild 标记按摘要本地构建的存放位置，local 保存关联和构建序号；源安装记录没有这些必要条件。
+
+源安装应用不能被普通本地安装无意覆盖。明确要将同 ID 应用替换安装为本地应用时，SDK 使用 --replace-source，宿主输入 replaceSource:true。替换沿用安装身份、启用设置及业务数据，原来源不再负责更新。没有“进入／退出开发”状态，也不保存另一套正式基线用于来回切换。后续如要重新改用源安装，需单独明确处理安装来源和兼容性。
+
+本地安装保留现有业务内容，先检查数据兼容；需要迁移或原数据损坏时拒绝安装并保留现场。旧窗口及在途操作排空后更新，不强制中断保存。替换来源时不提供回到另一来源的隐式回退；后续本地构建可在数据兼容时恢复上一构建。Core 对账保留本地来源；不支持本地包路径的旧 Core 被兼容检查阻止。
+
+公开发布为独立操作：明确要求发布时，确定新的公开版本，构建冻结候选、验收并分发。发布不改变当前本地安装来源，曾发布某一版本也不构成后续发布授权。

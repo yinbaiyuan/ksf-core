@@ -1,0 +1,2 @@
+import {useState} from 'react';import {Calendar} from '@ksf/sdk/calendar';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function CalendarYearExample(){const [value,setValue]=useState('2026-11-20'),[display,setDisplay]=useState<'month'|'year'>('year');return <div className="ksf-demo-stack"><div style={{width:320,maxWidth:'100%'}}><Calendar label="按月选择" fullSize={false} display={display} onDisplayChange={setDisplay} value={value} onSelect={setValue}/></div><output role="status">{display==='year'?'年内月份':'月内日期'} · {value}</output></div>;}

@@ -328,6 +328,14 @@ function previousPlans(root, plan) {
     const state = readJSON(root, `.agents/runtime-data/contributions/${id}/submitted.json`, true);
     const attempted = readJSON(root, `.agents/runtime-data/contributions/${id}/attempted.json`, true);
     if (!state && !attempted) continue;
+    // Historical plans may contain paths retired by a later Core. Verify their
+    // immutable envelope before deciding whether current path policy applies;
+    // a different source node and Core baseline cannot be a duplicate here.
+    const { digest, ...header } = readJSON(root, `.agents/runtime-data/contributions/${id}/plan.json`);
+    if (!isSHA(digest) || digestObject(header) !== digest || header.id !== id) fail('CONTRIBUTION_TAMPERED', 'A previous contribution changed; preserve and inspect it.');
+    if (attempted && (attempted.id !== id || attempted.digest !== digest)) fail('CONTRIBUTION_TAMPERED', 'A previous publication attempt does not match its reviewed plan.');
+    if (header.sourceCommit !== plan.sourceCommit &&
+        (header.core?.repository !== plan.core.repository || header.core?.branch !== plan.core.branch || header.core?.revision !== plan.core.revision)) continue;
     const previous = readContribution({ root, id });
     if (attempted && (attempted.id !== id || attempted.digest !== previous.digest)) fail('CONTRIBUTION_TAMPERED', 'A previous publication attempt does not match its reviewed plan.');
     if (previous.core.repository !== plan.core.repository) continue;

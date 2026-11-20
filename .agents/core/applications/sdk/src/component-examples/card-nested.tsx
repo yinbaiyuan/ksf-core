@@ -1,0 +1,3 @@
+import {Card,CardGridItem} from '@ksf/sdk/card';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function CardNestedExample(){return <div style={{display:'grid',gap:24}}><Card title="本轮工作"><p style={{marginTop:0}}>通过内嵌卡片组织子内容。</p><Card title="设计资料" appearance="inset" extra={<a href="#design-notes" onClick={event=>event.preventDefault()}>查看</a>}>6 项设计资料，3 项研究资料。</Card><Card title="交付记录" appearance="inset" style={{marginTop:16}}>本轮交付内容与验收记录。</Card></Card><Card title="连排网格" grid>{Array.from({length:7},(_,i)=><CardGridItem key={i} hoverable={i!==1}>内容 {i+1}{i===1?'（无悬停效果）':''}</CardGridItem>)}</Card></div>;}

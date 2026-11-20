@@ -52,6 +52,13 @@ test('desktop and appearance are shared instance values with strict validation a
  const version=(await f.service.read('desktop')).etag;
  await assert.rejects(f.write('desktop',{preferences:{...preferences,version:99}}),{code:'PREFERENCES_INVALID'});
  assert.equal((await f.service.read('desktop')).etag,version);
+ const docked={...preferences,dock:{iconSize:64}};await f.write('desktop',{preferences:docked});
+ const saved=(await another.read('desktop')).effective.preferences;assert.deepEqual(saved,docked);assert.deepEqual(saved.groups,preferences.groups);
+ const dockVersion=(await f.service.read('desktop')).etag;
+ for(const iconSize of [27,73,44.5])await assert.rejects(f.write('desktop',{preferences:{...docked,dock:{iconSize}}}),{code:'PREFERENCES_INVALID'});
+ await assert.rejects(f.write('desktop',{preferences:{...docked,dock:{iconSize:NaN}}}),{code:'USER_DATA_INVALID'});
+ await assert.rejects(f.write('desktop',{preferences:{...docked,dock:{iconSize:44,unknown:true}}}),{code:'PREFERENCES_INVALID'});
+ assert.equal((await f.service.read('desktop')).etag,dockVersion);
 });
 test('reset removes only selected overrides; unsupported schema is preserved',async t=>{
  const f=fixture(t);await f.write('identity',{name:'作者',email:'author@example.com'});
@@ -59,6 +66,23 @@ test('reset removes only selected overrides; unsupported schema is preserved',as
  assert.deepEqual((await f.service.read('identity')).values,{name:'作者'});
  f.put('.agents/user-data/instance.json','{"schema_version":99}');await assert.rejects(f.service.read('instance'),{code:'USER_DATA_VERSION_UNSUPPORTED'});
  assert.equal(readFileSync(join(f.root,'.agents/user-data/instance.json'),'utf8'),'{"schema_version":99}');
+});
+test('Dock pins roundtrip through shared configuration with strict validation, layout preservation and CAS conflicts',async t=>{
+ const f=fixture(t),preferences=defaultDesktop(),dock={iconSize:28,pinnedAppIds:['com.ksf.markdown','com.ksf.projects']};
+ await f.write('desktop',{preferences:{...preferences,dock}});
+ const another=createConfigurationService(f.root),saved=await another.read('desktop');
+ assert.deepEqual(saved.effective.preferences.dock,dock);assert.deepEqual(saved.effective.preferences.groups,preferences.groups);
+ await f.write('desktop',{preferences:{...preferences,dock:{...dock,iconSize:72}}});
+ assert.deepEqual((await another.read('desktop')).effective.preferences.dock,{...dock,iconSize:72});
+ await assert.rejects(another.perform('desktop','write',{values:{preferences:{...preferences,dock:{...dock,pinnedAppIds:[]}}},ifMatch:saved.etag}),{code:'CONFIG_CONFLICT'});
+ await f.write('desktop',{preferences:{...preferences,dock:{iconSize:72,pinnedAppIds:[...dock.pinnedAppIds].reverse()}}});
+ assert.deepEqual((await another.read('desktop')).effective.preferences.dock,{iconSize:72,pinnedAppIds:[...dock.pinnedAppIds].reverse()});
+ const version=(await another.read('desktop')).etag;
+ for(const pinnedAppIds of [null,{},'com.ksf.markdown',[''],[' '],[7],['com.ksf.markdown','com.ksf.markdown'],['x'.repeat(81)],Array.from({length:1001},(_,i)=>'com.test.'+i)])
+  await assert.rejects(f.write('desktop',{preferences:{...preferences,dock:{...dock,pinnedAppIds}}}),{code:'PREFERENCES_INVALID'});
+ assert.equal((await another.read('desktop')).etag,version);
+ await f.write('desktop',{preferences:{...preferences,dock:{iconSize:72,pinnedAppIds:[]}}});
+ assert.deepEqual((await another.read('desktop')).effective.preferences.dock,{iconSize:72,pinnedAppIds:[]});
 });
 test('export excludes device identity, grants, secrets, arbitrary ability values and collaboration by default',async t=>{
  const f=fixture(t);await f.write('instance',{name:'示例'});f.put('USER.md','私人协作设定');
@@ -125,8 +149,9 @@ test('real CLI starts a managed backend without frontend assets and round-trips 
  cpSync(join(core,'runtime/src'),join(f.root,'.agents/core/runtime/src'),{recursive:true});
  for(const name of ['build.json','data-compatibility.json'])cpSync(join(core,name),join(f.root,'.agents/core',name));cpSync(join(core,'runtime/package.json'),join(f.root,'.agents/core/runtime/package.json'));
  cpSync(join(core,'applications/sdk/src/shared'),join(f.root,'.agents/core/applications/sdk/src/shared'),{recursive:true});cpSync(join(core,'applications/sdk/package.json'),join(f.root,'.agents/core/applications/sdk/package.json'));
+ cpSync(join(core,'applications/sdk/src/session-contract.js'),join(f.root,'.agents/core/applications/sdk/src/session-contract.js'));
  f.put('.agents/core/applications/sdk/server/workflow-contract.mjs',readFileSync(join(core,'applications/sdk/server/workflow-contract.mjs')));
- f.put('.agents/core/applications/store/index.json',JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));
+ cpSync(join(core,'applications/builtin'),join(f.root,'.agents/core/applications/builtin'),{recursive:true});
  const values={items:[{id:'headless',kind:'api',enabled:true,concurrency:1,protocolId:'openai-responses-v1',baseURL:'https://example.invalid/v1',credentialRef:'env:FIXTURE_ONLY'}]};
  try{
   const result=spawnSync(process.execPath,[join(f.root,'.agents/core/runtime/src/cli.js'),'config','write','ai.connections','--data',JSON.stringify(values),'--if-match','missing','--json'],{encoding:'utf8',timeout:45000});
@@ -163,4 +188,155 @@ test('legacy desktop reads are non-mutating and shortcut writes publish the prot
  const before=readFileSync(join(f.root,path),'utf8');assert.deepEqual((await f.service.read('desktop')).values.preferences,preferences);assert.equal(readFileSync(join(f.root,path),'utf8'),before);
  preferences.shortcuts={initialized:true,homeGroupId:'home',installations:{'example.app':'install-1'}};preferences.groups[0].layout.push({i:'app-one',kind:'app',appId:'example.app',x:4,y:0,w:1,h:1});
  await f.write('desktop',{preferences});const saved=JSON.parse(readFileSync(join(f.root,path),'utf8'));assert.equal(saved.schema_version,2);assert.equal(saved.revision,5);assert.deepEqual(saved.values.preferences,preferences);
+});
+
+test('appearance theme modes persist through the existing versioned domain without changing desktop data',async t=>{
+ const f=fixture(t),preferences=defaultDesktop(),legacy=defaultMaterialSettings();delete legacy.themeMode;
+ preferences.groups[0].layout[0].config={preserve:{nested:true}};await f.write('desktop',{preferences});
+ await f.write('appearance',{settings:legacy});assert.equal((await f.service.read('appearance')).effective.settings.themeMode,undefined);
+ const another=createConfigurationService(f.root),beforeDesktop=await another.read('desktop');
+ for(const themeMode of ['system','light','dark']){
+  await f.write('appearance',{settings:{...legacy,themeMode}});
+  assert.equal((await another.read('appearance')).effective.settings.themeMode,themeMode);
+ }
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,themeMode:'light'}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,themeMode:'dark'}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.themeMode,'light');
+ for(const themeMode of ['sepia',null,3])await assert.rejects(f.write('appearance',{settings:{...legacy,themeMode}}),{code:'PREFERENCES_INVALID'});
+ assert.deepEqual(await another.read('desktop'),beforeDesktop);
+});
+
+test('desktop appearance controls accept legacy settings and retain CAS and layout protection',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.desktop;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const another=createConfigurationService(f.root),desktopBefore=await another.read('desktop');
+ assert.equal((await another.read('appearance')).effective.settings.desktop,undefined);
+ const custom={...legacy,desktop:{iconSize:88,gap:48}};await f.write('appearance',{settings:custom});
+ assert.deepEqual((await another.read('appearance')).effective.settings.desktop,custom.desktop);
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...custom,themeMode:'dark'}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...custom,desktop:{iconSize:64,gap:24}}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.themeMode,'dark');
+ for(const desktop of [null,{}, {iconSize:72}, {iconSize:47,gap:32}, {iconSize:97,gap:32}, {iconSize:72,gap:15}, {iconSize:72,gap:65}, {iconSize:72.5,gap:32}, {iconSize:72,gap:32,unknown:true}])
+   await assert.rejects(f.write('appearance',{settings:{...legacy,desktop}}),{code:'PREFERENCES_INVALID'});
+ assert.deepEqual(await another.read('desktop'),desktopBefore);
+});
+
+test('background selection is optional, validates modes and uses appearance CAS',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.backgroundMode;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const another=createConfigurationService(f.root),desktopBefore=await another.read('desktop');
+ assert.equal((await another.read('appearance')).effective.settings.backgroundMode,undefined);
+ for(const backgroundMode of ['side-rays','mountain','drape','aero-shards']){
+   await f.write('appearance',{settings:{...legacy,backgroundMode}});
+   assert.equal((await another.read('appearance')).effective.settings.backgroundMode,backgroundMode);
+ }
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,themeMode:'dark'}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,backgroundMode:'side-rays'}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.themeMode,'dark');
+ for(const backgroundMode of ['unknown',null,{},1])await assert.rejects(f.write('appearance',{settings:{...legacy,backgroundMode}}),{code:'PREFERENCES_INVALID'});
+ assert.deepEqual(await another.read('desktop'),desktopBefore);
+});
+
+test('side ray intensity supports legacy values, bounded persistence and conflict protection',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.sideRaysIntensity;
+ legacy.backgroundMode='side-rays';legacy.profiles.card.opacity=.63;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const another=createConfigurationService(f.root),desktopBefore=await another.read('desktop');
+ assert.equal((await another.read('appearance')).effective.settings.sideRaysIntensity,undefined);
+ for(const sideRaysIntensity of [0,.35,1,1.75,2]){
+  await f.write('appearance',{settings:{...legacy,sideRaysIntensity}});
+  assert.equal((await another.read('appearance')).effective.settings.sideRaysIntensity,sideRaysIntensity);
+ }
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,sideRaysIntensity:1.5}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,sideRaysIntensity:.5}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.sideRaysIntensity,1.5);
+ for(const sideRaysIntensity of [-.01,2.01,null,{},'1'])await assert.rejects(f.write('appearance',{settings:{...legacy,sideRaysIntensity}}),{code:'PREFERENCES_INVALID'});
+ for(const sideRaysIntensity of [NaN,Infinity])await assert.rejects(f.write('appearance',{settings:{...legacy,sideRaysIntensity}}),{code:'USER_DATA_INVALID'});
+ assert.equal((await another.read('appearance')).effective.settings.profiles.card.opacity,.63);
+ assert.deepEqual(await another.read('desktop'),desktopBefore);
+});
+
+test('independent bar glass intensity persists without altering legacy choices and rejects stale writes',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.barGlassIntensity;
+ legacy.profiles.dock.opacity=.61;legacy.profiles.statusbar.blur=10;legacy.sideRaysIntensity=.4;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const another=createConfigurationService(f.root),desktopBefore=await another.read('desktop');
+ assert.equal((await another.read('appearance')).effective.settings.barGlassIntensity,undefined);
+ for(const barGlassIntensity of [{statusbar:0,dock:2},{statusbar:1.75,dock:.35},{statusbar:1,dock:1}]){
+  await f.write('appearance',{settings:{...legacy,barGlassIntensity}});
+  assert.deepEqual((await another.read('appearance')).effective.settings,{...legacy,barGlassIntensity});
+ }
+ const stale=await another.read('appearance');
+ await f.write('appearance',{settings:{...legacy,barGlassIntensity:{statusbar:0,dock:1.5}}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,barGlassIntensity:{statusbar:1,dock:0}}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.deepEqual((await another.read('appearance')).effective.settings.barGlassIntensity,{statusbar:0,dock:1.5});
+ for(const barGlassIntensity of [null,[],{}, {dock:1}, {statusbar:1,dock:-.01}, {statusbar:2.01,dock:1}, {statusbar:'1',dock:1}, {statusbar:1,dock:1,unknown:true}])
+  await assert.rejects(f.write('appearance',{settings:{...legacy,barGlassIntensity}}),{code:'PREFERENCES_INVALID'});
+ for(const strength of [NaN,Infinity])await assert.rejects(f.write('appearance',{settings:{...legacy,barGlassIntensity:{statusbar:strength,dock:1}}}),{code:'USER_DATA_INVALID'});
+ assert.deepEqual(await another.read('desktop'),desktopBefore);
+});
+
+test('card glass intensity saves independently with legacy, validation and conflict protection',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.cardGlassIntensity;
+ legacy.barGlassIntensity={statusbar:1.75,dock:.35};legacy.profiles.card.opacity=.4;legacy.profiles.card.blur=18;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const another=createConfigurationService(f.root),desktopBefore=await another.read('desktop');
+ assert.equal((await another.read('appearance')).effective.settings.cardGlassIntensity,undefined);
+ for(const cardGlassIntensity of [0,.35,1,1.75,2]){
+  await f.write('appearance',{settings:{...legacy,cardGlassIntensity}});
+  assert.deepEqual((await another.read('appearance')).effective.settings,{...legacy,cardGlassIntensity});
+ }
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,cardGlassIntensity:.5}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,cardGlassIntensity:1.5}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.cardGlassIntensity,.5);
+ for(const cardGlassIntensity of [-.01,2.01,null,{},'1'])await assert.rejects(f.write('appearance',{settings:{...legacy,cardGlassIntensity}}),{code:'PREFERENCES_INVALID'});
+ for(const cardGlassIntensity of [NaN,Infinity])await assert.rejects(f.write('appearance',{settings:{...legacy,cardGlassIntensity}}),{code:'USER_DATA_INVALID'});
+ assert.deepEqual(await another.read('desktop'),desktopBefore);
+});
+
+test('desktop icon glass and tilt use appearance CAS, accept old configurations and never alter desktop layout',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.desktopIconGlassIntensity;delete legacy.desktopIconTilt;
+ legacy.desktop={iconSize:64,gap:48};legacy.barGlassIntensity={statusbar:.75,dock:1.5};legacy.cardGlassIntensity=.4;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const desktop=readFileSync(join(f.root,'.agents/user-data/desktop.json'),'utf8'),another=createConfigurationService(f.root);
+ assert.equal((await another.read('appearance')).effective.settings.desktopIconGlassIntensity,undefined);
+ for(const [desktopIconGlassIntensity,desktopIconTilt] of [[0,-30],[2,30],[.45,0],[1,4]]){const settings={...legacy,desktopIconGlassIntensity,desktopIconTilt};await f.write('appearance',{settings});assert.deepEqual((await another.read('appearance')).effective.settings,settings);}
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,desktopIconGlassIntensity:.5,desktopIconTilt:12}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,desktopIconGlassIntensity:2,desktopIconTilt:-10}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.desktopIconTilt,12);
+ for(const [key,values] of [['desktopIconGlassIntensity',[-.01,2.01,null,{},'1']],['desktopIconTilt',[-30.5,30.5,null,{},'4']]])for(const value of values)await assert.rejects(f.write('appearance',{settings:{...legacy,[key]:value}}),{code:'PREFERENCES_INVALID'});
+ assert.equal(readFileSync(join(f.root,'.agents/user-data/desktop.json'),'utf8'),desktop);
+});
+
+test('Dock icon glass and tilt use appearance CAS, accept old configurations and never alter desktop layout',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.dockIconGlassIntensity;delete legacy.dockIconTilt;
+ legacy.desktopIconGlassIntensity=.7;legacy.desktopIconTilt=-8;legacy.desktop={iconSize:64,gap:48};legacy.barGlassIntensity={statusbar:.75,dock:1.5};legacy.cardGlassIntensity=.4;
+ await f.write('desktop',{preferences:defaultDesktop()});await f.write('appearance',{settings:legacy});
+ const desktop=readFileSync(join(f.root,'.agents/user-data/desktop.json'),'utf8'),another=createConfigurationService(f.root);
+ assert.equal((await another.read('appearance')).effective.settings.dockIconGlassIntensity,undefined);
+ for(const [dockIconGlassIntensity,dockIconTilt] of [[0,-30],[2,30],[.45,0],[1,0]]){const settings={...legacy,dockIconGlassIntensity,dockIconTilt};await f.write('appearance',{settings});assert.deepEqual((await another.read('appearance')).effective.settings,settings);}
+ const stale=await another.read('appearance');await f.write('appearance',{settings:{...legacy,dockIconGlassIntensity:.5,dockIconTilt:12}});
+ await assert.rejects(another.perform('appearance','write',{values:{settings:{...legacy,dockIconGlassIntensity:2,dockIconTilt:-10}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await another.read('appearance')).effective.settings.dockIconTilt,12);
+ for(const [key,values] of [['dockIconGlassIntensity',[-.01,2.01,null,{},'1']],['dockIconTilt',[-30.5,30.5,null,{},'4']]])for(const value of values)await assert.rejects(f.write('appearance',{settings:{...legacy,[key]:value}}),{code:'PREFERENCES_INVALID'});
+ assert.equal(readFileSync(join(f.root,'.agents/user-data/desktop.json'),'utf8'),desktop);
+});
+
+test('application titlebar glass strength preserves legacy preferences, independent values and CAS conflicts',async t=>{
+ const f=fixture(t),legacy=defaultMaterialSettings();delete legacy.windowTitlebarGlassIntensity;
+ legacy.barGlassIntensity={statusbar:.75,dock:1.5};
+ await f.write('appearance',{settings:legacy});
+ assert.equal((await f.service.read('appearance')).effective.settings.windowTitlebarGlassIntensity,undefined);
+ for(const windowTitlebarGlassIntensity of [0,.35,1,2]){
+  await f.write('appearance',{settings:{...legacy,windowTitlebarGlassIntensity}});
+  const actual=(await f.service.read('appearance')).effective.settings;
+  assert.equal(actual.windowTitlebarGlassIntensity,windowTitlebarGlassIntensity);
+  assert.deepEqual(actual.barGlassIntensity,legacy.barGlassIntensity);
+  assert.deepEqual(actual.profiles,legacy.profiles);
+ }
+ const stale=await f.service.read('appearance');
+ await f.write('appearance',{settings:{...legacy,windowTitlebarGlassIntensity:.5}});
+ await assert.rejects(f.service.perform('appearance','write',{values:{settings:{...legacy,windowTitlebarGlassIntensity:1}},ifMatch:stale.etag}),{code:'CONFIG_CONFLICT'});
+ assert.equal((await f.service.read('appearance')).effective.settings.windowTitlebarGlassIntensity,.5);
+ for(const value of [-.01,2.01,'1',null])await assert.rejects(f.write('appearance',{settings:{...legacy,windowTitlebarGlassIntensity:value}}),{code:'PREFERENCES_INVALID'});
 });

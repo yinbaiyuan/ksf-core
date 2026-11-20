@@ -1,0 +1,4 @@
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {Select} from '@ksf/sdk/select';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function SelectDependentExample(){const [group,setGroup]=useState('research'),[value,setValue]=useState('a');const groups={research:[{value:'a',label:'研究说明'},{value:'b',label:'访谈记录'}],delivery:[{value:'c',label:'交付清单'},{value:'d',label:'配置表'}]};return <div className='ksf-demo-stack'><Select label='资料类别' value={group} onValueChange={next=>{setGroup(next);setValue(groups[next as keyof typeof groups][0].value);}} options={[{value:'research',label:'研究'},{value:'delivery',label:'交付'}]}/><Select label='具体资料' options={groups[group as keyof typeof groups]} value={value} onValueChange={setValue}/><output>{group} / {value}</output></div>;}

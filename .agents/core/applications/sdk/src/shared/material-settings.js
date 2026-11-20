@@ -6,13 +6,21 @@ export const profileLimits = {
     shadowOpacity: [0, .4, .01], shadowBlur: [0, 40, 1], shadowY: [0, 20, 1], grow: [0, 20, 1], squash: [0, 12, .5], stiffness: [80, 900, 10], damping: [10, 70, 1], stretch: [0, 24, 1],
 };
 export const backdropLimits = { wash: [0, 1, .01], brightness: [.4, 1.6, .05], saturation: [0, 2, .05], x: [0, 100, 1], y: [0, 100, 1] };
+export const desktopAppearanceLimits = { iconSize: [48, 96, 1], gap: [16, 64, 1] };
+export const sideRaysIntensityLimits = [0, 2, .05];
+export const barGlassIntensityLimits = [0, 2, .05];
+export const cardGlassIntensityLimits = [0, 2, .05];
+export const desktopIconGlassIntensityLimits = [0, 2, .05];
+export const desktopIconTiltLimits = [-30, 30, .5];
+export const dockIconGlassIntensityLimits = [0, 2, .05];
+export const dockIconTiltLimits = [-30, 30, .5];
 export function defaultMaterialSettings() {
     const panel = { tint: '#FFFFFF', opacity: .64, refraction: 24, bezel: .3, curvature: 4, ior: 1.5, invert: false, chroma: .1, blur: 2, specular: .5, specularWidth: 2, lightAngle: -120, radius: 22, shadowOpacity: .1, shadowBlur: 12, shadowY: 4, grow: 4, squash: 1.5, stiffness: 600, damping: 36, stretch: 0 };
-    return { version: 1, motion: true, backdrop: { wash: 0, brightness: 1, saturation: 1, x: 50, y: 50 }, profiles: {
+    return { version: 1, themeMode: 'system', backgroundMode: 'mountain', sideRaysIntensity: 1, windowTitlebarGlassIntensity: 1, barGlassIntensity: barGlassIntensity(), cardGlassIntensity: 1, desktopIconGlassIntensity: 1, desktopIconTilt: 4, dockIconGlassIntensity: 1, dockIconTilt: 0, desktop: desktopAppearance(), motion: true, backdrop: { wash: 0, brightness: 1, saturation: 1, x: 50, y: 50 }, profiles: {
             window: { ...panel, opacity: .64, blur: 12, refraction: 24, specular: .7, shadowOpacity: .24, shadowBlur: 40, shadowY: 16 },
-            dock: { ...panel, opacity: .48, blur: 8, refraction: 28, bezel: .48, specular: .8, radius: 26 },
-            statusbar: { ...panel, opacity: .65, blur: 10, refraction: 14, radius: 0, shadowOpacity: .06 },
-            card: { ...panel, opacity: .68, blur: 12, refraction: 22, specular: .68, radius: 24, shadowOpacity: .12, shadowBlur: 24, shadowY: 8 },
+            dock: { ...panel, opacity: .9, blur: 16, refraction: 28, bezel: .48, specular: .16, radius: 2 },
+            statusbar: { ...panel, opacity: .92, blur: 12, refraction: 14, radius: 0, shadowOpacity: .06 },
+            card: { ...panel, opacity: .9, blur: 16, refraction: 22, specular: .16, radius: 2, shadowOpacity: .12, shadowBlur: 24, shadowY: 8 },
             directory: { ...panel }, workspace: { ...panel }, chat: { ...panel, opacity: .72, radius: 11 }, round: { ...panel, opacity: .72, radius: 12 },
             reader: { ...panel, tint: '#FDFEFF', opacity: 1, blur: 8, radius: 17, shadowOpacity: .08, shadowY: 2 },
             button: { ...panel, opacity: .62, refraction: 14, bezel: .8, curvature: 3, chroma: .12, blur: 0, specular: .6, specularWidth: 1.5, radius: 16, grow: 10, squash: 4 },
@@ -22,12 +30,48 @@ export function defaultMaterialSettings() {
 }
 const record = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
 export function bounded(value, limits) { return Math.min(limits[1], Math.max(limits[0], value)); }
+export function sideRaysIntensity(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, sideRaysIntensityLimits) : 1; }
+export function windowTitlebarGlassIntensity(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, barGlassIntensityLimits) : 1; }
+export function cardGlassIntensity(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, cardGlassIntensityLimits) : 1; }
+export function desktopIconGlassIntensity(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, desktopIconGlassIntensityLimits) : 1; }
+export function dockIconGlassIntensity(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, dockIconGlassIntensityLimits) : 1; }
+export function dockIconTilt(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, dockIconTiltLimits) : 0; }
+export function desktopIconTilt(value) { return typeof value === 'number' && Number.isFinite(value) ? bounded(value, desktopIconTiltLimits) : 4; }
+export function barGlassIntensity(value) {
+    const result = { statusbar: 1, dock: 1 };
+    if (record(value))
+        for (const key of Object.keys(result))
+            if (typeof value[key] === 'number' && Number.isFinite(value[key]))
+                result[key] = bounded(value[key], barGlassIntensityLimits);
+    return result;
+}
+export function desktopAppearance(value) {
+    const result = { iconSize: 72, gap: 32 };
+    if (record(value))
+        for (const key of Object.keys(desktopAppearanceLimits))
+            if (typeof value[key] === 'number' && Number.isFinite(value[key]))
+                result[key] = Math.round(bounded(value[key], desktopAppearanceLimits[key]));
+    return result;
+}
 export function parseMaterialSettings(value) {
     const result = defaultMaterialSettings();
     if (!record(value) || value.version !== 1)
         return result;
     if (typeof value.motion === 'boolean')
         result.motion = value.motion;
+    if (['system', 'light', 'dark'].includes(value.themeMode))
+        result.themeMode = value.themeMode;
+    if (['mountain', 'side-rays', 'drape', 'aero-shards'].includes(value.backgroundMode))
+        result.backgroundMode = value.backgroundMode;
+    result.sideRaysIntensity = sideRaysIntensity(value.sideRaysIntensity);
+    result.windowTitlebarGlassIntensity = windowTitlebarGlassIntensity(value.windowTitlebarGlassIntensity);
+    result.barGlassIntensity = barGlassIntensity(value.barGlassIntensity);
+    result.cardGlassIntensity = cardGlassIntensity(value.cardGlassIntensity);
+    result.desktopIconGlassIntensity = desktopIconGlassIntensity(value.desktopIconGlassIntensity);
+    result.desktopIconTilt = desktopIconTilt(value.desktopIconTilt);
+    result.dockIconGlassIntensity = dockIconGlassIntensity(value.dockIconGlassIntensity);
+    result.dockIconTilt = dockIconTilt(value.dockIconTilt);
+    result.desktop = desktopAppearance(value.desktop);
     if (record(value.backdrop))
         for (const key of Object.keys(backdropLimits)) {
             const v = value.backdrop[key];

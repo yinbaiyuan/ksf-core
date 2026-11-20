@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KSF 基础恢复</title><link rel="stylesheet" href="/ui-recovery/recovery.css"><script src="/ui-recovery/recovery.js" defer></script></head>
+<body><main><header><span class="mark">KSF</span><span>基础恢复</span></header><h1>让工作台回到可用状态</h1><p class="lead">这里独立于组件运行时。检查完整前端快照，再选择兼容版本；应用包和业务数据由原服务保留。</p>
+<section aria-labelledby="current-title"><h2 id="current-title">当前状态</h2><p id="summary" role="status">正在读取本机状态…</p><dl id="details"></dl><p id="issue" role="alert"></p></section>
+<section id="pending-section" hidden aria-labelledby="pending-title"><h2 id="pending-title">维护结果待核实</h2><p id="pending-detail"></p><div class="actions"><button id="check-pending" type="button">核对原操作</button><button id="retry-pending" type="button">重试相同请求</button></div></section>
+<section aria-labelledby="releases-title"><h2 id="releases-title">本机前端快照</h2><div id="releases"></div><div class="actions"><button id="stage" type="button">校验并暂存随包快照</button><button id="refresh" type="button">重新检查</button><button id="export" type="button">导出诊断</button><a href="/">返回工作台</a></div></section>
+<section id="checkpoints-section" hidden aria-labelledby="checkpoints-title"><h2 id="checkpoints-title">恢复选择记录</h2><p>原选择记录无法读取时，可以恢复已校验检查点。损坏原件会保留，现有客户端的已登记资源继续保留。</p><div id="checkpoints"></div></section>
+<p class="footnote">切换仅影响新打开的工作台文档。已有窗口继续使用原快照，须完成状态保全后安全重载。</p></main></body></html>

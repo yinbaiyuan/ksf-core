@@ -1,0 +1,3 @@
+import {useState} from 'react';import {Timeline} from '@ksf/sdk/timeline';import {Button} from '@ksf/sdk/button';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TimelineStatesExample(){const [reverse,setReverse]=useState(false),[filled,setFilled]=useState(false);return <div className="ksf-demo-stack"><div className="ksf-demo-row"><Button onClick={()=>setReverse(v=>!v)}>切换时间顺序</Button><Button onClick={()=>setFilled(v=>!v)}>切换点样式</Button></div><Timeline reverse={reverse} appearance={filled?'filled':'outlined'} items={[{id:'one',title:'实施',time:'第一天'},{id:'two',title:'核验失败',time:'第二天',tone:'danger',content:'保留失败证据后修复。'},{id:'three',title:'重新核验',time:'第三天',tone:'success'}]}/></div>;}

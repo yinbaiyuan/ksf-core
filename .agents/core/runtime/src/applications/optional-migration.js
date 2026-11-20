@@ -1,0 +1,27 @@
+import {readFile,mkdir,rm,lstat} from 'node:fs/promises';import {join} from 'node:path';import {randomUUID} from 'node:crypto';
+import {OPTIONAL_APPLICATION_MIGRATIONS} from './identities.js';import {checksum,decodePackage} from './protocol.js';import {assert} from '../services/workbench-common.js';
+import {stageApplicationPackages} from './core-upgrade.js';import {inspectApplicationIdentityMigration,prepareApplicationIdentityMigration,applyApplicationIdentityMigration} from '../distribution/application-identities.js';import {atomicJSON} from '../shared/durable-json.js';
+const stateRelative='.agents/user-data/applications/state.json',homeRelative='.agents/runtime-data/applications/identity-migration';
+const readOptional=async path=>{try{return JSON.parse(await readFile(path,'utf8'));}catch(error){if(error.code==='ENOENT')return null;throw error;}};
+export function createOptionalApplicationMigration(root,{lock,readState,assertIdle,compatible,storage,fault}={}){
+ const activePath=join(root,homeRelative,'active.json'),previews=new Map();
+ async function guard(appId){const active=await readOptional(activePath);assert(!active||appId&&![active.from,active.to].includes(appId),'APP_ID_MIGRATION_PENDING','应用身份迁移尚未完成，请恢复迁移后重试。',409);}
+ async function preview({from,bytes,source}){for(const [token,value] of previews)if(value.expiresAt<Date.now())previews.delete(token);assert(previews.size<16,'APP_ID_MIGRATION_LIMIT','待确认的迁移过多，请稍后重试。');
+  const decoded=decodePackage(bytes),to=decoded.manifest.id;assert(OPTIONAL_APPLICATION_MIGRATIONS[from]===to,'APP_ID_MIGRATION_MAP','所选包不是已登记的迁移目标。');await compatible(decoded.manifest);const state=await readState(),old=state.installed[from];assert(old&&!state.installed[to]&&!old.pending,'APP_ID_MIGRATION_COLLISION','旧安装不存在、新身份已安装或旧安装仍待切换，请先核对。',409);
+  const data=await storage.inspectAll({appId:from,dataStores:decoded.manifest.dataStores});assert(data.compatible,'APP_DATA_INCOMPATIBLE','目标身份不能直接读取现有数据，请提供显式数据适配后再迁移。',409,data);
+  const identity=await inspectApplicationIdentityMigration(root,{[from]:to}),stateBytes=await readFile(join(root,stateRelative)),token=randomUUID(),release={manifest:decoded.manifest,listing:decoded.listing,digest:checksum(bytes),source:{id:source.id,name:source.name,url:source.url},installedAt:new Date().toISOString()},next=structuredClone(state);
+  next.installed[to]={...old,active:release,previous:null,pending:null,legacyIds:[...new Set([...(old.legacyIds??[]),from])]};delete next.installed[to].local;delete next.installed[to].development;delete next.installed[from];if(next.defaults)next.defaults=next.defaults.map(id=>id===from?to:id);next.revision++;
+  const nextBytes=Buffer.from(JSON.stringify(next)+'\n');identity.edits.push({path:stateRelative,before:checksum(stateBytes),after:checksum(nextBytes),content:nextBytes.toString('base64')});
+  const planDigest=checksum(Buffer.from(JSON.stringify(identity)));previews.set(token,{from,to,bytes:Buffer.from(bytes),release,identity,planDigest,expiresAt:Date.now()+15*60*1000});
+  return{token,planDigest,from,to,installationId:old.installationId,enabled:old.enabled,manifest:decoded.manifest,source,package:{sha256:release.digest,size:bytes.length},dataCompatibility:data,moves:identity.moves.map(({from,to})=>({from,to})),expiresAt:Date.now()+15*60*1000};
+ }
+ async function resume(){return lock(async()=>{const active=await readOptional(activePath);if(!active)return null;assert(OPTIONAL_APPLICATION_MIGRATIONS[active.from]===active.to&&/^[a-f0-9-]{36}$/.test(active.operationId),'APP_ID_MIGRATION_DATA','迁移恢复记录无效，保留现场。');await assertIdle(active.from,active.to);const folder=join(root,homeRelative,active.operationId);await applyApplicationIdentityMigration(root,folder,{fault});await rm(activePath);return{from:active.from,to:active.to,resumed:true};});}
+ async function apply(input){assert(input.trusted===true,'APP_TRUST_REQUIRED','请先核对迁移目标及数据保全范围。');const plan=previews.get(input.token);assert(plan&&plan.expiresAt>Date.now()&&plan.planDigest===input.planDigest,'APP_ID_MIGRATION_EXPIRED','迁移预览已过期或发生变化，请重新核对。',409);
+  return lock(async()=>{const currentState=await readState(),done=currentState.installed[plan.to];if(!currentState.installed[plan.from]&&done?.legacyIds?.includes(plan.from)&&done.active.digest===plan.release.digest)return{from:plan.from,to:plan.to,migrated:true,replayed:true};assert(!await readOptional(activePath),'APP_ID_MIGRATION_PENDING','已有身份迁移尚未完成。',409);await assertIdle(plan.from,plan.to);const current=await readFile(join(root,stateRelative));assert(checksum(current)===plan.identity.edits.at(-1).before,'APP_STATE_CHANGED','安装状态已变化，请重新预览。',409);
+   const identity=await inspectApplicationIdentityMigration(root,{[plan.from]:plan.to}),expected={...plan.identity,edits:plan.identity.edits.slice(0,-1)};assert(JSON.stringify(identity)===JSON.stringify(expected),'APP_DATA_CONFLICT','数据或宿主归属在预览后变化，请重新核对迁移。',409);
+   stageApplicationPackages(root,{packages:[{release:plan.release,archive:plan.bytes}]});const operationId=randomUUID(),folder=join(root,homeRelative,operationId);await mkdir(folder,{recursive:true});await prepareApplicationIdentityMigration(root,folder,plan.identity,{fault});
+   await atomicJSON(activePath,{operationId,from:plan.from,to:plan.to});await assertIdle(plan.from,plan.to);await applyApplicationIdentityMigration(root,folder,{fault});await rm(activePath);return{from:plan.from,to:plan.to,installationId:(await readState()).installed[plan.to].installationId,migrated:true};
+  });
+ }
+ return{guard,preview,apply,resume};
+}

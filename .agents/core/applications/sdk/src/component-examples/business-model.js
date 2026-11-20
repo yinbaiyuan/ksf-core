@@ -1,0 +1,6 @@
+// Local composition examples only. Application services remain the source of business decisions.
+export function amountToCents(text){const match=/^(\d{1,9})(?:\.(\d{0,2}))?$/.exec(String(text));return match?Number(match[1])*100+Number((match[2]??'').padEnd(2,'0')):null;}
+export function money(cents,currency='CNY'){return new Intl.NumberFormat('zh-CN',{style:'currency',currency}).format((Number.isSafeInteger(cents)?cents:0)/100);}
+export function nearestFreeSlot(request,duration,occupied,min=540,max=1080,step=15){if(!Number.isFinite(duration)||duration<=0||duration>max-min)return null;const choices=[];for(let n=min;n+duration<=max;n+=step)if(!occupied.some(([a,b])=>n<b&&n+duration>a))choices.push(n);return choices.sort((a,b)=>Math.abs(a-request)-Math.abs(b-request)||a-b)[0]??null;}
+export function timeLabel(minutes){const n=((Math.round(minutes)%1440)+1440)%1440;return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
+export function testCardValid(digits){if(!/^\d{13,19}$/.test(digits))return false;let sum=0;for(let n=digits.length-1,alternate=false;n>=0;n--,alternate=!alternate){let x=Number(digits[n]);if(alternate){x*=2;if(x>9)x-=9;}sum+=x;}return sum%10===0;}

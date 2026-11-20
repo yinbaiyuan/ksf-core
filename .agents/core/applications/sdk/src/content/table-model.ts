@@ -1,0 +1,4 @@
+export interface TableSort {column:string;direction:'ascending'|'descending'}
+export interface TableFilterOption {value:string;label:string}
+export interface TableProcessColumn<T> {id:string;sort?:(a:T,b:T)=>number;filter?:{options:readonly TableFilterOption[];match:(row:T,value:string)=>boolean}}
+export function processTableRows<T>(rows:readonly T[],columns:readonly TableProcessColumn<T>[],sort:TableSort|null,filters:Readonly<Record<string,string>>){const matches=rows.map((row,index)=>({row,index})).filter(({row})=>columns.every(column=>!filters[column.id]||!column.filter||column.filter.match(row,filters[column.id])));const column=columns.find(c=>c.id===sort?.column);if(column?.sort&&sort){const compare=column.sort,direction=sort.direction==='ascending'?1:-1;matches.sort((a,b)=>direction*compare(a.row,b.row)||a.index-b.index);}return matches.map(({row})=>row);}

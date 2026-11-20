@@ -1,0 +1,1 @@
+import {useState} from 'react';import {SubscribeButton} from '@ksf/sdk/subscribe-button';export default function Example(){const [subscribed,setSubscribed]=useState(false);return <SubscribeButton subscribed={subscribed} onSubscribedChange={setSubscribed}/>;}

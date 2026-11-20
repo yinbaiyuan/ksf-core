@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {configurationDifferences} from '../src/desktop/settings-comparison.ts';
+import {createSettingsReloadParticipant} from '../src/desktop/settings-reload.ts';
+import {DocumentReloadCoordinator} from '../src/ui-runtime/reload-model.ts';
 import {ConfigurationPreferences,type ConfigurationRequest,type ConfigurationSnapshot} from '../src/configuration-preferences.ts';
 function backend(){
  let value={name:'实例值'},version=1,posts=0,failAfterCommit=false,unreachable=false;
@@ -37,7 +40,7 @@ test('legacy migration is explicit, version-checked and repeatable without dupli
  await store.importLegacy();assert.equal(b.posts,1);assert.equal(store.getSnapshot().legacy,null);await store.importLegacy();assert.equal(b.posts,1);
 });
 test('unavailable backend leaves a visible unsaved draft without automatic retry',async()=>{
- const b=backend(),store=b.make();await store.load();b.offline();store.update({name:'离线草稿'});await store.flush();assert.equal(store.getSnapshot().status,'failed');assert.equal(store.getSnapshot().dirty,true);assert.equal(b.posts,0);
+ const b=backend(),store=b.make();await store.load();b.offline();store.update({name:'离线草稿'});await store.flush();assert.equal(store.getSnapshot().status,'unknown');assert.equal(store.getSnapshot().dirty,true);assert.equal(b.posts,0);
 });
 
 test('automatic reconciliation rereads after a concurrent write and recomputes without replacing it',async()=>{
@@ -54,9 +57,47 @@ test('automatic reconciliation defers held layouts and never discards a newer ma
 });
 
 
-test('failed automatic saves remain unconfirmed and are recomputed after reconnection',async()=>{
+test('unknown automatic saves retain their submission and are recomputed after reconnection',async()=>{
  const b=backend(),store=b.make();await store.load();b.offline();await store.reconcile(value=>({name:value.name+'+自动'}));
- assert.equal(store.getSnapshot().status,'failed');assert.equal(b.posts,0);
+ assert.equal(store.getSnapshot().status,'unknown');assert.equal(b.posts,0);
  b.online();await store.load();await store.reconcile(value=>({name:value.name+'+自动'}));
  assert.equal(store.getSnapshot().value.name,'实例值+自动');assert.equal(store.getSnapshot().status,'saved');assert.equal(b.posts,1);
+});
+test('manual preview never autosaves, including newer input received during its explicit save',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});const b=backend();let release:()=>void=()=>{};
+ const request:ConfigurationRequest=async<R>(url:string,input?:unknown)=>{if(input)await new Promise<void>(resolve=>{release=resolve;});return b.request<R>(url,input);};
+ const store=new ConfigurationPreferences('appearance','preferences',{name:'默认'},request);await store.load();store.beginManual();store.edit({name:'预览一'});t.mock.timers.tick(1000);assert.equal(b.posts,0);
+ const pending=store.flush();store.edit({name:'预览二'});release();await pending;t.mock.timers.tick(1000);
+ assert.equal(b.posts,1);assert.equal(store.getSnapshot().value.name,'预览二');assert.equal(store.getSnapshot().dirty,true);assert.equal(store.getSaveSnapshot().committed?.value.value.name,'预览一');assert.equal(store.getSaveSnapshot().status,'pending');
+ store.endManual();assert.equal(store.isManualEditing,true);await store.discardDraft();store.endManual();assert.equal(store.isManualEditing,false);
+});
+test('a manual unknown request cannot be discarded or released before its original outcome is reconciled',async()=>{
+ const b=backend(),store=b.make();await store.load();store.beginManual();store.edit({name:'原未知草稿'});b.offline();await store.flush();const pending=store.getSaveSnapshot().pending;
+ assert.ok(pending);assert.equal(store.getSnapshot().status,'unknown');store.endManual();assert.equal(store.isManualEditing,true);assert.equal(await store.discardDraft(),false);assert.equal(store.getSaveSnapshot().pending?.operationId,pending.operationId);assert.equal(store.getSnapshot().value.name,'原未知草稿');assert.equal(b.posts,0);
+ b.online();await store.retry();assert.equal(store.getSnapshot().status,'saved');assert.equal(b.posts,1);store.endManual();assert.equal(store.isManualEditing,false);
+});
+test('discarding a manual preview restores the latest committed service value without writing the preview',async()=>{
+ const b=backend(),store=b.make();await store.load();store.beginManual();store.edit({name:'临时预览'});b.change('最新外部值');await store.load();assert.equal(store.getSnapshot().value.name,'临时预览');
+ assert.equal(await store.discardDraft(),true);assert.equal(store.getSnapshot().value.name,'最新外部值');assert.equal(store.getSnapshot().dirty,false);assert.equal(b.posts,0);store.endManual();assert.equal(store.isManualEditing,false);
+});
+
+test('settings comparisons expose changed leaves without burying them under unchanged profiles',()=>{
+ const shared={profiles:{window:{blur:18,opacity:.9}},themeMode:'dark'},draft={...shared,desktop:{iconSize:82,gap:48},motion:true},latest={...shared,desktop:{iconSize:84,gap:48}};
+ const before=structuredClone({draft,latest});
+ assert.deepEqual(configurationDifferences(draft,latest),[{field:'desktop.iconSize',draft:82,latest:84},{field:'motion',draft:true,latest:'未设置'}]);
+ assert.deepEqual({draft,latest},before);assert.deepEqual(configurationDifferences(latest,latest),[]);
+ assert.deepEqual(configurationDifferences({list:[1,2]},{list:[2,1]}),[{field:'list',draft:[1,2],latest:[2,1]}]);
+});
+
+test('document reload stops before checkpoint for dirty, busy or unresolved settings',async()=>{
+ const state={open:true,location:'appearance',epoch:1,dirty:false,busy:false,unresolved:false};let checkpoints=0,navigations=0;
+ const participant=createSettingsReloadParticipant('settings',()=>({...state})),coordinator=new DocumentReloadCoordinator({participants:()=>[participant],snapshot:()=>({topology:'same',value:{}}),freeze:()=>()=>{},checkpoint:async()=>{checkpoints++;return {resumeToken:'test'};},navigate:()=>{navigations++;},cancelNavigation:()=>{}});
+ for(const key of ['dirty','busy','unresolved'] as const){state[key]=true;assert.equal(await coordinator.request(),false);assert.match(coordinator.getSnapshot().error??'',/未保存|未决提交/);assert.equal(checkpoints,0);assert.equal(navigations,0);state[key]=false;coordinator.dismissFailure();}
+ assert.equal(await coordinator.request(),true);assert.equal(checkpoints,1);assert.equal(navigations,1);coordinator.dispose();
+});
+
+test('settings preparation is rechecked at the actual document navigation boundary',async()=>{
+ const state={open:true,location:'appearance',epoch:1,dirty:false,busy:false,unresolved:false};let navigations=0;
+ const participant=createSettingsReloadParticipant('settings',()=>({...state})),coordinator=new DocumentReloadCoordinator({participants:()=>[participant],snapshot:()=>({topology:'same',value:{}}),freeze:()=>()=>{},checkpoint:async()=>{state.epoch++;return {resumeToken:'test'};},navigate:()=>{navigations++;},cancelNavigation:()=>{}});
+ assert.equal(await coordinator.request(),false);assert.equal(navigations,0);assert.match(coordinator.getSnapshot().error??'',/又有新内容/);coordinator.dispose();
 });

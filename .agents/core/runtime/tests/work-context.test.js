@@ -5,7 +5,7 @@ import { writeFileSync, readFileSync, mkdirSync, existsSync, unlinkSync } from '
 import { join } from 'node:path';
 import { routingFixture } from './helpers/routing-fixture.js';
 import { enableChat, readChat, readChatContext } from '../src/services/chat.js';
-import { readCurrentWork, bindCurrentWork, currentWorkContext, acceptWorkContext, resetWorkContext, createWorkContext, CURRENT_WORK_KEY } from '../src/services/work-context.js';
+import { readCurrentWork, bindCurrentWork, currentWorkContext, acceptWorkContext, resetWorkContext, executeCurrentTask, createWorkContext, CURRENT_WORK_KEY } from '../src/services/work-context.js';
 import { workContextHook, installContextHooks } from '../src/services/context-hook.js';
 import { runContextCommand } from '../src/commands/context.js';
 import {project} from '../src/services/projects.js';
@@ -79,6 +79,12 @@ test('base entry acknowledgment does not retire work and avoids startup duplicat
  const f=fixture(t),env={CODEX_THREAD_ID:f.identity.sessionId};const e=JSON.parse((await runContextCommand(['entry','--json'],f.root,{env})).stdout);assert(e.data.delivery);f.accept({delivery:e.data.delivery});
  f.bind();let p=f.get();assert.equal(p.bodies.length,2);f.accept(p);const active=p.active.length;
  const e2=JSON.parse((await runContextCommand(['entry','--json'],f.root,{env})).stdout);f.accept({delivery:e2.data.delivery});p=f.get();assert.equal(p.active.length,active);assert.equal(p.retired.length,0);assert.equal(p.bodies.length,0);
+});
+test('entry without a native identity stays usable and reports why no delivery was offered',async t=>{
+ const f=fixture(t),e=JSON.parse((await runContextCommand(['entry','--json'],f.root,{env:{}})).stdout);
+ assert.equal(e.ok,true);assert.equal(e.data.delivery,undefined);assert.equal(e.data.deliveryIssue.code,'ROUTE_IDENTITY_REQUIRED');
+ const c=JSON.parse((await runContextCommand(['entry','--json'],f.root,{env:{CLAUDE_CODE_SESSION_ID:f.identity.sessionId}})).stdout);
+ assert(c.data.delivery);assert.equal(c.data.deliveryIssue,undefined);
 });
 test('turn-local support never changes primary binding and clear retires current work',t=>{
  const f=fixture(t);f.bind();f.accept(f.get());const p=f.get({extras:[{ref:'competency.test.b@0.1.0',source:'system'}]});assert.equal(readCurrentWork(f.o).current.executor.ref,'competency.test.a@0.1.0');f.accept(p);
@@ -161,4 +167,15 @@ test('old taskRef resolves numbered task after migration without rewriting anoth
  const read=()=>projectGovernance({root:f.root,name:'demo'}).data;const initial=read();assert.deepEqual(projectGovernance({root:f.root,name:'demo',operation:'apply',data:{operationId:'context-seed-numbering',ifMatch:initial.etag,changes:[[pp,p],[mp,m],[tp,task]].map(([path,metadata])=>({path,ifMatch:path===pp?initial.project.etag:'missing',metadata,body:'# 原始任务\n'}))}}).errors,[]);
  f.bind({...f.current(),taskRef:tp});f.accept(f.get());const before=readCurrentWork(f.o),data={operationId:'context-task-numbering',ifMatch:read().etag,actor:'测试',reason:'更换展示编号',milestones:[{id:'m1',task_stages:[{code:'B',name:'实施',purpose:'取得结果',exit_criteria:'可以验收'}],tasks:[{id:'t1',code:'B1'}]}]},preview=projectGovernance({root:f.root,name:'demo',operation:'renumber',data,dryRun:true});assert.deepEqual(preview.errors,[]);assert.deepEqual(projectGovernance({root:f.root,name:'demo',operation:'renumber',data:{...data,ifMatch:preview.data.ifMatch}}).errors,[]);
  const packet=f.get();assert(packet.complete);assert(packet.active.some(x=>x.path?.includes('/B1-执行/task.md')));assert.equal(readCurrentWork(f.o).etag,before.etag);assert.equal(readCurrentWork(f.o).current.taskRef,tp);f.accept(packet);assert(f.get().complete);
+});
+
+test('execution ownership is separate from binding and clears only the same chat on pause or exit',async t=>{
+ const {defaultMetadata}=await import('../src/projects/governance/model.js'),{projectGovernance}=await import('../src/services/project-governance.js');const f=fixture(t);f.addProject('demo');const pp='项目/demo/project.md',mp='项目/demo/M1-交付/milestone.md',tp='项目/demo/M1-交付/B1-执行/task.md';
+ const p={...defaultMetadata('project','p1','demo'),status:'active',criteria:[{id:'p',text:'取得结果'}],milestones:[{id:'m1',path:mp}]},m={...defaultMetadata('milestone','m1','交付'),status:'active',criteria:[{id:'m',text:'阶段结果'}],task_stages:[{code:'B',name:'执行',purpose:'取得结果',exit_criteria:'可核验'}],project:{id:'p1',path:pp},tasks:[{id:'t1',path:tp}]},task={...defaultMetadata('task','t1','执行'),task_code:'B1',status:'active',owner:'Agent',next_action:'实际执行',criteria:[{id:'t',text:'取得结果'}],commitment:'now',project:{id:'p1',path:pp},milestone:{id:'m1',path:mp}};
+ const initial=projectGovernance({root:f.root,name:'demo'}).data;assert.deepEqual(projectGovernance({root:f.root,name:'demo',operation:'apply',data:{operationId:'claim-context-seed',ifMatch:initial.etag,changes:[[pp,p],[mp,m],[tp,task]].map(([path,metadata])=>({path,ifMatch:path===pp?initial.project.etag:'missing',metadata,body:'# 原件'}))}}).errors,[]);
+ f.bind({...f.current(),taskRef:tp});assert.equal(readCurrentWork(f.o).execution.claim,null);
+ const a=executeCurrentTask({...f.o,input:{action:'acquire'}});assert(a.claim.owned);
+ const second={...f.o,identity:{host:'codex',sessionId:randomUUID()}};bindCurrentWork({...second,current:readCurrentWork(f.o).current,ifMatch:readCurrentWork(second).etag});assert(readCurrentWork(second).executionBlocked);assert(currentWorkContext(second).complete);assert.throws(()=>executeCurrentTask({...second,input:{action:'acquire'}}),{code:'PROJECT_EXECUTION_BUSY'});
+ f.bind({...readCurrentWork(f.o).current,status:'paused'});assert.equal(readCurrentWork(second).execution.claim,null);const b=executeCurrentTask({...second,input:{action:'acquire'}});assert(b.claim.owned);f.bind(null);assert.equal(readCurrentWork(second).execution.claim.token,b.claim.token);
+ bindCurrentWork({...second,current:null,ifMatch:readCurrentWork(second).etag});assert.equal(projectGovernance({root:f.root,name:'demo'}).data.executionClaims.t1,undefined);
 });

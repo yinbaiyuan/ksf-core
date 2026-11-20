@@ -1,0 +1,19 @@
+/* Static pleats remain visible while loading or without WebGL. */
+.workbench-backdrop.is-drape {
+  --drape-lit: #fff;
+  --drape-shade: #d4d4d8;
+  --drape-base: #f4f4f5;
+  background: repeating-linear-gradient(94deg,var(--drape-shade) 0%,var(--drape-lit) 2.4%,var(--drape-base) 4.1%,var(--drape-shade) 6.5%);
+  filter: none;
+}
+.host-theme-dark .workbench-backdrop.is-drape {
+  --drape-lit: #27272a;
+  --drape-shade: #000;
+  --drape-base: #09090b;
+}
+.drape-background { position:absolute; inset:0; overflow:hidden; background:transparent; }
+.drape-lit,.drape-shade { display:none; }
+.drape-lit { color:var(--drape-lit); }
+.drape-shade { color:var(--drape-shade); }
+.drape-canvas-layer { position:absolute; inset:0; pointer-events:none; }
+.drape-canvas { width:100%; height:100%; display:block; opacity:0; }

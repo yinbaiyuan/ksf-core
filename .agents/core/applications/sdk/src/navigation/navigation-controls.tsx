@@ -1,0 +1,20 @@
+import {forwardRef,type HTMLAttributes,type ReactNode,type RefObject,type CSSProperties} from 'react';
+import {cx} from '../primitives/state';
+import './navigation.css';
+export interface TabItem {id:string;label:ReactNode;content?:ReactNode;tabId?:string;panelId?:string;disabled?:boolean;closable?:boolean}
+export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>,'defaultValue'|'onChange'> {label:string;items:readonly TabItem[];value?:string;defaultValue?:string;onValueChange?:(id:string)=>void;activation?:'auto'|'manual';orientation?:'horizontal'|'vertical';appearance?:'line'|'card';unmountInactive?:boolean;onClose?:(id:string)=>void;onAdd?:()=>void;size?:'small'|'medium'|'large';alignment?:'start'|'center'|'end';placement?:'top'|'bottom'|'start'|'end';extra?:ReactNode;indicatorStyle?:CSSProperties;barStyle?:CSSProperties}
+export {Tabs} from './tabs-control';
+export interface BreadcrumbItem {label:ReactNode;href?:string;onClick?:()=>void}
+export interface BreadcrumbProps extends HTMLAttributes<HTMLElement> {items:readonly BreadcrumbItem[];separator?:ReactNode;label?:string}
+export const Breadcrumb=forwardRef<HTMLElement,BreadcrumbProps>(function Breadcrumb({items,separator='/',label='当前位置',className='',...props},ref){return <nav {...props} ref={ref} aria-label={label} className={cx('ksf-breadcrumb',className)}><ol>{items.map((item,index)=><li key={index}>{index>0&&<span className="ksf-breadcrumb-separator" aria-hidden="true">{separator}</span>}{index===items.length-1?<span aria-current="page">{item.label}</span>:item.href?<a href={item.href} onClick={item.onClick}>{item.label}</a>:item.onClick?<button type="button" onClick={item.onClick}>{item.label}</button>:<span>{item.label}</span>}</li>)}</ol></nav>;});
+export interface NavigationItem {id:string;label:ReactNode;icon?:ReactNode;href?:string;children?:readonly NavigationItem[];disabled?:boolean}
+export interface NavigationListProps extends Omit<HTMLAttributes<HTMLElement>,'onSelect'> {label:string;items:readonly NavigationItem[];selectedId?:string;onSelect?:(id:string)=>void;expandedIds?:readonly string[];defaultExpandedIds?:readonly string[];onExpandedChange?:(ids:string[])=>void;collapsed?:boolean;layout?:'vertical'|'horizontal';onlyOneExpanded?:boolean;selectBranches?:boolean}
+export {NavigationList} from './navigation-list-control';
+export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>,'onChange'> {total:number;page?:number;defaultPage?:number;onPageChange?:(page:number)=>void;pageSize?:number;defaultPageSize?:number;onPageSizeChange?:(size:number)=>void;pageSizes?:readonly number[];showSizeChanger?:boolean;showQuickJumper?:boolean;compact?:boolean;disabled?:boolean;label?:string;align?:'start'|'center'|'end';size?:'small'|'medium';showTotal?:boolean|((range:{from:number;to:number;total:number})=>ReactNode);previousLabel?:ReactNode;nextLabel?:ReactNode;renderPage?:(page:number,active:boolean)=>ReactNode}
+export {Pagination} from './pagination-control';
+export interface AnchorItem {id:string;label:string}
+export interface AnchorProps extends Omit<HTMLAttributes<HTMLElement>,'onSelect'> {items:readonly AnchorItem[];container:RefObject<HTMLElement|null>;label?:string;offset?:number;onSelect?:(id:string)=>void;onActiveChange?:(id:string)=>void;orientation?:'vertical'|'horizontal';activeStyle?:CSSProperties}
+export {Anchor} from './anchor-control';
+export interface StepItem {id:string;title:ReactNode;description?:ReactNode;status?:'wait'|'process'|'finish'|'error';disabled?:boolean;icon?:ReactNode}
+export interface StepsProps extends Omit<HTMLAttributes<HTMLOListElement>,'onSelect'> {label?:string;items:readonly StepItem[];current?:number;status?:'process'|'error';orientation?:'horizontal'|'vertical';size?:'small'|'medium';onStepSelect?:(index:number)=>void;variant?:'line'|'dot'|'navigation'|'inline'|'panel';labelPlacement?:'inline'|'below';progress?:number;maxVisible?:number;renderMarker?:(item:StepItem,index:number,status:'wait'|'process'|'finish'|'error')=>ReactNode}
+export {Steps} from './steps-control';

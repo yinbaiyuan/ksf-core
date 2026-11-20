@@ -1,16 +1,16 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, type CSSProperties, type RefObject } from 'react';
 import { Surface } from '../vendor/liquid-surface';
 import { createSpring } from '../vendor/liquid-glass';
 import { shadowCSS, tintColor, type ProfileId } from '../material-settings';
 import { useMaterial } from './material-provider';
 import { useWindowContext } from '../window-context';
-type Props = { mode?: 'wallpaper' | 'frost'; variant?: 'panel' | 'selection' | 'button'; profile?: ProfileId; blur?: number; strength?: number; backdrop?: string };
+type Props = { geometryAnchor?: RefObject<HTMLElement | null>; mode?: 'wallpaper' | 'frost'; variant?: 'panel' | 'selection' | 'button'; profile?: ProfileId; blur?: number; strength?: number; backdrop?: string };
 // Application content uses solid surfaces. No controller, observer or filter is mounted.
 export function GlassSurface(props: Props) {
   const { id } = useWindowContext();
   return id === 'standalone' ? <RefractiveSurface {...props} /> : null;
 }
-function RefractiveSurface({ mode = 'wallpaper', variant = 'panel', profile: id, blur, strength, backdrop = '.workbench-backdrop' }: Props) {
+function RefractiveSurface({ mode = 'wallpaper', variant = 'panel', profile: id, blur, strength, backdrop = '.workbench-backdrop', geometryAnchor }: Props) {
   const { settings } = useMaterial();
   const profile = settings.profiles[id ?? (mode === 'frost' ? 'drawer' : variant === 'button' ? 'button' : variant === 'selection' ? 'chat' : 'directory')];
   const host = useRef<HTMLSpanElement>(null), surfaceRef = useRef<Surface | null>(null);
@@ -21,7 +21,7 @@ function RefractiveSurface({ mode = 'wallpaper', variant = 'panel', profile: id,
     const node = host.current, parent = node?.parentElement;
     if (!node || !parent) return;
     node.setAttribute('backdrop', mode === 'wallpaper' ? backdrop : 'none');
-    const surface = new Surface(node, { owner: node, radius: current.current.radius, bleed: 28, optics: opticsRef.current });
+    const surface = new Surface(node, { owner: node, geometryAnchor: geometryAnchor?.current ?? undefined, radius: current.current.radius, bleed: 28, optics: opticsRef.current });
     surfaceRef.current = surface;
     const transparency = matchMedia('(prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active)');
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -49,7 +49,7 @@ function RefractiveSurface({ mode = 'wallpaper', variant = 'panel', profile: id,
     transparency.addEventListener('change', sync); motion.addEventListener('change', stopMotion);
     sync();
     return () => { events.abort(); spring.stop(); transparency.removeEventListener('change', sync); motion.removeEventListener('change', stopMotion); surface.detach(); surface.root.remove(); surfaceRef.current = null; };
-  }, [mode, variant, backdrop, profile.stiffness, profile.damping, settings.motion]);
+  }, [mode, variant, backdrop, profile.stiffness, profile.damping, settings.motion, geometryAnchor]);
   useEffect(() => { surfaceRef.current?.setOptics(opticsRef.current, profile.radius); }, [profile, blur, strength]);
   useEffect(() => { surfaceRef.current?.refreshBackdrop(); }, [settings.backdrop]);
   const style = { '--lg-tint': tintColor(profile), '--lg-shadow-2': shadowCSS(profile), '--lg-fallback': `blur(${profile.blur}px) saturate(1.6)` } as CSSProperties;

@@ -1,0 +1,3 @@
+import Source from '../fidelity/kokonut/ai-checkout';import {FidelityScope} from '../fidelity/scope';import {useLocalRequest} from './local-request';import {EmptyState} from '../empty-state';
+/** Fixed free-source composition using fictional local data; it never executes a business service. */
+export function CheckoutReviewView({simulateFailure=false}:{simulateFailure?:boolean}={}){const task=useLocalRequest();return <div ref={task.ref} style={{width:"100%",maxWidth:448,minWidth:0,marginInline:"auto"}}><FidelityScope module="ai-checkout"><Source onPay={()=>task.request("7F2K",1500,simulateFailure?"模拟付款失败，未发生扣款。":undefined)}/></FidelityScope></div>;}

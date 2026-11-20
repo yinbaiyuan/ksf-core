@@ -3,7 +3,7 @@ import {join,dirname,relative,resolve} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 import {assert} from '../services/workbench-common.js';
 import {atomicJSON,replaceFile,syncDirectory} from '../shared/durable-json.js';
-import {LEGACY_APPLICATION_IDS,migrateDesktopApplicationIds} from '../applications/identities.js';
+import {LEGACY_APPLICATION_IDS,OPTIONAL_APPLICATION_MIGRATIONS,migrateDesktopApplicationIds} from '../applications/identities.js';
 export {LEGACY_APPLICATION_IDS};
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const exists=async path=>{try{return await lstat(path);}catch(e){if(e.code==='ENOENT')return null;throw e;}};
@@ -16,7 +16,7 @@ async function inventory(root,path){
 }
 /** Only host-owned identity fields are rewritten. Message manifests and application business data remain byte-identical. */
 export async function inspectApplicationIdentityMigration(root,mapping){
- for(const [old,id] of Object.entries(mapping))assert(Object.hasOwn(LEGACY_APPLICATION_IDS,old)&&LEGACY_APPLICATION_IDS[old]===id,'APP_ID_MIGRATION_MAP','只允许已登记的一次性身份映射。');
+ for(const [old,id] of Object.entries(mapping))assert(Object.hasOwn(LEGACY_APPLICATION_IDS,old)&&LEGACY_APPLICATION_IDS[old]===id||OPTIONAL_APPLICATION_MIGRATIONS[old]===id,'APP_ID_MIGRATION_MAP','只允许已登记的一次性身份映射。');
  assert(new Set(Object.values(mapping)).size===Object.keys(mapping).length,'APP_ID_MIGRATION_COLLISION','多个旧身份映射到同一应用，保留全部数据并人工核对。',409);
  const moves=[],edits=[];
  for(const [old,id] of Object.entries(mapping))for(const [base,suffix] of [
@@ -27,7 +27,7 @@ export async function inspectApplicationIdentityMigration(root,mapping){
  const rename=id=>Object.hasOwn(mapping,id)?mapping[id]:id;
  async function edit(path,change){if(!await safe(root,join(root,path)))return;const bytes=await readFile(join(root,path));let value;try{value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch{assert(false,'APP_ID_MIGRATION_DATA','宿主记录损坏，保留原件：'+path);}
   const before=JSON.stringify(value);change(value);if(JSON.stringify(value)!==before){const next=Buffer.from(JSON.stringify(value)+'\n');edits.push({path,before:sha(bytes),after:sha(next),content:next.toString('base64')});}}
- await edit('.agents/user-data/desktop.json',v=>{if(v.values?.preferences){v.values.preferences=migrateDesktopApplicationIds(v.values.preferences);v.revision++;}});
+ await edit('.agents/user-data/desktop.json',v=>{if(v.values?.preferences){v.values.preferences=migrateDesktopApplicationIds(v.values.preferences);for(const group of v.values.preferences.groups??[])for(const item of group.layout??[])if(item.appId)item.appId=rename(item.appId);const installs=v.values.preferences.shortcuts?.installations;if(installs)v.values.preferences.shortcuts.installations=Object.fromEntries(Object.entries(installs).map(([id,value])=>[rename(id),value]));v.revision++;}});
  await edit('.agents/runtime-data/applications/policy.json',v=>{for(const key of ['manual','stopped']){assert(Array.isArray(v[key]),'APP_ID_MIGRATION_DATA','应用运行策略无效。');v[key]=v[key].map(rename);}});
  await edit('.agents/user-data/communication/config.json',v=>{
   const grants={};for(const [key,grant] of Object.entries(v.grants??{})){const split=key.indexOf('|'),next=rename(key.slice(0,split))+key.slice(split);assert(!Object.hasOwn(grants,next),'APP_ID_MIGRATION_COLLISION','通信授权目标冲突。');grants[next]=grant;}v.grants=grants;

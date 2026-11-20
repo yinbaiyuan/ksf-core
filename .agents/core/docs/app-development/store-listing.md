@@ -26,7 +26,7 @@ store/
 }
 ```
 
-路径相对 `store/`，不得越界或经过链接。图片支持PNG、JPEG和WebP，每张不超过8 MiB，最多8张截图；截图必须有有意义的alt。subtitle、description、releaseNotes分别限制120、12000、8000字符。资料缺失时使用Manifest说明和宿主图标。截图和介绍只陈述该版本的实际功能，不携带私人实例资料。
+路径相对 `store/`，不得越界或经过链接。应用图标仅支持PNG，可带透明通道；截图支持PNG、JPEG和WebP，每张不超过8 MiB，最多8张截图；截图必须有有意义的alt。subtitle、description、releaseNotes分别限制120、12000、8000字符。资料缺失时使用Manifest说明和宿主图标。截图和介绍只陈述该版本的实际功能，不携带私人实例资料。
 
 ## 构建与发布
 

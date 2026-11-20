@@ -1,0 +1,15 @@
+{
+  "name": "ksf-icon-codecs-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pngjs": "7.0.0"
+  },
+  "devDependencies": {
+    "rolldown": "1.2.15",
+    "@resvg/resvg-js": "2.6.2"
+  }
+}

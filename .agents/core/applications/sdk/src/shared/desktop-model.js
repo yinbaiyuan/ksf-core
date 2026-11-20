@@ -2,15 +2,41 @@ import {migrateDesktopApplicationIds} from './application-identities.js';
 export const LEGACY_DESKTOP_KEY = 'ksf.workbench.desktop.v1';
 export const PREVIOUS_DESKTOP_KEY = 'ksf.workbench.desktop.v2';
 export const DESKTOP_KEY = 'ksf.workbench.desktop.v3';
-export const SQUARE_GRID = { version: 'square-v1', cell: 96, gap: 24, maxCols: 12 };
+export const SQUARE_GRID = { version: 'square-v1', cell: 96, gap: 32, maxCols: 12 };
+export const DOCK_SIZE = { min: 28, max: 72, default: 44 };
+export function dockIconSize(value) {
+    return Number.isFinite(value) ? Math.max(DOCK_SIZE.min, Math.min(DOCK_SIZE.max, Math.round(value))) : DOCK_SIZE.default;
+}
+const validDockAppId = id => typeof id === 'string' && id.length > 0 && id.length <= 80 && id.trim() === id;
+export function setDockPinned(value, appId, pinned) {
+    if (!validDockAppId(appId)) return value;
+    const ids = value.dock?.pinnedAppIds ?? [];
+    if (ids.includes(appId) === pinned) return value;
+    return { ...value, dock: { ...value.dock, iconSize: dockIconSize(value.dock?.iconSize), pinnedAppIds: pinned ? [...ids, appId] : ids.filter(id => id !== appId) } };
+}
+// Pins have a stable order; running windows only add apps not already pinned.
+export function dockApplicationIds(pinned, running) {
+    return [...new Set([...(pinned ?? []), ...running])];
+}
+export function reorderDockPins(ids, appId, targetId) {
+    const from = ids.indexOf(appId), to = ids.indexOf(targetId);
+    if (from < 0 || to < 0 || from === to) return ids;
+    const result = [...ids];
+    result.splice(from, 1); result.splice(to, 0, appId);
+    return result;
+}
 export const groupIcons = ['home', 'grid', 'briefcase', 'book', 'star', 'code'];
 export const defaultLayout = () => [
     { i: 'work-stats', appId: 'com.ksf.conversations', cardId: 'work-stats', config: {}, name: '工作统计', x: 0, y: 0, w: 4, h: 2, minW: 1, minH: 1 },
 ];
-export function squareGridMetrics(available) {
-    const cols = Math.max(1, Math.min(SQUARE_GRID.maxCols, Math.floor((available + SQUARE_GRID.gap) / (SQUARE_GRID.cell + SQUARE_GRID.gap))));
-    const width = Math.max(1, available), cell = (width - (cols - 1) * SQUARE_GRID.gap) / cols;
-    return { cols, cell, gap: SQUARE_GRID.gap, width };
+export function squareGridMetrics(available, options = {}) {
+    const baseCell = Number.isFinite(options.cell) ? Math.max(1, options.cell) : SQUARE_GRID.cell;
+    const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap) : SQUARE_GRID.gap;
+    const cols = Math.max(1, Math.min(SQUARE_GRID.maxCols, Math.floor((available + gap) / (baseCell + gap))));
+    // Keep desktop slots compact instead of stretching them on wide screens.
+    const cell = Math.min(baseCell, Math.max(1, available));
+    const width = cols * cell + (cols - 1) * gap;
+    return { cols, cell, gap, width };
 }
 const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 function integralItem(item, cols) {
@@ -95,6 +121,83 @@ export function moveWidgetPositions(stored, projected, moved) {
         return before && after && (before.x !== after.x || before.y !== after.y) ? { ...item, x: after.x, y: after.y } : item;
     });
 }
+// Pack displaced items into the space vacated by the dragged card. Try their
+// translated positions first; backtrack only when different footprints need
+// a different arrangement. No unrelated item participates in the swap.
+function packSwapItems(items, origin, occupied, preferred) {
+    const order = [...items].sort((a, b) => b.w * b.h - a.w * a.h || b.h - a.h || a.i.localeCompare(b.i));
+    const candidates = order.map(item => {
+        const positions = [];
+        for (let y = origin.y; y <= origin.y + origin.h - item.h; y++)
+            for (let x = origin.x; x <= origin.x + origin.w - item.w; x++) {
+                const position = { ...item, x, y };
+                if (!occupied.some(other => overlaps(position, other))) positions.push(position);
+            }
+        const ideal = preferred.find(value => value.i === item.i);
+        return positions.sort((a, b) => Math.abs(a.x - ideal.x) + Math.abs(a.y - ideal.y) - Math.abs(b.x - ideal.x) - Math.abs(b.y - ideal.y));
+    });
+    if (candidates.some(list => !list.length)) return null;
+    const mask = item => {
+        let value = 0n;
+        for (let y = item.y; y < item.y + item.h; y++) for (let x = item.x; x < item.x + item.w; x++)
+            value |= 1n << BigInt((y - origin.y) * origin.w + x - origin.x);
+        return value;
+    };
+    const options = candidates.map(list => list.map(item => ({ item, mask: mask(item) }))), failed = new Set();
+    let available = options.flat().reduce((sum, option) => sum | option.mask, 0n), cells = 0;
+    while (available) { available &= available - 1n; cells++; }
+    if (order.reduce((sum, item) => sum + item.w * item.h, 0) > cells) return null;
+    const search = (index, used, placed) => {
+        if (index === order.length) return placed;
+        const key = `${index}:${used}`;
+        if (failed.has(key)) return null;
+        for (const option of options[index]) if (!(used & option.mask)) {
+            const result = search(index + 1, used | option.mask, [...placed, option.item]);
+            if (result) return result;
+        }
+        failed.add(key);
+        return null;
+    };
+    return search(0, 0n, []);
+}
+// Always resolve against the drag-start snapshot, including while previewing.
+export function settleWidgetDrop(stored, projected, id, destination, cols = SQUARE_GRID.maxCols, resize = false) {
+    const before = projected.find(item => item.i === id), source = stored.find(item => item.i === id);
+    if (!before || !source || ![destination.x, destination.y].every(Number.isFinite)) return stored;
+    if (resize && ![destination.w, destination.h].every(Number.isFinite)) return stored;
+    let moved = integralItem({ ...before, x: destination.x, y: destination.y,
+        ...(resize && source.kind !== 'app' ? { w: destination.w, h: destination.h } : {}) }, cols);
+    moved.x = Math.min(moved.x, cols - moved.w);
+    if (sameLayout([before], [moved])) return stored;
+    const hits = projected.filter(item => item.i !== id && overlaps(moved, item));
+    if (resize && hits.length || hits.some(item => !stored.some(value => value.i === item.i))) return stored;
+    const target = hits.length === 1 ? hits[0] : null, targetSource = target && stored.find(item => item.i === target.i);
+    // A small item dropped inside a larger card aligns with that card's origin.
+    // A large card keeps its requested rectangle when it covers smaller items.
+    if (target && !(moved.w >= target.w && moved.h >= target.h)) moved = { ...moved, x: target.x, y: target.y };
+    const displaced = hits.map(item => ({ ...item, x: item.x + before.x - moved.x, y: item.y + before.y - moved.y }));
+    const fits = (items, width) => items.every(item => item.x >= 0 && item.y >= 0 && item.x + item.w <= width &&
+        items.every(other => other.i === item.i || !overlaps(item, other)));
+    const resolve = positions => {
+        const visible = projected.map(item => item.i === id ? moved : positions.find(value => value.i === item.i) ?? item);
+        const next = stored.map(item => {
+            if (item.i === id) return { ...item,
+                x: targetSource ? targetSource.x + moved.x - target.x : moved.x,
+                y: targetSource ? targetSource.y + moved.y - target.y : moved.y,
+                ...(resize && source.kind !== 'app' ? { w: moved.w, h: moved.h } : {}) };
+            const position = positions.find(value => value.i === item.i);
+            return position ? { ...item, x: source.x + position.x - before.x, y: source.y + position.y - before.y } : item;
+        });
+        // Narrow projections must not rewrite sizes or repack bystanders.
+        return fits(visible, cols) && fits(next, SQUARE_GRID.maxCols) && sameLayout(fitWidgetLayout(next, cols), visible) ? next : null;
+    };
+    const direct = resolve(displaced);
+    if (direct) return direct;
+    if (!hits.length) return stored;
+    const occupied = [...projected.filter(item => item.i !== id && !hits.some(hit => hit.i === item.i)), moved];
+    const packed = packSwapItems(hits, before, occupied, displaced);
+    return packed && resolve(packed) || stored;
+}
 function parseLayout(value, known, fallback) {
     if (!Array.isArray(value))
         return fallback;
@@ -118,6 +221,10 @@ export function parseDesktop(value, known = defaultLayout()) {
     if (!value || typeof value !== 'object' || ![1, 2, 3].includes(value.version))
         return fallback;
     const v = migrateDesktopApplicationIds(value);
+    if (v.dock && typeof v.dock === 'object' && !Array.isArray(v.dock)) {
+        fallback.dock = { iconSize: dockIconSize(v.dock.iconSize) };
+        if (Array.isArray(v.dock.pinnedAppIds)) fallback.dock.pinnedAppIds = [...new Set(v.dock.pinnedAppIds.filter(validDockAppId))].slice(0, 1000);
+    }
     if (v.shortcuts?.initialized === true && typeof v.shortcuts.homeGroupId === 'string' && v.shortcuts.installations && typeof v.shortcuts.installations === 'object')
         fallback.shortcuts = { initialized:true, homeGroupId:v.shortcuts.homeGroupId, installations:{...v.shortcuts.installations} };
     const readLayout = (layout, fallbackLayout) => {
@@ -180,26 +287,16 @@ export function adjustWidgetLayout(layout, id, dx, dy, resize = false, cols = SQ
     const next = fitWidgetLayout(layout, cols), item = next.find(w => w.i === id);
     if (!item)
         return next;
+    const destination = { ...item };
     if (resize && item.kind !== 'app') {
-        item.w = Math.max(Math.min(cols, item.minW ?? 1), Math.min(cols - item.x, Math.round(item.w + dx)));
-        item.h = Math.max(item.minH ?? 1, Math.min(12, Math.round(item.h + dy)));
+        destination.w = Math.max(Math.min(cols, item.minW ?? 1), Math.min(cols - item.x, Math.round(item.w + dx)));
+        destination.h = Math.max(item.minH ?? 1, Math.min(12, Math.round(item.h + dy)));
     }
     else if (!resize) {
-        item.x = Math.max(0, Math.min(cols - item.w, Math.round(item.x + dx)));
-        item.y = Math.max(0, Math.round(item.y + dy));
+        destination.x = Math.max(0, Math.min(cols - item.w, Math.round(item.x + dx)));
+        destination.y = Math.max(0, Math.round(item.y + dy));
     }
-    const intersects = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    const placed = [item];
-    // Like pointer editing, an occupied cell pushes the following cards down.
-    for (const other of next.filter(w => w !== item).sort((a, b) => a.y - b.y || a.x - b.x)) {
-        let collisions = placed.filter(w => intersects(w, other));
-        while (collisions.length) {
-            other.y = Math.max(...collisions.map(w => w.y + w.h));
-            collisions = placed.filter(w => intersects(w, other));
-        }
-        placed.push(other);
-    }
-    return next;
+    return settleWidgetDrop(layout, next, id, destination, cols, resize);
 }
 
 /** Reconcile a complete installed snapshot only. The marker and layout commit together. */

@@ -37,7 +37,7 @@ start/write 输入示例（通过标准输入传入）：
 
 ## 身份、轮次与版本
 
-默认身份为 `host: codex` 与环境 `CODEX_THREAD_ID`。其他宿主或无环境时，在输入增加 `identity: {host, sessionId}`，host 为小写字母开头的字母/数字/连字符名称。缺失身份明确报错，不用 cwd、项目名或摘要代替原生会话身份。
+默认身份依次取环境 `KSF_SESSION_HOST`+`KSF_SESSION_ID`（须同时设置）、`CODEX_THREAD_ID`（host: codex）、`CLAUDE_CODE_SESSION_ID`（host: claude-code）。其他宿主或无环境时，在输入增加 `identity: {host, sessionId}`，host 为小写字母开头的字母/数字/连字符名称。缺失身份明确报错，不用 cwd、项目名或摘要代替原生会话身份。
 
 本地随机密钥与 HMAC-SHA256 生成 sessionKey；密钥和记录分别为 `.agents/runtime-data/routing/v1/identity.key` 与 `<sessionKey>.json`，目录 0700、新文件 0600。原始 sessionId 不落盘。同一会话在不同 KSF 根有不同标识，密钥不可与已有记录分离清理。宿主原生轮次 ID 不作为前提；start 每次生成 KSF 处理轮次 UUID。
 

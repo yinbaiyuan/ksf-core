@@ -1,0 +1,1 @@
+import {PromiseTasksView} from '@ksf/sdk/component-examples/promise-tasks-view';export default function Example(){return <div style={{display:'grid',gap:12,width:'100%',justifyItems:'center'}}><PromiseTasksView/><p>发布、邀请、导出均为本地模拟；支持失败重试、撤销、悬停暂停及滑动关闭。</p></div>;}

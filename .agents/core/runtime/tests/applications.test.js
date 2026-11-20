@@ -1,3 +1,4 @@
+import {publishTerminal} from './helpers/optional-terminal.js';
 import {shellCommands,terminalText} from './helpers/platform.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -146,7 +147,7 @@ test('live HTTP server installs and runs an app without changing its health star
   await post('/api/apps/release', { instanceId: launch.body.data.id });
 });
 test('distributed Terminal uses a real PTY with UTF-8 output, resizing, Ctrl-C and isolated sessions', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'ksf-terminal-test-')), manager = createApplicationManager(root,{defaultSource:null}); t.after(async () => { await manager.close(); await rm(root, { recursive: true, force: true,maxRetries:8,retryDelay:50 }); });
+  const root = await mkdtemp(join(tmpdir(), 'ksf-terminal-test-')), store=join(root,'optional-source'); await publishTerminal(store); const manager = createApplicationManager(root,{defaultSource:null,storeDirectory:store}); t.after(async () => { await manager.close(); await rm(root, { recursive: true, force: true,maxRetries:8,retryDelay:50 }); });
   const app = await manager.previewInstall({appId:'com.ksf.terminal'}); assert.ok(app, 'current platform needs a distributed Terminal package');
   await manager.install({ trusted: true, sourceId: 'builtin', appId: app.manifest.id, version: app.manifest.version, digest: app.package.sha256 });
   const instance = await manager.launch(app.manifest.id, app.package.sha256), session = await manager.call(instance.id, 'create', { cols: 80, rows: 24 }); let cursor = 0;

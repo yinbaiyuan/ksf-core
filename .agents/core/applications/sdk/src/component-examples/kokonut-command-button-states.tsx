@@ -1,0 +1,1 @@
+import {CommandButton} from '@ksf/sdk/command-button';export default function Example(){return <div style={{display:'flex',gap:16,flexWrap:'wrap'}}><CommandButton shortcut="shift+n" shortcutScope="button">New</CommandButton><CommandButton shortcut="mod+s" disabled>Save</CommandButton><CommandButton shortcut="c" shortcutScope="button">Copy</CommandButton></div>;}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, symlinkSync, readdirSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, symlinkSync, readdirSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -147,7 +147,8 @@ test('missing latest payload cannot cause the last still usable rollback to be d
 test('cooperation migration journal is checked using its actual persisted schema', t => {
   const f = fixture(t); f.switchRun('2026-01-01'); f.switchRun('2026-01-02');
   const path = '.agents/runtime-data/cooperation-migration/state.json';
-  f.put(path, { schemaVersion: 1, root: f.root, status: 'applying', actions: [] });
+  // The migration writer records realpath(root); temp roots such as macOS /var are symlinked.
+  f.put(path, { schemaVersion: 1, root: realpathSync(f.root), status: 'applying', actions: [] });
   assert.throws(() => cleanupRuntimeArtifacts({ root: f.root, apply: true }), { code: 'MIGRATION_PENDING' });
   f.put(path, { schemaVersion: 1, root: f.root, status: 'complete', actions: [] });
   assert.equal(planRuntimeCleanup(f.root).candidates.length, 1);

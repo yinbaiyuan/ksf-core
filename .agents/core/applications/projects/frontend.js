@@ -5,6 +5,9 @@ import DOMPurify from 'dompurify';
 import { createConversationPanel } from './conversation.js';
 import { createProjectManagement } from './management-router.js';
 import {createProjectLifecycle} from './lifecycle.js';
+import {workspaceProjectKey,workspaceTarget,workspaceProjects,workspaceReadState} from './workspace-model.js';
+import {SaveController,createSessionSaveAdapter} from '@ksf/sdk/controllers';
+import {createWorkspaceSession} from './workspace-session.js';
 
 const names={backlog:'待梳理',ready:'待开始',review:'待验收',planned:'未开始',draft:'复盘草稿',in_progress:'进行中',blocked:'受阻',paused:'已暂停',completed:'已完成',cancelled:'已取消',unknown:'未标注',active:'进行中',archived:'已归档'};
 const icons={folder:'M3 7h6l2-3h9v16H3Z',search:'M16 16l5 5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',arrow:'M7 17 17 7M7 7h10v10',file:'M14 2H5v20h14V7ZM14 2v6h5M8 13h8M8 17h8',check:'m5 12 4 4L19 6',chat:'M3 3h18v14H8l-5 4Z',refresh:'M20 7v5h-5M4 17v-5h5M5 8a8 8 0 0 1 13-3l2 7M4 12l2 7a8 8 0 0 0 13-3',back:'m14 5-7 7 7 7',link:'m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0M14 8l2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0'};
@@ -47,23 +50,26 @@ export function mount(container,sdk){
   return mountProjectWindow(container,sdk,mountContent);
 }
 
-function mountContent(container,sdk,updateActions,contextMenu){
+function mountContent(container,sdk,updateActions,contextMenu,publishWorkspace,publishConversation){
   let alive=true,list=[],selected='',view='overview',scope='all',query='',detail=null,chatData=null,chatRecords=[];
   let request=0,listRequest=0,chatRequest=0,error='',listError='',notice='',loading=false,listLoading=true,chatLoading=false;
-  let listReady=false,lastDeep=null;
+  let listReady=false,lastDeep=null,pane='list',splitSize=30,detailError='',detailFailure='error',listFailed=false,listWarning='';
+  let domainPortals=[];
+  let recoveryReady=false,contextRevision=0,restoreContext=null,positions={listScroll:0,detailScroll:0},focusPin=null,focusSequence=0;
+  const recovery=createWorkspaceSession(sdk,{SaveController,createSessionSaveAdapter,onChange:()=>{if(alive)publish();}});
   let projectActions=null;
   let inspirationPanel=null;
   let pinnedProjects=new Set(),pinsReady=false,pinSaving=false,pinRevision=0,pinError='';
-  const projectKey=p=>p.scope+':'+p.name;
+  const projectKey=workspaceProjectKey;
   const root=el('div','ksf-projects');container.append(root);
-  const conversation=createConversationPanel(sdk,markdown);
+  const conversation=createConversationPanel(sdk,markdown,publishConversation);
   function prepareConversation(text){
     const token=request;
     setView('chats');
     void conversation.select(params()).then(()=>{if(alive&&token===request&&view==='chats')conversation.prefill(text);});
   }
   const management=createProjectManagement({
-    sdk,docLink,icon,contextMenu,canPreview:textFile,renderMarkdown:markdown,contextLink(entry){
+    sdk,docLink,icon,contextMenu,renderDomainSummary,onLocationChange:()=>checkpoint(),canPreview:textFile,renderMarkdown:markdown,contextLink(entry){
       const url=resourceURL(entry);
       if(url)return link(entry.name,url,'kp-source-link');
       const path=el('code','kp-muted',entry.path);
@@ -108,6 +114,7 @@ function mountContent(container,sdk,updateActions,contextMenu){
     const showObjectNavigation=selected&&view==='overview'&&!loading&&detail?.governance;
     updateActions({
       inspirationPanel,
+      conversation:selected&&detail?{active:view==='chats',open:()=>setView('chats')}:null,
       navigation:showObjectNavigation?management.navigation:null,
       projectActions:showObjectNavigation?projectActions:null,
       canReturn:!!selected&&!management.isSaving(),
@@ -117,89 +124,41 @@ function mountContent(container,sdk,updateActions,contextMenu){
     });
   }
 
-  const catalog=el('section','kp-catalog');
-  const catalogHead=el('header','kp-catalog-heading');
-  const catalogTitle=el('h1','','全部项目');
-  catalogTitle.tabIndex=-1;
-  const count=el('span','kp-catalog-count');
-  const catalogLabel=el('div','kp-catalog-label');
-  catalogLabel.append(catalogTitle,count);
-  const filters=el('div','kp-catalog-filters');
-  const searchLabel=el('label','kp-search');searchLabel.append(icon('search'));
-  const search=el('input');search.type='search';search.placeholder='搜索项目';search.setAttribute('aria-label','搜索项目');
-  searchLabel.append(search);
-  const scopeRow=el('div','kp-scope'),projectList=el('nav','kp-project-groups');
-  projectList.setAttribute('aria-label','项目列表');
-  scopeRow.setAttribute('role','group');
-  scopeRow.setAttribute('aria-label','项目范围');
-  filters.append(scopeRow,searchLabel);
-  catalogHead.append(catalogLabel,filters);
-  catalog.append(catalogHead,projectList);
-
   const message=el('div','kp-message'),content=el('section','kp-content');
-  message.setAttribute('role','status');
-  content.setAttribute('aria-label','项目内容');
-  content.tabIndex=-1;
-  main.append(message,lifecycle.node,catalog,content);
-  function params(){
-    const p=list.find(p=>projectKey(p)===selected);
-    return p?{name:p.name,scope:p.scope}:null;
+  message.setAttribute('role','status');content.setAttribute('aria-label','项目内容');content.tabIndex=-1;
+  main.append(message,lifecycle.node,content);
+  main.addEventListener('scroll',()=>checkpoint(),true);
+  function checkpoint(){if(recoveryReady)recovery.update({query,scope,selected,pane,splitSize,...positions,...management.getLocation(),...(view==='chats'?{projectView:'chats',...conversation.getLocation()}: {})});}
+  async function resumeClosed(){
+    const value=recovery.takeRecent();if(!value)return;
+    query=value.query;scope=value.scope;pane=value.pane;splitSize=value.splitSize;positions={listScroll:value.listScroll,detailScroll:value.detailScroll};restoreContext=value;contextRevision++;
+    if(value.selected){await choose(value.selected,{refresh:true,restoreLocation:value});pane=value.pane;}
+    notice='已恢复上次关闭的视图；项目和对象已重新读取。';publish();checkpoint();
   }
-  function showMessage(){const catalogError=selected?'':pinError;message.textContent=error||notice||listError||catalogError;message.classList.toggle('is-error',!!(error||listError||catalogError));message.hidden=!message.textContent;}
-  function renderScope(){
-    for(const b of scopeRow.children)b.setAttribute('aria-pressed',String(scope===b.dataset.scope));
+  function params(){return workspaceTarget(selected);}
+  function showMessage(){message.textContent=error||notice;message.classList.toggle('is-error',!!error);message.hidden=!message.textContent;}
+  function renderScope(){}
+  function renderList(){publish();}
+  function renderDomainSummary(document,facts,{stale=false}={}){
+    const host=el('div','kp-domain-summary-slot');host.tabIndex=-1;
+    domainPortals.push({key:document.path+':'+domainPortals.length,host,document,facts,stale});
+    queueMicrotask(()=>{if(alive)publish();});return host;
   }
-  for(const [id,title]of [['all','全部'],['current','当前'],['archived','已归档']]){
-    const b=btn(title,()=>{scope=id;renderScope();renderList();});
-    b.dataset.scope=id;
-    scopeRow.append(b);
-  }
-  function renderList(focusPinKey){
-    projectList.replaceChildren();
-    const entries=list.filter(p=>(scope==='all'||p.scope===scope)&&[p.title,p.name,p.description].some(value=>value?.toLocaleLowerCase().includes(query)));
-    count.textContent=listLoading&&!list.length?'':entries.length+' 个项目';
-    const pinned=entries.filter(p=>pinnedProjects.has(projectKey(p)));
-    const other=entries.filter(p=>!pinnedProjects.has(projectKey(p)));
-    if(pinned.length)appendProjectGroup(pinned,'已固定');
-    if(other.length)appendProjectGroup(other,pinned.length?'其他项目':'');
-    if(!entries.length)projectList.append(el('p','kp-empty-small',listLoading?'正在读取项目…':listError&&!list.length?'无法读取项目，请在标题栏刷新重试。':query?'没有匹配的项目':scope==='archived'?'还没有归档项目':'没有可读取的项目记录'));
-    if(focusPinKey&&!selected){
-      const focused=[...projectList.querySelectorAll('.kp-project-pin')].find(button=>button.dataset.projectKey===focusPinKey);
-      focused?.focus();
-    }
-  }
-  function appendProjectGroup(projects,label){
-    const section=el('section',label==='已固定'?'kp-project-group is-pinned':'kp-project-group');
-    if(label){
-      section.setAttribute('aria-label',label);
-      const heading=el('h2','kp-project-group-heading',label);
-      heading.append(el('span','kp-catalog-count',projects.length+' 个'));
-      section.append(heading);
-    }
-    const grid=el('div','kp-project-list');
-    for(const p of projects){
-      const id=projectKey(p),pinned=pinnedProjects.has(id);
-      const card=el('article','kp-project-card');
-      const b=btn('',()=>void choose(id,{focus:true}),'kp-project-item');
-      const title=el('span','kp-project-title');
-      title.append(el('strong','',p.title),badge(p.scope==='archived'?'archived':p.status));
-      b.append(title,el('span','kp-project-description',p.description||p.name));
-      const pin=btn('',()=>void togglePin(p),'kp-project-pin');
-      pin.append(icon('pin'));
-      pin.dataset.projectKey=id;
-      pin.title=pinned?'取消固定':'固定项目';
-      pin.setAttribute('aria-label','固定项目：'+p.title);
-      pin.setAttribute('aria-pressed',String(pinned));
-      pin.disabled=!pinsReady||listLoading;
-      card.append(b,pin);
-      grid.append(card);
-    }
-    section.append(grid);
-    projectList.append(section);
+  function publish(){
+    if(!alive||!publishWorkspace)return;
+    const projection=workspaceProjects(list,{query,scope,selected}),projectDocument=detail?.governance?.project??(detail?.metadata?{path:detail.path,metadata:detail.metadata}:null);
+    domainPortals=domainPortals.filter(portal=>main.contains(portal.host));
+    publishWorkspace({entries:projection.entries,pinned:[...pinnedProjects],selected,selectedTitle:list.find(project=>projectKey(project)===selected)?.title??params()?.name??'',query,scope,pane,splitSize,
+      listState:listLoading?(listReady?'refreshing':'loading'):listFailed?'error':'ready',listStale:listReady&&(listLoading||listFailed),listMessage:listError,listWarning:[listWarning,pinError,recovery.getIssue(),...(!selected?[notice,error]:[])].filter(Boolean).join('；'),
+      detailState:loading?(detail?'refreshing':'loading'):detailError?detailFailure:detail?'ready':'unavailable',detailStale:!!detail&&(loading||!!detailError),detailMessage:detailError,
+      selectionNotice:projection.excluded&&selected&&detail?'当前筛选未显示此项目，详情和选中身份仍保留。':'',legacyNode:main,projectDocument,portals:[...domainPortals],pinDisabled:!pinsReady||listLoading||pinSaving,focusPin,recent:!!recovery.getRecent(),resumeClosed,
+      positions,scroll:(kind,position)=>{positions={...positions,[kind]:position};checkpoint();},restoreContext,
+      choose:key=>void choose(key,{focus:true}),queryChange:value=>{contextRevision++;query=value;checkpoint();renderList();},scopeChange:value=>{if(['all','current','archived'].includes(value)){contextRevision++;scope=value;checkpoint();renderList();}},paneChange:value=>{contextRevision++;pane=value;checkpoint();publish();},splitChange:size=>{contextRevision++;splitSize=size;checkpoint();publish();},refreshList:()=>void reload(),refreshDetail:()=>void choose(selected,{refresh:true}),pin:key=>{const project=list.find(item=>projectKey(item)===key);if(project)void togglePin(project);}});
   }
   async function togglePin(project){
     if(pinSaving||!pinsReady||listLoading)return;
     const id=projectKey(project);
+    const initiator=document.activeElement;
     pinSaving=true;
     pinRevision++;
     try{
@@ -211,16 +170,15 @@ function mountContent(container,sdk,updateActions,contextMenu){
       if(alive)pinError='项目固定设置保存失败：'+e.message;
     }finally{
       pinSaving=false;
-      if(alive){renderList(id);showMessage();}
+      if(alive){if(sdk.getSnapshot().active&&(document.activeElement===initiator||document.activeElement===document.body&&initiator?.getAttribute('aria-label')==='固定项目：'+project.title))focusPin={key:id,sequence:++focusSequence};renderList();showMessage();}
     }
   }
-  search.addEventListener('input',()=>{query=search.value.trim().toLocaleLowerCase();renderList();});
 
   function resetDetail(){
     request++;chatRequest++;
     detail=null;chatData=null;chatRecords=[];
     chatLoading=false;
-    error='';notice='';
+    error='';notice='';detailError='';detailFailure='error';
   }
   function canLeaveProject(){
     if(management.isSaving()){notice='正在核对当前项目修改，请稍后切换。';showMessage();return false;}
@@ -229,15 +187,12 @@ function mountContent(container,sdk,updateActions,contextMenu){
     return false;
   }
   function showCatalog(focus=false){
-    if(!canLeaveProject())return;
-    selected='';view='overview';loading=false;
-    scope='all';query='';search.value='';renderScope();renderList();
-    resetDetail();
-    render();
-    if(focus)catalogTitle.focus();
+    pane='list';contextRevision++;checkpoint();publish();
+    if(focus)requestAnimationFrame(()=>{const state=sdk.getSnapshot();if(alive&&state.active&&state.enabled)state.root?.current?.querySelector('[data-ksf-component="project-workspace"] input[type="search"]')?.focus({preventScroll:true});});
   }
   async function reload(){
-    const token=++listRequest;listLoading=true;listError='';syncTitlebar();renderList();showMessage();
+    if(recoveryReady&&!recovery.isReady()){await recovery.load();checkpoint();}
+    const token=++listRequest;listLoading=true;listError='';listWarning='';listFailed=false;syncTitlebar();renderList();showMessage();
     const revision=pinRevision;
     try{
       const [projects,preferences]=await Promise.allSettled([
@@ -256,55 +211,57 @@ function mountContent(container,sdk,updateActions,contextMenu){
       const result=projects.value;
       listLoading=false;listReady=true;
       list=result.projects.sort((a,b)=>Number(a.scope==='archived')-Number(b.scope==='archived')||a.title.localeCompare(b.title,'zh-CN'));
-      listError=result.warnings?.join('；')??'';
+      listWarning=result.warnings?.join('；')??'';
       renderList();
       if(await followDeep())return;
-      if(params())await choose(selected,{refresh:true});
-      else if(selected)showCatalog();
+      if(selected)await choose(selected,{refresh:true,restoreLocation:detail?management.getLocation():restoreContext});
       else render();
     }catch(e){
-      if(alive&&token===listRequest){listLoading=false;listError='项目目录读取失败：'+e.message;renderList();showMessage();}
+      if(alive&&token===listRequest){listLoading=false;listFailed=true;listError='项目目录读取失败：'+e.message;renderList();showMessage();}
     }finally{if(alive&&token===listRequest){syncTitlebar();showMessage();}}
   }
-  async function choose(key,{refresh=false,focus=false,historyTarget}={}){
-    const target=list.find(p=>projectKey(p)===key);
+  async function choose(key,{refresh=false,focus=false,historyTarget,restoreLocation}={}){
+    const target=list.find(p=>projectKey(p)===key)??workspaceTarget(key);
     if(!target){notice='指定项目当前不可读取。';showMessage();return false;}
     if((key!==selected||refresh)&&!canLeaveProject())return false;
     if(key===selected&&!refresh)return true;
+    const previous=refresh&&key===selected?detail:null;
     if(!refresh)view='overview';
-    selected=key;resetDetail();
+    if(restoreLocation?.projectView==='chats')view='chats';
+    const location=restoreLocation??(refresh?management.getLocation():null);
+    selected=key;if(!refresh){pane='detail';positions={...positions,detailScroll:0};}resetDetail();detail=previous;contextRevision++;
     const token=request,p={name:target.name,scope:target.scope};
-    loading=true;render();content.scrollTop=0;
+    loading=true;render();if(!refresh)content.scrollTop=0;
     if(focus)content.focus({preventScroll:true});
     try{
       const result=await sdk.call('detail',p);
       if(!alive||token!==request)return true;
-      await management.select(p,result,{historyTarget});
+      await management.select(p,result,{historyTarget,restoreLocation:location});
       if(!alive||token!==request)return true;
       detail=result;
-    }catch(e){if(alive&&token===request)error='项目读取失败：'+e.message;}
+    }catch(e){if(alive&&token===request){detailError='项目读取失败：'+e.message;detailFailure=workspaceReadState(e);if(detailFailure!=='error')detail=null;}}
     finally{
       if(alive&&token===request){
-        loading=false;render();
+        loading=false;render();if(view==='chats'&&location?.aiSessionKey)await conversation.select(params(),{restoreKey:location.aiSessionKey});checkpoint();
         if(view==='chats'&&detail)void loadChats();
       }
     }
     return true;
   }
   function setView(value){
-    view=value;error='';
-    render();content.scrollTop=0;content.focus({preventScroll:true});
+    view=value;if(value==='chats')pane='detail';error='';
+    render();checkpoint();content.scrollTop=0;content.focus({preventScroll:true});
     if(view==='chats'&&detail&&!chatData)void loadChats();
   }
   function render(){
     conversation.setActive(view==='chats'&&!!detail);
     syncTitlebar();
-    catalog.hidden=!!selected;
     content.hidden=!selected;
-    showMessage();content.replaceChildren();
-    if(!selected)return;
-    if(loading){content.append(el('p','kp-empty','正在读取项目记录…'));return;}
-    if(!detail){content.append(el('p','kp-empty','项目详情暂不可用，请刷新重试。'));return;}
+    showMessage();
+    if(!selected){content.replaceChildren();publish();return;}
+    if(loading){publish();return;}
+    content.replaceChildren();
+    if(!detail){publish();return;}
     if(view!=='overview'){
       const label=detail.governance?'← 返回对象详情':'← 返回项目总览';
       content.append(btn(label,()=>setView('overview'),'kp-text-button kp-back-to-project'));
@@ -316,6 +273,7 @@ function mountContent(container,sdk,updateActions,contextMenu){
     }
     if(view==='chats')renderChats();
     else content.append(management.render(detail));
+    publish();
   }
   async function loadChats(append=false){const token=++chatRequest;chatLoading=true;error='';render();try{const result=await sdk.call('chats',{...params(),offset:append?chatData?.nextOffset??0:0});if(!alive||token!==chatRequest)return;chatData=result;const map=new Map((append?chatRecords:[]).map(r=>[r.taskId,r]));result.records.forEach(r=>map.set(r.taskId,r));chatRecords=[...map.values()];if(result.warnings.length)notice=result.warnings.join('；');}catch(e){if(alive&&token===chatRequest)error='聊天目录读取失败：'+e.message;}finally{if(alive&&token===chatRequest){chatLoading=false;render();}}}
   function renderChats(){void conversation.select(params());content.append(conversation.node);const intro=el('div','kp-view-intro');intro.append(el('h2','','相关聊天'),el('p','','依据历史轮次中明确记录的项目归属；引用项目的聊天不计入。'));content.append(intro);for(const r of chatRecords){const card=el('article','kp-chat-row'),a=link(r.title||'未命名聊天',deep('conversations',{target:selected,task:r.taskId,...(r.turnId?{turn:r.turnId}:{})}));a.append(icon('arrow'));card.append(a,el('p','',r.summary||'该聊天尚未记录项目进展简述。'),el('span','kp-muted',`${r.turnCount} 个相关轮次 · ${date(r.updatedAt,true)}`),btn('在工作台接续',()=>void conversation.attach(r.taskId),'kp-text-button'));content.append(card);}if(chatLoading)content.append(el('p','kp-empty','正在读取聊天归属…'));else if(!chatRecords.length)content.append(el('p','kp-empty',error?'聊天目录暂不可用，可重试读取。':'还没有明确归属于这个项目的聊天。'));if(chatData?.nextOffset!==null&&chatData?.nextOffset!==undefined){const more=btn('加载更多聊天',()=>loadChats(true),'kp-text-button');more.disabled=chatLoading;content.append(more);}const retry=btn('刷新聊天',()=>loadChats(),'kp-text-button');retry.disabled=chatLoading;content.append(retry);}
@@ -326,24 +284,34 @@ function mountContent(container,sdk,updateActions,contextMenu){
     const key=name?(search.get('scope')==='archived'?'archived':'current')+':'+name:null;
     if(key===lastDeep)return false;
     if(!key){lastDeep=null;return false;}
-    if(!list.some(p=>projectKey(p)===key)){
-      error='指定项目当前不可读取：'+name;showMessage();return false;
-    }
     lastDeep=key;
-    return choose(key,{focus:true});
+    // A recovered window may already select the deep-link target before its
+    // detail has been read. Re-read that target with its saved location instead
+    // of treating the initial deep link as an already rendered selection.
+    return choose(key,{focus:true,...(key===selected&&!detail?{refresh:true,restoreLocation:restoreContext}:{})});
   }
   renderScope();renderList();render();
-  const unregisterClose=sdk.onBeforeClose(async()=>{
-    const saved=await management.flushFileSaves();
-    const accepted=saved&&!management.hasDrafts()||window.confirm('此项目窗口还有未保存内容。请取消关闭以继续处理草稿。仍要关闭窗口吗？');
-    if(accepted)await management.closeReviews().catch(()=>{});
-    return accepted;
-  });
+  async function prepareClose(request){
+    await management.flushFileSaves();
+    if(management.isSaving())return {status:'failed',message:'项目仍有保存或待核对回执，窗口已保留。'};
+    if(management.hasDrafts()){
+      if(request.reason!=='close')return {status:'failed',message:'项目仍有未保存编辑，请先在原编辑页保存或放弃，再重载界面。'};
+      if(!window.confirm('此项目窗口还有未保存的手动编辑。确认放弃这些修改并关闭窗口？'))return {status:'cancelled'};
+      management.discardDrafts();
+      if(management.hasDrafts())return {status:'failed',message:'项目草稿尚未放弃完成，窗口已保留。'};
+    }
+    if(!await conversation.flush())return {status:'failed',message:'AI 草稿或原请求恢复记录尚未确认保存，窗口已保留。'};
+    checkpoint();if(!await recovery.flush({closed:request.reason==='close'}))return {status:'failed',message:'视图恢复记录尚未确认保存，窗口已保留。'};
+    if(request.reason==='close')await management.closeReviews().catch(()=>{});
+    const generation=recovery.getGeneration(),conversationGeneration=conversation.getGeneration();
+    return {status:'ready',validate:()=>alive&&!request.signal?.aborted&&generation===recovery.getGeneration()&&conversationGeneration===conversation.getGeneration()&&!management.isSaving()&&!management.hasDrafts()};
+  }
+  const unregisterClose=sdk.onCloseRequest?sdk.onCloseRequest(prepareClose):sdk.onBeforeClose(async()=>{const result=await prepareClose({reason:'close'});return result.status==='ready'&&result.validate();});
   const unsubscribe=sdk.subscribe(()=>{void followDeep();});
-  void reload();
+  void (async()=>{const revision=contextRevision,value=await recovery.load();if(!alive)return;if(value&&revision===contextRevision){query=value.query;scope=value.scope;selected=value.selected;pane=value.pane;splitSize=value.splitSize;positions={listScroll:value.listScroll,detailScroll:value.detailScroll};restoreContext=value;}recoveryReady=true;await reload();})();
   return {dispose(){
     alive=false;request++;listRequest++;chatRequest++;
-    unregisterClose?.();unsubscribe?.();management.dispose();lifecycle.dispose();conversation.dispose();
-    root.remove();
+    unregisterClose?.();unsubscribe?.();recovery.dispose();management.dispose();lifecycle.dispose();conversation.dispose();
+    main.remove();root.remove();
   }};
 }

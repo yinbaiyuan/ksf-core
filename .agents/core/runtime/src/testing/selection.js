@@ -30,7 +30,7 @@ export function dependencyInputs(root, paths) {
       const candidates = [target, ...['.js','.mjs','.ts','.tsx','.json'].map(ext=>target+ext), target.replace(/\.js$/,'.ts')];
       target = candidates.find(p=>existsSync(p)) ?? target;
       const rel = slash(relative(root,target));
-      if (!rel.startsWith('.agents/core/') || rel.includes('/node_modules/') || rel.includes('/.git/')) continue;
+      if (!rel.startsWith('.agents/core/') || rel.split('/').some(part => part === 'node_modules' || part === '.git')) continue;
       found.add(rel);
       if (existsSync(target) && statSync(target).isDirectory()) for (const child of walk(root,rel)) if (/\.[cm]?[jt]sx?$/.test(child)) found.add(child);
     }

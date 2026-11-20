@@ -1,0 +1,2 @@
+import {useState} from 'react';import {TextField} from '@ksf/sdk/text-field';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TextFieldStatesExample(){const [email,setEmail]=useState('demo');return <div className="ksf-demo-stack"><TextField label="联系邮箱" value={email} onValueChange={setEmail} error={!email.includes('@')?'请输入包含 @ 的邮箱地址':undefined} prefix="@"/><TextField label="只读编号" defaultValue="KSF-001" readOnly/><TextField label="当前不可编辑" defaultValue="等待权限" disabled/></div>;}

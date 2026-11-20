@@ -1,0 +1,19 @@
+@import './theme.css';
+
+.ksf-view {
+  /* Compatibility aliases; new components consume --ksf-color-* directly. */
+  --ksf-view-background: var(--ksf-color-background);
+  --ksf-view-surface: var(--ksf-color-surface);
+  --ksf-view-foreground: var(--ksf-color-foreground);
+  --ksf-view-muted: var(--ksf-color-muted-foreground);
+  --ksf-view-border: var(--ksf-color-border);
+  --ksf-view-accent: var(--ksf-color-primary);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ksf-view-background);
+  color: var(--ksf-view-foreground);
+}
+.ksf-view[data-ksf-view-direction="row"] { flex-direction: row; }

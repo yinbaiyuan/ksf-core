@@ -229,6 +229,11 @@ export function createCodexConversations(root, options = {}) {
       keys(params, ['operationId', 'threadId', 'version', 'request', 'answers', 'planRevision']); binding(params.threadId);
       assert(typeof params.version === 'string', 'CODEX_ARGUMENT', '回答需要当前快照版本。');
       return queue(caller, 'answer', params, async key => {
+        const linked = binding(params.threadId);
+        if (linked.execution) {
+          assert(linked.appId === caller.appId, 'CODEX_EXECUTION_GRANT', '受限会话只能由原应用回答。');
+          await createExecutionGrants(root).resolveGrant(caller, linked.execution.grant);
+        }
         const observed = await observe(params.threadId, true), snapshot = observed.snapshot;
         assert(observed.version === params.version, 'CODEX_QUESTION_STALE', '问题或计划已更新，请重新读取。');
         if (params.planRevision) {

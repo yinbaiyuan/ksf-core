@@ -1,0 +1,19 @@
+@import '../theme.css';
+.ksf-demo-stack {box-sizing:border-box;display:flex;flex-direction:column;gap:16px;width:100%;min-width:0;color:var(--ksf-color-foreground);font:14px/1.7 system-ui,sans-serif}
+.ksf-demo-row {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ksf-demo-muted {color:var(--ksf-color-muted-foreground);font-size:12px}
+.ksf-demo-box {box-sizing:border-box;padding:16px;min-width:0;border:1px solid var(--ksf-color-border);border-radius:6px;background:var(--ksf-color-surface-raised)}
+.ksf-demo-box h3 {font-size:16px;font-weight:500;margin:0 0 8px}
+.ksf-demo-box p {margin:8px 0;font-size:13px;overflow-wrap:anywhere}
+.ksf-demo-box[data-highlight] {background:var(--ksf-color-primary-surface);color:var(--ksf-color-primary);border-color:transparent}
+.ksf-demo-box small {font-size:12px;color:var(--ksf-color-muted-foreground)}
+.ksf-demo-pane {box-sizing:border-box;height:100%;padding:16px;background:var(--ksf-color-surface);overflow:auto}
+.ksf-demo-pane strong {display:block;font-size:14px;font-weight:500;margin-bottom:12px}
+.ksf-demo-pane p {font-size:13px;line-height:1.8;margin:12px 0}
+.ksf-demo-frame {border:1px solid var(--ksf-color-border);border-radius:6px;overflow:hidden}
+.ksf-demo-article {font-size:13px;line-height:1.9;padding:0 16px 16px}
+.ksf-demo-article h3 {font-size:16px;font-weight:500}
+.ksf-demo-color-block {height:90px;border-radius:4px;margin-bottom:12px;background:linear-gradient(135deg,var(--ksf-color-primary-surface),var(--ksf-color-surface))}
+.ksf-demo-stack>output {font-size:12px;color:var(--ksf-color-muted-foreground)}
+
+.ksf-demo-table-stripe>td{background:var(--ksf-color-surface)}

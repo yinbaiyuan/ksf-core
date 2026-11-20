@@ -1,0 +1,4 @@
+import Ring from '../fidelity/kokonut/spending-ring';
+import {FidelityScope} from '../fidelity/scope';
+export interface SpendingSlice {name:string;amount:number;change?:number;tone?:'primary'|'success'|'danger'|'warning'|'muted'}
+export function SpendingRingView({title,categories,currency='CNY'}:{title:string;categories:readonly SpendingSlice[];currency?:string}) {const styles={primary:['stroke-sky-500','bg-sky-500'],success:['stroke-emerald-500','bg-emerald-500'],danger:['stroke-rose-500','bg-rose-500'],warning:['stroke-amber-400','bg-amber-400'],muted:['stroke-zinc-400','bg-zinc-400']};return <FidelityScope module="spending-ring"><Ring title={title} categories={categories.map(c=>({...c,amount:Math.max(0,c.amount),stroke:styles[c.tone??'primary'][0],dot:styles[c.tone??'primary'][1]}))} currency={currency}/></FidelityScope>}

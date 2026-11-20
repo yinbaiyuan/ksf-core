@@ -1,0 +1,5 @@
+import {Button} from '@ksf/sdk/button';
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {Table,type TableColumn} from '@ksf/sdk/table';import {TextField} from '@ksf/sdk/text-field';import {Checkbox} from '@ksf/sdk/checkbox';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TableDeleteExample(){type Row={id:string;name:string;age:number;team:string;description:string};const rows=Array.from({length:24},(_,i)=>({id:String(i),name:'成员 '+(i+1),age:20+i,team:i%2?'设计':'研究',description:'负责需求研究、组件设计与工程核验。'})),columns:TableColumn<Row>[]=[{id:'name',header:'姓名',cell:(r:Row)=>r.name},{id:'age',header:'年龄',cell:(r:Row)=>r.age,sort:(a:Row,b:Row)=>a.age-b.age},{id:'team',header:'分组',cell:(r:Row)=>r.team,filter:{options:[{value:'设计',label:'设计'},{value:'研究',label:'研究'}],match:(r:Row,v:string)=>r.team===v}}];const [data,setData]=useState(rows.slice(0,5));return <Table label='成员操作' rows={data} getId={r=>r.id} columns={[...columns,{id:'action',header:'操作',cell:r=><Button size='small' variant='text' onClick={()=>setData(data.filter(v=>v.id!==r.id))}>删除</Button>}]}/>;}

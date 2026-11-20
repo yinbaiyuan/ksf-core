@@ -1,3 +1,4 @@
+import {taskExecution,executionStatus,releaseChatExecution} from '../projects/task-execution.js';
 import { lstatSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -105,9 +106,11 @@ export function readCurrentWork(options) {
   const current=validateCurrentWork(value),lifecycle=[];
   if(current?.ownership.state==='bound'&&current.ownership.target.kind==='project'){
     const raw=current.ownership.target,record=raw.targetId?targetRegistry(options.root).records.get(raw.targetId):null,target=record?targetLocator(record):raw,roots=projectLocations(options.root);let project=roots.find(p=>p.path===(target.scope==='archived'?'档案/项目/':'项目/')+target.name+'/project.md')??roots.find(p=>p.scope==='archived'&&p.path==='档案/项目/'+target.name+'/project.md');const seen=new Set();
+    if(!project&&target.scope==='current')try{const located=locateProjectResource(options.root,{path:'项目/'+target.name+'/project.md',metadataOnly:true});project=roots.find(p=>p.path===located.path);if(project)lifecycle.push({code:'PROJECT_WORK_MERGED',message:'原项目已并入父项目；原始绑定保留，当前入口按合并记录定位。',path:project.path,name:project.folder.split('/').at(-1),readOnly:false});}catch(e){if(e.code!=='PROJECT_REFERENCE_MISSING')throw e;}
     while(project&&!seen.has(project.path)){seen.add(project.path);if(project.scope==='archived')lifecycle.push({code:'PROJECT_WORK_ARCHIVED',message:'当前项目或祖先已归档；只读查阅或先恢复，不能继续执行。',path:project.path,readOnly:true});project=roots.find(p=>p.path===project.metadata.parent_project?.path);}
   }
-  return { complete: true, chatId: key, etag: before.etag, current,executionBlocked:!!lifecycle.length,lifecycle };
+  let execution=null;if(current?.taskRef)try{execution=executionStatus(options.root,current.taskRef,key);}catch(e){execution=e.code==='PROJECT_EXECUTION_UNSUPPORTED'?{supported:false,blocked:false}:{blocked:true,error:issue(e)};}
+  return { complete: true, chatId: key, etag: before.etag, current,execution,executionBlocked:lifecycle.some(e=>e.readOnly)||execution?.blocked===true,lifecycle };
 }
 
 function routeArrangement(current) {
@@ -191,6 +194,8 @@ export function bindCurrentWork(options) {
       }
       etag = publish(options.root, before, next, 'scope', key);
     }
+    const prior=before.document?.values?.[CURRENT_WORK_KEY];
+    if(prior?.taskRef&&(!current||current.status==='paused'||current.taskRef!==prior.taskRef))releaseChatExecution(options.root,prior.taskRef,key);
     return { complete: true, chatId: key, etag, current, changed, ...(routeFactIssue ? { routeFactIssue } : {}) };
   });
 }
@@ -309,6 +314,7 @@ export function currentWorkContext(options) {
   const delivery = complete && binding.chatId && !manifestOnly ? { bindingEtag: binding.etag, cacheEtag: before.etag,
     generation: before.generation, manifestDigest: digest(active), baseOnly, extras } : null;
   return { complete, mode: entry.mode, chatId: binding.chatId, bindingEtag: binding.etag, current: baseOnly ? null : current,
+    execution:binding.execution,executionBlocked:binding.executionBlocked,
     generation: before.generation, cacheDiscarded: before.discarded ?? false, active, pending, retired,
     ...(!manifestOnly ? { bodies: all.filter(i => pending.some(p => p.fingerprint === i.fingerprint)), delivery } : {}), errors };
 }
@@ -335,11 +341,16 @@ export function acceptWorkContext(options) {
 export function entryWorkDelivery(options, entry) {
   return currentWorkContext({ ...options, entry, baseOnly: true }).delivery;
 }
+export function executeCurrentTask(options){
+  const work=readCurrentWork(options),input=options.input??{};
+  if(!work.current?.taskRef)invalid('执行占用需要当前明确taskRef；读取或准备草稿不启动执行。');
+  return taskExecution(options.root,{...input,taskRef:work.current.taskRef,chatId:work.chatId});
+}
 export function createWorkContext(root) {
   const call = (fn, names = []) => input => {
     if (!fields(input, ['identity', ...names]) || !input.identity) invalid('SDK work context requires an explicit native identity and supported fields.');
     return fn({ ...input, root });
   };
   return { read: call(readCurrentWork), bind: call(bindCurrentWork, ['current', 'ifMatch', 'turnId']),
-    current: call(currentWorkContext, ['manifestOnly', 'extras']), accept: call(acceptWorkContext, ['delivery']), reset: call(resetWorkContext) };
+    current: call(currentWorkContext, ['manifestOnly', 'extras']), execute:call(executeCurrentTask,['input']), accept: call(acceptWorkContext, ['delivery']), reset: call(resetWorkContext) };
 }

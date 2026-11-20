@@ -46,6 +46,17 @@ export interface BackdropSettings {
 }
 export interface MaterialSettings {
     version: 1;
+    themeMode?: 'system' | 'light' | 'dark';
+    backgroundMode?: 'mountain' | 'side-rays' | 'drape' | 'aero-shards';
+    sideRaysIntensity?: number;
+    barGlassIntensity?: BarGlassIntensitySettings;
+    windowTitlebarGlassIntensity?: number;
+    cardGlassIntensity?: number;
+    desktopIconGlassIntensity?: number;
+    desktopIconTilt?: number;
+    dockIconGlassIntensity?: number;
+    dockIconTilt?: number;
+    desktop?: DesktopAppearanceSettings;
     motion: boolean;
     backdrop: BackdropSettings;
     profiles: Record<ProfileId, MaterialProfile>;
@@ -71,6 +82,28 @@ export declare const profileLimits: {
     readonly damping: readonly [10, 70, 1];
     readonly stretch: readonly [0, 24, 1];
 };
+export interface DesktopAppearanceSettings { iconSize: number; gap: number; }
+export declare const desktopAppearanceLimits: {
+    readonly iconSize: readonly [48, 96, 1];
+    readonly gap: readonly [16, 64, 1];
+};
+export declare function desktopAppearance(value?: unknown): DesktopAppearanceSettings;
+export declare const sideRaysIntensityLimits: readonly [0, 2, 0.05];
+export declare function sideRaysIntensity(value?: unknown): number;
+export interface BarGlassIntensitySettings { statusbar: number; dock: number; }
+export declare function windowTitlebarGlassIntensity(value?: unknown): number;
+export declare const barGlassIntensityLimits: readonly [0, 2, 0.05];
+export declare function barGlassIntensity(value?: unknown): BarGlassIntensitySettings;
+export declare const cardGlassIntensityLimits: readonly [0, 2, 0.05];
+export declare function cardGlassIntensity(value?: unknown): number;
+export declare const desktopIconGlassIntensityLimits: readonly [0, 2, 0.05];
+export declare const desktopIconTiltLimits: readonly [-30, 30, 0.5];
+export declare function desktopIconGlassIntensity(value?: unknown): number;
+export declare function desktopIconTilt(value?: unknown): number;
+export declare const dockIconGlassIntensityLimits: readonly [0, 2, 0.05];
+export declare const dockIconTiltLimits: readonly [-30, 30, 0.5];
+export declare function dockIconGlassIntensity(value?: unknown): number;
+export declare function dockIconTilt(value?: unknown): number;
 export declare const backdropLimits: {
     readonly wash: readonly [0, 1, 0.01];
     readonly brightness: readonly [0.4, 1.6, 0.05];

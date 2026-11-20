@@ -1,0 +1,1 @@
+import {LightboxGallery} from '@ksf/sdk/lightbox-gallery';import {lightboxPhotos} from '@ksf/sdk/component-examples/lightbox-demo-images';export default function Example(){return <div style={{display:'grid',gap:24}}><LightboxGallery label="空图片集" items={[]}/><LightboxGallery label="禁用图片集" items={lightboxPhotos} disabled/></div>;}

@@ -53,7 +53,7 @@ export function createLocalControl(root,{applications,communication,service:host
     return true;
    }
    ensure(!hostService?.isStopping?.()||url.pathname==='/api/local/service','SERVICE_STOPPING','后台正在退出，请稍后重试。',409);
-   if(url.pathname==='/api/local/apps'){if(operation==='runtime')json(await applications.runtimeManage(input));else if(operation==='list')json(await applications.listApplications());else if(operation==='docs')json(await applications.cliDocs(input.appId,input));else if(operation==='exec')json(await applications.cliExec(input.appId,input.commandId,input.request));else throw error('APP_CLI_COMMAND_UNKNOWN','未知应用网关操作。');return true;}
+   if(url.pathname==='/api/local/apps'){if(operation==='local')json(await applications.localApplication(input));else if(operation==='runtime')json(await applications.runtimeManage(input));else if(operation==='list')json(await applications.listApplications());else if(operation==='docs')json(await applications.cliDocs(input.appId,input));else if(operation==='exec')json(await applications.cliExec(input.appId,input.commandId,input.request));else throw error('APP_CLI_COMMAND_UNKNOWN','未知应用网关操作。');return true;}
    if(url.pathname==='/api/local/service'){ensure(hostService&&['status','logs','stop','restart','autostart'].includes(operation),'SERVICE_OPERATION_INVALID','未知服务操作。');json(await hostService[operation]({...input,controlOffset:1}));return true;}
    service=await communication;
    ensure(url.pathname==='/api/local/communication','COMM_ROUTE_NOT_FOUND','本机控制路由不存在。',404);const caller=operation?.startsWith('messages.')?await service.authenticateToken(request.headers['x-ksf-agent-token']):undefined;

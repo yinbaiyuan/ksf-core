@@ -10,6 +10,7 @@ import {packApplication} from './server/pack.mjs';
 import {atomicWrite,withStoreLock} from './server/publication.mjs';
 import {validateManifest,stampSDKManifest,SDK_API_VERSION} from './server/protocol.js';
 import {loadStoreListing} from './server/listing.mjs';
+import {mermaidCSPPlugin} from './server/mermaid-csp.mjs';
 const sdkRoot=dirname(fileURLToPath(import.meta.url));
 function toolchain(root,{frontend=true}={}){
   for(const directory of [root,sdkRoot,resolve(sdkRoot,'../../runtime/web')]){
@@ -19,18 +20,17 @@ function toolchain(root,{frontend=true}={}){
   throw new Error('请安装应用或 SDK 声明的构建依赖，再执行 build。');
 }
 export async function buildApplication(root,options={}){return withStoreLock(resolve(root),()=>buildApplicationUnlocked(root,options),{lockName:'.ksf-build.lock'});}
-async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntries={},quiet=false}={}){
+async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntries={},quiet=false,local=false}={}){
   root=resolve(root);const checked=await checkApplication(root);if(!checked.ok)throw Object.assign(Error('应用源码检查失败。'),{code:'APP_SOURCE_CHECK_FAILED',diagnostics:checked.diagnostics});const productionOnly={name:'ksf-production-only',load(id){const rel=relative(root,id.split('?')[0]);if(!id.includes('node_modules')&&isTestSource(id))throw Object.assign(Error('生产包不能加载测试装置：'+rel),{code:'APP_TEST_IMPORT'});}};const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));validateManifest(manifest);const frontend=!!manifest.window||!!manifest.cards?.length,tools=toolchain(root,{frontend}),{rolldown}=await import(pathToFileURL(tools.rolldown).href),out=join(root,'.build');let build,react;if(frontend){({build}=await import(pathToFileURL(tools.vite).href));react=(await import(pathToFileURL(tools.react).href)).default;}
   await rm(out,{recursive:true,force:true});await mkdir(join(out,'frontend'),{recursive:true});
   const sdkPackage=JSON.parse(await readFile(join(sdkRoot,'package.json'),'utf8')),appPackage=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
-  if(sdkPackage.version!==SDK_API_VERSION)throw Error('SDK 工具包版本与 API 契约不一致。');
-  Object.assign(manifest,stampSDKManifest(manifest));validateManifest(manifest);
+  Object.assign(manifest,stampSDKManifest(manifest,{toolkitVersion:sdkPackage.version}));validateManifest(manifest);
   const storeListing=await loadStoreListing(root);
   const names=new Set([...Object.keys(sdkPackage.peerDependencies??{}),...Object.keys(appPackage.dependencies??{})]);
   const alias=[{find:'@ksf/sdk',replacement:join(sdkRoot,'src')}];
   for(const name of names){if(name==='@ksf/sdk')continue;const location=[root,sdkRoot,resolve(sdkRoot,'../../runtime/web')].flatMap(directory=>createRequire(join(directory,'package.json')).resolve.paths(name)??[]).map(path=>join(path,name)).find(path=>existsSync(join(path,'package.json')));if(location)alias.push({find:name,replacement:location});}
   const entries={};if(manifest.window){entries.index=sourcePath(root,sourceEntries.window??'frontend.tsx');manifest.window.entry='frontend/index.js';}for(const card of manifest.cards??[]){entries['cards/'+card.id]=sourcePath(root,sourceEntries.cards?.[card.id]??card.id+'.tsx');card.entry='frontend/cards/'+card.id+'.js';}
-  if(Object.keys(entries).length)await build({configFile:false,root:root,define:{'process.env.NODE_ENV':JSON.stringify('production')},plugins:[productionOnly,react()],resolve:{alias},logLevel:quiet?'silent':'warn',build:{outDir:join(out,'frontend'),emptyOutDir:true,minify:true,target:'es2022',cssCodeSplit:false,lib:{entry:entries,formats:['es']},rolldownOptions:{output:{entryFileNames:'[name].js',chunkFileNames:'chunks/[name]-[hash].js',assetFileNames:'assets/[name]-[hash][extname]'}}}});
+  if(Object.keys(entries).length)await build({configFile:false,root:root,define:{'process.env.NODE_ENV':JSON.stringify('production')},plugins:[productionOnly,mermaidCSPPlugin(),react()],resolve:{alias},logLevel:quiet?'silent':'warn',build:{outDir:join(out,'frontend'),emptyOutDir:true,minify:true,target:'es2022',cssCodeSplit:false,lib:{entry:entries,formats:['es']},rolldownOptions:{output:{entryFileNames:'[name].js',chunkFileNames:'chunks/[name]-[hash].js',assetFileNames:'assets/[name]-[hash][extname]'}}}});
   async function collect(relative){const files=[];for(const item of await readdir(join(out,relative),{withFileTypes:true})){const path=relative+'/'+item.name;if(item.isDirectory())files.push(...await collect(path));else if(item.name.endsWith('.css'))files.push(path);}return files;}const styles=await collect('frontend');for(const path of styles)await writeFile(join(out,path),scopeApplicationCSS(await readFile(join(out,path),'utf8'),manifest));
   if(manifest.window)manifest.window.styles=styles;for(const card of manifest.cards??[])card.styles=styles;
   if(manifest.backend){const backendSource=sourcePath(root,sourceEntries.backend??'backend.mjs');await mkdir(join(out,'backend'),{recursive:true});const bundle=await rolldown({input:backendSource,plugins:[productionOnly],platform:'node',external:/^node:/});await bundle.write({format:'esm',file:join(out,manifest.backend.entry),codeSplitting:false,banner:"import { createRequire as __ksfRequire } from 'node:module'; const require = __ksfRequire(import.meta.url);"});await bundle.close();}
@@ -45,6 +45,8 @@ async function buildApplicationUnlocked(root,{storeDirectory,entries:sourceEntri
   if(frontend&&existsSync(join(root,'THIRD_PARTY_NOTICES.txt'))){const extra=await readFile(sourcePath(root,'THIRD_PARTY_NOTICES.txt'),'utf8');await writeFile(join(out,'frontend/THIRD_PARTY_NOTICES.txt'),await readFile(join(out,'frontend/THIRD_PARTY_NOTICES.txt'),'utf8')+'\n\n'+extra);}
   await mkdir(join(out,'store'),{recursive:true});await writeFile(join(out,'store/listing.json'),JSON.stringify(storeListing.listing)+'\n');for(const image of storeListing.media){await mkdir(dirname(join(out,image.url)),{recursive:true});await writeFile(join(out,image.url),image.bytes);}
   await writeFile(join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+  if(local){const directory=join(root,'.ksf-local'),entry=await packApplication(out,join(directory,'packages'),{contentAddressed:true});if(storeListing.listing!==undefined){entry.listing=storeListing.listing;for(const image of storeListing.media)await atomicWrite(join(directory,image.url),image.bytes);}const result={...entry,appDirectory:root,packagePath:join(directory,'packages',entry.package.url),mediaDirectory:directory};await atomicWrite(join(directory,'latest.json'),JSON.stringify(result,null,2)+'\n');return result;}
+
   const store=storeDirectory??resolve(root,'../store'),entry=await packApplication(out,join(store,`${manifest.id}-${manifest.version}.ksfapp`));
   await withStoreLock(store,async()=>{let index;try{index=JSON.parse(await readFile(join(store,'index.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;index={protocol:'ksf-app-registry-v1',name:'KSF 应用',apps:[]};}
   const previous=index.apps.find(item=>item.manifest.id===manifest.id&&item.manifest.version===manifest.version);if(previous&&previous.package.sha256!==entry.package.sha256)throw Error('索引已存在同版本不同内容。');

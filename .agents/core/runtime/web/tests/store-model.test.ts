@@ -16,4 +16,14 @@ test('CLI badge follows the displayed candidate or the installed active release,
  assert.equal(storeListManifest({...candidate,display:entry},'apps',{...installed,active:{...installed.active,manifest:{...manifest,cli}}}).cli,undefined);
 });
 
+test('local installation ignores source updates and is independent of optional associations',()=>{
+ const update={...app,candidate:{...entry,manifest:{...manifest,version:'2.0.0'}}};
+ const local={...installed,installationType:'local' as const,local:{sequence:3}};
+ assert.equal(storeAction(update,local).kind,'open');assert.equal(hasStoreUpdate(update,local),false);
+ assert.equal(storeAction(update,installed).kind,'update');
+});
+
 test('paged summaries preserve pending state and installation origin across sources',()=>{const summary={...app,summary:true,candidate:null,display:{...entry,manifest:{...manifest,version:'1.1.0'}}};assert.equal(storeAction(summary,{...installed,pending:installed.active}).kind,'pending');const foreign={...summary,display:{...summary.display,source:{id:'other',name:'Other',url:'https://example.invalid/index.json'},manifest:{...manifest,version:'9.0.0'}}};assert.equal(mergeStorePages([summary],[foreign],[installed])[0].display.source.id,entry.source.id);assert.equal(mergeStorePages([summary],[foreign])[0].display.manifest.version,'9.0.0');});
+test('Core installations ignore catalog candidates and pending local builds in source update counts',()=>{
+ const builtin={...installed,distribution:'core' as const,installationType:'builtin' as const},candidate={...app,candidate:{...entry,manifest:{...manifest,version:'9.0.0'}}};assert.equal(storeAction(candidate,builtin).kind,'open');assert.equal(storeAction(candidate,{...builtin,enabled:false}).kind,'enable');assert.equal(hasStoreUpdate(candidate,builtin),false);assert.equal(hasStoreUpdate(candidate,{...builtin,installationType:'local',pending:installed.active}),false);
+});

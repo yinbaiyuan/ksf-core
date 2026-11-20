@@ -21,7 +21,7 @@ export async function validateBuiltPackage(bytes){
  return decoded;
 }
 
-export async function packApplication(directory, output) {
+export async function packApplication(directory, output, {contentAddressed=false}={}) {
   const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8')), files = {};if(compareVersions(manifest.minCoreVersion,PACKAGE_MIN_CORE_VERSION)<0)manifest.minCoreVersion=PACKAGE_MIN_CORE_VERSION;
   async function walk(path) {
     const stat = await lstat(join(directory, path));
@@ -32,7 +32,7 @@ export async function packApplication(directory, output) {
   }
   if(manifest.window||(manifest.cards??[]).length)await walk('frontend'); if (manifest.backend) await walk('backend');
   if(manifest.cli){await walk('cli');await walk('docs');}if(existsSync(join(directory,'store')))await walk('store');
-  const bytes = encodePackage(manifest, files);await validateBuiltPackage(bytes);await withStoreLock(dirname(output),async()=>{let existing;try{existing=await readFile(output);}catch(error){if(error.code!=='ENOENT')throw error;}if(existing&&checksum(existing)!==checksum(bytes))throw Object.assign(Error('同版本应用包已有不同内容，请递增版本。'),{code:'APP_VERSION_REUSED'});await atomicWrite(output,bytes);});
+  const bytes = encodePackage(manifest, files);await validateBuiltPackage(bytes);if(contentAddressed)output=join(output,checksum(bytes)+'.ksfapp');await withStoreLock(dirname(output),async()=>{let existing;try{existing=await readFile(output);}catch(error){if(error.code!=='ENOENT')throw error;}if(existing&&checksum(existing)!==checksum(bytes))throw Object.assign(Error('同版本应用包已有不同内容，请递增版本。'),{code:'APP_VERSION_REUSED'});await atomicWrite(output,bytes);});
   return { manifest,listing:decodePackage(bytes).listing, package: { url: basename(output), sha256: checksum(bytes), size: bytes.length } };
 }
 export async function runPackCLI(directory,output){

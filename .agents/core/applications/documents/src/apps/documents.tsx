@@ -1,3 +1,6 @@
+import {createFileClient} from '@ksf/sdk/files';
+import {useApplicationSDK} from '@ksf/sdk/react';
+import {useMemo} from 'react';
 import { useContextMenu, copyText } from '@ksf/sdk/components/ui/context-menu';
 import { WindowToolbar } from '@ksf/sdk/window-toolbar';
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -25,7 +28,7 @@ function TreeNode({ entry, selected, open, move, contextMenu }: { contextMenu:Re
 }
 function Tab({ path, selected, choose, close, menu }: { menu:ReturnType<ReturnType<typeof useContextMenu>['bind']>; path: string; selected: boolean; choose: () => void; close: () => void }) { const doc = useDocument(path); return <div {...menu} className={`document-tab ${selected ? 'selected' : ''}`}><button onClick={choose} title={path}><FileText size={14} /><span>{path.split('/').at(-1)}</span>{doc.dirty && <i aria-label="未保存" />}</button><button aria-label={`关闭 ${path}`} onClick={close}><X size={13} /></button></div>; }
 export function DocumentsApp({ search, navigate, openApp }: AppProps) {
-  const contextMenu=useContextMenu();
+  const contextMenu=useContextMenu(),sdk=useApplicationSDK(),files=useMemo(()=>createFileClient(sdk),[sdk]);
   const path = search.get('path') ?? '', doc = useDocument(path), context = useWindowContext();
   const [tabs, setTabs] = useWindowState<string[]>('document-tabs', []), [mode, setMode] = useWindowState<'live' | 'source' | 'split' | 'read'>('document-mode', 'live');
   const [sidebar, setSidebar] = useState(true), [outline, setOutline] = useState(true), [term, setTerm] = useState(''), [debounced, setDebounced] = useState(''), [line, setLine] = useState(0);
@@ -56,6 +59,7 @@ export function DocumentsApp({ search, navigate, openApp }: AppProps) {
     };
     window.addEventListener('ksf:files-moved', moved); return () => window.removeEventListener('ksf:files-moved', moved);
   }, [path, navigate]);
+  useEffect(()=>{if(!context.enabled||!path)return;return files.watch({scope:'workspace',path},event=>{workspaceChanged();if(event.type==='move'&&event.previousRef)workspaceMoved(event.previousRef.path,event.ref.path);for(const name of tabsRef.current)void checkDocument(name);},error=>setError((error as Error).message));},[files,path,context.enabled]);
   useEffect(() => { if (!path || !context.enabled) return; const timer = setInterval(() => { if (!document.hidden) void checkDocument(path); }, 3000); const focus = () => void checkDocument(path); window.addEventListener('focus', focus); return () => { clearInterval(timer); window.removeEventListener('focus', focus); }; }, [path, context.enabled]);
   useEffect(() => {
     const guard = async () => {
@@ -95,6 +99,8 @@ export function DocumentsApp({ search, navigate, openApp }: AppProps) {
   const jump = (target: number, title: string) => { setLine(target); if (effectiveMode === 'read') previewRoot.current?.querySelector<HTMLElement>('#' + CSS.escape(headingId(title)))?.scrollIntoView({ block: 'start' }); };
   return <div className="builtin-app documents-app">
     <WindowToolbar object={{title:path?.split('/').at(-1)||'KSF文档',detail:path}} navigation={<><button aria-label="切换文件树" title="切换文件树" onClick={() => setSidebar(v => !v)}><PanelLeft size={17} /></button><span className="app-breadcrumb" title={path}>{path || 'KSF文档'}</span></>} actions={[
+      { id:'files', label:'文件操作', icon:Folder, priority:1, onAction:()=>files.manage({initialPath:parent(path)}) },
+      { id:'pick-file', label:'打开文件…', icon:FileText, onAction:async()=>{const selected=await files.pickFile({initialPath:parent(path)});if(selected)open(selected.path);} },
       { id:'new-file', label:'新建文件', icon:Plus, priority:2, onAction:() => showForm('file') },
       { id:'new-directory', label:'新建目录', icon:Folder, onAction:() => showForm('directory') },
       { id:'outline', label:'大纲', icon:List, pressed:outline, onAction:() => setOutline(v => !v) },

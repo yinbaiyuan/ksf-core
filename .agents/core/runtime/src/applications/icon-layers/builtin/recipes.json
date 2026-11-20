@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "recipes": {
+    "meeting": {
+      "file": "meeting.png",
+      "sourceDigest": "3f0436575a13898ce6456135345215b1c48b632209dd4f3cfddaf08b42f7196e",
+      "recipeVersion": "526dc787e45f9576ac8f9dc957cee2591e913da2e1408b6e364d6c43c60d88f0",
+      "foregroundDigest": "cf59a4eae994714cacf6cf451252330580570e1344faa018a5e29ed1daec8387",
+      "background": {
+        "colors": [
+          "#6B92FF",
+          "#3C51C8"
+        ],
+        "angle": 151
+      }
+    },
+    "brief": {
+      "file": "brief.png",
+      "sourceDigest": "637a129cb01f66fd58f8d09a0588a3ed05541d0eb69c9fb304dfc34eb3b1edb0",
+      "recipeVersion": "cae77a739911d037f8bf77c40253cf2b23e6e77d105d3c00331ea2f6044f51e6",
+      "foregroundDigest": "a89ba14175a3390ea8282ea0e9ebc218feef48b25ecce58d2802409cbe15a3f2",
+      "background": {
+        "colors": [
+          "#FFBE58",
+          "#EC7134"
+        ],
+        "angle": 151
+      }
+    },
+    "tasks": {
+      "file": "tasks.png",
+      "sourceDigest": "9d1e9bc0f5882ca0993231a8b72ae35cddc8affbfde0a1bbb4cd335da22fd762",
+      "recipeVersion": "6d9b0f9bc73f45dc77d356ef081d52b8ee598e50c038e5341191e6dac8b0f42a",
+      "foregroundDigest": "d3b69d59c5715328c274f52fd42b9020074d263e9985a3086ea742d0eb8c18c7",
+      "background": {
+        "colors": [
+          "#37CFB1",
+          "#087E6B"
+        ],
+        "angle": 151
+      }
+    },
+    "lan": {
+      "file": "lan.png",
+      "sourceDigest": "e849c87046bb0fdc434cb4b6e3bd826e3a9b32454a4f237c2b0556662202e930",
+      "recipeVersion": "950d5ee092da20364d622f42963084e383ca36916f89de4c0acc853f01e76a3e",
+      "foregroundDigest": "1cc8baeb2bc28f56610a68bedbdda04cb7640b71e58604f212d2787532a4bc7b",
+      "background": {
+        "colors": [
+          "#55CDFF",
+          "#2863D5"
+        ],
+        "angle": 151
+      }
+    },
+    "monitor": {
+      "file": "monitor.png",
+      "sourceDigest": "486c2a0146fac87b1c22a008b2c1a2bf9ca4865b88e6afb12dba4c04f9fe7ee6",
+      "recipeVersion": "8ea356358f6c0e3f915ba83f66bd7b6de176d994586b056bb2a3fb6dc560e640",
+      "foregroundDigest": "2f8e1cb0ea7c545b5dd9014a2767934bd8ec277bc90e05d9c54cd87beb1ae2ed",
+      "background": {
+        "colors": [
+          "#314C63",
+          "#122536"
+        ],
+        "angle": 151
+      }
+    },
+    "manual": {
+      "file": "manual.png",
+      "sourceDigest": "417d9608e5439cc88d891faca935995632273ed71081fdc96ee72c413866fd0b",
+      "recipeVersion": "f08f90c336fa678bd962449c4b649cf585dab8c46c0918928aa83db2067c0b44",
+      "foregroundDigest": "b351020773a90674e3dc7e885a17878ad28e81bae4e1afb9d3ee5ca47f487edc",
+      "background": {
+        "colors": [
+          "#55BFB8",
+          "#176C7D"
+        ],
+        "angle": 151
+      }
+    },
+    "flywheel": {
+      "file": "flywheel.png",
+      "sourceDigest": "50de13f222c2e42e8f81502716f1cb6f2f4501e413f76cf93f6ed2e0b032a1a2",
+      "recipeVersion": "915613c7c989b089676e8600db34738e538d64ebd308e1df8a3280e47ef3ac94",
+      "foregroundDigest": "a8a8e1f2d881d965348c9026ccf968686ac5e0725741ff0806d145e971c58fba",
+      "background": {
+        "colors": [
+          "#5878EF",
+          "#293A91"
+        ],
+        "angle": 151
+      }
+    },
+    "knowledge": {
+      "file": "knowledge.png",
+      "sourceDigest": "17e090bfa1d8ce931d34cf4f8454200e31e9505098954fb8cd21cf89edbf8ff2",
+      "recipeVersion": "70d7f1231b0d15552b537bd7ed05840d47f1f888ef73e19dbe72f33e6d436262",
+      "foregroundDigest": "cb3cd0471c407fb5ee4121eba91fe8823fff855436f2512230fc1956a355ab97",
+      "background": {
+        "colors": [
+          "#4AC5A1",
+          "#19765F"
+        ],
+        "angle": 151
+      }
+    },
+    "abilities": {
+      "file": "abilities.png",
+      "sourceDigest": "86ea5cd4c288f3809105e010d6c3a2b4ff8ca01494f2672038ceba2b748d5700",
+      "recipeVersion": "596de07748c2180fd194018b2ef77e42a87498d46cdb2c5b543f49065944d93c",
+      "foregroundDigest": "135657e28dd1003a01f3623bf0cd6c94a68cceb4f3b413f9fb3a29a6d58c668d",
+      "background": {
+        "colors": [
+          "#AB89F1",
+          "#6742B5"
+        ],
+        "angle": 151
+      }
+    },
+    "store": {
+      "file": "store.png",
+      "sourceDigest": "e698b79345b227e88802fc0fc1e1a4369b367f425f1f23d09126d149efd6ad9b",
+      "recipeVersion": "f9d355ab764c84dbf5f7793382906b288e1aa134cdb2332fcde0db3c3894ce4d",
+      "foregroundDigest": "a0be215bfd5cbdfc0cc9d5cf9be1f80c97125f6ed8ca0b140c2669669a19a01b",
+      "background": {
+        "colors": [
+          "#35BBFF",
+          "#2259D9"
+        ],
+        "angle": 151
+      }
+    },
+    "ability-store": {
+      "file": "ability-store.png",
+      "sourceDigest": "58f7ca289789bf44f6feb5d86ebfc3eef0f0fb5362edc69ae2907d3b56237d2c",
+      "recipeVersion": "aef98e2ccfea4951c069d4f1e3d672d269ae4f30f8c407714589ea48d6de8dff",
+      "foregroundDigest": "119522a7899acbe701151a95d438f76747153bade5da2f23259e52150dcd63c7",
+      "background": {
+        "colors": [
+          "#B780FF",
+          "#6537C2"
+        ],
+        "angle": 151
+      }
+    },
+    "launcher": {
+      "file": "launcher.png",
+      "sourceDigest": "2d72596750e4a15f004b7131afa7f9e2a564606b26f27ec171817610f84345ba",
+      "recipeVersion": "5251c9f5e1b84d61874f14bf16fa437a6062f8aadb7715f0ccf3c272b6c2ec73",
+      "foregroundDigest": "9cc1f5be48e71a2b4e86b4e534ab7366d1c67d64888afd10f12671bbea39a040",
+      "background": {
+        "colors": [
+          "#8799B6",
+          "#546988"
+        ],
+        "angle": 145
+      }
+    },
+    "documents": {
+      "file": "documents.png",
+      "sourceDigest": "71d5564239fa130a0c27c6dc90735838596398c898a3306dabbe1bee4f6229d9",
+      "recipeVersion": "eaa51b7df3e5df6a6827208552fc3ee3ade9cf4cec5aca59545e50609047da36",
+      "foregroundDigest": "73b5a9b1dec288ce02dfc8b301c235720f9b889d4593ccc04c3fb5df892e3989",
+      "background": {
+        "colors": [
+          "#ffb95b",
+          "#ed832e"
+        ],
+        "angle": 145
+      }
+    },
+    "git": {
+      "file": "git.png",
+      "sourceDigest": "b0daf285ba84580011c5e1b28aef5b2ac104245a973bbfc1458c79b7e67545f0",
+      "recipeVersion": "f731a54ac1919caef5cd81daf6008cff1d45a1ed334f4b27c138a745029da753",
+      "foregroundDigest": "f787eea8799cb1178c9ac1abd692d99c7b10756f055408af77229cc601fae05f",
+      "background": {
+        "colors": [
+          "#ff9173",
+          "#e45b3e"
+        ],
+        "angle": 145
+      }
+    },
+    "projects": {
+      "file": "projects.png",
+      "sourceDigest": "7ecf0de20e112b50334221bc3ecc5e6369986d6ede58efc309ffac265406c7af",
+      "recipeVersion": "ff1818f9bc515c34992940cb5f3f4b8f0c1f5bef5f72086b7618ed1bbe30a5af",
+      "foregroundDigest": "2aebc4331017412896aab523f83fa7115e0bfb28051ad0f8134ea2c716f8bad4",
+      "background": {
+        "colors": [
+          "#9c8af8",
+          "#6551ca"
+        ],
+        "angle": 145
+      }
+    },
+    "cooperation": {
+      "file": "cooperation.png",
+      "sourceDigest": "512ae0fde0c99508820379f20e40c30fd39d91d53c1760ea0fd97ed1252fe8ce",
+      "recipeVersion": "1cf9d3f19c2590264d53a65135ee430c9b0553cb88e17090605a25f2c4d646d8",
+      "foregroundDigest": "4d385945c3cf95479f40210ff1252c17bc13c1677ad88b04e679582271c709e2",
+      "background": {
+        "colors": [
+          "#40b8d0",
+          "#3161c8"
+        ],
+        "angle": 145
+      }
+    },
+    "terminal": {
+      "file": "terminal.png",
+      "sourceDigest": "8432733e9a08defd77799fba9279648e538604985e12ced1a6bb84353c51916e",
+      "recipeVersion": "c9dcb3bf74a3b68042298a7453e8ead67d6a55ae25807a10fc6925bdf7cd00fd",
+      "foregroundDigest": "43914a79fa313aa26989ded6987b23e5bcf517b99fb8332e7568e135d7713c9c",
+      "background": {
+        "colors": [
+          "#202329",
+          "#202329"
+        ],
+        "angle": 151
+      }
+    },
+    "package": {
+      "file": "package.png",
+      "sourceDigest": "9532625d972369db6cfeae3b09b5b04d69f1f59e082726987ffefec605d80f7f",
+      "recipeVersion": "69d67e422aa4a454156e1fa1fe40a33770949d0c5dab3676c4e600e053942735",
+      "foregroundDigest": "d9a19db2d14f136cff1e8ccb1f1da9157c2fe2f709b17c7130ff3d74934fed2c",
+      "background": {
+        "colors": [
+          "#f0f3f8",
+          "#e2e9f4"
+        ],
+        "angle": 145
+      }
+    },
+    "activity": {
+      "file": "activity.png",
+      "sourceDigest": "45958cb2eba5d6a9b096b6001e8170a56797a0988d7774ae7144222e163dc548",
+      "recipeVersion": "d0944f3ce0305a3bf2f79a8001cb4888dcebfc0412861803e94ca3ba0961b7b9",
+      "foregroundDigest": "270a66fe322148611b9422911da9f6a00f97e554999dd4362308608ebad3be6c",
+      "background": {
+        "colors": [
+          "#f0f3f8",
+          "#e2e9f4"
+        ],
+        "angle": 151
+      }
+    },
+    "conversations": {
+      "file": "conversations.png",
+      "sourceDigest": "24b62272704f848efb3f8fffa31cfc27e26c7353f2f8949d81ac68ef516d0054",
+      "recipeVersion": "8a427523eedf8e2fde8adf0793cb9362791e146598aca7f914f2b54ac3b5a06c",
+      "foregroundDigest": "7e73880c6401621d57d00cec1b7a86573de3ae62a5d13f31b7c50f5213aee280",
+      "background": {
+        "colors": [
+          "#66b0ff",
+          "#1874df"
+        ],
+        "angle": 145
+      }
+    }
+  }
+}

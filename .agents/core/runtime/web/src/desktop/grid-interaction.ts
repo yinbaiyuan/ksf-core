@@ -1,4 +1,15 @@
 import { cloneElement, isValidElement, type ReactNode } from 'react';
+import type { WidgetLayout } from '../desktop-model';
+
+// RGL owns mutable interaction coordinates. During preview keep the active
+// item's raw cursor position, while restoring every other item from the same
+// drag-start snapshot before applying this frame's swap.
+export function applyGridPositions(next: readonly WidgetLayout[], positions: readonly WidgetLayout[], active: string | null = null) {
+  for (const item of next) {
+    const position = positions.find(value => value.i === item.i);
+    if (position && item.i !== active) Object.assign(item, { x: position.x, y: position.y, w: position.w, h: position.h });
+  }
+}
 
 // RGL 2.3.0 keeps pixel positions in refs, but memoizes GridItem by integer
 // coordinates. Refresh only the active child so sub-cell motion is rendered.

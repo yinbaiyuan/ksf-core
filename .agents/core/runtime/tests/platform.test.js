@@ -121,6 +121,7 @@ test('native filename validation distinguishes ordinary spaces from Windows rese
 test('login startup ownership distinguishes another instance and rejects ambiguous launch agents',()=>{
   const own='/Users/test/中文 & core',document='<plist><key>WorkingDirectory</key><string>/Users/test/中文 &amp; core</string></plist>';
   assert.equal(launchAgentBelongsToRoot(document,own),true);
+  assert.equal(launchAgentBelongsToRoot(document,own+'/'),true);
   assert.equal(launchAgentBelongsToRoot(document,'/Users/test/other'),false);
   assert.throws(()=>launchAgentBelongsToRoot('<plist/>',own),{code:'SERVICE_OS_FAILED'});
   assert.throws(()=>launchAgentBelongsToRoot(document+document,own),{code:'SERVICE_OS_FAILED'});

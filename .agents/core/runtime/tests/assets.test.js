@@ -9,6 +9,8 @@ import { createWorkspaceFiles } from '../src/services/workspace-files.js';
 import { createCoordinator } from '../src/services/workbench-common.js';
 import { objectMutation } from '../src/services/objects.js';
 import { activateAssets } from '../../applications/shared/assets-backend.mjs';
+import {decodeAbilityPackage} from '../src/ability-store/package.js';
+import {previewAbilityStore,mutateAbilityStore} from '../src/services/ability-store.js';
 import { suggestionUpdate, suggestionHandoff } from '../../applications/conversations/backend/suggestion-delivery.js';
 import { createApplicationManager } from './helpers/application-catalog.js';
 import { encodePackage, checksum } from '../src/applications/protocol.js';
@@ -83,6 +85,49 @@ test('两个应用后端只转交各自已声明原子操作，不接受另一�
   assert.equal(abilities.call('writeObject',{type:'partner'}),'ok');assert.deepEqual(calls[0],['assets','writeObject',[{type:'partner'}]]);
   assert.throws(()=>abilities.call('saveKnowledge',{}),{code:'ASSET_METHOD_UNKNOWN'});
   assert.throws(()=>knowledge.call('writeObject',{}),{code:'ASSET_METHOD_UNKNOWN'});
+  assert.equal(abilities.call('previewAbilityPackage',{items:[]}),'ok');
+  assert.throws(()=>knowledge.call('downloadAbilityPackage',{}),{code:'ASSET_METHOD_UNKNOWN'});
+});
+
+test('个人能力多选打包包含共享依赖与资源，可在另一实例原子导入且不改变原件',async t=>{
+  const {api,root}=fixture(t),destination=fixture(t),ids=['partner.example.first','partner.example.second'],dep='competency.example.shared';
+  const data=(name,references=[])=>({metadata:{name,description:'打包夹具',version:'0.1.0',status:'draft',references},body:'# '+name+'\n[资源](guide.txt)\n'});
+  api.writeObject({type:'competency',ref:dep,ifMatch:'missing',dryRun:false,data:data('共享方法')});
+  for(const id of ids)api.writeObject({type:'partner',ref:id,ifMatch:'missing',dryRun:false,data:data(id,[dep+'@0.1.0'])});
+  const paths=[dep,...ids].map(id=>api.readObject({type:id.split('.')[0],ref:id}).data.object);
+  for(const o of paths){writeFileSync(join(root,o.directory,'guide.txt'),'necessary asset');mkdirSync(join(root,o.directory,'.upstream'));writeFileSync(join(root,o.directory,'.upstream','private.txt'),'private baseline');}
+  const before=paths.map(o=>readFileSync(join(root,o.path))),input={name:'两个能力',items:ids.map(id=>({id,source:'user'}))},plan=api.previewAbilityPackage(input);
+  assert.equal(plan.objects.length,3);assert.equal(plan.objects.filter(o=>o.dependency).length,1);assert.equal(plan.name,'两个能力.ksfabi');
+  const exported=api.downloadAbilityPackage({...input,planDigest:plan.planDigest}),decodedPacket=decodeAbilityPackage(Buffer.from(exported.content,'base64')),packet=decodedPacket.protocol==='ksf-ability-package-v2'?{...decodedPacket,files:decodedPacket.groups.flatMap(g=>g.files),sourceId:decodedPacket.groups[0].sourceId}:decodedPacket;
+  assert.equal(packet.files.filter(f=>f.path.endsWith('guide.txt')).length,3);assert(!packet.files.some(f=>f.path.includes('.upstream')));
+  for(const f of packet.files.filter(f=>f.path.endsWith('.md')))assert(!Buffer.from(f.content,'base64').toString().includes('user_revision:'));
+  const imported=previewAbilityStore(destination.root,{action:'import',package:exported.content});
+  await mutateAbilityStore(destination.root,'import',{package:exported.content,ifMatch:imported.version,planDigest:imported.planDigest,operationId:'fixture-package-import'});
+  for(const id of ids){const o=destination.api.readObject({type:'partner',ref:id}).data.object;assert.equal(o.source,packet.sourceId);assert.equal(o.metadata.status,'draft');}
+  paths.forEach((o,i)=>assert.deepEqual(readFileSync(join(root,o.path)),before[i]));
+});
+
+test('打包预览失效、固定入口与符号链接会明确阻止下载',t=>{
+  const {api,root}=fixture(t),id='competency.example.pack',type='competency';
+  api.writeObject({type,ref:id,ifMatch:'missing',dryRun:false,data:{metadata:{name:'打包测试',description:'fixture',version:'0.1.0',status:'active',references:[]},body:'# Test\n'}});
+  const item=api.readObject({type,ref:id}).data.object,input={items:[{id,source:'user'}]},p=api.previewAbilityPackage(input);
+  assert.equal(api.previewAbilityPackage({...input,name:'测试.ksfabi'}).name,'测试.ksfabi');
+  assert.throws(()=>api.previewAbilityPackage({...input,name:'invalid:name'}),{code:'INVALID_ARGUMENTS'});
+  writeFileSync(join(root,item.directory,'later.txt'),'changed');assert.throws(()=>api.downloadAbilityPackage({...input,planDigest:p.planDigest}),{code:'ABILITY_PACKAGE_CHANGED'});
+  assert.throws(()=>api.downloadAbilityPackage(input),{code:'INVALID_ARGUMENTS'});
+  assert.throws(()=>api.previewAbilityPackage({items:[{id:'partner.ksf.runtime',source:'system'}]}),{code:'OBJECT_PROTECTED'});
+  symlinkSync(join(root,'USER.md'),join(root,item.directory,'link'));assert.throws(()=>api.previewAbilityPackage(input));
+});
+
+test('个人资源引用跨目录重定位且递归保存声明的支持文件，不复制实例根资料',t=>{
+  const {api,root}=fixture(t),id='competency.example.portable';
+  writeFileSync(join(root,'能力/基本功','shared.md'),'---\nreferences:\n  - +./support.txt\n---\n[附件](support.txt)\n');
+  writeFileSync(join(root,'能力/基本功','support.txt'),'shared support');
+  api.writeObject({type:'competency',ref:id,ifMatch:'missing',dryRun:false,data:{metadata:{name:'资源打包',description:'fixture',version:'0.1.0',status:'active',references:['+../shared.md','+/USER.md']},body:'# Test\n[支持](../shared.md)\n'}});
+  const input={items:[{id,source:'user'}]},p=api.previewAbilityPackage(input),result=api.downloadAbilityPackage({...input,planDigest:p.planDigest}),decodedPacket=decodeAbilityPackage(Buffer.from(result.content,'base64')),packet=decodedPacket.protocol==='ksf-ability-package-v2'?{...decodedPacket,files:decodedPacket.groups.flatMap(g=>g.files)}:decodedPacket;
+  assert.equal(packet.files.length,3);assert(!packet.files.some(f=>f.path.endsWith('USER.md')));
+  const texts=packet.files.filter(f=>f.path.endsWith('.md')).map(f=>Buffer.from(f.content,'base64').toString());
+  assert(texts.some(s=>s.includes('+/USER.md')));assert(texts.every(s=>!s.includes(root)));assert(texts.some(s=>s.includes('resources/')));
 });
 test('真实应用进程缺少 filesystem 权限时不能调用新增公共资产服务',async t=>{
   const {root,api}=fixture(t),store=join(root,'fixture-store');mkdirSync(store);

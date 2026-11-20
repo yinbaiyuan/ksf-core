@@ -140,7 +140,9 @@ export function locked(root, chatId, action) {
   if (chatId !== 'configuration' && !isKey(chatId)) invalid('Invalid chat lock identity.');
   const path = safePath(root, `.agents/runtime-data/chat-state/${chatId}.lock`, { createParents: true });
   return withExclusiveLock(path, { pid: process.pid }, () => { assertNoCooperationMigration(root); return action(); }, {
-    onLocked() { fail('CHAT_LOCKED', 'Another writer holds the chat lock; preserve it and retry after reconciliation.'); },
+    // Agent tool calls are often killed on timeout; a dead owner must not block the chat forever.
+    reclaimStale: true,
+    onLocked() { fail('CHAT_LOCKED', 'Another live writer holds the chat lock; retry after it finishes.'); },
     onReplaced() { process.stderr.write('CHAT_LOCK_CLEANUP: Replaced lock was preserved.\n'); },
   });
 }

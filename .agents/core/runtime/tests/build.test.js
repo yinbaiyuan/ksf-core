@@ -207,3 +207,12 @@ for(const changed of ['host-floor','frontend-floor','runtime-api'])test('build b
  for(const path of ['applications/sdk/server/protocol.js','applications/sdk/src/index.ts','runtime/src/applications/protocol.js'])writeFileSync(join(core,path),`export const SDK_API_VERSION='${changed==='runtime-api'&&path.startsWith('runtime/')?'1.2.0':'1.1.0'}';export const SDK_COMPATIBILITY={version:SDK_API_VERSION,minCompatibleVersion:'${changed==='frontend-floor'&&path.endsWith('index.ts')?'1.0.1':'1.0.0'}'};`);
  await assert.rejects(buildManifest(f.root),{code:'SDK_CONTRACT_MISMATCH'});assert.equal(readFileSync(f.outputPath,'utf8'),'previous manifest\n');
 });
+
+test('toolkit release identity can evolve independently of the unchanged host API range',async t=>{
+ const f=fixture(t),core=join(f.root,'.agents/core');
+ mkdirSync(join(core,'applications/sdk/server'),{recursive:true});mkdirSync(join(core,'applications/sdk/src'),{recursive:true});mkdirSync(join(core,'runtime/src/applications'),{recursive:true});
+ writeFileSync(join(core,'applications/sdk/package.json'),JSON.stringify({version:'1.3.0'}));
+ writeFileSync(join(core,'data-compatibility.json'),JSON.stringify({sdkCompatibility:{version:'1.2.0',minCompatibleVersion:'1.0.0'}}));
+ for(const path of ['applications/sdk/server/protocol.js','applications/sdk/src/index.ts','runtime/src/applications/protocol.js'])writeFileSync(join(core,path),`export const SDK_API_VERSION='1.2.0';export const SDK_COMPATIBILITY={version:SDK_API_VERSION,minCompatibleVersion:'1.0.0'};`);
+ const result=await buildManifest(f.root);assert.equal(result.ok,true);assert.match(result.manifest.build.source_sha256,/^[a-f0-9]{64}$/);
+});

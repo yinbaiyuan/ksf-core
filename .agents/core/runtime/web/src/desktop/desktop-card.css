@@ -1,0 +1,34 @@
+.desktop-card-frame { position:absolute; inset:var(--desktop-tile-inset,12px); border-radius:var(--desktop-card-radius); --mb-radius:var(--desktop-card-radius); --mb-spot-size:300px; --mb-border-size:225px; --mb-hot:0; --mb-near:0; }
+/* The host grid owns placement; SDK WidgetFrame's generic relative positioning
+   must not collapse the existing absolute card frame. */
+.os-desktop .desktop-grid .desktop-card-frame[data-bento-card] { position:absolute; }
+.desktop-card-visual > .magic-bento__content { display:block; height:100%; min-height:0; padding:0; }
+.desktop-card-visual { user-select:auto; -webkit-user-select:auto; }
+.desktop-card-frame > .desktop-card-visual { background:transparent; }
+.desktop-card-visual > .glass-surface { z-index:0; pointer-events:none; }
+.desktop-card-visual::before { content:''; position:absolute; inset:0; z-index:1; background:rgba(245,247,250,.65); pointer-events:none; }
+.desktop-card-frame { --mb-surface:linear-gradient(180deg,#f0f1f3,#e7e9ed); --mb-muted:#5d6672; --mb-ink:#252a32; --mb-edge:rgba(37,42,50,.16); --mb-highlight:rgba(255,255,255,.44); --mb-line:rgba(37,42,50,.13); --mb-shadow:0 10px 24px -14px rgba(16,20,28,.3),0 2px 6px -3px rgba(16,20,28,.12); }
+/* The upstream faint neutral glow is tuned for opaque panels. A cool accent
+   remains visible against the changing, light frosted backdrop. */
+.os-desktop.host-theme-light .desktop-card-frame { --mb-glow-rgb:27,105,220; --mb-spot-alpha:.16; --mb-glow-alpha:.95; }
+.os-desktop.host-theme-dark .desktop-card-frame { --mb-surface:linear-gradient(180deg,#2b2f36,#242830); --mb-muted:#b8bec8; --mb-ink:#f0f1f4; --mb-edge:rgba(216,224,237,.25); --mb-highlight:rgba(255,255,255,.08); --mb-line:rgba(216,224,237,.14); --mb-shadow:0 12px 28px -16px rgba(0,0,0,.5),0 2px 6px -3px rgba(0,0,0,.25); }
+.host-theme-dark .desktop-card-visual::before { background:rgba(35,39,46,.54); }
+.desktop-grid[data-glass-interacting] .desktop-card-visual { background:var(--mb-surface); }
+.os-desktop .desktop-card-visual .widget-content { color:var(--mb-ink); }
+.desktop-card-visual .widget-edit-tools { position:absolute; right:6px; top:6px; z-index:5; display:flex; gap:3px; }
+.desktop-card-visual .widget-edit-tools button { width:22px; height:22px; border:1px solid var(--mb-edge); border-radius:3px; background:var(--mb-well); color:var(--mb-ink); box-shadow:none; }
+.desktop-card-visual .widget-size { position:absolute; left:8px; bottom:6px; z-index:5; padding:1px 5px; border-radius:5px; background:var(--mb-surface); color:var(--mb-ink); font-size:10px; pointer-events:none; }
+.is-editing .desktop-card-visual { outline:1px solid var(--host-border); outline-offset:0; }
+.is-editing .desktop-card-frame:focus-visible { outline:none; }
+.is-editing .desktop-card-frame:focus-visible > .desktop-card-visual { outline:2px solid var(--host-accent); }
+/* The built-in statistics header owns its title; other application cards keep
+   their existing captions and content contracts. The frame remains draggable. */
+.desktop-tile:has(.work-stats-header) > .widget-caption { display:none; }
+.desktop-card-visual .widget-content:has(.work-stats-header) { padding:10px 16px 9px; overflow:hidden; }
+.is-editing .work-stats-header { padding-right:26px; }
+.desktop-card-visual:has(.work-stats-header) .widget-size { top:17px; bottom:auto; left:auto; right:92px; padding:0; border-radius:0; background:transparent; color:var(--mb-muted); }
+.desktop-card-visual:has(.work-stats-header) .widget-edit-tools { top:13px; }
+.os-desktop .desktop-grid .react-resizable-handle::after { border-color:var(--host-muted) !important; }
+@media(prefers-reduced-transparency:reduce){.desktop-card-frame > .desktop-card-visual{background:var(--mb-surface)}.desktop-card-visual::before,.desktop-card-visual > .host-live-frost{display:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.desktop-card-frame > .desktop-card-visual{background:var(--mb-surface)}.desktop-card-visual > .host-live-frost{display:none}}
+@media(forced-colors:active),(prefers-contrast:more){.os-desktop:is(.host-theme-light,.host-theme-dark) .desktop-card-frame{--mb-ink:CanvasText;--mb-muted:CanvasText}.desktop-card-frame .magic-bento__light,.desktop-card-frame .magic-bento__border,.desktop-card-visual::before,.desktop-card-visual > .host-live-frost{display:none}.desktop-card-frame .desktop-card-visual{background:Canvas;color:CanvasText;border:1px solid CanvasText;box-shadow:none}}

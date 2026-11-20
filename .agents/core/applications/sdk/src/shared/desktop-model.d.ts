@@ -1,10 +1,15 @@
 export declare const LEGACY_DESKTOP_KEY = "ksf.workbench.desktop.v1";
 export declare const PREVIOUS_DESKTOP_KEY = "ksf.workbench.desktop.v2";
 export declare const DESKTOP_KEY = "ksf.workbench.desktop.v3";
+export declare const DOCK_SIZE: { readonly min: 28; readonly max: 72; readonly default: 44 };
+export declare function dockIconSize(value?: number): number;
+export declare function setDockPinned(value: DesktopPreferences, appId: string, pinned: boolean): DesktopPreferences;
+export declare function dockApplicationIds(pinned: readonly string[] | undefined, running: readonly string[]): string[];
+export declare function reorderDockPins(ids: string[], appId: string, targetId: string): string[];
 export declare const SQUARE_GRID: {
     readonly version: 'square-v1';
     readonly cell: 96;
-    readonly gap: 24;
+    readonly gap: 32;
     readonly maxCols: 12;
 };
 export interface Bounds {
@@ -41,15 +46,16 @@ export interface DesktopPreferences {
     groups: DesktopGroup[];
     activeGroupId: string;
     bounds: Bounds;
+    dock?: { iconSize: number; pinnedAppIds?: string[] };
     shortcuts?: { initialized: true; homeGroupId: string; installations: Record<string,string> };
 }
 export interface ShortcutApplication {id:string;name:string;installationId:string;hasWindow:boolean}
 export declare function reconcileApplicationShortcuts(value:DesktopPreferences,installed:ShortcutApplication[],cols:number,createId:()=>string):DesktopPreferences;
 export declare const defaultLayout: () => WidgetLayout[];
-export declare function squareGridMetrics(available: number): {
+export declare function squareGridMetrics(available: number, options?: { cell?: number; gap?: number }): {
     cols: number;
     cell: number;
-    gap: 24;
+    gap: number;
     width: number;
 };
 export declare function fitWidgetLayout(layout: WidgetLayout[], cols: number): WidgetLayout[];
@@ -74,6 +80,7 @@ export declare function moveGroup(value: DesktopPreferences, id: string, directi
 export declare function removeGroup(value: DesktopPreferences, id: string): DesktopPreferences;
 export declare function sameLayout(a: WidgetLayout[], b: WidgetLayout[]): boolean;
 export declare function moveWidgetPositions(stored: WidgetLayout[], projected: readonly WidgetLayout[], moved: readonly WidgetLayout[]): WidgetLayout[];
+export declare function settleWidgetDrop(stored: WidgetLayout[], projected: readonly WidgetLayout[], id: string, destination: Pick<WidgetLayout, 'x' | 'y'> & Partial<Pick<WidgetLayout, 'w' | 'h'>>, cols?: number, resize?: boolean): WidgetLayout[];
 export declare function parseDesktop(value: unknown, known?: WidgetLayout[]): DesktopPreferences;
 export declare function readDesktop(storage?: Pick<Storage, 'getItem'>, known?: WidgetLayout[]): DesktopPreferences;
 export declare function saveDesktop(value: DesktopPreferences, storage?: Pick<Storage, 'setItem'>): boolean;

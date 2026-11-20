@@ -1,16 +1,18 @@
 import {useId,type ReactElement} from 'react';
 
 type EmblemKind='meeting'|'brief'|'tasks'|'lan'|'monitor'|'manual'|'flywheel'|'knowledge'|'abilities';
-const colors:Record<EmblemKind,[string,string]>={meeting:['#6B92FF','#3C51C8'],brief:['#FFBE58','#EC7134'],tasks:['#37CFB1','#087E6B'],lan:['#55CDFF','#2863D5'],monitor:['#314C63','#122536'],manual:['#55BFB8','#176C7D'],flywheel:['#5878EF','#293A91'],knowledge:['#4AC5A1','#19765F'],abilities:['#AB89F1','#6742B5']};
+export const emblemColors:Record<EmblemKind,[string,string]>={meeting:['#6B92FF','#3C51C8'],brief:['#FFBE58','#EC7134'],tasks:['#37CFB1','#087E6B'],lan:['#55CDFF','#2863D5'],monitor:['#314C63','#122536'],manual:['#55BFB8','#176C7D'],flywheel:['#5878EF','#293A91'],knowledge:['#4AC5A1','#19765F'],abilities:['#AB89F1','#6742B5']};
 
 /** Original vector marks stay legible at desktop, Dock and status-bar sizes. */
-function Emblem({kind}:{kind:EmblemKind}){
- const id='application-emblem-'+useId().replace(/:/g,''),[light,dark]=colors[kind];
+export function Emblem({kind,foreground=false}:{kind:EmblemKind;foreground?:boolean}){
+ const id='application-emblem-'+useId().replace(/:/g,''),[light,dark]=emblemColors[kind];
  return <svg className="application-emblem" viewBox="0 0 64 64" fill="none" aria-hidden="true" focusable="false">
   <defs><linearGradient id={id} x1="12" y1="0" x2="48" y2="64" gradientUnits="userSpaceOnUse"><stop stopColor={light}/><stop offset="1" stopColor={dark}/></linearGradient></defs>
-  <rect className="emblem-plate" width="64" height="64" rx="15" fill={`url(#${id})`}/>
+  {!foreground&&<>
+  <rect className="emblem-plate" width="64" height="64" fill={`url(#${id})`}/>
   <path d="M0 0h64v28C44 37 20 24 0 38V0Z" fill="white" fillOpacity=".055"/>
-  <rect className="emblem-rim" x=".75" y=".75" width="62.5" height="62.5" rx="14.25" stroke="white" strokeOpacity=".25" strokeWidth="1.5"/>
+  <rect className="emblem-rim" x=".75" y=".75" width="62.5" height="62.5" stroke="white" strokeOpacity=".25" strokeWidth="1.5"/>
+  </>}
   {kind==='knowledge'&&<>
    <path d="m22 22 10-9 10 9" stroke="#D3FFED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
    <circle cx="32" cy="12" r="3.5" fill="#F3FFF9"/>

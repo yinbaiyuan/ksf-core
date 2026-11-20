@@ -52,9 +52,21 @@ function secret(root, create) {
   if (value && value.length !== 32) fail('ROUTE_KEY_INVALID', 'Invalid local routing identity key; preserve it and existing records.');
   return value;
 }
+// Native session identity from the host environment. An explicit KSF pair wins so
+// nested hosts (one agent launched inside another) can be disambiguated; Codex
+// keeps precedence over Claude Code for existing records.
+export function environmentIdentity(env = process.env) {
+  if (env.KSF_SESSION_HOST !== undefined || env.KSF_SESSION_ID !== undefined) {
+    if (!env.KSF_SESSION_HOST || !env.KSF_SESSION_ID) invalid('Set both KSF_SESSION_HOST and KSF_SESSION_ID.');
+    return { host: env.KSF_SESSION_HOST, sessionId: env.KSF_SESSION_ID };
+  }
+  if (env.CODEX_THREAD_ID) return { host: 'codex', sessionId: env.CODEX_THREAD_ID };
+  if (env.CLAUDE_CODE_SESSION_ID) return { host: 'claude-code', sessionId: env.CLAUDE_CODE_SESSION_ID };
+  return null;
+}
 export function hostIdentity(input, env = process.env) {
-  const identity = input ?? (env.CODEX_THREAD_ID ? { host: 'codex', sessionId: env.CODEX_THREAD_ID } : null);
-  if (!plain(identity)) fail('ROUTE_IDENTITY_REQUIRED', 'Provide a native host/session identity through stdin or CODEX_THREAD_ID.');
+  const identity = input ?? environmentIdentity(env);
+  if (!plain(identity)) fail('ROUTE_IDENTITY_REQUIRED', 'Provide a native host/session identity through stdin, KSF_SESSION_HOST/KSF_SESSION_ID, CODEX_THREAD_ID or CLAUDE_CODE_SESSION_ID.');
   keys(identity, ['host', 'sessionId'], 'identity');
   if (!text(identity.host, 64) || !/^[a-z][a-z0-9-]*$/.test(identity.host) || !text(identity.sessionId, 1024)) invalid('Invalid host/session identity.');
   return identity;

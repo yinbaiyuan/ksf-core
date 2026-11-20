@@ -33,3 +33,20 @@ test('local CLI control requires its private credential and does not require a b
  assert.equal((await fetch(web.url+'api/health')).status,200,'a cancelled stream must not crash the backend');
  await web.close();await assert.rejects(readFile(join(root,'.agents/runtime-data/web/control.json')),{code:'ENOENT'});
 });
+
+test('browser settings and local control recover from a stale address without losing device trust',async t=>{
+ const {createCommunicationService}=await import('../src/communication/service.js');
+ const root=await mkdtemp(join(tmpdir(),'ksf-control-network-'));let initial,web;
+ t.after(async()=>{await initial?.close();await web?.close();await rm(root,{recursive:true,force:true});});
+ initial=await createCommunicationService(root);const identity=await initial.identityExport();
+ await initial.trust({identity,fingerprint:identity.fingerprint,host:'127.0.0.1',port:45731,name:'retained fixture peer'});
+ await initial.store.update(cfg=>Object.assign(cfg,{enabled:true,host:'192.0.2.254',port:0,discovery:false}));
+ const identityBytes=await readFile(join(root,'.agents/runtime-data/communication/identity/device.json')),peers=JSON.stringify((await initial.store.config()).peers);
+ await initial.close();initial=undefined;web=await startWebServer({root,port:0,capture:false});
+ const offline=await controlRequest(root,'/api/local/communication',{operation:'state'});assert.equal(offline.network.state,'network-changed');assert.equal(offline.listener,null);assert(offline.interfaces.length>0);assert.equal(offline.identity.nodeId,identity.nodeId);
+ const session=(await (await fetch(web.url+'api/workbench/session')).json()).data,headers={Origin:web.url.slice(0,-1),'content-type':'application/json','X-KSF-Token':session.token};
+ const settings=await fetch(web.url+'api/communication/state',{headers});assert.equal(settings.status,200);assert.equal((await settings.json()).data.network.state,'network-changed');
+ const read=await fetch(web.url+'api/config/communication',{headers});assert.equal(read.status,200);const config=(await read.json()).data;
+ const retry=await fetch(web.url+'api/config/communication',{method:'POST',headers,body:JSON.stringify({operation:'write',ifMatch:config.etag,values:{enabled:true,host:'127.0.0.1',port:0,discovery:false}})});assert.equal(retry.status,200);const saved=(await retry.json()).data;assert.equal(saved.application.state,'immediate');
+ const online=await controlRequest(root,'/api/local/communication',{operation:'state'});assert.equal(online.network.state,'online');assert.equal(online.listener.host,'127.0.0.1');assert.equal(JSON.stringify(online.config.peers),peers);assert.deepEqual(await readFile(join(root,'.agents/runtime-data/communication/identity/device.json')),identityBytes);
+});

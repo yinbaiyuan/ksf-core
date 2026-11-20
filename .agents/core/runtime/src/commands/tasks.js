@@ -6,6 +6,7 @@ import { targetRegistry } from '../routing/target-registry.js';
 import { listTasks, listTaskTargets, readTask, readTaskInput, captureStatus, installTaskHooks, syncTasks, declareTask, taskHook } from '../services/tasks.js';
 import { createTaskActivitySource } from '../services/task-activity.js';
 import { readCurrentWork } from '../services/work-context.js';
+import { environmentIdentity } from '../routing/storage.js';
 
 export function taskHelp() {
   return `KSF task\n\nUsage:\n` +
@@ -41,7 +42,7 @@ function archiveFilter({ project, ability, currentProject }, root, env) {
   }
   if (ability !== undefined && !currentProject) return { ability };
   const unavailable = () => fail('TASK_CURRENT_PROJECT_REQUIRED', '当前聊天没有可查询的工作项目，请用 --project 明确指定项目。', {}, 2);
-  if (!env.CODEX_THREAD_ID) unavailable();
+  if (!environmentIdentity(env)) unavailable();
   const ownership = readCurrentWork({ root, env }).current?.ownership;
   if (ownership?.state !== 'bound' || ownership.target.kind !== 'project') unavailable();
   const raw = ownership.target;

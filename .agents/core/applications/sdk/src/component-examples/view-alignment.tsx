@@ -1,0 +1,5 @@
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {View} from '@ksf/sdk/view';
+import {DemoPanel,SearchGlyph,CheckGlyph,FolderGlyph,ArrowGlyph} from '@ksf/sdk/component-examples/showcase-utils';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function ViewAlignmentExample(){const [justify,setJustify]=useState('space-between'),[align,setAlign]=useState('center');return <div className='ksf-demo-stack'><label>主轴 <select value={justify} onChange={e=>setJustify(e.target.value)}>{['start','center','end','space-between','space-around'].map(v=><option key={v}>{v}</option>)}</select></label><label>交叉轴 <select value={align} onChange={e=>setAlign(e.target.value)}>{['start','center','end','stretch'].map(v=><option key={v}>{v}</option>)}</select></label><View direction='row' justify={justify} align={align} gap={8} style={{minHeight:140,background:'var(--ksf-color-surface)',padding:12}}>{[32,60,90].map(height=><DemoPanel emphasis key={height} style={{minHeight:height,padding:8}}>对齐</DemoPanel>)}</View></div>;}

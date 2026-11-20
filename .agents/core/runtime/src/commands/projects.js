@@ -27,7 +27,7 @@ const usages = {
 
 export function projectHelp(operation) {
   return `KSF project${operation ? ` ${operation}` : ''}\n\nUsage:\n` +
-    (operation ? [usages[operation]] : [...Object.values(usages), 'management read|check|write <name> [--help]', 'governance read|check|apply|migrate|create-task|renumber|reorganize|context-list|recover <target> [--help]']).map(usage => `  ksf project ${usage}`).join('\n') + '\n\n' +
+    (operation ? [usages[operation]] : [...Object.values(usages), 'management read|check|write <name> [--help]', 'governance read|check|apply|migrate|create-task|renumber|reorganize|merge-child|context-list|recover <target> [--help]']).map(usage => `  ksf project ${usage}`).join('\n') + '\n\n' +
     'Targets are directory names under 项目/ (current) or 档案/项目/ (archived). Default scope: current.\n' +
     'read defaults to all; list returns root-card summaries without bodies.\n' +
     'write accepts {"metadata": {...}, "body": "..."}; creation requires body.\n' +

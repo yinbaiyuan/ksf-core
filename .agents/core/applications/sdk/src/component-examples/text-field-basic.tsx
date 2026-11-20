@@ -1,0 +1,2 @@
+import {useState} from 'react';import {TextField} from '@ksf/sdk/text-field';import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TextFieldBasicExample(){const [value,setValue]=useState('项目资料');return <div className="ksf-demo-stack"><TextField label="项目名称" value={value} onValueChange={setValue} clearable placeholder="填写项目名称" description="支持原生属性、中文输入与清空。"/><output role="status">当前值：{value||'（空）'}</output></div>;}

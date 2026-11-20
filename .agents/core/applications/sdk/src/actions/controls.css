@@ -1,0 +1,21 @@
+@import '../theme.css';
+button.ksf-icon-button {width:32px;min-width:32px;height:32px;padding:0}
+button.ksf-icon-button[data-size="small"] {width:24px;min-width:24px;height:24px}
+button.ksf-icon-button[data-size="large"] {width:40px;min-width:40px;height:40px}
+.ksf-button-group {display:inline-flex;align-items:center;gap:8px;max-width:100%;min-width:0;flex-wrap:wrap}
+.ksf-button-group[data-orientation="vertical"] {flex-direction:column;align-items:stretch}
+.ksf-button-group[data-attached="true"] {gap:0;flex-wrap:nowrap;padding:0}
+.ksf-button-group[data-attached="true"]>button {border-radius:0;position:relative}
+.ksf-button-group[data-attached="true"]>button:focus-visible {z-index:1}
+.ksf-button-group[data-attached="true"][data-orientation="horizontal"]>button+button {margin-left:-1px}
+.ksf-button-group[data-attached="true"][data-orientation="horizontal"]>button:first-child {border-radius:6px 0 0 4px}
+.ksf-button-group[data-attached="true"][data-orientation="horizontal"]>button:last-child {border-radius:0 6px 6px 0}
+.ksf-button-group[data-attached="true"][data-orientation="vertical"]>button+button {margin-top:-1px}
+.ksf-button-group[data-attached="true"][data-orientation="vertical"]>button:first-child {border-radius:6px 4px 0 0}
+.ksf-button-group[data-attached="true"][data-orientation="vertical"]>button:last-child {border-radius:0 0 6px 6px}
+.ksf-button-group[data-attached="true"]>button:only-child {border-radius:6px}
+a.ksf-link {color:var(--ksf-color-primary);text-decoration:underline;text-underline-offset:3px;border-radius:2px;overflow-wrap:anywhere}
+a.ksf-link:hover {text-decoration-thickness:2px}
+a.ksf-link:focus-visible {outline:2px solid var(--ksf-color-focus-ring);outline-offset:3px}
+
+.ksf-button-group[data-attached=true]>button:is(:hover,:active){z-index:1}

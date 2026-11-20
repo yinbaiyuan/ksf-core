@@ -1,0 +1,1 @@
+import {DockToolbar} from '@ksf/sdk/dock-toolbar';import {dockDemoTools} from '@ksf/sdk/component-examples/navigation-demo-data';export default function Example(){return <DockToolbar label="受控工具与左侧停靠" items={dockDemoTools} value="select" onValueChange={()=>{}} defaultEdge="left" shortcuts="off"/>;}

@@ -1,1 +1,1 @@
-export * from '../../../../../applications/sdk/src/components/ui/button.tsx';
+export * from '../../internal-ui/compat-button';

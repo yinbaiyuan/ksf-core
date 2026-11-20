@@ -17,7 +17,7 @@ import {planCoreApplications,stageApplicationPackages,assertApplicationBaseline,
 import {liveIdentity} from '../services/service-lock.js';
 import { checkSourceCompatibility } from '../sources/compatibility.js';
 import { isRepository, isRevision } from './git-values.js';
-import { developmentPath } from './paths.js';
+import { developmentPath,retiredCorePath } from './paths.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { download, releaseIndex } from './network.js';
 import { inspectCoreArchive } from './release.js';
@@ -113,7 +113,8 @@ export async function planUpdate(root, current, incoming, entries) {
     const base = current.files[path] ?? null, next = incoming.files[path] ?? null, local = localFile(root, path, base?.mode);
     const remote = next ? entries.get(path) : null;
     let chosen;
-    if (generated.has(path)) chosen = remote;
+    if(retiredCorePath(path)&&next===null)chosen=null;
+    else if (generated.has(path)) chosen = remote;
     else if (equals(local, next)) chosen = local;
     else if (equals(local, base)) chosen = remote;
     else if ((base === null && next === null) || (base && next && equals(remote, base))) chosen = local;

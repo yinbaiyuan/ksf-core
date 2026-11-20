@@ -7,7 +7,7 @@ import {createBackend} from '../backend.mjs';
 import {project} from '../../../runtime/src/services/projects.js';
 import {projectManagement,emptyProjectPlan} from '../../../runtime/src/services/project-management.js';
 import {projectGovernance} from '../../../runtime/src/services/project-governance.js';
-import {defaultMetadata} from '../../../runtime/src/projects/governance/model.js';
+import {defaultMetadata,criteriaDigest,hash} from '../../../runtime/src/projects/governance/model.js';
 import {createProjectContextFiles} from '../../../runtime/src/services/project-context-files.js';
 import {createApplicationStorage} from '../../../runtime/src/services/application-storage.js';
 import {createWorkspaceFiles} from '../../../runtime/src/services/workspace-files.js';
@@ -62,6 +62,20 @@ if(process.env.KSF_PROJECTS_PREVIEW_NUMBERING==='1'){
  );
  const out=projectGovernance({root,name:'示例',operation:'apply',data:{operationId:'numbering-browser-fixture',ifMatch:g.etag,changes}});if(out.errors.length)throw Error(JSON.stringify(out.errors));
 }
+if(process.env.KSF_PROJECTS_PREVIEW_TASK_UNIT==='1'){
+ const g=projectGovernance({root,name:'示例'}).data,ref=(id,path)=>({id,path}),pp=g.project.path,mp='项目/示例/M1-任务推进/milestone.md',mp2='项目/示例/M2-阶段确认/milestone.md',tp='项目/示例/M1-任务推进/B1-当前工作/task.md',tp2='项目/示例/M2-阶段确认/B1-已完成结果/task.md',rp='项目/示例/M2-阶段确认/复盘.md',ep='项目/示例/M2-阶段确认/B1-已完成结果/10-证据.txt',text='隔离验证结果，不是真实用户验收。',at=new Date().toISOString();
+ const p={...defaultMetadata('project',g.project.metadata.id,'任务推进隔离验证'),status:'active',owner:'示例负责人',next_action:'继续明确当前任务，阶段等待用户确认',goals:[{id:'g',title:'交付可检查结果'}],criteria:[{id:'p',text:'取得整体结果'}],milestones:[ref('unit_m1',mp),ref('unit_m2',mp2)],focus_milestones:[ref('unit_m1',mp)]};
+ const stages=[{code:'B',name:'交付',purpose:'取得结果',exit_criteria:'结果可检查'}];
+ const m={...defaultMetadata('milestone','unit_m1','当前任务所在阶段'),status:'active',project:ref(p.id,pp),goal_ids:['g'],criteria:[{id:'m1',text:'当前工作完成'}],task_stages:stages,tasks:[ref('unit_t1',tp)],focus_tasks:[ref('unit_t1',tp)],next_action:'建议当前任务完成后再选择下一项'};
+ const task={...defaultMetadata('task','unit_t1','当前工作'),status:'active',task_code:'B1',project:ref(p.id,pp),milestone:ref(m.id,mp),goal_ids:['g'],owner:'示例负责人',commitment:'now',next_action:'核对同一成果并补齐证据',criteria:[{id:'t1',text:'成果可检查'}]};
+ const m2={...defaultMetadata('milestone','unit_m2','等待用户阶段确认'),status:'review',project:ref(p.id,pp),goal_ids:['g'],criteria:[{id:'m2',text:'演示结果及证据可核对'}],task_stages:stages,tasks:[ref('unit_t2',tp2)],review_ref:ref('unit_r2',rp),next_action:'等待用户核对阶段成果并明确确认'};
+ const proof={criterion_id:'t2',result:'passed',reviewer:'隔离Agent预检',reviewed_at:at,evidence:[{path:ep,digest:hash(text)}]};
+ const task2={...defaultMetadata('task','unit_t2','已完成结果'),status:'completed',task_code:'B1',project:ref(p.id,pp),milestone:ref(m2.id,mp2),goal_ids:['g'],owner:'示例负责人',commitment:'now',criteria:[{id:'t2',text:'结果已取得'}],verification:null};task2.verification={basis_digest:criteriaDigest(task2),results:[proof]};
+ const review={...defaultMetadata('review','unit_r2','阶段验收草稿'),subject:ref(m2.id,mp2),owner:'示例负责人',next_action:'等待用户明确阶段确认',basis_digest:criteriaDigest(m2),criterion_results:[{...proof,criterion_id:'m2'}]};
+ const objects=[[pp,p],[mp,m],[tp,task],[mp2,m2],[tp2,task2],[rp,review]];
+ const changes=objects.map(([path,metadata])=>({path,ifMatch:g.documents.find(d=>d.path===path)?.etag??'missing',metadata,body:metadata.kind==='review'?'# 阶段验收草稿\n\nAgent预检通过，等待用户确认。':'# '+metadata.name+'\n\n## 目标\n隔离验证任务和阶段边界。\n\n## 当前结果\n已有可核对结果。\n\n## 未决与缺口\n真实用户效果未在此夹具中验收。\n'}));changes.push({path:ep,ifMatch:'missing',body:text});
+ const out=projectGovernance({root,name:'示例',operation:'apply',data:{operationId:'browser-task-unit-fixture',ifMatch:g.etag,changes}});if(out.errors.length)throw Error(JSON.stringify(out.errors));
+}
 const files=createWorkspaceFiles(root,createCoordinator());
 const contextFiles=createProjectContextFiles(files,createApplicationStorage(root));
 const contextFileCall=input=>{
@@ -74,7 +88,7 @@ const previewGovernance=async(operation,input)=>{
   if(operation==='read'&&delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
   const saveDelay=Number(process.env.KSF_PROJECTS_PREVIEW_SAVE_DELAY_MS??0);
   if(operation==='apply'&&saveDelay>0)await new Promise(resolve=>setTimeout(resolve,saveDelay));
-  const result=projectGovernance({root,operation,...input});
+  const result=projectGovernance({root,operation,...input},{caller:{source:'surface',humanWindow:true,appId:'com.ksf.projects',instanceId:'isolated-browser'}});
   const lostReply=join(root,'.project-fixture-lost-save-reply');
   if(operation==='apply'&&existsSync(lostReply)){
     rmSync(lostReply);throw Object.assign(Error('隔离验收：保存已执行，但回执未收到。'),{code:'FIXTURE_REPLY_UNKNOWN'});

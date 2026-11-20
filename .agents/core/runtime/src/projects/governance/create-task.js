@@ -44,7 +44,7 @@ function prepare(root,name,scope,data){
  safePath(root,path,{missing:true});if(stat(join(root,dirname(path))))fail('PROJECT_TASK_CREATE_COLLISION','任务目标目录已存在，不能覆盖。');
  const metadata={...defaultMetadata('task',id,data.name),project:{id:project.metadata.id,path:project.path},milestone:{id:milestone.metadata.id,path:milestone.path},task_code};
  for(const key of ['owner','next_action','criteria','goal_ids','depends_on','priority','commitment','work_type'])if(Object.hasOwn(data,key))metadata[key]=data[key];
- const nextCounters={...counters,[stage]:Number(task_code.slice(1))},task={id,path,code:task_code,stage,numberingMode:'staged'},body=data.body??'# '+data.name+'\n\n';
+ const nextCounters={...counters,[stage]:Number(task_code.slice(1))},task={id,path,code:task_code,stage,numberingMode:'staged'},body=data.body??'# '+data.name+'\n\n## 目标\n\n## 当前结果\n\n## 未决与缺口\n';
  const refs=[...milestone.metadata.tasks,{id,path}].sort((a,b)=>compareCodes(a.id===id?task_code:codeOf(state.graph.byId.get(a.id)),b.id===id?task_code:codeOf(state.graph.byId.get(b.id))));
  const changes=[{path,ifMatch:'missing',metadata,body},{path:milestone.path,ifMatch:milestone.etag,metadata:{tasks:refs,task_counters:nextCounters}}],write={operationId:data.operationId,ifMatch:state.etag,changes};
  const prepared=prepareChanges(root,name,scope,write,{allowTaskCounters:true});

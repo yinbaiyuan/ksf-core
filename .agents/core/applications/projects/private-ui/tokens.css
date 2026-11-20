@@ -1,0 +1,111 @@
+@import '@ksf/sdk/theme.css';
+.ksf-ui-application-mount { position:relative; height:100%; min-width:0; min-height:0; }
+.ksf-ui-overlay-root { position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; }
+.ksf-ui-overlay-backdrop { position:absolute; inset:0; background:#142e4d55; pointer-events:auto; }
+.ksf-ui-overlay-panel { position:relative; min-width:0; max-width:100%; max-height:100%; overflow:auto; pointer-events:auto; outline:0; }
+/* KSF public semantic tokens. No reset or document-level theme mutation. */
+.ksf-ui-root[data-ksf-ui="1"] {
+  --ksf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --ksf-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ksf-font-body: 15px; --ksf-line-body: 1.6;
+  --ksf-space-1: 2px; --ksf-space-2: 4px; --ksf-space-3: 8px;
+  --ksf-space-4: 12px; --ksf-space-5: 16px; --ksf-space-6: 24px;
+  --ksf-space-7: 32px; --ksf-space-8: 48px;
+  --ksf-radius-icon: 0; --ksf-radius-window: 2px; --ksf-radius-control: 4px; --ksf-radius-surface: 6px;
+  --ksf-control-min: 32px; --ksf-row-min: 40px; --ksf-menu-min: 32px;
+  --ksf-field-gap: 12px; --ksf-surface-padding: 16px;
+  --ksf-duration-fast: 120ms; --ksf-duration-standard: 180ms; --ksf-duration-overlay: 220ms;
+  --ksf-ease-enter: cubic-bezier(.2,0,0,1); --ksf-ease-exit: cubic-bezier(.4,0,1,1);
+  --ksf-focus-width: 2px; --ksf-focus-offset: 2px;
+  --ksf-background: #eff4fa; --ksf-surface-content: #fff; --ksf-surface-raised: #f9fbfe; --ksf-surface-inset: #e5edf5;
+  --ksf-text-primary: #1d3047; --ksf-text-secondary: #526780;
+  --ksf-border-subtle: #a9bbce; --ksf-border-control: #6b8198;
+  --ksf-action-primary: #075a88; --ksf-on-primary: #fff; --ksf-action-hover: #06496f; --ksf-action-pressed: #043954;
+  --ksf-selection-background: #d7ebf7; --ksf-selection-foreground: #075a88; --ksf-hover: #dde9f5; --ksf-focus: #147baf;
+  --ksf-success: #176344; --ksf-success-background: #eaf5ee;
+  --ksf-warning: #7a530e; --ksf-warning-background: #fbf4e7;
+  --ksf-danger: #aa302e; --ksf-danger-background: #fceeed; --ksf-on-danger: #fff;
+  --ksf-info: #075a88; --ksf-info-background: #e9f4fb;
+  --ksf-disabled-foreground: #526780; --ksf-disabled-background: #e5edf5;
+  --ksf-frost-fill: #f5f9fce6; --ksf-frost-blur: 16px;
+  --ksf-shadow-overlay: 0 8px 24px #11294424; --ksf-shadow-window: 0 12px 32px #11294432;
+  --ksf-edge-soft: #d2dce7; --ksf-edge-input: #7d90a6;
+  --ksf-control-top: #fff; --ksf-control-bottom: #f1f5f9;
+  --ksf-control-highlight: #ffffffeb; --ksf-control-shade: #133a5912;
+  --ksf-surface-shadow: 0 1px 2px #17375208, 0 8px 24px #17375208;
+  --ksf-control-shadow: inset 0 1px 0 var(--ksf-control-highlight), 0 1px 2px #17375212;
+  --ksf-focus-halo: #278cbd22; --ksf-accent-soft: #edf6fb;
+  color-scheme: light; color: var(--ksf-text-primary); font: 400 var(--ksf-font-body)/var(--ksf-line-body) var(--ksf-font-sans);
+  min-width: 0; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums;
+}
+.ksf-ui-root[data-ksf-ui="1"][data-theme="dark"] {
+  --ksf-background: #162332; --ksf-surface-content: #1c2b3c; --ksf-surface-raised: #23364a; --ksf-surface-inset: #122030;
+  --ksf-text-primary: #edf3fa; --ksf-text-secondary: #b4c5d8;
+  --ksf-border-subtle: #526e88; --ksf-border-control: #7a93ab;
+  --ksf-action-primary: #79cef2; --ksf-on-primary: #162332; --ksf-action-hover: #9eddf7; --ksf-action-pressed: #58bde7;
+  --ksf-selection-background: #284e68; --ksf-selection-foreground: #d2f1ff; --ksf-hover: #30475e; --ksf-focus: #79cef2;
+  --ksf-success: #a0e6c0; --ksf-success-background: #18392f;
+  --ksf-warning: #f4d285; --ksf-warning-background: #40351e;
+  --ksf-danger: #ffb1a9; --ksf-danger-background: #44282d; --ksf-on-danger: #44282d;
+  --ksf-info: #79cef2; --ksf-info-background: #203b50;
+  --ksf-disabled-foreground: #a1b4c6; --ksf-disabled-background: #27394b;
+  --ksf-frost-fill: #1c2b3ce6; --ksf-shadow-overlay: 0 8px 24px #030b1652; --ksf-shadow-window: 0 14px 36px #030b1666;
+  --ksf-edge-soft: #40566e; --ksf-edge-input: #7f97b0;
+  --ksf-control-top: #304257; --ksf-control-bottom: #26374a;
+  --ksf-control-highlight: #ffffff14; --ksf-control-shade: #020a1838;
+  --ksf-surface-shadow: 0 1px 2px #030a1830, 0 8px 24px #030a1826;
+  --ksf-control-shadow: inset 0 1px 0 var(--ksf-control-highlight), 0 1px 3px #030a1840;
+  --ksf-focus-halo: #79cef22b; --ksf-accent-soft: #233f54;
+  color-scheme: dark;
+}
+/* Bridge the retained project UI to the public SDK palette. Portals receive
+   the same theme attribute; local app themes never mutate host preferences. */
+.ksf-ui-root[data-ksf-ui="1"][data-theme] {
+  --ksf-background:var(--ksf-color-surface); --ksf-surface-content:var(--ksf-color-background);
+  --ksf-surface-raised:var(--ksf-color-surface-raised); --ksf-surface-inset:var(--ksf-color-surface);
+  --ksf-text-primary:var(--ksf-color-foreground); --ksf-text-secondary:var(--ksf-color-muted-foreground);
+  --ksf-border-subtle:var(--ksf-color-border); --ksf-border-control:var(--ksf-color-border-strong);
+  --ksf-action-primary:var(--ksf-color-primary); --ksf-on-primary:var(--ksf-color-on-primary);
+  --ksf-action-hover:color-mix(in srgb,var(--ksf-color-primary) 90%,var(--ksf-color-foreground));
+  --ksf-action-pressed:color-mix(in srgb,var(--ksf-color-primary) 80%,var(--ksf-color-foreground));
+  --ksf-selection-background:var(--ksf-color-selection); --ksf-selection-foreground:var(--ksf-color-selection-foreground);
+  --ksf-hover:var(--ksf-color-surface); --ksf-focus:var(--ksf-color-focus-ring);
+  --ksf-success:var(--ksf-color-success); --ksf-success-background:var(--ksf-color-success-surface);
+  --ksf-warning:var(--ksf-color-warning); --ksf-warning-background:var(--ksf-color-warning-surface);
+  --ksf-danger:var(--ksf-color-danger); --ksf-danger-background:var(--ksf-color-danger-surface);
+  --ksf-info:var(--ksf-color-info); --ksf-info-background:var(--ksf-color-info-surface);
+  --ksf-disabled-foreground:var(--ksf-color-muted-foreground); --ksf-disabled-background:var(--ksf-color-surface);
+  --ksf-frost-fill:var(--ksf-color-surface-raised); --ksf-edge-soft:var(--ksf-color-border); --ksf-edge-input:var(--ksf-color-border-strong);
+  --ksf-control-top:var(--ksf-color-surface-raised); --ksf-control-bottom:var(--ksf-color-surface-raised);
+  --ksf-control-highlight:transparent; --ksf-control-shade:transparent; --ksf-surface-shadow:none; --ksf-control-shadow:none;
+  --ksf-focus-halo:color-mix(in srgb,var(--ksf-color-focus-ring) 15%,transparent); --ksf-accent-soft:var(--ksf-color-primary-surface);
+}
+.ksf-ui-root[data-ksf-ui="1"][data-density="comfortable"] {
+  --ksf-control-min: 40px; --ksf-row-min: 48px; --ksf-menu-min: 40px; --ksf-field-gap: 16px; --ksf-surface-padding: 24px;
+}
+.ksf-ui-root[data-ksf-ui="1"][data-motion="reduced"],
+.ksf-ui-root[data-ksf-ui="1"][data-ui-visible="false"] {
+  --ksf-duration-fast: 0ms; --ksf-duration-standard: 0ms; --ksf-duration-overlay: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ksf-ui-root[data-ksf-ui="1"] { --ksf-duration-fast: 0ms; --ksf-duration-standard: 0ms; --ksf-duration-overlay: 0ms; }
+}
+@media (forced-colors: active) {
+  .ksf-ui-root[data-ksf-ui="1"][data-theme] {
+    --ksf-background: Canvas; --ksf-surface-content: Canvas; --ksf-surface-raised: Canvas; --ksf-surface-inset: Canvas;
+    --ksf-text-primary: CanvasText; --ksf-text-secondary: CanvasText; --ksf-border-control: ButtonText; --ksf-border-subtle: GrayText;
+    --ksf-focus: Highlight; --ksf-action-primary: Highlight; --ksf-on-primary: HighlightText; --ksf-frost-fill: Canvas;
+    --ksf-success: CanvasText; --ksf-warning: CanvasText; --ksf-danger: CanvasText; --ksf-info: CanvasText;
+    --ksf-success-background: Canvas; --ksf-warning-background: Canvas; --ksf-danger-background: Canvas; --ksf-info-background: Canvas;
+    --ksf-shadow-overlay: none; --ksf-shadow-window: none;
+    --ksf-edge-soft: GrayText; --ksf-edge-input: ButtonText;
+    --ksf-control-top: Canvas; --ksf-control-bottom: Canvas;
+    --ksf-control-highlight: transparent; --ksf-control-shade: transparent;
+    --ksf-surface-shadow: none; --ksf-control-shadow: none;
+    --ksf-focus-halo: transparent; --ksf-accent-soft: Canvas;
+  }
+}
+/* A mount owns only these elements; window slots remain host-owned. */
+.ksf-ui-application { height:100%; min-width:0; min-height:0; }
+.ksf-ui-application > .ksf-ui-root { height:100%; min-height:0; }
+.ksf-ui-application-overlays { position:absolute; inset:0; pointer-events:none; isolation:isolate; }

@@ -1,0 +1,3058 @@
+[
+  {
+    "id": "foundation",
+    "label": "基础呈现与规范",
+    "scope": "颜色、文字、图标和按键表达；主题机制与界面组件分别标明。",
+    "items": [
+      {
+        "id": "FND-01",
+        "name": "Theme Colors",
+        "label": "主题颜色",
+        "purpose": "提供浅深语义色、CSS变量和宿主主题绑定。",
+        "note": "基础机制，不计作一个界面组件。",
+        "kind": "foundation",
+        "available": {
+          "section": "theme",
+          "entry": "@ksf/sdk/theme"
+        },
+        "delivery": "available",
+        "aliases": [
+          "主题",
+          "颜色",
+          "深浅色",
+          "配色"
+        ]
+      },
+      {
+        "id": "FND-02",
+        "name": "Typography",
+        "label": "文本排版",
+        "purpose": "统一正文、标题、辅助文字和行内代码的基本表达。",
+        "note": "只管理文字呈现，不承接页面布局。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "文字",
+          "正文",
+          "标题",
+          "Heading",
+          "Text",
+          "InlineCode",
+          "行内代码"
+        ],
+        "available": {
+          "section": "typography",
+          "entry": "@ksf/sdk/typography"
+        }
+      },
+      {
+        "id": "FND-03",
+        "name": "Icon",
+        "label": "图标",
+        "purpose": "统一图标尺寸、颜色继承与装饰/语义图标的可访问名称。",
+        "note": "传入应用按需导入的SVG图标；无内置全量图标注册表。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "图标",
+          "SVG",
+          "装饰图标",
+          "语义图标"
+        ],
+        "available": {
+          "section": "icon",
+          "entry": "@ksf/sdk/icon"
+        }
+      },
+      {
+        "id": "FND-04",
+        "name": "Kbd",
+        "label": "快捷键提示",
+        "purpose": "清晰呈现按键与组合键符号。",
+        "note": "使用原生kbd呈现提示，不监听键盘或注册快捷键。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "键帽",
+          "按键",
+          "快捷键提示",
+          "组合键"
+        ],
+        "available": {
+          "section": "kbd",
+          "entry": "@ksf/sdk/kbd"
+        }
+      },
+      {
+        "id": "FND-05",
+        "name": "AnimatedText",
+        "label": "文字动效",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "文字动效，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "ai-text-loading",
+          "cradle-text",
+          "type-writer",
+          "swoosh-text",
+          "plucked-text",
+          "glitch-text",
+          "dynamic-text",
+          "marker-text",
+          "shadow-text",
+          "split-flap-text"
+        ],
+        "available": {
+          "section": "animated-text",
+          "entry": "@ksf/sdk/animated-text"
+        }
+      }
+    ]
+  },
+  {
+    "id": "layout",
+    "label": "布局与容器",
+    "scope": "组织空间、分栏、滚动和内容排布，不持有业务数据。",
+    "items": [
+      {
+        "id": "LAY-01",
+        "name": "View",
+        "label": "布局容器",
+        "purpose": "承载内容、横纵布局与局部主题边界。",
+        "note": "间距和尺寸用CSS控制，不再重复建立Box/Flex容器。",
+        "available": {
+          "section": "view",
+          "entry": "@ksf/sdk/view"
+        },
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "容器",
+          "布局",
+          "横向布局",
+          "纵向布局"
+        ]
+      },
+      {
+        "id": "LAY-02",
+        "name": "Grid",
+        "label": "网格布局",
+        "purpose": "用行列网格组织内容并适应容器宽度。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "grid",
+          "entry": "@ksf/sdk/grid"
+        }
+      },
+      {
+        "id": "LAY-03",
+        "name": "SplitView",
+        "label": "可调整分栏",
+        "purpose": "管理相邻面板的比例、拖动分隔与最小尺寸。",
+        "note": "只调整应用内部面板，不管理宿主窗口。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "split-view",
+          "entry": "@ksf/sdk/split-view"
+        }
+      },
+      {
+        "id": "LAY-04",
+        "name": "ScrollArea",
+        "label": "滚动区域",
+        "purpose": "限定内容滚动范围，保留键盘滚动与可访问性。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "scroll-area",
+          "entry": "@ksf/sdk/scroll-area"
+        }
+      },
+      {
+        "id": "LAY-05",
+        "name": "Divider",
+        "label": "分隔线",
+        "purpose": "表达内容分组的水平或垂直边界。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "divider",
+          "entry": "@ksf/sdk/divider"
+        }
+      },
+      {
+        "id": "LAY-06",
+        "name": "AspectRatio",
+        "label": "固定比例区域",
+        "purpose": "为图片、视频和预览内容保留稳定宽高比。",
+        "delivery": "planned",
+        "kind": "component",
+        "aliases": []
+      },
+      {
+        "id": "LAY-07",
+        "name": "Masonry",
+        "label": "瀑布流布局",
+        "purpose": "组织不等高媒体条目并适应容器。",
+        "note": "与通用Grid区分；可以复用布局而非必须独立export。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "masonry",
+          "entry": "@ksf/sdk/masonry"
+        }
+      },
+      {
+        "id": "LAY-08",
+        "name": "BentoGrid",
+        "label": "部件网格",
+        "purpose": "部件网格，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "note": "不是把每种发光或悬停效果拆成一个组件。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "bento-grid"
+        ],
+        "available": {
+          "section": "bento-grid",
+          "entry": "@ksf/sdk/bento-grid"
+        }
+      },
+      {
+        "id": "LAY-09",
+        "name": "AppLayout",
+        "label": "应用布局",
+        "purpose": "组织应用内部页头、侧栏、内容与页脚。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "app-layout",
+          "entry": "@ksf/sdk/app-layout"
+        }
+      },
+      {
+        "id": "LAY-10",
+        "name": "Space",
+        "label": "间距组合",
+        "purpose": "统一相邻内容的排列、间距与紧凑连接。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "space",
+          "entry": "@ksf/sdk/space"
+        }
+      },
+      {
+        "id": "LAY-11",
+        "name": "Affix",
+        "label": "吸附定位",
+        "purpose": "在所属滚动区域内保持内容可见。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "affix",
+          "entry": "@ksf/sdk/affix"
+        }
+      },
+      {
+        "id": "LAY-12",
+        "name": "BackgroundEffect",
+        "label": "交互背景",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "交互背景，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "halftone-background",
+          "shape-hero",
+          "background-paths",
+          "dot-field",
+          "flow-field",
+          "topo-background",
+          "drape-background",
+          "ink-background",
+          "caustics-background",
+          "rain-glass-background"
+        ],
+        "available": {
+          "section": "background-effect",
+          "entry": "@ksf/sdk/background-effect"
+        }
+      },
+      {
+        "id": "LAY-13",
+        "name": "StackPanel",
+        "label": "层级面板",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "层级面板，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "stack-panel"
+        ],
+        "available": {
+          "section": "stack-panel",
+          "entry": "@ksf/sdk/stack-panel"
+        }
+      }
+    ]
+  },
+  {
+    "id": "actions",
+    "label": "操作与命令",
+    "scope": "按钮、菜单与应用内工具栏；业务执行和宿主命令各归其主。",
+    "items": [
+      {
+        "id": "ACT-01",
+        "name": "Button",
+        "label": "按钮",
+        "purpose": "提供常规、主要和轻量操作入口，保留原生按钮行为。",
+        "available": {
+          "section": "button",
+          "entry": "@ksf/sdk/button"
+        },
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "按钮",
+          "保存操作",
+          "保存",
+          "提交",
+          "操作入口"
+        ]
+      },
+      {
+        "id": "ACT-02",
+        "name": "IconButton",
+        "label": "图标按钮",
+        "purpose": "提供紧凑的单图标操作，并要求清楚的可访问名称。",
+        "note": "复用Button与Icon，label必需；不新建第二套按钮底座。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "图标操作",
+          "图标按钮"
+        ],
+        "available": {
+          "section": "icon-button",
+          "entry": "@ksf/sdk/icon-button"
+        }
+      },
+      {
+        "id": "ACT-03",
+        "name": "ButtonGroup",
+        "label": "按钮组",
+        "purpose": "组织一组相关操作的排列、边界与键盘顺序。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "按钮分组",
+          "组合按钮"
+        ],
+        "available": {
+          "section": "button-group",
+          "entry": "@ksf/sdk/button-group"
+        },
+        "note": "只组织按钮排列和分组；保留各按钮的原生Tab顺序，不假定单选或多选。"
+      },
+      {
+        "id": "ACT-04",
+        "name": "Link",
+        "label": "链接",
+        "purpose": "表达可导航的目标地址和链接语义。",
+        "note": "保留原生a导航语义；应用路由可自行接入onClick。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "导航链接",
+          "超链接"
+        ],
+        "available": {
+          "section": "link",
+          "entry": "@ksf/sdk/link"
+        }
+      },
+      {
+        "id": "ACT-05",
+        "name": "DropdownMenu",
+        "label": "下拉菜单",
+        "purpose": "从触发器展开一组应用命令。",
+        "note": "菜单项与子菜单使用统一窗口内底座，快捷键文字不等于注册命令。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "下拉命令",
+          "菜单",
+          "更多操作"
+        ],
+        "available": {
+          "section": "dropdown-menu",
+          "entry": "@ksf/sdk/dropdown-menu"
+        }
+      },
+      {
+        "id": "ACT-06",
+        "name": "ContextMenu",
+        "label": "上下文菜单",
+        "purpose": "为某个内容对象提供鼠标或键盘调用的相关命令。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "右键菜单",
+          "上下文操作"
+        ],
+        "available": {
+          "section": "context-menu",
+          "entry": "@ksf/sdk/context-menu"
+        },
+        "note": "右键、ContextMenu键或Shift+F10触发，菜单归所属应用窗口。"
+      },
+      {
+        "id": "ACT-07",
+        "name": "Toolbar",
+        "label": "工具栏",
+        "purpose": "组织当前内容的按钮、分组及溢出操作。",
+        "note": "应用内部工具栏，按group分隔并按priority溢出到更多；宿主顶栏仍用WindowToolbar。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "内容工具栏",
+          "溢出操作",
+          "工具栏分组",
+          "toolbar"
+        ],
+        "available": {
+          "section": "toolbar",
+          "entry": "@ksf/sdk/toolbar"
+        }
+      },
+      {
+        "id": "ACT-08",
+        "name": "Menubar",
+        "label": "应用内菜单栏",
+        "purpose": "组织常驻菜单与子菜单，支持菜单间的键盘切换。",
+        "note": "只用于应用内部菜单，支持菜单间及子菜单键盘导航，不替代宿主/OS菜单。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "应用菜单",
+          "常驻菜单",
+          "菜单栏"
+        ],
+        "available": {
+          "section": "menubar",
+          "entry": "@ksf/sdk/menubar"
+        }
+      },
+      {
+        "id": "ACT-09",
+        "name": "FloatButton",
+        "label": "悬浮操作按钮",
+        "purpose": "在应用内容区域固定放置常用操作。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "float-button",
+          "entry": "@ksf/sdk/float-button"
+        }
+      },
+      {
+        "id": "ACT-10",
+        "name": "CommandButton",
+        "label": "键帽命令按钮",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "键帽随真实快捷键下沉，按钮与快捷键由所属窗口管理。",
+        "aliases": [
+          "CommandAction",
+          "command-button"
+        ],
+        "available": {
+          "section": "command-button",
+          "entry": "@ksf/sdk/command-button"
+        }
+      },
+      {
+        "id": "ACT-11",
+        "name": "RadialMenu",
+        "label": "径向菜单",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "径向菜单，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "marking-menu"
+        ],
+        "available": {
+          "section": "radial-menu",
+          "entry": "@ksf/sdk/radial-menu"
+        }
+      },
+      {
+        "id": "ACT-12",
+        "name": "TearAction",
+        "label": "撕纸操作组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "撕纸操作组合，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "tear-button"
+        ],
+        "composition": true,
+        "available": {
+          "section": "tear-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "ACT-13",
+        "name": "SubscribeButton",
+        "label": "订阅铃铛按钮",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "受控订阅状态、订阅数量及双摆铃铛反馈；实际订阅由应用处理。",
+        "aliases": [
+          "BellAction",
+          "bell-button"
+        ],
+        "available": {
+          "section": "bell-action",
+          "entry": "@ksf/sdk/subscribe-button"
+        }
+      },
+      {
+        "id": "ACT-14",
+        "name": "HoldButton",
+        "label": "长按确认",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "长按确认，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "hold-button"
+        ],
+        "available": {
+          "section": "hold-button",
+          "entry": "@ksf/sdk/motion-button"
+        }
+      },
+      {
+        "id": "ACT-15",
+        "name": "MotionButton",
+        "label": "按钮动效",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "按钮动效，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "attract-button",
+          "gradient-button",
+          "particle-button",
+          "slide-text-button"
+        ],
+        "available": {
+          "section": "motion-button",
+          "entry": "@ksf/sdk/motion-button"
+        }
+      },
+      {
+        "id": "ACT-16",
+        "name": "GenerateAction",
+        "label": "生成操作组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "KSF本地生成状态组合，演示异步进度；真实生成由应用接入。",
+        "aliases": [],
+        "composition": true,
+        "available": {
+          "section": "generate-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "ACT-17",
+        "name": "UndoAction",
+        "label": "撤销操作组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "撤销操作组合，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "undo-button"
+        ],
+        "composition": true,
+        "available": {
+          "section": "undo-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "ACT-18",
+        "name": "SlideToConfirm",
+        "label": "滑动确认",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "滑动确认，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "slide-to-confirm"
+        ],
+        "available": {
+          "section": "slide-to-confirm",
+          "entry": "@ksf/sdk/motion-button"
+        }
+      },
+      {
+        "id": "ACT-19",
+        "name": "SaveAction",
+        "label": "收藏操作组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "收藏到集合、移动收藏位置并新建集合。",
+        "aliases": [
+          "save-button"
+        ],
+        "composition": true,
+        "available": {
+          "section": "save-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "ACT-20",
+        "name": "CartAction",
+        "label": "购物车操作组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "购物车操作组合，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "cart-button"
+        ],
+        "composition": true,
+        "available": {
+          "section": "cart-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "ACT-21",
+        "name": "ThemeToggle",
+        "label": "主题切换按钮",
+        "purpose": "以太阳与月亮图形形变发出浅深主题切换意图，主题状态由应用控制。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "switch-button"
+        ],
+        "available": {
+          "section": "theme-toggle",
+          "entry": "@ksf/sdk/theme-toggle"
+        }
+      },
+      {
+        "id": "ACT-22",
+        "name": "ExternalToolAction",
+        "label": "外部工具入口组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "外部编辑工具入口；目的地与打开方式由应用负责。",
+        "aliases": [
+          "v0-button",
+          "V0Button",
+          "external editor"
+        ],
+        "composition": true,
+        "available": {
+          "section": "external-tool-action",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ai",
+    "label": "AI 交互与应用",
+    "scope": "AI输入、模型、工具、上下文、审阅、会话及AI业务组合；实际模型和业务服务由应用接入。",
+    "items": [
+      {
+        "id": "INP-20",
+        "name": "InlineSuggestions",
+        "label": "行内补全",
+        "purpose": "在输入中预览应用提供的补全文本，并由用户明确接受。",
+        "note": "复用TextField/Combobox/Popover基础；候选来源与AI推理归应用。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "ai-autocomplete"
+        ],
+        "available": {
+          "section": "inline-suggestions",
+          "entry": "@ksf/sdk/inline-suggestions"
+        }
+      },
+      {
+        "id": "INP-31",
+        "name": "AIPrompt",
+        "label": "AI输入器",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "组织多行提示输入、附件、模型选择与发送、停止反馈。",
+        "aliases": [
+          "ai-prompt"
+        ],
+        "available": {
+          "section": "ai-prompt",
+          "entry": "@ksf/sdk/ai-prompt"
+        }
+      },
+      {
+        "id": "INP-33",
+        "name": "VoiceInput",
+        "label": "语音输入状态",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "展示录制、就绪、播放、丢弃和发送等语音交互状态。",
+        "aliases": [
+          "ai-voice"
+        ],
+        "available": {
+          "section": "voice-input",
+          "entry": "@ksf/sdk/voice-input"
+        }
+      },
+      {
+        "id": "INP-37",
+        "name": "ModelSelector",
+        "label": "模型选择",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "选择应用提供的模型及其支持的推理强度。",
+        "aliases": [
+          "ai-model-selector"
+        ],
+        "available": {
+          "section": "model-selector",
+          "entry": "@ksf/sdk/model-selector"
+        }
+      },
+      {
+        "id": "INP-40",
+        "name": "ScheduleFlow",
+        "label": "预约流程组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "预约流程组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-schedule"
+        ],
+        "composition": true,
+        "available": {
+          "section": "schedule-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-23",
+        "name": "Citation",
+        "label": "来源引用",
+        "purpose": "以内联标记展开来源信息、摘录及打开来源的入口。",
+        "note": "参考 Kokonut UI AI Inline Citations：引用标签、来源预览与关联内容高亮。组合 Link／Popover／内容定位；来源真实性、访问权限和读取由应用负责。仅登记参考方向。https://kokonutui.com/docs/ai/ai-citations",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "Inline Citations",
+          "AI Inline Citations",
+          "引用标记",
+          "引用预览",
+          "ai-citations"
+        ],
+        "available": {
+          "section": "citation",
+          "entry": "@ksf/sdk/citation"
+        }
+      },
+      {
+        "id": "DSP-42",
+        "name": "TokenAlternatives",
+        "label": "词元候选",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "展示词元的候选文本与应用提供的概率信息。",
+        "aliases": [
+          "ai-token-alternatives"
+        ],
+        "available": {
+          "section": "token-alternatives",
+          "entry": "@ksf/sdk/token-alternatives"
+        }
+      },
+      {
+        "id": "DSP-44",
+        "name": "Redaction",
+        "label": "发送前隐私处理",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "识别敏感信息、选择遮蔽并预览脱敏后的发送内容。",
+        "aliases": [
+          "ai-redact"
+        ],
+        "available": {
+          "section": "redaction",
+          "entry": "@ksf/sdk/redaction"
+        }
+      },
+      {
+        "id": "DSP-45",
+        "name": "MemoryList",
+        "label": "记忆列表",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "按范围查看和管理应用提供的记忆条目。",
+        "aliases": [
+          "ai-memory"
+        ],
+        "available": {
+          "section": "memory-list",
+          "entry": "@ksf/sdk/memory-list"
+        }
+      },
+      {
+        "id": "DSP-43",
+        "name": "AttachmentReading",
+        "label": "附件阅读组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "附件阅读组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-attachment"
+        ],
+        "composition": true,
+        "available": {
+          "section": "attachment-reading",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "FDB-10",
+        "name": "AgentActivity",
+        "label": "执行活动",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "按步骤展示执行状态、进度、记录及失败重试入口。",
+        "aliases": [
+          "ai-loading",
+          "ai-tool-calls"
+        ],
+        "available": {
+          "section": "agent-activity",
+          "entry": "@ksf/sdk/agent-activity"
+        }
+      },
+      {
+        "id": "FDB-11",
+        "name": "ContextMeter",
+        "label": "上下文用量",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "展示上下文容量、组成及应用提供的压缩入口。",
+        "aliases": [
+          "ai-context-meter"
+        ],
+        "available": {
+          "section": "context-meter",
+          "entry": "@ksf/sdk/context-meter"
+        }
+      },
+      {
+        "id": "NAV-11",
+        "name": "ToolApproval",
+        "label": "工具审批",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "展示待确认的工具操作、参数和允许或拒绝决定。",
+        "aliases": [
+          "ai-tool-approval"
+        ],
+        "available": {
+          "section": "tool-approval",
+          "entry": "@ksf/sdk/tool-approval"
+        }
+      },
+      {
+        "id": "NAV-14",
+        "name": "CheckoutFlow",
+        "label": "对话结算组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "对话结算组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-checkout"
+        ],
+        "composition": true,
+        "available": {
+          "section": "checkout-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-15",
+        "name": "ConnectionFlow",
+        "label": "应用连接组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "应用连接组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-connect"
+        ],
+        "composition": true,
+        "available": {
+          "section": "connection-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-16",
+        "name": "MessageSendFlow",
+        "label": "邮件发送组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "邮件发送组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-send"
+        ],
+        "composition": true,
+        "available": {
+          "section": "message-send-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-17",
+        "name": "CodeRunFlow",
+        "label": "代码运行组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "代码运行组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-code-run"
+        ],
+        "composition": true,
+        "available": {
+          "section": "code-run-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-18",
+        "name": "OrderStatus",
+        "label": "订单状态组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "订单状态组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-order-status"
+        ],
+        "composition": true,
+        "available": {
+          "section": "order-status",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-19",
+        "name": "HandoffFlow",
+        "label": "人工转交组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "人工转交组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "ai-handoff"
+        ],
+        "composition": true,
+        "available": {
+          "section": "handoff-flow",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-20",
+        "name": "ConversationBranches",
+        "label": "会话分支",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "选择有父子关系的会话分支并查看摘要。",
+        "aliases": [
+          "ai-branches"
+        ],
+        "available": {
+          "section": "conversation-branches",
+          "entry": "@ksf/sdk/conversation-branches"
+        }
+      },
+      {
+        "id": "NAV-21",
+        "name": "AgentLanes",
+        "label": "执行通道",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "并列查看多条执行通道的状态、步骤与输出。",
+        "aliases": [
+          "ai-agent-lanes"
+        ],
+        "available": {
+          "section": "agent-lanes",
+          "entry": "@ksf/sdk/agent-lanes"
+        }
+      },
+      {
+        "id": "NAV-22",
+        "name": "MessageQueue",
+        "label": "消息队列",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "展示待发送消息，支持明确的重排、编辑、移除和重试意图。",
+        "aliases": [
+          "ai-message-queue"
+        ],
+        "available": {
+          "section": "message-queue",
+          "entry": "@ksf/sdk/message-queue"
+        }
+      },
+      {
+        "id": "DSP-20",
+        "name": "DiffViewer",
+        "label": "差异审阅",
+        "purpose": "按文件对比文本行变化，表达接受、拒绝与撤销决定。",
+        "note": "接受/拒绝/撤销的真实文件事务由应用/平台执行，不由视觉组件假定完成。 参考 Kokonut UI AI Diff Review：逐项审阅、采纳、拒绝和撤销反馈；实际写入仍由应用或平台执行。https://kokonutui.com/docs/ai/ai-diff-review",
+        "kind": "extension",
+        "delivery": "available",
+        "aliases": [
+          "ai-diff-review"
+        ],
+        "available": {
+          "section": "diff-viewer",
+          "entry": "@ksf/sdk/diff-viewer"
+        }
+      },
+      {
+        "id": "AI-01",
+        "name": "AITextLoading",
+        "label": "AI 文字加载",
+        "purpose": "逐字亮度波与模糊切换展示可控的AI处理文字。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "ai-text-loading"
+        ],
+        "available": {
+          "section": "ai-text-loading",
+          "entry": "@ksf/sdk/ai-text-loading"
+        }
+      },
+      {
+        "id": "AI-02",
+        "name": "ToolCalls",
+        "label": "AI 工具调用",
+        "purpose": "展示独立工具调用的收折、参数、结果和失败状态。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "ai-tool-calls"
+        ],
+        "available": {
+          "section": "tool-calls",
+          "entry": "@ksf/sdk/tool-calls"
+        }
+      },
+      {
+        "id": "AI-03",
+        "name": "AISearch",
+        "label": "AI搜索输入",
+        "purpose": "AI搜索输入；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "ai-input-search"
+        ],
+        "available": {
+          "section": "ai-search",
+          "entry": "@ksf/sdk/ai-search"
+        }
+      },
+      {
+        "id": "AI-04",
+        "name": "AIInlineEdit",
+        "label": "AI选区改写",
+        "purpose": "段落选区改写、逐词差异、多个版本、接受与放弃；模型调用由应用提供。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "ai-inline-edit"
+        ],
+        "available": {
+          "section": "ai-inline-edit",
+          "entry": "@ksf/sdk/ai-inline-edit"
+        }
+      }
+    ]
+  },
+  {
+    "id": "inputs",
+    "label": "输入与选择",
+    "scope": "编辑文本、选择值及接收输入，不承担业务保存和传输。",
+    "items": [
+      {
+        "id": "INP-01",
+        "name": "TextField",
+        "label": "单行输入框",
+        "purpose": "编辑单行文本，提供原生输入属性和焦点能力。",
+        "note": "密码、前后缀等先作为同一输入底座的用法讨论。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "text-field",
+          "entry": "@ksf/sdk/text-field"
+        }
+      },
+      {
+        "id": "INP-02",
+        "name": "TextArea",
+        "label": "多行输入框",
+        "purpose": "编辑多行纯文本，控制行数与尺寸。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "text-area",
+          "entry": "@ksf/sdk/text-area"
+        }
+      },
+      {
+        "id": "INP-03",
+        "name": "SearchField",
+        "label": "搜索框",
+        "purpose": "表达搜索输入、清空及显式搜索动作。",
+        "note": "搜索算法与结果归应用，不做业务搜索服务。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "search-field",
+          "entry": "@ksf/sdk/search-field"
+        }
+      },
+      {
+        "id": "INP-04",
+        "name": "NumberField",
+        "label": "数值输入",
+        "purpose": "采集数值并表达步长、范围与本地化格式。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "number-field",
+          "entry": "@ksf/sdk/number-field"
+        }
+      },
+      {
+        "id": "INP-05",
+        "name": "Checkbox",
+        "label": "复选框",
+        "purpose": "表达独立勾选或多项选择，可表示部分选中。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "checkbox",
+          "entry": "@ksf/sdk/checkbox"
+        }
+      },
+      {
+        "id": "INP-06",
+        "name": "RadioGroup",
+        "label": "单选组",
+        "purpose": "在一组互斥选项中选择一个值。",
+        "note": "表单互斥选值使用RadioGroup；模式切换与分段呈现另见ToggleGroup，外观相似不合并语义。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "radio-group",
+          "entry": "@ksf/sdk/radio-group"
+        }
+      },
+      {
+        "id": "INP-07",
+        "name": "Switch",
+        "label": "开关",
+        "purpose": "表达可立即理解的开启/关闭选项。",
+        "note": "是否立即写入配置由应用决定。 参考 Cult UI Halo Switch：开关切换、选中与焦点反馈。https://www.cult-ui.com/docs",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "switch-button"
+        ],
+        "available": {
+          "section": "switch",
+          "entry": "@ksf/sdk/switch"
+        }
+      },
+      {
+        "id": "INP-08",
+        "name": "Select",
+        "label": "选择器",
+        "purpose": "从预先给定的选项中选择一个或多个值。",
+        "note": "包含单选与多选，MultiSelect不重复计数；允许创建新词条时使用TagsInput。与Combobox共用选项模型。 参考 Cult UI Halo Select：选中、加载、空态和展开反馈；外观统一到 KSF 主题。https://www.cult-ui.com/docs/components/halo-select",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "select",
+          "entry": "@ksf/sdk/select"
+        }
+      },
+      {
+        "id": "INP-09",
+        "name": "Combobox",
+        "label": "可搜索选择器",
+        "purpose": "通过输入检索选项并完成选择。",
+        "note": "与普通Select共用选项模型，是否独立入口待定。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "combobox",
+          "entry": "@ksf/sdk/combobox"
+        }
+      },
+      {
+        "id": "INP-10",
+        "name": "Slider",
+        "label": "滑块",
+        "purpose": "通过拖动或键盘选择连续值或数值区间。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "slider",
+          "entry": "@ksf/sdk/slider"
+        }
+      },
+      {
+        "id": "INP-13",
+        "name": "ColorPicker",
+        "label": "颜色选择",
+        "purpose": "选择并编辑应用允许的颜色值。",
+        "note": "编辑内容颜色，不修改KSF公共主题定义。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "color-picker",
+          "entry": "@ksf/sdk/color-picker"
+        }
+      },
+      {
+        "id": "INP-14",
+        "name": "FilePicker",
+        "label": "文件选择",
+        "purpose": "选择文件并展示已选项，允许移除选择。",
+        "note": "真实文件访问走SDK文件能力；选择不等于上传。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "file-picker",
+          "entry": "@ksf/sdk/file-picker"
+        }
+      },
+      {
+        "id": "INP-15",
+        "name": "ToggleGroup",
+        "label": "切换组／分段选择",
+        "purpose": "切换一组模式或选项。",
+        "note": "SegmentedControl先作为同家族呈现；Cult当前两个示例均为单选，不据此声称已核实多选接口。 参考 Cult UI Halo Segmented／Toggle Group：分段选中与连续切换反馈。https://www.cult-ui.com/docs",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "toggle-group",
+          "entry": "@ksf/sdk/toggle-group"
+        }
+      },
+      {
+        "id": "INP-16",
+        "name": "WheelPicker",
+        "label": "滚轮选择",
+        "purpose": "以滚轮选择离散值或多列值。",
+        "note": "共享选项数据但保留与普通Select不同的呈现和操作。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "wheel-picker"
+        ],
+        "available": {
+          "section": "wheel-picker",
+          "entry": "@ksf/sdk/wheel-picker"
+        }
+      },
+      {
+        "id": "INP-17",
+        "name": "Dial",
+        "label": "旋钮输入",
+        "purpose": "通过旋转/键盘调整有界数值。",
+        "note": "值范围与业务含义归应用；不是新增Slider样式名。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "detent-dial"
+        ],
+        "available": {
+          "section": "dial",
+          "entry": "@ksf/sdk/dial"
+        }
+      },
+      {
+        "id": "INP-18",
+        "name": "Rating",
+        "label": "评分与评价",
+        "purpose": "采集等级评分或评价值。",
+        "note": "星级和有用性反馈是用法，反馈原因与提交归应用。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "helpful-rating"
+        ],
+        "available": {
+          "section": "rating",
+          "entry": "@ksf/sdk/rating"
+        }
+      },
+      {
+        "id": "INP-19",
+        "name": "OTPInput",
+        "label": "分段验证码输入",
+        "purpose": "处理固定长度字符槽、粘贴与自动填充呈现。",
+        "note": "验证验证码、登录和发送频率属于应用服务。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "otp-input",
+          "entry": "@ksf/sdk/otp-input"
+        }
+      },
+      {
+        "id": "INP-21",
+        "name": "Dropzone",
+        "label": "拖入接收区",
+        "purpose": "表达拖入目标、已选文件和接受/拒绝提示。",
+        "note": "和FilePicker/Upload分别负责接收UI、选择和传输；不另做上传服务。 参考 Kokonut UI File Upload：文件拖入、接受或拒绝提示；上传队列由 Upload 组合。https://kokonutui.com/docs/inputs/file-upload",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "dropzone",
+          "entry": "@ksf/sdk/dropzone"
+        }
+      },
+      {
+        "id": "INP-22",
+        "name": "TagsInput",
+        "label": "标签输入",
+        "purpose": "输入多个词条，支持建议、创建和删除。",
+        "note": "与从既有选项中多选不同，允许创建值；可复用Combobox和Tag。合法性与落库归应用。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "tags-input",
+          "entry": "@ksf/sdk/tags-input"
+        }
+      },
+      {
+        "id": "INP-23",
+        "name": "Cascader",
+        "label": "级联选择",
+        "purpose": "按父子层级逐级选择路径。",
+        "note": "与TreeSelect共享层级数据，但路径式操作不同；分类规则和加载由应用提供。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "cascader",
+          "entry": "@ksf/sdk/cascader"
+        }
+      },
+      {
+        "id": "INP-24",
+        "name": "TreeSelect",
+        "label": "树形选择",
+        "purpose": "在树结构中选取一个或多个节点并回填字段。",
+        "note": "TreeView用于浏览/操作树；TreeSelect是表单选值。复用树模型和浮层，不复制树引擎。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "tree-select",
+          "entry": "@ksf/sdk/tree-select"
+        }
+      },
+      {
+        "id": "INP-25",
+        "name": "Transfer",
+        "label": "穿梭选择",
+        "purpose": "并排展示可选与已选集合，并调整成员归属。",
+        "note": "复用ListBox/选择模型；不是任务看板，也不执行权限授予或成员持久化。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "transfer",
+          "entry": "@ksf/sdk/transfer"
+        }
+      },
+      {
+        "id": "INP-27",
+        "name": "ListBox",
+        "label": "选项列表",
+        "purpose": "对一组选项提供单选/多选、焦点和键盘选择。",
+        "note": "普通List表达内容，ListBox表达值选择；可支撑Select/Combobox/Transfer，不要求每个使用者单独实现。",
+        "delivery": "planned",
+        "kind": "component",
+        "aliases": []
+      },
+      {
+        "id": "INP-29",
+        "name": "PasswordField",
+        "label": "密码输入",
+        "purpose": "输入密码并切换可见状态。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "password-field",
+          "entry": "@ksf/sdk/password-field"
+        }
+      },
+      {
+        "id": "INP-30",
+        "name": "Mentions",
+        "label": "提及输入",
+        "purpose": "在多行输入中选择与插入提及项。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "mentions",
+          "entry": "@ksf/sdk/mentions"
+        }
+      },
+      {
+        "id": "INP-32",
+        "name": "CurrencyTransfer",
+        "label": "转账跟踪组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "转账跟踪组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "currency-transfer"
+        ],
+        "composition": true,
+        "available": {
+          "section": "currency-transfer",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "INP-34",
+        "name": "LiquidSlider",
+        "label": "液态滑块",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "液态滑块，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "liquid-slider"
+        ],
+        "available": {
+          "section": "liquid-slider",
+          "entry": "@ksf/sdk/liquid-slider"
+        }
+      },
+      {
+        "id": "INP-35",
+        "name": "SignaturePad",
+        "label": "签名板",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "签名板，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "signature-pad"
+        ],
+        "available": {
+          "section": "signature-pad",
+          "entry": "@ksf/sdk/signature-pad"
+        }
+      },
+      {
+        "id": "INP-36",
+        "name": "PullSwitch",
+        "label": "拉绳开关",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "拉绳开关，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "pull-cord"
+        ],
+        "available": {
+          "section": "pull-switch",
+          "entry": "@ksf/sdk/pull-switch"
+        }
+      },
+      {
+        "id": "INP-38",
+        "name": "AvatarPicker",
+        "label": "头像选择",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "头像选择，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "avatar-picker"
+        ],
+        "available": {
+          "section": "avatar-picker",
+          "entry": "@ksf/sdk/avatar-picker"
+        }
+      },
+      {
+        "id": "INP-41",
+        "name": "SeatMap",
+        "label": "座位选择",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "座位选择，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "seat-map"
+        ],
+        "available": {
+          "section": "seat-map",
+          "entry": "@ksf/sdk/seat-map"
+        }
+      },
+      {
+        "id": "INP-42",
+        "name": "AmountPad",
+        "label": "金额键盘",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "金额键盘，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "amount-pad"
+        ],
+        "available": {
+          "section": "amount-pad",
+          "entry": "@ksf/sdk/amount-pad"
+        }
+      },
+      {
+        "id": "INP-45",
+        "name": "TipSelector",
+        "label": "小费选择组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "小费选择组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "tip-selector"
+        ],
+        "composition": true,
+        "available": {
+          "section": "tip-selector",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "INP-46",
+        "name": "LocationPicker",
+        "label": "上车点组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "上车点组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "location-picker"
+        ],
+        "composition": true,
+        "available": {
+          "section": "location-picker",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "INP-26",
+        "name": "Editable",
+        "label": "行内编辑",
+        "purpose": "普通文本的编辑、校验及保存反馈。",
+        "note": "选区AI改写由独立AIInlineEdit承接。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "editable",
+          "entry": "@ksf/sdk/editable"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dates",
+    "label": "日期与时间",
+    "scope": "日期、时间及内联日历共用日期逻辑；排班预约由应用实现。",
+    "items": [
+      {
+        "id": "INP-11",
+        "name": "DatePicker",
+        "label": "日期选择",
+        "purpose": "选择日期或日期范围，表达本地化与日期限制。",
+        "note": "日期范围属于同一家族；内联呈现另见Calendar，日期时间组合复用TimePicker，排班预约归应用。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "date-picker",
+          "entry": "@ksf/sdk/date-picker"
+        }
+      },
+      {
+        "id": "INP-12",
+        "name": "TimePicker",
+        "label": "时间选择",
+        "purpose": "选择时间或时间范围，支持适合业务的精度。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "time-picker",
+          "entry": "@ksf/sdk/time-picker"
+        }
+      },
+      {
+        "id": "INP-28",
+        "name": "Calendar",
+        "label": "内联日历",
+        "purpose": "在页面内持续呈现日期网格并选择日期。",
+        "note": "DatePicker是输入与浮层组合，Calendar是可复用日历呈现；范围是同家族能力。排班/预约日程另归应用。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "calendar",
+          "entry": "@ksf/sdk/calendar"
+        }
+      },
+      {
+        "id": "INP-39",
+        "name": "TimezonePlanner",
+        "label": "跨时区会议组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "跨时区会议组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "timezone-planner"
+        ],
+        "composition": true,
+        "available": {
+          "section": "timezone-planner",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "INP-43",
+        "name": "StayPicker",
+        "label": "住宿日期组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "住宿日期组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "stay-picker"
+        ],
+        "composition": true,
+        "available": {
+          "section": "stay-picker",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "INP-44",
+        "name": "SlotPicker",
+        "label": "会议时段组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "会议时段组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "slot-picker"
+        ],
+        "composition": true,
+        "available": {
+          "section": "slot-picker",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "forms",
+    "label": "表单组织与校验",
+    "scope": "组织字段、标签、帮助与错误信息，保持原生表单语义。",
+    "items": [
+      {
+        "id": "FRM-01",
+        "name": "Form",
+        "label": "表单",
+        "purpose": "组织字段、校验时机、提交及重置过程。",
+        "note": "默认保持原生表单语义，是否适配第三方表单库待讨论。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "form",
+          "entry": "@ksf/sdk/form"
+        }
+      },
+      {
+        "id": "FRM-02",
+        "name": "Field",
+        "label": "表单字段",
+        "purpose": "关联标签、必填说明、帮助文字、输入和字段错误。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "field",
+          "entry": "@ksf/sdk/field"
+        }
+      },
+      {
+        "id": "FRM-03",
+        "name": "ErrorSummary",
+        "label": "错误摘要",
+        "purpose": "集中列出表单错误，并能定位到相应字段。",
+        "note": "单字段错误由Field呈现，此项负责跨字段汇总。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "error-summary",
+          "entry": "@ksf/sdk/error-summary"
+        }
+      },
+      {
+        "id": "FRM-04",
+        "name": "Fieldset",
+        "label": "字段组",
+        "purpose": "用组标题和说明把相关字段组成一组。",
+        "note": "Field关联一个字段，Fieldset分组若干字段，Form组织提交；优先复用原生fieldset/legend，不引入第二套表单引擎。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "fieldset",
+          "entry": "@ksf/sdk/fieldset"
+        }
+      },
+      {
+        "id": "FRM-05",
+        "name": "PaymentFields",
+        "label": "付款字段组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "付款字段组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "card-field"
+        ],
+        "composition": true,
+        "available": {
+          "section": "payment-fields",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "navigation",
+    "label": "导航与定位",
+    "scope": "定位页面和内容，不代替宿主桌面或窗口导航。",
+    "items": [
+      {
+        "id": "NAV-01",
+        "name": "Tabs",
+        "label": "标签页",
+        "purpose": "在同层相关内容面板之间切换并管理焦点。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "smooth-tab"
+        ],
+        "available": {
+          "section": "tabs",
+          "entry": "@ksf/sdk/tabs"
+        }
+      },
+      {
+        "id": "NAV-02",
+        "name": "Breadcrumb",
+        "label": "面包屑",
+        "purpose": "表达当前位置及可返回的上级层级。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "breadcrumb",
+          "entry": "@ksf/sdk/breadcrumb"
+        }
+      },
+      {
+        "id": "NAV-03",
+        "name": "NavigationList",
+        "label": "导航列表",
+        "purpose": "组织应用内部侧栏或目录的分组、链接与当前位置。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "navigation-list",
+          "entry": "@ksf/sdk/navigation-list"
+        }
+      },
+      {
+        "id": "NAV-04",
+        "name": "Pagination",
+        "label": "分页",
+        "purpose": "在分页内容中切换页码或前后页。",
+        "note": "数据获取与总量解释由应用负责。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "pagination",
+          "entry": "@ksf/sdk/pagination"
+        }
+      },
+      {
+        "id": "NAV-06",
+        "name": "Anchor",
+        "label": "页内目录",
+        "purpose": "定位长页面的内容章节并标识当前阅读位置。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "scroll-index"
+        ],
+        "available": {
+          "section": "anchor",
+          "entry": "@ksf/sdk/anchor"
+        }
+      },
+      {
+        "id": "NAV-07",
+        "name": "CommandPalette",
+        "label": "命令面板",
+        "purpose": "通过检索查找并执行应用命令或跳转内容。",
+        "note": "不接管系统全局快捷键；可复用弹层与命令模型。 参考 Kokonut UI Command Palette：命令分组、最近使用、逐层进入和操作进度。https://kokonutui.com/docs/navigation/action-search-bar",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "action-search-bar"
+        ],
+        "available": {
+          "section": "command-palette",
+          "entry": "@ksf/sdk/command-palette"
+        }
+      },
+      {
+        "id": "NAV-10",
+        "name": "TeamSelector",
+        "label": "团队席位组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "选择团队人数，显示头像队列、人数滚动与按席位费用。",
+        "aliases": [
+          "team-selector"
+        ],
+        "composition": true,
+        "available": {
+          "section": "team-selector",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "NAV-12",
+        "name": "AccountMenu",
+        "label": "账号菜单",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "身份、账号切换、外观偏好、在线状态和长按退出意图；真实会话由应用管理。",
+        "aliases": [
+          "AccountMenu",
+          "profile-dropdown"
+        ],
+        "available": {
+          "section": "account-menu",
+          "entry": "@ksf/sdk/account-menu"
+        }
+      },
+      {
+        "id": "NAV-13",
+        "name": "MorphNavigation",
+        "label": "形变导航",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "MorphNavigation，参考Kokonut免费组件并沿KSF接口接入。",
+        "aliases": [
+          "morphic-navbar"
+        ],
+        "available": {
+          "section": "morph-navigation",
+          "entry": "@ksf/sdk/morph-navigation"
+        }
+      }
+    ]
+  },
+  {
+    "id": "display",
+    "label": "数据与内容展示",
+    "scope": "呈现条目、卡片、表格和事件；数据与业务规则由应用提供。",
+    "items": [
+      {
+        "id": "DSP-01",
+        "name": "Card",
+        "label": "内容卡片",
+        "purpose": "以标题、正文和操作区组织一块相关内容。",
+        "note": "不内置项目摘要、AI结果等业务字段。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "card",
+          "entry": "@ksf/sdk/card"
+        }
+      },
+      {
+        "id": "DSP-02",
+        "name": "List",
+        "label": "列表",
+        "purpose": "展示重复条目、辅助信息和条目操作。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "list",
+          "entry": "@ksf/sdk/list"
+        }
+      },
+      {
+        "id": "DSP-03",
+        "name": "Table",
+        "label": "表格",
+        "purpose": "展示行列数据与基本排序、选择等交互。",
+        "note": "Table表达表格结构；DataTable是排序、筛选、分页和行选择的组合，复杂单元格操作另见DataGrid。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "table",
+          "entry": "@ksf/sdk/table"
+        }
+      },
+      {
+        "id": "DSP-04",
+        "name": "TreeView",
+        "label": "树形视图",
+        "purpose": "展示可展开的层级节点并支持选择与键盘定位。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "tree-view",
+          "entry": "@ksf/sdk/tree-view"
+        }
+      },
+      {
+        "id": "DSP-05",
+        "name": "DescriptionList",
+        "label": "详情属性列表",
+        "purpose": "以名称和值配对展示对象属性。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "description-list",
+          "entry": "@ksf/sdk/description-list"
+        }
+      },
+      {
+        "id": "DSP-06",
+        "name": "Tag",
+        "label": "标签",
+        "purpose": "呈现分类、关键字或可移除的选中值。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "tag",
+          "entry": "@ksf/sdk/tag"
+        }
+      },
+      {
+        "id": "DSP-07",
+        "name": "Badge",
+        "label": "徽标",
+        "purpose": "在对象旁补充数量、标记或简短提示。",
+        "note": "与可独立阅读的Tag区分，不仅靠颜色传递含义。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "badge",
+          "entry": "@ksf/sdk/badge"
+        }
+      },
+      {
+        "id": "DSP-08",
+        "name": "Avatar",
+        "label": "头像",
+        "purpose": "展示人物或对象的图片、缩写和缺图回退。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "avatar",
+          "entry": "@ksf/sdk/avatar"
+        }
+      },
+      {
+        "id": "DSP-10",
+        "name": "Statistic",
+        "label": "统计数值",
+        "purpose": "突出单项数值、单位及辅助说明。",
+        "note": "指标口径、计算与趋势解释归应用。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "statistic",
+          "entry": "@ksf/sdk/statistic"
+        }
+      },
+      {
+        "id": "DSP-11",
+        "name": "Accordion",
+        "label": "折叠内容",
+        "purpose": "按标题展开或收起一组内容，可讨论单项披露用法。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "accordion",
+          "entry": "@ksf/sdk/accordion"
+        }
+      },
+      {
+        "id": "DSP-12",
+        "name": "CodeBlock",
+        "label": "代码展示",
+        "purpose": "以语言、行号和复制入口呈现只读代码。",
+        "note": "不承接代码编辑器。 参考 Aceternity UI Code Block：文件名、多文件页签、重点行高亮及代码阅读层次。https://ui.aceternity.com/components/code-block",
+        "delivery": "planned",
+        "kind": "component",
+        "aliases": []
+      },
+      {
+        "id": "DSP-13",
+        "name": "Markdown",
+        "label": "Markdown阅读",
+        "purpose": "渲染允许的Markdown内容并处理链接与代码。",
+        "note": "须明确外来内容清理边界；编辑另列扩展。",
+        "delivery": "planned",
+        "kind": "component",
+        "aliases": []
+      },
+      {
+        "id": "DSP-14",
+        "name": "Timeline",
+        "label": "时间线",
+        "purpose": "按时间或事件顺序展示节点、说明与相关操作。",
+        "note": "只负责事件呈现，不定义任务或流程推进规则。 参考 Aceternity UI Timeline：时间分组、节点和关联内容层次，适合活动记录与版本历史。https://ui.aceternity.com/components/timeline",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "timeline",
+          "entry": "@ksf/sdk/timeline"
+        }
+      },
+      {
+        "id": "DSP-17",
+        "name": "CardStack",
+        "label": "层叠卡片",
+        "purpose": "层叠卡片，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "note": "底层切换逻辑可与Carousel共享，不要求两套重复引擎。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "card-stack"
+        ],
+        "available": {
+          "section": "card-stack",
+          "entry": "@ksf/sdk/card-stack"
+        }
+      },
+      {
+        "id": "DSP-18",
+        "name": "AvatarGroup",
+        "label": "头像群与在线身份展示",
+        "purpose": "组合多个身份头像及在线提示。",
+        "note": "这是由协作头像示例归纳出的KSF模式，不声称上游存在同名AvatarGroup API；协作服务归应用。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "avatar-group",
+          "entry": "@ksf/sdk/avatar-group"
+        }
+      },
+      {
+        "id": "DSP-22",
+        "name": "ExpandableCard",
+        "label": "可展开卡片",
+        "purpose": "从卡片摘要展开补充内容。",
+        "note": "按实际内容复用Accordion或Dialog；不能只按视觉名字决定模态性。",
+        "kind": "pattern",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "DSP-24",
+        "name": "QRCode",
+        "label": "二维码",
+        "purpose": "将应用提供的文本编码为可扫描二维码。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "qr-code",
+          "entry": "@ksf/sdk/qr-code"
+        }
+      },
+      {
+        "id": "DSP-25",
+        "name": "Watermark",
+        "label": "水印",
+        "purpose": "在应用内容上展示重复文字水印。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "watermark",
+          "entry": "@ksf/sdk/watermark"
+        }
+      },
+      {
+        "id": "DSP-26",
+        "name": "BorderBeam",
+        "label": "边框光带",
+        "purpose": "在内容边界提供可关闭的动态强调。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "border-beam",
+          "entry": "@ksf/sdk/border-beam"
+        }
+      },
+      {
+        "id": "DSP-27",
+        "name": "FlipCard",
+        "label": "翻转卡片",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "翻转卡片，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "card-flip"
+        ],
+        "available": {
+          "section": "flip-card",
+          "entry": "@ksf/sdk/flip-card"
+        }
+      },
+      {
+        "id": "DSP-29",
+        "name": "ActivityRings",
+        "label": "活动目标环",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "活动目标环，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "apple-activity-card"
+        ],
+        "available": {
+          "section": "activity-rings",
+          "entry": "@ksf/sdk/activity-rings"
+        }
+      },
+      {
+        "id": "DSP-30",
+        "name": "ActivityTerrain",
+        "label": "活动地形",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "活动地形，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "activity-terrain"
+        ],
+        "available": {
+          "section": "activity-terrain",
+          "entry": "@ksf/sdk/activity-terrain"
+        }
+      },
+      {
+        "id": "DSP-31",
+        "name": "ReceiptPrinter",
+        "label": "收据打印组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "收据打印组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "receipt-printer"
+        ],
+        "composition": true,
+        "available": {
+          "section": "receipt-printer",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-32",
+        "name": "MetricCard",
+        "label": "指标卡片组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "指标卡片组合，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "metric-card"
+        ],
+        "composition": true,
+        "available": {
+          "section": "metric-card",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-33",
+        "name": "UptimeCard",
+        "label": "可用性卡片组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "可用性卡片组合，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "uptime-card"
+        ],
+        "composition": true,
+        "available": {
+          "section": "uptime-card",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-34",
+        "name": "SpendingRing",
+        "label": "预算环组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "预算环组合，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "spending-ring"
+        ],
+        "composition": true,
+        "available": {
+          "section": "spending-ring",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-40",
+        "name": "SpoilerText",
+        "label": "隐藏文字",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "隐藏文字，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "spoiler-text"
+        ],
+        "available": {
+          "section": "spoiler-text",
+          "entry": "@ksf/sdk/spoiler-text"
+        }
+      },
+      {
+        "id": "DSP-41",
+        "name": "PageFlip",
+        "label": "翻页书册",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "翻页书册，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "page-flip"
+        ],
+        "available": {
+          "section": "page-flip",
+          "entry": "@ksf/sdk/page-flip"
+        }
+      },
+      {
+        "id": "DSP-46",
+        "name": "BoardingPass",
+        "label": "登机牌组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "登机牌组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "boarding-pass"
+        ],
+        "composition": true,
+        "available": {
+          "section": "boarding-pass",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "media",
+    "label": "媒体浏览与预览",
+    "scope": "组织图片、画廊、附件及播放预览，文件访问与传输走平台服务。",
+    "items": [
+      {
+        "id": "DSP-09",
+        "name": "Image",
+        "label": "图片",
+        "purpose": "呈现图片、替代文本与失败回退。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "image",
+          "entry": "@ksf/sdk/image"
+        }
+      },
+      {
+        "id": "EXT-08",
+        "name": "MediaPlayer",
+        "label": "音视频播放",
+        "purpose": "提供播放、进度、音量与字幕等媒体控制。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "DSP-15",
+        "name": "Carousel",
+        "label": "轮播",
+        "purpose": "在一组内容中按项切换并提供键盘/翻页入口。",
+        "note": "自动播放与3D转场是可选参考，不纳入全局动效维度。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "carousel",
+          "entry": "@ksf/sdk/carousel"
+        }
+      },
+      {
+        "id": "DSP-16",
+        "name": "Gallery",
+        "label": "媒体画廊",
+        "purpose": "以集合方式浏览、选择和预览媒体。",
+        "note": "可组合Masonry/Carousel/Lightbox；同一上游演示可能覆盖多种职责。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "lightbox-grid"
+        ],
+        "available": {
+          "section": "gallery",
+          "entry": "@ksf/sdk/gallery"
+        }
+      },
+      {
+        "id": "DSP-19",
+        "name": "AttachmentList",
+        "label": "附件清单与预览",
+        "purpose": "展示已接收附件、类型、移除和预览入口。",
+        "note": "传输、文件访问、解析和持久化继续归应用/SDK服务。 参考 Kokonut UI File Upload：附件条目、状态与移除入口。https://kokonutui.com/docs/inputs/file-upload",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "attachment-list",
+          "entry": "@ksf/sdk/attachment-list"
+        }
+      },
+      {
+        "id": "DSP-21",
+        "name": "ImageCompare",
+        "label": "图像对比",
+        "purpose": "比较同位置的两张图像并调整分界。",
+        "note": "不同于Carousel的逐项切换。 参考 Aceternity UI Compare：拖动分界查看两张图像差异。https://ui.aceternity.com/components/compare",
+        "kind": "pattern",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "OVR-05",
+        "name": "Lightbox",
+        "label": "媒体灯箱",
+        "purpose": "临时放大查看当前媒体并返回原集合。",
+        "note": "复用Dialog焦点/关闭及窗口归属，不新建第二套模态协调器。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "lightbox",
+          "entry": "@ksf/sdk/lightbox"
+        }
+      },
+      {
+        "id": "DSP-28",
+        "name": "MomentumCarousel",
+        "label": "惯性卡片轨道",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "惯性卡片轨道，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "carousel-cards"
+        ],
+        "available": {
+          "section": "momentum-carousel",
+          "entry": "@ksf/sdk/momentum-carousel"
+        }
+      },
+      {
+        "id": "DSP-35",
+        "name": "FocalPointPicker",
+        "label": "图片焦点",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "图片焦点，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "focal-point-picker"
+        ],
+        "available": {
+          "section": "focal-point-picker",
+          "entry": "@ksf/sdk/focal-point-picker"
+        }
+      },
+      {
+        "id": "DSP-36",
+        "name": "PhotoStraighten",
+        "label": "图片水平校正",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "图片水平校正，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "photo-straighten"
+        ],
+        "available": {
+          "section": "photo-straighten",
+          "entry": "@ksf/sdk/photo-straighten"
+        }
+      },
+      {
+        "id": "DSP-37",
+        "name": "ClipTrimmer",
+        "label": "片段选择",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "片段选择，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "clip-trimmer"
+        ],
+        "available": {
+          "section": "clip-trimmer",
+          "entry": "@ksf/sdk/clip-trimmer"
+        }
+      },
+      {
+        "id": "DSP-38",
+        "name": "SyncedTranscript",
+        "label": "字幕时间轴",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "字幕时间轴，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "synced-transcript"
+        ],
+        "available": {
+          "section": "synced-transcript",
+          "entry": "@ksf/sdk/synced-transcript"
+        }
+      },
+      {
+        "id": "DSP-39",
+        "name": "NowPlaying",
+        "label": "播放卡片组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "播放卡片组合，使用KSF公共组件组织本地模拟，真实业务由应用接入。",
+        "aliases": [
+          "liquid-glass-card"
+        ],
+        "composition": true,
+        "available": {
+          "section": "now-playing",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "DSP-47",
+        "name": "ContactSheet",
+        "label": "选片组合",
+        "kind": "pattern",
+        "delivery": "available",
+        "purpose": "选片组合，使用KSF主题、公共属性与独立窗口状态。",
+        "aliases": [
+          "contact-sheet"
+        ],
+        "composition": true,
+        "available": {
+          "section": "contact-sheet",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "feedback",
+    "label": "反馈与数值",
+    "scope": "表达提示、结果、进度和用量，数值与执行事实由应用提供。",
+    "items": [
+      {
+        "id": "FDB-01",
+        "name": "InlineAlert",
+        "label": "页内提示",
+        "purpose": "在内容附近持续说明提示、风险或错误及处理入口。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "inline-alert",
+          "entry": "@ksf/sdk/inline-alert"
+        }
+      },
+      {
+        "id": "FDB-02",
+        "name": "Toast",
+        "label": "短暂通知",
+        "purpose": "在当前应用窗口内反馈简短操作结果。",
+        "note": "不取代宿主系统通知，也不承担必须确认的事项。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "toast",
+          "entry": "@ksf/sdk/toast"
+        }
+      },
+      {
+        "id": "FDB-03",
+        "name": "Progress",
+        "label": "进度指示",
+        "purpose": "呈现可量化的完成比例或阶段进展。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "progress",
+          "entry": "@ksf/sdk/progress"
+        }
+      },
+      {
+        "id": "FDB-04",
+        "name": "Spinner",
+        "label": "等待指示",
+        "purpose": "说明正在处理但无法给出完成比例。",
+        "note": "仅列等待反馈用途，不增加动效配置维度。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "loader"
+        ],
+        "available": {
+          "section": "spinner",
+          "entry": "@ksf/sdk/spinner"
+        }
+      },
+      {
+        "id": "FDB-05",
+        "name": "Skeleton",
+        "label": "内容占位",
+        "purpose": "在内容加载期间保留预期结构与空间。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "skeleton",
+          "entry": "@ksf/sdk/skeleton"
+        }
+      },
+      {
+        "id": "FDB-06",
+        "name": "EmptyState",
+        "label": "空内容提示",
+        "purpose": "说明暂无内容的原因和可采取的下一步。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "empty-state",
+          "entry": "@ksf/sdk/empty-state"
+        }
+      },
+      {
+        "id": "FDB-07",
+        "name": "Result",
+        "label": "结果面板",
+        "purpose": "在内容区域说明整体操作结果及后续操作。",
+        "note": "不是阻塞确认弹窗。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "result",
+          "entry": "@ksf/sdk/result"
+        }
+      },
+      {
+        "id": "FDB-08",
+        "name": "Meter",
+        "label": "用量仪表",
+        "purpose": "用量仪表，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "note": "Progress表示任务完成进度；Meter表示数值占用。可共用视觉轨道，保留不同语义；配额事实由平台/应用提供。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "liquid-gauge"
+        ],
+        "available": {
+          "section": "meter",
+          "entry": "@ksf/sdk/meter"
+        }
+      },
+      {
+        "id": "FDB-09",
+        "name": "Notification",
+        "label": "通知提示",
+        "purpose": "在应用窗口内展示可关闭的详细通知。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [
+          "notification-stack"
+        ],
+        "available": {
+          "section": "notification",
+          "entry": "@ksf/sdk/notification"
+        }
+      },
+      {
+        "id": "FDB-12",
+        "name": "StatusIsland",
+        "label": "任务状态胶囊",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "任务状态胶囊，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "status-island"
+        ],
+        "available": {
+          "section": "status-island",
+          "entry": "@ksf/sdk/status-island"
+        }
+      },
+      {
+        "id": "FDB-13",
+        "name": "SaveStatus",
+        "label": "保存状态",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "保存状态，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [],
+        "available": {
+          "section": "save-status",
+          "entry": "@ksf/sdk/save-status"
+        }
+      },
+      {
+        "id": "FDB-14",
+        "name": "FeedbackRating",
+        "label": "表情评价组合",
+        "purpose": "五档表情形变、原因标签与备注反馈。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "helpful-rating"
+        ],
+        "available": {
+          "section": "feedback-rating",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "FDB-15",
+        "name": "ProjectEmpty",
+        "label": "项目空态组合",
+        "purpose": "项目空态组合；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "empty-state"
+        ],
+        "available": {
+          "section": "project-empty",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "FDB-16",
+        "name": "DeploymentChecks",
+        "label": "部署检查组合",
+        "purpose": "部署检查组合；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "inline-alert"
+        ],
+        "available": {
+          "section": "deployment-checks",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "FDB-17",
+        "name": "AutosaveEditor",
+        "label": "自动保存编辑器组合",
+        "purpose": "自动保存编辑器组合；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "save-status"
+        ],
+        "available": {
+          "section": "autosave-editor",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      },
+      {
+        "id": "FDB-18",
+        "name": "PromiseTasks",
+        "label": "异步任务通知组合",
+        "purpose": "异步任务通知组合；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "promise-toast"
+        ],
+        "available": {
+          "section": "promise-tasks",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "overlays",
+    "label": "弹层与辅助说明",
+    "scope": "区分模态、非模态和锚定浮层，限定所属应用窗口。",
+    "items": [
+      {
+        "id": "OVR-01",
+        "name": "Dialog",
+        "label": "对话框",
+        "purpose": "承载需集中处理的模态内容并恢复触发点焦点。",
+        "note": "确认框先作为Dialog组合用法，不另建重复底座。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "dialog",
+          "entry": "@ksf/sdk/dialog"
+        }
+      },
+      {
+        "id": "OVR-02",
+        "name": "Drawer",
+        "label": "抽屉面板",
+        "purpose": "从应用内容一侧展开补充信息或编辑面板。",
+        "note": "模态抽屉共用Dialog的焦点与关闭规则；非模态详情侧板另见SidePanel，不管理宿主窗口。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "drawer",
+          "entry": "@ksf/sdk/drawer"
+        }
+      },
+      {
+        "id": "OVR-03",
+        "name": "Popover",
+        "label": "锚定浮层",
+        "purpose": "相对触发器展示可交互的轻量补充内容。",
+        "note": "菜单使用菜单语义；此项是通用浮层底座。 参考 Cult UI Popover：就地填写、补充说明与关闭反馈；具体内容由应用组合。https://www.cult-ui.com/docs/components/popover",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "popover",
+          "entry": "@ksf/sdk/popover"
+        }
+      },
+      {
+        "id": "OVR-04",
+        "name": "Tooltip",
+        "label": "文字提示",
+        "purpose": "在悬停或键盘焦点时补充简短、非交互说明。",
+        "note": "重要信息不能只藏在Tooltip里。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "tooltip",
+          "entry": "@ksf/sdk/tooltip"
+        }
+      },
+      {
+        "id": "OVR-06",
+        "name": "SidePanel",
+        "label": "非模态侧边面板",
+        "purpose": "在当前内容一侧展示补充信息或编辑。",
+        "note": "非模态侧栏与模态Drawer分开；Cult例子为展示侧板，KSF焦点和窗口规则须另定。 参考 Cult UI Side Panel：展开补充内容时保留主内容上下文。https://www.cult-ui.com/docs/components/side-panel",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "side-panel",
+          "entry": "@ksf/sdk/side-panel"
+        }
+      },
+      {
+        "id": "OVR-07",
+        "name": "LinkPreview",
+        "label": "链接预览",
+        "purpose": "查看链接的标题、摘要或预览图，并保留打开原文入口。",
+        "note": "参考 Aceternity UI Link Preview：链接与预览的关联展示。组合 Link／Popover，支持键盘和点击访问；预览资料由应用提供，不内置外部抓取服务。仅登记参考方向。https://ui.aceternity.com/components/link-preview",
+        "kind": "pattern",
+        "delivery": "planned",
+        "aliases": [
+          "链接摘要",
+          "网址预览"
+        ]
+      },
+      {
+        "id": "OVR-08",
+        "name": "Popconfirm",
+        "label": "气泡确认",
+        "purpose": "在触发操作附近确认或取消动作。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "popconfirm",
+          "entry": "@ksf/sdk/popconfirm"
+        }
+      },
+      {
+        "id": "OVR-09",
+        "name": "SnapDrawer",
+        "label": "吸附抽屉",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "吸附抽屉，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [],
+        "available": {
+          "section": "snap-drawer",
+          "entry": "@ksf/sdk/snap-drawer"
+        }
+      },
+      {
+        "id": "OVR-10",
+        "name": "MorphPopover",
+        "label": "变形浮层",
+        "kind": "component",
+        "delivery": "available",
+        "purpose": "变形浮层，数据及业务动作通过KSF公共组件和应用状态组织。",
+        "aliases": [
+          "morph-popover"
+        ],
+        "available": {
+          "section": "morph-popover",
+          "entry": "@ksf/sdk/morph-popover"
+        }
+      },
+      {
+        "id": "OVR-11",
+        "name": "OrderReview",
+        "label": "订单确认组合",
+        "purpose": "订单确认组合；沿固定免费原版保留布局、层次和主要交互，业务执行由应用接入。",
+        "kind": "pattern",
+        "delivery": "available",
+        "aliases": [
+          "smooth-drawer"
+        ],
+        "available": {
+          "section": "order-review",
+          "entry": "组合示例 · KSF公共组件"
+        }
+      }
+    ]
+  },
+  {
+    "id": "flows",
+    "label": "引导与流程",
+    "scope": "区分步骤位置、分步内容与页面元素引导，完成条件归应用。",
+    "items": [
+      {
+        "id": "NAV-05",
+        "name": "Steps",
+        "label": "步骤导航",
+        "purpose": "说明流程位置、已完成步骤和允许的跳转。",
+        "note": "业务流程和推进条件归应用。",
+        "delivery": "available",
+        "kind": "component",
+        "aliases": [],
+        "available": {
+          "section": "steps",
+          "entry": "@ksf/sdk/steps"
+        }
+      },
+      {
+        "id": "NAV-08",
+        "name": "Wizard",
+        "label": "分步引导／首次使用流程",
+        "purpose": "组合步骤内容、前后导航及完成入口。",
+        "note": "Steps继续表达位置，Wizard组织内容；业务校验与完成条件归应用。 参考 Cult UI Wizard Expandable：步骤切换、返回修改与校验反馈；校验规则由应用提供。https://www.cult-ui.com/docs/components/wizard-expandable",
+        "kind": "pattern",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "NAV-09",
+        "name": "GuidedTour",
+        "label": "页面元素引导",
+        "purpose": "依次指向已有控件或内容区域，提供高亮和说明。",
+        "note": "不同于Wizard的分步内容容器；引导步骤和已读记录归应用，浮层须限定当前窗口，不跨窗查找任意元素。",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [],
+        "available": {
+          "section": "guided-tour",
+          "entry": "@ksf/sdk/guided-tour"
+        }
+      }
+    ]
+  },
+  {
+    "id": "extensions",
+    "label": "按需扩展",
+    "scope": "重型交互和专业工具按实际需求接入，不要求SDK统一持有引擎。",
+    "items": [
+      {
+        "id": "EXT-01",
+        "name": "VirtualList",
+        "label": "虚拟列表",
+        "purpose": "为大批量条目提供可视区域渲染与定位。",
+        "note": "优先讨论List的扩展方式。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-02",
+        "name": "DataGrid",
+        "label": "可编辑数据网格",
+        "purpose": "处理大量单元格、编辑、选区与复杂表格键盘交互。",
+        "note": "包括单元格导航、编辑和大量数据操作的扩展参考；专业引擎按需引入，查询、聚合和真实保存由应用处理。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-03",
+        "name": "Chart",
+        "label": "图表",
+        "purpose": "将数据按明确图形编码展示，提供文字和数据回看方式。",
+        "note": "图表库及指标模型按场景选择。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-04",
+        "name": "Upload",
+        "label": "上传交互",
+        "purpose": "组织待传文件、上传进度、取消与重试的界面。",
+        "note": "传输实现、目标和鉴权归应用或平台服务。 参考 Kokonut UI File Upload：逐文件进度、取消、重试及队列反馈；状态接真实传输结果。https://kokonutui.com/docs/inputs/file-upload",
+        "kind": "component",
+        "delivery": "available",
+        "aliases": [
+          "file-upload"
+        ],
+        "available": {
+          "section": "upload",
+          "entry": "@ksf/sdk/upload"
+        }
+      },
+      {
+        "id": "EXT-05",
+        "name": "DragAndDrop",
+        "label": "拖放与排序",
+        "purpose": "支持内容拖入、条目重排及可替代的键盘操作。",
+        "note": "提供拖放基础交互参考；完整列表重排另见SortableList，数据保存和冲突处理归应用。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-06",
+        "name": "RichTextEditor",
+        "label": "富文本编辑",
+        "purpose": "编辑格式化文档及内嵌内容，明确文档模型和保存边界。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-07",
+        "name": "CodeEditor",
+        "label": "代码编辑",
+        "purpose": "提供源码编辑、语言支持与编辑操作。",
+        "note": "不附带代码执行环境。",
+        "kind": "extension",
+        "delivery": "planned",
+        "aliases": []
+      },
+      {
+        "id": "EXT-09",
+        "name": "SortableList",
+        "label": "可排序列表",
+        "purpose": "通过拖动或键盘替代操作调整条目顺序。",
+        "note": "泛化DragAndDrop不是完整排序交互；重排保存和冲突由应用处理。 参考 Cult UI Sortable List：拖动位置变化、占位和落位反馈；补齐键盘替代操作。https://www.cult-ui.com/docs/components/sortable-list",
+        "kind": "pattern",
+        "delivery": "planned",
+        "aliases": []
+      }
+    ]
+  }
+]

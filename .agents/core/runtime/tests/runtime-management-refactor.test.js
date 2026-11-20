@@ -40,10 +40,10 @@ function fixture(t,{shipped=false}={}) {
   };
   return {root,put,add};
 }
-test('shipped Core contains exactly 35 valid objects, four protected entries and closed references',t=>{
+test('shipped Core contains exactly 40 valid objects, four protected entries and closed references',t=>{
   const f=fixture(t,{shipped:true}),c=catalog(f.root);
-  assert.deepEqual(c.errors,[]);assert.equal(c.rows.length,35);
-  assert.deepEqual(c.rows.reduce((a,r)=>(a[r.type]=(a[r.type]??0)+1,a),{}),{cooperation:1,partner:10,competency:24});
+  assert.deepEqual(c.errors,[]);assert.equal(c.rows.length,40);
+  assert.deepEqual(c.rows.reduce((a,r)=>(a[r.type]=(a[r.type]??0)+1,a),{}),{cooperation:1,partner:11,competency:28});
   assert.equal(Object.keys(protectedPaths).length,4);
   for(const r of c.rows){assert.deepEqual(r.errors,[],r.path);assert.ok(referenceResults(c,r).every(x=>!x.error),JSON.stringify(referenceResults(c,r)));}
   assert.ok(!c.rows.some(r=>r.id==='competency.ksf.asset-maintenance'||r.id===oldManagerId));
@@ -71,7 +71,7 @@ test('candidate validation supports legacy schema exports and uses the candidate
         f.put(row.path,`---\n${YAML.stringify(metadata)}---\n${row.parsed.body.toString('utf8')}`);
       }
     }
-    const result=await validateSystemDefinitions(f.root);assert.equal(result.valid,true);assert.equal(result.objects,35);
+    const result=await validateSystemDefinitions(f.root);assert.equal(result.valid,true);assert.equal(result.objects,40);
   }
 });
 test('normal entry returns the root only and never independently loads profiles or route definitions',t=>{

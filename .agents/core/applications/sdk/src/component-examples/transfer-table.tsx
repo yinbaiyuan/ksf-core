@@ -1,0 +1,4 @@
+import {useState,useRef,useEffect,useId,useMemo} from 'react';
+import {Transfer} from '@ksf/sdk/transfer';import {Table} from '@ksf/sdk/table';import {Checkbox} from '@ksf/sdk/checkbox';
+import '@ksf/sdk/component-examples/catalog-examples.css';
+export function TransferTableExample(){return <Transfer label='表格穿梭' options={Array.from({length:18},(_,i)=>({value:String(i),label:'资料 '+(i+1),description:i%2?'需求文档':'设计文件',disabled:i===4}))} defaultValue={['1']} pageSize={6} renderList={ctx=><Table label={ctx.side==='source'?'来源资料':'目标资料'} rows={ctx.options} getId={o=>o.value} columns={[{id:'check',header:'选择',cell:o=><Checkbox label={'选择 '+o.label} disabled={ctx.disabled||o.disabled} checked={ctx.selectedIds.includes(o.value)} onCheckedChange={checked=>ctx.onSelectionChange(checked?[...ctx.selectedIds,o.value]:ctx.selectedIds.filter(id=>id!==o.value))}/>},{id:'label',header:'资料',cell:o=>o.label}]}/>}/>;}

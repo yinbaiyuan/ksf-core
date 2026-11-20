@@ -71,7 +71,7 @@ test('bundled defaults install once and respect disable/uninstall across manager
   const official={bytes,entry:{manifest,package:{url:'official.ksfapp',size:bytes.length,sha256:checksum(bytes)}}};await f.publish(official);
   assert.equal((await f.manager.snapshot()).installed[0].id,'com.ksf.conversations');
   await f.manager.changeApp('com.ksf.conversations','disable');assert.equal((await f.manager.snapshot()).installed[0].enabled,false);
-  await f.manager.changeApp('com.ksf.conversations','uninstall');const fresh=createApplicationManager(f.root, { defaultSource: null, storeDirectory:f.store});t.after(()=>fresh.close());assert.equal((await fresh.snapshot()).installed.length,0);
+  await assert.rejects(f.manager.changeApp('com.ksf.conversations','uninstall'),{code:'APP_CORE_MANAGED'});const fresh=createApplicationManager(f.root, { defaultSource: null, storeDirectory:f.store});t.after(()=>fresh.close());assert.equal((await fresh.snapshot()).installed[0].enabled,false);await f.publish(official,sample);await f.install(sample);await f.manager.changeApp(sample.entry.manifest.id,'uninstall');assert.equal((await fresh.snapshot()).installed.some(app=>app.id===sample.entry.manifest.id),false);
 });
 
 test('declared v2 environment inheritance preserves Git/SSH settings without changing the default filtered environment',async t=>{

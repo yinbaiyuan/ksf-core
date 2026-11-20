@@ -21,7 +21,7 @@ export interface AITask<T=unknown> {
   execution:{executorId:string;profileId:string;profileRevision:number;connectionRevision:number;model:string|null;attempts:AIAttempt[]};
 }
 export interface AIEvents<T=unknown> {events:{seq:number;type:string;status:AIStatus;at:string}[];afterSeq:number;hasMore?:boolean;snapshot:AITask<T>}
-export interface AIServiceDescription {contractVersion:'ai-task-v1';limits:{requestBytes:number;textMaterialBytes:number;uploadBytes:number};profiles:{id:string;executorId:string;kind:'api'|'codex';protocolId?:string;model:string|null;capabilities:string[];limits:{maxInputBytes:number;maxOutputBytes:number;timeoutMs:number;maxAttempts:number}}[]}
+export interface AIServiceDescription {contractVersion:'ai-task-v1';features?:string[];limits:{requestBytes:number;textMaterialBytes:number;uploadBytes:number};profiles:{id:string;executorId:string;kind:'api'|'codex';protocolId?:string;model:string|null;capabilities:string[];limits:{maxInputBytes:number;maxOutputBytes:number;timeoutMs:number;maxAttempts:number}}[]}
 export interface AIMaterial {materialId:string;version:number;sha256:string;size:number;mimeType:string;name:string}
 export function createAIClient(context:Pick<ApplicationBackendContext,'services'>) {
   function call<T>(method:string,...params:unknown[]):Promise<T>{if(!context.services)throw new Error('AI 服务需要 SDK v1 公共服务桥。');return context.services.call<T>('ai',method,params);}
@@ -29,6 +29,7 @@ export function createAIClient(context:Pick<ApplicationBackendContext,'services'
     describe:()=>call<AIServiceDescription>('describe'),
     submit:<T=unknown>(request:AIRequest)=>call<AITask<T>>('submit',request),
     get:<T=unknown>(id:string)=>call<AITask<T>>('get',id),
+    lookup:<T=unknown>(idempotencyKey:string)=>call<AITask<T>|null>('lookup',idempotencyKey),
     readResult:<T=unknown>(id:string)=>call<AIResult<T>>('readResult',id),
     cancel:<T=unknown>(id:string)=>call<AITask<T>>('cancel',id),
     events:<T=unknown>(id:string,afterSeq=0)=>call<AIEvents<T>>('events',id,afterSeq),

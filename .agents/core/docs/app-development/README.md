@@ -4,7 +4,7 @@
 
 本地开发实现包含应用包内 CLI、公共通信、持久保活与消息激活，尚未正式发行。全部应用按新 SDK v1 重建，不保留旧协议适配。
 
-这是应用开发的唯一现行入口，面向开发者和开发应用的 AI。KSF 是承载业务应用的工作台。应用定义业务行为，宿主提供窗口、卡片、安装、文件协作和统一 AI 执行。
+这里是应用技术接口的说明入口，面向开发者和开发应用的 AI。[KSF 应用管理](../../abilities/partners/app-manager/partner.md)及其基本功持有开发接入、验收、安装更新与发布流程；SDK/宿主程序持有字段和接口契约。应用定义业务行为，宿主提供窗口、卡片、安装、文件协作和统一 AI 执行。
 
 ## 阅读路线
 
@@ -17,6 +17,7 @@
 | [Manifest 与包](manifest.md) | 字段、尺寸、平台、入口、构建及完整性 |
 | [窗口与交互](windows.md) | React、状态、全局菜单栏与设置入口、标题栏、快捷键、弹层、关闭保护 |
 | [桌面卡片](cards.md) | 类型/实例、配置、可见状态、尺寸、刷新、恢复 |
+| [通用文件](files.md) | 三范围文件、128 MiB、版本、回收站、订阅和选择器 |
 | [后端与数据](backend-data.md) | 四类应用、运行租约、RPC、锁、持久化、迁移 |
 | [应用 CLI](cli.md) | 包内实现/文档、用户指定后按需读取、KSF CLI 统一调用与版本绑定 |
 | [通信与应用工作流](communication.md) | 在线收发、Agent 端点、大材料、任务反馈、持久保活及消息激活 |
@@ -43,6 +44,6 @@
 
 ## 初始兼容契约与迁移
 
-清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion=1、sdkVersion=1、SDK工具包=1.0.0。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
+清单必须声明 `minCoreVersion` 与 `dataStores`（无受管数据填[]）；schemaVersion/sdkVersion 及 SDK 工具包/API 版本以当前 SDK 类型、构建产物和兼容契约为准。安装、启动和回退均核验宿主与数据。受管JSON通过prepareData显式迁移，read不执行迁移；离线检查使用 `ksf app data inspect <appId> --json`。副本不自动恢复，格式不兼容拒绝回退。完整接口及恢复规则见[后端数据](backend-data.md)与[生命周期](lifecycle.md)。
 
 开发验证按[统一测试规范](../testing.md)选择定向、快速和全量；不将安装依赖、全量回归和发行预演机械绑定每次修改。

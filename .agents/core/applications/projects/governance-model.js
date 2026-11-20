@@ -1,5 +1,10 @@
 import {mergeProjectPlans} from './plan-merge.js';
 export const documentValue=d=>({metadata:structuredClone(d.metadata),body:d.body});
+export function documentForReading(document,draft){
+  if(!draft)return document;
+  const dirty=!draft.base||JSON.stringify(documentValue(draft.base))!==JSON.stringify(draft.value)||Object.keys(draft.evidenceInputs??{}).length>0;
+  return dirty?{...document,...draft.value}:document;
+}
 export function adoptSavedDocument(draft,sent,latest){
   const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   const unchanged=same(draft.value,{metadata:sent.metadata,body:sent.body});

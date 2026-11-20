@@ -6,7 +6,7 @@ const button=(text,fn,cls='pg-plan-text-button')=>{const node=el('button',cls,te
 const referenceKey=ref=>ref.path??ref.url;
 
 export function createProjectPlanEditor({draft,record,getRecord,state,labels,field,writable,busy,modified,id,renderMarkdown,docLink,
-  onObject,onProject,onFile,getFiles,getProjects,resolveParent,track,isCurrent}){
+  onObject,onProject,onFile,getFiles,getProjects,resolveParent,track,isCurrent,onViewChange}){
   const root=el('div','pg-project-plan'),m=draft.value.metadata;
   state.editing??=new Set();state.scroll??={};state.details??={};
   if(!PROJECT_PLAN_TABS.some(([key])=>key===state.tab))state.tab='plan';
@@ -20,6 +20,7 @@ export function createProjectPlanEditor({draft,record,getRecord,state,labels,fie
     state.tab=key;if(key==='materials')state.filesLoaded=false;render();
     if(reader)reader.scrollTop=state.scroll[key]??0;
     if(focus)controls.get(key).focus();
+    onViewChange?.();
   }
   for(const [key,label]of PROJECT_PLAN_TABS){
     const control=button(label,()=>activate(key),'pg-plan-tab');

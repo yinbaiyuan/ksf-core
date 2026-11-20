@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": 1,
+  "id": "com.ksf.component-library",
+  "name": "KSF 组件库",
+  "description": "逐步积累的 KSF 系统组件：实际示例与公共 SDK 用法。",
+  "version": "0.9.0",
+  "minCoreVersion": "0.5.7",
+  "dataStores": [],
+  "permissions": [],
+  "cards": [],
+  "window": {
+    "entry": "frontend/index.js",
+    "multiInstance": true,
+    "defaultSize": {
+      "width": 1080,
+      "height": 780
+    },
+    "minSize": {
+      "width": 360,
+      "height": 360
+    }
+  }
+}
