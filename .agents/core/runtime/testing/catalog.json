@@ -9841,8 +9841,68 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 32.75,
-        "win32": 109.35,
+        "darwin": 35,
+        "win32": 125,
+        "linux": 45
+      },
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/archive.js",
+        ".agents/core/runtime/src/distribution/baseline.js",
+        ".agents/core/runtime/src/distribution/contribute.js",
+        ".agents/core/runtime/src/distribution/manifests.js",
+        ".agents/core/runtime/src/distribution/publish.js",
+        ".agents/core/runtime/src/distribution/release.js",
+        ".agents/core/runtime/src/distribution/system.js",
+        ".agents/core/runtime/src/platform/catalog.js",
+        ".agents/core/runtime/src/platform/runtime-bundle.js",
+        ".agents/core/runtime/src/services/build-manifest.js",
+        ".agents/core/runtime/src/shared/hash.js",
+        ".agents/core/runtime/src/vendor/yaml/dist/index.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ],
+      "timingBasis": "Windows first scenario measured 123.7 seconds in Actions run 44781528373; other targets use conservative estimates."
+    },
+    {
+      "id": "core:runtime-bundle-inspection",
+      "path": ".agents/core/runtime/tests/runtime-bundle-inspection.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "timeoutMs": 180000,
+      "isolation": "exclusive",
+      "inputs": [
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/services/build-manifest.js",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/distribution/runtime-layout.json",
+        ".agents/core/runtime/tests/helpers",
+        ".agents/core/runtime/bootstrap.sh",
+        ".agents/core/runtime/bootstrap.ps1",
+        ".agents/core/runtime/tools/bootstrap-config.py",
+        ".agents/ksf",
+        ".agents/ksf.ps1"
+      ],
+      "requirements": [],
+      "cacheable": false,
+      "seconds": {
+        "darwin": 30,
+        "win32": 100,
         "linux": 40
       },
       "verification": {
@@ -9868,7 +9928,8 @@
       ],
       "fixtures": [
         "distribution"
-      ]
+      ],
+      "timingBasis": "Independent archive rejection scenario split from runtime-bundle after a Windows file timeout; conservative estimate, not a new hosted measurement."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10527,9 +10588,61 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 120,
-        "win32": 300
+        "win32": 400,
+        "linux": 120
       },
-      "timingBasis": "Conservative estimate for real archive/HTTP/Core+app rollback and process-kill recovery.",
+      "timingBasis": "Ownership/rollback first scenario measured 156.2 seconds on Windows in run 44781528373; migration/live-service protection retain conservative allowance.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real CLI archives, HTTP store, process death, fixed launcher recovery, data migration and rollback must execute on Mac and Windows."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/applications",
+        ".agents/core/data-compatibility.json",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".agents/core/runtime/tests/helpers/distribution-fixture.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:system-update-applications-recovery",
+      "path": ".agents/core/runtime/tests/system-update-applications-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "sdk",
+        "web"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 120,
+        "win32": 430,
+        "linux": 120
+      },
+      "timingBasis": "Three crash points measured 103.6–107.5 seconds each on Windows in run 44781528373; concurrent-edit recovery adds a conservative allowance.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11874,7 +11987,8 @@
       "path": ".agents/core/runtime/tests/application-source-lifecycle.test.js",
       "owner": "core",
       "covers": [
-        "core"
+        "core",
+        "sdk"
       ],
       "suite": "full",
       "platforms": [
@@ -11898,9 +12012,27 @@
         ".agents/ksf.ps1",
         ".gitignore",
         ".gitattributes",
-        "README.md"
+        "README.md",
+        ".agents/core/applications/sdk/build.mjs",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/templates"
       ],
-      "requirements": [],
+      "requirements": [
+        {
+          "component": "sdk",
+          "name": "postcss"
+        },
+        {
+          "component": "sdk",
+          "name": "es-module-lexer"
+        },
+        {
+          "component": "sdk",
+          "name": "rolldown"
+        }
+      ],
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 20,
@@ -13718,15 +13850,16 @@
         ".agents/core/applications/sdk/package-lock.json",
         ".agents/core/applications/sdk/tests/components.test.mjs",
         ".agents/core/runtime/web/package.json",
-        ".agents/core/runtime/web/package-lock.json"
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
       ],
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
-        "win32": 12
+        "darwin": 25,
+        "win32": 65
       },
-      "timingBasis": "Conservative estimates for static filesystem fixtures and locked compiler subprocesses; Windows timing is not a verification claim.",
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13742,7 +13875,161 @@
         ".agents/core/applications/sdk/scripts/generate-components.mjs",
         ".agents/core/applications/sdk/package.json",
         ".agents/core/applications/sdk/tests/components.test.mjs",
-        ".agents/core/applications/component-library"
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-target-integrity",
+      "path": ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-target-integrity.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-target-resolution",
+      "path": ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-target-resolution.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
+      ]
+    },
+    {
+      "id": "sdk:components-reference",
+      "path": ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+      "owner": "sdk",
+      "covers": [
+        "sdk"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/applications/sdk/scripts",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/package-lock.json",
+        ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+        ".agents/core/runtime/web/package.json",
+        ".agents/core/runtime/web/package-lock.json",
+        ".agents/core/applications/sdk/tests/helpers"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 30,
+        "win32": 90
+      },
+      "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Exercises real public CLI, target dependency/build resolution, metadata/source identity, actual TypeScript example checks and no-execution/no-project-write boundaries."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/sdk/components",
+        ".agents/core/applications/sdk/src/component-catalog.js",
+        ".agents/core/applications/sdk/src/component-catalog.d.ts",
+        ".agents/core/applications/sdk/src/component-examples",
+        ".agents/core/applications/sdk/server/components",
+        ".agents/core/applications/sdk/scripts/ksf-app.mjs",
+        ".agents/core/applications/sdk/scripts/generate-components.mjs",
+        ".agents/core/applications/sdk/package.json",
+        ".agents/core/applications/sdk/tests/components-reference.test.mjs",
+        ".agents/core/applications/component-library",
+        ".agents/core/applications/sdk/tests/helpers"
       ]
     },
     {

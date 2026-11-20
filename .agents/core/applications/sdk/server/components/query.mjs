@@ -18,7 +18,7 @@ async function executeQuery({operation, selector = '', appDir, sdkRoot: explicit
   const resolution = await resolveTarget({appDir, sdkRoot: explicitSDK});
   const base = {protocol, ok: true, operation, catalogSource: reference.identity, target: resolution.target};
   let targetRegistry;
-  const inspect = async (component, requestedExample) => {
+  const inspect = async (component, requestedExample, deferTypes = false) => {
     const referenceContract = reference.contracts.find(contract => contract.id === component.id) ?? null;
     if (component.delivery === 'planned') return {support: issue('notApplicable', 'COMPONENT_NOT_IMPLEMENTED'), contract: null, source: null};
     if (resolution.issue) return {support: issue('unknown', resolution.issue, resolution.message), contract: referenceContract, source: reference.identity};
@@ -51,6 +51,7 @@ async function executeQuery({operation, selector = '', appDir, sdkRoot: explicit
       const contract = targetRegistry.contracts.find(value => value.id === component.id);
       const selected = requestedExample ? contract.examples.find(example => example.id === requestedExample) : undefined;
       if (requestedExample && !selected) return {support: issue('unsupported', 'EXAMPLE_NOT_SUPPORTED', '目标SDK没有这个示例；不会替换成其他示例。'), contract, source: targetRegistry.identity};
+      if (deferTypes) return {contract, source: targetRegistry.identity, pendingTypecheck: true};
       const support = await checkTypes(targetRegistry, contract, resolution, selected);
       if (support.status === 'supported') {
         const current = await loadRegistry(root);
@@ -63,12 +64,29 @@ async function executeQuery({operation, selector = '', appDir, sdkRoot: explicit
   };
   if (operation === 'search') {
     const records = searchComponentRecords(selector, {includePlanned, limit, records: reference.items, library, kind});
-    const items = [];
+    const results = [];
     // Bound work: only the requested matches are inspected, never the entire catalog's API.
-    for (const component of records) {
-      const result = await inspect(component);
-      items.push({id: component.id, name: component.name, label: component.label, kind: component.kind, purpose: component.purpose, delivery: component.delivery, references: (targetRegistry ?? reference).references.components[component.id], targetSupport: result.support, canGenerateSdkUsage: result.support.status === 'supported'});
+    for (const component of records) results.push(await inspect(component, undefined, true));
+    const pending = results.filter(result => result.pendingTypecheck);
+    if (pending.length) {
+      // One compiler program verifies the complete requested set. Failed batches
+      // retain individual probes so one invalid example cannot taint other matches.
+      const batch = await checkTypes(targetRegistry, pending.map(result => result.contract), resolution);
+      for (const result of pending) {
+        result.support = batch.status === 'supported'
+          ? {...batch, proof: {...batch.proof, exampleIds: result.contract.examples.map(example => example.id)}}
+          : await checkTypes(targetRegistry, result.contract, resolution);
+      }
+      try {
+        const current = await loadRegistry(resolution.target.sdkRoot);
+        if (current.identity.fingerprint !== targetRegistry.identity.fingerprint) {
+          for (const result of pending) if (result.support.status === 'supported') result.support = issue('unknown', 'SDK_CHANGED_DURING_QUERY', '查询过程中SDK内容已变化，请重新查询。');
+        }
+      } catch (error) {
+        for (const result of pending) if (result.support.status === 'supported') result.support = issue(error.code === 'ENOENT' ? 'unsupported' : 'unknown', error.code === 'ENOENT' ? 'SDK_ENTRY_MISSING' : error.code ?? 'SDK_METADATA_INVALID', error.message);
+      }
     }
+    const items = records.map((component, index) => ({id: component.id, name: component.name, label: component.label, kind: component.kind, purpose: component.purpose, delivery: component.delivery, references: (targetRegistry ?? reference).references.components[component.id], targetSupport: results[index].support, canGenerateSdkUsage: results[index].support.status === 'supported'}));
     return {...base, items};
   }
   let component;

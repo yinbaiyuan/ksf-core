@@ -11,6 +11,7 @@ const toolsRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 /** Compile data in a disposable directory. No application/module code is imported or run. */
 export async function checkTypes(registry, contract, resolution, selected) {
+  const contracts = Array.isArray(contract) ? contract : [contract];
   const {target, app} = resolution, sdkRoot = registry.root;
   const compilerRoot = await packageDirectory('typescript', [toolsRoot, resolve(toolsRoot, '../../runtime/web')]);
   if (!compilerRoot) return {status: 'unknown', reason: 'TYPECHECK_TOOL_UNAVAILABLE'};
@@ -36,7 +37,7 @@ export async function checkTypes(registry, contract, resolution, selected) {
   }
   const roots = [target.appDir, sdkRoot, resolve(sdkRoot, '../../runtime/web')];
   const names = new Set([...Object.keys(registry.pkg.peerDependencies ?? {}), ...Object.keys(registry.pkg.dependencies ?? {}), ...Object.keys(app.dependencies ?? {}), ...Object.keys(app.devDependencies ?? {})]);
-  if ((contract.binding?.framework ?? 'react') === 'react' && !app.dependencies?.react && !app.devDependencies?.react && !app.peerDependencies?.react) return {status: 'unknown', reason: 'APP_REQUIREMENT_MISSING', message: '目标应用尚未声明 React 依赖。'};
+  if (contracts.some(value => (value.binding?.framework ?? 'react') === 'react') && !app.dependencies?.react && !app.devDependencies?.react && !app.peerDependencies?.react) return {status: 'unknown', reason: 'APP_REQUIREMENT_MISSING', message: '目标应用尚未声明 React 依赖。'};
   for (const name of names) {
     if (name === '@ksf/sdk') continue;
     const typeName = name === 'react' || name === 'react-dom' ? '@types/' + name : name;
@@ -51,22 +52,24 @@ export async function checkTypes(registry, contract, resolution, selected) {
   const directory = await mkdtemp(join(tmpdir(), 'ksf-component-query-'));
   try {
     const files = [];
-    const examples = selected ? [selected] : contract.examples;
+    const examples = selected ? [selected] : contracts.flatMap(value => value.examples);
     for (const [index, example] of examples.entries()) {
       const file = join(directory, 'example-' + index + (example.file.endsWith('.tsx') ? '.tsx' : '.ts'));
       await writeFile(file, await bytes(sdkRoot, example.file)); files.push(file);
     }
-    const probe = join(directory, 'exports.ts');
-    const probes = contract.bindings.filter(binding => binding.exports.length).map(binding => `import type {${binding.exports.join(',')}} from ${JSON.stringify(binding.module)};`);
-    let count = 0;
-    for (const binding of contract.bindings) {
-      const runtime = publicEntry(registry.pkg, binding.module, {runtime: true});
-      if (!/\.tsx?$/.test(runtime ?? '')) continue;
-      for (const name of binding.runtimeExports) {
-        probes.push(`import {${name} as Runtime${count}} from ${JSON.stringify(resolve(sdkRoot, runtime).replaceAll('\\', '/'))}; export const value${count} = Runtime${count};`); count++;
+    for (const [index, value] of contracts.entries()) {
+      const probe = join(directory, 'exports-' + index + '.ts');
+      const probes = value.bindings.filter(binding => binding.exports.length).map(binding => `import type {${binding.exports.join(',')}} from ${JSON.stringify(binding.module)};`);
+      let count = 0;
+      for (const binding of value.bindings) {
+        const runtime = publicEntry(registry.pkg, binding.module, {runtime: true});
+        if (!/\.tsx?$/.test(runtime ?? '')) continue;
+        for (const name of binding.runtimeExports) {
+          probes.push(`import {${name} as Runtime${count}} from ${JSON.stringify(resolve(sdkRoot, runtime).replaceAll('\\', '/'))}; export const value${count} = Runtime${count};`); count++;
+        }
       }
+      await writeFile(probe, probes.join('\n') + '\nexport {};'); files.push(probe);
     }
-    await writeFile(probe, probes.join('\n') + '\nexport {};'); files.push(probe);
     const globals = join(directory, 'styles.d.ts'); await writeFile(globals, "declare module '*.css';\n"); files.push(globals);
     const options = {...inherited, target: inherited.target ?? 'ES2022', module: inherited.module ?? 'ESNext', moduleResolution: inherited.moduleResolution ?? 'Bundler', jsx: inherited.jsx ?? 'react-jsx', lib: inherited.lib ?? ['ES2022', 'DOM', 'DOM.Iterable'], strict: true, skipLibCheck: true, noEmit: true, allowImportingTsExtensions: true, esModuleInterop: true, paths, types: [], noUnusedLocals: false, noUnusedParameters: false, incremental: false, composite: false};
     for (const name of ['baseUrl', 'rootDir', 'rootDirs', 'outDir', 'outFile', 'declarationDir', 'tsBuildInfoFile', 'plugins', 'typeRoots']) delete options[name];
