@@ -8,8 +8,10 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {startWebServer} from '../src/services/web.js';
 import {webSourceDigest} from '../src/web/assets.js';
+import {createUIBootstrap,injectUIBootstrap} from '../web/scripts/ui-runtime.mjs';
 import {encodePackage,checksum} from '../src/applications/protocol.js';
 import {createApplicationManager} from '../src/applications/manager.js';
+import {createAITaskService} from '../src/ai-tasks/service.js';
 import {writeUserData} from '../src/services/user-data.js';
 import {defaultMaterialSettings} from '../../applications/sdk/src/shared/material-settings.js';
 
@@ -37,9 +39,12 @@ const material=defaultMaterialSettings();material.motion=false;material.profiles
 const desktop={version:1,layout:[{i:'work-stats',x:0,y:0,w:4,h:2}],bounds:{x:32,y:24,width:1000,height:680}};
 const seed=`if(!sessionStorage.getItem('ksf-t03-fixture-seeded')){localStorage.setItem('ksf.workbench.desktop.v1',${JSON.stringify(JSON.stringify(desktop))});localStorage.setItem('ksf.workbench.material.v1',${JSON.stringify(JSON.stringify(material))});sessionStorage.setItem('ksf-t03-fixture-seeded','1');}`;
 const seedPath='assets/configuration-seed.js';await writeFile(join(web,'dist',seedPath),seed);
-const htmlPath=join(web,'dist/index.html'),html=await readFile(htmlPath,'utf8');await writeFile(htmlPath,html.replace('<head>','<head><script src="/'+seedPath+'"></script>'));
+const htmlPath=join(web,'dist/index.html'),html=(await readFile(htmlPath,'utf8')).replace(/<script type="application\/json" id="ksf-frontend-runtime">[^<]*<\/script>\n/,'').replace('<head>','<head><script src="/'+seedPath+'"></script>');
 const manifestPath=join(web,'dist/build.json'),manifest=JSON.parse(await readFile(manifestPath,'utf8'));
-for(const name of ['index.html',seedPath])manifest.files[name]=createHash('sha256').update(await readFile(join(web,'dist',name))).digest('hex');manifest.sourceDigest=webSourceDigest(web);await writeFile(manifestPath,JSON.stringify(manifest));
+manifest.files['index.html']=createHash('sha256').update(html).digest('hex');manifest.files[seedPath]=createHash('sha256').update(seed).digest('hex');manifest.sourceDigest=webSourceDigest(web);
+const graph={...manifest.frontendRuntime.resources,[seedPath]:[]},buildGraph=Object.fromEntries(Object.entries(graph).map(([file,imports])=>[file,{file,imports}]));
+manifest.frontendRuntime=createUIBootstrap(buildGraph,{sourceDigest:manifest.sourceDigest,files:manifest.files});
+const injected=injectUIBootstrap(html,manifest.frontendRuntime);await writeFile(htmlPath,injected);manifest.files['index.html']=createHash('sha256').update(injected).digest('hex');await writeFile(manifestPath,JSON.stringify(manifest));
 const manager=createApplicationManager(root,{storeDirectory,defaultSource:null});
 const catalog=await manager.catalog();
 const latest=new Map();for(const entry of catalog.apps.filter(item=>!item.incompatibility).slice().reverse())latest.set(entry.manifest.id,entry);
@@ -48,6 +53,12 @@ const menuCode=await readFile(new URL('./fixtures/configuration-menu-app.js',imp
 const menuPackage=encodePackage({schemaVersion:1,sdkVersion:1,minCoreVersion:'0.3.0',dataStores:[],id:'com.example.menu',name:'菜单验收',description:'隔离验证菜单注册、级联、回调和退出保护',version:'1.0.0',permissions:[],window:{entry:'frontend/index.js',multiInstance:true}},{'frontend/index.js':{content:menuCode.toString('base64'),sha256:checksum(menuCode),mode:0o644}});
 const preview=await manager.prepareImport(menuPackage,'menu-fixture.ksfapp');await manager.installImport({importId:preview.importId,digest:preview.package.sha256,trusted:true});
 await manager.close();
+// Synthetic local tasks exercise pagination without credentials or a model call.
+const synthetic=createAITaskService(root,{pollMs:10,executors:{'openai-responses-v1':{async execute(){return {text:'隔离验收结果'};}}}});
+await synthetic.config('connections',{revision:0,items:[{id:'fixture-api',kind:'api',enabled:true,concurrency:1,protocolId:'openai-responses-v1',baseURL:'https://example.invalid/v1',credentialRef:'env:FIXTURE_ONLY'}]});
+await synthetic.config('profiles',{revision:0,items:[{id:'fixture-profile',executorId:'fixture-api',enabled:true,model:'synthetic-model',timeoutMs:1000,maxAttempts:1,retryDelayMs:0,maxInputBytes:1048576,maxOutputBytes:4096}]});
+for(let i=0;i<25;i++)await synthetic.submit({appId:'example.settings.fixture',version:'1.0.0',releaseDigest:'a'.repeat(64)},{contractVersion:'ai-task-v1',idempotencyKey:'settings-fixture-'+i,profileId:'fixture-profile',instruction:'隔离验收',inputs:[{kind:'text',text:'合成数据'}],outputSpec:{format:'text'}});
+await synthetic.close();
 const blockedExecutor={async execute(){throw Object.assign(Error('Browser fixture forbids real model execution.'),{code:'FIXTURE_NO_MODEL'});}};
 const server=await startWebServer({root,port:0,capture:false,webDirectory:web,applications:{storeDirectory,defaultSource:null},ai:{executors:Object.fromEntries(['codex','openai-responses-v1','deepseek-responses-v1','openai-transcription-v1'].map(key=>[key,blockedExecutor]))}});
 console.log(JSON.stringify({url:server.url,root,mode:'isolated-T03-browser-fixture',legacySeeded:true}));

@@ -89,11 +89,14 @@ function navigationSplitter(workspace,board,signal){
   return handle;
 }
 
-export function createGovernanceManagement({sdk,docLink,icon,contextMenu,contextLink,canPreview,renderMarkdown,renderDomainSummary,onChange,onPrepare,onNavigate,onLocationChange,onLifecycle,onProjectActionsChange,onInspirationChange}){
+export function createGovernanceManagement({sdk,docLink,icon,contextMenu,contextLink=null,canPreview=null,renderMarkdown,renderDomainSummary=null,onChange=null,onPrepare,onNavigate=null,onLocationChange=null,onLifecycle=null,onProjectActionsChange=null,onInspirationChange=null,headless=false}){
+  const listeners=new Set();let snapshot=null;
+  function emit(){snapshot=null;for(const fn of listeners)fn();}
   const node=el('div','pm-workspace pg-workspace');
   let selected=null,key='',record=null,drafts=new Map(),editing=null,error='',notice='',busy=false,alive=true,generation=0,conflict=null,storage='',pendingRequest=null;
   let hierarchyRecord,hierarchy,activePath=null,contextPreview=null,contextRequest=0,pendingReadingLocation=null;
   let projectDurationRequest=null,contextView,projectContextView;
+  let manualSaveJob=null;
   let detailSaveTimer,detailSaveJob=null,detailSaveIssue=null,detailsSaved=false,detailComposing=false;
   const fileDrafts=createContextDrafts(sdk),fileTreeStates=new Map(),projectPlanStates=new Map(),readingPositions=new Map();
   let navigationPosition=0;
@@ -150,7 +153,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   board.addEventListener('keydown',event=>{if(narrowObjects&&showObjects&&event.key==='Escape'&&!event.isComposing){event.preventDefault();event.stopPropagation();showObjectNavigation(false);objectToggle.focus();}},{signal:motion.signal});
   workspace.append(objectToggle,board,objectSplitter,detailPane);showObjectNavigation(false);
 
-  const notes=createInspiration({sdk,docLink,onDrawerChange:onInspirationChange,onSaved:(r,path)=>{if(r)record=r;for(const view of contextViews())view.observeOpened(path);onChange?.();}});
+  const notes=createInspiration({sdk,docLink,headless,onDrawerChange:onInspirationChange,onSaved:(r,path)=>{if(r)record=r;for(const view of contextViews())view.observeOpened(path);onChange?.();if(headless)emit();}});
   const contextViews=()=>[...new Set([contextView,projectContextView].filter(Boolean))];
   const evidenceJobs=new Set();
   const call=(method,extra={})=>sdk.call('governance.'+method,{...selected,...extra});
@@ -237,7 +240,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
         hierarchyRecord=record;hierarchy=projectCardHierarchy(record);
         selectedBranch=hierarchy.branches.find(b=>b.milestone.path===activePath||b.tasks.some(t=>t.path===activePath));
         selectedDoc=selectedBranch?.tasks.find(t=>t.path===activePath)??selectedBranch?.milestone??hierarchy.project;
-        if(!board.contains(document.activeElement)){renderObjectNavigationList();renderObjectNavigation();}
+        if(!headless&&!board.contains(document.activeElement)){renderObjectNavigationList();renderObjectNavigation();}
         projectPlanStates.get(record.project.path)?.refresh?.();
       }catch(e){
         if(!alive||g!==generation)return;
@@ -364,6 +367,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   const saveDisabled=()=>busy||!!detailSaveJob||!changedDrafts().length||!!conflict;
   const draftStatus=()=>readOnly()?readOnlyLabel():autoKind(drafts.get(editing)?.value.metadata.kind)?(detailSaveJob?'自动保存中…':detailSaveIssue?'未保存 · 草稿已保留':detailsChanged()?'待自动保存':detailsSaved?'已自动保存':'所有更改已保存'):changedDrafts().length?'本窗口有未保存修改':'原件已读取';
   function syncSavebar(){
+    if(headless){emit();return;}
     const b=node.querySelector('[data-save-documents]');if(b)b.disabled=saveDisabled();
     const n=node.querySelector('[data-draft-label]');if(n)n.textContent=draftStatus();
     for(const label of node.querySelectorAll('[data-criterion-label]')){
@@ -1463,7 +1467,8 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     const contexts=section('引用与证据','只打开当前需要的原件');const seenContexts=new Set();for(const r of [...(m.context_refs??[]),...(m.result_refs??[]),...evidenceReferences(m)]){const key=r.path??r.url;if(seenContexts.has(key))continue;seenContexts.add(key);if(r.path)contexts.append(docLink(r.role??r.path.split('/').at(-1),r.path));else{const a=el('a','kp-source-link',r.role??r.url);a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';contexts.append(a);}}form.append(contexts);
     const advanced=el('details','pg-advanced');advanced.append(el('summary','','高级：原件元数据'));const raw=field(advanced,'元数据 JSON',JSON.stringify(m,null,2),()=>{},{textarea:true});raw.addEventListener('change',()=>{try{const value=JSON.parse(raw.value);if(!value||Array.isArray(value)||typeof value!=='object'||!statesFor(value).length||value.kind!=='review'&&!Array.isArray(value.criteria)||value.kind==='project'&&!Array.isArray(value.goals))throw Error('请保留对象类型及其列表字段');draft.value.metadata=value;modified();draw();}catch(e){error='元数据未应用：'+e.message;}});form.append(advanced);return form;
   }
-  async function save(){
+  function save(){if(detailComposing)return Promise.resolve(false);if(manualSaveJob)return manualSaveJob;manualSaveJob=performSave().finally(()=>{manualSaveJob=null;});return manualSaveJob;}
+  async function performSave(){
       if(detailSaveJob)await detailSaveJob;
       clearTimeout(detailSaveTimer);
       if(busy||readOnly()||!drafts.size||conflict)return;busy=true;error='';const g=generation;draw();
@@ -1527,6 +1532,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
   }
   function draw(){
     if(!alive)return;
+    if(headless){emit();return;}
     cardMotion.resetBrowsing();
     node.classList.remove('is-card-board');
     node.replaceChildren();
@@ -1549,6 +1555,41 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     }
   }
   return {navigation,select,render(){draw();return node;},prefill:onPrepare,
+    subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
+    getSnapshot(){return snapshot??=({record:record?readingRecord():null,readOnly:!record||readOnly(),busy:busy||!!detailSaveJob,dirty:changedDrafts().length>0,pending:!!pendingRequest,error:detailSaveIssue?.message||error,notice,conflict,editing,notes});},
+    edit(path,change,{verification=false}={}){if(readOnly())return;const doc=[record.project,...record.documents].find(d=>d.path===path)||drafts.get(path)?.value;if(!doc)return;const draft=drafts.get(path)||draftFor(doc);change(draft.value);if(verification)draft.verificationChanged=true;modified();emit();},
+    composition(active){detailComposing=active;if(active)clearTimeout(detailSaveTimer);else scheduleDetailSave();},
+    save:async()=>{if(detailComposing)return false;if(detailsChanged())await flushDetailSave();if(changedDrafts().length&&!detailSaveIssue)await save();emit();},
+    flush:flushDetailSave,compare:()=>compare(false),resolve(key,value){if(!conflict)return;conflict.choices[key]=value;reconcile();},
+    retry(){detailSaveIssue=null;return pendingRequest?save():flushDetailSave();},
+    review(subject){openObjectReview(subject);emit();return editing;},
+    async confirmMilestone(subjectPath,reviewPath){
+      if(!await flushDetailSave())throw Error('请先处理未保存内容或冲突。');
+      const {data}=await confirmationRequest(subjectPath,reviewPath);
+      for(const change of data.changes){let draft=drafts.get(change.path);if(!draft){const doc=record.documents.find(d=>d.path===change.path);if(!doc)throw Error('确认原件缺失。');draft=draftFor(doc);}draft.value={metadata:change.metadata,body:change.body};draft.requiresReviewSave=true;}
+      pendingRequest=structuredClone(data);persist();await save();if(pendingRequest||error)throw Error(error||'阶段确认回执待核对。');emit();
+    },
+    draft(path){return drafts.get(path);},
+    evidenceInput(path,criterionId,text){
+      const doc=record.documents.find(d=>d.path===path)||drafts.get(path)?.value;if(!doc||readOnly())return;
+      const draft=drafts.get(path)||draftFor(doc);draft.evidenceInputs??=Object.create(null);draft.evidenceInputs[criterionId]=text;persist();emit();
+    },
+    cancelEvidenceInput(path,criterionId){const draft=drafts.get(path);if(!draft?.evidenceInputs)return;delete draft.evidenceInputs[criterionId];detailSaveIssue=null;persist();emit();scheduleDetailSave();},
+    async evidence(path,criterionId,text){
+      const doc=record.documents.find(d=>d.path===path)||drafts.get(path)?.value;if(!doc||readOnly())return;
+      const draft=drafts.get(path)||draftFor(doc),m=draft.value.metadata;
+      draft.evidenceInputs??=Object.create(null);draft.evidenceInputs[criterionId]=text;persist();emit();
+      const g=generation;const job=(async()=>{const evidence=[];
+        for(const line of text.split('\n').map(x=>x.trim()).filter(Boolean)){
+          if(/^https?:\/\//.test(line)){const [url,...parts]=line.split('|');const version=parts.join('|').trim();if(!version)throw Error('网页证据须注明版本或时间。');const u=new URL(url.trim());if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw Error('证据地址无效。');evidence.push({url:u.href,version});}
+          else evidence.push(await call('evidence',{path:line}));
+        }
+        if(!alive||g!==generation||draft.evidenceInputs[criterionId]!==text)return;
+        const rows=m.kind==='task'?(m.verification??={basis_digest:null,results:[]}).results:(m.criterion_results??=[]);
+        let row=rows.find(r=>r.criterion_id===criterionId);if(!row){row={criterion_id:criterionId,result:'pending',reviewer:'',reviewed_at:'',evidence:[]};rows.push(row);}row.evidence=evidence;
+        delete draft.evidenceInputs[criterionId];draft.verificationChanged=true;detailSaveIssue=null;modified();
+      })().catch(e=>{if(alive&&g===generation){detailSaveIssue={code:'DETAIL_INPUT',message:'无法固定证据：'+(e.code==='ENOENT'?'指定原件不存在，请核对输入路径。':e.message)};persist();emit();}}).finally(()=>{evidenceJobs.delete(job);emit();});evidenceJobs.add(job);return job;
+    },
     getLocation:()=>{const reader=selectedBody.querySelector('.pg-project-context-reader')??selectedBody;if(reader.getClientRects().length&&reader.clientHeight)readingPositions.set(activePath,reader.scrollTop);if(board.getClientRects().length&&board.clientHeight)navigationPosition=board.scrollTop;return {objectPath:activePath,objectScroll:pendingReadingLocation?.objectPath===activePath?pendingReadingLocation.objectScroll:readingPositions.get(activePath)??0,navigationScroll:pendingReadingLocation?.navigationScroll??navigationPosition,...(record&&projectPlanStates.get(record.project.path)?.tab?{projectTab:projectPlanStates.get(record.project.path).tab}:{})};},
     isSaving:()=>busy||!!detailSaveJob||!!pendingRequest||evidenceJobs.size>0||notes.isSaving(),
     async flushFileSaves(){await flushDetailSave();await notes.flush();await Promise.all(contextViews().map(view=>view.flushFileSave()));await fileDrafts.settle();await Promise.allSettled([...evidenceJobs]);return !fileDrafts.hasDrafts()&&!detailsChanged()&&!notes.drafts().length;},

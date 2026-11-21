@@ -8674,7 +8674,12 @@
         ".agents/core/runtime/web/src/desktop/settings-comparison.ts",
         ".agents/core/runtime/web/src/desktop/settings-reload.ts",
         ".agents/core/runtime/web/src/desktop/appearance-editor.tsx",
-        ".agents/core/runtime/web/src/desktop/configuration-settings.tsx"
+        ".agents/core/runtime/web/src/desktop/configuration-settings.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-mutation.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-feedback.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-dialog.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-fields.tsx",
+        ".agents/core/runtime/web/src/desktop/settings-window.css"
       ]
     },
     {
@@ -13591,7 +13596,7 @@
       ],
       "cacheable": true,
       "inputs": [
-        ".agents/core/applications/projects/private-ui/ai-model.ts",
+        ".agents/core/applications/projects/ai-model.ts",
         ".agents/core/applications/sdk/src/resource-model.ts",
         ".agents/core/applications/sdk/src/controllers/run-types.ts",
         ".agents/core/runtime/web/tests/ui-ai.test.ts"
@@ -13609,18 +13614,17 @@
         "reason": "Pure AI input and fact-presentation contracts; actual host form/overlay/native interaction and service adapters are verified separately."
       },
       "selectionInputs": [
-        ".agents/core/applications/projects/private-ui/ai-model.ts",
-        ".agents/core/applications/projects/private-ui/ai.tsx",
-        ".agents/core/applications/projects/private-ui/ai.css",
+        ".agents/core/applications/projects/ai-model.ts",
+        ".agents/core/applications/projects/conversation-view.tsx",
         ".agents/core/runtime/web/tests/ui-ai.test.ts"
       ]
     },
     {
-      "id": "core:private-domain",
-      "path": ".agents/core/runtime/tests/private-domain.test.js",
+      "id": "core:project-object-properties",
+      "path": ".agents/core/runtime/tests/project-object-properties.test.js",
       "owner": "core",
       "covers": [
-        "web"
+        "app:com.ksf.projects"
       ],
       "suite": "quick",
       "platforms": [
@@ -13629,8 +13633,8 @@
       ],
       "cacheable": true,
       "inputs": [
-        ".agents/core/applications/projects/private-ui/domain-model.ts",
-        ".agents/core/runtime/tests/private-domain.test.js",
+        ".agents/core/applications/projects/object-file-model.js",
+        ".agents/core/runtime/tests/project-object-properties.test.js",
         ".agents/core/runtime/src/projects/governance/model.js"
       ],
       "requirements": [],
@@ -13639,17 +13643,16 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "Structural compatibility with current governance records, immutable intent identities and no inferred authority or stage confirmation.",
+      "timingBasis": "Literal property compatibility with current governance records; preserves unknown fields and independent completion/evidence, with a guard against retired private UI files.",
       "verification": {
         "lane": "shared",
         "kind": "logic",
-        "reason": "Pure display projections tested against actual governance defaultMetadata; visual reuse and service model reads checked separately."
+        "reason": "Pure metadata presentation and explicit edit behavior against actual governance defaultMetadata; no derived summaries or workflow authority."
       },
       "selectionInputs": [
-        ".agents/core/applications/projects/private-ui/domain-model.ts",
-        ".agents/core/applications/projects/private-ui/domain.tsx",
-        ".agents/core/applications/projects/private-ui/domain.css",
-        ".agents/core/runtime/tests/private-domain.test.js"
+        ".agents/core/applications/projects/object-file-model.js",
+        ".agents/core/applications/projects/object-metadata.tsx",
+        ".agents/core/runtime/tests/project-object-properties.test.js"
       ]
     },
     {
@@ -15252,6 +15255,216 @@
       "selectionInputs": [
         ".agents/core/applications/sdk/src",
         ".agents/core/applications/sdk/tests/upload.test.mjs"
+      ]
+    },
+    {
+      "id": "web:settings-numbers",
+      "path": ".agents/core/runtime/web/tests/settings-numbers.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.03,
+        "win32": 0.03
+      },
+      "timingBasis": "Initial local estimate; refresh from observed run.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/desktop/settings-numbers.ts",
+        ".agents/core/runtime/web/src/desktop/ai-settings.tsx",
+        ".agents/core/runtime/web/src/desktop/communication-settings.tsx"
+      ]
+    },
+    {
+      "id": "web:settings-preference-reload",
+      "path": ".agents/core/runtime/web/tests/settings-preference-reload.test.ts",
+      "owner": "web",
+      "covers": [
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/web",
+        ".agents/core/applications/sdk/src",
+        ".agents/core/applications/sdk/server",
+        ".agents/core/runtime/src/routing"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.04,
+        "win32": 0.04
+      },
+      "timingBasis": "Initial local estimate; refresh from observed run.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/web/src/desktop/settings-preference-reload.ts",
+        ".agents/core/runtime/web/src/desktop/desktop.tsx",
+        ".agents/core/runtime/web/src/configuration-preferences.ts"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:detail-content",
+      "path": ".agents/core/applications/projects/tests/detail-content.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 0.2
+      },
+      "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure metadata, Markdown reading, recent-visit and injected external-probe models execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/detail-content-model.js",
+        ".agents/core/applications/projects/tests/detail-content.test.mjs"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:detail-reading",
+      "path": ".agents/core/applications/projects/tests/detail-reading.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 0.2
+      },
+      "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure metadata, Markdown reading, recent-visit and injected external-probe models execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/detail-reading-model.js",
+        ".agents/core/applications/projects/tests/detail-reading.test.mjs"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:object-file-model",
+      "path": ".agents/core/applications/projects/tests/object-file-model.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 0.2
+      },
+      "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure metadata, Markdown reading, recent-visit and injected external-probe models execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/object-file-model.js",
+        ".agents/core/applications/projects/tests/object-file-model.test.mjs"
+      ]
+    },
+    {
+      "id": "app:com.ksf.projects:project-catalog",
+      "path": ".agents/core/applications/projects/tests/project-catalog.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects",
+        ".agents/core/applications/sdk/src"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 0.2
+      },
+      "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure metadata, Markdown reading, recent-visit and injected external-probe models execute once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/project-catalog-model.js",
+        ".agents/core/applications/projects/tests/project-catalog.test.mjs"
       ]
     }
   ],

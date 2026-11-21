@@ -119,7 +119,7 @@ body { background: #B8C7D8; }
 .material-color input { width: 35px; height: 29px; padding: 2px; border: 1px solid #CBD5E3; border-radius: 6px; background: #FFFFFF; cursor: pointer; }
 .material-color code { font-size: 11px; color: #465870; }
 .material-range { margin: 18px 0; }
-.material-range > div:not([data-ksf-component="slider"]) { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+.material-range > .material-range-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 13px; }
 .material-number { display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; color: #465870; font-size: 11px; }
 .material-number > input { width: 66px; height: 28px; border: 1px solid #CBD5E3; border-radius: 6px; padding: 3px 5px; background: #FFFFFF; color: #17283E; text-align: right; font: inherit; font-size: 12px; }
 .ksf-ui-root .material-number{font-size:var(--ksf-font-body);color:var(--ksf-text-secondary)}

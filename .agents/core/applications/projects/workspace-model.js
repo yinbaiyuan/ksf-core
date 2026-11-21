@@ -17,8 +17,15 @@ export function workspaceReadState(error){
 /** A recovery record carries view coordinates only, never project facts or draft values. */
 export function workspaceContext(value={}){
  const position=n=>Number.isFinite(n)?Math.max(0,Math.min(1e7,Math.round(n))):0;
+ const safePath=p=>typeof p==='string'&&!p.startsWith('/')&&!p.split('/').some(part=>['.','..',''].includes(part))&&!/[\\\x00-\x1f]/.test(p);
+ const file=value.fileView,fileView=file&&safePath(file.objectPath)&&safePath(file.path)&&['file','directory'].includes(file.kind)&&(!file.digest||/^[a-f0-9]{64}$/.test(file.digest))?{objectPath:file.objectPath,path:file.path,kind:file.kind,scroll:position(file.scroll),...(file.digest?{digest:file.digest}:{})}:null;
  const path=typeof value.objectPath==='string'&&!value.objectPath.startsWith('/')&&!value.objectPath.split('/').some(part=>['.','..',''].includes(part))&&!/[\\\x00-\x1f]/.test(value.objectPath)?value.objectPath:null;
- return {schema:1,query:typeof value.query==='string'?value.query.slice(0,4096):'',scope:['all','current','archived'].includes(value.scope)?value.scope:'all',selected:workspaceTarget(value.selected)?value.selected:'',pane:value.pane==='detail'?'detail':'list',splitSize:Number.isFinite(value.splitSize)?Math.max(10,Math.min(90,value.splitSize)):30,objectPath:path,listScroll:position(value.listScroll),detailScroll:position(value.detailScroll),objectScroll:position(value.objectScroll),navigationScroll:position(value.navigationScroll),...(['plan','progress','materials'].includes(value.projectTab)?{projectTab:value.projectTab}:{}),...(value.projectView==='chats'?{projectView:'chats'}:{}),...(typeof value.aiSessionKey==='string'&&value.aiSessionKey.startsWith('projects-ai-')&&value.aiSessionKey.length<=256?{aiSessionKey:value.aiSessionKey}:{})};
+ return {schema:1,query:typeof value.query==='string'?value.query.slice(0,4096):'',scope:['all','current','archived'].includes(value.scope)?value.scope:'all',selected:workspaceTarget(value.selected)?value.selected:'',pane:value.pane==='detail'?'detail':'list',splitSize:Number.isFinite(value.splitSize)?Math.max(10,Math.min(90,value.splitSize)):30,objectPath:path,listScroll:position(value.listScroll),detailScroll:position(value.detailScroll),objectScroll:position(value.objectScroll),navigationScroll:position(value.navigationScroll),...(['plan','progress','materials'].includes(value.projectTab)?{projectTab:value.projectTab}:{}),...(['overview','tasks','materials','acceptance','original'].includes(value.detailSection)?{detailSection:value.detailSection}:{}),...(fileView?{fileView}:{}),...(value.projectView==='chats'?{projectView:'chats'}:{}),...(typeof value.aiSessionKey==='string'&&value.aiSessionKey.startsWith('projects-ai-')&&value.aiSessionKey.length<=256?{aiSessionKey:value.aiSessionKey}:{})};
+}
+/** A project opened directly from the catalog has no explicit objectPath yet. */
+export function workspaceFileReference(location,projectPath){
+ const file=workspaceContext(location).fileView;
+ return file?.objectPath===(location.objectPath??projectPath)?{path:file.path,kind:file.kind,...(file.digest?{digest:file.digest}:{})}:null;
 }
 /** Facts come from the checked owning-service view. Unsaved drafts invalidate its conclusions. */
 export function workspaceDomainFacts(document,record,{draft=false}={}){

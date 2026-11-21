@@ -1,5 +1,4 @@
-import {createFileClient} from '@ksf/sdk/files';
-import {copyText} from '@ksf/sdk/components/ui/context-menu';
+const copyText=text=>navigator.clipboard.writeText(text);
 import {contextScopeForPath} from './context-scopes.js';
 import {followPointer} from './project-card-motion.js';
 import {createFileReadOnlyNotice} from './file-readonly.js';
@@ -66,9 +65,9 @@ export function createContextDrafts(sdk) {
 }
 
 export function createContextFileWorkspace({
-  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction,readOnlyNotice,
+  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction=null,readOnlyNotice,headless=false,editorRenderer=null,
 }) {
-  const genericFiles=createFileClient(sdk);
+  const listeners=new Set();let snapshot=null,issue='',viewEntry=null;function emit(){snapshot=null;for(const fn of listeners)fn();}
   const root=parent(rootPath);
   const scopes=(contextRoots??[{objectPath,root,label:rootLabel}]).map(scope=>({...scope}));
   const primaryScope=scopes.find(scope=>scope.objectPath===objectPath)??scopes[0];
@@ -98,7 +97,7 @@ export function createContextFileWorkspace({
     return folder;
   }
   const treeName=(entry,folder)=>parent(entry.path)===folder?displayName(entry):entry.path.slice(folder.length+1);
-  const work=()=>loadingEditor??=import('./context-file-editor.tsx').catch(error=>{loadingEditor=undefined;throw error;});
+  const work=()=>{if(!editorRenderer)throw Error('文件编辑视图须由项目窗口的React生命周期承载。');return Promise.resolve({mountFileEditor:editorRenderer});};
   function action(label,symbol,fn) {
     const control=iconButton(label,symbol,fn);
     control.removeAttribute('aria-controls');
@@ -135,7 +134,7 @@ export function createContextFileWorkspace({
   }
   function start(){
     if(timer||disposed)return;
-    const poll=()=>{if(list.isConnected&&!document.hidden&&sdk.getSnapshot().enabled!==false)void refresh();};
+    const poll=()=>{if((headless||list.isConnected)&&!document.hidden&&sdk.getSnapshot().enabled!==false)void refresh();};
     queueMicrotask(poll);
     timer=setInterval(poll,900);
     document.addEventListener('visibilitychange',poll);
@@ -204,7 +203,7 @@ export function createContextFileWorkspace({
       if(error.code==='APP_SERVICE_UNKNOWN'){fallback();return;}
       if(!supported && !list.contains(treeWrap))list.append(syncState);
       syncState.textContent='自动更新暂时中断 · '+error.message;
-    }finally{working=false;}
+    }finally{working=false;emit();}
   }
   function menuActions(path){
     const entry=scopes.some(scope=>scope.root===path)?{path,kind:'directory'}:entries.get(path);
@@ -219,7 +218,6 @@ export function createContextFileWorkspace({
         return fn(current);
       };
     }
-    if(entry.reason!=='deleted')items.push({id:'file-operations',label:'附件与文件操作…',onAction:choose(()=>genericFiles.manage({initialPath:entry.kind==='directory'?entry.path:parent(entry.path),rootPath:rootFor(entry.path)}))});
     if(canCreate&&entry.reason!=='deleted'){
       items.push(
         {id:'new-file',label:'新建文件',onAction:choose(()=>inlineForm('file'))},
@@ -282,6 +280,7 @@ export function createContextFileWorkspace({
     return row;
   }
   function renderTree() {
+    if(headless){emit();return;}
     const counts=new Map();
     let unreadCount=0;
     for(const entry of entries.values())if(entry.unread&&showInFileNavigation(entry)){
@@ -512,7 +511,7 @@ export function createContextFileWorkspace({
   function reset({discard=false}={}){
     request++;
     const previous=active, composing=previous?.composing;
-    active=null;
+    active=null;viewEntry=null;
     clearEditor();
     if(!previous)return;
     clearTimeout(previous.saveTimer);
@@ -587,6 +586,7 @@ export function createContextFileWorkspace({
     }
   }
   function editFile(file,text){
+    file.autoFocus=false;
     const wasReview=hasReview(file);
     file.text=text;
     file.message=file.error=file.saveError='';
@@ -612,6 +612,7 @@ export function createContextFileWorkspace({
     };
   }
   function syncEditor(file) {
+    if(headless){emit();return;}
     if(active!==file)return;
     const notice=readOnlyNotice?.(file.entry,file.base);
     const dirty=file.text!==file.base.text;
@@ -652,6 +653,7 @@ export function createContextFileWorkspace({
     return control;
   }
   function fileActions(file){
+    if(headless){emit();return;}
     actions.replaceChildren();
     const markdown=file.entry.format==='markdown';
     const large=file.text.length>1024*1024;
@@ -694,6 +696,7 @@ export function createContextFileWorkspace({
     if(!open)file.outlineButton?.focus({preventScroll:true});
   }
   async function drawFile(file,{focus=false}={}){
+    if(headless){file.autoFocus=focus;emit();return true;}
     const render=++file.render;
     clearEditor();
     if(!file.base.writable)file.mode='preview';
@@ -828,7 +831,7 @@ export function createContextFileWorkspace({
     }finally{file.reviewing=false;syncEditor(file);}
   }
   async function open(entry,{edit=false}={}){
-    reset();
+    reset();viewEntry=entry;issue='';emit();
     if(entry.reason==='deleted'){
       const heading=el('h3','','文件已删除');
       heading.tabIndex=-1;
@@ -880,7 +883,7 @@ export function createContextFileWorkspace({
         void seen(entry,base.stamp);
       }
     }catch(error){
-      if(current())content.replaceChildren(el('p','pg-card-error',error.message),button('重试',()=>onOpen(entry,{edit})));
+      if(current()){issue=error.message;emit();if(!headless)content.replaceChildren(el('p','pg-card-error',error.message),button('重试',()=>onOpen(entry,{edit})));}
     }
   }
   function dispose(){
@@ -888,7 +891,16 @@ export function createContextFileWorkspace({
     list.removeEventListener('contextmenu',openRootMenu);
     moveDialog?.remove();
   }
-  return {start,open,reset,select,seen,revealFolder,dispose,supported:()=>supported,mutating:()=>mutating,
+  return {start,open,reset,select,seen,revealFolder,dispose,
+    subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
+    getSnapshot(){return snapshot??=({entries:[...entries.values()],scopes,selected,active,entry:viewEntry,error:issue||syncState.textContent,canCreate,working,mutating,supported,props:active?editorProps(active,!!active.autoFocus):null});},
+    refresh,mode(mode){if(active&&!active.composing){active.mode=active.base.writable?mode:'preview';emit();}},
+    edit(text){if(active)editFile(active,text);emit();},
+    merge(text){if(!active?.disk)return;active.base=active.disk;active.disk=null;active.mergeText=null;editFile(active,text);emit();},
+    markReviewed:()=>active&&markReviewed(active),
+    moveVersion:path=>call('moveVersion',{path}),
+    async mutate(action,data){if(mutating)throw Error('文件操作尚未结束');if(!projectWritable())throw Error('当前项目只读');let value;await changeTree(action,data,result=>{value=result;if(action==='move')afterMove(result);else if(data.kind==='file'){const entry=entries.get(result.path);if(entry)onOpen(entry,{edit:true});}else selected=result.path;});emit();return value;},
+    supported:()=>supported,mutating:()=>mutating,
     flush:()=>active&&save(active,{flush:true}),
     isOpen:path=>active?.entry.path===path&&!!mounted,
     observeOpened(path){openedOnSave.add(path);void refresh(true);},

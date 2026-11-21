@@ -1,8 +1,8 @@
 {
   "protocol": "ksf-web-build-v1",
-  "sourceDigest": "ed4656e003c37b6dc66ddc93d6854bbc3e5b7385e856cc8c5d3521ac2f0b3bce",
+  "sourceDigest": "c679bc1cf7a0a034fe1668f29d60f56875bbeb1f6ca413168fae483969bfcc8e",
   "files": {
-    "THIRD_PARTY_NOTICES.txt": "2b7f967cdc0aa8d91d7c99a0050c61e36931a5ca25c5f3d69129716718f1e602",
+    "THIRD_PARTY_NOTICES.txt": "4a42e915ab23b36b35732966e76c16bcc7b51049842695a744480349070dbfaf",
     "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
     "assets/KaTeX_AMS-Regular-DMm9YOAa.woff": "30da91e84c893f875e252689faebdc590b2871145e8adc7f9a9d4dbd8ce0b251",
     "assets/KaTeX_AMS-Regular-DRggAlZN.ttf": "68534840bcfdd2bffb6f0e8deb48684dd01e7f04ea2813267577afb906de1d13",
@@ -62,14 +62,14 @@
     "assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff": "e14fed02b1aba7ce9f5afd5844b5d0321b22351febc720e0de8b8723527609f7",
     "assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b",
     "assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa",
-    "assets/ability-store-CT9QzjFy.js": "b5d9734391da53e2e0a17993a78a583a448e233d031ed45956876b6a289336fc",
+    "assets/ability-store-BLmb55sZ.js": "14e09809e57742c745b7cf9647b20eb46e5744295ba0857943d47cb4027a9197",
     "assets/ability-store-bMvAXBYz.css": "92241902fa76e4c92a2877b590cbe797b32b1f98498689a7dff5650a4add43de",
     "assets/abnfDiagram-WEYOIA3C-C0MkZo7o.js": "289e99410cf22a4481d15de33ecdd686baf8721be583e69ed4e61a6c2ce9a31e",
     "assets/aero-shards-backdrop-BMyXjxg5.css": "59395273cbe2265a2e6140cb98a6602231b27d5304c7cca95967735178727145",
     "assets/aero-shards-backdrop-G-hZakLk.js": "d6738a198a9b3f420dd52a5bd221a5137803e462f2c41055dc4bacdc52d84e94",
+    "assets/app-store-C3mjWPrP.js": "d4527c7886d5dfa163c7cc2c3e7f108bf046456320319b213f933cd759ef9b93",
     "assets/app-store-CVntRkbF.css": "afc5687be78ef8cc8ccbd2ae260adcc2821ac36cb9a1f89ba8f7dbb9289afdd1",
-    "assets/app-store-DIsp-eK1.js": "0bf5a79bf5a33c6031fd9688b7c9a7e56da12a2741d99a1e976aa77710155059",
-    "assets/app-store-DM0foyr0.js": "ea92048461e19a8fc053cc4c5c13cdae674484ae4f9aed814281c8268db31939",
+    "assets/app-store-DnoyhK34.js": "87d2e42d41d689e787df48e39f8d48b9c242e5753da01d0681cb29b503c4c510",
     "assets/arc-Y1ARJVZ4.js": "9687148ad8d8bb2ddb472484db3bc587c7a7ade22a23780f8dd608620297ab32",
     "assets/architecture-WOLXFQ4H-tER6YKVA.js": "030fe436c2335c299d6d65db8e658ee758866b5ed48426c974604e4858edfb74",
     "assets/architectureDiagram-ZHVYKT53-0pm-SWK5.js": "a162d8fee42dd76047df91eef05f2cbbf20f4ce378ce2fc2874822eb7eaf081f",
@@ -119,7 +119,7 @@
     "assets/chunk-ZCHMQSOR-CIEq-XQH.js": "7a14cffee600d54746df8d3b8658390b03d9c0e6f3ac3a21fff1441ce347f3aa",
     "assets/chunk-ZO67DCNQ-DnpDWW4I.js": "482e23b7d153f3ad897435f44b80572a7a5d86e48aaac28a5a3fb44e68ae0da2",
     "assets/classDiagram-v2-4MYWR3UA-DtqJu7lt.js": "a992ffaf29ebbfab20b4bb2f665123cea17a51e9815346ecd42c51c03ff56922",
-    "assets/cli-document-dialog-Cbc_9Q91.js": "57bad029be5ff00da7152a7ccfa467f055937e704e31f704cf84c9d1a9d834c6",
+    "assets/cli-document-dialog-DCcOlPCc.js": "28612b554be39ba2cb277c72b067b08870bd2c25ed9260d5c7a59a5c22787216",
     "assets/cli-document-dialog-SZtxQGdE.css": "0b3b3e33c8cd318edae2fb44ad0e2a3ff1bc74d52f442fe93be330b097a7ff07",
     "assets/client-Dwi0iLbf.js": "a6ce25938e29636682eacc06a89dbd2c39b06694d29bffc5e96b5514dbd9a48a",
     "assets/cose-bilkent-JH36ORCC--NrVI5Vi.js": "54d8817e6e4f432d29406598745c0df7cdf97d292d2cd53ed1faef014b404752",
@@ -161,11 +161,11 @@
     "assets/lib-BAVov5dh.js": "a4d9f01f7a5aabcc48e98fce15199d7165a2271edeb1248c9c54964b3e5aad1f",
     "assets/line-CueHJKHM.js": "418b2a84da4bbc50e05f75fe6fb66e0cc983eb5d253bb45dcce3f6a930a7132e",
     "assets/linear-29cWsCuT.js": "0130d031eacd54b0ad83e2f972b7e4a81a24eefdd155f5fe25998ded3568fc31",
-    "assets/main-BWEB-Wo1.css": "63f3cd0314ccde322fdcebddf0ea97c855db4ea0c48f8b727642dbbd2ac6aa1d",
-    "assets/main-CJReztkQ.js": "57282130bf72ec5f628ca66e5f94cf42463b1afbab3258cff155a9c991edd959",
+    "assets/main-BcOfHEVn.js": "a978776c2fbbce088ff5019abcb749d5f3dc22e79d6bf6ed16bbdc51f29700ec",
+    "assets/main-CuYlmz1c.css": "ec140e39d28b7d65a3154567f992fe7d3370dfdc928eddd600acd1c4cdf6077d",
     "assets/material-provider-C6J7KGbU.js": "1608614bdee1226f98eba5272b169d75ef7e639a3adcef3e11cb3244c1f4e35e",
     "assets/mermaid-parser.core-BFL4D_5F.js": "4db58bf6c0ba51c520c770009021ee4c000bf11174d045ea2fef5ee87f79d8cf",
-    "assets/mermaid.core-D29DjUIP.js": "2984e9bb771b98c5f4c212ca62728f467a4af74e2f8a02c94cb00e041186006f",
+    "assets/mermaid.core-BkGi5sBv.js": "b9791aab024f0315cc15480f93af6c6227313336a1523b2b10fce4fae96df7e3",
     "assets/mindmap-definition-6OY57UG3-DzWXxXwI.js": "70f283f1d141b16e69ba4ec30b24505450aea54267fb052f9f5bfcab4f78663d",
     "assets/ordinal-BDEzSJ7C.js": "1a236cf33d69c13da184852fe890a0d5d4083636373cb3ce166537b3e8cc0dcb",
     "assets/packet-JDAUHWVQ-DAR0r-Im.js": "5980f1a2e45366f8dbed13f395a2088be7c14f8586b02bf8c5bef7ed1c8f6b28",
@@ -184,7 +184,7 @@
     "assets/railroad-peg-JR7BVNR7-B90veE1n.js": "2dfe9ce888b24791fce485b64938251770aee1e8222a615b67f8aa02086e8d9d",
     "assets/railroadDiagram-Y72NRBL7-C7Il5k2s.js": "d56672f05ed57f5276eee2e6d191d022961a92fdbbb0ee54c36a07440e99556e",
     "assets/requirementDiagram-EQYSW5RA-DvB6ROqM.js": "1ca47f7cc7717d4e44191da2b6e6a577cb6071c979d59036b338b40aba9ce476",
-    "assets/rich-preview-BKDs1nXi.js": "ba5e072b2a282630b26aaaf99f9ad3153c9c5cc02436f0ed2cf0a7b4bb8b5175",
+    "assets/rich-preview-CFxtbEU9.js": "33d874c61cdec3cf7c9badccc51bbe9bdf77b9aed41594936393f8ad94854f37",
     "assets/rich-preview-iSGeIYZ8.css": "89c9b22ec894cd035ade5355beb340b649698a3e2f64d5c270c4bcd6859ca717",
     "assets/rolldown-runtime-COiEfhsA.js": "174e7e98105b02138bee9b4c62dfc8a01980db395f9e6c916db999c091115562",
     "assets/rough.esm-Dy-Kn_BL.js": "ef405c5eaa3316c75428f63ec698e39993bdcc2da358dbc7ebd355d18901f63f",
@@ -205,13 +205,13 @@
     "assets/vennDiagram-Q3Y3IDCW-B8mopyyI.js": "a55fd27a81adc1538c877c9ebf937ec4172c54c85732348423d03e397f3103a5",
     "assets/wardley-7MLQ67FV-CCVlnR9Q.js": "90babe6f62acba9b9d2c5982fed2f1bb3b4276f4c8684698761257d21dc299c6",
     "assets/wardleyDiagram-IVAIDKWA-B9EBXOcR.js": "f5deaceb620bf754ed9de80f373bd96da6e6a61a56af9cff4651c0a2dfb9fa30",
-    "assets/window-toolbar-YfinrLVk.js": "cef15bb07067681fd366e296b3b4e9003f838c3810150f6120004f91791ad43e",
+    "assets/window-toolbar-D-lHJDj1.js": "7c3b91342cc2b08410a664e3a2c5af9036aecb31174f455a1d6bfaaf10da0cbf",
     "assets/xychartDiagram-4URNHDU4-BlnilVdk.js": "3f7ea2776957ef55260e58fc5a9d065e5f4239565374d81a8b4e89ef5849918d",
-    "index.html": "d98d61ebfd238eceebe2ef6fcc83e93a055c82c3b9004a2932b9df3bcff223a9"
+    "index.html": "dc5d3b8a57d14ed1b0a77bc54a460fdcafa72a4dbdb0a3579b1662e4542f6744"
   },
   "frontendRuntime": {
     "protocol": "ksf-frontend-runtime-v1",
-    "frontendReleaseId": "9d816b30e9b322c15d35b03e4b4c3cc8bb1805c47e10a99821e105bae61bfaa3",
+    "frontendReleaseId": "7ef219deffc8e4b0814c24e431d19f676f07f601309049a6a22c57ddec219491",
     "hostCompatibility": {
       "workbenchContract": "ksf-workbench-v1",
       "minimumCoreVersion": "0.6.0",
@@ -277,13 +277,13 @@
       "assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff": [],
       "assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2": [],
       "assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf": [],
-      "assets/ability-store-CT9QzjFy.js": [
+      "assets/ability-store-BLmb55sZ.js": [
         "assets/ability-store-bMvAXBYz.css",
-        "assets/app-store-DIsp-eK1.js",
+        "assets/app-store-DnoyhK34.js",
         "assets/client-Dwi0iLbf.js",
         "assets/jsx-runtime-CldxteV5.js",
         "assets/rolldown-runtime-COiEfhsA.js",
-        "assets/window-toolbar-YfinrLVk.js"
+        "assets/window-toolbar-D-lHJDj1.js"
       ],
       "assets/ability-store-bMvAXBYz.css": [],
       "assets/abnfDiagram-WEYOIA3C-C0MkZo7o.js": [
@@ -303,21 +303,21 @@
         "assets/jsx-runtime-CldxteV5.js",
         "assets/rolldown-runtime-COiEfhsA.js"
       ],
+      "assets/app-store-C3mjWPrP.js": [
+        "assets/app-store-DnoyhK34.js",
+        "assets/cli-document-dialog-DCcOlPCc.js",
+        "assets/client-Dwi0iLbf.js",
+        "assets/jsx-runtime-CldxteV5.js",
+        "assets/rolldown-runtime-COiEfhsA.js",
+        "assets/window-toolbar-D-lHJDj1.js"
+      ],
       "assets/app-store-CVntRkbF.css": [],
-      "assets/app-store-DIsp-eK1.js": [
+      "assets/app-store-DnoyhK34.js": [
         "assets/app-store-CVntRkbF.css",
         "assets/client-Dwi0iLbf.js",
         "assets/jsx-runtime-CldxteV5.js",
         "assets/material-provider-C6J7KGbU.js",
         "assets/rolldown-runtime-COiEfhsA.js"
-      ],
-      "assets/app-store-DM0foyr0.js": [
-        "assets/app-store-DIsp-eK1.js",
-        "assets/cli-document-dialog-Cbc_9Q91.js",
-        "assets/client-Dwi0iLbf.js",
-        "assets/jsx-runtime-CldxteV5.js",
-        "assets/rolldown-runtime-COiEfhsA.js",
-        "assets/window-toolbar-YfinrLVk.js"
       ],
       "assets/arc-Y1ARJVZ4.js": [
         "assets/dist-CumnGVmJ.js",
@@ -603,10 +603,10 @@
         "assets/purify.es-B9ve_eFf.js",
         "assets/src-UsG7Ncy7.js"
       ],
-      "assets/cli-document-dialog-Cbc_9Q91.js": [
-        "assets/ability-store-CT9QzjFy.js",
-        "assets/app-store-DIsp-eK1.js",
-        "assets/app-store-DM0foyr0.js",
+      "assets/cli-document-dialog-DCcOlPCc.js": [
+        "assets/ability-store-BLmb55sZ.js",
+        "assets/app-store-C3mjWPrP.js",
+        "assets/app-store-DnoyhK34.js",
         "assets/cli-document-dialog-SZtxQGdE.css",
         "assets/client-Dwi0iLbf.js",
         "assets/host-theme-BTvEJSkc.js",
@@ -614,7 +614,7 @@
         "assets/lib-BAVov5dh.js",
         "assets/material-provider-C6J7KGbU.js",
         "assets/preload-helper-BLdHbfdN.js",
-        "assets/rich-preview-BKDs1nXi.js",
+        "assets/rich-preview-CFxtbEU9.js",
         "assets/rolldown-runtime-COiEfhsA.js"
       ],
       "assets/cli-document-dialog-SZtxQGdE.css": [],
@@ -901,24 +901,25 @@
         "assets/init-C-OQMol4.js",
         "assets/src-UsG7Ncy7.js"
       ],
-      "assets/main-BWEB-Wo1.css": [],
-      "assets/main-CJReztkQ.js": [
+      "assets/main-BcOfHEVn.js": [
         "assets/aero-shards-backdrop-G-hZakLk.js",
-        "assets/app-store-DIsp-eK1.js",
-        "assets/cli-document-dialog-Cbc_9Q91.js",
+        "assets/app-store-DnoyhK34.js",
+        "assets/cli-document-dialog-DCcOlPCc.js",
         "assets/client-Dwi0iLbf.js",
         "assets/drape-background-BI7Rs_c7.js",
         "assets/host-theme-BTvEJSkc.js",
         "assets/jsx-runtime-CldxteV5.js",
         "assets/ksf-favicon-J5dv2kU6.svg",
         "assets/lib-BAVov5dh.js",
-        "assets/main-BWEB-Wo1.css",
+        "assets/main-CuYlmz1c.css",
         "assets/material-provider-C6J7KGbU.js",
         "assets/preload-helper-BLdHbfdN.js",
+        "assets/rich-preview-CFxtbEU9.js",
         "assets/rolldown-runtime-COiEfhsA.js",
         "assets/side-rays-awXJc-1j.js",
         "assets/summit-dawn-CjlLNYcC.jpg"
       ],
+      "assets/main-CuYlmz1c.css": [],
       "assets/material-provider-C6J7KGbU.js": [
         "assets/jsx-runtime-CldxteV5.js",
         "assets/rolldown-runtime-COiEfhsA.js"
@@ -957,7 +958,7 @@
         "assets/treemap-SAJKECNS-yO7fe4dH.js",
         "assets/wardley-7MLQ67FV-CCVlnR9Q.js"
       ],
-      "assets/mermaid.core-D29DjUIP.js": [
+      "assets/mermaid.core-BkGi5sBv.js": [
         "assets/abnfDiagram-WEYOIA3C-C0MkZo7o.js",
         "assets/architectureDiagram-ZHVYKT53-0pm-SWK5.js",
         "assets/blockDiagram-RJAE7QA3-B_OZBa27.js",
@@ -1122,7 +1123,7 @@
         "assets/chunk-ZAUX2LTX-Cjoew9jN.js",
         "assets/src-UsG7Ncy7.js"
       ],
-      "assets/rich-preview-BKDs1nXi.js": [
+      "assets/rich-preview-CFxtbEU9.js": [
         "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2",
         "assets/KaTeX_AMS-Regular-DMm9YOAa.woff",
         "assets/KaTeX_AMS-Regular-DRggAlZN.ttf",
@@ -1187,7 +1188,7 @@
         "assets/jsx-runtime-CldxteV5.js",
         "assets/katex-B-LInNAB.js",
         "assets/lib-BAVov5dh.js",
-        "assets/mermaid.core-D29DjUIP.js",
+        "assets/mermaid.core-BkGi5sBv.js",
         "assets/preload-helper-BLdHbfdN.js",
         "assets/purify.es-jCOl0DZA.js",
         "assets/rich-preview-iSGeIYZ8.css",
@@ -1335,8 +1336,8 @@
         "assets/mermaid-parser.core-BFL4D_5F.js",
         "assets/src-UsG7Ncy7.js"
       ],
-      "assets/window-toolbar-YfinrLVk.js": [
-        "assets/app-store-DIsp-eK1.js",
+      "assets/window-toolbar-D-lHJDj1.js": [
+        "assets/app-store-DnoyhK34.js",
         "assets/client-Dwi0iLbf.js",
         "assets/jsx-runtime-CldxteV5.js",
         "assets/rolldown-runtime-COiEfhsA.js"
@@ -1355,7 +1356,7 @@
         "assets/src-UsG7Ncy7.js"
       ]
     },
-    "baseHtmlDigest": "1c2f39d6b40895758c61eabfad284293ae989941f46f87f4845d90d989ce977f",
+    "baseHtmlDigest": "9abae997ee07f512073c13c808f3cec42d65fc7f4a5ea58729816f25a6fa8505",
     "features": [
       "document-boot"
     ]

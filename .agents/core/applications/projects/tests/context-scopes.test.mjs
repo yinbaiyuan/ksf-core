@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {contextOwners,contextScopes,contextScopeForPath} from '../context-scopes.js';
+import {contextOwners,contextScopes,contextPanels,contextScopeForPath,isManagedSource} from '../context-scopes.js';
 
 function fixture(){
   const doc=(kind,id,path,metadata={})=>({path,metadata:{kind,id,name:id,...metadata}});
@@ -36,4 +36,24 @@ test('operations resolve to the deepest displayed scope, keeping identical filen
   assert.equal(contextScopeForPath(scopes,'项目/示例/M1').objectPath,'项目/示例/M1/milestone.md');
   assert.equal(contextScopeForPath(scopes,'项目/示例2/说明.md'),undefined);
   assert.equal(contextScopeForPath(scopes,'项目/其他/说明.md'),undefined);
+});
+
+test('visible context panels expose each registered level and its own inspiration without mutating records',()=>{
+  const {p,m,t,record}=fixture(),before=structuredClone(record),panels=contextPanels(record,t);
+  assert.deepEqual(panels.map(x=>[x.owner,x.kind,x.current]),[[t,'任务',true],[m,'里程碑',false],[p,'项目',false]]);
+  assert.deepEqual(panels.map(x=>x.notePath),['项目/示例/M1/T1/灵感闪现.md','项目/示例/M1/灵感闪现.md','项目/示例/灵感闪现.md']);
+  assert.deepEqual(contextPanels(record,m).map(x=>x.objectPath),[m.path,p.path]);
+  assert.deepEqual(contextPanels(record,p).map(x=>x.objectPath),[p.path]);
+  assert.deepEqual(record,before);
+});
+
+test('context panels never expose a note from an unregistered ancestor',()=>{
+  const {t,record}=fixture();t.metadata.milestone.id='wrong';
+  assert.deepEqual(contextPanels(record,t).map(x=>x.notePath),['项目/示例/M1/T1/灵感闪现.md']);
+});
+
+test('registered source identity keeps managed records out of the ordinary file editor',()=>{
+  const {p,m,t,record}=fixture();
+  for(const doc of [p,m,t])assert.equal(isManagedSource(record,doc.path),true);
+  for(const path of ['项目/示例/资料/task.md','项目/示例/M1/T1/说明.md','项目/其他/project.md'])assert.equal(isManagedSource(record,path),false);
 });

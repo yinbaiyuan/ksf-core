@@ -250,49 +250,49 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 @keyframes settings-reveal { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .sheet.system-settings { animation: none; } }
 .system-settings > .sheet-body { padding: 0; display: grid; grid-template-columns: 184px minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; }
-.settings-navigation { display: flex; flex-direction: column; min-height: 0; background: #f5f7fa; border-right: 1px solid #e5eaf1; padding: 22px 12px 14px; }
-.settings-brand { display: flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; padding: 0 8px 24px; }
-.settings-tabs { display: grid; gap: 6px; min-height: 0; overflow: auto; align-content: start; }
-.settings-tabs button { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 9px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #43546b; text-align: left; font-size: 13px; cursor: pointer; }
-.settings-tabs button:hover { background: #e9eef5; }
-.settings-tabs button[aria-selected="true"] { background: #fff; border-color: #e5eaf1; color: #075ba8; box-shadow: 0 2px 5px #19334e08; }
-.settings-local-note { margin: auto 8px 0; padding-top: 24px; font-size: 10px; line-height: 1.6; color: #718096; flex-shrink: 0; }
-.settings-page { min-width: 0; min-height: 0; padding: 26px 30px 18px; overflow: auto; scrollbar-width: thin; }
-.settings-page-title { margin: 0 0 24px; font-size: 18px; font-weight: 600; color: #24364e; }
-.settings-page button { cursor: pointer; }
-.settings-page button:disabled { opacity: .35; cursor: default; }
-.settings-section { border-bottom: 1px solid #e8edf3; padding-bottom: 22px; margin-bottom: 22px; }
-.settings-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
-.settings-section h4 { margin: 0 0 7px; font-size: 14px; font-weight: 600; }
-.settings-section-heading p, .settings-description, .settings-notice { margin: 0; color: #64748b; font-size: 12px; line-height: 1.7; }
-.settings-description { margin-bottom: 16px; }
-.settings-notice { margin: 12px 0; }
-.settings-desktop-actions { display: flex; gap: 10px; }
-.settings-desktop-actions button, .settings-form-actions button, .group-switch-actions button, .group-delete-confirm button { min-height: 34px; padding: 7px 13px; border: 1px solid #d7e0eb; background: #fff; color: #344c68; border-radius: 8px; font: inherit; font-size: 12px; }
-.settings-page button:hover:not(:disabled), .group-switch-actions button:hover { border-color: #9fb9d8; }
-.settings-page .settings-primary, .group-switch-actions .settings-primary { background: #0969cc; border-color: #0969cc; color: #fff; }
-.settings-add-group { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 6px 8px; border: 1px solid #d9e3ef; border-radius: 7px; background: #fff; color: #1766af; font-size: 12px; }
-.settings-group-list { display: grid; gap: 8px; }
-.settings-group-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; border: 1px solid #e4eaf2; border-radius: 10px; }
-.group-select { display: flex; flex: 1; min-width: 100px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 7px 5px; background: transparent; color: #43546b; font-size: 13px; text-align: left; }
-.group-select span { min-width: 0; overflow-wrap: anywhere; flex: 1; }
-.group-select svg { flex-shrink: 0; }
-.group-select[aria-pressed="true"] { color: #0969cc; }
-.group-row-actions { display: flex; gap: 2px; }
-.group-row-actions button { display: grid; place-items: center; width: 28px; height: 30px; background: transparent; color: #64748b; border: 1px solid transparent; border-radius: 6px; }
-.group-editor { padding: 16px; margin-bottom: 16px; background: #f5f8fc; border: 1px solid #dfe8f2; border-radius: 11px; }
-.group-editor > label, .group-editor legend { display: block; font-size: 12px; color: #43546b; margin-bottom: 8px; }
-.group-editor > input { width: 100%; height: 36px; border: 1px solid #ccd9e8; border-radius: 7px; background: #fff; color: #24364e; padding: 0 10px; font: inherit; font-size: 13px; }
-.group-editor fieldset { margin: 16px 0; padding: 0; border: 0; min-width: 0; }
-.group-icon-picker { display: flex; flex-wrap: wrap; gap: 7px; }
-.group-icon-picker button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #d9e3ef; border-radius: 8px; background: #fff; color: #60738b; }
-.group-icon-picker button[aria-pressed="true"] { color: #0969cc; background: #e8f2ff; border-color: #87b4e7; }
-.group-editor [role="alert"] { color: #a33838; font-size: 12px; }
-.settings-form-actions, .group-delete-confirm > div { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
-.group-delete-confirm { width: 100%; padding: 12px; background: #fff5f3; border-radius: 7px; }
-.group-delete-confirm p { margin: 0 0 12px; font-size: 12px; line-height: 1.7; }
-.group-delete-confirm .settings-danger { background: #ae4035; border-color: #ae4035; color: #fff; }
-.settings-save-status { min-height: 20px; color: #64748b; font-size: 11px; line-height: 1.7; }
+:where(.sheet.system-settings) .settings-navigation { display: flex; flex-direction: column; min-height: 0; background: #f5f7fa; border-right: 1px solid #e5eaf1; padding: 22px 12px 14px; }
+:where(.sheet.system-settings) .settings-brand { display: flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; padding: 0 8px 24px; }
+:where(.sheet.system-settings) .settings-tabs { display: grid; gap: 6px; min-height: 0; overflow: auto; align-content: start; }
+:where(.sheet.system-settings) .settings-tabs button { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 9px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #43546b; text-align: left; font-size: 13px; cursor: pointer; }
+:where(.sheet.system-settings) .settings-tabs button:hover { background: #e9eef5; }
+:where(.sheet.system-settings) .settings-tabs button[aria-selected="true"] { background: #fff; border-color: #e5eaf1; color: #075ba8; box-shadow: 0 2px 5px #19334e08; }
+:where(.sheet.system-settings) .settings-local-note { margin: auto 8px 0; padding-top: 24px; font-size: 10px; line-height: 1.6; color: #718096; flex-shrink: 0; }
+:where(.sheet.system-settings) .settings-page { min-width: 0; min-height: 0; padding: 26px 30px 18px; overflow: auto; scrollbar-width: thin; }
+:where(.sheet.system-settings) .settings-page-title { margin: 0 0 24px; font-size: 18px; font-weight: 600; color: #24364e; }
+:where(.sheet.system-settings) .settings-page button { cursor: pointer; }
+:where(.sheet.system-settings) .settings-page button:disabled { opacity: .35; cursor: default; }
+:where(.sheet.system-settings) .settings-section { border-bottom: 1px solid #e8edf3; padding-bottom: 22px; margin-bottom: 22px; }
+:where(.sheet.system-settings) .settings-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+:where(.sheet.system-settings) .settings-section h4 { margin: 0 0 7px; font-size: 14px; font-weight: 600; }
+:where(.sheet.system-settings) .settings-section-heading p, :where(.sheet.system-settings) .settings-description, :where(.sheet.system-settings) .settings-notice { margin: 0; color: #64748b; font-size: 12px; line-height: 1.7; }
+:where(.sheet.system-settings) .settings-description { margin-bottom: 16px; }
+:where(.sheet.system-settings) .settings-notice { margin: 12px 0; }
+:where(.sheet.system-settings) .settings-desktop-actions { display: flex; gap: 10px; }
+:where(.sheet.system-settings) .settings-desktop-actions button, :where(.sheet.system-settings) .settings-form-actions button, :where(.sheet.system-settings) .group-switch-actions button, :where(.sheet.system-settings) .group-delete-confirm button { min-height: 34px; padding: 7px 13px; border: 1px solid #d7e0eb; background: #fff; color: #344c68; border-radius: 8px; font: inherit; font-size: 12px; }
+:where(.sheet.system-settings) .settings-page button:hover:not(:disabled), :where(.sheet.system-settings) .group-switch-actions button:hover { border-color: #9fb9d8; }
+:where(.sheet.system-settings) .settings-page .settings-primary, :where(.sheet.system-settings) .group-switch-actions .settings-primary { background: #0969cc; border-color: #0969cc; color: #fff; }
+:where(.sheet.system-settings) .settings-add-group { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 6px 8px; border: 1px solid #d9e3ef; border-radius: 7px; background: #fff; color: #1766af; font-size: 12px; }
+:where(.sheet.system-settings) .settings-group-list { display: grid; gap: 8px; }
+:where(.sheet.system-settings) .settings-group-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; border: 1px solid #e4eaf2; border-radius: 10px; }
+:where(.sheet.system-settings) .group-select { display: flex; flex: 1; min-width: 100px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 7px 5px; background: transparent; color: #43546b; font-size: 13px; text-align: left; }
+:where(.sheet.system-settings) .group-select span { min-width: 0; overflow-wrap: anywhere; flex: 1; }
+:where(.sheet.system-settings) .group-select svg { flex-shrink: 0; }
+:where(.sheet.system-settings) .group-select[aria-pressed="true"] { color: #0969cc; }
+:where(.sheet.system-settings) .group-row-actions { display: flex; gap: 2px; }
+:where(.sheet.system-settings) .group-row-actions button { display: grid; place-items: center; width: 28px; height: 30px; background: transparent; color: #64748b; border: 1px solid transparent; border-radius: 6px; }
+:where(.sheet.system-settings) .group-editor { padding: 16px; margin-bottom: 16px; background: #f5f8fc; border: 1px solid #dfe8f2; border-radius: 11px; }
+:where(.sheet.system-settings) .group-editor > label, :where(.sheet.system-settings) .group-editor legend { display: block; font-size: 12px; color: #43546b; margin-bottom: 8px; }
+:where(.sheet.system-settings) .group-editor > input { width: 100%; height: 36px; border: 1px solid #ccd9e8; border-radius: 7px; background: #fff; color: #24364e; padding: 0 10px; font: inherit; font-size: 13px; }
+:where(.sheet.system-settings) .group-editor fieldset { margin: 16px 0; padding: 0; border: 0; min-width: 0; }
+:where(.sheet.system-settings) .group-icon-picker { display: flex; flex-wrap: wrap; gap: 7px; }
+:where(.sheet.system-settings) .group-icon-picker button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #d9e3ef; border-radius: 8px; background: #fff; color: #60738b; }
+:where(.sheet.system-settings) .group-icon-picker button[aria-pressed="true"] { color: #0969cc; background: #e8f2ff; border-color: #87b4e7; }
+:where(.sheet.system-settings) .group-editor [role="alert"] { color: #a33838; font-size: 12px; }
+:where(.sheet.system-settings) .settings-form-actions, :where(.sheet.system-settings) .group-delete-confirm > div { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+:where(.sheet.system-settings) .group-delete-confirm { width: 100%; padding: 12px; background: #fff5f3; border-radius: 7px; }
+:where(.sheet.system-settings) .group-delete-confirm p { margin: 0 0 12px; font-size: 12px; line-height: 1.7; }
+:where(.sheet.system-settings) .group-delete-confirm .settings-danger { background: #ae4035; border-color: #ae4035; color: #fff; }
+:where(.sheet.system-settings) .settings-save-status { min-height: 20px; color: #64748b; font-size: 11px; line-height: 1.7; }
 .system-settings .about-content { padding: 46px 0 24px; text-align: center; }
 .material-settings-inline .material-settings-top { padding: 0 0 18px; background: transparent; }
 .material-settings-inline .material-settings-content { overflow: visible; padding: 0; }
@@ -309,13 +309,13 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
   .desktop-motto h1 { font-size: 22px; }
   .desktop-actions > span:not(.desktop-save) { display: none; }
   .system-settings > .sheet-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .settings-navigation { border-right: 0; border-bottom: 1px solid #e5eaf1; padding: 8px; }
-  .settings-brand, .settings-local-note { display: none; }
-  .settings-tabs { display: flex; gap: 4px; overflow: auto; scrollbar-width: thin; }
-  .settings-tabs button { flex-shrink: 0; min-height: 36px; padding: 7px 10px; }
-  .settings-page { padding: 20px 16px; }
-  .settings-section-heading { flex-wrap: wrap; }
-  .settings-page-title { margin-bottom: 20px; }
+:where(.sheet.system-settings) .settings-navigation { border-right: 0; border-bottom: 1px solid #e5eaf1; padding: 8px; }
+:where(.sheet.system-settings) .settings-brand, :where(.sheet.system-settings) .settings-local-note { display: none; }
+:where(.sheet.system-settings) .settings-tabs { display: flex; gap: 4px; overflow: auto; scrollbar-width: thin; }
+:where(.sheet.system-settings) .settings-tabs button { flex-shrink: 0; min-height: 36px; padding: 7px 10px; }
+:where(.sheet.system-settings) .settings-page { padding: 20px 16px; }
+:where(.sheet.system-settings) .settings-section-heading { flex-wrap: wrap; }
+:where(.sheet.system-settings) .settings-page-title { margin-bottom: 20px; }
   .system-settings .about-content { padding-top: 24px; }
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) { .desktop-sidebar { background: #eff4fa; } }

@@ -98,7 +98,7 @@ export function DocumentsApp({ search, navigate, openApp }: AppProps) {
   };
   const jump = (target: number, title: string) => { setLine(target); if (effectiveMode === 'read') previewRoot.current?.querySelector<HTMLElement>('#' + CSS.escape(headingId(title)))?.scrollIntoView({ block: 'start' }); };
   return <div className="builtin-app documents-app">
-    <WindowToolbar object={{title:path?.split('/').at(-1)||'KSF文档',detail:path}} navigation={<><button aria-label="切换文件树" title="切换文件树" onClick={() => setSidebar(v => !v)}><PanelLeft size={17} /></button><span className="app-breadcrumb" title={path}>{path || 'KSF文档'}</span></>} actions={[
+    <WindowToolbar object={{title:path?.split('/').at(-1)||'KSF文档',detail:path}} navigation={<><button aria-label="切换文件树" title="切换文件树" onClick={() => setSidebar(v => !v)}><PanelLeft size={20} /><span>文件</span></button><span className="app-breadcrumb" title={path}>{path || 'KSF文档'}</span></>} actions={[
       { id:'files', label:'文件操作', icon:Folder, priority:1, onAction:()=>files.manage({initialPath:parent(path)}) },
       { id:'pick-file', label:'打开文件…', icon:FileText, onAction:async()=>{const selected=await files.pickFile({initialPath:parent(path)});if(selected)open(selected.path);} },
       { id:'new-file', label:'新建文件', icon:Plus, priority:2, onAction:() => showForm('file') },

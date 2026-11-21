@@ -7,7 +7,8 @@ const newId=()=>'note_'+randomId().replace(/[^A-Za-z0-9]/g,'');
 const scopeLabel={project:'项目',milestone:'里程碑',task:'任务'};
 const fromBase64=value=>new TextDecoder().decode(Uint8Array.from(atob(value),c=>c.charCodeAt(0)));
 
-export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
+export function createInspiration({sdk,docLink,onDrawerChange,onSaved,headless=false}){
+  const listeners=new Set();let snapshot=null;function emit(){snapshot=null;for(const fn of listeners)fn();}
   const node=el('section','pg-inspiration');
   const menuEvents=new AbortController();
   function closeMenus(except=null){
@@ -63,7 +64,7 @@ export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
     }catch(e){if(g===generation)loadError=e.message;}
     finally{if(alive&&g===generation){loading=false;persist();draw();if(entry&&dirty(entry)&&!entry.conflict&&!entry.issue)schedule();}}
   }
-  async function close(){const g=generation;closeMenus();await flush();if(!alive||g!==generation)return;persist();visible=false;onDrawerChange?.(null);}
+  async function close(){const g=generation;closeMenus();await flush();if(!alive||g!==generation)return;persist();visible=false;onDrawerChange?.(null);emit();}
   function checkpoint(n,group=''){
     if(!group||n.undoGroup!==group||Date.now()-(n.undoAt??0)>1000){n.undo.push({text:n.text,model:n.model,raw:n.raw});if(n.undo.length>50)n.undo.shift();}
     n.undoGroup=group;n.undoAt=Date.now();n.redo=[];
@@ -83,7 +84,7 @@ export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
     checkpoint(n);n.model={...n.model,rows:result.rows};
     if(!n.model.rows.length)n.model.rows=[{id:outlineId(),depth:0,text:'',done:false}];
     if(result.expand)n.collapsed.delete(result.expand);
-    changed(n);renderRows();focusRow(result.focus??n.model.rows[0].id,result.caret);
+    changed(n);renderRows();focusRow(result.focus??n.model.rows[0].id,result.caret);return result;
   }
   function history(redo=false){
     const n=entry,from=redo?n?.redo:n?.undo,to=redo?n?.undo:n?.redo;
@@ -154,6 +155,7 @@ export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
     n.base=latest;n.pendingRequest=null;n.pendingText=null;n.conflict=null;n.issue='';persist();draw();if(mine)schedule();
   }
   function draw(){
+    if(headless){emit();return;}
     if(!alive)return;node.replaceChildren();status=errorBox=editor=summary=sourceButton=undoButton=redoButton=retryButton=null;
     const heading=el('header','pg-inspiration-heading'),ownerText=el('span','pg-inspiration-owner',ownerLabel());ownerText.title=ownerLabel();
     status=el('span','pg-outline-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -174,6 +176,7 @@ export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
     renderEditor();sync();requestAnimationFrame(()=>{if(visible&&node.isConnected)node.querySelector('textarea')?.focus({preventScroll:true});});
   }
   function sync(){
+    if(headless){emit();return;}
     if(!entry||!status)return;const n=entry;
     status.textContent=!writable(n)?'只读':n.conflict?'修改待核对':n.issue?'未保存 · 草稿已保留':job?'自动保存中…':n.pendingRequest?'保存回执待核对':n.text!==n.base.text?'待自动保存':'已保存';
     if(errorBox){errorBox.replaceChildren();const issue=n.issue||(storageBroken?loadError:n.formatIssue);if(issue){errorBox.append(el('span','pm-error',issue));if(n.issue&&!n.conflict){retryButton=button('重试保存',()=>{n.issue='';void save(n);});errorBox.append(retryButton);}}}
@@ -220,7 +223,7 @@ export function createInspiration({sdk,docLink,onDrawerChange,onSaved}){
   node.addEventListener('compositionstart',()=>{composing=true;clearTimeout(timer);});
   node.addEventListener('compositionend',()=>{composing=false;if(entry?.conflict)draw();else schedule();});
   node.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='s'){event.preventDefault();void flush();}});
-  return {node,select,open,flush,loaded:()=>!!entry?.base.exists,isSaving:()=>!!job,
+  return {node,select,open,close,flush,subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},getSnapshot(){return snapshot??=({entry,owner,visible,loading,error:loadError||entry?.issue,writable:writable(entry),saving:!!job,dirty:dirty(entry)});},editText(text){if(!entry||!writable(entry))return;checkpoint(entry);const raw=entry.raw;entry.text=text;hydrate(entry);entry.raw=raw;persist();schedule();emit();},editRow(rowId,text){if(!entry||!writable(entry))return;checkpoint(entry,'text:'+rowId);entry.model={...entry.model,rows:entry.model.rows.map(r=>r.id===rowId?{...r,text}:r)};changed(entry);emit();},action(action){const result=act(action);emit();return result;},toggleCollapsed(id){if(entry?.collapsed.has(id))entry.collapsed.delete(id);else entry?.collapsed.add(id);emit();},source(){toggleSource();emit();},history(redo){history(redo);emit();},compose(active){composing=active;if(active)clearTimeout(timer);else schedule();},resolve:resolveConflict,loaded:()=>!!entry?.base.exists,isSaving:()=>!!job,
     drafts:()=>[...entries.values()].filter(dirty).map(n=>n.ownerPath),
     discardDrafts(){if(job||[...entries.values()].some(n=>n.pendingRequest))throw Error('灵感保存回执待核对，请先核对原文。');clearTimeout(timer);entries=new Map();entry=null;persist();draw();},
     dispose(){clearTimeout(timer);menuEvents.abort();persist();alive=false;generation++;visible=false;onDrawerChange?.(null);node.remove();}

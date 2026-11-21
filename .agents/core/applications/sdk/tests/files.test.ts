@@ -1,7 +1,13 @@
 import {pickerLocation,withinPickerRoot} from '../src/file-navigation.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createBackendFileClient,createFileClient} from '../src/files.ts';
+import {createBackendFileClient,createFileClient,createFileTransport} from '../src/files.ts';
+test('public headless file transport preserves host mutation identity without exposing UI methods',async()=>{
+ const requests:any[]=[];const sdk:any={instanceId:'transport-only',resources:{prepare:async()=>{}},request:async(url:string,body:any)=>{requests.push({url,body});return {operationId:body.input.operationId};}};
+ const files=createFileTransport(sdk);const receipt=await files.move({ref:{scope:'workspace',path:'项目/a.txt'},destination:{scope:'workspace',path:'项目/b.txt'},version:'v1',operationId:'stable-operation'});
+ assert.equal(receipt.operationId,'stable-operation');assert.equal(requests[0].body.input.version,'v1');assert.equal('pickFile' in files,false);
+
+});
 test('backend file client uses the dedicated host service and preserves binary bytes',async()=>{
  const calls:any[]=[];const client=createBackendFileClient({services:{async call(service,method,params){calls.push({service,method,params});return params?.[0] as any;}}});const bytes=new Uint8Array([0,255]);await client.write({ref:{scope:'user',path:'images/a.bin'},bytes});assert.equal(calls[0].service,'files');assert.equal(calls[0].method,'write');assert.deepEqual(calls[0].params[0].bytes,bytes);assert.ok(calls[0].params[0].operationId);await client.stat({scope:'runtime',path:'cache'});assert.deepEqual(calls[1].params,[{scope:'runtime',path:'cache'}]);
 });

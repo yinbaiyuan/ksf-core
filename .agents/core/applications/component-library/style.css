@@ -90,16 +90,19 @@
 .library-nav-item>.ksf-text{display:none}
 @container ksf-components (max-width:660px){.component-library-content{padding:20px}.library-page-heading>.ksf-heading[data-ksf-heading-level]{font-size:26px}.library-inventory{padding-bottom:20px}}
 
-/* Window chrome A, using public IconButton and ToggleGroup. */
+/* Shared captioned window controls, using public Button, ToggleGroup and DropdownMenu. */
 .library-window-controls{display:flex;align-items:center;gap:12px;flex:1;min-width:0;height:100%;color:var(--ksf-toolbar-ink,var(--ksf-color-foreground))}
-.library-window-controls .library-directory-command{flex:none;width:36px;min-width:36px;height:34px;padding:7px 8px;border:0;border-radius:6px;background:transparent;color:inherit;box-shadow:none}
+.library-window-controls .library-directory-command{flex:none;width:auto;min-width:36px;height:34px;padding:7px 10px;gap:6px;font:500 13px/20px system-ui;border:0;border-radius:6px;background:transparent;color:inherit;box-shadow:none}
 .library-window-controls .library-directory-command[aria-pressed=true]{background:color-mix(in srgb,currentColor 13%,transparent)}
 .library-window-controls .library-directory-command:hover{background:color-mix(in srgb,currentColor 18%,transparent)}
 .library-window-controls .library-directory-command svg{width:20px;height:20px;stroke-width:1.75}
 .library-window-location{font:600 13px/20px system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.library-window-controls .ksf-segmented{margin-left:auto;flex:none;border-radius:7px;background:color-mix(in srgb,currentColor 7%,transparent);height:32px;padding:2px;gap:0}
-.library-window-controls .ksf-segmented>label{width:35px;height:28px;padding:0;border-radius:5px;color:inherit}
-.library-window-controls .ksf-segmented>label>span{display:flex;align-items:center;justify-content:center;height:28px;font-size:0;line-height:0}
-.library-window-controls .ksf-segmented svg{width:18px;height:18px;stroke-width:1.75}
+.library-theme-controls{margin-left:auto;flex:none}.library-window-controls .ksf-segmented{flex:none;border-radius:7px;background:color-mix(in srgb,currentColor 7%,transparent);height:32px;padding:2px;gap:0}
+.library-window-controls .ksf-segmented>label{width:auto;min-width:0;height:28px;padding:0 9px;border-radius:5px;color:inherit}
+.library-window-controls .ksf-segmented>label>span{display:flex;align-items:center;justify-content:center;gap:6px;height:28px;font:500 13px/20px system-ui}
+.library-window-controls .ksf-segmented svg{width:20px;height:20px;stroke-width:1.75}
 .library-window-controls .ksf-segmented-thumb{border-radius:5px;background:var(--ksf-toolbar-panel,var(--ksf-color-surface-raised));box-shadow:0 1px 3px #0003}
 @container app (max-width:480px){.library-window-controls{gap:8px}.library-window-location{display:none}}
+
+.library-theme-command .library-theme-chevron{width:14px;height:14px}
+@media(pointer:coarse){.library-window-controls .library-directory-command{min-height:44px}.library-window-controls .ksf-segmented{height:48px}.library-window-controls .ksf-segmented>label,.library-window-controls .ksf-segmented>label>span{height:44px}}

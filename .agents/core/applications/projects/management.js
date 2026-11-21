@@ -11,8 +11,9 @@ const defaults=()=>({purpose:'',scope:'',summary:'',reviewedAt:'',currentStageId
 const item=()=>({id:uid('work'),title:'',goalIds:[],stageId:'',description:'',state:'backlog',commitment:'candidate',priority:'normal',priorityReason:'',owner:'',dueDate:'',dependsOn:[],blocker:'',nextAction:'',acceptance:[],links:[],source:null});
 const criterion=()=>({id:uid('criterion'),text:'',result:'pending',evidence:[],reviewer:'',reviewedAt:''});
 
-export function createProjectManagement({sdk,onChange,onPrepare,docLink}){
+export function createProjectManagement({sdk,onChange=null,onPrepare,docLink,headless=false}){
   let selected=null,key='',record=null,plan=defaults(),dirty=false,busy=false,error='',notice='',conflict=false,dialog=null,projection=null,warnings=[],generation=0,checkToken=0,storage='',operation=null;
+  const listeners=new Set();let snapshot=null;function emit(){snapshot=null;for(const fn of listeners)fn();}
   let detail=null,alive=true;
   const node=el('div','pm-workspace');
   const readOnly=()=>selected?.scope==='archived'||record?.readOnly===true;
@@ -109,6 +110,6 @@ export function createProjectManagement({sdk,onChange,onPrepare,docLink}){
     }
     queueMicrotask(()=>{if(dialog===d)box.querySelector('input,textarea,select,button')?.focus({preventScroll:true});});
   }
-  function draw(){if(!alive)return;node.replaceChildren();if(!record){node.append(el('p',error?'pm-error':'kp-empty',error||'正在核对项目安排…'));if(error)node.append(button('重试读取',()=>{const p=selected;key='';void select(p);}));return;}toolbar();overview();if(dialog)renderDialog();}
-  return {select,render(projectDetail){detail=projectDetail;draw();return node;},hasDrafts:()=>busy||dirty,discardDrafts(){if(busy||operation)throw Error('保存回执待核对，请先核对原文。');plan=clone(record.plan);dirty=false;conflict=false;dialog=null;persist();draw();},async prefill(text){onPrepare(text);},dispose(){persist();alive=false;generation++;checkToken++;node.remove();}};
+  function draw(){if(!alive)return;if(headless){emit();return;}node.replaceChildren();if(!record){node.append(el('p',error?'pm-error':'kp-empty',error||'正在核对项目安排…'));if(error)node.append(button('重试读取',()=>{const p=selected;key='';void select(p);}));return;}toolbar();overview();if(dialog)renderDialog();}
+  return {async reload(){if(busy||dirty||operation)return false;key='';await select(selected);return !!record;},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},getSnapshot(){return snapshot??=({record,plan,dirty,busy,error,notice,conflict,dialog,projection,warnings,readOnly:readOnly()});},edit(change){if(readOnly())return;change(plan);changed();},save,compare,resolve(key,value){if(dialog?.kind==='compare'){dialog.choices[key]=value;draw();}},dismissDialog(){dialog=null;draw();},async applyMerge(){if(dialog?.kind!=='compare')return;const checked=mergeProjectPlans(record.plan,plan,dialog.latest.plan,dialog.choices);if(checked.conflicts.length)return;try{await call('check',{data:{plan:checked.plan}});record=dialog.latest;plan=checked.plan;conflict=false;error='';dialog=null;changed();}catch(e){error=e.message;draw();}},select,render(projectDetail){detail=projectDetail;draw();return node;},hasDrafts:()=>busy||dirty,discardDrafts(){if(busy||operation)throw Error('保存回执待核对，请先核对原文。');plan=clone(record.plan);dirty=false;conflict=false;dialog=null;persist();draw();},async prefill(text){onPrepare(text);},dispose(){persist();alive=false;generation++;checkToken++;node.remove();}};
 }

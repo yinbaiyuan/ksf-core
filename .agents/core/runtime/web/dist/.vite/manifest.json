@@ -1,6 +1,6 @@
 {
   "../../applications/sdk/src/apps/rich-preview.tsx": {
-    "file": "assets/rich-preview-BKDs1nXi.js",
+    "file": "assets/rich-preview-CFxtbEU9.js",
     "name": "rich-preview",
     "src": "../../applications/sdk/src/apps/rich-preview.tsx",
     "isDynamicEntry": true,
@@ -86,14 +86,14 @@
     "file": "assets/app-store-CVntRkbF.css",
     "src": "_app-store-CVntRkbF.css"
   },
-  "_app-store-DIsp-eK1.js": {
-    "file": "assets/app-store-DIsp-eK1.js",
+  "_app-store-DnoyhK34.js": {
+    "file": "assets/app-store-DnoyhK34.js",
     "name": "app-store",
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
       "_jsx-runtime-CldxteV5.js",
-      "_material-provider-C6J7KGbU.js",
-      "_client-Dwi0iLbf.js"
+      "_client-Dwi0iLbf.js",
+      "_material-provider-C6J7KGbU.js"
     ],
     "css": [
       "assets/app-store-CVntRkbF.css"
@@ -497,17 +497,17 @@
       "_chunk-NGNAAXSQ-Bw6tHVuc.js"
     ]
   },
-  "_cli-document-dialog-Cbc_9Q91.js": {
-    "file": "assets/cli-document-dialog-Cbc_9Q91.js",
+  "_cli-document-dialog-DCcOlPCc.js": {
+    "file": "assets/cli-document-dialog-DCcOlPCc.js",
     "name": "cli-document-dialog",
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
-      "_app-store-DIsp-eK1.js",
+      "_app-store-DnoyhK34.js",
       "_jsx-runtime-CldxteV5.js",
-      "_material-provider-C6J7KGbU.js",
       "_client-Dwi0iLbf.js",
-      "_lib-BAVov5dh.js",
+      "_material-provider-C6J7KGbU.js",
       "_host-theme-BTvEJSkc.js",
+      "_lib-BAVov5dh.js",
       "_preload-helper-BLdHbfdN.js"
     ],
     "dynamicImports": [
@@ -688,39 +688,40 @@
       "_chunk-Y2CYZVJY-DsF7k-Jl.js"
     ]
   },
-  "_window-toolbar-YfinrLVk.js": {
-    "file": "assets/window-toolbar-YfinrLVk.js",
+  "_window-toolbar-D-lHJDj1.js": {
+    "file": "assets/window-toolbar-D-lHJDj1.js",
     "name": "window-toolbar",
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
-      "_app-store-DIsp-eK1.js",
+      "_app-store-DnoyhK34.js",
       "_jsx-runtime-CldxteV5.js",
       "_client-Dwi0iLbf.js"
     ]
   },
   "index.html": {
-    "file": "assets/main-CJReztkQ.js",
+    "file": "assets/main-BcOfHEVn.js",
     "name": "main",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
-      "_app-store-DIsp-eK1.js",
+      "_app-store-DnoyhK34.js",
       "_jsx-runtime-CldxteV5.js",
-      "_cli-document-dialog-Cbc_9Q91.js",
-      "_material-provider-C6J7KGbU.js",
       "_client-Dwi0iLbf.js",
-      "_lib-BAVov5dh.js",
+      "_cli-document-dialog-DCcOlPCc.js",
+      "_material-provider-C6J7KGbU.js",
       "_host-theme-BTvEJSkc.js",
+      "_lib-BAVov5dh.js",
       "_preload-helper-BLdHbfdN.js"
     ],
     "dynamicImports": [
+      "../../applications/sdk/src/apps/rich-preview.tsx",
       "src/vendor/side-rays/side-rays.tsx",
       "src/vendor/drape-background/drape-background.tsx",
       "src/components/aero-shards-backdrop.tsx"
     ],
     "css": [
-      "assets/main-BWEB-Wo1.css"
+      "assets/main-CuYlmz1c.css"
     ],
     "assets": [
       "assets/summit-dawn-CjlLNYcC.jpg",
@@ -1872,7 +1873,7 @@
     ]
   },
   "node_modules/mermaid/dist/mermaid.core.mjs": {
-    "file": "assets/mermaid.core-D29DjUIP.js",
+    "file": "assets/mermaid.core-BkGi5sBv.js",
     "name": "mermaid.core",
     "src": "node_modules/mermaid/dist/mermaid.core.mjs",
     "isDynamicEntry": true,
@@ -1935,33 +1936,33 @@
     ]
   },
   "src/apps/ability-store.tsx": {
-    "file": "assets/ability-store-CT9QzjFy.js",
+    "file": "assets/ability-store-BLmb55sZ.js",
     "name": "ability-store",
     "src": "src/apps/ability-store.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
-      "_app-store-DIsp-eK1.js",
+      "_app-store-DnoyhK34.js",
       "_jsx-runtime-CldxteV5.js",
-      "_window-toolbar-YfinrLVk.js",
-      "_client-Dwi0iLbf.js"
+      "_client-Dwi0iLbf.js",
+      "_window-toolbar-D-lHJDj1.js"
     ],
     "css": [
       "assets/ability-store-bMvAXBYz.css"
     ]
   },
   "src/apps/app-store.tsx": {
-    "file": "assets/app-store-DM0foyr0.js",
+    "file": "assets/app-store-C3mjWPrP.js",
     "name": "app-store",
     "src": "src/apps/app-store.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-COiEfhsA.js",
-      "_app-store-DIsp-eK1.js",
+      "_app-store-DnoyhK34.js",
       "_jsx-runtime-CldxteV5.js",
-      "_cli-document-dialog-Cbc_9Q91.js",
-      "_window-toolbar-YfinrLVk.js",
-      "_client-Dwi0iLbf.js"
+      "_client-Dwi0iLbf.js",
+      "_cli-document-dialog-DCcOlPCc.js",
+      "_window-toolbar-D-lHJDj1.js"
     ]
   },
   "src/assets/ksf-favicon.svg": {

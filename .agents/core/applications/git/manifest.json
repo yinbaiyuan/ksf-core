@@ -31,8 +31,8 @@
     "network",
     "environment"
   ],
-  "minCoreVersion": "0.5.5",
+  "minCoreVersion": "0.6.0",
   "dataStores": [],
-  "sdkApiVersion": "1.1.0",
-  "builtWithSdkVersion": "1.1.0"
+  "sdkApiVersion": "1.2.0",
+  "builtWithSdkVersion": "1.2.0"
 }

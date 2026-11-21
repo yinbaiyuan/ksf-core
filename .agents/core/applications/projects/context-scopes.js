@@ -24,6 +24,19 @@ export function contextScopes(record,current){
   })).reverse();
 }
 
+// Visible access points share the exact same registered owners as file operations.
+export function contextPanels(record,current){
+  return contextOwners(record,current).map((doc,index)=>({
+    owner:doc,objectPath:doc.path,root:parent(doc.path),kind:labels[doc.metadata.kind]??'记录',
+    name:doc.metadata.name,label:labels[doc.metadata.kind]+' · '+doc.metadata.name,
+    notePath:parent(doc.path)+'/灵感闪现.md',current:index===0,
+  }));
+}
+
+export function isManagedSource(record,path){
+  return [record.project,...(record.documents??[])].some(d=>d?.path===path);
+}
+
 export function contextScopeForPath(scopes,path){
   if(typeof path!=='string')return undefined;
   return scopes.filter(scope=>path===scope.root||path.startsWith(scope.root+'/'))
