@@ -22,6 +22,8 @@ prepare 需要 Git、已有 HEAD，且 KSF 根必须是 Git 工作树根。使�
 
 新版计划 schema_version 为 5，记录 sourceCommit、baseline（schema_version、manifest_sha256）、core（精确出处）、target（官方仓库与 core-main）、version、changes、完整 commitMessage、prDescription、完整 prBody 和 digest；每项变化保存原始权限 before_mode、前后校验与冻结内容。计划位于 `.agents/runtime-data/contributions/<ID>/plan.json`，公开 diff 位于 review.diff。共同标题和两份正文必须明确提供。--body 与 --body-file 二选一，按[提交信息规则](../git-commit-message.md)填写 Git 正文；--pr-body 与 --pr-body-file 二选一，按[PR 说明规则](../pr-description.md)填写独立 PR 正文。文件都不包含标题，路径基于 KSF 根或使用绝对路径。标题和正文也会公开；CLI 输出公开 diff 与元数据，不输出二进制 base64。prepare 的 dry-run 不保存计划，但仍会联网读取小型凭据所指的原版及核对既有贡献。公开 Core 的基线读取无需账户，原文按准确提交从 raw 地址读取并核对 Git blob，避免逐文件消耗匿名 REST 配额；已有授权可复用；read 只读本地计划。
 
+冻结计划包含 base64 原文和公开差异，可能超过普通持久 JSON 的 64 MiB 上限。新计划（含 dry-run）在保存前按 UTF-8 字节数限制为 128 MiB；超出返回 `CONTRIBUTION_TOO_LARGE`，应缩小选定系统路径。升级兼容预检仅对固定贡献计划位置使用相同的 128 MiB 上限，仍完整解析 JSON 并核对目标支持的格式版本；其他持久记录保持 64 MiB。既有计划的内容、摘要和回执不迁移、不重写。
+
 首次发布前 HEAD 须与 sourceCommit 相同；新增或切换本地提交后重新 prepare 和审阅。仅继续编辑工作目录或暂存区不影响冻结内容。submit 本地预览不认证、不联网，返回 remoteVerified:false，不能证明远程权限、原版内容或合并条件已核实。
 
 ## 完整提交信息与 PR 说明

@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join,resolve,relative} from 'node:path';
 import {assert,problem} from './services/workbench-common.js';
 import {validateManifest,assertCompatible,validVersion,validateSDKCompatibility} from './applications/protocol.js';
+import {contributionPlanMaxBytes} from './distribution/contribution-plan.js';
 
 const currentContract=JSON.parse(readFileSync(new URL('../../data-compatibility.json',import.meta.url),'utf8'));
 async function ordinary(root,path){
@@ -11,8 +12,8 @@ async function ordinary(root,path){
   for(const segment of rel.split(/[\\/]/)){current=join(current,segment);const stat=await lstat(current);assert(!stat.isSymbolicLink(),'CORE_DATA_PATH_INVALID','兼容检查不跟随符号链接。');}
   return lstat(path);
 }
-async function json(root,path){
-  const stat=await ordinary(root,path);assert(stat.isFile()&&stat.size<=64*1024*1024,'CORE_DATA_INVALID','兼容检查需要有界普通 JSON 文件。');
+async function json(root,path,maxBytes=64*1024*1024){
+  const stat=await ordinary(root,path);assert(stat.isFile()&&stat.size<=maxBytes,'CORE_DATA_INVALID','兼容检查需要有界普通 JSON 文件。');
   try{return JSON.parse(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(await readFile(path)));}catch(e){throw problem('CORE_DATA_INVALID','持久数据损坏，请保留原件。',409,{path});}
 }
 function contract(value){
@@ -42,7 +43,7 @@ export async function inspectCoreDataCompatibility(root,targetCore,{applicationS
         if(entry.isDirectory()&&owner.recursive&&depth<(owner.maxDepth??16)){await walk(file,depth+1);continue;}
         if(!entry.isFile()||!pattern.test(name))continue;
         try{
-          let document;if(owner.versionField==='$bytes'){const stat=await ordinary(root,file);assert(stat.isFile()&&stat.size===owner.byteLength,'CORE_DATA_INVALID','固定格式身份文件长度无效。');document=await readFile(file);}else document=await json(root,file);filesChecked++;
+          let document;if(owner.versionField==='$bytes'){const stat=await ordinary(root,file);assert(stat.isFile()&&stat.size===owner.byteLength,'CORE_DATA_INVALID','固定格式身份文件长度无效。');document=await readFile(file);}else document=await json(root,file,owner.id==='contribution-plans'?contributionPlanMaxBytes:undefined);filesChecked++;
           const shape=owner.shape?.kind==='git-ledger'?Array.isArray(document)&&document.length<=500&&document.every(item=>typeof item?.requestId==='string'&&typeof item.fingerprint==='string'&&typeof item.operation?.id==='string'&&typeof item.operation.status==='string'):Object.entries(owner.shape??{}).every(([key,type])=>type==='counter'?Number.isSafeInteger(document?.[key])&&document[key]>=0:type==='digest'?typeof document?.[key]==='string'&&/^[a-f0-9]{64}$/.test(document[key]):type==='object'?document?.[key]!==null&&typeof document?.[key]==='object'&&!Array.isArray(document[key]):type==='string'&&typeof document?.[key]==='string');
           const actual=owner.versionField==='$bytes'&&document.length===owner.byteLength||owner.versionField==='$shape'&&shape?1:document?.[owner.versionField];
           if(!reader||reader.versionField!==owner.versionField||(owner.versionField==='$bytes'&&reader.byteLength!==owner.byteLength)||(owner.versionField==='$shape'&&JSON.stringify(reader.shape)!==JSON.stringify(owner.shape))||!reader.versions.includes(actual))throw problem('CORE_DATA_INCOMPATIBLE','目标 Core 无法读取现有数据格式。',409,{actual});
