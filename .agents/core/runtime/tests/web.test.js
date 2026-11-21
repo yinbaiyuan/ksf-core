@@ -33,10 +33,12 @@ function call(instance, path = '/', { method = 'GET', headers = {} } = {}) {
   });
 }
 
-async function running(t) {
+// Keep the original static-page contract covered independently of the executing
+// Core version. Snapshot-aware HTTP cases opt into the 0.6 contract explicitly.
+async function running(t, {coreVersion = '0.5.7'} = {}) {
   let instance;
   t.after(() => instance?.close());
-  instance = await startWebServer({ root:routingFixture(t).root,port: 0 });
+  instance = await startWebServer({ root:routingFixture(t).root,port: 0, applications:{coreVersion} });
   return instance;
 }
 
@@ -62,6 +64,30 @@ test('Web serves the packaged page and live health over loopback, including HEAD
   const head = await call(instance, '/', { method: 'HEAD' });
   assert.equal(head.status, 200);
   assert.equal(head.body, '');
+  assert.equal(head.headers['content-length'], page.headers['content-length']);
+});
+
+test('Core 0.6 packaged documents bind distinct clients to one release and preserve health and HEAD semantics', async t => {
+  const instance = await running(t, {coreVersion:'0.6.0'});
+  const page = await call(instance), index = await call(instance, '/index.html');
+  const clientTag = /<script type="application\/json" id="ksf-frontend-client">([\s\S]*?)<\/script>/;
+  assert.equal(page.status, 200); assert.equal(index.status, 200);
+  assert.match(page.headers['content-type'], /^text\/html; charset=utf-8$/);
+  assert.match(page.body, clientTag); assert.match(index.body, clientTag);
+  const first = JSON.parse(page.body.match(clientTag)[1]), second = JSON.parse(index.body.match(clientTag)[1]);
+  assert.match(first.clientId, /^[a-f0-9-]{36}$/); assert.match(second.clientId, /^[a-f0-9-]{36}$/);
+  assert.notEqual(first.clientId, second.clientId); assert.equal(first.releaseId, second.releaseId);
+  assert.equal(first.selectionEtag, second.selectionEtag);
+  assert.deepEqual(first.resources, second.resources); assert.deepEqual(first.styles, second.styles);
+  assert.equal(page.body.replace(clientTag, '<client-binding>'), index.body.replace(clientTag, '<client-binding>'));
+  const health = await call(instance, '/api/health?check=1'), payload = JSON.parse(health.body);
+  assert.equal(health.status, 200); assert.equal(health.headers['cache-control'], 'no-store');
+  assert.deepEqual(payload, {ok:true, service:'ksf-core', pid:process.pid, nonce:payload.nonce,
+    reason:'foreground', frontend:{state:'ready', frontendReleaseId:first.releaseId},
+    nodeVersion:process.version, startedAt:instance.startedAt});
+  assert.match(payload.nonce, /^[a-f0-9-]{36}$/);
+  const head = await call(instance, '/', {method:'HEAD'});
+  assert.equal(head.status, 200); assert.equal(head.body, '');
   assert.equal(head.headers['content-length'], page.headers['content-length']);
 });
 

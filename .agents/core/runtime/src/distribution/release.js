@@ -20,6 +20,7 @@ import { gitExecutable } from '../platform/index.js';
 import { releaseTargets } from '../platform/catalog.js';
 import {runtimeLayoutPath,isPlatformRuntimeLayout,runtimePackagesPath,runtimePathForPlatform,assertCanonicalRuntimePackages} from '../platform/runtime-bundle.js';
 import YAML from '../vendor/yaml/dist/index.js';
+import {writeReleaseFiles} from './release-files.js';
 
 export const userDirectories = ['项目', '知识', ...Object.values(types).map(type => type.user), '@收件箱', '档案', '档案/个人', '档案/企业', '档案/项目', userDataRoot];
 // Explicit instance seed allowlist: never discover or package personal content.
@@ -78,7 +79,7 @@ export function inspectCoreArchive(bytes, { expectedVersion, expectedPlatform, e
   }
   return { entries, manifest };
 }
-async function buildPlatformRelease({ root, output, platform, allowDirty = false, dryRun = false }) {
+async function buildPlatformRelease({ root, output, platform, allowDirty = false, dryRun = false }, {materializeInstance = true} = {}) {
   const config = configuration(root), build = parseJSON(readRegular(root, '.agents/core/build.json'), 'build.json');
   versionParts(build.version);
   if (!build.runtime?.packages?.[platform]) fail('PLATFORM_UNSUPPORTED', `No bundled runtime for ${platform}.`);
@@ -99,7 +100,7 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
   const staging = mkdtempSync(join(tmpdir(), 'ksf-release-'));
   try {
     // Only explicit system files are read. User directories are never scanned.
-    const sourceHashes = new Map(), sourceModes = new Map();
+    const sourceHashes = new Map(), sourceModes = new Map(), stagedEntries = [];
     for (const path of [...paths, 'AGENTS.md']) {
       const original = committed?.entries.get(path);
       const bytes = readRegular(root, path), mode = fileMode(checkedPath(root, path), original?.mode === '100755' ? 0o755 : original?.mode === '100644' ? 0o644 : undefined);
@@ -107,7 +108,7 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
       if (committed && path !== '.agents/core/manifest.yaml' && (!original || original.type !== 'blob' ||
           original.mode !== (mode === 0o755 ? '100755' : '100644') || gitBlobID(bytes) !== original.object)) source.dirty = true;
       sourceHashes.set(path, sha256(bytes));
-      if(!scoped||runtimePathForPlatform(path,platform,build))writeAtomic(checkedPath(staging, path), bytes, mode);
+      if(!scoped||runtimePathForPlatform(path,platform,build))stagedEntries.push({path,bytes,mode});
     }
     if (committed) {
       const expected = [...committed.entries.keys()].filter(path => baselinePath(path) && !excluded(path) && path !== '.agents/core/manifest.yaml').sort();
@@ -115,6 +116,8 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
       if (expected.join('\n') !== actual.join('\n')) source.dirty = true;
       if (source.dirty && !allowDirty) fail('RELEASE_SOURCE_DIRTY', 'System files must exactly match the recorded Core commit; ignored or uncommitted files cannot enter an official release.');
     }
+    await writeReleaseFiles(staging,stagedEntries);
+    stagedEntries.length=0;
     await buildManifest(staging, { sourceRoot: root, builtAt: source.builtAt,...(scoped?{target:platform}:{}) });
     const inventory = {}, coreEntries = [];
     for (const path of [...bundledPaths.filter(p => p !== '.agents/core/manifest.yaml'), '.agents/core/manifest.yaml', 'AGENTS.md'].sort()) {
@@ -147,7 +150,7 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
       products, output: destination, instance: targetRoot, template: targetRoot, index, sourceDigest: sha256(stableJSON([...sourceHashes])), managedFiles: Object.keys(inventory).length, dryRun };
     if (!dryRun) {
       mkdirSync(destination, { recursive: true });
-      for (const entry of fullEntries) writeAtomic(checkedPath(targetRoot, entry.path), entry.bytes, entry.mode);
+      if(materializeInstance)await writeReleaseFiles(targetRoot,fullEntries);
       writeAtomic(join(destination, coreName), coreArchive);
       writeAtomic(join(destination, releaseIndexName), stableJSON(index));
       writeAtomic(join(destination, legacyReleaseIndexName), stableJSON(compatibilityIndex(index)));
@@ -169,8 +172,11 @@ export async function buildRelease(options) {
   if (existsSync(destination)) fail('OUTPUT_EXISTS', 'Release output already exists; choose a new output directory.');
   const staging = mkdtempSync(join(tmpdir(), 'ksf-platform-releases-'));
   try {
-    const results = [];
-    for (const target of targets) results.push(await buildPlatformRelease({ ...options, platform: target, output: join(staging, target) }));
+    const results = [], nativePlatform = `${process.platform}-${process.arch}`;
+    const instancePlatform = targets.includes(nativePlatform) ? nativePlatform : targets[0];
+    // Every target still builds and verifies its archive. Only the retained
+    // local inspection instance needs its full directory materialized.
+    for (const target of targets) results.push(await buildPlatformRelease({ ...options, platform: target, output: join(staging, target) }, {materializeInstance:target===instancePlatform}));
     const first = results[0];
     if (results.some(result => result.version !== first.version || result.coreRevision !== first.coreRevision || result.sourceDigest !== first.sourceDigest || result.development !== first.development)) fail('RELEASE_INPUT_CHANGED', 'All platform packages must come from the same frozen system source.');
     const index = { ...first.index, platforms: Object.assign({}, ...results.map(result => result.index.platforms)) };
