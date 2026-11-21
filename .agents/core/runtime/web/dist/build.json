@@ -1,6 +1,6 @@
 {
   "protocol": "ksf-web-build-v1",
-  "sourceDigest": "65eb3ddd758f8c7a63ac8eea3ff4b885211bce96df7b495a543b23c4929c59a8",
+  "sourceDigest": "ed4656e003c37b6dc66ddc93d6854bbc3e5b7385e856cc8c5d3521ac2f0b3bce",
   "files": {
     "THIRD_PARTY_NOTICES.txt": "2b7f967cdc0aa8d91d7c99a0050c61e36931a5ca25c5f3d69129716718f1e602",
     "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
@@ -207,11 +207,11 @@
     "assets/wardleyDiagram-IVAIDKWA-B9EBXOcR.js": "f5deaceb620bf754ed9de80f373bd96da6e6a61a56af9cff4651c0a2dfb9fa30",
     "assets/window-toolbar-YfinrLVk.js": "cef15bb07067681fd366e296b3b4e9003f838c3810150f6120004f91791ad43e",
     "assets/xychartDiagram-4URNHDU4-BlnilVdk.js": "3f7ea2776957ef55260e58fc5a9d065e5f4239565374d81a8b4e89ef5849918d",
-    "index.html": "99847a7d3d4810af1b2e170bd595c39188e4d320568c06589e8e0101be321dff"
+    "index.html": "d98d61ebfd238eceebe2ef6fcc83e93a055c82c3b9004a2932b9df3bcff223a9"
   },
   "frontendRuntime": {
     "protocol": "ksf-frontend-runtime-v1",
-    "frontendReleaseId": "5324234764dced4d5ac9bc8c96b599c01a03259c396370d5790a79bdff575f09",
+    "frontendReleaseId": "9d816b30e9b322c15d35b03e4b4c3cc8bb1805c47e10a99821e105bae61bfaa3",
     "hostCompatibility": {
       "workbenchContract": "ksf-workbench-v1",
       "minimumCoreVersion": "0.6.0",

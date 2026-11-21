@@ -121,6 +121,30 @@ function sameDocumentationPayload(local, remote) {
     return isDeepStrictEqual(values[0], values[1]);
   } catch { return false; }
 }
+// A new source fingerprint may regenerate frontend identities without changing
+// executable resources or their complete compatibility contract. Keep every
+// other field (including unknown future fields) under ordinary merge protection.
+function sameFrontendBuildPayload(local, remote) {
+  try {
+    const values = [local, remote].map(bytes => JSON.parse(bytes.toString('utf8')));
+    for (const value of values) {
+      if (value?.protocol !== 'ksf-web-build-v1' || !isSHA(value.sourceDigest) || !isSHA(value.files?.['index.html']) ||
+          value.frontendRuntime?.protocol !== 'ksf-frontend-runtime-v1' || !isSHA(value.frontendRuntime.frontendReleaseId)) return false;
+      delete value.sourceDigest;
+      delete value.files['index.html'];
+      delete value.frontendRuntime.frontendReleaseId;
+    }
+    return isDeepStrictEqual(values[0], values[1]);
+  } catch { return false; }
+}
+function sameFrontendDocument(local, remote) {
+  const normalized = [local, remote].map(bytes => {
+    const html = bytes.toString('utf8');
+    const identities = [...html.matchAll(/<script type="application\/json" id="ksf-frontend-runtime">\{"frontendReleaseId":"[a-f0-9]{64}"\}<\/script>/g)];
+    return identities.length === 1 ? html.replace(identities[0][0], '<ksf-generated-frontend-identity>') : null;
+  });
+  return normalized[0] !== null && normalized[0] === normalized[1];
+}
 export async function planUpdate(root, current, incoming, entries) {
   const result = { files: new Map(), changes: [], conflicts: [] };
   const paths = [...new Set([...Object.keys(current.files), ...Object.keys(incoming.files)])].sort();
@@ -136,8 +160,10 @@ export async function planUpdate(root, current, incoming, entries) {
     else if (base && next && local && textBytes(local.bytes) && textBytes(remote.bytes)) {
       const original = await current.read(path);
       if (!textBytes(original)) { result.conflicts.push({ path, kind: 'binary' }); continue; }
-      const merged = path === '.agents/core/docs/catalog.json' && sameDocumentationPayload(local.bytes, remote.bytes)
-        ? { conflict: false, bytes: remote.bytes } : mergeText(original, local.bytes, remote.bytes);
+      const derivedIdentityOnly = path === '.agents/core/docs/catalog.json' && sameDocumentationPayload(local.bytes, remote.bytes) ||
+        path === '.agents/core/runtime/web/dist/build.json' && sameFrontendBuildPayload(local.bytes, remote.bytes) ||
+        path === '.agents/core/runtime/web/dist/index.html' && sameFrontendDocument(local.bytes, remote.bytes);
+      const merged = derivedIdentityOnly ? { conflict: false, bytes: remote.bytes } : mergeText(original, local.bytes, remote.bytes);
       if (merged.conflict) result.conflicts.push({ path, kind: 'text', merged: merged.bytes.toString('utf8') });
       else chosen = { bytes: merged.bytes, mode: local.mode === base.mode ? next.mode : local.mode };
     } else result.conflicts.push({ path, kind: !base ? 'add-add' : !next ? 'delete-modify' : !local ? 'modify-delete' : 'binary' });
