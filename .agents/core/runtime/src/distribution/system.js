@@ -328,7 +328,12 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
     for (const [path, file] of plan.files) {
       const target = checkedPath(staging, path);
       if (file === null) rmSync(target, { force: true });
-      else writeAtomic(target, file.bytes, file.mode);
+      else {
+        // Core was copied above. Verify the actual private copy before skipping
+        // a redundant durable write; never trust source timestamps or a cache.
+        const copied = localFile(staging, path, file.mode);
+        if (!copied || copied.mode !== file.mode || !copied.bytes.equals(file.bytes)) writeAtomic(target, file.bytes, file.mode);
+      }
     }
     writeAtomic(join(staging, '.agents/core/release.json'), stableJSON(releaseReceipt(incoming)));
     const environment=verifyCandidate(staging, plan.changes.map(c => c.path));

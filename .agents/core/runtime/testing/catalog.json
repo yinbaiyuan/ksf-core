@@ -7271,6 +7271,45 @@
       ]
     },
     {
+      "id": "core:release-files",
+      "path": ".agents/core/runtime/tests/release-files.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/tests/release-files.test.js",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/src/shared"
+      ],
+      "requirements": [],
+      "timeoutMs": 30000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1,
+        "linux": 1
+      },
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Actual durable staging, file modes and failure cleanup must complete on each native filesystem."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/tests/release-files.test.js",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/platform",
+        ".agents/core/runtime/src/shared"
+      ]
+    },
+    {
       "id": "core:task-checkpoints",
       "path": ".agents/core/runtime/tests/task-checkpoints.test.js",
       "owner": "core",
