@@ -1,10 +1,10 @@
 import {randomId} from '@ksf/sdk/random-id';
 import {RunController,createDesktopRunAdapter,SaveController,createSessionSaveAdapter,projectFileResource} from '@ksf/sdk/controllers';
-import {createFileClient} from '@ksf/sdk/files';
+import {createFileTransport} from '@ksf/sdk/files';
 import {createConversationWorkspace} from './conversation-model.js';
-export function createConversationPanel(sdk,renderMarkdown,publish){
+export function createConversationPanel(sdk,renderMarkdown,publish,{pickFile}={}){
  const node=document.createElement('section');node.className='kp-conversation';node.setAttribute('aria-label','Codex Desktop 项目对话');
- const model=createConversationWorkspace(sdk,{RunController,createDesktopRunAdapter,SaveController,createSessionSaveAdapter,files:createFileClient(sdk),projectFileResource,randomId,
+ const model=createConversationWorkspace(sdk,{RunController,createDesktopRunAdapter,SaveController,createSessionSaveAdapter,files:{...createFileTransport(sdk),pickFile},projectFileResource,randomId,
   async readLegacy(project){
    const session=await sdk.getSession(),key=`${sdk.appId}:codex-draft:${session.instanceId??location.origin}:${sdk.surfaceId??sdk.instanceId}:codex-draft:${project.scope}:${project.name}`;
    // Keep the old original until the managed checkpoint is confirmed. Reads never delete it.

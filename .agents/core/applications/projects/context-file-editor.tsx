@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { createRoot } from 'react-dom/client';
+import {Button} from '@ksf/sdk/button';
+import {SplitView} from '@ksf/sdk/split-view';
+import {TreeView} from '@ksf/sdk/tree-view';
 import { ChangeSet, EditorSelection } from '@codemirror/state';
 import { redo, undo } from '@codemirror/commands';
 import { getOriginalDoc, originalDocChangeEffect, unifiedMergeView } from '@codemirror/merge';
@@ -108,16 +110,16 @@ function EditToolbar({ view, writable, markdown, onUpload }: {
   }
   return <>
     {groups.map(group => <div className="pg-document-edit-group" key={group[0][0]}>
-      {group.map(([label, Icon, command]) => <button key={label} type="button" aria-label={label} title={label}
+      {group.map(([label, Icon, command]) => <Button key={label} type="button" aria-label={label} title={label}
         disabled={disabled} onMouseDown={event => event.preventDefault()} onClick={() => run(command)}>
         <Icon size={16} aria-hidden="true" />
-      </button>)}
+      </Button>)}
     </div>)}
     {markdown && onUpload && <div className="pg-document-edit-group">
-      <button type="button" aria-label="插入图片" title="插入图片" disabled={disabled}
+      <Button type="button" aria-label="插入图片" title="插入图片" disabled={disabled}
         onMouseDown={event => event.preventDefault()} onClick={() => image.current?.click()}>
         <ImagePlus size={16} aria-hidden="true" />
-      </button>
+      </Button>
       <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden ref={image} onChange={event => {
         const file = event.currentTarget.files?.[0];
         event.currentTarget.value = '';
@@ -127,7 +129,7 @@ function EditToolbar({ view, writable, markdown, onUpload }: {
   </>;
 }
 
-function DocumentSurface({ formatHost, ...props }: Props & { formatHost: HTMLElement }) {
+export function DocumentSurface({ formatHost, ...props }: Props & { formatHost?: HTMLElement }) {
   const { mode, text, path, open, allowLocal, isMarkdown, canEdit, writable, onUpload, reviewOriginal,
     outlineOpen, outlineId, onOutlineChange, ...editor } = props;
   const [view, setView] = useState<EditorView | null>(null);
@@ -159,33 +161,32 @@ function DocumentSurface({ formatHost, ...props }: Props & { formatHost: HTMLEle
     if(reading||split)preview.current?.querySelectorAll('h1,h2,h3,h4,h5,h6')[index]?.scrollIntoView({block:'start'});
   }
   return <div className="pg-file-surface">
-    {!reading && createPortal(<EditToolbar view={view} writable={writable&&canEdit} markdown={!!isMarkdown} onUpload={onUpload} />, formatHost)}
-    <div className={split ? 'pg-file-panes pg-markdown-split' : 'pg-file-panes'}>
-      <section className="pg-file-source-pane" aria-label={split ? '源码' : '文档编辑'} hidden={reading}>
+    {!reading && (formatHost?createPortal(<EditToolbar view={view} writable={writable&&canEdit} markdown={!!isMarkdown} onUpload={onUpload} />, formatHost):<div className="project-file-format"><EditToolbar view={view} writable={writable&&canEdit} markdown={!!isMarkdown} onUpload={onUpload}/></div>)}
+    <div className="pg-file-panes">
+      <SplitView collapseButtons="hidden" disabled={!split} defaultSizes={[50,50]} collapsed={reading?['source']:split?[]:['preview']} panels={[
+       {id:'source',label:'文档编辑',minSize:100,collapsible:true,content:<section className="pg-file-source-pane" aria-label={split ? '源码' : '文档编辑'}>
         <MarkdownEditor {...editor} path={path} text={text} open={open} allowLocal={allowLocal} writable={writable}
           onUpload={onUpload} isMarkdown={isMarkdown} onView={setView}
           extensions={reviewExtension} mode={!reviewing && mode === 'live' ? 'live' : 'source'} />
-      </section>
-      {(reading || split) && <section ref={preview} className="pg-file-preview-pane" tabIndex={0} aria-label={split ? '实时预览' : '文档阅读'}>
+       </section>},
+       {id:'preview',label:'文档预览',minSize:100,collapsible:true,content:(reading||split)&&<section ref={preview} className="pg-file-preview-pane" tabIndex={0} aria-label={split ? '实时预览' : '文档阅读'}>
         {isMarkdown ? <RichPreview text={text} path={path} open={open} allowLocal={allowLocal} styleNonce={props.styleNonce} />
           : <pre className="pg-project-context-text">{text}</pre>}
-      </section>}
+       </section>}
+      ]}/>
       {isMarkdown&&outlineOpen&&<aside id={outlineId} className="pg-file-outline" aria-label="文档大纲">
-        <header><h3>大纲</h3><button type="button" aria-label="收起大纲" title="收起大纲"
-          onClick={()=>onOutlineChange(false)}><X size={15} aria-hidden="true" /></button></header>
-        <nav aria-label="文档标题">
-          {headings.length?headings.map((heading,index)=><button type="button" key={heading.line}
-            title={heading.text} aria-current={activeHeading===heading.line?'location':undefined}
-            style={{paddingInlineStart:10+(heading.level-1)*12}} onClick={()=>jumpToHeading(index)}>{heading.text}</button>)
-            :<p>当前文档没有标题</p>}
-        </nav>
+        <header><h3>大纲</h3><Button type="button" aria-label="收起大纲" title="收起大纲"
+          onClick={()=>onOutlineChange(false)}><X size={15} aria-hidden="true" /></Button></header>
+        <TreeView label="文档标题" nodes={headings.map(heading=>({id:String(heading.line),label:heading.text}))} selectedId={activeHeading===null?undefined:String(activeHeading)} onSelect={line=>jumpToHeading(headings.findIndex(h=>String(h.line)===line))}/>
       </aside>}
     </div>
   </div>;
 }
 
+// The application owns one React root. Older imperative consumers must provide a portal renderer.
 export function mountFileEditor(host: HTMLElement, props: Props, formatHost: HTMLElement) {
-  const root = createRoot(host);
-  root.render(<DocumentSurface {...props} formatHost={formatHost} />);
-  return { update(next: Props) { root.render(<DocumentSurface {...next} formatHost={formatHost} />); }, dispose() { root.unmount(); } };
+  const renderer=(host as HTMLElement & {projectRender?: (view: import('react').ReactNode)=>void}).projectRender;
+  if(!renderer)throw Error('文档编辑器须由项目窗口的React视图承载。');
+  renderer(<DocumentSurface {...props} formatHost={formatHost}/>);
+  return {update(next:Props){renderer(<DocumentSurface {...next} formatHost={formatHost}/>);},dispose(){renderer(null);}};
 }

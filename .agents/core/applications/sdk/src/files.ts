@@ -2,7 +2,7 @@ export {pickerLocation,withinPickerRoot} from './file-navigation.ts';
 /** Public legacy client. Transport is shared; bundled pickers retain their private renderer boundary. */
 import {createFileTransport,type FilePickerOptions} from './file-client.ts';
 export type * from './file-client.ts';
-export {createBackendFileClient,createApplicationFileClient} from './file-client.ts';
+export {createBackendFileClient,createApplicationFileClient,createFileTransport} from './file-client.ts';
 export function createFileClient(sdk:Parameters<typeof createFileTransport>[0],fetcher:typeof fetch=fetch){
  const files=createFileTransport(sdk,fetcher);
  return {...files,

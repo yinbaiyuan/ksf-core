@@ -1,6 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resultSections,taskProgressAction,taskProgressPrompt,milestoneTasks,workTasks,milestoneAcceptancePrompt,milestoneCompletionChanges} from '../result-detail-model.js';
+import {taskFollowUpPrompt} from '../result-detail-model.js';
+
+test('completed follow-up is an inert draft carrying original identity, conditions and current result',()=>{
+  const done={...task,body:'## 当前结果\n代码已可运行，无额外文件。',metadata:{...task.metadata,status:'completed',criteria:[{id:'c',text:'用户可完成操作'}],result_refs:[{path:'.agents/core/applications/projects/frontend.js'}]}};
+  const snapshot=structuredClone({done,record});
+  const prompt=taskFollowUpPrompt(done,record,'甲','新增一种使用方式');
+  for(const content of [done.metadata.id,done.path,'用户可完成操作','代码已可运行','新增一种使用方式','新增独立结果另行安排','不会发送、重开或新建任务'])assert(prompt.includes(content));
+  assert.deepEqual({done,record},snapshot);
+  assert.equal(taskFollowUpPrompt({...done,metadata:{...done.metadata,status:'cancelled'}},record,'甲'),null);
+  assert.equal(taskFollowUpPrompt(done,{...record,readOnly:true},'甲'),null);
+  assert.equal(taskFollowUpPrompt(done,{...record,valid:false},'甲'),null);
+  assert.equal(taskFollowUpPrompt(done,{...record,project:{path:'foreign',metadata:{id:'foreign',milestones:[]}},documents:[]},'甲'),null);
+});
+
+test('continuation names the owning rules and keeps delivery and immutable proof boundaries',()=>{
+  const prompt=taskProgressPrompt({...task,metadata:{...task.metadata,status:'active'}},record,'甲');
+  for(const content of ['正式的项目推进搭档','同一结果的修改、测试、构建与安装','多个独立结果','成果可以是代码或运行入口','工作草稿持续维护','已固定原件不得覆盖'])assert(prompt.includes(content));
+});
 
 const task={path:'项目/甲/M1/B1/task.md',metadata:{id:'t',kind:'task',name:'导入结果',status:'planned',next_action:'核对样本',project:{id:'p',path:'项目/甲/project.md'},milestone:{id:'m',path:'项目/甲/M1/milestone.md'}}};
 const record={path:'项目/甲/project.md',projection:{readiness:[{id:'t',path:task.path,ready:false,reasons:['在制容量已满']}]}};

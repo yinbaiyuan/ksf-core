@@ -13,4 +13,4 @@ for(const name of ['marked','dompurify','yaml']){
   notices.push(`## ${name}@${pkg.version}\n${license}`);
 }
 await writeFile(join(root,'THIRD_PARTY_NOTICES.txt'),notices.join('\n\n'));
-await buildApplication(root,{entries:{window:'frontend.js'},storeDirectory:process.env.KSF_PROJECTS_BUILD_STORE??fileURLToPath(new URL('../builtin',import.meta.url))});
+await buildApplication(root,{entries:{window:'frontend.js'},local:process.env.KSF_PROJECTS_LOCAL_BUILD==='1',storeDirectory:process.env.KSF_PROJECTS_BUILD_STORE??fileURLToPath(new URL('../builtin',import.meta.url))});

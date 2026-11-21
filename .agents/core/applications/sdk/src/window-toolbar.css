@@ -27,14 +27,16 @@
 
 .window-command-feedback{position:absolute;inset:auto 12px 12px;display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border:1px solid var(--ksf-border-control,#9babbc);border-radius:6px;background:var(--ksf-surface-content,#fff);color:var(--ksf-text-primary,#182c42);box-shadow:0 6px 20px #11294424;pointer-events:auto;z-index:160;font:inherit;overflow-wrap:anywhere}.window-command-feedback span{flex:1;min-width:0}.window-command-feedback button{display:grid;place-items:center;flex:none;border:0;background:none;color:inherit;min-width:24px;min-height:24px}
 
-/* Default A: monochrome symbols, neutral selection, shared host and SDK. */
-.ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) { position:relative; display:inline-flex; flex-direction:row; align-items:center; justify-content:center; gap:0; min-width:36px; height:34px; padding:7px 8px; border:0; border-radius:6px; background:transparent; box-shadow:none; color:var(--ksf-toolbar-ink,var(--ksf-color-foreground,#1b1b1b)); font:500 12px/18px system-ui; transform:none; isolation:isolate; }
+/* Shared window defaults: persistent captions and neutral interaction states. */
+.ksf-sdk-surface.ksf-toolbar-refined .window-navigation :is(button,.window-nav-button) { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; gap:6px; min-height:34px; padding:7px 10px; border:0; border-radius:6px; background:transparent; color:inherit; font:500 13px/20px system-ui; white-space:nowrap; }
+.ksf-sdk-surface.ksf-toolbar-refined .window-navigation :is(button,.window-nav-button) svg { flex:none; width:20px; height:20px; stroke-width:1.75; }
+.ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) { position:relative; display:inline-flex; flex-direction:row; align-items:center; justify-content:center; gap:6px; min-width:36px; height:34px; padding:7px 10px; border:0; border-radius:6px; background:transparent; box-shadow:none; color:var(--ksf-toolbar-ink,var(--ksf-color-foreground,#1b1b1b)); font:500 13px/20px system-ui; transform:none; isolation:isolate; }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"])::before { content:""; position:absolute; z-index:-1; inset:0; width:100%; height:100%; box-sizing:border-box; border:0; border-radius:6px; background:transparent; transition:background-color 120ms ease; pointer-events:none; }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]):hover:not(:disabled):not([aria-disabled="true"])::before { background:color-mix(in srgb,var(--ksf-toolbar-ink,var(--ksf-color-foreground,#1b1b1b)) 8%,transparent); }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]):is([aria-pressed="true"],[aria-expanded="true"])::before { background:color-mix(in srgb,var(--ksf-toolbar-ink,var(--ksf-color-foreground,#1b1b1b)) 13%,transparent); }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]):active:not(:disabled):not([aria-disabled="true"])::before { background:color-mix(in srgb,var(--ksf-toolbar-ink,var(--ksf-color-foreground,#1b1b1b)) 18%,transparent); }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) > svg, .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) .ksf-control-icon svg { display:block; flex:none; width:20px; height:20px; stroke-width:1.75; color:inherit; }
-.ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) > .command-label { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) > .command-label { position:static; width:auto; height:auto; padding:0; overflow:visible; clip-path:none; white-space:nowrap; font:inherit; }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]):focus-visible { outline:2px solid var(--ksf-toolbar-focus,var(--ksf-color-focus-ring,#005fb8)); outline-offset:2px; }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]):disabled, .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"])[aria-disabled="true"] { opacity:.4; cursor:default; }
 .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"])[aria-busy="true"] { opacity:.75; cursor:progress; }
@@ -42,14 +44,17 @@
 .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-content { display:flex; align-items:center; min-width:0; flex:1; gap:12px; }
 .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-navigation { flex:1; min-width:0; overflow:hidden; }
 .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-measure { position:absolute; visibility:hidden; pointer-events:none; height:0; overflow:hidden; display:flex; width:max-content; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-measure-command { display:inline-flex; align-items:center; gap:0; min-width:36px; padding:7px 8px; font:500 12px/18px system-ui; white-space:nowrap; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-measure-command:has(.ksf-control-icon) { width:36px; font-size:0; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-label { display:flex; align-items:center; gap:6px; color:inherit; font:500 12px/18px system-ui; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-label:has(.ksf-control-icon) { font-size:0; line-height:0; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-measure-command { display:inline-flex; align-items:center; gap:6px; min-width:36px; padding:7px 10px; font:500 13px/20px system-ui; white-space:nowrap; box-sizing:border-box; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-measure-command:has(.ksf-control-icon) { width:max-content; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-label { display:flex; align-items:center; gap:6px; color:inherit; font:500 13px/20px system-ui; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-label:has(.ksf-control-icon) { font:inherit; }
 .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-control-icon { display:grid; place-items:center; width:20px; height:20px; color:inherit; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-badge { position:absolute; top:-2px; right:0; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-busy { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0; }
-.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-busy[aria-hidden="true"], .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-label[aria-hidden="true"] { visibility:hidden; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-toolbar-badge { position:static; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-busy { position:absolute; inset:0 auto 0 10px; width:20px; display:flex; align-items:center; justify-content:center; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-busy[aria-hidden="true"] { visibility:hidden; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] button[aria-busy="true"] .ksf-button-label { visibility:visible; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] button[aria-busy="true"] .ksf-control-icon { visibility:hidden; }
+.ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-button-busy>span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .ksf-sdk-surface.ksf-toolbar-refined [data-variant="window"] .ksf-busy-indicator { box-sizing:border-box; width:20px; height:20px; border:1.75px solid currentColor; border-right-color:transparent; border-radius:50%; animation:toolbar-spin 1s linear infinite; }
 .ksf-sdk-surface.ksf-toolbar-refined .ksf-toolbar-window-root { display:flex; align-items:center; flex:1; min-width:0; height:100%; }
 .ksf-sdk-surface.ksf-toolbar-refined [data-ksf-component="toolbar"][data-variant="window"] { position:relative; display:flex; flex:1; min-width:0; align-self:stretch; }
@@ -60,3 +65,10 @@
 @media(forced-colors:active){
 .ksf-sdk-surface.ksf-toolbar-refined .ksf-segmented>label[data-selected],.ksf-sdk-surface.ksf-toolbar-refined .window-navigation button[aria-pressed="true"]{forced-color-adjust:none;background:Highlight!important;color:HighlightText!important;outline:1px solid Highlight}
 }
+
+/* The hidden meter uses exactly the visible caption, icon, badge and padding. */
+.ksf-sdk-surface.ksf-toolbar-refined .window-toolbar-measure { position:absolute; visibility:hidden; pointer-events:none; height:0; overflow:hidden; display:flex; width:max-content; }
+.ksf-sdk-surface.ksf-toolbar-refined .window-toolbar-measure-command { display:inline-flex; align-items:center; gap:6px; min-width:36px; padding:7px 10px; font:500 13px/20px system-ui; white-space:nowrap; box-sizing:border-box; }
+.ksf-sdk-surface.ksf-toolbar-refined .window-toolbar-measure-command>svg { width:20px; height:20px; flex:none; }
+.ksf-sdk-surface.ksf-toolbar-refined :is(.command-badge,[data-variant="window"] .ksf-toolbar-badge) { position:static; display:inline-block; min-width:16px; box-sizing:border-box; padding:0 4px; border-radius:4px; background:color-mix(in srgb,currentColor 13%,transparent); color:inherit; font:500 11px/16px system-ui; }
+@media(pointer:coarse) { .ksf-sdk-surface.ksf-toolbar-refined :is(.window-command,[data-variant="window"] .ksf-toolbar-actions button[data-ksf-component="button"]) { min-height:44px; } }

@@ -1,7 +1,7 @@
 import {projectCardHierarchy} from './hierarchy-model.js';
 
 // A view of the existing document, never another source of business state.
-export function resultSections(body='') {
+export function resultSections(body='',{aliases={}}={}) {
   const names=['目标','当前结果','未决与缺口'];
   const sections=Object.fromEntries(names.map(name=>[name,[]]));
   const original=[];
@@ -14,7 +14,8 @@ export function resultSections(body='') {
     }else if(!fence){
       const heading=line.match(/^ {0,3}(#{1,2})\s+(.+?)\s*#*\s*$/);
       if(heading){
-        current=heading[1]==='##'&&names.includes(heading[2])?heading[2]:null;
+        const name=aliases[heading[2]]??heading[2];
+        current=heading[1]==='##'&&names.includes(name)?name:null;
         if(current)continue;
       }
     }
@@ -51,9 +52,25 @@ export function taskProgressPrompt(document,record,projectName){
     action.intent+'。'+(action.reasons.length?'当前原因：'+action.reasons.join('；')+'。':''),
     '下一步：'+(m.next_action??'核对当前结果和未决缺口'),
     '用户发送这条指令后，在本任务的输入、依赖、容量和授权边界内连续推进，维护同一稳定任务，不按讨论、测试或返工另建任务。不要自动暂停其他任务或扩大范围。',
+    '详细方法先读取正式的项目推进搭档及其引用的治理定义和项目管执行原件。同一结果的修改、测试、构建与安装接续原任务；扩大为多个独立结果时先重新安排。成果可以是代码或运行入口，按需交付文件，不为每轮另出报告或复制安装包。工作草稿持续维护；重要基线、交付、回退和验收依据固定版本，已固定原件不得覆盖。',
     '本次执行单位是这个任务，不为具体工作新增里程碑，不顺次执行所属阶段的其他任务；无合适阶段时先给归属建议，等待用户确定。',
     '按完成条件读取实际产物和证据；充分则完成并清空本任务 next_action，需要用户体验、业务判断或未知外部结果则保留待验收。',
     '收尾后核对阶段缺口，在所属里程碑 next_action 给出一项下一任务建议及理由，等待用户选择，不启动下一任务。每个里程碑须用户明确确认后完成，局部成功或停止尝试不作为阶段确认。未知外部操作先对账。'].join('\n\n');
+}
+
+/** A draft only: no task transition, dispatch, or persistence. */
+export function taskFollowUpPrompt(document,record,projectName,feedback=''){
+  const m=document.metadata;
+  if(record.readOnly||record.valid===false||m.kind!=='task'||m.status!=='completed')return null;
+  if(record.project&&!projectCardHierarchy(record).branches.some(b=>b.tasks.some(t=>t.path===document.path&&t.metadata.id===m.id)))return null;
+  return ['请核对项目「'+projectName+'」已完成任务的后续工作：'+m.name+'（原任务稳定ID：'+m.id+'）。',
+    '原任务：'+document.path+'；所属里程碑：'+m.milestone.path+'；项目：'+record.path+'。先读取这些原件及正式项目推进搭档和治理定义，保留原验收结论。',
+    '原完成条件：\n'+(m.criteria??[]).map(c=>'- '+c.text).join('\n'),
+    '原当前结果：\n'+(resultSections(document.body).sections['当前结果']||'原任务没有简短摘要，请读取原文核对。'),
+    '原结果引用：\n'+(m.result_refs??[]).map(r=>JSON.stringify(r)).join('\n'),
+    '用户反馈或新要求：\n'+feedback,
+    '先判断是原结果未达约定的明确返工，还是原结果成立后的新增独立能力。明确返工才按授权重开原任务，保留旧验收和重开原因；新增独立结果另行安排关联任务。范围或授权不清时先澄清。准备本草稿不会发送、重开或新建任务。用户发送后仍核对容量、依赖和执行占用。',
+    '同一成果持续维护，按需交付文件，重要交付、回退及验收依据固定版本。取消或归档记录只读核对，不直接执行。'].join('\n\n');
 }
 
 export function milestoneTasks(document,record){

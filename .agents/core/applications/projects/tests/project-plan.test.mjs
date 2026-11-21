@@ -26,6 +26,21 @@ function readModelFixture(){
   return {record,project,milestone,doing,focused,candidate};
 }
 
+test('reference uses are structural, share one original, retain distinct fixed versions, and never write the record',()=>{
+  const {record,doing}=readModelFixture(),path='项目/样例/运行入口.js';
+  doing.metadata.result_refs=[{path,role:'旧证据混在结果字段'},{path:'项目/样例/不存在.md',role:'旧引用'}];
+  doing.metadata.verification={basis_digest:'basis',results:[{criterion_id:'tc',result:'passed',reviewer:'原复核者',reviewed_at:'2026-11-21T00:00:00Z',evidence:[{path,digest:'a'.repeat(64)},{path,digest:'b'.repeat(64)}]}]};
+  const before=structuredClone(record),view=projectPlanView(record),item=view.results.find(r=>r.key===path);
+  assert.equal(view.results.filter(r=>r.key===path).length,1);
+  assert.deepEqual(item.usages.map(u=>u.category),['result','evidence','evidence']);
+  assert.equal(item.usages[0].role,'旧证据混在结果字段');
+  assert.equal(item.versions.length,3);
+  assert.deepEqual(item.usages.slice(1).map(u=>u.reference.digest),['a'.repeat(64),'b'.repeat(64)]);
+  assert(item.usages.every(u=>u.subject.path===doing.path));
+  assert(view.results.some(r=>r.key.endsWith('不存在.md')),'missing resources remain recorded gaps, not silently removed');
+  assert.deepEqual(record,before);
+});
+
 test('project read model separates recorded focus, actual in-flight work, commitment and reproducible readiness',()=>{
   const {record,project,milestone,doing,focused}=readModelFixture();
   const foreign={...doing,path:'项目/其他/task.md',metadata:{...doing.metadata,id:'foreign',project:{id:'other',path:'项目/其他/project.md'}}};record.documents.push(foreign);

@@ -1,3 +1,4 @@
+import {validRecentProjects,recordProjectVisit} from './project-catalog-model.js';
 import { readFile, readdir, lstat, realpath, open, mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { resolve, relative, join, dirname, sep, extname, isAbsolute } from 'node:path';
 import { randomUUID,createHash } from 'node:crypto';
@@ -58,6 +59,7 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
       assert(value?.schemaVersion === 1, '应用显示设置格式不受支持。');
       assert(value.pinnedProjects === undefined || (Array.isArray(value.pinnedProjects)
         && value.pinnedProjects.every(key => typeof key === 'string')), '固定项目设置格式无效。');
+      assert(validRecentProjects(value.recentProjects),'最近访问设置格式无效。');
       return value;
     } catch (error) {
       if (error.code === 'ENOENT') return {schemaVersion:1};
@@ -381,6 +383,12 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
     if(method==='preferences.save'){
       assert(typeof params.selected==='string'&&params.selected.length<500&&['overview','plan','work','governance','tasks','chats','resources'].includes(params.tab),'显示设置无效。');
       return updatePreferences(value=>({...value,selected:params.selected,tab:params.tab}));
+    }
+    if(method==='preferences.visit'){
+      const {name,scope,visitedAt}=key(params);
+      assert(typeof visitedAt==='string'&&Number.isFinite(Date.parse(visitedAt))&&new Date(visitedAt).toISOString()===visitedAt&&Date.parse(visitedAt)<=Date.now()+60000,'访问时间无效。');
+      await project({name,scope});
+      return updatePreferences(value=>recordProjectVisit(value,scope+':'+name,visitedAt));
     }
     if(method==='preferences.pin'){
       const {name,scope,pinned}=key(params);

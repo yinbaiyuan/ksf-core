@@ -1,3 +1,7 @@
+import {preparePreferenceReload} from './settings-preference-reload';
+import {SettingsDiagnostics} from './settings-diagnostics';
+import {SettingsDialog} from './settings-dialog';
+import {Button as SettingsButton} from '@ksf/sdk/button';
 import {installWindowToolbarHints} from '../../../../applications/sdk/src/window-toolbar-hints';
 import {windowGeometry} from '../window-geometry';
 import {UIProvider} from '../internal-ui/provider';
@@ -152,7 +156,7 @@ export function Desktop() {
   const menuFor=useCallback((id:string)=>{let menus=menuControllers.current.get(id);if(!menus){menus=createWindowMenus();menuControllers.current.set(id,menus);}return menus;},[]);
   const applicationRevision = useApplications();
   const shortcuts=useMemo(()=>applicationShortcuts(),[applicationRevision]);
-  const windowArea = useRef<HTMLDivElement>(null), settingsAnchor = useRef<HTMLButtonElement>(null), launcherAnchor=useRef<HTMLButtonElement>(null);
+  const windowArea = useRef<HTMLDivElement>(null), settingsAnchor = useRef<HTMLButtonElement>(null),settingsNavigation=useRef<(action:()=>void)=>void>(action=>action()), launcherAnchor=useRef<HTMLButtonElement>(null);
   const getArea = useCallback((): WindowArea => ({ width: windowArea.current?.clientWidth ?? innerWidth, height: windowArea.current?.clientHeight ?? innerHeight }), []);
   const preferenceState=useInstancePreferences(desktopPreferences);
   const preferences=preferenceState.value,prefsRef=useRef(preferences);prefsRef.current=preferences;
@@ -168,7 +172,7 @@ export function Desktop() {
     if(pending.ids.length!==windows.length||pending.ids.some(id=>!windows.some(model=>model.id===id)||!document.querySelector(`[data-window-id="${CSS.escape(id)}"]`)))return;
     restoring.current=null;documentRecovery.restored(pending.token);
   },[windows]);
-  const [settings, setSettings] = useState(false), [settingsTab, setSettingsTab] = useState<SettingsTab>('desktop'), [library, setLibrary] = useState(false), [launcher,setLauncher]=useState(false), [keyboard, setKeyboard] = useState<string | null>(null);
+  const [settings, setSettings] = useState(false), [settingsTab, setSettingsTab] = useState<SettingsTab>('instance'), [library, setLibrary] = useState(false), [launcher,setLauncher]=useState(false), [keyboard, setKeyboard] = useState<string | null>(null);
   const [startNewGroup, setStartNewGroup] = useState(false), [groupEditorKey, setGroupEditorKey] = useState(0), [pendingGroup, setPendingGroup] = useState<string | null>(null);
   const selectedGroup = currentGroup(preferences);
   const [movingCard, setMovingCard] = useState(false);
@@ -176,7 +180,7 @@ export function Desktop() {
   const [editing, setEditing] = useState(false), [draft, setDraft] = useState<WidgetLayout[]>(selectedGroup.layout);
   const saved=preferenceStatus(preferenceState.status);
   useEffect(()=>{setEditing(false);},[preferenceState.discardVersion]);
-  const openSettings = useCallback((tab?: SettingsTab, create = false) => { if(tab)setSettingsTab(tab); setStartNewGroup(create); setGroupEditorKey(value => value + 1); setSettings(true); }, []);
+  const openSettings = useCallback((tab?: SettingsTab, create = false) => settingsNavigation.current(()=>{if(tab)setSettingsTab(tab);setStartNewGroup(create);setGroupEditorKey(value=>value+1);setSettings(true);}),[]);
   const openDiagnostics = useCallback(() => openSettings('diagnostics'), [openSettings]);
   const catalog = useRemote<TaskTargets>('/api/task-targets'), health = useRemote<{ ok: boolean; startedAt: string }>(settings && settingsTab === 'diagnostics' ? '/api/health' : null);
   const materialStyle = useMaterialStyle(), { settings: material } = useMaterial();
@@ -210,13 +214,7 @@ export function Desktop() {
         ...(model.object!==undefined?{object:model.object===null?null:{title:model.object.title,...(model.object.detail!==undefined?{detail:model.object.detail}:{})}}:{})})),
       activeId:activeRef.current,desktop:desktopRef.current,activeGroupId:currentGroup(prefsRef.current).id});
     const detach=documentRecovery.attach({capture,topology:()=>JSON.stringify([capture(),apps.map(app=>[app.id,app.release?.digest??'builtin'])]),prepare:async request=>{
-      if(documentBusy.current)return {status:'failed',message:'请先完成桌面布局或Dock排序。'};
-      await Promise.all([desktopPreferences.flush(),appearancePreferences.flush()]);
-      const stores=[desktopPreferences,appearancePreferences];
-      const clean=()=>!request.signal?.aborted&&!documentBusy.current&&stores.every(store=>{const state=store.getSnapshot();return state.ready&&!state.dirty&&['saved','default'].includes(state.status);});
-      if(!clean())return {status:'failed',message:'实例设置仍有未保存或待确认的修改，请先核对。'};
-      const before=JSON.stringify(stores.map(store=>store.getSnapshot().value));
-      return {status:'ready',validate:()=>clean()&&JSON.stringify(stores.map(store=>store.getSnapshot().value))===before};
+      return preparePreferenceReload([desktopPreferences,appearancePreferences],request.signal,()=>documentBusy.current);
     }});
     void documentRecovery.initialize();return detach;
   },[]);
@@ -416,10 +414,10 @@ export function Desktop() {
     })}</AnimatePresence></div><DockGlassLayer grid={dockSort.rail} size={dockSize} paused={!!dockSort.dragging} motion={material.motion} theme={theme} layoutKey="taskbar-applications" intensity={material.dockIconGlassIntensity} tilt={material.dockIconTilt}/></div><div ref={tools} className="taskbar-tools"><button className={`dock-item ${desktop ? 'selected' : ''}`} aria-label="显示桌面" aria-pressed={desktop} onClick={showDesktop}><span className="desktop-icon"><Monitor size={21} /></span><span className="dock-tooltip">显示桌面</span></button></div></Taskbar>
     <ApplicationLauncher open={launcher} onOpenChange={setLauncher} anchor={launcherAnchor} applications={shortcuts} openApp={openApp} manage={manageApplication} addedApplications={new Set((editing?draft:selectedGroup.layout).filter(item=>item.kind==='app').map(item=>item.appId!))} addApplication={addApplication} pinnedApplications={pinnedApplications} pinApplication={changeDockPin}/>
     <PairingNotifications/>
-    <SettingsWindow onProjects={apps.some(app=>app.id==='com.ksf.projects')?()=>{setSettings(false);openApp('com.ksf.projects');}:undefined} onMonitor={()=>{setSettings(false);openApp('com.ksf.activity-monitor');}} onDocumentation={apps.some(app=>app.id==='com.ksf.documentation')?()=>{setSettings(false);openApp('com.ksf.documentation');}:undefined} open={settings} onOpenChange={setSettings} tab={settingsTab} select={setSettingsTab} saved={saved} anchor={settingsAnchor}
+    <SettingsWindow navigationGuard={settingsNavigation} onProjects={apps.some(app=>app.id==='com.ksf.projects')?()=>{setSettings(false);openApp('com.ksf.projects');}:undefined} onMonitor={()=>{setSettings(false);openApp('com.ksf.activity-monitor');}} onDocumentation={apps.some(app=>app.id==='com.ksf.documentation')?()=>{setSettings(false);openApp('com.ksf.documentation');}:undefined} open={settings} onOpenChange={setSettings} tab={settingsTab} select={setSettingsTab} saved={saved} anchor={settingsAnchor}
       desktop={<><DockSizeSettings size={dockSize} change={changeDockSize}/><GroupManager key={groupEditorKey} value={preferences} change={next => { if (!editing) persist(next); }} select={selectGroup} startNew={startNewGroup} editing={editing} edit={beginEdit} library={() => { setSettings(false); setLibrary(true); }} /></>}
-      diagnostics={<><div className="os-health">{health.error ? '服务健康检查失败：' + settingsError(health.error) : health.data ? '本地服务健康检查成功' : '正在检查本地服务…'}<button onClick={() => { catalog.refresh(); health.refresh(); }}>重试</button></div><Diagnostics capture={catalog.data?.capture} errors={catalog.data?.errors ?? []} /></>} />
-    <Sheet open={!!pendingGroup} onOpenChange={value => { if (!value) setPendingGroup(null); }} title="切换桌面分组" description="当前桌面的卡片布局尚未保存。" solid className="group-switch-sheet"><p>保存当前布局后切换到“{preferences.groups.find(group => group.id === pendingGroup)?.name}”？</p><div className="group-switch-actions"><button type="button" onClick={() => setPendingGroup(null)}>继续编辑</button><button type="button" onClick={() => resolveGroup(false)}>放弃并切换</button><button type="button" className="settings-primary" onClick={() => resolveGroup(true)}>保存并切换</button></div></Sheet>
+      diagnostics={<><div className="os-health">{health.error ? '服务健康检查失败：' + settingsError(health.error) : health.data ? '本地服务健康检查成功' : '正在检查本地服务…'}<SettingsButton onClick={() => { catalog.refresh(); health.refresh(); }}>重试</SettingsButton></div><SettingsDiagnostics capture={catalog.data?.capture} errors={catalog.data?.errors ?? []} /></>} />
+    <SettingsDialog open={!!pendingGroup} onClose={()=>setPendingGroup(null)} title="切换桌面分组" description="当前桌面的卡片布局尚未保存。" centered closeOnOutside={false} footer={<><SettingsButton onClick={()=>setPendingGroup(null)}>继续编辑</SettingsButton><SettingsButton tone="danger" onClick={()=>resolveGroup(false)}>放弃并切换</SettingsButton><SettingsButton variant="solid" tone="primary" onClick={()=>resolveGroup(true)}>保存并切换</SettingsButton></>}><p>保存当前布局后切换到“{preferences.groups.find(group=>group.id===pendingGroup)?.name}”？</p></SettingsDialog>
     <Sheet open={library} onOpenChange={setLibrary} title="桌面卡片库" solid><h3>功能卡片</h3><p className="library-intro">卡片由已安装的应用提供。同一种卡片可添加多张，各自保存配置。</p><div className="widget-library">{widgets.map(w => { return <article key={w.id}><span><w.icon size={25} /></span><div><h3>{w.name}</h3><small>{w.appName}</small><p>{w.description}</p></div><button onClick={() => addWidget(w.id)}><Plus size={17} />添加</button></article>; })}</div>{!widgets.length&&<p className="library-intro">暂无可添加的功能卡片。</p>}<button className="os-primary" onClick={() => { setLibrary(false); if (!editing) beginEdit(); }}>编辑卡片布局</button></Sheet>
     <Sheet open={!!keyboardWindow} onOpenChange={value => { if (!value) setKeyboard(null); }} title="移动与调整窗口" solid>{keyboardWindow && keyboardBounds && <><p>使用输入框或方向键微调。窗口将限制在桌面可用范围内。</p><div className="window-coordinate-form">{(['x', 'y', 'width', 'height'] as const).map(key => <label key={key}>{{ x: '水平位置', y: '垂直位置', width: '宽度', height: '高度' }[key]}<input type="number" step={8} value={Math.round(keyboardBounds[key])} onChange={e => { const bounds = fitBounds({ ...keyboardBounds, [key]: Number(e.target.value) }, area); change(keyboardWindow.id, { bounds, normal: bounds, mode: 'normal' }); requestAnimationFrame(requestSync); }} /></label>)}</div></>}</Sheet>
   </div></UIProvider>;

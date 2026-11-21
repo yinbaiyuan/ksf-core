@@ -81,7 +81,7 @@ export function projectPlanView(record,project=record.project){
     if(typeof ref?.path==='string'&&ref.path)return true;
     try{const url=new URL(ref?.url);return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password;}catch{return false;}
   };
-  function add(ref,doc,{role='成果引用',criterion,reviewStatus,reviewOutcome,subject=doc}={}){
+  function add(ref,doc,{role='结果引用',criterion,reviewStatus,reviewOutcome,subject=doc}={}){
     if(!validReference(ref))return;
     const key=ref.path??ref.url,origin=source(doc),stale=isStale(doc)||isStale(subject);
     let item=resultMap.get(key);
@@ -90,10 +90,10 @@ export function projectPlanView(record,project=record.project){
     if(!item.sources.some(value=>value.id===origin.id&&value.path===origin.path))item.sources.push(origin);
     const linkedGoals=(subject.metadata.goal_ids??[]).flatMap(id=>goals.has(id)?[goals.get(id)]:[]);
     for(const goal of linkedGoals)if(!item.goals.some(value=>value.id===goal.id))item.goals.push(goal);
-    const usage={reference:{...ref},source:origin,role:ref.role??role,goals:linkedGoals,stale,
+    const usage={reference:{...ref},source:origin,role:ref.role??role,category:criterion?'evidence':'result',subject:source(subject),goals:linkedGoals,stale,
       ...(criterion?{criterion}:{}),...(reviewStatus?{reviewStatus}:{}),...(reviewOutcome?{reviewOutcome}:{})};
     // Repeated references can support different conditions or carry different review outcomes.
-    const signature=JSON.stringify([origin.path,projectReferenceKey(ref),usage.role,criterion?.id,criterion?.result,criterion?.reviewer,criterion?.reviewedAt,reviewStatus,reviewOutcome]);
+    const signature=JSON.stringify([origin.path,projectReferenceKey(ref),usage.category,usage.role,criterion?.id,criterion?.result,criterion?.reviewer,criterion?.reviewedAt,reviewStatus,reviewOutcome]);
     if(!item.usages.some(value=>value.signature===signature))item.usages.push({...usage,signature});
     if(criterion&&!item.criteria.some(value=>value.source.path===origin.path&&value.id===criterion.id&&projectReferenceKey(value.reference)===projectReferenceKey(ref)&&value.result===criterion.result))item.criteria.push({...criterion,source:origin,reference:{...ref},reviewStatus,reviewOutcome,stale});
     item.stale||=stale;

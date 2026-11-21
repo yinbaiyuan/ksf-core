@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerSnapshot,promptSnapshot,requestActionable,runStatusAxes,resultReadyForIntent,canRequestStop} from '../../../applications/projects/private-ui/ai-model.ts';
+import {answerSnapshot,promptSnapshot,requestActionable,runStatusAxes,resultReadyForIntent,canRequestStop} from '../../../applications/projects/ai-model.ts';
 import {projectAITask} from '../../../applications/sdk/src/controllers/run-projections.ts';
 import type {RunQuestion,RunView} from '../../../applications/sdk/src/controllers/run-types';
 import {createDesktopRunAdapter} from '../../../applications/sdk/src/controllers/run-adapters.ts';

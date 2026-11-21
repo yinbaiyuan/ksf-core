@@ -1,67 +1,262 @@
-import {useEffect,useState} from 'react';
-import {createWorkbenchClient} from '../apps/request-client';
-import './communication-settings.css';
-import {settingsError,SettingsGroup,SettingsLink,SettingsStatus,SettingsActions,SettingsEmpty,SettingsTechnical,useSettingsDraft,useSettingsDetail,useSettingsNavigation} from './settings-controls';
-type Grant={peers:string[];activation:boolean};
-type Pairing={requestId:string;name:string;host:string;appId:string;appName?:string;code:string;status:string;direction:string};
-type NetworkState='offline'|'starting'|'online'|'network-changed'|'failed'|'degraded';
-type Snapshot={network?:{state:NetworkState;online:boolean;requiresOnline:boolean;error?:{code:string;message:string}|null};device?:{name:string;custom:boolean};pairingRequests:Pairing[];pairingListener?:{host:string;port:number}|null;pairingError?:{message:string};config:{enabled:boolean;host:string;port:number;discovery:boolean;maxMessageBytes:number;maxStorageBytes:number;peers:Record<string,{nodeId:string;name:string;host:string;port:number;fingerprint:string}>;grants:Record<string,Grant>;endpoints:Record<string,{key:string;enabled:boolean;channels:string[];peers:string[]}>};identity:{nodeId:string;fingerprint:string}|null;listener:{host:string;port:number}|null;interfaces:{name:string;address:string;internal:boolean}[];discovered:{nodeId:string;host:string;port:number}[];routes:{appId:string;name:string;channel:string;enabled:boolean}[];background:{applications:Record<string,Record<string,{reason:string}>>};deliveries:{messageId:string;to:{endpoint:{id:string}};delivery:{state:string;error?:{message:string}}}[];operations:{operationId:string;status:string;error?:{message:string}}[];discoveryError?:{message:string};dispatchError?:{message:string}};
-const client=createWorkbenchClient(),MiB=1024**2;
-const names:Record<string,string>={pending:'等待分发',delivering:'正在分发',acknowledged:'应用已接管',suspended:'接收应用不可用',parked:'分发已暂停',delivered:'对端已完整接收',failed:'发送失败',unconfirmed:'送达状态未知',cancelled:'已取消',preparing:'准备中',sending:'发送中',confirming:'确认中'};
-const emptyPeer={identity:'',fingerprint:'',host:'',port:45731,name:''};
-const networkLabels:Record<NetworkState,string>={offline:'未上线',starting:'正在上线',online:'已在线','network-changed':'网络已变化，待重新上线',failed:'上线失败，可重试',degraded:'部分通信功能尚未就绪'};
-const currentHost=(value:Snapshot,host:string)=>value.interfaces.some(item=>item.address===host)?host:(()=>{const choices=value.interfaces.filter(item=>!item.internal);return choices.length===1?choices[0].address:'';})();
-export function CommunicationSettingsContent(){
- const [loadError,setLoadError]=useState(''),[data,setData]=useState<Snapshot|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[identity,setIdentity]=useState(''),[view,setView]=useState<'identity'|'peers'|'grants'|'dispatch'|null>(null);
- const [form,setForm]=useState({enabled:false,host:'',port:45731,discovery:true,maxMessageBytes:1024,maxStorageBytes:8192}),[deviceName,setDeviceName]=useState(''),[baseline,setBaseline]=useState('');
- const [peer,setPeer]=useState(emptyPeer),[revoke,setRevoke]=useState<string|null>(null),[versions,setVersions]=useState<Record<string,string>>({}),[grant,setGrant]=useState({route:'',peers:[] as string[],activation:false}),[grantBaseline,setGrantBaseline]=useState(''),[limit,setLimit]=useState(20);
- const navigate=useSettingsNavigation(),titles={identity:'本机身份',peers:'节点配对',grants:'应用接收与消息激活',dispatch:'分发与发送记录'};
- const dirty=view==='peers'?JSON.stringify(peer)!==JSON.stringify(emptyPeer):view==='grants'?!!grantBaseline&&JSON.stringify(grant)!==grantBaseline:!view?!!baseline&&JSON.stringify({form,deviceName})!==baseline:false;
- useSettingsDraft(dirty,busy,()=>{if(view==='peers')setPeer({...emptyPeer});else if(view==='grants'&&grantBaseline)setGrant(JSON.parse(grantBaseline));else if(!view&&baseline){const old=JSON.parse(baseline);setForm(old.form);setDeviceName(old.deviceName);}});
- useSettingsDetail(view,view?titles[view]:'',()=>setView(null));
- function open(next:NonNullable<typeof view>){navigate(()=>{setView(next);setError('');setNotice('');});}
- const load=async(initial=false)=>{
-  const value=await client.request<Snapshot>('/api/communication/state');setData(value);setLoadError('');
-  if(initial){const [communication,device]=await Promise.all([client.request<{etag:string}>('/api/config/communication'),client.request<{etag:string}>('/api/config/device')]);setVersions({communication:communication.etag,device:device.etag});const next={enabled:value.config.enabled,host:currentHost(value,value.config.host),discovery:value.config.discovery,port:value.listener?.port??(value.config.port||45731),maxMessageBytes:value.config.maxMessageBytes/MiB,maxStorageBytes:value.config.maxStorageBytes/MiB},name=value.device?.name??'';setDeviceName(name);setForm(next);setBaseline(JSON.stringify({form:next,deviceName:name}));setError('');}else setForm(current=>({...current,host:currentHost(value,current.host)}));
- };
- useEffect(()=>{void load(true).catch(e=>setLoadError(settingsError(e)));const refresh=()=>{if(document.visibilityState!=='hidden')void load().catch(e=>setLoadError(settingsError(e)));};const timer=setInterval(refresh,3000);document.addEventListener('visibilitychange',refresh);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};},[]);
- async function act(operation:string,input:unknown,message='已保存。',savedForm=form){
-  setBusy(true);setError('');setNotice('');
-  try{
-   let applicationError='';
-   if(operation==='configure'||operation==='device.set'){
-    const domain=operation==='configure'?'communication':'device';const result=await client.request<{etag:string;application:{state:string;error?:{message:string}}}>('/api/config/'+domain,{operation:'write',ifMatch:versions[domain],values:input});setVersions(old=>({...old,[domain]:result.etag}));
-    setBaseline(old=>JSON.stringify({...JSON.parse(old),...(operation==='configure'?{form:savedForm}:{deviceName})}));
-    if(result.application.state==='failed')applicationError=result.application.error?.message??'配置已保存，但应用失败。';
-   }else{await client.request('/api/communication/'+operation,input);if(operation==='trust')setPeer({...emptyPeer});if(operation==='grant')setGrantBaseline(JSON.stringify(grant));}
-   await load();setNotice(applicationError?'已保存，尚未成功应用。':message);if(applicationError)setError(applicationError);setRevoke(null);
-  }catch(e){setError(settingsError(e,true));}finally{setBusy(false);}
- }
- async function exportIdentity(){setBusy(true);try{setIdentity(JSON.stringify(await client.request('/api/communication/identity',{}),null,2));await load();setError('');}catch(e){setError(settingsError(e));}finally{setBusy(false);}}
- function declareOnline(enabled:boolean){const next={...form,enabled};setForm(next);void act('configure',{...next,maxMessageBytes:next.maxMessageBytes*MiB,maxStorageBytes:next.maxStorageBytes*MiB},enabled?'已在当前网络声明在线。':'已下线，设备身份和已有配对已保留。',next);}
- const networkState:NetworkState=data?.network?.state??(data?.listener?'online':'offline');
- const feedback=<>{loadError&&<SettingsStatus error>通信状态暂时无法读取：{loadError}</SettingsStatus>}{!data&&!error&&!loadError&&<SettingsStatus>正在读取通信设置…</SettingsStatus>}{dirty&&<SettingsStatus>有尚未保存的修改</SettingsStatus>}{error&&<SettingsStatus error>{error}</SettingsStatus>}{notice&&<SettingsStatus>{notice}</SettingsStatus>}</>;
- if(view==='identity')return <>{feedback}<SettingsGroup title="节点身份" description="公共身份用于配对，指纹用于核对节点。"><dl className="settings-metadata"><div><dt>节点</dt><dd>{data?.identity?.nodeId??'尚未创建'}</dd></div><div><dt>指纹</dt><dd>{data?.identity?.fingerprint??'尚未创建'}</dd></div></dl></SettingsGroup><SettingsActions><button disabled={busy} onClick={()=>void exportIdentity()}>导出公共身份</button></SettingsActions>{identity&&<SettingsGroup title="公共身份"><div className="settings-form-fields"><label className="settings-field is-wide"><span>将此公共身份交给对方配对</span><textarea className="settings-code" readOnly value={identity} rows={8}/></label></div></SettingsGroup>}</>;
- if(view==='peers')return <>{feedback}<SettingsGroup title="节点配对" description="在内网通信应用中请求配对，对方同意后即可收发。">{Object.values(data?.config.peers??{}).map(node=><article className="settings-record" key={node.nodeId}><div className="settings-record-heading"><strong>{node.name}</strong><span>{node.host}:{node.port}</span></div><SettingsTechnical title="指纹与信任"><p>{node.fingerprint}</p><SettingsActions><button className="settings-danger" disabled={busy} onClick={()=>setRevoke(node.nodeId)}>撤销信任</button></SettingsActions>{revoke===node.nodeId&&<div role="alert"><p>撤销对“{node.name}”的信任？后续通信需重新配对。</p><SettingsActions><button disabled={busy} onClick={()=>setRevoke(null)}>取消</button><button className="settings-danger" disabled={busy} onClick={()=>void act('untrust',{nodeId:node.nodeId},'已撤销对端信任。')}>确认撤销</button></SettingsActions></div>}</SettingsTechnical></article>)}{!Object.keys(data?.config.peers??{}).length&&<SettingsEmpty>尚无已配对节点。</SettingsEmpty>}{data?.pairingError&&<SettingsStatus error>{data.pairingError.message}</SettingsStatus>}</SettingsGroup>
-  <SettingsGroup title="兼容与高级配对"><SettingsTechnical title="手动交换公共身份"><p>供兼容旧节点或经其他通道核对指纹时使用。</p>{!!data?.discovered.length&&<div className="settings-inline-list">{data.discovered.map(node=><button type="button" className="settings-button" key={node.nodeId} onClick={()=>setPeer({...peer,host:node.host,port:node.port})}>{node.host}:{node.port}</button>)}</div>}<form onSubmit={e=>{e.preventDefault();try{void act('trust',{...peer,identity:JSON.parse(peer.identity)},'已保存对端信任。对方也需要导入本机身份。');}catch{setError('对端公共身份需要有效 JSON。');}}}><fieldset className="settings-form-fields" disabled={busy}><label className="settings-field is-wide"><span>对端公共身份</span><textarea required className="settings-code" rows={5} value={peer.identity} onChange={e=>setPeer({...peer,identity:e.target.value})}/></label><label className="settings-field is-wide"><span>经双方核对的完整指纹</span><input required value={peer.fingerprint} onChange={e=>setPeer({...peer,fingerprint:e.target.value.trim()})}/></label><label className="settings-field"><span>对端 IPv4</span><input required value={peer.host} onChange={e=>setPeer({...peer,host:e.target.value.trim()})}/></label><label className="settings-field"><span>对端端口</span><input type="number" min="1" max="65535" value={peer.port} onChange={e=>setPeer({...peer,port:Number(e.target.value)})}/></label><label className="settings-field"><span>名称</span><input value={peer.name} onChange={e=>setPeer({...peer,name:e.target.value})}/></label></fieldset><SettingsActions><button className="settings-primary" disabled={busy}>信任此节点</button></SettingsActions></form></SettingsTechnical></SettingsGroup></>;
- if(view==='grants')return <>{feedback}<form onSubmit={e=>{e.preventDefault();const [appId,channel]=grant.route.split('|');void act('grant',{appId,channel,peers:grant.peers,activation:grant.activation});}}><SettingsGroup title="接收授权" description="消息激活应用接收入口，任务与 AI 执行仍由接收应用决定。"><fieldset className="settings-form-fields" disabled={busy}><label className="settings-field is-wide"><span>应用通道</span><select required value={grant.route} onChange={e=>{const route=e.target.value,saved=data?.config.grants[route],next={route,peers:saved?.peers??[],activation:saved?.activation??false};navigate(()=>{setGrant(next);setGrantBaseline(JSON.stringify(next));});}}><option value="">选择应用通道</option>{data?.routes.map(route=><option key={route.appId+'|'+route.channel} value={route.appId+'|'+route.channel}>{route.name} · {route.channel}{route.enabled?'':'（已停用）'}</option>)}</select></label><h4 className="settings-field-note">允许来信的节点</h4>{Object.values(data?.config.peers??{}).map(node=><label className="settings-checkbox" key={node.nodeId}><span>{node.name}</span><input type="checkbox" checked={grant.peers.includes(node.nodeId)} onChange={e=>setGrant({...grant,peers:e.target.checked?[...grant.peers,node.nodeId]:grant.peers.filter(id=>id!==node.nodeId)})}/></label>)}{!Object.keys(data?.config.peers??{}).length&&<SettingsEmpty>先配对节点，再分配接收授权。</SettingsEmpty>}<label className="settings-checkbox"><span>允许新消息激活未运行的应用</span><input type="checkbox" role="switch" checked={grant.activation} onChange={e=>setGrant({...grant,activation:e.target.checked})}/></label></fieldset></SettingsGroup><SettingsActions><button className="settings-primary" disabled={busy||!grant.route}>保存接收授权</button></SettingsActions></form></>;
- if(view==='dispatch')return <>{feedback}<SettingsGroup title="应用分发" action={<button className="settings-button" disabled={busy} onClick={()=>void load().catch(e=>setError(settingsError(e)))}>刷新</button>}>{data?.dispatchError&&<SettingsStatus error>{data.dispatchError.message}</SettingsStatus>}{data?.deliveries.slice(0,limit).map(item=><article className="settings-record" key={item.messageId}><div className="settings-record-heading"><strong>{names[item.delivery.state]??item.delivery.state}</strong><span>{item.to.endpoint.id}</span></div>{item.delivery.error&&<SettingsStatus error>{item.delivery.error.message}</SettingsStatus>}<SettingsTechnical title="消息标识"><p>{item.messageId}</p></SettingsTechnical>{['suspended','parked'].includes(item.delivery.state)&&<SettingsActions><button disabled={busy} onClick={()=>void act('retry',{messageId:item.messageId},'已重新安排本机分发。')}>重试应用分发</button></SettingsActions>}</article>)}{!data?.deliveries.length&&<SettingsEmpty>暂无分发记录。</SettingsEmpty>}</SettingsGroup>
-  <SettingsGroup title="最近发送" description="对端完整接收与接收应用处理任务是不同阶段。">{data?.operations.slice(0,limit).map(item=><article className="settings-record" key={item.operationId}><strong>{names[item.status]??item.status}</strong>{item.error&&<SettingsStatus error>{item.error.message}</SettingsStatus>}<SettingsTechnical title="操作标识"><p>{item.operationId}</p></SettingsTechnical></article>)}{!data?.operations.length&&<SettingsEmpty>暂无发送记录。</SettingsEmpty>}</SettingsGroup>{Math.max(data?.deliveries.length??0,data?.operations.length??0)>limit&&<SettingsActions><button onClick={()=>setLimit(limit+20)}>显示更多记录</button></SettingsActions>}
-  <SettingsGroup title="后台保活"><SettingsTechnical title="应用保活原因">{Object.entries(data?.background.applications??{}).map(([appId,holds])=><div key={appId}><strong>{appId}</strong>{Object.entries(holds).map(([key,value])=><p key={key}>{value.reason}</p>)}</div>)}{!Object.keys(data?.background.applications??{}).length&&<SettingsEmpty>暂无保活记录。</SettingsEmpty>}</SettingsTechnical></SettingsGroup></>;
- return <>{feedback}<SettingsGroup title="本机名称" description="附近节点显示的设备名称，改名无需重新配对。"><form className="settings-form-fields" onSubmit={e=>{e.preventDefault();void act('device.set',{name:deviceName},'本机名称已保存。');}}><label className="settings-field"><span>设备名称</span><input required maxLength={64} disabled={busy} value={deviceName} placeholder="例如：超哥的 Mac" onChange={e=>setDeviceName(e.target.value)}/></label><SettingsActions><button disabled={busy||!data}>保存本机名称</button></SettingsActions></form></SettingsGroup>
-  <SettingsGroup title="网络与发现" description={data?.listener?`正在监听 ${data.listener.host}:${data.listener.port}`:'选择当前网络后声明在线；更换网络无需重新配对。'}>
-   {data&&<SettingsStatus error={['failed','degraded'].includes(networkState)}>{networkLabels[networkState]}{data.network?.error&&'：'+data.network.error.message}</SettingsStatus>}
-   <form onSubmit={e=>{e.preventDefault();declareOnline(true);}}>
-    <fieldset className="settings-form-fields" disabled={busy||!data}>
-     <label className="settings-field"><span>当前网络</span><select required value={form.host} onChange={e=>setForm({...form,host:e.target.value})}><option value="">选择当前可用网络</option>{data?.interfaces.map(item=><option key={item.address} value={item.address}>{item.name} · {item.address}{item.internal?'（本机测试）':''}</option>)}</select></label>
-     <label className="settings-field"><span>通信端口</span><input type="number" min="1" max="65535" value={form.port} onChange={e=>setForm({...form,port:Number(e.target.value)})}/></label>
-     <label className="settings-checkbox"><span>发现当前网段的节点</span><input type="checkbox" role="switch" checked={form.discovery} onChange={e=>setForm({...form,discovery:e.target.checked})}/></label>
+import {SettingsNumberField} from './settings-fields';
+import {Dialog} from '@ksf/sdk/dialog';
+import {useSettingsMutation} from './settings-mutation';
+import {configurationNumber} from './settings-numbers';
+import {Button} from '@ksf/sdk/button';
+import {SettingsField} from './settings-fields';
+import {TextArea} from '@ksf/sdk/text-area';
+import {Form} from '@ksf/sdk/form';
+import {TextField} from '@ksf/sdk/text-field';
+import {SettingsSelect} from './settings-fields';
+import {Checkbox} from '@ksf/sdk/checkbox';
+import {Switch} from '@ksf/sdk/switch';
+import { useEffect, useState,useRef } from 'react';
+import { createWorkbenchClient } from '../apps/request-client';
+import { settingsError, SettingsGroup, SettingsLink, SettingsStatus, SettingsActions, SettingsEmpty, SettingsTechnical, useSettingsDraft, useSettingsDetail, useSettingsNavigation } from './settings-controls';
+type Grant = {
+    peers: string[];
+    activation: boolean;
+};
+type Pairing = {
+    requestId: string;
+    name: string;
+    host: string;
+    appId: string;
+    appName?: string;
+    code: string;
+    status: string;
+    direction: string;
+};
+type NetworkState = 'offline' | 'starting' | 'online' | 'network-changed' | 'failed' | 'degraded';
+type Snapshot = {
+    network?: {
+        state: NetworkState;
+        online: boolean;
+        requiresOnline: boolean;
+        error?: {
+            code: string;
+            message: string;
+        } | null;
+    };
+    device?: {
+        name: string;
+        custom: boolean;
+    };
+    pairingRequests: Pairing[];
+    pairingListener?: {
+        host: string;
+        port: number;
+    } | null;
+    pairingError?: {
+        message: string;
+    };
+    config: {
+        enabled: boolean;
+        host: string;
+        port: number;
+        discovery: boolean;
+        maxMessageBytes: number;
+        maxStorageBytes: number;
+        peers: Record<string, {
+            nodeId: string;
+            name: string;
+            host: string;
+            port: number;
+            fingerprint: string;
+        }>;
+        grants: Record<string, Grant>;
+        endpoints: Record<string, {
+            key: string;
+            enabled: boolean;
+            channels: string[];
+            peers: string[];
+        }>;
+    };
+    identity: {
+        nodeId: string;
+        fingerprint: string;
+    } | null;
+    listener: {
+        host: string;
+        port: number;
+    } | null;
+    interfaces: {
+        name: string;
+        address: string;
+        internal: boolean;
+    }[];
+    discovered: {
+        nodeId: string;
+        host: string;
+        port: number;
+    }[];
+    routes: {
+        appId: string;
+        name: string;
+        channel: string;
+        enabled: boolean;
+    }[];
+    background: {
+        applications: Record<string, Record<string, {
+            reason: string;
+        }>>;
+    };
+    deliveries: {
+        messageId: string;
+        to: {
+            endpoint: {
+                id: string;
+            };
+        };
+        delivery: {
+            state: string;
+            error?: {
+                message: string;
+            };
+        };
+    }[];
+    operations: {
+        operationId: string;
+        status: string;
+        error?: {
+            message: string;
+        };
+    }[];
+    discoveryError?: {
+        message: string;
+    };
+    dispatchError?: {
+        message: string;
+    };
+};
+const client = createWorkbenchClient(), MiB = 1024 ** 2;
+const names: Record<string, string> = { pending: '等待分发', delivering: '正在分发', acknowledged: '应用已接管', suspended: '接收应用不可用', parked: '分发已暂停', delivered: '对端已完整接收', failed: '发送失败', unconfirmed: '送达状态未知', cancelled: '已取消', preparing: '准备中', sending: '发送中', confirming: '确认中' };
+const emptyPeer = { identity: '', fingerprint: '', host: '', port: '45731', name: '' };
+const networkLabels: Record<NetworkState, string> = { offline: '未上线', starting: '正在上线', online: '已在线', 'network-changed': '网络已变化，待重新上线', failed: '上线失败，可重试', degraded: '部分通信功能尚未就绪' };
+const currentHost = (value: Snapshot, host: string) => value.interfaces.some(item => item.address === host) ? host : (() => { const choices = value.interfaces.filter(item => !item.internal); return choices.length === 1 ? choices[0].address : ''; })();
+export function CommunicationSettingsContent() {
+    const [loadError, setLoadError] = useState(''), [data, setData] = useState<Snapshot | null>(null), [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [identity, setIdentity] = useState(''), [view, setView] = useState<'identity' | 'peers' | 'peer-manual' | 'limits' | 'grants' | 'dispatch' | null>(null);
+    const [form, setForm] = useState({ enabled: false, host: '', port: '45731', discovery: true, maxMessageBytes: '1024', maxStorageBytes: '8192' }), [deviceName, setDeviceName] = useState(''), [baseline, setBaseline] = useState('');
+    const [peer, setPeer] = useState(emptyPeer), [revoke, setRevoke] = useState<string | null>(null), [versions, setVersions] = useState<Record<string, string>>({}), [grant, setGrant] = useState({ route: '', peers: [] as string[], activation: false }), [grantBaseline, setGrantBaseline] = useState(''), [limit, setLimit] = useState(20);
+    const submittedDraft=useRef({form:'',deviceName:''});
+    const communicationMutation=useSettingsMutation('communication',()=>{void load(true);},()=>{if(submittedDraft.current.form)setBaseline(old=>JSON.stringify({...JSON.parse(old||'{}'),form:JSON.parse(submittedDraft.current.form)}));void load();}),deviceMutation=useSettingsMutation('device',()=>{void load(true);},()=>{setBaseline(old=>JSON.stringify({...JSON.parse(old||'{}'),deviceName:submittedDraft.current.deviceName}));void load();});
+    const navigate = useSettingsNavigation(), titles = { identity: '本机身份', peers: '节点配对', grants: '应用接收与消息激活', dispatch: '分发与发送记录','peer-manual':'手动节点配对',limits:'消息与存储额度' };
+    const dirty = view === 'peer-manual' ? JSON.stringify(peer) !== JSON.stringify(emptyPeer) : view === 'grants' ? !!grantBaseline && JSON.stringify(grant) !== grantBaseline : (!view||view==='limits') ? !!baseline && JSON.stringify({ form, deviceName }) !== baseline : false;
+    useSettingsDraft(dirty, busy, () => { if (view === 'peer-manual')
+        setPeer({ ...emptyPeer });
+    else if (view === 'grants' && grantBaseline)
+        setGrant(JSON.parse(grantBaseline));
+    else if ((!view||view==='limits') && baseline) {
+        const old = JSON.parse(baseline);
+        setForm(old.form);
+        setDeviceName(old.deviceName);
+    } });
+    useSettingsDetail(view,view?titles[view]:'',()=>setView(view==='peer-manual'?'peers':null));
+    function open(next: NonNullable<typeof view>) { navigate(() => { setView(next); setError(''); setNotice(''); }); }
+    const load = async (initial = false) => {
+        const value = await client.request<Snapshot>('/api/communication/state');
+        setData(value);
+        setLoadError('');
+        if (initial) {
+            const [communication, device] = await Promise.all([client.request<{
+                    etag: string;
+                }>('/api/config/communication'), client.request<{
+                    etag: string;
+                }>('/api/config/device')]);
+            setVersions({ communication: communication.etag, device: device.etag });
+            const next = { enabled: value.config.enabled, host: currentHost(value, value.config.host), discovery: value.config.discovery, port: String(value.listener?.port ?? (value.config.port || 45731)), maxMessageBytes: String(value.config.maxMessageBytes / MiB), maxStorageBytes: String(value.config.maxStorageBytes / MiB) }, name = value.device?.name ?? '';
+            setDeviceName(name);
+            setForm(next);
+            setBaseline(JSON.stringify({ form: next, deviceName: name }));
+            setError('');
+        }
+        else
+            setForm(current => ({ ...current, host: currentHost(value, current.host) }));
+    };
+    useEffect(() => { void load(true).catch(e => setLoadError(settingsError(e))); const refresh = () => { if (document.visibilityState !== 'hidden')
+        void load().catch(e => setLoadError(settingsError(e))); }; const timer = setInterval(refresh, 3000); document.addEventListener('visibilitychange', refresh); return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh); }; }, []);
+    async function act(operation: string, input: unknown, message = '已保存。', savedForm = form) {
+        setBusy(true);
+        setError('');
+        setNotice('');
+        try {
+            let applicationError = '';
+            if (operation === 'configure' || operation === 'device.set') {
+                const domain = operation === 'configure' ? 'communication' : 'device';
+                if(domain==='communication')submittedDraft.current.form=JSON.stringify(savedForm);else submittedDraft.current.deviceName=deviceName;
+                const result=await (domain==='communication'?communicationMutation:deviceMutation).submit(input as Record<string,unknown>);
+                if(!result)return;
+                setVersions(old => ({ ...old, [domain]: result.etag }));
+                setBaseline(old => JSON.stringify({ ...JSON.parse(old||'{}'), ...(operation === 'configure' ? { form: savedForm } : { deviceName }) }));
+                if (result.application.state === 'failed')
+                    applicationError = result.application.error?.message ?? '配置已保存，但应用失败。';
+            }
+            else {
+                await client.request('/api/communication/' + operation, input);
+                if (operation === 'trust')
+                    setPeer({ ...emptyPeer });
+                if (operation === 'grant')
+                    setGrantBaseline(JSON.stringify(grant));
+            }
+            await load();
+            setNotice(applicationError ? '已保存，尚未成功应用。' : message);
+            if (applicationError)
+                setError(applicationError);
+            setRevoke(null);
+        }
+        catch (e) {
+            setError(settingsError(e, true));
+        }
+        finally {
+            setBusy(false);
+        }
+    }
+    async function exportIdentity() { setBusy(true); try {
+        setIdentity(JSON.stringify(await client.request('/api/communication/identity', {}), null, 2));
+        await load();
+        setError('');
+    }
+    catch (e) {
+        setError(settingsError(e));
+    }
+    finally {
+        setBusy(false);
+    } }
+    function declareOnline(enabled:boolean){try{const next={...form,enabled};const maxMessageBytes=configurationNumber(next.maxMessageBytes,'单条消息上限',1,16384,false)*MiB,maxStorageBytes=configurationNumber(next.maxStorageBytes,'临时接收额度',maxMessageBytes/MiB,Number.MAX_SAFE_INTEGER/MiB,false)*MiB;const port=configurationNumber(next.port,'通信端口',1,65535);setForm(next);void act('configure',{...next,port,maxMessageBytes,maxStorageBytes},enabled?'已在当前网络声明在线。':'已下线，设备身份和已有配对已保留。',next);}catch(e){setError(settingsError(e,true));}}
+    const networkState: NetworkState = data?.network?.state ?? (data?.listener ? 'online' : 'offline');
+    const feedback = <>{communicationMutation.feedback}{deviceMutation.feedback}{loadError && <SettingsStatus error>通信状态暂时无法读取：{loadError}</SettingsStatus>}{!data && !error && !loadError && <SettingsStatus>正在读取通信设置…</SettingsStatus>}{dirty && <SettingsStatus>有尚未保存的修改</SettingsStatus>}{error && <SettingsStatus error>{error}</SettingsStatus>}{notice && <SettingsStatus>{notice}</SettingsStatus>}</>;
+    if(view==='limits')return <>{feedback}<Form layout="vertical" disabled={busy||communicationMutation.blocked} onCommit={async()=>{declareOnline(data?.config.enabled??form.enabled);}}><SettingsGroup title="消息与存储额度"><SettingsField className="settings-field" label={<>单条消息上限（MiB）</>}><TextField disabled={busy} inputMode="decimal" required min="1" max="16384" value={form.maxMessageBytes} onChange={e => setForm({ ...form, maxMessageBytes: e.target.value })}/></SettingsField><SettingsField className="settings-field" label={<>临时接收额度（MiB）</>}><TextField disabled={busy} inputMode="decimal" required min={form.maxMessageBytes} value={form.maxStorageBytes} onChange={e => setForm({ ...form, maxStorageBytes: e.target.value })}/></SettingsField></SettingsGroup><SettingsActions><Button type="submit" variant="solid" tone="primary" disabled={!data||busy||communicationMutation.blocked}>保存通信额度</Button></SettingsActions></Form></>;
+    if (view === 'identity')
+        return <>{feedback}<SettingsGroup title="节点身份" description="公共身份用于配对，指纹用于核对节点。"><dl className="settings-metadata"><div><dt>节点</dt><dd>{data?.identity?.nodeId ?? '尚未创建'}</dd></div><div><dt>指纹</dt><dd>{data?.identity?.fingerprint ?? '尚未创建'}</dd></div></dl></SettingsGroup><SettingsActions><Button disabled={busy} onClick={() => void exportIdentity()} type="button">导出公共身份</Button></SettingsActions>{identity && <SettingsGroup title="公共身份"><div className="settings-form-fields"><SettingsField className="settings-field is-wide" label={<>将此公共身份交给对方配对</>}><TextArea className="settings-code" readOnly value={identity} rows={8}/></SettingsField></div></SettingsGroup>}</>;
+    if (view === 'peers')
+        return <>{feedback}<SettingsGroup title="节点配对" description="在内网通信应用中请求配对，对方同意后即可收发。">{Object.values(data?.config.peers ?? {}).map(node => <article className="settings-record" key={node.nodeId}><div className="settings-record-heading"><strong>{node.name}</strong><span>{node.host}:{node.port}</span></div><SettingsTechnical title="指纹与信任"><p>{node.fingerprint}</p><SettingsActions><Button className="settings-danger" disabled={busy} onClick={() => setRevoke(node.nodeId)} type="button" tone="danger">撤销信任</Button></SettingsActions><Dialog open={revoke===node.nodeId} title="撤销节点信任？" description={`撤销对“${node.name}”的信任后，后续通信需重新配对。`} centered danger closeOnOutside={false} confirming={busy} onClose={()=>{if(busy)return false;setRevoke(null);}} confirmLabel="撤销信任" onConfirm={async()=>{if(busy)return false;await act('untrust',{nodeId:node.nodeId},'已撤销对端信任。');return false;}}/></SettingsTechnical></article>)}{!Object.keys(data?.config.peers ?? {}).length && <SettingsEmpty>尚无已配对节点。</SettingsEmpty>}{data?.pairingError && <SettingsStatus error>{data.pairingError.message}</SettingsStatus>}</SettingsGroup>
+  <SettingsLink title="手动交换公共身份" description="兼容旧节点或通过其他通道核对指纹" onClick={()=>open('peer-manual')}/></>;
+    if(view==='peer-manual')return <>{feedback}<SettingsGroup title="兼容与高级配对"><p>供兼容旧节点或经其他通道核对指纹时使用。</p>{!!data?.discovered.length && <div className="settings-inline-list">{data.discovered.map(node => <Button type="button" className="settings-button" key={node.nodeId} onClick={() => setPeer({ ...peer, host: node.host, port: String(node.port) })}>{node.host}:{node.port}</Button>)}</div>}<Form onSubmit={e => { e.preventDefault(); try {
+            void act('trust', { ...peer,port:configurationNumber(peer.port,'对端端口',1,65535), identity: JSON.parse(peer.identity) }, '已保存对端信任。对方也需要导入本机身份。');
+        }
+        catch {
+            setError('请检查对端公共身份 JSON 和 1–65535 范围内的端口。');
+        } }} layout="vertical"><fieldset className="settings-form-fields" disabled={busy}><SettingsField className="settings-field is-wide" label={<>对端公共身份</>}><TextArea required className="settings-code" rows={5} value={peer.identity} onChange={e => setPeer({ ...peer, identity: e.target.value })}/></SettingsField><SettingsField className="settings-field is-wide" label={<>经双方核对的完整指纹</>}><TextField required value={peer.fingerprint} onChange={e => setPeer({ ...peer, fingerprint: e.target.value.trim() })}/></SettingsField><SettingsField className="settings-field" label={<>对端 IPv4</>}><TextField required value={peer.host} onChange={e => setPeer({ ...peer, host: e.target.value.trim() })}/></SettingsField><SettingsField className="settings-field" label={<>对端端口</>}><SettingsNumberField inputMode="decimal" required min="1" max="65535" value={peer.port} onChange={e => setPeer({ ...peer, port: e.target.value })}/></SettingsField><SettingsField className="settings-field" label={<>名称</>}><TextField value={peer.name} onChange={e => setPeer({ ...peer, name: e.target.value })}/></SettingsField></fieldset><SettingsActions><Button className="settings-primary" disabled={busy} type="submit" variant="solid" tone="primary">信任此节点</Button></SettingsActions></Form></SettingsGroup></>;
+    if (view === 'grants')
+        return <>{feedback}<Form onSubmit={e => { e.preventDefault(); const [appId, channel] = grant.route.split('|'); void act('grant', { appId, channel, peers: grant.peers, activation: grant.activation }); }} layout="vertical"><SettingsGroup title="接收授权" description="消息激活应用接收入口，任务与 AI 执行仍由接收应用决定。"><fieldset className="settings-form-fields" disabled={busy}><SettingsField className="settings-field is-wide" label={<>应用通道</>}><SettingsSelect required value={grant.route} onChange={e => { const route = e.target.value, saved = data?.config.grants[route], next = { route, peers: saved?.peers ?? [], activation: saved?.activation ?? false }; navigate(() => { setGrant(next); setGrantBaseline(JSON.stringify(next)); }); }}><option value="">选择应用通道</option>{data?.routes.map(route => <option key={route.appId + '|' + route.channel} value={route.appId + '|' + route.channel}>{route.name} · {route.channel}{route.enabled ? '' : '（已停用）'}</option>)}</SettingsSelect></SettingsField><h4 className="settings-field-note">允许来信的节点</h4>{Object.values(data?.config.peers ?? {}).map(node => <SettingsField className="settings-checkbox" key={node.nodeId} label={<>{node.name}</>}><Checkbox checked={grant.peers.includes(node.nodeId)} onChange={e => setGrant({ ...grant, peers: e.target.checked ? [...grant.peers, node.nodeId] : grant.peers.filter(id => id !== node.nodeId) })}/></SettingsField>)}{!Object.keys(data?.config.peers ?? {}).length && <SettingsEmpty>先配对节点，再分配接收授权。</SettingsEmpty>}<SettingsField className="settings-checkbox" label={<>允许新消息激活未运行的应用</>}><Switch checked={grant.activation} onCheckedChange={(checked) => setGrant({ ...grant, activation: checked })} label="允许新消息激活未运行的应用"/></SettingsField></fieldset></SettingsGroup><SettingsActions><Button className="settings-primary" disabled={busy || !grant.route} type="submit" variant="solid" tone="primary">保存接收授权</Button></SettingsActions></Form></>;
+    if (view === 'dispatch')
+        return <>{feedback}<SettingsGroup title="应用分发" action={<Button className="settings-button" disabled={busy} onClick={() => void load().catch(e => setError(settingsError(e)))} type="button">刷新</Button>}>{data?.dispatchError && <SettingsStatus error>{data.dispatchError.message}</SettingsStatus>}{data?.deliveries.slice(0, limit).map(item => <article className="settings-record" key={item.messageId}><div className="settings-record-heading"><strong>{names[item.delivery.state] ?? item.delivery.state}</strong><span>{item.to.endpoint.id}</span></div>{item.delivery.error && <SettingsStatus error>{item.delivery.error.message}</SettingsStatus>}<SettingsTechnical title="消息标识"><p>{item.messageId}</p></SettingsTechnical>{['suspended', 'parked'].includes(item.delivery.state) && <SettingsActions><Button disabled={busy} onClick={() => void act('retry', { messageId: item.messageId }, '已重新安排本机分发。')} type="button">重试应用分发</Button></SettingsActions>}</article>)}{!data?.deliveries.length && <SettingsEmpty>暂无分发记录。</SettingsEmpty>}</SettingsGroup>
+  <SettingsGroup title="最近发送" description="对端完整接收与接收应用处理任务是不同阶段。">{data?.operations.slice(0, limit).map(item => <article className="settings-record" key={item.operationId}><strong>{names[item.status] ?? item.status}</strong>{item.error && <SettingsStatus error>{item.error.message}</SettingsStatus>}<SettingsTechnical title="操作标识"><p>{item.operationId}</p></SettingsTechnical></article>)}{!data?.operations.length && <SettingsEmpty>暂无发送记录。</SettingsEmpty>}</SettingsGroup>{Math.max(data?.deliveries.length ?? 0, data?.operations.length ?? 0) > limit && <SettingsActions><Button onClick={() => setLimit(limit + 20)} type="button">显示更多记录</Button></SettingsActions>}
+  <SettingsGroup title="后台保活"><SettingsTechnical title="应用保活原因">{Object.entries(data?.background.applications ?? {}).map(([appId, holds]) => <div key={appId}><strong>{appId}</strong>{Object.entries(holds).map(([key, value]) => <p key={key}>{value.reason}</p>)}</div>)}{!Object.keys(data?.background.applications ?? {}).length && <SettingsEmpty>暂无保活记录。</SettingsEmpty>}</SettingsTechnical></SettingsGroup></>;
+    return <>{feedback}<SettingsGroup title="本机名称" description="附近节点显示的设备名称，改名无需重新配对。"><Form className="settings-form-fields" onSubmit={e => { e.preventDefault(); void act('device.set', { name: deviceName }, '本机名称已保存。'); }} layout="vertical"><SettingsField className="settings-field" label={<>设备名称</>}><TextField required maxLength={64} disabled={busy} value={deviceName} placeholder="例如：超哥的 Mac" onChange={e => setDeviceName(e.target.value)}/></SettingsField><SettingsActions><Button disabled={busy || !data || communicationMutation.blocked || deviceMutation.blocked} type="submit">保存本机名称</Button></SettingsActions></Form></SettingsGroup>
+  <SettingsGroup title="网络与发现" description={data?.listener ? `正在监听 ${data.listener.host}:${data.listener.port}` : '选择当前网络后声明在线；更换网络无需重新配对。'}>
+   {data && <SettingsStatus error={['failed', 'degraded'].includes(networkState)}>{networkLabels[networkState]}{data.network?.error && '：' + data.network.error.message}</SettingsStatus>}
+   <Form onSubmit={e => { e.preventDefault(); declareOnline(true); }} layout="vertical">
+    <fieldset className="settings-form-fields" disabled={busy || !data || communicationMutation.blocked || deviceMutation.blocked}>
+     <SettingsField className="settings-field" label={<>当前网络</>}><SettingsSelect required value={form.host} onChange={e => setForm({ ...form, host: e.target.value })}><option value="">选择当前可用网络</option>{data?.interfaces.map(item => <option key={item.address} value={item.address}>{item.name} · {item.address}{item.internal ? '（本机测试）' : ''}</option>)}</SettingsSelect></SettingsField>
+     <SettingsField className="settings-field" label={<>通信端口</>}><SettingsNumberField inputMode="decimal" required min="1" max="65535" value={form.port} onChange={e => setForm({ ...form, port: e.target.value })}/></SettingsField>
+     <SettingsField className="settings-checkbox" label={<>发现当前网段的节点</>}><Switch checked={form.discovery} onCheckedChange={(checked) => setForm({ ...form, discovery: checked })} label="发现当前网段的节点"/></SettingsField>
     </fieldset>
-    <SettingsTechnical title="消息与存储额度"><label className="settings-field"><span>单条消息上限（MiB）</span><input disabled={busy} type="number" min="1" max="16384" value={form.maxMessageBytes} onChange={e=>setForm({...form,maxMessageBytes:Number(e.target.value)})}/></label><label className="settings-field"><span>临时接收额度（MiB）</span><input disabled={busy} type="number" min={form.maxMessageBytes} value={form.maxStorageBytes} onChange={e=>setForm({...form,maxStorageBytes:Number(e.target.value)})}/></label></SettingsTechnical>
-    <div className="settings-group-footer"><SettingsActions><button className="settings-primary" disabled={busy||!data}>{busy?'正在应用…':networkState==='offline'?'声明在线':'重新声明在线'}</button><button type="button" disabled={busy||!data||!data.config.enabled&&!data.listener} onClick={()=>declareOnline(false)}>下线</button></SettingsActions></div>
-   </form>
+    <SettingsLink title="消息与存储额度" description="调整单条消息上限和临时接收额度" onClick={()=>open('limits')}/>
+    <div className="settings-group-footer"><SettingsActions><Button className="settings-primary" disabled={busy || !data || communicationMutation.blocked || deviceMutation.blocked} type="submit" variant="solid" tone="primary">{busy ? '正在应用…' : networkState === 'offline' ? '声明在线' : '重新声明在线'}</Button><Button type="button" disabled={busy || !data || !data.config.enabled && !data.listener} onClick={() => declareOnline(false)}>下线</Button></SettingsActions></div>
+   </Form>
   </SettingsGroup>
-  <SettingsGroup title="连接与接收"><SettingsLink title="本机身份" description="节点标识、指纹与公共身份" onClick={()=>open('identity')}/><SettingsLink title="节点配对" description="查看已配对节点与高级配对" value={data?`${Object.keys(data.config.peers).length} 个节点`:undefined} onClick={()=>open('peers')}/><SettingsLink title="应用接收与消息激活" description="管理允许接收消息的节点和应用" onClick={()=>open('grants')}/><SettingsLink title="分发与发送记录" description="查看接收、发送及后台保活状态" onClick={()=>open('dispatch')}/></SettingsGroup>
-  <SettingsActions><button disabled={busy} onClick={()=>navigate(()=>void load(true).catch(e=>setError(settingsError(e))))}>重新读取配置</button></SettingsActions>
+  <SettingsGroup title="连接与接收"><SettingsLink title="本机身份" description="节点标识、指纹与公共身份" onClick={() => open('identity')}/><SettingsLink title="节点配对" description="查看已配对节点与高级配对" value={data ? `${Object.keys(data.config.peers).length} 个节点` : undefined} onClick={() => open('peers')}/><SettingsLink title="应用接收与消息激活" description="管理允许接收消息的节点和应用" onClick={() => open('grants')}/><SettingsLink title="分发与发送记录" description="查看接收、发送及后台保活状态" onClick={() => open('dispatch')}/></SettingsGroup>
+  <SettingsActions><Button disabled={busy} onClick={() => navigate(() => void load(true).catch(e => setError(settingsError(e))))} type="button">重新读取配置</Button></SettingsActions>
  </>;
 }

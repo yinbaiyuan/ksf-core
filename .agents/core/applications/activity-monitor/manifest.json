@@ -7,7 +7,7 @@
   "version": "0.1.6",
   "author": "KSF",
   "icon": "activity",
-  "minCoreVersion": "0.5.5",
+  "minCoreVersion": "0.6.0",
   "dataStores": [],
   "window": {
     "entry": "frontend/index.js",
@@ -26,6 +26,6 @@
     "runtime.read",
     "runtime.manage"
   ],
-  "sdkApiVersion": "1.1.0",
-  "builtWithSdkVersion": "1.1.0"
+  "sdkApiVersion": "1.2.0",
+  "builtWithSdkVersion": "1.2.0"
 }

@@ -34,7 +34,7 @@ const notices = [readFileSync('scripts/licenses/react-bits-aero-shards.txt', 'ut
 for (const key of [...included].sort()) {
   const pkg = JSON.parse(readFileSync(join(key, 'package.json'), 'utf8'));
   const licenses = readdirSync(key).filter(name => /^(licen[sc]e|copying|notice)(?:[._-]|$)/i.test(name) && statSync(join(key, name)).isFile());
-  const supplements = { 'react-remove-scroll-bar@2.3.8': 'react-remove-scroll-bar', 'remark-math@6.0.0': 'remark-math', 'rehype-katex@7.0.1': 'rehype-katex' };
+  const supplements = { 'react-remove-scroll-bar@2.3.8': 'react-remove-scroll-bar', 'remark-math@6.0.0': 'remark-math', 'rehype-katex@7.0.1': 'rehype-katex', '@fluentui/react-icons@2.0.347': 'fluentui-system-icons' };
   const supplement = supplements[`${pkg.name}@${pkg.version}`] ? `scripts/licenses/${supplements[`${pkg.name}@${pkg.version}`]}.txt` : null;
   if (!licenses.length && !supplement) throw new Error(`Missing license notice for ${key}; inspect before distributing.`);
   notices.push(`## ${pkg.name}@${pkg.version} (${pkg.license ?? 'see notice'})\n` +

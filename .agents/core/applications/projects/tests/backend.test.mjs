@@ -116,3 +116,14 @@ test('SDK v1 对话代理保留原文和操作号，多窗口恢复各自的原�
   const rejected=await app.call('conversation.attach',{...params,taskId:'unmatched'},one);assert.equal(rejected.attached,false);assert.equal((await app.call('conversation.resume',params,one)).threadId,'thread-operation-one');
   const text=await readFile(join(root,'data/conversations.json'),'utf8');assert.ok(!text.includes('空格'));
 });
+
+test('最近访问串行合并到原显示设置，重复及迟到请求不倒退，不改业务原件',async t=>{
+ const {app,root,params,p}=await fixture(t),now=Date.now(),first=new Date(now-2000).toISOString(),last=new Date(now-1000).toISOString();
+ const path=join(root,'项目/示例/project.md');await writeFile(path,p.body);const original=await readFile(path,'utf8');
+ await app.call('preferences.visit',{...params,visitedAt:first});
+ await Promise.all([app.call('preferences.visit',{...params,visitedAt:last}),app.call('preferences.pin',{...params,pinned:true}),app.call('preferences.save',{selected:'current:示例',tab:'plan'})]);
+ await app.call('preferences.visit',{...params,visitedAt:first});
+ const reopened=createBackend({workspace:root,dataDirectory:join(root,'.app-data')});t.after(()=>reopened.dispose());const preferences=await reopened.call('preferences.read');
+ assert.equal(preferences.recentProjects['current:示例'],last);assert.deepEqual(preferences.pinnedProjects,['current:示例']);assert.equal(preferences.tab,'plan');assert.equal(preferences.schemaVersion,1);assert.equal(await readFile(path,'utf8'),original);
+ await assert.rejects(app.call('preferences.visit',{...params,visitedAt:'bad'}),/访问时间无效/);await assert.rejects(app.call('preferences.visit',{...params,visitedAt:new Date(now+3600000).toISOString()}),/访问时间无效/);
+});
