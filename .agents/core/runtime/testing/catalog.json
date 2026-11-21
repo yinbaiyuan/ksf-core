@@ -13620,11 +13620,11 @@
       ]
     },
     {
-      "id": "core:private-domain",
-      "path": ".agents/core/runtime/tests/private-domain.test.js",
+      "id": "core:project-object-properties",
+      "path": ".agents/core/runtime/tests/project-object-properties.test.js",
       "owner": "core",
       "covers": [
-        "web"
+        "app:com.ksf.projects"
       ],
       "suite": "quick",
       "platforms": [
@@ -13633,8 +13633,8 @@
       ],
       "cacheable": true,
       "inputs": [
-        ".agents/core/applications/projects/private-ui/domain-model.ts",
-        ".agents/core/runtime/tests/private-domain.test.js",
+        ".agents/core/applications/projects/object-file-model.js",
+        ".agents/core/runtime/tests/project-object-properties.test.js",
         ".agents/core/runtime/src/projects/governance/model.js"
       ],
       "requirements": [],
@@ -13643,17 +13643,16 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "Structural compatibility with current governance records, immutable intent identities and no inferred authority or stage confirmation.",
+      "timingBasis": "Literal property compatibility with current governance records; preserves unknown fields and independent completion/evidence, with a guard against retired private UI files.",
       "verification": {
         "lane": "shared",
         "kind": "logic",
-        "reason": "Pure display projections tested against actual governance defaultMetadata; visual reuse and service model reads checked separately."
+        "reason": "Pure metadata presentation and explicit edit behavior against actual governance defaultMetadata; no derived summaries or workflow authority."
       },
       "selectionInputs": [
-        ".agents/core/applications/projects/private-ui/domain-model.ts",
-        ".agents/core/applications/projects/private-ui/domain.tsx",
-        ".agents/core/applications/projects/private-ui/domain.css",
-        ".agents/core/runtime/tests/private-domain.test.js"
+        ".agents/core/applications/projects/object-file-model.js",
+        ".agents/core/applications/projects/object-metadata.tsx",
+        ".agents/core/runtime/tests/project-object-properties.test.js"
       ]
     },
     {
