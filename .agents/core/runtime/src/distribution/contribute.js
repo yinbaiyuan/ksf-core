@@ -15,6 +15,7 @@ import { GitHubAPI, treeFromChanges } from './github.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
 import { contributionCommitMessage, checkCommitMessage } from '../services/commit-message.js';
 import { requirePRDescription, checkPRDescription, contributionPRBody } from '../services/pr-description.js';
+import {serializeContributionPlan} from './contribution-plan.js';
 
 // GitHub omits the final LF when presenting an otherwise identical Git message.
 const matchesCommitMessage = (actual, expected) => actual === expected || expected.endsWith('\n') && actual === expected.slice(0, -1);
@@ -83,9 +84,10 @@ export async function prepareContribution({ root, paths, all = false, title, bod
   const plan = { schema_version: 5, target: { repository: manifest.core.repository, branch: configuration(root).core_branch }, id: randomUUID(), created_at: new Date().toISOString(), sourceCommit: source.sourceCommit,
     baseline, core: manifest.core, version: manifest.version, title, body, commitMessage, prDescription, prBody: publicPRBody, changes };
   const digest = digestObject(plan), directory = `.agents/runtime-data/contributions/${plan.id}`;
+  const frozen = serializeContributionPlan({ ...plan, digest });
   const warnings = await previousContributionWarnings(root, plan, api, fetcher);
   if (!dryRun) {
-    writeJSON(checkedPath(root, `${directory}/plan.json`), { ...plan, digest });
+    writeAtomic(checkedPath(root, `${directory}/plan.json`), frozen);
     writeAtomic(checkedPath(root, `${directory}/review.diff`), changes.map(c => c.diff).join('\n'));
   }
   return { ...plan, digest, dryRun, warnings, reviewPath: dryRun ? null : `${directory}/review.diff` };

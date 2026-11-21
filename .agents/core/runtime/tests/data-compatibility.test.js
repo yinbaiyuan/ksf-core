@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm,open} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {inspectCoreDataCompatibility,assertCoreDataCompatibility} from '../src/data-compatibility.js';
+import {serializeContributionPlan,contributionPlanMaxBytes} from '../src/distribution/contribution-plan.js';
 const original=JSON.parse(await readFile(new URL('../../data-compatibility.json',import.meta.url),'utf8'));
 async function fixture(t){const root=await mkdtemp(join(tmpdir(),'ksf-compat-'));t.after(()=>rm(root,{recursive:true,force:true}));const candidate=join(root,'candidate');await mkdir(candidate);await writeFile(join(candidate,'build.json'),JSON.stringify({version:'0.3.0'}));await writeFile(join(candidate,'data-compatibility.json'),JSON.stringify(original));return{root,candidate,async write(path,value){const target=join(root,path);await mkdir(join(target,'..'),{recursive:true});await writeFile(target,typeof value==='string'?value:JSON.stringify(value));return target;}};}
 test('Core compatibility preflight is read only and rejects unknown schema versions',async t=>{
@@ -62,4 +64,38 @@ test('runtime, renamed and legacy Git locators use the same authoritative reader
 test('cooperation statement schema requires a compatible Core and never rewrites rules during preflight',async t=>{
  const f=await fixture(t),path=await f.write('.agents/runtime-data/ai/execution-grants/rules.json',{schemaVersion:2,revision:1,rules:[]}),before=await readFile(path,'utf8');assert.equal((await inspectCoreDataCompatibility(f.root,f.candidate)).compatible,true);
  const old=structuredClone(original);old.formats=old.formats.filter(row=>row.id!=='cooperation-execution-rules');await writeFile(join(f.candidate,'data-compatibility.json'),JSON.stringify(old));const result=await inspectCoreDataCompatibility(f.root,f.candidate);assert.equal(result.compatible,false);assert.ok(result.errors.some(e=>e.format==='cooperation-execution-rules'));assert.equal(await readFile(path,'utf8'),before);
+});
+
+test('large frozen contribution records retain their bytes and still require compatible readers',async t=>{
+ const f=await fixture(t),name='.agents/runtime-data/contributions/11111111-1111-4111-8111-111111111111/plan.json';
+ const path=await f.write(name,'{"schema_version":5}'+ ' '.repeat(65*1024*1024));
+ const checksum=async()=>createHash('sha256').update(await readFile(path)).digest('hex'),before=await checksum();
+ assert.equal((await inspectCoreDataCompatibility(f.root,f.candidate)).compatible,true);
+ assert.equal(await checksum(),before);
+ const missing=structuredClone(original);missing.formats=missing.formats.filter(row=>row.id!=='contribution-plans');
+ await writeFile(join(f.candidate,'data-compatibility.json'),JSON.stringify(missing));
+ const result=await inspectCoreDataCompatibility(f.root,f.candidate);assert.equal(result.compatible,false);assert(result.errors.some(e=>e.format==='contribution-plans'));
+ assert.equal(await checksum(),before);
+ await writeFile(join(f.candidate,'data-compatibility.json'),JSON.stringify(original));
+ const handle=await open(path,'r+');await handle.write('{"schema_version":9}',0,'utf8');await handle.close();
+ assert.equal((await inspectCoreDataCompatibility(f.root,f.candidate)).compatible,false);
+ const restore=await open(path,'r+');await restore.write('{"schema_version":5}',0,'utf8');await restore.close();assert.equal(await checksum(),before);
+});
+
+test('contribution preflight keeps bounded JSON parsing and the ordinary record limit',async t=>{
+ const f=await fixture(t),name='.agents/runtime-data/contributions/11111111-1111-4111-8111-111111111111/plan.json';
+ const path=await f.write(name,'{"schema_version":5}');
+ const oversized=await open(path,'r+');await oversized.truncate(128*1024*1024+1);await oversized.close();
+ const tooLarge=await inspectCoreDataCompatibility(f.root,f.candidate);assert.equal(tooLarge.compatible,false);assert(tooLarge.errors.some(e=>e.format==='contribution-plans'&&e.code==='CORE_DATA_INVALID'));
+ await f.write(name,'{"schema_version":5}'+ ' '.repeat(65*1024*1024)+'!');
+ assert.equal((await inspectCoreDataCompatibility(f.root,f.candidate)).compatible,false);
+ await rm(path);const ordinary=await f.write('.agents/user-data/settings.json','{"schema_version":1}');
+ const handle=await open(ordinary,'r+');await handle.truncate(64*1024*1024+1);await handle.close();
+ const regular=await inspectCoreDataCompatibility(f.root,f.candidate);assert.equal(regular.compatible,false);assert(regular.errors.some(e=>e.path==='.agents/user-data/settings.json'&&e.code==='CORE_DATA_INVALID'));
+});
+
+test('new contribution plans are bounded by encoded UTF-8 bytes before persistence',()=>{
+ const exact={padding:' '.repeat(contributionPlanMaxBytes-Buffer.byteLength('{\n  "padding": ""\n}\n'))};
+ assert.equal(Buffer.byteLength(serializeContributionPlan(exact)),contributionPlanMaxBytes);
+ exact.padding+='中';assert.throws(()=>serializeContributionPlan(exact),{code:'CONTRIBUTION_TOO_LARGE'});
 });
