@@ -7271,6 +7271,46 @@
       ]
     },
     {
+      "id": "core:system-update-frontend-metadata",
+      "path": ".agents/core/runtime/tests/system-update-frontend-metadata.test.js",
+      "owner": "core",
+      "covers": [
+        "core",
+        "web"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/runtime/tests/system-update-frontend-metadata.test.js",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform"
+      ],
+      "requirements": [],
+      "timeoutMs": 30000,
+      "seconds": {
+        "darwin": 1,
+        "win32": 1,
+        "linux": 1
+      },
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Validate real filesystem merge planning of generated frontend identities while preserving custom content on every native target."
+      },
+      "selectionInputs": [
+        ".agents/core/runtime/tests/system-update-frontend-metadata.test.js",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/shared",
+        ".agents/core/runtime/src/platform"
+      ]
+    },
+    {
       "id": "core:release-files",
       "path": ".agents/core/runtime/tests/release-files.test.js",
       "owner": "core",
