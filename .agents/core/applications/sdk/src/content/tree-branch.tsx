@@ -2,7 +2,7 @@ import {useLayoutEffect,useRef,useState,type ReactNode} from 'react';
 import {useWindowContext} from '../window-context';
 
 /** A finite height transition, with no animation runtime or cross-window timers. */
-export function TreeBranch({open,children}:{open:boolean;children:ReactNode}) {
+export function TreeBranch({open,children}:{open:boolean;children:ReactNode|(()=>ReactNode)}) {
   const [present,setPresent]=useState(open), element=useRef<HTMLUListElement>(null), initial=useRef(true), context=useWindowContext();
   useLayoutEffect(()=>{
     if(initial.current){initial.current=false;return;}
@@ -30,5 +30,5 @@ export function TreeBranch({open,children}:{open:boolean;children:ReactNode}) {
     media.addEventListener('change',reduced);doc.addEventListener('visibilitychange',visibility);view.addEventListener('blur',blur);node.addEventListener('transitionend',end);
     return()=>{disposed=true;view.cancelAnimationFrame(frame);view.clearTimeout(timer);observer?.disconnect();mutation?.disconnect();media.removeEventListener('change',reduced);doc.removeEventListener('visibilitychange',visibility);view.removeEventListener('blur',blur);node.removeEventListener('transitionend',end);};
   },[open,present,context.active,context.enabled]);
-  return present?<ul ref={element} role="group" className="ksf-tree-branch" aria-hidden={!open||undefined} inert={!open||undefined}>{children}</ul>:null;
+  return present?<ul ref={element} role="group" className="ksf-tree-branch" aria-hidden={!open||undefined} inert={!open||undefined}>{typeof children==='function'?children():children}</ul>:null;
 }

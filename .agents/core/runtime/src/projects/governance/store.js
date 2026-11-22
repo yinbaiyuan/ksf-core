@@ -9,6 +9,7 @@ import {hash,digest,fail,object,safePath,snapshot,encodeDocument,document} from 
 import {loadGraph,checkGraph,closure,projection} from './graph.js';
 import {documentKind,inspirationPath,resourceOwner} from './layout.js';
 import {contextEntries} from './contexts.js';
+import {withGovernanceRead} from './read-context.js';
 import {checkExecutionWrite,executionViews,releaseEndedExecutions} from '../task-execution.js';
 import {hostIdentity,sessionKey} from '../../routing/storage.js';
 import {confirmationScope,prepareConfirmation,requireMilestoneConfirmation} from './confirmation.js';
@@ -25,6 +26,9 @@ function readJSON(path){return JSON.parse(readSnapshot(path).bytes.toString('utf
 export const governanceJournal={ensure:ensureInternal,path:journal,save:saveJSON,read:readJSON,pendingPath};
 export function projectPath(name,scope='current'){validateName(name);if(!['current','archived'].includes(scope))fail('INVALID_ARGUMENTS','scope使用current或archived。');return (scope==='archived'?'档案/项目/':'项目/')+name+'/project.md';}
 export function readGovernance(root,name,scope='current',{overlay=new Map(),changedPaths=null,allowPending=false}={}){
+  return withGovernanceRead(()=>readGovernanceSnapshot(root,name,scope,{overlay,changedPaths,allowPending}));
+}
+function readGovernanceSnapshot(root,name,scope,{overlay,changedPaths,allowPending}){
   if(!allowPending)assertNoPending(root);
   const path=projectPath(name,scope),graph=loadGraph(root,overlay),rootDoc=graph.docs.get(path)??graph.legacy.get(path);
   if(!rootDoc)return {format:'missing',state:'missing',path,etag:'missing',readOnly:scope==='archived',documents:[],errors:graph.errors.filter(x=>x.path===path),warnings:[],graph};

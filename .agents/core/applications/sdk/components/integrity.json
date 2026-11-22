@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fingerprint": "e73acec2b07bbba9124336c88a4880cfa81814b0ce90f7f1ebd58972214001d9",
+  "fingerprint": "38bd4d9c3c766df42972dff91c2a564ad6a14de8df03d9cf93af095cf5f8eb94",
   "files": {
     "THIRD_PARTY_NOTICES.txt": "5535bafe2809eabe3c1e782385c11f2bda302f2e163c96cf1f016acda6071bc8",
     "build.mjs": "320b0b3b7816469e9447b3a89595fbcebd45d4a6ced3877ab1c7333c007ce3bc",
@@ -1235,10 +1235,10 @@
     "src/content/table-filter.tsx": "b8318930956fe1a6a852163415723ef1ef6bd8c84d5de83bfeb53e8917d9e5a3",
     "src/content/table-model.ts": "fbc747756514a9877fbee2d672871e1a21590a0bca49b8d1e0ca127a74cdeb0e",
     "src/content/table.css": "50df132df809e7e8015e586f2ff8b70806b0907304ec3dd1c1760fffe7832e08",
-    "src/content/tree-branch.tsx": "b98ef7012a0c8e5c6c3e43da7e9311ecc8ee684a7dbf42e2aea2c698ed5b23e5",
+    "src/content/tree-branch.tsx": "8f106278ad70746783ecd3cc9d8e7f76749bf7628c079479ecd8d5195b1c2576",
     "src/content/tree-model.ts": "3e84456378c540dc3cc796525a96229a150b639e268c29355ef5acfdbafea81e",
     "src/content/tree.css": "388506393a483fd17d4fe054adec8f14ab6eefc5c3ff78c1f49d0595ed2ebbf5",
-    "src/content/tree.tsx": "93d0266c02064b7481a9f0ee48f07bee16ef079fcba7509cb4421d37b0f2114e",
+    "src/content/tree.tsx": "308aedfb1986a2c6368e0786690faa7baf9780b5e357af77477f936d4500ff79",
     "src/content/watermark-control.tsx": "e3b0f7a8a4c1e8c1d24e71bb1cb4a7545136cf864a832daed34aa6cf14add8db",
     "src/context-menu.tsx": "fe2ef4970a265ad3a6fdd13b890c68c0746619df1269cd05d469248accfa6872",
     "src/context-meter.tsx": "afebbd9be6e8f8cbc736418da8a64ae2f91be7f35b5095f8e681e9d85b46f9e6",

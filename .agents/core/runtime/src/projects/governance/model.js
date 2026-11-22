@@ -7,6 +7,7 @@ import {MetadataError} from '../../metadata/errors.js';
 import {platform} from '../../platform/index.js';
 import {historicalProjectBytes,locateProjectResource} from './locations.js';
 import {taskCode,stageIssues} from './task-codes.js';
+import {memoRead} from './read-context.js';
 
 import {SCHEMA,STATES,statesFor,unified} from './states.js';
 export {SCHEMA,STATES} from './states.js';
@@ -118,6 +119,9 @@ export function validateMetadata(d){
 }
 
 export function evidenceValid(root,e,overlay=new Map()){
+  return memoRead(overlay,JSON.stringify([root,e]),()=>checkEvidence(root,e,overlay));
+}
+function checkEvidence(root,e,overlay){
   try{
     if(!object(e))return false;
     if(e.url){const u=new URL(e.url);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password&&typeof e.version==='string'&&!!e.version.trim();}
@@ -129,7 +133,7 @@ export function evidenceValid(root,e,overlay=new Map()){
       return hash(bytes)===e.digest||!!overlay.beforeVersions?.get(e.path+':'+e.digest)||!!historicalProjectBytes(root,e.path,e.digest,bytes,undefined,{mergeRecords:overlay.mergeRecords});
     }
     const path=safePath(root,e.path,{missing:true,resource:true});let current;
-    try{current=readSnapshot(path,{digestOnly:true});}
+    try{current=memoRead(root,'digest:'+path,()=>readSnapshot(path,{digestOnly:true}));}
     catch(error){if(error.code!=='FILE_NOT_FOUND')throw error;return locateProjectResource(root,{path:e.path,digest:e.digest,digestOnly:true},{mergeRecords:overlay.mergeRecords}).digest===e.digest;}
     if(current.digest===e.digest||overlay.beforeVersions?.get(e.path+':'+e.digest))return true;
     return current.stat.size<=2*1024*1024&&!!historicalProjectBytes(root,e.path,e.digest,readSnapshot(path).bytes,undefined,{mergeRecords:overlay.mergeRecords});

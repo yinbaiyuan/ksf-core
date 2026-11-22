@@ -9,6 +9,19 @@ import {projectGovernance} from '../src/services/project-governance.js';
 import {projectManagement,emptyProjectPlan} from '../src/services/project-management.js';
 import {runProjectCommand} from '../src/commands/projects.js';
 
+test('repeated evidence checks share a read but never hide subsequent evidence changes',t=>{
+  const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);
+  const path=dirname(f.tp)+'/proof.txt',text='固定原始证据';writeFileSync(join(f.root,path),text);
+  const criteria=[{id:'a',text:'第一项'},{id:'b',text:'第二项'}],metadata={...f.task,criteria};
+  const result=f.apply([f.change(f.tp,{status:'completed',criteria,verification:f.proof(metadata,path,text),next_action:null})]);
+  assert.deepEqual(result.errors,[]);assert(!f.read().stale.includes(f.task.id));
+  writeFileSync(join(f.root,path),'外部修改过的证据');assert(f.read().stale.includes(f.task.id));
+  writeFileSync(join(f.root,path),text);assert(!f.read().stale.includes(f.task.id));
+  const overlay=f.call('apply',{operationId:'read-isolation-overlay',ifMatch:f.read().etag,changes:[{path,ifMatch:hash(text),body:'预览的新证据'}]},true);
+  assert(overlay.errors.length>0||overlay.data.stale.includes(f.task.id));
+  assert.equal(readFileSync(join(f.root,path),'utf8'),text);assert(!f.read().stale.includes(f.task.id));
+});
+
 test('flat layout discovers all three context levels and lists one directory at a time through CLI',t=>{
   const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);
   const p=dirname(f.pp),m=dirname(f.mp),task=dirname(f.tp);

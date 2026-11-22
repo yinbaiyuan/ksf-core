@@ -22,9 +22,6 @@
       "@/*": [
         "./src/*"
       ],
-      "@ksf/sdk": [
-        "../../applications/sdk/src/index.ts"
-      ],
       "@ksf/sdk/*": [
         "../../applications/sdk/src/*"
       ],

@@ -223,7 +223,7 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
       const tasks=own.filter(d=>d.metadata.kind==='task').map(d=>({path:d.path,name:(d.metadata.task_code?d.metadata.task_code+' · ':'')+d.metadata.name,taskId:d.metadata.id,state:d.metadata.status,updated:d.metadata.updated,schema:'governance',next:[{title:'下一步',body:d.metadata.next_action??''}]}));
       const refs=links(p.body,p.path),seen=new Set(refs.map(x=>x.path??x.url));
       for(const d of own){for(const ref of [...links(d.body,d.path),...(d.metadata.context_refs??[]).map(r=>({...r,title:r.role??r.path??r.url,source:d.path})),...(d.metadata.result_refs??[]).map(r=>({...r,title:r.role??r.path??r.url,source:d.path})),...evidenceReferences(d.metadata).map(r=>({...r,title:r.role+' · '+(r.path?.split('/').at(-1)??r.url),source:d.path}))]){const id=ref.path??ref.url;if(!seen.has(id)){seen.add(id);refs.push(ref);}}}
-      const resources=g.lifecycle?.supported&&(injectedLifecycle||context.services)?await relocatedLinks(refs.slice(0,600)):refs.slice(0,600);
+      const resources=refs.slice(0,600);
       return {...p,title:string(metadata.name)||p.name,description:string(metadata.description),status:string(metadata.status),updated:string(metadata.updated),topics:metadata.topics??[],sections:sections(p.body),tasks,warnings:[...[...(g.errors??[]),...(g.warnings??[])].map(x=>(x.path?x.path+'：':'')+x.message),...resources.filter(r=>r.warning).map(r=>r.title+'：'+r.warning)],resources,resourcesTruncated:refs.length>600,repositories:(metadata.repositories??[]).map(path=>({path,title:path.split('/').at(-1)})),governance:g};
     }
     const scan=await scanTasks(p);
@@ -356,7 +356,7 @@ export function createBackend(context, {cli: injectedCLI, management: injectedMa
     }
     if(method==='file'){
       const p=await project(params);let path=string(params.path),version;
-      if((p.metadata?.archive_history?.length||p.metadata?.task_numbering_history?.length)||params.digest){version=await lifecycle('resolve',{path,digest:params.digest,read:!!params.digest});path=version.path;}
+      if((p.metadata?.archive_history?.length||p.metadata?.task_numbering_history?.length)||params.digest||params.source&&params.href){version=await lifecycle('resolve',{path:params.source&&params.href?decodeURIComponent(params.href.split('#')[0]):path,...(params.source&&params.href?{source:params.source}:{}),digest:params.digest,read:!!params.digest});path=version.path;}
       if(!inside(resolve(root,p.directory),resolve(root,path))){
         assert(params.digest,'请从该项目的原文件入口打开。');
         const state=await governance('read',{name:params.name,scope:params.scope});

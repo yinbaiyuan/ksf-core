@@ -1,4 +1,4 @@
-import {useEffect,useState,type ReactNode} from 'react';
+import {memo,useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 import {Button} from '@ksf/sdk/button';
 import {TextField} from '@ksf/sdk/text-field';
 import {TextArea} from '@ksf/sdk/text-area';
@@ -16,8 +16,20 @@ export const labels:Record<string,string>={project:'项目',archived:'已归档'
 export const fieldLabels:Record<string,string>={name:'名称',title:'标题',text:'内容',description:'说明',purpose:'目标',scope:'范围',summary:'当前判断',successCriteria:'成功标准',status:'状态',state:'状态',owner:'负责人',next_action:'下一步',nextAction:'下一步',blocker:'阻塞原因',resume_condition:'恢复条件',resume_status:'暂停前环节',status_reason:'状态原因',commitment:'承诺',work_type:'任务用途',priority:'优先级',priority_reason:'优先级理由',priorityReason:'优先级理由',due_date:'期限',dueDate:'期限',criteria:'完成条件',goals:'目标',goal_ids:'关联目标',goalIds:'关联目标',depends_on:'硬依赖',dependsOn:'硬依赖',risks:'风险',decisions:'决定',rationale:'理由与依据',impact:'影响',response:'应对行动',reviewTrigger:'复核触发条件',review_trigger:'复核触发条件',reviewedAt:'复核时间',reviewed_at:'复核时间',reviewer:'复核者',result:'复核结果',outcome:'复盘结论',path:'原件路径',url:'网页地址',version:'记录版本',role:'记录用途',context_refs:'参考资料引用',result_refs:'结果引用',wip_limit:'在制上限',wipLimit:'在制上限',level:'管理强度',mode:'项目方式',phase:'当前环节',currentStageId:'当前阶段',task_stages:'任务推进阶段',code:'阶段字母',exit_criteria:'退出条件',goal:'目标',links:'关联入口',stageId:'所属阶段',items:'工作事项',stages:'阶段成果',acceptance:'验收条件',parent_project:'父项目',child_projects:'子项目',focus_milestones:'关注里程碑',focus_tasks:'关注任务',id:'稳定标识'};
 const choices:Record<string,string[]>={status:['planned','active','paused','review','completed','cancelled'],commitment:['candidate','next','now'],work_type:['delivery','acceptance'],priority:['high','normal','low'],resume_status:['planned','active','review'],result:['pending','passed','failed'],outcome:['pending','passed','failed','cancelled'],level:['A','B','C','D'],mode:['finite','ongoing'],phase:['definition','planning','execution']};
 export function Status({value}:{value:string}){return <Badge>{labels[value]??value??'未标注'}</Badge>;}
-export function Fold({title,children,initial=false}:{title:string;children:ReactNode;initial?:boolean}){return <Accordion appearance="plain" defaultValue={initial?['content']:[]} items={[{id:'content',title,content:children}]}/>;}
+function FoldContent({children}:{children:ReactNode|(()=>ReactNode)}){return typeof children==='function'?children():children;}
+export function Fold({title,children,initial=false,lazy=false}:{title:string;children:ReactNode|(()=>ReactNode);initial?:boolean;lazy?:boolean}){return <Accordion appearance="plain" unmountClosed={lazy} defaultValue={initial?['content']:[]} items={[{id:'content',title,content:<FoldContent>{children}</FoldContent>}]}/>;}
 export function Markdown({text,path='',open}:{text?:string;path?:string;open?:(path:string)=>void}){const sdk=useApplicationSDK();return text?<RichPreview text={text} path={path} open={open??(target=>sdk.openApp('markdown',new URLSearchParams({path:target,mode:'read'}).toString()))} allowLocal={()=>false}/>:<p className="project-muted">尚未记录</p>;}
+const ReadingMarkdown=memo(Markdown);
+// Read-only bodies only. Keep at most three mounted previews in this window so
+// returning to a long task does not parse its unchanged Markdown again.
+export function CachedMarkdown({text,path,open}:{text:string;path:string;open:(path:string)=>void}){
+ const retained=useRef(new Map<string,{path:string;text:string}>()),latestOpen=useRef(open);latestOpen.current=open;
+ const onOpen=useCallback((target:string)=>latestOpen.current(target),[]);
+ const existing=retained.current.get(path);
+ retained.current.delete(path);retained.current.set(path,existing?.text===text?existing:{path,text});
+ while(retained.current.size>3)retained.current.delete(retained.current.keys().next().value!);
+ return <>{[...retained.current.values()].map(entry=><div key={entry.path} hidden={entry.path!==path}><ReadingMarkdown text={entry.text} path={entry.path} open={onOpen}/></div>)}</>;
+}
 export function Block({title,children}:{title:string;children:ReactNode}){return <section className="project-block"><h3>{title}</h3>{children}</section>;}
 
 /** Business field composition. Native validation and interaction belong to the SDK. */

@@ -83,16 +83,28 @@ function reconcile(previous, entries, {seenPath, saved, move, visible, onMove}) 
 export function createProjectContextFiles(files, storage) {
   const {root} = files;
   const queue = createCoordinator(), watches = new Map(), reviews = new Map();
+  let baselineReads=0;
+  const baselineWaiters=[];
+  async function baselineSlot(read,priority=0){
+    if(baselineReads>=4)await new Promise(resolve=>baselineWaiters.push({resolve,priority}));
+    else baselineReads++;
+    try{return await read();}
+    finally{
+      let index=0;
+      for(let i=1;i<baselineWaiters.length;i++)if(baselineWaiters[i].priority>baselineWaiters[index].priority)index=i;
+      const next=baselineWaiters.splice(index,1)[0];if(next)next.resolve();else baselineReads--;
+    }
+  }
   let closed = false;
-  function target({name,scope,objectPath}) {
+  function target({name,scope,objectPath},state) {
     assert(['current','archived'].includes(scope), 'PROJECT_CONTEXT_PATH', '请选择项目范围。');
-    const {parsed} = load(root,name,{scope});
+    const parsed = state?.project ? {values:state.project.metadata} : load(root,name,{scope}).parsed;
     const projectBase = (scope === 'current' ? '项目/' : '档案/项目/') + name;
     const projectPath=projectBase+'/project.md';
     let owner={path:projectPath,metadata:parsed.values}, valid=true;
     if(objectPath!==undefined){
       assert(typeof objectPath==='string'&&within(objectPath,projectBase), 'PROJECT_CONTEXT_PATH', '请选择当前项目的对象原件。');
-      const state=readGovernance(root,name,scope);
+      state??=readGovernance(root,name,scope);
       owner=objectPath===projectPath?state.project:state.documents.find(doc=>doc.path===objectPath);
       const indexed=(doc,kind,container,refs)=>doc?.metadata.kind===kind&&documentKind(doc.path)===kind&&
         doc.metadata.project?.id===parsed.values.id&&doc.metadata.project?.path===projectPath&&
@@ -236,23 +248,23 @@ export function createProjectContextFiles(files, storage) {
     }else review.baselines.delete(path);
     return available;
   }
-  async function reviewProject(project,id,live,move){
+  async function reviewProject(project,id,live,move,priority=0){
     const session=reviewSession(id);
     let review=session.projects.get(project.base);
     if(!review){
       review={baselines:new Map(),state:reconcile(null,live.entries,{visible:()=>true})};
       const baselineEntries=new Map(review.state.entries.map(entry=>[entry.path,entry]));
-      for(const entry of live.entries){
-        if(entry.kind!=='file'||!textFile(entry.path)||reserved.has(posix.basename(entry.path).toLowerCase()))continue;
+      await Promise.all(live.entries.map(entry=>baselineSlot(async()=>{
+        if(entry.kind!=='file'||!textFile(entry.path)||reserved.has(posix.basename(entry.path).toLowerCase()))return;
         try{
           const item=await checked(project,entry.path);
-          if(item.stat.size>MAX_REVIEW_FILE||session.bytes+item.stat.size>MAX_REVIEW_BYTES)continue;
+          if(item.stat.size>MAX_REVIEW_FILE||session.bytes+item.stat.size>MAX_REVIEW_BYTES)return;
           const file=await files.read(entry.path);
           if(setBaseline(session,review,entry.path,file)){
             baselineEntries.get(entry.path).stamp=file.stamp;
           }
         }catch{ /* An unreadable file establishes its baseline on a later successful open. */ }
-      }
+      },priority)));
       session.projects.set(project.base,review);
     }
     review.state=reconcile(review.state,live.entries,{
@@ -265,7 +277,7 @@ export function createProjectContextFiles(files, storage) {
     return {session,review};
   }
   async function reviewedValue(project,id,value){
-    const {session,review}=await reviewProject(project,id,await scan(project));
+    const {session,review}=await reviewProject(project,id,await scan(project),undefined,2);
     let baseline=review.baselines.get(value.path);
     if(!baseline){
       const isNew=review.state.entries.some(entry=>entry.path===value.path&&entry.reason==='new');
@@ -320,11 +332,27 @@ export function createProjectContextFiles(files, storage) {
       reviewSession(input.reviewSession).ownerPid=input.reviewOwnerPid;
     }
     const {action,path,version,text,destination,kind,unread}=input;
-    const project=target(input);
-    return queue.run(project.projectBase,async()=>{
+    if(action==='changes'&&input.objects!==undefined){
+      assert(Array.isArray(input.objects)&&input.objects.length>0&&input.objects.length<=3&&
+        input.objects.every(object=>typeof object?.objectPath==='string')&&
+        new Set(input.objects.map(object=>object.objectPath)).size===input.objects.length,
+      'PROJECT_CONTEXT_INPUT','批量读取需要一至三个不同的对象。');
+      const state=readGovernance(root,input.name,input.scope);
+      const targets=input.objects.map(object=>target({...input,objectPath:object.objectPath},state));
+      const scopes=await Promise.all(targets.map((project,index)=>perform(project,{...input,objectPath:input.objects[index].objectPath,revision:input.objects[index].revision,objects:undefined},state,index===0?1:0)));
+      return {scopes,governanceRevision:{etag:state.etag,projectId:state.project?.metadata.id,valid:state.valid,readOnly:state.readOnly}};
+    }
+    const state=input.objectPath!==undefined||action==='read'?readGovernance(root,input.name,input.scope):undefined;
+    return perform(target(input,state),input,state);
+  }
+  async function perform(project,input,state,priority=1){
+    const {action,path,version,text,destination,kind,unread}=input;
+    // Object directories are disjoint. A parent's baseline must not hold up a
+    // task's read. Actual writes still take the existing project transaction lock.
+    return queue.run(project.base,async()=>{
       if (action==='changes') {
         const live=await scan(project);
-        const state=input.reviewSession?(await reviewProject(project,input.reviewSession,live)).review.state:live;
+        const state=input.reviewSession?(await reviewProject(project,input.reviewSession,live,undefined,priority)).review.state:live;
         const entries=input.includeDeleted===true?[...state.entries,...state.deleted]:state.entries;
         const revision=digest(JSON.stringify(entries.map(({path,kind,stamp,unread})=>[path,kind,stamp,unread])));
         return {root:project.base,objectPath:project.objectPath,writable:project.writable,revision,...(revision===input.revision?{}:{entries:publicEntries(project,entries)})};
@@ -371,7 +399,7 @@ export function createProjectContextFiles(files, storage) {
         if (action==='moveVersion') return {version:await files.moveVersion(path)};
         assert(item.stat.isFile() && textFile(path),'PROJECT_CONTEXT_FORMAT','此格式请通过原文件入口打开。',415);
         const value=await files.read(path);
-        const {graph,valid}=readGovernance(root,project.name,project.scope);
+        const {graph,valid}=state??readGovernance(root,project.name,project.scope);
         const protectedPath=reserved.has(posix.basename(path).toLowerCase()) || referencePaths(graph).get(pathKey(path)) || managedText(value.text,path);
         const result={...value,writable:project.writable && valid && value.writable && !protectedPath};
         return input.reviewSession?reviewedValue(project,input.reviewSession,result):result;

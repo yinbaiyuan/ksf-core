@@ -65,7 +65,7 @@ export function createContextDrafts(sdk) {
 }
 
 export function createContextFileWorkspace({
-  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction=null,readOnlyNotice,headless=false,editorRenderer=null,
+  sdk,project,rootPath,objectPath,contextRoots,rootLabel='项目根目录',list,content,actions,status,reader,icon,iconButton,docLink,drafts,reviewSession,changesReader=null,contextMenu,onOpen,onFallback,onUnread,displayName,showInFileNavigation,focusState,projectWritable,navigationAction=null,readOnlyNotice,headless=false,editorRenderer=null,
 }) {
   const listeners=new Set();let snapshot=null,issue='',viewEntry=null;function emit(){snapshot=null;for(const fn of listeners)fn();}
   const root=parent(rootPath);
@@ -132,25 +132,34 @@ export function createContextFileWorkspace({
     if(navigationAction){newFile.hidden=newFolder.hidden=true;list.prepend(controls);}
     onFallback();dispose();
   }
+  let started=false;
   function start(){
-    if(timer||disposed)return;
-    const poll=()=>{if((headless||list.isConnected)&&!document.hidden&&sdk.getSnapshot().enabled!==false)void refresh();};
-    queueMicrotask(poll);
-    timer=setInterval(poll,900);
-    document.addEventListener('visibilitychange',poll);
-    window.addEventListener('ksf:workspace-change',poll);
-    cleanup=()=>{document.removeEventListener('visibilitychange',poll);window.removeEventListener('ksf:workspace-change',poll);};
+    if(started||disposed)return;
+    started=true;
+    const enabled=()=>started&&!disposed&&!document.hidden&&sdk.getSnapshot().enabled!==false;
+    const schedule=delay=>{clearTimeout(timer);if(enabled())timer=setTimeout(poll,delay);};
+    const poll=async()=>{if(!enabled())return;if(headless||list.isConnected)await refresh();schedule(3000);};
+    const wake=()=>schedule(160);
+    if(supported)schedule(3000);else schedule(0);
+    let previousEnabled=sdk.getSnapshot().enabled;
+    const unsubscribe=sdk.subscribe?.(()=>{const next=sdk.getSnapshot().enabled;if(next!==previousEnabled){previousEnabled=next;wake();}});
+    document.addEventListener('visibilitychange',wake);
+    window.addEventListener('ksf:workspace-change',wake);
+    window.addEventListener('focus',wake);
+    cleanup=()=>{unsubscribe?.();document.removeEventListener('visibilitychange',wake);window.removeEventListener('ksf:workspace-change',wake);window.removeEventListener('focus',wake);};
   }
   let cleanup=()=>{};
-  async function refresh(force=false) {
+  async function refresh(force=false,cached=null) {
     if(disposed||working||mutating&&!force)return;
     working=true;
+    let notify=false;const previousStatus=syncState.textContent;
     try {
       if(!supported){
         syncState.textContent='正在建立本次审阅基线…';
         if(!list.contains(treeWrap))list.append(treeWrap);
       }
-      const results=await Promise.all(scopes.map(async scope=>({scope,result:await scopedCall(scope,'changes',{revision:force?undefined:scope.revision,includeDeleted:true})})));
+      const ordered=[primaryScope,...scopes.filter(scope=>scope!==primaryScope)];
+      const results=cached??await (changesReader?changesReader.read(ordered,force):Promise.all(scopes.map(async scope=>({scope,result:await scopedCall(scope,'changes',{revision:force?undefined:scope.revision,includeDeleted:true})}))));
       if(disposed)return;
       if(results.some(({scope,result})=>result.supported===false||result.root!==scope.root)){fallback();return;}
       if(!supported){
@@ -162,6 +171,7 @@ export function createContextFileWorkspace({
       canCreate=writable;
       newFile.hidden=newFolder.hidden=!canCreate;
       const changed=results.some(({result})=>result.entries);
+      notify=changed||permissionsChanged;
       for(const {scope,result} of results){
         scope.revision=result.revision;
         if(result.entries)scope.entries=result.entries.filter(entry=>entry.path!==scope.root&&within(entry.path,scope.root));
@@ -203,7 +213,7 @@ export function createContextFileWorkspace({
       if(error.code==='APP_SERVICE_UNKNOWN'){fallback();return;}
       if(!supported && !list.contains(treeWrap))list.append(syncState);
       syncState.textContent='自动更新暂时中断 · '+error.message;
-    }finally{working=false;emit();}
+    }finally{working=false;if(!disposed&&(notify||previousStatus!==syncState.textContent))emit();}
   }
   function menuActions(path){
     const entry=scopes.some(scope=>scope.root===path)?{path,kind:'directory'}:entries.get(path);
@@ -827,7 +837,10 @@ export function createContextFileWorkspace({
       void refresh(true);
     }catch(error){
       file.error=error.message;
-      if(error.code==='WORKSPACE_CONFLICT')await syncFromDisk(file);
+      if(error.code==='WORKSPACE_CONFLICT'){
+        await syncFromDisk(file);
+        if(!file.error)file.message='原文已更新，仍待审阅';
+      }
     }finally{file.reviewing=false;syncEditor(file);}
   }
   async function open(entry,{edit=false}={}){
@@ -887,11 +900,15 @@ export function createContextFileWorkspace({
     }
   }
   function dispose(){
-    disposed=true;motion.abort();reset();clearInterval(timer);cleanup();
+    disposed=true;motion.abort();reset();clearTimeout(timer);cleanup();
     list.removeEventListener('contextmenu',openRootMenu);
     moveDialog?.remove();
   }
-  return {start,open,reset,select,seen,revealFolder,dispose,
+  // Seed a new object view before React subscribes. Its existing file list does
+  // not need an empty first render followed by two synchronous notifications.
+  const cached=changesReader?.peek(scopes);
+  if(cached)void refresh(false,cached);
+  return {start,open,reset,select,seen,revealFolder,dispose,pause(){clearTimeout(timer);cleanup();started=false;reset();},
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     getSnapshot(){return snapshot??=({entries:[...entries.values()],scopes,selected,active,entry:viewEntry,error:issue||syncState.textContent,canCreate,working,mutating,supported,props:active?editorProps(active,!!active.autoFocus):null});},
     refresh,mode(mode){if(active&&!active.composing){active.mode=active.base.writable?mode:'preview';emit();}},

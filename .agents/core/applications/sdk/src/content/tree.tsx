@@ -17,7 +17,7 @@ export const TreeView=forwardRef<HTMLUListElement,TreeViewProps>(function TreeVi
  const [selected,setSelected,resetSelected]=useValue(selectedId,defaultSelectedId,onSelect),[expanded,setExpanded,resetExpanded]=useValue<readonly string[]>(expandedIds,defaultExpandedIds,next=>onExpandedChange?.([...next])),[checked,setChecked,resetChecked]=useValue<readonly string[]>(checkedIds,defaultCheckedIds,next=>onCheckedChange?.([...next]));
  const [root,assign]=useElementRef(ref),items=useRef(new Map<string,HTMLLIElement>()),[lastFocus,setLastFocus]=useState<string|null>(null),search=useRef({text:'',at:0}),context=useWindowContext(),interactive=context.active&&context.enabled;
  useFormReset(root,selectedId===undefined||expandedIds===undefined||checkedIds===undefined,()=>{if(selectedId===undefined)resetSelected();if(expandedIds===undefined)resetExpanded();if(checkedIds===undefined)resetChecked();});
- const renderNodes=filterTree(nodes,filter),expandedSet=new Set(filter.trim()?allTreeNodes(renderNodes).filter(node=>node.children?.length).map(node=>node.id):expanded),checkedSet=new Set(cascadeChecks?expandTreeChecks(nodes,checked):checked),visible=visibleTree(renderNodes,expandedSet),enabled=visible.filter(item=>!item.node.disabled);
+ const renderNodes=filterTree(nodes,filter),expandedSet=new Set(filter.trim()?allTreeNodes(renderNodes).filter(node=>node.children?.length).map(node=>node.id):expanded),checkedSet=new Set(checkable&&cascadeChecks?expandTreeChecks(nodes,checked):checked),visible=visibleTree(renderNodes,expandedSet),enabled=visible.filter(item=>!item.node.disabled);
  useEffect(()=>{setLastFocus(null);},[filter]);
  const focusId=enabled.find(item=>item.node.id===lastFocus)?.node.id??enabled.find(item=>item.node.id===selected)?.node.id??(filter.trim()?enabled.find(item=>item.node.label.toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase()))?.node.id:undefined)??enabled[0]?.node.id;
  const focus=(id:string|undefined)=>{
@@ -32,7 +32,7 @@ export const TreeView=forwardRef<HTMLUListElement,TreeViewProps>(function TreeVi
  const toggle=(node:TreeNode)=>{if(!interactive||filter.trim())return;setExpanded(expandedSet.has(node.id)?expanded.filter(id=>id!==node.id):[...expanded,node.id]);};
  const changeCheck=(node:TreeNode)=>{if(!interactive||node.disabled||node.disableCheckbox)return;setChecked(cascadeChecks?toggleTreeCheck(nodes,checked,node.id):checked.includes(node.id)?checked.filter(id=>id!==node.id):[...checked,node.id]);};
  const render=(list:readonly TreeNode[],parent:string|null=null,level=1,continuations:readonly boolean[]=[]):ReactNode=>list.map((node,index)=>{
-  const children=!!node.children?.length,isExpanded=expandedSet.has(node.id),mixed=cascadeChecks&&treeMixed(flat.find(value=>value.id===node.id)??node,checkedSet),last=index===list.length-1;
+  const children=!!node.children?.length,isExpanded=expandedSet.has(node.id),mixed=checkable&&cascadeChecks&&treeMixed(flat.find(value=>value.id===node.id)??node,checkedSet),last=index===list.length-1;
   return <li key={node.id} ref={element=>{if(element)items.current.set(node.id,element);else items.current.delete(node.id);}} role="treeitem" tabIndex={node.id===focusId?0:-1} aria-level={level} aria-expanded={children?isExpanded:undefined} aria-selected={selected===node.id} aria-checked={checkable?(mixed?'mixed':checkedSet.has(node.id)):undefined} aria-disabled={node.disabled||undefined} className="ksf-tree-item" data-selected={selected===node.id||undefined}
    onFocus={event=>{if(event.target===event.currentTarget)setLastFocus(node.id);}}
    onKeyDown={event=>{
@@ -52,7 +52,7 @@ export const TreeView=forwardRef<HTMLUListElement,TreeViewProps>(function TreeVi
     {checkable&&<span className="ksf-tree-check" data-disabled={node.disableCheckbox||undefined} aria-hidden="true" onClick={event=>{event.stopPropagation();if(interactive&&!node.disabled&&!node.disableCheckbox){changeCheck(node);focus(node.id);}}}/>}
     <span className="ksf-tree-label">{showIcons&&node.icon!=null&&<span className="ksf-tree-icon" aria-hidden="true">{node.icon}</span>}<span className="ksf-tree-title">{renderLabel?renderLabel(node):node.label}</span></span>
    </div>
-   {children&&<TreeBranch open={isExpanded}>{render(node.children!,node.id,level+1,[...continuations,!last])}</TreeBranch>}
+   {children&&<TreeBranch open={isExpanded}>{()=>render(node.children!,node.id,level+1,[...continuations,!last])}</TreeBranch>}
   </li>;
  });
  return <><ul {...props} ref={assign} role="tree" aria-label={label} className={cx('ksf-tree',className)} data-lines={showLines||undefined} data-block-rows={blockRows||undefined}>{render(renderNodes)}</ul>{name&&(checkable?checked:[selected]).filter(Boolean).map(value=><input key={value} type="hidden" name={name} value={value}/>)}</>;

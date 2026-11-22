@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {readSnapshot} from '../../metadata/files.js';
 import {parseFrontmatter} from '../../metadata/frontmatter.js';
 import {MetadataError} from '../../metadata/errors.js';
+import {memoRead} from './read-context.js';
 
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const inside=(path,base)=>path===base||path.startsWith(base+'/');
@@ -16,6 +17,9 @@ function normalized(path){
 }
 function safe(root,path){let p=root;for(const part of normalized(path).split('/')){p=join(p,part);try{if(lstatSync(p).isSymbolicLink())fail('PROJECT_REFERENCE_PATH','引用不能穿过符号链接。');}catch(e){if(e.code==='ENOENT')break;throw e;}}return join(root,path);}
 export function projectLocations(root){
+  return memoRead(root,'locations',()=>readProjectLocations(root));
+}
+function readProjectLocations(root){
   const result=[];
   for(const scope of ['项目','档案/项目']){
     let entries;try{entries=readdirSync(join(root,scope),{withFileTypes:true});}catch(e){if(e.code==='ENOENT')continue;throw e;}
@@ -27,10 +31,14 @@ export function projectLocations(root){
 }
 // Resolve old task folders and project moves together; never rewrite source prose.
 export function projectMergeRecords(root,roots=projectLocations(root),extra=[]){
+ return memoRead(extra.length?extra:roots,'merges:'+root,()=>readMergeRecords(root,roots,extra));
+}
+function journal(root,id){return memoRead(root,'journal:'+id,()=>JSON.parse(readSnapshot(join(root,'.agents/runtime-data/projects/governance/operations',id+'.json')).bytes));}
+function readMergeRecords(root,roots,extra){
  const records=[...extra],seen=new Set(extra.map(r=>r.operationId));
  for(const owner of roots)for(const entry of owner.metadata.project_merge_history??[]){
   const id=entry.operation_id;if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/.test(id)||seen.has(id))continue;seen.add(id);
-  try{const r=JSON.parse(readSnapshot(join(root,'.agents/runtime-data/projects/governance/operations',id+'.json')).bytes);
+  try{const r=journal(root,id);
    if(r.kind==='governance-merge-child'&&r.phase==='completed'&&r.operationId===id&&r.targetProject?.id===owner.metadata.id&&r.sourceProject?.id===entry.source_id&&Array.isArray(r.moves)&&Array.isArray(r.files))records.push(r);
   }catch(e){if(e.code!=='ENOENT'&&e.code!=='FILE_NOT_FOUND')throw e;}
  }return records;
@@ -86,15 +94,19 @@ export function locateProjectResource(root,input,{mergeRecords=[]}={}){
   return {path:actual,originalPath:path,relocated:actual!==path,scope:owner?.scope??null,projectId:owner?.metadata.id??null,historical,digest:hash(versionBytes),...(input.digestOnly?{}:{bytes:versionBytes})};
 }
 export function historicalProjectBytes(root,path,expected,current,roots=projectLocations(root),{mergeRecords=[]}={}){
+  const records=memoRead(mergeRecords.length?mergeRecords:roots,'history:'+root,()=>{
   const records=[],seen=new Set();
   for(const p of roots)for(const e of [...(Array.isArray(p.metadata.archive_history)?p.metadata.archive_history:[]),...(Array.isArray(p.metadata.task_numbering_history)?p.metadata.task_numbering_history:[])]){const id=e?.operation_id;if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/.test(id)||seen.has(id))continue;seen.add(id);
-    try{const r=JSON.parse(readSnapshot(join(root,'.agents/runtime-data/projects/governance/operations',id+'.json')).bytes);if(['governance-transition','governance-numbering'].includes(r.kind)&&r.phase==='completed'&&Array.isArray(r.files))records.push(r);}catch(e){if(e.code!=='ENOENT')throw e;}
+    try{const r=journal(root,id);if(['governance-transition','governance-numbering'].includes(r.kind)&&r.phase==='completed'&&Array.isArray(r.files))records.push(r);}catch(e){if(e.code!=='ENOENT')throw e;}
   }
-  for(const r of projectMergeRecords(root,roots,mergeRecords)){
-   records.push(r);
+  records.push(...projectMergeRecords(root,roots,mergeRecords));
+  return records.sort((a,b)=>b.at.localeCompare(a.at));
+  });
+  for(const r of records){
+   if(r.kind!=='governance-merge-child')continue;
    if(path===r.targetProject.path){const entry=r.entries.find(e=>e.path==='project.md');if(entry?.sha256===expected){const bytes=readSnapshot(safe(root,r.snapshotPath+'/project.md')).bytes;if(hash(bytes)===expected)return bytes;}}
   }
-  records.sort((a,b)=>b.at.localeCompare(a.at));let cursor=path,bytes=current;
+  let cursor=path,bytes=current;
   for(const r of records){const f=r.files.find(f=>f.path===cursor&&f.afterHash===hash(bytes));if(!f)continue;const before=Buffer.from(f.before,'base64');if(hash(before)!==f.beforeHash)fail('PROJECT_REFERENCE_HISTORY','原版本快照摘要损坏。');bytes=before;cursor=f.originalPath??f.path;if(hash(bytes)===expected)return bytes;}
   return null;
 }

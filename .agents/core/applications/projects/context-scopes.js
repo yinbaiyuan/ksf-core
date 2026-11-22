@@ -30,7 +30,7 @@ export function contextPanels(record,current){
     owner:doc,objectPath:doc.path,root:parent(doc.path),kind:labels[doc.metadata.kind]??'记录',
     name:doc.metadata.name,label:labels[doc.metadata.kind]+' · '+doc.metadata.name,
     notePath:parent(doc.path)+'/灵感闪现.md',current:index===0,
-  }));
+  })).reverse();
 }
 
 export function isManagedSource(record,path){
@@ -41,4 +41,47 @@ export function contextScopeForPath(scopes,path){
   if(typeof path!=='string')return undefined;
   return scopes.filter(scope=>path===scope.root||path.startsWith(scope.root+'/'))
     .sort((a,b)=>b.root.length-a.root.length)[0];
+}
+
+function contextTreeEntries(entries,excluded,scopes){
+  const visible=entries.filter(entry=>!excluded.has(entry.path));
+  const directories=new Set(visible.filter(entry=>entry.kind==='directory').map(entry=>entry.path));
+  const folderFor=entry=>{
+    let folder=parent(entry.path);
+    const scope=contextScopeForPath(scopes,entry.path);
+    if(entry.reason==='deleted'&&scope){
+      while(folder!==scope.root&&!directories.has(folder)&&folder.startsWith(scope.root+'/'))folder=parent(folder);
+    }
+    return folder;
+  };
+  return {visible,folderFor};
+}
+
+// Count backend-issued unread tokens within their registered owner only.
+export function contextFileReview(entries,scopes,excluded=new Set()){
+  const {visible,folderFor}=contextTreeEntries(entries,excluded,scopes),counts=new Map(),notices=new Map();
+  for(const entry of visible){
+    if(entry.kind!=='file'||!entry.unread)continue;
+    notices.set(entry.path,entry.reason==='updated'?'modified':entry.reason==='deleted'?'deleted':'new');
+    const scope=contextScopeForPath(scopes,entry.path);
+    if(!scope)continue;
+    for(let folder=folderFor(entry);folder===scope.root||folder.startsWith(scope.root+'/');folder=parent(folder)){
+      counts.set(folder,(counts.get(folder)??0)+1);
+      if(folder===scope.root)break;
+    }
+  }
+  return {counts,notices};
+}
+
+// Deleted paths stay visible under their nearest surviving folder, as in the
+// original file reader. Normal files retain their exact registered hierarchy.
+export function contextFileNodes(entries,excluded=new Set(),scopes=[]){
+  const {visible,folderFor}=contextTreeEntries(entries,excluded,scopes);
+  const children=new Map();
+  for(const entry of visible){
+    const folder=folderFor(entry),members=children.get(folder)??[];
+    members.push(entry);children.set(folder,members);
+  }
+  const nodes=folder=>(children.get(folder)??[]).map(entry=>({id:entry.path,label:parent(entry.path)===folder?entry.name??entry.path.split('/').at(-1):entry.path.slice(folder.length+1),children:entry.kind==='directory'?nodes(entry.path):undefined}));
+  return nodes;
 }
