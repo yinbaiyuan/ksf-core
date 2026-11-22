@@ -87,6 +87,14 @@ const files=createWorkspaceFiles(root,createCoordinator());
 const contextFiles=createProjectContextFiles(files,createApplicationStorage(root));
 const transportFiles=createFileService(root,{workspace:files}),fileCaller={appId:'com.ksf.projects'};
 const contextFileCall=input=>{
+  // A one-shot concurrent edit for the real review-confirmation UI check.
+  // This hook exists only in the isolated browser fixture, never in a package.
+  const reviewRace=join(root,'.project-fixture-review-race');
+  if(input.action==='markReviewed'&&existsSync(reviewRace)){
+    const target=resolve(root,input.path);
+    if(!target.startsWith(join(root,'项目/示例')+'/'))throw Error('隔离审阅夹具路径无效');
+    const changed=readFileSync(reviewRace,'utf8');rmSync(reviewRace);writeFileSync(target,changed);
+  }
   if(process.env.KSF_PROJECTS_PREVIEW_OLD_SCOPE!=='1')return contextFiles.call(input);
   const {objectPath,...legacy}=input;
   return contextFiles.call(legacy);

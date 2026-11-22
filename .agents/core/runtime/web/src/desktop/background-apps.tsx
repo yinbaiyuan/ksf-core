@@ -1,17 +1,9 @@
-import {useEffect,useState,useSyncExternalStore,type KeyboardEvent} from 'react';
+import {useEffect,useState,type KeyboardEvent} from 'react';
 import {Activity,Ellipsis} from 'lucide-react';
 import {useRemote} from '../api';
 import {ApplicationIcon} from '../apps/application-icon';
 import {applicationShortcuts,apps} from './registry';
-import {iconLayerCatalog} from './icon-layer-catalog';
 import {runningBackgroundApplications,backgroundIconSlots,type BackgroundSnapshot,type BackgroundApplication} from './background-apps-model';
-
-/** Reuse the managed foreground artwork as a quiet status glyph. */
-function StatusIcon({appId,manifest}:{appId:string;manifest:Parameters<typeof ApplicationIcon>[0]['manifest']}){
- useSyncExternalStore(iconLayerCatalog.subscribe,iconLayerCatalog.snapshot);
- const layer=iconLayerCatalog.get(appId);
- return layer?.status==='ready'&&layer.foreground?<img className="status-layer-icon" src={layer.foreground.url} alt="" draggable={false}/>:<ApplicationIcon appId={appId} manifest={manifest} variant="status"/>;
-}
 
 export function BackgroundApps({openApp,monitor}:{openApp:(id:string)=>void;monitor:()=>void}){
  const state=useRemote<BackgroundSnapshot>('/api/runtime/apps'),[slots,setSlots]=useState(()=>backgroundIconSlots(innerWidth));
@@ -25,7 +17,7 @@ export function BackgroundApps({openApp,monitor}:{openApp:(id:string)=>void;moni
  const actions=(app:BackgroundApplication)=><><h3>{app.name}</h3><p className="background-state">{state.error?'状态未知 · 等待重新连接':`后台运行中 · ${app.lifecycle==='resident'?'常驻':'按需'}`}</p>{app.hasWindow&&apps.some(item=>item.id===app.id)&&<button role="menuitem" onClick={()=>openApp(app.id)}>打开应用</button>}<button role="menuitem" onClick={monitor}><Activity size={14}/>活动监视器</button></>;
  return <div className={`background-apps ${state.error?'is-stale':''}`} aria-label="后台运行的应用">
   {visible.map(app=><details className="os-menu background-app-menu" key={app.id} data-background-app={app.id}>
-   <summary aria-label={`${app.name} · ${state.error?'后台状态未知':'后台运行中'}`} title={`${app.name} · ${state.error?'状态未知':'后台运行中'}`}><StatusIcon appId={app.id} manifest={definitions.find(item=>item.id===app.id)?.release?.manifest}/></summary>
+   <summary aria-label={`${app.name} · ${state.error?'后台状态未知':'后台运行中'}`} title={`${app.name} · ${state.error?'状态未知':'后台运行中'}`}><ApplicationIcon appId={app.id} manifest={definitions.find(item=>item.id===app.id)?.release?.manifest} variant="status"/></summary>
    <div role="menu" aria-label={`${app.name}后台状态`} onKeyDown={key}>{actions(app)}</div>
   </details>)}
   {!!overflow.length&&<details className="os-menu background-app-menu"><summary aria-label={`更多后台应用，${overflow.length} 个`} title={`更多后台应用（${overflow.length}）`}><Ellipsis size={18}/></summary><div role="menu" aria-label="更多后台应用" onKeyDown={key}>{overflow.map(app=><section key={app.id} data-background-app={app.id}>{actions(app)}</section>)}</div></details>}

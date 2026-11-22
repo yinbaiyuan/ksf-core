@@ -58,6 +58,35 @@ test('initial baseline, nested external writes, read receipts, and move identity
   assert.equal(reopened.find(e=>e.name==='改名.md').unread,null);
 });
 
+test('batch scopes retain independent revisions, ownership and review originals',async t=>{
+  const f=setup(t),objects=[f.tp,f.mp,f.pp].map(objectPath=>({objectPath})),reviewSession='batch-review-window-20261122';
+  for(const {objectPath}of objects)await writeFile(join(f.root,posix.dirname(objectPath),'普通笔记.md'),objectPath+' 原始内容');
+  const first=await f.call('changes',{objects,reviewSession});
+  assert.equal(first.scopes.length,3);assert.equal(first.governanceRevision.projectId,'p1');assert.equal(first.governanceRevision.etag,f.read().etag);
+  const next=await f.call('changes',{reviewSession,objects:first.scopes.map(({objectPath,revision})=>({objectPath,revision}))});
+  assert(next.scopes.every(scope=>scope.entries===undefined));
+  const path=posix.dirname(f.tp)+'/普通笔记.md';await writeFile(join(f.root,path),'外部更新');
+  await changed(f,entries=>entries.find(entry=>entry.path===path&&entry.unread),{objectPath:f.tp,reviewSession});
+  assert.equal((await f.call('read',{objectPath:f.tp,path,reviewSession})).reviewOriginal,f.tp+' 原始内容');
+  await assert.rejects(f.call('changes',{objects:[{objectPath:f.pp},{objectPath:f.pp}]}),{code:'PROJECT_CONTEXT_INPUT'});
+  await assert.rejects(f.call('changes',{objects:[...objects,{objectPath:'other'}]}),{code:'PROJECT_CONTEXT_INPUT'});
+  await assert.rejects(f.call('changes',{objects:[{objectPath:'项目/其他/project.md'}]}),{code:'PROJECT_CONTEXT_PATH'});
+});
+
+test('a task read does not wait for an unrelated parent baseline scan',async t=>{
+  const f=setup(t),files=createWorkspaceFiles(f.root,createCoordinator()),path=posix.dirname(f.tp)+'/任务笔记.md',parentPath=f.at('上层笔记.md');
+  await writeFile(join(f.root,path),'任务正文');await writeFile(join(f.root,parentPath),'上层正文');
+  const originalRead=files.read;let unblock,entered;
+  const waiting=new Promise(resolve=>entered=resolve),hold=new Promise(resolve=>unblock=resolve);
+  files.read=async path=>{if(path===parentPath){entered();await hold;}return originalRead(path);};
+  const api=createProjectContextFiles(files,createApplicationStorage(f.root));t.after(()=>api.close());
+  const input={name:f.name,scope:'current',reviewSession:'independent-review-scopes-window'};
+  const parentScan=api.call({...input,action:'changes',objectPath:f.pp});await waiting;
+  const taskRead=api.call({...input,action:'read',objectPath:f.tp,path});
+  try{const value=await Promise.race([taskRead,delay(1500).then(()=>{throw Error('task blocked behind parent scan');})]);assert.equal(value.text,'任务正文');}
+  finally{unblock();await parentScan;}
+});
+
 test('deletion receipts survive restart, never hide restored files and remain opt-in for older clients',async t=>{
   const f=setup(t), path=f.at('素材/记录.md'), input={includeDeleted:true};
   await mkdir(f.absolute('素材'));

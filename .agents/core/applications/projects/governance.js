@@ -1559,7 +1559,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     getSnapshot(){return snapshot??=({record:record?readingRecord():null,readOnly:!record||readOnly(),busy:busy||!!detailSaveJob,dirty:changedDrafts().length>0,pending:!!pendingRequest,error:detailSaveIssue?.message||error,notice,conflict,editing,notes});},
     edit(path,change,{verification=false}={}){if(readOnly())return;const doc=[record.project,...record.documents].find(d=>d.path===path)||drafts.get(path)?.value;if(!doc)return;const draft=drafts.get(path)||draftFor(doc);change(draft.value);if(verification)draft.verificationChanged=true;modified();emit();},
     composition(active){detailComposing=active;if(active)clearTimeout(detailSaveTimer);else scheduleDetailSave();},
-    save:async()=>{if(detailComposing)return false;if(detailsChanged())await flushDetailSave();if(changedDrafts().length&&!detailSaveIssue)await save();emit();},
+    save:async()=>{if(detailComposing)return false;if(!detailsChanged()&&!changedDrafts().length&&!pendingRequest)return;if(detailsChanged())await flushDetailSave();if(changedDrafts().length&&!detailSaveIssue)await save();emit();},
     flush:flushDetailSave,compare:()=>compare(false),resolve(key,value){if(!conflict)return;conflict.choices[key]=value;reconcile();},
     retry(){detailSaveIssue=null;return pendingRequest?save():flushDetailSave();},
     review(subject){openObjectReview(subject);emit();return editing;},

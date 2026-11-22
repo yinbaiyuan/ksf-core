@@ -1,6 +1,6 @@
 {
   "protocol": "ksf-web-build-v1",
-  "sourceDigest": "c679bc1cf7a0a034fe1668f29d60f56875bbeb1f6ca413168fae483969bfcc8e",
+  "sourceDigest": "71457e49258d49249ce2691e45ae973fb263f1015ddf9032ce0af46c1b61270b",
   "files": {
     "THIRD_PARTY_NOTICES.txt": "4a42e915ab23b36b35732966e76c16bcc7b51049842695a744480349070dbfaf",
     "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
@@ -161,8 +161,8 @@
     "assets/lib-BAVov5dh.js": "a4d9f01f7a5aabcc48e98fce15199d7165a2271edeb1248c9c54964b3e5aad1f",
     "assets/line-CueHJKHM.js": "418b2a84da4bbc50e05f75fe6fb66e0cc983eb5d253bb45dcce3f6a930a7132e",
     "assets/linear-29cWsCuT.js": "0130d031eacd54b0ad83e2f972b7e4a81a24eefdd155f5fe25998ded3568fc31",
-    "assets/main-BcOfHEVn.js": "a978776c2fbbce088ff5019abcb749d5f3dc22e79d6bf6ed16bbdc51f29700ec",
-    "assets/main-CuYlmz1c.css": "ec140e39d28b7d65a3154567f992fe7d3370dfdc928eddd600acd1c4cdf6077d",
+    "assets/main-BGyyePm3.css": "42ad7b9921380284a322fb908517a683403b36d96e460559cb2baff9257eb95c",
+    "assets/main-C5q4ZFe3.js": "fe33ce1f6cc89df09a082ebe123a2b50f282b49a866cbcd0bcdb7d839c17f00e",
     "assets/material-provider-C6J7KGbU.js": "1608614bdee1226f98eba5272b169d75ef7e639a3adcef3e11cb3244c1f4e35e",
     "assets/mermaid-parser.core-BFL4D_5F.js": "4db58bf6c0ba51c520c770009021ee4c000bf11174d045ea2fef5ee87f79d8cf",
     "assets/mermaid.core-BkGi5sBv.js": "b9791aab024f0315cc15480f93af6c6227313336a1523b2b10fce4fae96df7e3",
@@ -207,11 +207,11 @@
     "assets/wardleyDiagram-IVAIDKWA-B9EBXOcR.js": "f5deaceb620bf754ed9de80f373bd96da6e6a61a56af9cff4651c0a2dfb9fa30",
     "assets/window-toolbar-D-lHJDj1.js": "7c3b91342cc2b08410a664e3a2c5af9036aecb31174f455a1d6bfaaf10da0cbf",
     "assets/xychartDiagram-4URNHDU4-BlnilVdk.js": "3f7ea2776957ef55260e58fc5a9d065e5f4239565374d81a8b4e89ef5849918d",
-    "index.html": "dc5d3b8a57d14ed1b0a77bc54a460fdcafa72a4dbdb0a3579b1662e4542f6744"
+    "index.html": "14b852908609b2c508682e35948e584396e7de42f09e24059e2a4d599ecefeb5"
   },
   "frontendRuntime": {
     "protocol": "ksf-frontend-runtime-v1",
-    "frontendReleaseId": "7ef219deffc8e4b0814c24e431d19f676f07f601309049a6a22c57ddec219491",
+    "frontendReleaseId": "18a9a50ce1ff9ee5a69b595a9bdae75dce1d8dd19ae7e4908ed16e685931d341",
     "hostCompatibility": {
       "workbenchContract": "ksf-workbench-v1",
       "minimumCoreVersion": "0.6.0",
@@ -901,7 +901,8 @@
         "assets/init-C-OQMol4.js",
         "assets/src-UsG7Ncy7.js"
       ],
-      "assets/main-BcOfHEVn.js": [
+      "assets/main-BGyyePm3.css": [],
+      "assets/main-C5q4ZFe3.js": [
         "assets/aero-shards-backdrop-G-hZakLk.js",
         "assets/app-store-DnoyhK34.js",
         "assets/cli-document-dialog-DCcOlPCc.js",
@@ -911,7 +912,7 @@
         "assets/jsx-runtime-CldxteV5.js",
         "assets/ksf-favicon-J5dv2kU6.svg",
         "assets/lib-BAVov5dh.js",
-        "assets/main-CuYlmz1c.css",
+        "assets/main-BGyyePm3.css",
         "assets/material-provider-C6J7KGbU.js",
         "assets/preload-helper-BLdHbfdN.js",
         "assets/rich-preview-CFxtbEU9.js",
@@ -919,7 +920,6 @@
         "assets/side-rays-awXJc-1j.js",
         "assets/summit-dawn-CjlLNYcC.jpg"
       ],
-      "assets/main-CuYlmz1c.css": [],
       "assets/material-provider-C6J7KGbU.js": [
         "assets/jsx-runtime-CldxteV5.js",
         "assets/rolldown-runtime-COiEfhsA.js"
@@ -1356,7 +1356,7 @@
         "assets/src-UsG7Ncy7.js"
       ]
     },
-    "baseHtmlDigest": "9abae997ee07f512073c13c808f3cec42d65fc7f4a5ea58729816f25a6fa8505",
+    "baseHtmlDigest": "e217feaa924655d142a0b6fbc40f7281689d89e7726160cfd21f706d22a3d54c",
     "features": [
       "document-boot"
     ]

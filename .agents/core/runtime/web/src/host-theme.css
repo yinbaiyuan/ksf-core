@@ -115,9 +115,6 @@ body .host-surface.page-group-menu { width:min(280px,calc(100vw - 16px)); min-wi
 .os-desktop :is(.ksf-system-trigger,.os-application-menubar > button,.os-menu summary) { border-radius:1px; }
 .os-desktop :is(.ksf-system-trigger:hover,.os-application-menubar > button:hover,.os-application-menubar > button[aria-expanded=true],.os-menu[open] summary) { background:var(--host-hover); }
 .os-desktop .os-application-menubar > button[aria-expanded=true] { box-shadow:inset 2px 0 var(--host-accent); }
-.os-desktop .status-layer-icon { display:block; width:18px; height:18px; object-fit:contain; filter:brightness(0); opacity:.85; }
-.os-desktop.host-theme-dark .status-layer-icon { filter:brightness(0) invert(1); }
-.os-desktop .background-apps summary .status-app-icon { filter:grayscale(1); }
 .host-theme-choices { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; padding:12px; border:1px solid var(--host-border); }
 .host-theme-choices legend { padding-inline:4px; font-weight:600; }
 .host-theme-choices label { display:flex; align-items:center; gap:7px; flex:1; min-width:100px; padding:10px 12px; background:var(--host-raised); border:1px solid var(--host-border); cursor:pointer; }

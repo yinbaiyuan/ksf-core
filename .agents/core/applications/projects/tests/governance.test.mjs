@@ -11,6 +11,18 @@ import {criteriaDigest as governanceCriteriaDigest} from '../../../runtime/src/p
 import {milestoneCompletionChanges} from '../result-detail-model.js';
 import {fileReadOnlyNotice} from '../file-readonly.js';
 
+test('project entry defers link relocation until the selected authored reference is opened',async t=>{
+  const {project}=await import('../../../runtime/src/services/projects.js');
+  const f=fixture(t);assert.deepEqual(f.initialize().errors,[]);
+  const path=dirname(f.pp)+'/输入.md';writeFileSync(join(f.root,path),'# 原始输入');
+  assert.deepEqual(f.apply([f.change(f.pp,undefined,'# 项目\n\n[输入](输入.md)\n')]).errors,[]);
+  const resolutions=[];
+  const app=createBackend({workspace:f.root,dataDirectory:join(f.root,'.app-data')},{cli:async args=>project({root:f.root,operation:args[1],name:args[2],scope:'current'}),governance:async(operation,input)=>projectGovernance({...input,root:f.root,operation}),lifecycle:async(operation,input)=>{resolutions.push(input);return project({root:f.root,operation:'locate',name:input.path,source:input.source,digest:input.digest});}});t.after(()=>app.dispose());
+  const params={name:f.name,scope:'current'},detail=await app.call('detail',params);
+  assert.equal(resolutions.length,0);const ref=detail.resources.find(ref=>ref.path===path);assert(ref);
+  const file=await app.call('file',{...params,...ref});assert.equal(file.body,'# 原始输入');assert.equal(resolutions.length,1);assert.equal(resolutions[0].source,f.pp);
+});
+
 test('read-only guidance identifies pending evidence without mislabelling ordinary references or archived files',()=>{
   const path='项目/示例/报告.md',entry={path},ref={path,digest:'a'.repeat(64)};
   const task={metadata:{kind:'task',verification:{results:[{result:'pending',evidence:[ref]}]}}};

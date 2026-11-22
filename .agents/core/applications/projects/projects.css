@@ -46,22 +46,46 @@
 .project-files .project-file-navigation{padding:12px}
 .project-file-navigation>.ksf-control-field{margin-bottom:12px}
 .project-file-image{display:block;max-width:100%;max-height:70vh;object-fit:contain}
-.project-file-actions{display:flex;flex-direction:column;align-items:start;gap:8px;margin-bottom:12px}
-.project-file-format,.pg-document-edit-group{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.project-file-format{gap:12px;padding:8px 0;margin-bottom:12px;border-bottom:1px solid var(--ksf-color-border)}
+.project-file-format{flex:none;margin-bottom:12px}
 .pg-file-surface{height:100%;min-height:280px;display:flex;flex-direction:column;min-width:0}
 .pg-file-panes{display:flex;gap:12px;min-height:260px;min-width:0;flex:1}
 .pg-file-panes>.ksf-split-view{flex:1;min-width:0;width:100%}
-.pg-file-source-pane,.pg-file-preview-pane{flex:1;min-width:0;overflow:auto}
+.pg-file-source-pane,.pg-file-preview-pane{flex:1;min-width:0;height:100%;overflow:auto}
 .pg-file-source-pane .cm-editor{min-height:260px}
 .pg-file-outline{flex:0 0 160px;overflow:auto;max-height:600px;padding:10px;border-inline-start:1px solid var(--ksf-color-border)}
 .pg-file-outline header{display:flex;justify-content:space-between;align-items:center}
 .pg-file-outline nav{display:flex;flex-direction:column;align-items:stretch}
 .pg-project-context-text{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace}
 .project-merge{display:grid;gap:14px}
-.project-note-row{display:flex;gap:8px;align-items:start;margin:8px 0}
-.project-note-row>.ksf-control-field{flex:1;min-width:0}
-.project-note-row>.ksf-check-control{flex:0 0 auto}
+.project-note-list{list-style:none;padding:0;margin:0}
+.project-note-row{display:flex;gap:4px;align-items:start;margin:2px 0;min-width:0;border-radius:4px}
+.project-note-row:focus-within{background:var(--ksf-color-surface)}
+.project-note-row>.ksf-control-field,.project-note-row>.ksf-field{flex:1;min-width:0}
+.project-note-row>.ksf-checkbox-label{flex:none;margin-top:9px}
+.project-note-row>.ksf-button,.project-note-disclosure-space{flex:none;width:24px;min-width:24px;margin-top:3px}
+.project-note-text{line-height:1.65;overflow-wrap:anywhere}
+.project-note-row[data-done=true] .project-note-text{text-decoration:line-through;color:var(--ksf-color-muted-foreground)}
+.project-note-actions{flex:none;opacity:0;margin-top:3px}
+.project-note-row:hover .project-note-actions,.project-note-row:focus-within .project-note-actions{opacity:1}
+.project-inspiration.ksf-dialog-panel>header.ksf-dialog-header{padding:8px 16px;gap:12px}
+.project-inspiration>.ksf-dialog-header>div{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.project-inspiration>.ksf-dialog-header h2{flex:none;margin:0;font-size:14px;line-height:24px}
+.project-inspiration>.ksf-dialog-header .ksf-dialog-description{flex:1;min-width:0;margin:0}
+.project-inspiration.ksf-dialog-panel>div.ksf-dialog-body{padding:10px 16px}
+.project-inspiration.ksf-dialog-panel>footer.ksf-dialog-footer{padding:6px 16px}
+.project-inspiration-topline{display:flex;align-items:center;min-width:0;gap:12px}
+.project-inspiration-context{display:flex;align-items:center;gap:8px;min-width:0;flex:1;font-size:12px}
+.project-inspiration-context>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.project-inspiration-context>.ksf-save-status{flex:none}
+.project-inspiration-header-controls{display:flex;align-items:center;gap:8px;flex:none;margin-inline-start:auto}
+.project-inspiration-history{display:flex;align-items:center;gap:2px;flex:none}
+.project-inspiration-location{font-size:11px;color:var(--ksf-color-muted-foreground);overflow-wrap:anywhere;margin:0 0 14px}
+.project-inspiration-empty{font-size:12px;color:var(--ksf-color-muted-foreground);margin:12px 0}
+.project-inspiration-source{font-family:ui-monospace,monospace;line-height:1.7}
+.project-inspiration-footer{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;width:100%;font-size:11px;color:var(--ksf-color-muted-foreground)}
+.project-inspiration-footer>span:last-child{margin-inline-start:auto;white-space:nowrap}
+.project-inspiration-conflict{display:grid;gap:16px}
+@media(hover:none){.project-note-actions{opacity:1}}
 @media(max-width:650px){.project-page-reader{padding:12px}.project-detail .ksf-scroll-area,.project-files .ksf-scroll-area{padding:12px}.project-conversation{padding:14px}.pg-markdown-split{flex-direction:column}.pg-file-outline{flex-basis:120px}.project-heading{gap:8px}}
 
 @media(max-width:600px){.project-catalog-header{padding:16px}.project-catalog-controls{width:100%;gap:10px}.project-catalog .ksf-scroll-area{padding:8px 12px}.project-files .ksf-scroll-area{padding:14px}}
@@ -102,7 +126,21 @@
 /* Keep the three work questions together; long source text remains expandable. */
 .project-work-overview .project-block{margin:12px 0;padding-bottom:10px}.project-work-overview .project-section-heading{margin-bottom:6px}.project-work-overview .markdown p,.project-work-overview .project-result-excerpt{margin:4px 0 6px;line-height:1.65}.project-work-overview .project-block:first-child{margin-top:12px}.project-work-overview .project-actions{margin:6px 0}.project-result-brief{-webkit-line-clamp:3}.project-work-overview .project-block>.ksf-button{margin-top:4px}
 /* Context level is independent of the selected project object and open file. */
-.project-context-levels{display:grid;gap:2px;flex:none;margin:0 0 6px}.project-context-level{display:flex;align-items:center;gap:2px;min-width:0;border-left:2px solid transparent}.project-context-level[data-current=true]{border-left-color:var(--ksf-color-primary);background:var(--ksf-color-background)}.project-context-level-open{flex:1;min-width:0;justify-content:start;gap:6px;text-align:left;padding-inline:6px!important}.project-context-level-open>span:first-child{flex:none;color:var(--ksf-color-muted-foreground);font-size:11px}.project-context-level-open strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}.project-context-level>.ksf-button:last-child{flex:none}.project-context-scope-actions{display:flex;align-items:center;gap:6px;flex:none;padding:2px 2px 8px;border-bottom:1px solid var(--ksf-color-border);margin-bottom:8px}.project-file-scope-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.project-context-navigation .project-files-nav-heading h3{padding-left:0}.project-context-navigation .project-file-navigation{min-height:120px}
+/* One indentation step across object navigation, context levels, and folders. */
+.project-object-tree .ksf-tree-indent-unit,.project-context-level-files .ksf-tree-indent-unit{width:16px}
+.project-object-tree .ksf-tree-label,.project-context-level-files .ksf-tree-label{padding-inline:0}
+.project-context-levels{min-width:0;margin:0 0 8px}
+.project-context-navigation .project-context-levels.ksf-accordion>section>header{padding-inline:0;gap:8px;align-items:center}
+.project-context-navigation .project-context-levels.ksf-accordion>section>header>h3>button{gap:4px;align-items:center}
+.project-context-navigation .project-context-levels.ksf-accordion>section>header [data-expand-icon]{width:24px;min-width:24px}
+.project-context-navigation .project-context-levels.ksf-accordion>section>.ksf-accordion-panel>.ksf-accordion-body{padding:0 0 8px 16px}
+.project-context-level-title{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-width:0;width:100%;text-align:left;line-height:18px}
+.project-context-level-title>span{flex:none;font-size:11px;color:var(--ksf-color-muted-foreground)}
+.project-context-level-title strong{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}
+.project-context-level-files{min-width:0;padding:0}
+.project-context-level-kind{display:flex;align-items:center;gap:6px}.project-context-file-label{display:flex;align-items:center;gap:6px;min-width:0;width:100%}.project-context-file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.project-context-file-label>.ksf-badge{flex:none}.project-context-level-files .ksf-tree-title{flex:1}
+.project-context-level-files>.project-muted{font-size:11px;padding:4px 0;margin:0}
+.project-context-scope-actions{display:flex;align-items:center;gap:6px;flex:none;padding:2px 2px 8px;border-bottom:1px solid var(--ksf-color-border);margin-bottom:8px}.project-file-scope-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.project-context-navigation .project-files-nav-heading h3{padding-left:0}.project-context-navigation .project-file-navigation{min-height:120px}
 
 .project-overview-links{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 12px}.project-overview-links>.ksf-button{padding-inline:0}.project-scope-overview .project-result-brief{margin:4px 0 6px;line-height:1.65}
 
@@ -110,3 +148,32 @@
 .project-simple-section{padding:16px 0;border-bottom:1px solid var(--ksf-color-border)}.project-simple-section:last-child{border-bottom:0}.project-simple-section>.project-section-heading{margin-bottom:12px}.project-property-text{white-space:pre-wrap;overflow-wrap:anywhere}.project-object-properties>.ksf-accordion{margin-top:10px}.project-property-list{padding-left:20px;margin:4px 0}.project-property-list>li{padding:6px 0}.project-object-properties .ksf-description-list{font-size:12px;line-height:1.7}.project-reader-kind{font-size:12px;color:var(--ksf-color-muted-foreground)}.project-simple-section .ksf-button{max-width:100%}
 
 .project-title-navigation>.ksf-menu-owner{flex:none}.project-title-navigation[data-compact=true]>.project-title-breadcrumb{display:none}
+
+/* A single document header, persistent view controls, and one responsive format bar. */
+.project-reader-navigation .project-file-reading-title{margin:0;font-size:13px;font-weight:600;line-height:1.4;color:var(--ksf-color-foreground)}
+.project-file-identity{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.project-file-identity .project-file-reading-title{display:flex;align-items:baseline;flex:0 1 auto}
+.project-file-parent-path{flex:0 2 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:400;color:var(--ksf-color-muted-foreground)}
+.project-file-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.project-reader-status{flex:none;min-width:0;max-width:45%}
+.project-file-view-controls,.project-reader-actions{flex:none;margin-inline-start:auto}
+.project-file-chrome{flex:none;min-width:0;padding:10px 16px;border-bottom:1px solid var(--ksf-color-border);background:var(--ksf-color-background)}
+.project-file-chrome:empty{display:none}
+.project-file-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0}
+.project-file-format-slot{min-width:0;margin-top:8px}
+.project-file-format-slot:empty{display:none}
+.project-file-format-slot:first-child{margin-top:0}
+.project-file-chrome:not(:has(.project-file-controls)):has(.project-file-format-slot:empty){display:none}
+.project-files .project-file-reader{padding:0!important}
+.project-file-body{padding:16px;min-width:0}
+.project-file-body[data-document=true]{height:100%;display:flex;flex-direction:column}
+.project-file-body>.pg-file-surface{flex:1;height:auto;min-height:0}
+.project-file-body .pg-file-panes{min-height:0}
+.project-file-body .pg-file-source-pane .cm-editor{min-height:100%}
+@media(max-width:650px){.project-file-chrome{padding:8px 12px}.project-file-body{padding:12px}}
+/* Editor composition follows Tiptap Simple Editor's grouped, quiet formatting strip.
+   Buttons, menus and tooltips retain SDK visuals and window ownership. */
+.project-markdown-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;padding:2px 0}
+.project-format-group{display:flex;align-items:center;gap:2px;flex:none}
+.project-format-group+.project-format-group{border-inline-start:1px solid var(--ksf-color-border);padding-inline-start:6px}
+.project-format-heading{display:inline-block;min-width:28px;text-align:start;font-size:12px}
