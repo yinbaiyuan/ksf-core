@@ -213,7 +213,7 @@ test('layered proof requires every disjoint shared and real-native obligation',t
   const proofPath=join(f.root,'proof.json'),summaryPath=join(f.root,'coverage.json');
   aggregateLayeredReports(f.root,reports,plan,identity,{proofPath,summaryPath});assert.ok(existsSync(proofPath));
   assert.throws(()=>aggregateLayeredReports(f.root,[],plan,identity,{proofPath,summaryPath}),{code:'TEST_PROOF_INVALID'});
-  assert.equal(existsSync(proofPath),false);assert.ok(JSON.parse(readFileSync(summaryPath)).groups.every(g=>g.missing.length===1));
+  assert.equal(existsSync(proofPath),false);assert.ok(JSON.parse(readFileSync(summaryPath)).groups.every(g=>g.missing.length===g.expected));
   const impact=makePlan(f,false);aggregateLayeredReports(f.root,reportsFor(impact),impact,sourceIdentity(f.root),{proofPath,summaryPath});assert.equal(existsSync(proofPath),false);
 });
 test('release accepts only schema-2 complete trusted evidence for the exact run and source',t=>{

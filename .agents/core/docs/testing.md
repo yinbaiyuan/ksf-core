@@ -62,7 +62,7 @@ Windows的Node可执行夹具包含额外PE包装进程。模拟单个CLI时显�
 
 `check.yml` 在PR上执行完整义务，先于合并取得冻结候选的证明。主线推送先核对可信完整证明；只有API确认同源PR的准确head已合入当前最终提交、测试合并提交的第二父提交仍是该head、且源码／工作流／清单／运行时／分组输入逐项一致时，才复用该次结果。缺失、失败、取消、来源或输入变化均回退完整验证。手动full=false保留精确影响计划，不产生发行证明。`verification.yml` 生成并上传 `verification-plan.json`：含实际源码摘要、清单、运行时、Git共同祖先、变更、每组精确文件和计划摘要。消费端重算计划，基准与当前依赖变化、文件增删、平台或摘要不一致均拒绝。计划阶段执行覆盖基线审计。
 
-shared在官方`xcode-27`标准macOS ARM64基准宿主只执行一次；Windows x64只运行native契约与必要真实集成。Mac native独立分组，Linux Ubuntu22/24保留其声明的原生开发Core契约，不因此声明完整Linux发行支持。按实际选中的耗时估计生成矩阵，shared/Mac各最多4组、Windows最多12组；空影响不创建无效测试任务。计划、覆盖汇总及required为纯编排，在Ubuntu24执行；Mac名额用于实际通用和原生验证。`verification-platform.yml` 在每个平台内部准备一次锁定依赖与前端，然后启动该平台的精确分组，Windows不等待Mac准备，组内恢复SDK链接；固定required要求本次完整验证成功，或证明核验作业成功且明确返回valid=true。分支保护仍由仓库配置维持。
+shared在官方`xcode-27`标准macOS ARM64基准宿主只执行一次；Windows x64只运行native契约与必要真实集成。Mac native独立分组，Linux Ubuntu22/24保留其声明的原生开发Core契约，不因此声明完整Linux发行支持。按实际选中的耗时估计生成矩阵，完整计划把Mac的shared与native文件均衡分到最多5个工作组，文件原有lane和平台义务不变；影响计划保留shared最多2组、Mac native最多3组，Windows最多12组；空影响不创建无效测试任务。计划、覆盖汇总及required为纯编排，在Ubuntu24执行；Mac名额用于实际通用和原生验证。`verification-platform.yml` 在每个平台内部准备一次锁定依赖与前端，然后启动该平台的精确分组，Windows不等待Mac准备，组内恢复SDK链接；固定required要求本次完整验证成功，或证明核验作业成功且明确返回valid=true。分支保护仍由仓库配置维持。
 
 运行器通过 `ci.js run-group` 校验冻结计划、真实平台与架构后调用同一测试命令。断言失败、超时、取消、缺依赖、准备失败和启动错误在非零退出前落盘，失败报告与逐文件日志始终上传。执行前后核对完整公开源码，包含未跟踪的自有源码；不以输入集合外的源码变化生成成功证明。
 

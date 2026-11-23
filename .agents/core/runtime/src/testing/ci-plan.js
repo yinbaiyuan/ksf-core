@@ -3,12 +3,18 @@ import {changedPaths, assignShards} from './planner.js';
 import {selectChangedTests} from './selection.js';
 
 export const targets = [
-  {target:'shared', profile:'shared', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:4},
-  {target:'mac', profile:'native', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:4},
+  {target:'shared', profile:'shared', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:2},
+  {target:'mac', profile:'native', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:3},
   {target:'win', profile:'native', platform:'win32', architecture:'x64', os:'windows-2025', prepared:'Windows', limit:12},
   {target:'linux22', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-22.04', prepared:null, limit:1},
   {target:'linux24', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-24.04', prepared:null, limit:1},
 ];
+// Full verification uses the five available Mac workers as one balanced pool.
+// File lanes stay in the reviewed catalog: shared still runs only on Mac;
+// every native platform obligation remains in its original platform set.
+export const verificationTargets = full => full
+  ? [{...targets[1],profile:'all',limit:5},...targets.slice(2)]
+  : targets;
 export const planDigest = plan => {const {digest, ...content} = plan; return sha256(JSON.stringify(content));};
 export const sameFiles = (a,b) => Array.isArray(a) && Array.isArray(b) && a.length === b.length && JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 
@@ -20,8 +26,8 @@ export function createVerificationPlan(root, {full = false, base, changes} = {},
   const selection = full ? null : selectChangedTests(root, catalog, diff.paths);
   const selected = catalog.tests.filter(t => full || selection.ids.includes(t.id));
   const groups = [];
-  for (const target of targets) {
-    const tests = selected.filter(t => t.verification.lane === target.profile && t.platforms.includes(target.platform));
+  for (const target of verificationTargets(full)) {
+    const tests = selected.filter(t => (target.profile === 'all' || t.verification.lane === target.profile) && t.platforms.includes(target.platform));
     if (!tests.length) continue;
     const seconds = tests.reduce((sum,t) => sum + (t.seconds?.[target.platform] ?? 1), 0);
     const count = Math.min(tests.length, target.limit, Math.max(1, Math.ceil(seconds / 450)));

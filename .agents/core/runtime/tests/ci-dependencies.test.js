@@ -6,7 +6,7 @@ import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {loadCatalog} from '../src/testing/catalog.js';
-import {createVerificationPlan, targets} from '../src/testing/ci-plan.js';
+import {createVerificationPlan, targets,verificationTargets} from '../src/testing/ci-plan.js';
 import {sourceIdentity} from '../src/testing/ci.js';
 
 function repositoryWorkflows(t) {
@@ -69,15 +69,16 @@ test('native matrix has unique artifacts and a complete disjoint partition of ea
   const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root);
   const plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
   assert.equal(new Set(plan.groups.map(g=>g.id)).size,plan.groups.length);
-  for(const target of targets){
+  for(const target of verificationTargets(true)){
     const groups=plan.groups.filter(g=>g.target===target.target),files=groups.flatMap(g=>g.files);
-    const expected=catalog.tests.filter(t=>t.verification.lane===target.profile&&t.platforms.includes(target.platform)).map(t=>t.path);
+    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)).map(t=>t.path);
     assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);
     assert.ok(groups.length<=target.limit);
   }
-  const shared=plan.groups.filter(g=>g.profile==='shared').flatMap(g=>g.files);
+  const shared=plan.groups.filter(g=>g.platform==='darwin').flatMap(g=>g.files).filter(path=>catalog.tests.find(t=>t.path===path).verification.lane==='shared');
   assert.equal(shared.length,catalog.tests.filter(t=>t.verification.lane==='shared').length);
   assert.ok(plan.groups.filter(g=>g.platform==='win32').every(g=>g.profile==='native'));
+  assert.ok(plan.groups.filter(g=>g.platform==='darwin').length<=5);
 
 });
 
