@@ -13,21 +13,28 @@ on:
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 concurrency:
   group: verify-core-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  reuse:
+    if: github.repository == 'yinbaiyuan/ksf-core' && github.event_name != 'pull_request'
+    uses: ./.github/workflows/proof.yml
   verification:
-    if: github.repository == 'yinbaiyuan/ksf-core'
+    needs: reuse
+    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && needs.reuse.outputs.valid != 'true' }}
     uses: ./.github/workflows/verification.yml
     with:
-      full: ${{ github.event_name != 'pull_request' && (github.event_name == 'push' || inputs.full == true || !github.event.before) }}
+      full: ${{ github.event_name != 'workflow_dispatch' || inputs.full == true }}
       base: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
   required:
     if: always() && github.repository == 'yinbaiyuan/ksf-core'
-    needs: verification
+    needs: [reuse, verification]
     runs-on: ubuntu-24.04
     steps:
       - env:
+          REUSED: ${{ needs.reuse.outputs.valid }}
+          REUSE_RESULT: ${{ needs.reuse.result }}
           VERIFICATION: ${{ needs.verification.result }}
-        run: test "$VERIFICATION" = success
+        run: test "$VERIFICATION" = success || { test "$REUSE_RESULT" = success && test "$REUSED" = true; }

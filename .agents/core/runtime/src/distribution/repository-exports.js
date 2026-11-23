@@ -4,5 +4,6 @@
 export const repositoryExports = Object.freeze(Object.fromEntries([
   'README.md', '.gitignore', '.gitattributes', '.github/workflows/check.yml',
   '.github/workflows/verification.yml', '.github/workflows/release.yml',
+  '.github/workflows/proof.yml', '.github/workflows/verification-platform.yml',
 ].map(path => [`.agents/core/distribution/repository/${path}`, path])));
 export const projectedPath = (workspacePath, sourcePath) => repositoryExports[workspacePath] === sourcePath;

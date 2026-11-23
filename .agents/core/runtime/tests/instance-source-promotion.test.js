@@ -31,6 +31,16 @@ test('new plan targets core-main while keeping an old main baseline and projects
   assert.equal(api.commit.parents[0].sha,receipt.core.revision);
 });
 
+test('reusable proof and platform workflows project from Core without reading personal root CI',async t=>{
+ const f=await distributionFixture(t),paths=['proof.yml','verification-platform.yml'].map(name=>'.agents/core/distribution/repository/.github/workflows/'+name);
+ for(const path of paths){writeAtomic(join(f.workspace,path),readRegular(f.workspace,path).toString()+'\n# reviewed workflow change\n');writeAtomic(join(f.workspace,'.github/workflows/'+path.split('/').at(-1)),'PRIVATE_REUSABLE_SENTINEL');}
+ commitWorkspace(f);
+ const plan=await prepareContribution({...contributionDescription,root:f.workspace,paths,api:new ForkAPI({coreRoot:f.root})});
+ assert.equal(plan.changes.length,4);
+ for(const path of paths){const target='.github/workflows/'+path.split('/').at(-1),canonical=plan.changes.find(c=>c.source_path===path),projected=plan.changes.find(c=>c.source_path===target);assert.ok(projected);assert.equal(projected.content,canonical.content);}
+ assert.ok(!JSON.stringify(plan).includes('PRIVATE_REUSABLE_SENTINEL'));
+});
+
 
 test('same-version source promotion verifies exact ancestry while an old release remains immutable', async t => {
   const f=await distributionFixture(t,{compact:true}),receipt=installedManifest(f.workspace);

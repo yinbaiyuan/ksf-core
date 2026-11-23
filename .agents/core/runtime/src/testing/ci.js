@@ -99,26 +99,62 @@ export function aggregateReports(root,reports,{full=true,proofPath,summaryPath})
  writeFileSync(proofPath,JSON.stringify(proof,null,2)+'\n');return proof;
 }
 export function trustedRun(run,repo,sha){return run?.conclusion==='success'&&run.head_sha===sha&&run.head_branch==='core-main'&&run.head_repository?.full_name===repo&&run.path==='.github/workflows/check.yml'&&['push','workflow_dispatch'].includes(run.event);}
-export function validateProof(root,proof,run){
+// A PR receipt is eligible only after the API confirms that this exact,
+// same-repository head was merged into the final commit being checked. Input
+// identity below still covers every source, workflow, test and runtime byte.
+export function trustedMergedPullRun(run,pull,repo,sha){
+ return run?.conclusion==='success'&&run.event==='pull_request'&&run.path==='.github/workflows/check.yml'&&
+  run.head_repository?.full_name===repo&&pull?.merged===true&&pull.merge_commit_sha===sha&&
+  pull.head?.sha===run.head_sha&&pull.head?.repo?.full_name===repo&&
+  pull.base?.ref==='core-main'&&pull.base?.repo?.full_name===repo;
+}
+export function validateProof(root,proof,run,pull,testedCommit){
  const identity=sourceIdentity(root),repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA;
  const expected=createVerificationPlan(root,{full:true},identity);
- if(!trustedRun(run,repo,sha)||proof.schemaVersion!==2||!proof.full||proof.policy!==expected.policy||proof.planDigest!==expected.digest||JSON.stringify(proof.groups)!==JSON.stringify(expected.groups)||proof.commit!==sha||proof.repository!==repo||String(proof.runId)!==String(run.id)||String(proof.runAttempt)!==String(run.run_attempt)||JSON.stringify(proof.platforms)!==JSON.stringify(['darwin','win32'])||proof.sourceDigest!==identity.sourceDigest||proof.catalogDigest!==identity.catalogDigest||JSON.stringify(proof.runtime)!==JSON.stringify(identity.runtime))fail('TEST_PROOF_INVALID','The trusted layered CI receipt does not match this final source and native runtimes.');
+ const direct=trustedRun(run,repo,sha),merged=trustedMergedPullRun(run,pull,repo,sha)&&
+  testedCommit?.sha===proof.commit&&testedCommit.parents?.length===2&&testedCommit.parents[1]?.sha===run.head_sha;
+ if((!direct&&!merged)||proof.schemaVersion!==2||!proof.full||proof.policy!==expected.policy||proof.planDigest!==expected.digest||JSON.stringify(proof.groups)!==JSON.stringify(expected.groups)||(direct?proof.commit!==sha:!/^[a-f0-9]{40}$/.test(proof.commit??''))||proof.repository!==repo||String(proof.runId)!==String(run.id)||String(proof.runAttempt)!==String(run.run_attempt)||JSON.stringify(proof.platforms)!==JSON.stringify(['darwin','win32'])||proof.sourceDigest!==identity.sourceDigest||proof.catalogDigest!==identity.catalogDigest||JSON.stringify(proof.runtime)!==JSON.stringify(identity.runtime))fail('TEST_PROOF_INVALID','The trusted layered CI receipt does not match this final source and native runtimes.');
  return true;
 }
-async function findProof(root){
+export async function findProof(root,{requester}={}){
  const repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA,token=process.env.GITHUB_TOKEN;
- const request=async path=>{const response=await fetch('https://api.github.com'+path,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Actions API '+response.status);return response;};
+ const request=requester??(async path=>{const response=await fetch('https://api.github.com'+path,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Actions API '+response.status);return response;});
+ const select=async candidates=>{
+  for(const run of candidates){
+   const artifacts=await(await request(`/repos/${repo}/actions/runs/${run.id}/artifacts`)).json(),matches=artifacts.artifacts?.filter(a=>a.name.startsWith('suite-proof-')&&!a.expired)??[];
+   if(matches.length!==1)continue;
+   appendFileSync(process.env.GITHUB_OUTPUT,`candidate=${matches[0].id}\nrun=${run.id}\n`);return true;
+  }
+  return false;
+ };
  try{
   const runs=await(await request(`/repos/${repo}/actions/runs?head_sha=${sha}&status=success&per_page=30`)).json();
-  for(const run of runs.workflow_runs??[]){
-   if(!trustedRun(run,repo,sha))continue;
-   const artifacts=await(await request(`/repos/${repo}/actions/runs/${run.id}/artifacts`)).json(),artifact=artifacts.artifacts?.find(a=>a.name==='suite-proof-'+sha&&!a.expired);
-   if(!artifact)continue;
-   // Artifact download is delegated to the official action by its numeric ID.
-   appendFileSync(process.env.GITHUB_OUTPUT,`candidate=${artifact.id}\nrun=${run.id}\n`);return;
+  if(await select((runs.workflow_runs??[]).filter(run=>trustedRun(run,repo,sha))))return;
+  const pulls=await(await request(`/repos/${repo}/commits/${sha}/pulls`)).json();
+  for(const summary of pulls){
+   const pull=await(await request(`/repos/${repo}/pulls/${summary.number}`)).json();
+   if(!pull.merged||pull.merge_commit_sha!==sha||pull.head?.repo?.full_name!==repo)continue;
+   const prior=await(await request(`/repos/${repo}/actions/runs?head_sha=${pull.head.sha}&status=success&per_page=30`)).json();
+   if(await select((prior.workflow_runs??[]).filter(run=>trustedMergedPullRun(run,pull,repo,sha))))return;
   }
  }catch(error){process.stderr.write('CI proof unavailable; native full verification is required: '+error.message+'\n');}
  appendFileSync(process.env.GITHUB_OUTPUT,'candidate=\nrun=\n');
+}
+export async function verifyProofCandidate(root,proof,runId,{requester}={}){
+ const repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA;
+ const get=requester??(async path=>{const response=await fetch(`https://api.github.com/repos/${repo}/${path}`,{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Proof provenance unavailable');return response.json();});
+ if(!/^[a-f0-9]{40}$/.test(proof?.commit??'')||!/^\d+$/.test(String(runId)))fail('TEST_PROOF_INVALID','Invalid tested commit or run.');
+ const run=await get(`actions/runs/${runId}`);let pull;
+ if(run.event==='pull_request'){
+  // GitHub may clear run.pull_requests after merge. Rebuild the association
+  // from the final commit, then read the PR's authoritative merge/head state.
+  for(const item of await get(`commits/${sha}/pulls`)){
+   const candidate=await get(`pulls/${item.number}`);
+   if(trustedMergedPullRun(run,candidate,repo,sha)){pull=candidate;break;}
+  }
+ }
+ const testedCommit=run.event==='pull_request'?await get(`commits/${proof.commit}`):undefined;
+ return validateProof(root,proof,run,pull,testedCommit);
 }
 function reportsIn(directory){
  return !existsSync(directory)?[]:readdirSync(directory,{withFileTypes:true}).flatMap(e=>{
@@ -135,8 +171,8 @@ async function main(){
   const audit=auditCoverage(root); writeFileSync('coverage-audit.json',JSON.stringify(audit,null,2)+'\n');
   writeFileSync('verification-plan.json',JSON.stringify(plan,null,2)+'\n');
   const matrix=plan.groups.filter(g=>g.prepared),linux=plan.groups.filter(g=>!g.prepared);
-  const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared}])).values()];
-  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'macos-15'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'macos-15',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
+  const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared,groups:JSON.stringify({include:matrix.filter(item=>item.prepared===g.prepared)})}])).values()];
+  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'xcode-27'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'xcode-27',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
  }else if(command==='run-group'){
   const [planPath,id,reportPath]=args;
   try{
@@ -159,7 +195,10 @@ async function main(){
   aggregateReports(root,reportsIn(args[0]),{full:args[1]==='full',proofPath:args[2],summaryPath:args[3]??'coverage.json'});
  }else if(command==='find-proof')await findProof(root);
  else if(command==='verify-proof'){
-  try{const response=await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/actions/runs/${args[1]}`,{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Run unavailable');validateProof(root,JSON.parse(readFileSync(args[0],'utf8')),await response.json());appendFileSync(process.env.GITHUB_OUTPUT,'valid=true\n');}
+  try{
+   const proof=JSON.parse(readFileSync(args[0],'utf8'));
+   await verifyProofCandidate(root,proof,args[1]);appendFileSync(process.env.GITHUB_OUTPUT,'valid=true\n');
+  }
   catch(error){process.stderr.write(error.message+'; running missing full verification.\n');appendFileSync(process.env.GITHUB_OUTPUT,'valid=false\n');}
  }else fail('INVALID_ARGUMENTS','Unknown CI test operation.');
 }

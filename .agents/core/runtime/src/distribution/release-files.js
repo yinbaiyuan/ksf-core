@@ -7,7 +7,7 @@ import {replaceFile} from '../platform/index.js';
 // Release staging and new template directories contain independent files.
 // Bound concurrent I/O while retaining durable writes and atomic publication.
 // Drain every writer before returning an error so callers may remove staging.
-export async function writeReleaseFiles(root,entries){
+export async function writeReleaseFiles(root,entries,{durable=true}={}){
  let cursor=0,stopped=false;
  async function worker(){
   while(!stopped&&cursor<entries.length){
@@ -17,7 +17,7 @@ export async function writeReleaseFiles(root,entries){
     await mkdir(dirname(target),{recursive:true});
     try{
      handle=await open(temporary,'wx',entry.mode);owned=true;
-     await handle.writeFile(entry.bytes);await handle.sync();await handle.close();handle=undefined;
+     await handle.writeFile(entry.bytes);if(durable)await handle.sync();await handle.close();handle=undefined;
      await replaceFile(temporary,target);
     }finally{
      try{await handle?.close();}finally{if(owned)await rm(temporary,{force:true});}

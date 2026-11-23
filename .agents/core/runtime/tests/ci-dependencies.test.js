@@ -6,7 +6,7 @@ import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {loadCatalog} from '../src/testing/catalog.js';
-import {createVerificationPlan, targets} from '../src/testing/ci-plan.js';
+import {createVerificationPlan, targets,verificationTargets} from '../src/testing/ci-plan.js';
 import {sourceIdentity} from '../src/testing/ci.js';
 
 function repositoryWorkflows(t) {
@@ -18,7 +18,8 @@ function repositoryWorkflows(t) {
 test('CI prepares locked toolchains once per platform and restores them before full shards', t => {
   const directory = repositoryWorkflows(t); if (!directory) return;
   const verification = YAML.parse(readFileSync(join(directory, 'verification.yml'), 'utf8'));
-  const setup = verification.jobs.platform.steps, full = verification.jobs.tests.steps;
+  const native = YAML.parse(readFileSync(join(directory, 'verification-platform.yml'), 'utf8'));
+  const setup = native.jobs.prepare.steps, full = native.jobs.tests.steps;
   for (const part of ['applications/sdk', 'applications/projects', 'runtime/web']) {
     assert.ok(setup.some(s => s['working-directory'] === '.agents/core/'+part && /npm ci/.test(s.run ?? '')));
   }
@@ -28,8 +29,8 @@ test('CI prepares locked toolchains once per platform and restores them before f
   assert.ok(!full.some(s => /npm (?:test|ci)|release build|npm run build/.test(s.run ?? '')));
   for (const step of [...setup,...full]) assert.ok(!step.env?.NODE_OPTIONS);
   const check = YAML.parse(readFileSync(join(directory, 'check.yml'), 'utf8'));
-  assert.equal(check.jobs.required.if, "always() && github.repository == 'yinbaiyuan/ksf-core'");assert.equal(check.jobs.required.needs, 'verification');
-  assert.deepEqual(verification.jobs.coverage.needs, ['plan','platform','tests','linux-core']);
+  assert.equal(check.jobs.required.if, "always() && github.repository == 'yinbaiyuan/ksf-core'");assert.deepEqual(check.jobs.required.needs, ['reuse','verification']);
+  assert.deepEqual(verification.jobs.coverage.needs, ['plan','platform','linux-core']);
   assert.ok(!check.on.pull_request.paths && !check.on.push.paths);
   for(const id of ['plan','coverage'])assert.equal(verification.jobs[id]['runs-on'],'ubuntu-24.04','Pure orchestration must not queue for a native Mac runner.');
   assert.equal(check.jobs.required['runs-on'],'ubuntu-24.04');
@@ -47,8 +48,9 @@ test('CI prepares locked toolchains once per platform and restores them before f
 
 test('failed shards upload structured outcomes and coverage diagnoses before gating release proof',t=>{
   const workflow=YAML.parse(readFileSync(join(repositoryWorkflows(t),'verification.yml'),'utf8'));
+  const native=YAML.parse(readFileSync(join(repositoryWorkflows(t),'verification-platform.yml'),'utf8'));
   for(const [job,id] of [['tests','tests'],['linux-core','tests']]){
-    const steps=workflow.jobs[job].steps,run=steps.find(s=>s.id===id);
+    const steps=(job==='tests'?native:workflow).jobs[job].steps,run=steps.find(s=>s.id===id);
     assert.match(run.run,/ci.js run-group /);assert.doesNotMatch(run.run,/stamp|\|\|\s*true/);
     const upload=steps.find(s=>s.with?.name?.startsWith('group-'));
     assert.match(upload.if,/always\(\)/);assert.match(upload.if,new RegExp('steps\\.'+id+'\\.outcome'));
@@ -61,19 +63,22 @@ test('failed shards upload structured outcomes and coverage diagnoses before gat
 });
 test('native matrix has unique artifacts and a complete disjoint partition of each platform',t=>{
   const directory=repositoryWorkflows(t),workflow=YAML.parse(readFileSync(join(directory,'verification.yml'),'utf8'));
-  assert.equal(workflow.jobs.tests.strategy.matrix, '${{ fromJSON(needs.plan.outputs.matrix) }}');
+  const native=YAML.parse(readFileSync(join(directory,'verification-platform.yml'),'utf8'));
+  assert.equal(native.jobs.tests.strategy.matrix, '${{ fromJSON(inputs.groups) }}');
+  assert.equal(workflow.jobs.platform.with.groups, '${{ matrix.groups }}');
   const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root);
   const plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
   assert.equal(new Set(plan.groups.map(g=>g.id)).size,plan.groups.length);
-  for(const target of targets){
+  for(const target of verificationTargets(true)){
     const groups=plan.groups.filter(g=>g.target===target.target),files=groups.flatMap(g=>g.files);
-    const expected=catalog.tests.filter(t=>t.verification.lane===target.profile&&t.platforms.includes(target.platform)).map(t=>t.path);
+    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)).map(t=>t.path);
     assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);
     assert.ok(groups.length<=target.limit);
   }
-  const shared=plan.groups.filter(g=>g.profile==='shared').flatMap(g=>g.files);
+  const shared=plan.groups.filter(g=>g.platform==='darwin').flatMap(g=>g.files).filter(path=>catalog.tests.find(t=>t.path===path).verification.lane==='shared');
   assert.equal(shared.length,catalog.tests.filter(t=>t.verification.lane==='shared').length);
   assert.ok(plan.groups.filter(g=>g.platform==='win32').every(g=>g.profile==='native'));
+  assert.ok(plan.groups.filter(g=>g.platform==='darwin').length<=5);
 
 });
 
@@ -129,3 +134,22 @@ test('CI Node environment flags can start the bundled runtime before selecting t
   assert.ok(linux.steps.some(s=>/always\(\)/.test(s.if??'')&&s.with?.name==='group-${{ matrix.id }}'));
 
  });
+
+test('native platforms start independently and complete-proof reuse retains a fail-closed required gate',()=>{
+ const directory=repositoryWorkflows(),verification=YAML.parse(readFileSync(join(directory,'verification.yml'),'utf8'));
+ const native=YAML.parse(readFileSync(join(directory,'verification-platform.yml'),'utf8'));
+ assert.equal(verification.jobs.platform.needs,'plan');
+ assert.equal(verification.jobs.platform.uses,'./.github/workflows/verification-platform.yml');
+ assert.equal(native.jobs.tests.needs,'prepare');
+ assert.equal(native.jobs.prepare['runs-on'],'${{ inputs.os }}');
+ const check=YAML.parse(readFileSync(join(directory,'check.yml'),'utf8'));
+ assert.match(check.jobs.verification.with.full,/github.event_name != 'workflow_dispatch'/);
+ assert.match(check.jobs.verification.if,/needs.reuse.outputs.valid != 'true'/);
+ assert.match(check.jobs.required.steps[0].run,/REUSE_RESULT.*success.*REUSED.*true/);
+ const proof=YAML.parse(readFileSync(join(directory,'proof.yml'),'utf8'));
+ assert.equal(proof.jobs.proof['runs-on'],'ubuntu-24.04');
+ assert.ok(proof.jobs.proof.steps.some(step=>/ci.js verify-proof/.test(step.run??'')));
+ const release=YAML.parse(readFileSync(join(directory,'release.yml'),'utf8'));
+ assert.equal(release.jobs.release['runs-on'],'ubuntu-24.04');
+ assert.equal(release.jobs.prepare['runs-on'],'xcode-27');
+});

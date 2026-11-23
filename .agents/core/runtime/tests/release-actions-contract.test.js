@@ -12,9 +12,10 @@ test('official workflows use core-main, native platform evidence and one Core pu
   const check = YAML.parse(text('check.yml')), release = YAML.parse(text('release.yml')), verification = YAML.parse(text('verification.yml'));
   assert.deepEqual(check.on.push.branches, ['core-main']); assert.deepEqual(check.on.pull_request.branches, ['core-main']);
   assert.equal(verification.jobs.platform.strategy.matrix, '${{ fromJSON(needs.plan.outputs.preparations) }}');
-  assert.equal(verification.jobs.tests.strategy.matrix, '${{ fromJSON(needs.plan.outputs.matrix) }}');
+  const native=YAML.parse(text('verification-platform.yml'));
+  assert.equal(native.jobs.tests.strategy.matrix, '${{ fromJSON(inputs.groups) }}');
   assert.ok(verification.jobs.plan.steps.some(s=>/ci.js plan/.test(s.run??'')));
-  assert.equal(check.jobs.required.needs,'verification');
+  assert.deepEqual(check.jobs.required.needs,['reuse','verification']);
   for (const name of ['check.yml','release.yml','verification.yml']) {
     assert.ok(text(name).includes("github.repository == 'yinbaiyuan/ksf-core'"));
     assert.ok(!/ksf-workspace|KSF_TEMPLATE_APP|create-github-app-token|release template|release mirror|release-only/.test(text(name)));
@@ -22,7 +23,7 @@ test('official workflows use core-main, native platform evidence and one Core pu
   assert.deepEqual(Object.keys(release.jobs), ['find-proof','verification','prepare','release']);
   assert.ok(text('release.yml').includes('origin/core-main'));
   assert.ok(text('release.yml').includes('release publish'));
-  assert.ok(text('verification.yml').includes('restore-links'));
+  assert.ok(text('verification-platform.yml').includes('restore-links'));
 });
 test('publication result must identify the exact frozen Core release', async t => {
   const f = await distributionFixture(t), identity = inspectHandoff({ root: f.root, directory: f.first.output });
