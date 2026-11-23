@@ -86,10 +86,13 @@ export function inputFingerprints(root, catalog, tests) {
     if (ancestors.has(actual)) return 'cycle';
     if (!dependencyTrees.has(actual)) {
       const next = new Set([...ancestors, actual]), records = [];
-      for (const name of readdirSync(actual).sort()) {
+      for (const entry of readdirSync(actual,{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)) {
+        const name=entry.name;
         if (['.cache', '.vite', '.bin'].includes(name)) continue;
-        const path = join(actual, name), stat = statSync(path);
-        records.push([name, stat.isDirectory() ? dependencies(path, next) : sha256(readFileSync(path))]);
+        // The current directory enumeration already gives regular-file types.
+        // Follow links and unknown entries as before; retain the exact digest format.
+        const path = join(actual, name), directory=entry.isDirectory()||!entry.isFile()&&statSync(path).isDirectory();
+        records.push([name, directory ? dependencies(path, next) : sha256(readFileSync(path))]);
       }
       dependencyTrees.set(actual, sha256(JSON.stringify(records)));
     }

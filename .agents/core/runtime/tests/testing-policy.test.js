@@ -378,3 +378,17 @@ test('transported fixtures run all scenarios and reject seed mutation without de
  writeFileSync(flag,'mutate');const failed=await executeTestPlan(f.root,plan,options);
  assert.equal(failed.ok,false);assert.equal(failed.result.fixtureError.code,'TEST_FIXTURE_CHANGED');assert.equal(failed.result.summary.executed,1);assert.deepEqual(failed.result.changedInputs,[]);assert.equal(existsSync(payload),true);assert.equal(existsSync(failed.result.temporaryDirectory),false);
 });
+
+test('complete verification plans retain final-source identity in a real shallow checkout',t=>{
+ const f=fixture(t),clone=f.root+'-shallow';t.after(()=>rmSync(clone,{recursive:true,force:true}));
+ const env={...process.env,GIT_CONFIG_GLOBAL:nullDevice,GIT_CONFIG_SYSTEM:nullDevice},git=args=>{const r=spawnSync(gitBinary,args,{encoding:'utf8',env});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
+ writeFileSync(join(f.root,f.runtime,'src/logic.js'),'export const value=2;\n');git(['-C',f.root,'add','--','.agents']);git(['-C',f.root,'-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-m','Second synthetic source']);
+ git(['clone','--depth=1','--no-local','--template=',f.root,clone]);assert.equal(git(['-C',clone,'rev-parse','--is-shallow-repository']),'true');
+ assert.deepEqual(sourceIdentity(clone),sourceIdentity(f.root));assert.deepEqual(createVerificationPlan(clone,{full:true},sourceIdentity(clone)),createVerificationPlan(f.root,{full:true},sourceIdentity(f.root)));
+});
+
+test('runtime-only declarations fail closed when a reviewed transaction gains toolchain requirements',t=>{
+ const f=fixture(t),native=f.catalog.tests[1];native.id='core:system-update';native.isolation='exclusive';native.fixtures=['distribution'];f.save();
+ const plan=makePlan(f);assert.ok(plan.groups.some(g=>g.toolchains===false&&g.files.includes(native.path)));
+ native.requirements=['new-compiler'];f.save();assert.throws(()=>makePlan(f),{code:'TEST_CI_PLAN_INVALID'});
+});

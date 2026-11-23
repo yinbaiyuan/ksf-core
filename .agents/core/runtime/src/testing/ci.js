@@ -50,6 +50,13 @@ export function restorePreparedLinks(root){
  }
 }
 
+export function validateGroupPreparation(root,group){
+ if(group.toolchains===false&&group.prepared){
+  for(const path of ['applications/sdk/node_modules','applications/projects/node_modules','runtime/web/node_modules'])
+   if(existsSync(join(root,'.agents/core',path)))fail('TEST_CI_PREPARATION_INVALID','Runtime-only native verification must not inherit developer toolchains.',{target:path});
+ }
+}
+
 export function sourceIdentity(root){
  const git=spawnSync(gitExecutable,['-C',root,'ls-files','--cached','--others','--exclude-standard','-z','--','.agents/core','.agents/ksf','.agents/ksf.ps1','AGENTS.md','README.md','.github','.gitignore','.gitattributes'],{encoding:'utf8',maxBuffer:32*1024*1024});
  if(git.status!==0)fail('TEST_PROOF_INVALID','Cannot enumerate the final source.');
@@ -176,13 +183,14 @@ async function main(){
   const audit=auditCoverage(root); writeFileSync('coverage-audit.json',JSON.stringify(audit,null,2)+'\n');
   writeFileSync('verification-plan.json',JSON.stringify(plan,null,2)+'\n');
   const matrix=plan.groups.filter(g=>g.prepared),linux=plan.groups.filter(g=>!g.prepared);
-  const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared,groups:JSON.stringify({include:matrix.filter(item=>item.prepared===g.prepared)})}])).values()];
+  const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared,toolchains:g.toolchains,groups:JSON.stringify({include:matrix.filter(item=>item.prepared===g.prepared)})}])).values()];
   appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'xcode-27'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'xcode-27',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
  }else if(command==='run-group'){
   const [planPath,id,reportPath]=args;
   try{
    const plan=validateVerificationPlan(root,JSON.parse(readFileSync(planPath,'utf8')),sourceIdentity(root)),group=plan.groups.find(g=>g.id===id);
    if(!group||group.platform!==process.platform||group.architecture!==process.arch)fail('TEST_CI_PLAN_INVALID','CI group requires its real native target.');
+   validateGroupPreparation(root,group);
    let execution={};
    if(process.env.KSF_TEST_CI_PREPARED_SEEDS){
     if(process.env.GITHUB_ACTIONS!=='true')fail('TEST_CI_PREPARATION_INVALID','Prepared distribution fixtures require Actions provenance.');

@@ -49,7 +49,8 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   for (const error of retention.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);
   const runId = randomUUID(), base = join(root, '.agents/runtime-data/tests'), directory = join(base, runId), cache = join(base, 'cache');
   mkdirSync(directory, { recursive: true }); mkdirSync(cache, { recursive: true });
-  const before = inputFingerprints(root, plan.catalog, plan.tests), results = new Array(plan.tests.length), active = new Set();
+  const fingerprintStarted=performance.now();
+  const before = inputFingerprints(root, plan.catalog, plan.tests), beforeFingerprintMs=Math.round(performance.now()-fingerprintStarted), results = new Array(plan.tests.length), active = new Set();
   // Keep native Windows staging paths within legacy PowerShell/.NET limits.
   // A profile-root scratch directory is shorter than %LOCALAPPDATA%/Temp plus
   // another run/file hierarchy, and is exclusively owned and removed here.
@@ -152,7 +153,8 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
     await scheduleTests(schedule, parallel, async item => { results[item.index] = await runOne(item, item.index); }, () => cancelled);
   } catch (error) { fixtureError = {code:error.code ?? 'TEST_EXECUTION_FAILED',message:error.message}; progress(error.message); } finally { process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); for (const child of active) stop(child); }
   for (let i = 0; i < results.length; i++) if (!results[i]) results[i] = { id: plan.tests[i].id, path: plan.tests[i].path, owner: plan.tests[i].owner, status: 'not-executed', durationMs: 0 };
-  const after = inputFingerprints(root, plan.catalog, plan.tests), changed = plan.tests.filter(item => before[item.id] !== after[item.id]).map(item => item.path);
+  const afterFingerprintStarted=performance.now();
+  const after = inputFingerprints(root, plan.catalog, plan.tests), afterFingerprintMs=Math.round(performance.now()-afterFingerprintStarted), changed = plan.tests.filter(item => before[item.id] !== after[item.id]).map(item => item.path);
   try {if (fixturePreparation && fixtureDigest(seedDirectory) !== fixturePreparation.digest) fixtureError = {code:'TEST_FIXTURE_CHANGED',message:'A test changed the run-owned immutable fixture seed.'};}
   catch(error) {fixtureError = {code:'TEST_FIXTURE_CHANGED',message:error.message};}
   let cleanupError;
@@ -160,6 +162,7 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   const ok = !cancelled && !changed.length && !cleanupError && !fixtureError && results.every(result => ['passed', 'reused'].includes(result.status));
   if (ok) for (let i = 0; i < results.length; i++) if (plan.tests[i].cacheable && results[i].status === 'passed') writeJSON(join(cache, `${before[plan.tests[i].id]}.json`), { schemaVersion: 1, key: before[plan.tests[i].id], runId, result: results[i] });
   const result = { schemaVersion: 1, runId, startedAt, finishedAt: new Date().toISOString(), durationMs: Math.round(performance.now() - start), status: ok ? plan.tests.length ? 'passed' : plan.status : cancelled ? 'cancelled' : changed.length ? 'inputs-changed' : 'failed', complete: ok, platform: process.platform, architecture: process.arch, nodeVersion: process.version, catalogDigest: plan.catalog.digest, suite: plan.suite, profile: plan.profile, scope: plan.scope, component: plan.component, shard: plan.options.shard ?? null, selectedFiles: plan.selectedFiles, assignedFiles: plan.tests.map(t => t.path), requiredFullComponents: plan.requiredFullComponents, excludedPlatform: plan.excludedPlatform, inputFingerprints: before, changedInputs: changed, results, summary: { executed: results.filter(r => !['reused', 'not-executed'].includes(r.status)).length, reused: results.filter(r => r.status === 'reused').length, failed: results.filter(r => !['passed', 'reused'].includes(r.status)).length, platformNotApplicable: plan.excludedPlatform.length }, reportPath: join(directory, 'report.json') };
+  result.fingerprintTiming={beforeMs:beforeFingerprintMs,afterMs:afterFingerprintMs};
   result.fixturePreparation=fixturePreparation; result.fixtureError=fixtureError??null; result.execution=plan.execution;result.gaps=plan.gaps; result.temporaryDirectory = temporaryDirectory; result.cleanupError=cleanupError??null;
   writeJSON(result.reportPath, result);
   const retained = retainRuntimeArtifacts(root, 'tests', { keepRunId: runId });
