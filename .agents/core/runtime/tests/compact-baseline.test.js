@@ -1,4 +1,4 @@
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chmodSync, readFileSync, rmSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { gitBlobID, resolveBaseline } from '../src/distribution/baseline.js';
 import { GitHubAPI } from '../src/distribution/github.js';
 import { systemRead, systemUpdate, systemRollback, systemFingerprint } from '../src/distribution/system.js';
 import { prepareContribution, readContribution, submitContribution } from '../src/distribution/contribute.js';
-import { distributionFixture, commitWorkspace, git, contributionDescription } from './helpers/distribution-fixture.js';
+import { officialArchiveFixture as distributionFixture, commitWorkspace, git, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 const example = '.agents/core/example.txt';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';

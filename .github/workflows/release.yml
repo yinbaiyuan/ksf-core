@@ -22,7 +22,7 @@ jobs:
   prepare:
     needs: [find-proof, verification]
     if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && (needs.find-proof.outputs.valid == 'true' || needs.verification.result == 'success') }}
-    runs-on: xcode-27
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     outputs:
       version: ${{ steps.bundle.outputs.version }}
@@ -40,12 +40,12 @@ jobs:
           KSF_REF_TYPE: ${{ github.ref_type }}
           KSF_REF_NAME: ${{ github.ref_name }}
         run: |
-          ksf_version=$(/usr/bin/plutil -extract version raw -o - .agents/core/build.json)
+          ksf_version=$(python3 -c 'import json; print(json.load(open(".agents/core/build.json"))["version"])')
           if [ "$KSF_REF_TYPE" = tag ]; then test "$KSF_REF_NAME" = "v$ksf_version"; fi
           git merge-base --is-ancestor "$GITHUB_SHA" origin/core-main
           .agents/ksf build --json > /dev/null
           .agents/ksf runtime verify --json
-          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
+          ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           printf 'KSF_RELEASE_NODE=%s\n' "$ksf_node" >> "$GITHUB_ENV"
           dirname "$ksf_node" >> "$GITHUB_PATH"
       - name: Install SDK test dependencies

@@ -1,3 +1,4 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -6,7 +7,7 @@ import { join, dirname } from 'node:path';
 import { distributionFixture, instanceEntries } from './helpers/distribution-fixture.js';
 import { enableChat, registerChatTurn, mutateChat, readChat } from '../src/services/chat.js';
 import { systemUpdate, systemRollback } from '../src/distribution/system.js';
-import { buildRelease } from '../src/distribution/release.js';
+
 import { readArchive } from '../src/distribution/archive.js';
 
 test('Core upgrade and rollback retain chat counters, runs and dynamic values byte-for-byte', async t => {

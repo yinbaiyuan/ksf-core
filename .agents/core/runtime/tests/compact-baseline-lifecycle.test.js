@@ -1,10 +1,11 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chmodSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { digestObject, installedManifest, releaseReceipt, stableJSON, writeAtomic } from '../src/distribution/common.js';
-import { buildRelease, inspectCoreArchive } from '../src/distribution/release.js';
+import { inspectCoreArchive } from '../src/distribution/release.js';
 import { inspectReleaseDirectory } from '../src/distribution/publish.js';
 import { gitBlobID, resolveBaseline } from '../src/distribution/baseline.js';
 import { GitHubAPI } from '../src/distribution/github.js';

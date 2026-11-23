@@ -20,9 +20,12 @@ test('CI prepares locked toolchains once per platform and restores them before f
   const verification = YAML.parse(readFileSync(join(directory, 'verification.yml'), 'utf8'));
   const native = YAML.parse(readFileSync(join(directory, 'verification-platform.yml'), 'utf8'));
   const setup = native.jobs.prepare.steps, full = native.jobs.tests.steps;
+  const installer=setup.find(s=>s.name==='Install locked platform dependencies').run;
   for (const part of ['applications/sdk', 'applications/projects', 'runtime/web']) {
-    assert.ok(setup.some(s => s['working-directory'] === '.agents/core/'+part && /npm ci/.test(s.run ?? '')));
+    assert.ok(installer.includes('npm --prefix .agents/core/'+part+' ci'));
   }
+  assert.match(installer,/wait "\$ksf_pid" \|\| ksf_install_status=\$\?/);
+  assert.match(installer,/exit "\$ksf_install_status"/);
   assert.ok(setup.findIndex(s => /npm run build/.test(s.run ?? '')) < setup.findIndex(s => /tar -cf prepared.tar/.test(s.run ?? '')));
   assert.ok(!setup.some(s => /ci.js run/.test(s.run ?? '')));
   assert.ok(full.findIndex(s => /tar -xf prepared.tar/.test(s.run ?? '')) < full.findIndex(s => /ci.js run-group/.test(s.run ?? '')));
@@ -71,11 +74,11 @@ test('native matrix has unique artifacts and a complete disjoint partition of ea
   assert.equal(new Set(plan.groups.map(g=>g.id)).size,plan.groups.length);
   for(const target of verificationTargets(true)){
     const groups=plan.groups.filter(g=>g.target===target.target),files=groups.flatMap(g=>g.files);
-    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)).map(t=>t.path);
+    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)&&!(t.verification.lane==='shared'&&target.platform==='darwin'&&t.platforms.includes('linux'))).map(t=>t.path);
     assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);
     assert.ok(groups.length<=target.limit);
   }
-  const shared=plan.groups.filter(g=>g.platform==='darwin').flatMap(g=>g.files).filter(path=>catalog.tests.find(t=>t.path===path).verification.lane==='shared');
+  const shared=plan.groups.flatMap(g=>g.files).filter(path=>catalog.tests.find(t=>t.path===path).verification.lane==='shared');
   assert.equal(shared.length,catalog.tests.filter(t=>t.verification.lane==='shared').length);
   assert.ok(plan.groups.filter(g=>g.platform==='win32').every(g=>g.profile==='native'));
   assert.ok(plan.groups.filter(g=>g.platform==='darwin').length<=5);
@@ -126,7 +129,7 @@ test('CI Node environment flags can start the bundled runtime before selecting t
  test('Linux core CI uses native Ubuntu and the verified bundled runtime',()=>{
   const workflow=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification.yml'),'utf8'));
   const linux=workflow.jobs['linux-core'];
-  assert.deepEqual(targets.filter(t=>t.platform==='linux').map(t=>t.os),['ubuntu-22.04','ubuntu-24.04']);
+  assert.deepEqual(targets.filter(t=>t.platform==='linux'&&t.profile==='native').map(t=>t.os),['ubuntu-22.04','ubuntu-24.04']);
   assert.equal(linux.strategy.matrix,'${{ fromJSON(needs.plan.outputs.linux) }}');
   assert.equal(linux['runs-on'],'${{ matrix.os }}');
   assert.ok(linux.steps.some(s=>/\.agents\/ksf runtime verify --json/.test(s.run??'')));
@@ -151,5 +154,5 @@ test('native platforms start independently and complete-proof reuse retains a fa
  assert.ok(proof.jobs.proof.steps.some(step=>/ci.js verify-proof/.test(step.run??'')));
  const release=YAML.parse(readFileSync(join(directory,'release.yml'),'utf8'));
  assert.equal(release.jobs.release['runs-on'],'ubuntu-24.04');
- assert.equal(release.jobs.prepare['runs-on'],'xcode-27');
+ assert.equal(release.jobs.prepare['runs-on'],'ubuntu-24.04');
 });

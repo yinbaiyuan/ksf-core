@@ -1,3 +1,4 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
@@ -9,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { distributionFixture, repository, instanceEntries } from './helpers/distribution-fixture.js';
 import { readUserData, writeUserData } from '../src/services/user-data.js';
 import { systemRead, systemUpdate, systemRollback } from '../src/distribution/system.js';
-import { buildRelease } from '../src/distribution/release.js';
+
 import { readArchive } from '../src/distribution/archive.js';
 
 test('Core upgrade and rollback preserve portable settings and identity while system operations consume settings overrides', async t => {

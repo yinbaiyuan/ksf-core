@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {buildRelease,inspectCoreArchive} from '../src/distribution/release.js';
 import {createArchive} from '../src/distribution/archive.js';
 import {sha256,stableJSON} from '../src/shared/hash.js';
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {multi,inspect} from './helpers/runtime-bundle-fixture.js';
 

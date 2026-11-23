@@ -115,13 +115,24 @@ test('a misspelled risk component cannot silently suppress changed coverage',t=>
 test('pure changes run once; native changes retain each target; unknown inputs fail closed',t=>{
   const f=fixture(t);
   writeFileSync(join(f.root,f.catalog.tests[0].path),"import '../src/logic.js'; // change\n");
-  let plan=makePlan(f,false);assert.deepEqual(plan.groups.map(g=>g.profile),['shared']);assert.equal(plan.groups[0].platform,'darwin');
+  let plan=makePlan(f,false);assert.deepEqual(plan.groups.map(g=>g.profile),['shared']);assert.equal(plan.groups[0].platform,'linux');
   writeFileSync(join(f.root,f.catalog.tests[1].path),"import '../src/adapter.js'; // change\n");
   plan=makePlan(f,false);assert.deepEqual(plan.groups.filter(g=>g.profile==='native').map(g=>g.target),['mac','win','linux22','linux24']);
   writeFileSync(join(f.root,f.runtime,'src/unmapped.js'),'// new owned implementation\n');
   plan=makePlan(f,false);assert.equal(plan.selectedIds.length,2);assert.ok(plan.reasons.some(r=>/Unmapped/.test(r.reason)));
   assert.equal(createTestPlan(f.root,parseTestOptions(['--suite','full','--profile','shared'])).tests.length,1);
   assert.throws(()=>parseTestOptions(['--profile','windows']),{code:'INVALID_ARGUMENTS'});
+});
+
+test('portable shared cases execute once on Linux while native and official publisher boundaries stay on Mac',t=>{
+ const f=fixture(t);f.save();
+ const plan=makePlan(f);const shared=plan.groups.filter(g=>g.profile==='shared');
+ assert.equal(shared.length,1);assert.equal(shared[0].platform,'linux');assert.equal(shared[0].architecture,'x64');assert.equal(shared[0].prepared,'Linux');
+ assert.equal(plan.groups.flatMap(g=>g.files).filter(p=>p===f.catalog.tests[0].path).length,1);
+ for(const platform of ['darwin','win32','linux'])assert.ok(plan.groups.some(g=>g.platform===platform&&g.files.includes(f.catalog.tests[1].path)));
+ f.catalog.tests[0].platforms=['darwin','win32'];f.save();
+ const fallback=makePlan(f);assert.equal(fallback.groups.flatMap(g=>g.files).filter(p=>p===f.catalog.tests[0].path).length,1);
+ assert.ok(fallback.groups.some(g=>g.platform==='darwin'&&g.files.includes(f.catalog.tests[0].path)));
 });
 
 test('full risk obligations do not depend on expanding unrelated dynamic dependency directories',t=>{
@@ -207,7 +218,7 @@ test('layered proof requires every disjoint shared and real-native obligation',t
   const f=fixture(t),plan=makePlan(f),identity=sourceIdentity(f.root),reports=reportsFor(plan);
   assert.equal(validateLayeredCoverage(f.root,reports,plan,identity).schemaVersion,2);
   for(const bad of [reports.slice(1),[...reports,reports[0]],reports.slice(0,-1)])assert.throws(()=>validateLayeredCoverage(f.root,bad,plan,identity),{code:'TEST_PROOF_INVALID'});
-  for(const override of [{status:'cancelled'},{commandExitCode:1},{profile:'native'},{architecture:'x64'},{platform:'win32'},{planDigest:'stale'},{sourceDigest:'stale'},{catalogDigest:'stale'},{runtime:{}},{nodeVersion:'v0.0.0'},{changedInputs:['x']},{summary:{executed:1,reused:1}},{assignedFiles:[]},{selectedFiles:[]},{results:[{path:reports[0].assignedFiles[0],status:'reused'}]},{fixtureError:{code:'TEST_FIXTURE_CHANGED'}}]){
+  for(const override of [{status:'cancelled'},{commandExitCode:1},{profile:'native'},{architecture:reports[0].architecture==='arm64'?'x64':'arm64'},{platform:'win32'},{planDigest:'stale'},{sourceDigest:'stale'},{catalogDigest:'stale'},{runtime:{}},{nodeVersion:'v0.0.0'},{changedInputs:['x']},{summary:{executed:1,reused:1}},{assignedFiles:[]},{selectedFiles:[]},{results:[{path:reports[0].assignedFiles[0],status:'reused'}]},{fixtureError:{code:'TEST_FIXTURE_CHANGED'}}]){
     assert.throws(()=>validateLayeredCoverage(f.root,[{...reports[0],...override},...reports.slice(1)],plan,identity),{code:'TEST_PROOF_INVALID'});
   }
   const proofPath=join(f.root,'proof.json'),summaryPath=join(f.root,'coverage.json');
