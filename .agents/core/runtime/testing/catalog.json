@@ -11580,6 +11580,40 @@
       ]
     },
     {
+      "id": "app:com.ksf.projects:context-file-actions",
+      "path": ".agents/core/applications/projects/tests/context-file-actions.test.mjs",
+      "owner": "app:com.ksf.projects",
+      "covers": [
+        "app:com.ksf.projects"
+      ],
+      "suite": "quick",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": true,
+      "inputs": [
+        ".agents/core/applications/projects/context-file-actions.js",
+        ".agents/core/applications/projects/tests/context-file-actions.test.mjs"
+      ],
+      "requirements": [],
+      "timeoutMs": 120000,
+      "seconds": {
+        "darwin": 0.1,
+        "win32": 0.2
+      },
+      "timingBasis": "Conservative planning estimate for injected file-action model tests; not a measured cross-platform result.",
+      "verification": {
+        "lane": "shared",
+        "kind": "logic",
+        "reason": "Pure path validation and injected file-operation, draft, conflict and receipt models run once on the baseline host."
+      },
+      "selectionInputs": [
+        ".agents/core/applications/projects/context-file-actions.js",
+        ".agents/core/applications/projects/tests/context-file-actions.test.mjs"
+      ]
+    },
+    {
       "id": "app:com.ksf.projects:context-review",
       "path": ".agents/core/applications/projects/tests/context-review.test.mjs",
       "owner": "app:com.ksf.projects",

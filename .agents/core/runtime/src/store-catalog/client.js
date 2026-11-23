@@ -1,10 +1,12 @@
-import {readFile,mkdir,writeFile,rename} from 'node:fs/promises';
-import {join} from 'node:path';
+import {readFile,mkdir,writeFile,rename,rm} from 'node:fs/promises';
+import {join,resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {PROTOCOL,digest,rootCatalog,reference,normalize,queryTerms,searchText,cursor,nextCursor,fault} from './protocol.js';
+// Clients for separate requests can share the same on-disk cache.
+const cacheWrites=new Map();
 /** Content-addressed verified cache. A failed refresh never overwrites a verified root. */
 export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDirectory,fetcher=fetch,offlineOnly=false}){
- const memory=new Map();let current,live=false,rootError;
+ const memory=new Map(),pending=new Map();let current,live=false,rootError;
  const http=async(address,limit)=>{
   const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw fault('STORE_URL_INVALID','目录只支持无凭据的HTTP(S)地址。');
   const r=await fetcher(u.href,{signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw fault('STORE_UNAVAILABLE','目录返回HTTP '+r.status);
@@ -14,7 +16,25 @@ export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDi
   if((!encoding||encoding==='identity')&&Number(r.headers.get('content-length')??0)>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');
   const parts=[];let size=0;for await(const b of r.body){size+=b.length;if(size>limit)throw fault('STORE_SIZE_INVALID','目录资源超过大小限制。');parts.push(Buffer.from(b));}return Buffer.concat(parts);
  };
- const save=async(name,bytes)=>{if(!cacheDirectory)return;await mkdir(cacheDirectory,{recursive:true});const tmp=join(cacheDirectory,name+'.'+randomUUID()+'.tmp');await writeFile(tmp,bytes);await rename(tmp,join(cacheDirectory,name));};
+ const save=async(name,bytes)=>{
+  if(!cacheDirectory)return;
+  const target=resolve(cacheDirectory,name),previous=cacheWrites.get(target);
+  const matches=async()=>{try{return (await readFile(target)).equals(bytes);}catch(e){if(e.code==='ENOENT')return false;throw e;}};
+  const operation=(async()=>{
+   await previous?.catch(()=>{});
+   if(await matches())return;
+   await mkdir(cacheDirectory,{recursive:true});const tmp=target+'.'+randomUUID()+'.tmp';
+   try{
+    await writeFile(tmp,bytes);
+    try{await rename(tmp,target);}catch(e){
+     // Another process may have committed the identical verified resource.
+     if(!['EPERM','EEXIST'].includes(e.code)||!await matches())throw e;
+    }
+   }finally{await rm(tmp,{force:true});}
+  })();
+  cacheWrites.set(target,operation);
+  try{await operation;}finally{if(cacheWrites.get(target)===operation)cacheWrites.delete(target);}
+ };
  async function open({refresh=false}={}){
   if(current&&!refresh)return current;
   let bytes,origin='live';rootError=undefined;
@@ -36,7 +56,22 @@ export function createCatalogClient({url,kind,sourceId,cacheDirectory,baselineDi
   if(bytes.length!==ref.size||digest(bytes)!==ref.sha256)throw fault('STORE_INTEGRITY','目录资源大小或SHA-256校验失败。');
   await save(ref.sha256,bytes);return bytes;
  }
- async function read(ref){reference(ref);if(memory.has(ref.sha256)){const saved=memory.get(ref.sha256);if(saved.size!==ref.size)throw fault('STORE_INTEGRITY','缓存资源大小与引用不符。');memory.delete(ref.sha256);memory.set(ref.sha256,saved);return saved.value;}const bytes=await binary(ref),value=JSON.parse(bytes);memory.set(ref.sha256,{value,size:bytes.length});while([...memory.values()].reduce((sum,v)=>sum+v.size,0)>32*1024*1024)memory.delete(memory.keys().next().value);return value;}
+ async function read(ref){
+  reference(ref);
+  const saved=memory.get(ref.sha256)??pending.get(ref.sha256);
+  if(saved){
+   if(saved.size!==ref.size)throw fault('STORE_INTEGRITY','缓存资源大小与引用不符。');
+   if(saved.promise)return saved.promise;
+   memory.delete(ref.sha256);memory.set(ref.sha256,saved);return saved.value;
+  }
+  const operation=(async()=>{
+   const bytes=await binary(ref),value=JSON.parse(bytes);memory.set(ref.sha256,{value,size:bytes.length});
+   while([...memory.values()].reduce((sum,v)=>sum+v.size,0)>32*1024*1024)memory.delete(memory.keys().next().value);
+   return value;
+  })();
+  pending.set(ref.sha256,{size:ref.size,promise:operation});
+  try{return await operation;}finally{if(pending.get(ref.sha256)?.promise===operation)pending.delete(ref.sha256);}
+ }
  async function lookup(ref,id){const node=await read(ref);if(node.entries)return node.entries.find(e=>e.id===id);const child=node.children?.find(c=>id.startsWith(c.prefix));return child?lookup(child.ref,id):undefined;}
  async function* rows(ref,{after='',type=''}={}){const node=await read(ref);if(node.entries){for(const row of node.entries)if(row.id>after&&(!type||row.type===type))yield row;return;}for(const child of node.children??[]){if(child.max<=after||type&&!child.types?.[type])continue;yield* rows(child.ref,{after,type});}}
  async function list({query='',type='',limit=40,cursor:token}={}){

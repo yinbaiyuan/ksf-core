@@ -17,6 +17,13 @@ export function contextOwners(record,current){
   return [current,milestone,project];
 }
 
+// Keep the window's deeper context while reading one of its registered owners.
+// A different branch, missing object or changed ownership selects a new context.
+export function retainContextSubject(record,previousPath,current){
+  const previous=[record.project,...(record.documents??[])].find(doc=>doc.path===previousPath);
+  return previous&&contextOwners(record,previous).some(owner=>matches(owner,{path:current.path,id:current.metadata.id}))?previous:current;
+}
+
 export function contextScopes(record,current){
   return contextOwners(record,current).map((doc,index)=>({
     objectPath:doc.path,root:parent(doc.path),label:labels[doc.metadata.kind]+' · '+doc.metadata.name,
@@ -35,6 +42,13 @@ export function contextPanels(record,current){
 
 export function isManagedSource(record,path){
   return [record.project,...(record.documents??[])].some(d=>d?.path===path);
+}
+
+// Current object links use object navigation; a fixed version remains evidence.
+export function contextObjectReference(record,reference){
+  if(!reference?.path||reference.digest)return undefined;
+  return [record.project,...(record.documents??[])].find(doc=>doc?.path===reference.path&&
+    (doc===record.project||['milestone','task'].includes(doc.metadata.kind)&&matches(record.project,doc.metadata.project)));
 }
 
 export function contextScopeForPath(scopes,path){

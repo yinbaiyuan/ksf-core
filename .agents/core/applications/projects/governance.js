@@ -564,6 +564,7 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
     const projectTarget={...selected};
     const projectRoot=parent(record.project.path)+'/';
     const owners=contextOwners(record,d),contextRoots=contextScopes(record,d);
+    const scopeKey=JSON.stringify(contextRoots.map(({objectPath,root,label})=>({objectPath,root,label})));
     const ownerFor=path=>owners.find(owner=>owner.path===contextScopeForPath(contextRoots,path)?.objectPath)??d;
     const rootEntry={kind:'file',path:d.path,name:d.path.split('/').at(-1)};
     const split=el('div','pg-project-context-split');
@@ -920,31 +921,43 @@ export function createGovernanceManagement({sdk,docLink,icon,contextMenu,context
       onUnread:updateUnread,focusState:fileState,projectWritable:()=>!readOnly(),navigationAction:primaryAction,
       readOnlyNotice:(entry,file)=>fileReadOnlyNotice(record,entry,file,selected?.scope),
     });
+    // A restored preview can arrive before the first context baseline. Once
+    // ready, hand it to the file reader instead of leaving the loading text.
+    let filesReady=fileWorkspace.supported();
+    const stopObserving=fileWorkspace.subscribe(()=>{
+      if(filesReady||!fileWorkspace.supported())return;
+      filesReady=true;
+      if(current&&!current.file&&canOpenFile(current.entry)){
+        const pending=current;current=undefined;show(pending);
+      }
+    });
     function updateProject(next){
       primaryAction.disabled=busy;
       if(next===d)return;
+      owners.splice(0,owners.length,...contextOwners(record,next));
       d=next;
       const wasPrimary=current===primary;
       primary={entry:rootEntry,file:{path:d.path,body:d.body}};
       loadPrimaryLinks();
       if(wasPrimary)show();
     }
-    return {panel,path:d.path,record,show,openEntry,openFolder,showEditor,canOpenFile,updateProject,primaryLinks:()=>primary.file.links??[],
+    return {panel,path:d.path,scopeKey,show,openEntry,openFolder,showEditor,canOpenFile,updateProject,primaryLinks:()=>primary.file.links??[],
       openPrimary:()=>openEntry(rootEntry),
       isOpen:path=>fileWorkspace?.isOpen(path),
-      start:()=>fileWorkspace?.start(),dispose(){fileWorkspace?.dispose();sizeObserver.disconnect();},markRead:entry=>fileWorkspace?.seen(entry),
+      start:()=>fileWorkspace?.start(),dispose(){stopObserving();fileWorkspace?.dispose();sizeObserver.disconnect();},markRead:entry=>fileWorkspace?.seen(entry),
       mutating:()=>fileWorkspace?.mutating(),observeOpened:path=>fileWorkspace?.observeOpened(path),
       flushFileSave:()=>fileWorkspace?.flush(),resetFile:()=>{fileWorkspace?.reset({discard:true});current=undefined;},
     };
   }
   function appendContext(d){
     const previous=contextView;
+    const scopeKey=JSON.stringify(contextScopes(record,d).map(({objectPath,root,label})=>({objectPath,root,label})));
     if(d.metadata.kind==='project'){
-      projectContextView??=contextReader(d);
+      if(projectContextView?.scopeKey!==scopeKey){projectContextView?.dispose();projectContextView=contextReader(d);}
       contextView=projectContextView;
-    }else if(contextView?.record!==record||contextView.path!==d.path)contextView=contextReader(d);
+    }else if(contextView?.path!==d.path||contextView.scopeKey!==scopeKey)contextView=contextReader(d);
     if(previous&&previous!==contextView&&previous!==projectContextView)previous.dispose();
-    if(d.metadata.kind==='project')contextView.updateProject(d);
+    contextView.updateProject(d);
     if(contextView.panel.parentNode!==selectedBody)selectedBody.replaceChildren(contextView.panel);
     contextView.start();
     if(d.metadata.kind==='project'&&record.valid!==false&&!contextPreview&&!isContextEditing()){

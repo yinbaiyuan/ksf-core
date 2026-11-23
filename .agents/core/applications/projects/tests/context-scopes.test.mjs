@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {contextOwners,contextScopes,contextPanels,contextScopeForPath,isManagedSource} from '../context-scopes.js';
+import {contextOwners,contextScopes,contextPanels,contextScopeForPath,isManagedSource,contextObjectReference,retainContextSubject} from '../context-scopes.js';
 
 function fixture(){
   const doc=(kind,id,path,metadata={})=>({path,metadata:{kind,id,name:id,...metadata}});
@@ -47,6 +47,34 @@ test('visible context panels expose each registered level and its own inspiratio
   assert.deepEqual(record,before);
 });
 
+test('reading a registered owner retains the deeper context and all its file scopes',()=>{
+  const {p,m,t,record}=fixture(),before=structuredClone(record);
+  for(const selected of [t,m,p]){
+    const context=retainContextSubject(record,t.path,selected);
+    assert.equal(context,t);
+    assert.deepEqual(contextPanels(record,context).map(level=>level.objectPath),[p.path,m.path,t.path]);
+  }
+  assert.equal(retainContextSubject(record,m.path,p),m);
+  assert.deepEqual(record,before);
+});
+
+test('selecting another branch replaces the retained context rather than showing unrelated children',()=>{
+  const {p,m,t,sibling,record}=fixture();
+  assert.equal(retainContextSubject(record,t.path,sibling),sibling);
+  const other={path:'项目/示例/M2/milestone.md',metadata:{kind:'milestone',id:'m2',project:{path:p.path,id:p.metadata.id},tasks:[]}};
+  p.metadata.milestones.push({path:other.path,id:other.metadata.id});record.documents.push(other);
+  assert.equal(retainContextSubject(record,t.path,other),other);
+  assert.equal(retainContextSubject(record,p.path,t),t);
+  assert.equal(retainContextSubject(record,'项目/示例/已移除/task.md',m),m);
+});
+
+test('retained context follows current registered identities after external ownership changes',()=>{
+  for(const change of [f=>f.m.metadata.tasks=[],f=>f.t.metadata.project.id='other',f=>f.p.metadata.id='replaced']){
+    const f=fixture();change(f);
+    assert.equal(retainContextSubject(f.record,f.t.path,f.p),f.p);
+  }
+});
+
 test('context panels never expose a note from an unregistered ancestor',()=>{
   const {t,record}=fixture();t.metadata.milestone.id='wrong';
   assert.deepEqual(contextPanels(record,t).map(x=>x.notePath),['项目/示例/M1/T1/灵感闪现.md']);
@@ -58,7 +86,28 @@ test('registered source identity keeps managed records out of the ordinary file 
   for(const path of ['项目/示例/资料/task.md','项目/示例/M1/T1/说明.md','项目/其他/project.md'])assert.equal(isManagedSource(record,path),false);
 });
 
+test('only current project object references use object navigation; fixed evidence keeps its identity',()=>{
+  const {p,m,t,record}=fixture(),before=structuredClone(record);
+  for(const doc of [p,m,t]){
+    assert.equal(contextObjectReference(record,{path:doc.path}),doc);
+    assert.equal(contextObjectReference(record,{path:doc.path,digest:'fixed-version'}),undefined);
+  }
+  const review={path:'项目/示例/M1/复盘.md',metadata:{kind:'review',id:'review'}};
+  const foreign={path:'项目/别处/task.md',metadata:{kind:'task',id:'foreign',project:{id:'other',path:'项目/别处/project.md'}}};
+  for(const reference of [{path:'项目/示例/资料/task.md'},{path:review.path},{path:foreign.path},{url:'https://example.invalid/result'},null])
+    assert.equal(contextObjectReference({...record,documents:[...record.documents,review,foreign]},reference),undefined);
+  assert.deepEqual(record,before);
+});
+
 import {createContextChangesReader} from '../context-changes.js';
+
+test('a file mutation waits for an older poll and then reads the committed paths',async()=>{
+ let finish,calls=0;
+ const scopes=[{objectPath:'p/task.md',root:'p'}];
+ const reader=createContextChangesReader({project:{name:'p'},sdk:{call:async()=>{calls++;if(calls===1)return new Promise(resolve=>finish=()=>resolve({scopes:[{root:'p',entries:[{path:'p/before.md'}],revision:'before'}]}));return {scopes:[{root:'p',entries:[{path:'p/after.md'}],revision:'after'}]};}}});
+ const old=reader.read(scopes),latest=reader.afterChange(scopes);finish();await old;
+ assert.equal((await latest)[0].result.entries[0].path,'p/after.md');assert.equal(calls,2);reader.dispose();
+});
 
 const scopes=[{objectPath:'task.md',root:'task'},{objectPath:'milestone.md',root:'milestone'},{objectPath:'project.md',root:'project'}];
 const result=(scope,revision='r1')=>({objectPath:scope.objectPath,root:scope.root,writable:true,revision,entries:[{path:scope.root+'/note.md',kind:'file'}]});

@@ -14,6 +14,12 @@ export function createContextChangesReader({sdk,project,reviewSession,getRecord,
   }
   return {
     peek(scopes){return scopes.every(scope=>cache.has(scope.objectPath))?results(scopes,true):null;},
+    async afterChange(scopes){
+      const key=scopes.map(scope=>scope.objectPath).sort().join('\n');
+      // A response started before the mutation cannot confirm its final path.
+      if(pending.has(key))await pending.get(key).catch(()=>{});
+      return this.read(scopes,true);
+    },
     async read(scopes,force=false){
       const key=scopes.map(scope=>scope.objectPath).sort().join('\n');
       const base=getRecord?.();

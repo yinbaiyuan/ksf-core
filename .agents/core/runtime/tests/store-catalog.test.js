@@ -19,3 +19,24 @@ test('HTTP compression uses decoded limits and preserves binary integrity',async
  await assert.rejects(client.binary({...ref,size:bytes.length-1}),{code:'STORE_SIZE_INVALID'});
  await assert.rejects(client.binary({...ref,sha256:'a'.repeat(64)}),{code:'STORE_INTEGRITY'});
 });
+
+test('search terms sharing one posting read that verified fragment once, including concurrent callers',async t=>{
+ const f=fixture(1);t.after(()=>rmSync(f.directory,{recursive:true,force:true}));
+ const pages=await Promise.all(Array.from({length:8},()=>f.client.list({query:'设计能力0'})));
+ assert.ok(pages.every(page=>page.items[0]?.id==='partner.example.item00000'));
+ const fragmentCalls=f.calls.filter(path=>path.startsWith('/catalog/'));
+ for(const path of new Set(fragmentCalls))assert.equal(fragmentCalls.filter(p=>p===path).length,1,path);
+});
+
+test('pending reads enforce reference size and a failed read does not poison retry',async t=>{
+ const f=fixture(1);t.after(()=>rmSync(f.directory,{recursive:true,force:true}));
+ let finish,started;const entered=new Promise(resolve=>started=resolve);let fail=true;
+ const client=createCatalogClient({url:'https://test/index.json',kind:'abilities',fetcher:async url=>{
+  if(new URL(url).pathname==='/'+f.root.directory.url&&fail){started();await new Promise(resolve=>finish=resolve);return new Response('{}');}
+  return f.fetcher(url);
+ }});
+ const first=client.read(f.root.directory);await entered;
+ await assert.rejects(client.read({...f.root.directory,size:f.root.directory.size+1}),{code:'STORE_INTEGRITY'});
+ const rejected=assert.rejects(first,{code:'STORE_INTEGRITY'});finish();await rejected;
+ fail=false;assert.ok((await client.read(f.root.directory)).entries.length);
+});
