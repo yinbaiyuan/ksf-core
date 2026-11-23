@@ -4,7 +4,7 @@ import {createFixtureBase,embedReceiptBaseline,repository} from './distribution-
 
 // Build/archive/Git once. Both immutable receipt variants refer to that same
 // source and artifact; consumers independently copy all mutable scenario trees.
-const {originals, ...compact} = await createFixtureBase({after() {}}, {compact:true});
+const {originals, ...compact} = await createFixtureBase({after() {}}, {compact:true,...(process.argv[3]?{temporaryRoot:process.argv[3]}:{})});
 const workspace = join(compact.directory,'legacy-workspace');
 cpSync(compact.workspace,workspace,{recursive:true});
 embedReceiptBaseline(workspace,compact.first);

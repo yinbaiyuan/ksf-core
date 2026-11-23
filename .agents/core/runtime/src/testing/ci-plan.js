@@ -1,5 +1,5 @@
 import {loadCatalog, sha256, fail, rebuiltArtifact} from './catalog.js';
-import {changedPaths, assignShards} from './planner.js';
+import {changedPaths, assignShards, scheduledSeconds} from './planner.js';
 import {selectChangedTests} from './selection.js';
 
 export const targets = [
@@ -41,7 +41,7 @@ export function createVerificationPlan(root, {full = false, base, changes} = {},
     for (const [index, files] of assignShards(tests, count, target.platform).entries()) groups.push({
       id:`${target.target}-${index + 1}`, target:target.target, profile:target.profile,
       platform:target.platform, architecture:target.architecture, os:target.os, prepared:target.prepared,
-      files:files.map(t => t.path), estimatedSeconds:Math.round(files.reduce((sum,t) => sum + (t.seconds?.[target.platform] ?? 1),0)),
+      files:files.map(t => t.path), estimatedSeconds:Math.ceil(scheduledSeconds(files,target.platform)),
     });
   }
   const plan = {schemaVersion:2, policy:'shared-once-native-boundaries-v2', full,

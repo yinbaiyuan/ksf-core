@@ -59,15 +59,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Install locked platform dependencies
+        env:
+          KSF_CI_GROUPS: ${{ inputs.groups }}
         run: |
+          node .agents/core/runtime/src/testing/prepare-ci-fixtures.js > fixtures.prepare.log 2>&1 & ksf_fixtures_pid=$!
           npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
           npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
           npm --prefix .agents/core/applications/projects ci --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
           ksf_install_status=0
-          for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid" "$ksf_projects_pid"; do
+          for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid" "$ksf_projects_pid" "$ksf_fixtures_pid"; do
             wait "$ksf_pid" || ksf_install_status=$?
           done
-          cat sdk.install.log web.install.log projects.install.log
+          cat sdk.install.log web.install.log projects.install.log fixtures.prepare.log
           exit "$ksf_install_status"
       - name: Build frontend before server tests
         working-directory: .agents/core/runtime/web
@@ -76,7 +79,7 @@ jobs:
         env:
           COPYFILE_DISABLE: '1'
         run: |
-          tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist
+          tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist .agents/runtime-data/ci-seeds
           node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
       - uses: actions/upload-artifact@v7.0.2
         with:
@@ -144,6 +147,8 @@ jobs:
         run: node .agents/core/runtime/src/testing/ci.js restore-links
       - name: Exact planned group
         id: tests
+        env:
+          KSF_TEST_CI_PREPARED_SEEDS: .agents/runtime-data/ci-seeds
         run: node .agents/core/runtime/src/testing/ci.js run-group verification-plan.json "${{ matrix.id }}" "${{ matrix.id }}.report.json"
       - uses: actions/upload-artifact@v7.0.2
         if: always() && steps.tests.outcome != 'skipped'

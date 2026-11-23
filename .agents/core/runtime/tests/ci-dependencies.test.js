@@ -166,3 +166,11 @@ test('native Linux obligations use bounded early groups without changing their h
   assert.deepEqual(groups.flatMap(g=>g.files).sort(),expected);assert.ok(groups.every(g=>g.os===(target==='linux22'?'ubuntu-22.04':'ubuntu-24.04')));
  }
 });
+
+test('CI prepares immutable same-attempt fixtures alongside dependencies and transports them with toolchains',()=>{
+ const native=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8'));
+ const install=native.jobs.prepare.steps.find(s=>s.name==='Install locked platform dependencies'),freeze=native.jobs.prepare.steps.find(s=>s.name==='Freeze prepared toolchains'),run=native.jobs.tests.steps.find(s=>s.id==='tests');
+ assert.match(install.run,/prepare-ci-fixtures.js.*ksf_fixtures_pid=\$!/);assert.match(install.run,/for ksf_pid in .*"\$ksf_fixtures_pid"/);
+ assert.equal(install.env.KSF_CI_GROUPS,'${{ inputs.groups }}');assert.match(freeze.run,/tar -cf prepared.tar.*\.agents\/runtime-data\/ci-seeds/);
+ assert.equal(run.env.KSF_TEST_CI_PREPARED_SEEDS,'.agents/runtime-data/ci-seeds');
+});

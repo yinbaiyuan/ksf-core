@@ -5,7 +5,7 @@ import { tmpdir, homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { platform, removePathSync } from '../platform/index.js';
 import { inputFingerprints, fail } from './catalog.js';
-import { fixtureDigest } from './fixtures.js';
+import { fixtureDigest,readPreparedFixtures } from './fixtures.js';
 import { retainRuntimeArtifacts } from '../distribution/retention.js';
 
 export function testEnvironment(input = process.env) {
@@ -17,6 +17,7 @@ export function testEnvironment(input = process.env) {
   // The outer frozen plan owns its comparison base. Child tests create their
   // own Git repositories and must never compare them with the CI checkout.
   delete env.KSF_TEST_BASE;
+  delete env.KSF_TEST_CI_PREPARED_SEEDS;
   env.PATH = [dirname(process.execPath), ...(process.platform === 'win32' ? [dirname(platform.tool('tar'))] : []), env.PATH ?? env.Path ?? ''].join(process.platform === 'win32' ? ';' : ':');
   if (process.platform === 'win32') { env.Path = env.PATH; }
   return env;
@@ -42,7 +43,7 @@ export async function scheduleTests(items, parallel, run, cancelled) {
   }
   await Promise.all(active);
 }
-export async function executeTestPlan(root, plan, { progress = line => process.stderr.write(line + '\n') } = {}) {
+export async function executeTestPlan(root, plan, { progress = line => process.stderr.write(line + '\n'), preparedFixtures } = {}) {
   if (plan.missingDependencies.length) fail('TEST_DEPENDENCIES_MISSING', 'Selected tests have missing locked dependencies. No tests were started.', { missingDependencies: plan.missingDependencies });
   const retention = retainRuntimeArtifacts(root, 'tests');
   for (const error of retention.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);
@@ -73,6 +74,13 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   async function prepareFixtures() {
     const consumers = plan.tests.filter(t => t.fixtures?.includes('distribution'));
     if (!consumers.length || cancelled) return;
+    if(preparedFixtures){
+      const began=performance.now(),prepared=readPreparedFixtures(root,preparedFixtures);
+      seedDirectory=prepared.seedDirectory;seedPath=prepared.seedPath;
+      fixturePreparation={kind:'distribution',consumerFiles:consumers.length,coldSeeds:0,receiptVariants:2,durationMs:Math.round(performance.now()-began),digest:prepared.digest,preparedInCurrentRun:true,preparedAttempt:prepared.preparedAttempt};
+      progress('[PREPARED] verified current-run platform distribution seeds ('+fixturePreparation.durationMs+' ms; '+consumers.length+' consumers)');
+      return;
+    }
     seedDirectory = join(temporaryDirectory, 'seeds'); mkdirSync(seedDirectory);
     seedPath = join(seedDirectory, 'manifest.json');
     const began = performance.now(), log = join(directory, 'fixture-preparation.log');

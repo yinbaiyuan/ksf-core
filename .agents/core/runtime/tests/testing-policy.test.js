@@ -362,3 +362,19 @@ test('large literal dependency comparisons complete without a glob compiler bott
   assert.equal(run.status,0,run.stderr);
   assert.equal(run.stdout.trim(),'0');
 });
+
+test('transported fixtures run all scenarios and reject seed mutation without deleting the prepared payload',async t=>{
+ const f=fixture(t),directory=join(f.root,'.agents/runtime-data/ci-seeds'),payload=join(directory,'payload'),base=join(payload,'fixture'),flag=join(f.root,'.agents/runtime-data/mutate-seed');
+ for(const name of ['core','workspace','release'])mkdirSync(join(base,name),{recursive:true});
+ writeFileSync(join(base,'core','source'),'seed');
+ const seed={directory:base,root:join(base,'core'),workspace:join(base,'workspace'),first:{output:join(base,'release')}};
+ writeFileSync(join(payload,'manifest.json'),JSON.stringify({schemaVersion:1,platform:process.platform,node:process.execPath,repository:f.root,seeds:{true:seed,false:seed}}));
+ const script=`import test from 'node:test';import assert from 'node:assert/strict';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{join}from'node:path';test('consume prepared seed',()=>{const m=JSON.parse(readFileSync(process.env.KSF_TEST_DISTRIBUTION_SEEDS));assert.equal(readFileSync(join(m.seeds.true.root,'source'),'utf8'),'seed');if(existsSync(${JSON.stringify(flag)}))writeFileSync(join(m.seeds.true.root,'source'),'changed');});`;
+ writeFileSync(join(f.root,f.catalog.tests[0].path),script);f.catalog.tests[0].fixtures=['distribution'];f.catalog.tests[0].timeoutMs=10000;f.save();
+ const identity=sourceIdentity(f.root),metadata={schemaVersion:1,complete:true,...identity,platform:process.platform,architecture:process.arch,node:process.execPath,repository:f.root,runId:'17',runAttempt:'2',digest:fixtureDigest(payload)};
+ writeFileSync(join(directory,'prepared.json'),JSON.stringify(metadata));
+ const plan=createTestPlan(f.root,parseTestOptions(['--profile','shared'])),options={progress(){},preparedFixtures:{directory,identity,runId:'17',runAttempt:'2'}};
+ const passed=await executeTestPlan(f.root,plan,options);assert.equal(passed.ok,true);assert.equal(passed.result.summary.executed,1);assert.equal(passed.result.fixturePreparation.coldSeeds,0);assert.equal(passed.result.fixturePreparation.preparedInCurrentRun,true);
+ writeFileSync(flag,'mutate');const failed=await executeTestPlan(f.root,plan,options);
+ assert.equal(failed.ok,false);assert.equal(failed.result.fixtureError.code,'TEST_FIXTURE_CHANGED');assert.equal(failed.result.summary.executed,1);assert.deepEqual(failed.result.changedInputs,[]);assert.equal(existsSync(payload),true);assert.equal(existsSync(failed.result.temporaryDirectory),false);
+});
