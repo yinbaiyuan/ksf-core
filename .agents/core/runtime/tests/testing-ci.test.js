@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,realpathSync,existsSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,realpathSync,existsSync,symlinkSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {sourceIdentity,validateCoverage,validateProof,trustedRun,restorePreparedLinks,runVerification,aggregateReports} from '../src/testing/ci.js';
+import {sourceIdentity,validateCoverage,validateProof,trustedRun,restorePreparedLinks,runVerification,aggregateReports,validateGroupPreparation} from '../src/testing/ci.js';
 import {gitBinary,nullDevice} from './helpers/platform.js';
-import {loadCatalog,catalogPath} from '../src/testing/catalog.js';
+import {loadCatalog,catalogPath,inputFingerprints} from '../src/testing/catalog.js';
 function proofFixture(t){
  const root=mkdtempSync(join(tmpdir(),'ksf-proof-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
  mkdirSync(join(root,'.agents/core/runtime/tests'),{recursive:true});mkdirSync(join(root,'.agents/core/runtime/testing'));
@@ -114,4 +114,22 @@ test('CI cancellation preserves its status and report while stopping the owned f
  const started=existsSync(marker);process.emit('SIGTERM');
  assert.equal(await pending,1);assert.equal(started,true);
  const cancelled=JSON.parse(readFileSync(report,'utf8'));assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.complete,false);assert.equal(cancelled.results[0].status,'cancelled');
+});
+
+test('dependency fingerprints follow linked trees and cycles and detect changes without stale type caching',t=>{
+ const root=proofFixture(t),base=join(root,'.agents/core/runtime'),modules=join(base,'node_modules'),lib=join(modules,'library'),alternate=join(root,'alternate-library');
+ mkdirSync(lib,{recursive:true});mkdirSync(alternate);writeFileSync(join(base,'package.json'),'{}');
+ for(const directory of [lib,alternate]){for(const name of ['Z.js','a.js','中文.js'])writeFileSync(join(directory,name),name);symlinkSync(modules,join(directory,'cycle'),process.platform==='win32'?'junction':'dir');}
+ const alias=join(modules,'linked');symlinkSync(lib,alias,process.platform==='win32'?'junction':'dir');
+ const catalog=loadCatalog(root),fingerprint=()=>inputFingerprints(root,catalog,catalog.tests),before=fingerprint();assert.deepEqual(fingerprint(),before);
+ rmSync(alias,{recursive:true});symlinkSync(alternate,alias,process.platform==='win32'?'junction':'dir');assert.deepEqual(fingerprint(),before,'Equivalent linked bytes retain the existing fingerprint format.');
+ writeFileSync(join(alias,'a.js'),'new linked dependency bytes');assert.notDeepEqual(fingerprint(),before);writeFileSync(join(alias,'a.js'),'a.js');assert.deepEqual(fingerprint(),before);
+ writeFileSync(join(lib,'added.js'),'new dependency');assert.notDeepEqual(fingerprint(),before);rmSync(join(lib,'added.js'));assert.deepEqual(fingerprint(),before);
+});
+
+test('runtime-only group validation refuses inherited developer toolchains before executing coverage',t=>{
+ const root=proofFixture(t),group={toolchains:false,prepared:'runtime'};assert.doesNotThrow(()=>validateGroupPreparation(root,group));
+ for(const path of ['applications/sdk/node_modules','applications/projects/node_modules','runtime/web/node_modules']){
+  const directory=join(root,'.agents/core',path);mkdirSync(directory,{recursive:true});assert.throws(()=>validateGroupPreparation(root,group),{code:'TEST_CI_PREPARATION_INVALID'});assert.doesNotThrow(()=>validateGroupPreparation(root,{toolchains:true,prepared:'full'}));rmSync(directory,{recursive:true});
+ }
 });

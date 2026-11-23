@@ -509,10 +509,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21,
-        "win32": 53
+        "darwin": 15,
+        "win32": 21
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -558,7 +558,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -680,7 +680,7 @@
         "darwin": 8,
         "win32": 10
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -931,7 +931,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -970,7 +970,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1148,7 +1148,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1193,10 +1193,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 5
+        "darwin": 3,
+        "win32": 6
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1245,9 +1245,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 2
+        "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1447,7 +1447,7 @@
         "darwin": 3,
         "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1554,10 +1554,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 8
+        "darwin": 7,
+        "win32": 14
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1612,10 +1612,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 19
+        "darwin": 6,
+        "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1776,7 +1776,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1821,9 +1821,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 4,
-        "win32": 4
+        "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1870,10 +1870,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 6,
         "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2044,10 +2044,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 6,
         "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2197,10 +2197,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 7,
+        "darwin": 9,
         "win32": 18
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2294,11 +2294,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 71,
-        "win32": 102,
+        "darwin": 68,
+        "win32": 124,
         "linux": 55.32
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2342,9 +2342,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 20
+        "win32": 17
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2379,11 +2379,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9,
+        "darwin": 8,
         "win32": 150,
         "linux": 2.34
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2418,11 +2418,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18,
-        "win32": 41,
+        "darwin": 26,
+        "win32": 52,
         "linux": 25.99
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2470,10 +2470,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 13,
-        "win32": 24
+        "darwin": 10,
+        "win32": 26
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2836,10 +2836,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 3,
+        "win32": 4,
         "linux": 1.64
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2877,7 +2877,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2976,10 +2976,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 6
+        "darwin": 3,
+        "win32": 7
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3078,9 +3078,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 5
+        "win32": 6
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -3116,10 +3116,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 12,
-        "win32": 25
+        "darwin": 11,
+        "win32": 22
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3472,11 +3472,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 54,
-        "win32": 184,
+        "darwin": 52,
+        "win32": 181,
         "linux": 31.17
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -3532,11 +3532,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 11,
-        "win32": 12,
+        "darwin": 15,
+        "win32": 14,
         "linux": 7.34
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4126,7 +4126,7 @@
         "darwin": 2,
         "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4173,9 +4173,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 23
+        "win32": 31
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4407,10 +4407,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 2,
+        "win32": 3,
         "linux": 0.9
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4456,10 +4456,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 9
+        "darwin": 3,
+        "win32": 13
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4511,9 +4511,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 4
+        "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4567,9 +4567,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 6,
-        "win32": 9
+        "win32": 10
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4608,10 +4608,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 27,
-        "win32": 45
+        "darwin": 23,
+        "win32": 64
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4650,10 +4650,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 26,
-        "win32": 58
+        "darwin": 30,
+        "win32": 55
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4866,10 +4866,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 11,
         "win32": 8.16
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
@@ -5083,9 +5083,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 3
+        "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5120,11 +5120,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 1,
-        "win32": 8,
+        "darwin": 2,
+        "win32": 11,
         "linux": 0.36
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5161,10 +5161,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 58,
-        "win32": 138
+        "darwin": 48,
+        "win32": 134
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -5210,10 +5210,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3,
-        "win32": 6
+        "darwin": 4,
+        "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5314,7 +5314,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5362,10 +5362,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 6,
-        "win32": 6,
+        "win32": 7,
         "linux": 1.93
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5516,10 +5516,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5737,7 +5737,7 @@
         "darwin": 3,
         "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5788,10 +5788,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 5,
+        "win32": 6,
         "linux": 0.22
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5952,7 +5952,7 @@
         "darwin": 3,
         "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6057,7 +6057,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6702,7 +6702,7 @@
         "darwin": 1,
         "win32": 1.87
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
@@ -6757,7 +6757,7 @@
         "darwin": 2,
         "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6805,7 +6805,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -7006,10 +7006,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 57,
-        "win32": 139
+        "darwin": 94,
+        "win32": 124
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7053,10 +7053,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 46,
-        "win32": 189
+        "darwin": 56,
+        "win32": 196
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7100,10 +7100,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 86,
-        "win32": 125
+        "darwin": 122,
+        "win32": 187
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7147,10 +7147,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 83,
-        "win32": 162
+        "darwin": 79,
+        "win32": 206
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7194,10 +7194,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 40,
-        "win32": 126
+        "darwin": 42,
+        "win32": 104
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7241,10 +7241,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32,
-        "win32": 88
+        "darwin": 56,
+        "win32": 77
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7288,10 +7288,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 46,
-        "win32": 95
+        "darwin": 79,
+        "win32": 174
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7335,10 +7335,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 59,
-        "win32": 97
+        "darwin": 53,
+        "win32": 156
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7382,10 +7382,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 48,
-        "win32": 158
+        "darwin": 67,
+        "win32": 129
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7440,7 +7440,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:system-update-frontend-metadata",
@@ -7481,7 +7481,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:release-files",
@@ -7521,7 +7521,7 @@
         ".agents/core/runtime/src/platform",
         ".agents/core/runtime/src/shared"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:task-checkpoints",
@@ -7824,10 +7824,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 89,
-        "win32": 332
+        "darwin": 124,
+        "win32": 322
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7883,7 +7883,7 @@
         "darwin": 1,
         "win32": 0.66
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "shared",
         "kind": "logic",
@@ -7928,10 +7928,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 5,
-        "win32": 7,
+        "win32": 6,
         "linux": 2.72
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -7977,10 +7977,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 5,
-        "win32": 6,
+        "win32": 7,
         "linux": 4.46
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8084,7 +8084,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8182,7 +8182,7 @@
         "win32": 1,
         "linux": 0.16
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8229,7 +8229,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8272,10 +8272,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 71,
-        "win32": 85
+        "darwin": 61,
+        "win32": 97
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8310,7 +8310,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -9739,10 +9739,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 51,
-        "win32": 126
+        "darwin": 45,
+        "win32": 136
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9786,10 +9786,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 51,
-        "win32": 140
+        "darwin": 34,
+        "win32": 160
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9834,9 +9834,9 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 17,
-        "win32": 76
+        "win32": 58
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9880,10 +9880,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 86,
-        "win32": 223
+        "darwin": 49,
+        "win32": 285
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9927,10 +9927,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
-        "win32": 250
+        "darwin": 66,
+        "win32": 258
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9978,10 +9978,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 52,
-        "win32": 158
+        "darwin": 79,
+        "win32": 171
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10024,10 +10024,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 26,
-        "win32": 109
+        "darwin": 35,
+        "win32": 75
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10063,9 +10063,9 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "win32": 1
+        "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10230,10 +10230,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 7
+        "darwin": 4,
+        "win32": 25
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10327,8 +10327,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 29,
-        "win32": 105,
+        "darwin": 37,
+        "win32": 106,
         "linux": 23.62
       },
       "verification": {
@@ -10355,7 +10355,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:runtime-bundle-inspection",
@@ -10387,8 +10387,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 26,
-        "win32": 94,
+        "darwin": 28,
+        "win32": 58,
         "linux": 28.57
       },
       "verification": {
@@ -10415,7 +10415,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10447,8 +10447,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 30,
-        "win32": 74,
+        "darwin": 36,
+        "win32": 92,
         "linux": 24.53
       },
       "verification": {
@@ -10468,7 +10468,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:runtime-bundle-native",
@@ -10500,8 +10500,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 45,
-        "win32": 200,
+        "darwin": 37,
+        "win32": 125,
         "linux": 0.18
       },
       "verification": {
@@ -10520,7 +10520,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     },
     {
       "id": "core:distribution-policy",
@@ -10591,10 +10591,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 35,
-        "win32": 71
+        "darwin": 36,
+        "win32": 90
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10647,9 +10647,9 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 37,
-        "win32": 69
+        "win32": 112
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10694,10 +10694,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 4,
         "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -10799,10 +10799,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 26,
-        "win32": 69
+        "darwin": 25,
+        "win32": 71
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10854,7 +10854,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11032,10 +11032,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 7
+        "darwin": 4,
+        "win32": 4
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11082,11 +11082,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
-        "win32": 165,
+        "darwin": 96,
+        "win32": 146,
         "linux": 120
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11133,11 +11133,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 67,
-        "win32": 137,
+        "darwin": 68,
+        "win32": 210,
         "linux": 120
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11203,7 +11203,7 @@
         "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11249,10 +11249,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 7
+        "darwin": 4,
+        "win32": 5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11369,7 +11369,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11429,7 +11429,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11454,7 +11454,7 @@
       ],
       "seconds": {
         "darwin": 3,
-        "win32": 7
+        "win32": 6
       }
     },
     {
@@ -11492,10 +11492,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 13
+        "darwin": 4,
+        "win32": 18
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11555,10 +11555,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 11
+        "darwin": 9,
+        "win32": 10
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11666,9 +11666,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 5
+        "win32": 6
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11727,9 +11727,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 9,
-        "win32": 12
+        "win32": 14
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11788,10 +11788,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7,
-        "win32": 10
+        "darwin": 9,
+        "win32": 9
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12191,11 +12191,11 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 1,
         "linux": 0.43
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -12243,11 +12243,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 28,
-        "win32": 49,
+        "darwin": 38,
+        "win32": 113,
         "linux": 21.27
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12297,11 +12297,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 12,
+        "darwin": 3,
+        "win32": 10,
         "linux": 5.25
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12405,11 +12405,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 11,
-        "win32": 39,
+        "darwin": 14,
+        "win32": 57,
         "linux": 4.85
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12460,10 +12460,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 7
+        "darwin": 3,
+        "win32": 6
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12511,11 +12511,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 11,
+        "darwin": 9,
+        "win32": 13,
         "linux": 5.19
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12567,7 +12567,7 @@
         "win32": 2,
         "linux": 0.43
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12634,11 +12634,11 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4,
+        "darwin": 3,
+        "win32": 3,
         "linux": 1.54
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12687,10 +12687,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 2,
+        "win32": 1,
         "linux": 1.09
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12742,7 +12742,7 @@
         "win32": 3,
         "linux": 1.64
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12791,7 +12791,7 @@
         "win32": 3,
         "linux": 1.1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12840,7 +12840,7 @@
         "win32": 4,
         "linux": 2.28
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12877,7 +12877,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12921,11 +12921,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 5,
         "win32": 6,
         "linux": 3.5
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12982,9 +12982,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 3
+        "win32": 4
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13088,9 +13088,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 10,
-        "win32": 19
+        "win32": 16
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13218,7 +13218,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13255,7 +13255,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13290,10 +13290,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 11
+        "darwin": 8,
+        "win32": 12
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13331,7 +13331,7 @@
         "darwin": 2,
         "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13372,9 +13372,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 4,
-        "win32": 5
+        "win32": 25
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13422,7 +13422,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13463,7 +13463,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13510,7 +13510,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13552,10 +13552,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 6
+        "darwin": 4,
+        "win32": 9
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13628,7 +13628,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13820,7 +13820,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13862,9 +13862,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 2
+        "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14262,10 +14262,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 1
+        "darwin": 3,
+        "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14309,7 +14309,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14350,10 +14350,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14442,10 +14442,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14489,10 +14489,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 60,
-        "win32": 110
+        "darwin": 98,
+        "win32": 102
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14540,10 +14540,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 47,
-        "win32": 73
+        "darwin": 58,
+        "win32": 80
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14591,10 +14591,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 34,
-        "win32": 63
+        "darwin": 46,
+        "win32": 69
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14642,10 +14642,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 30,
-        "win32": 60
+        "darwin": 34,
+        "win32": 71
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14692,10 +14692,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 22,
-        "win32": 25
+        "darwin": 25,
+        "win32": 52
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14742,10 +14742,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 59,
-        "win32": 76
+        "darwin": 98,
+        "win32": 103
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15024,7 +15024,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15157,10 +15157,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 4,
         "win32": 3
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15428,7 +15428,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15474,9 +15474,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 1
+        "win32": 2
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15521,10 +15521,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 6,
         "win32": 4
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15569,10 +15569,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 1
       },
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -16118,7 +16118,7 @@
         ".agents/core/runtime/src/testing/prepared-archive.js",
         ".agents/core/distribution/repository/.github/workflows/verification-platform.yml"
       ],
-      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
+      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately."
     }
   ],
   "timingBaseline": {

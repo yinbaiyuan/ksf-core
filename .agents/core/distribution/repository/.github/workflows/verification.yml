@@ -61,6 +61,8 @@ jobs:
       prepared: ${{ matrix.prepared }}
       groups: ${{ matrix.groups }}
       base: ${{ inputs.base }}
+      toolchains: ${{ matrix.toolchains }}
+      full: ${{ needs.plan.outputs.full == 'true' }}
   linux-core:
     name: ${{ matrix.id }} (native Linux Core)
     if: needs.plan.outputs.has_linux == 'true'
@@ -73,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ needs.plan.outputs.full == 'true' && 1 || 0 }}
       - uses: actions/download-artifact@v8.0.2
         with:
           name: verification-plan
@@ -113,7 +115,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ needs.plan.outputs.full == 'true' && 1 || 0 }}
       - name: Preserve incomplete-plan diagnostics
         run: echo '{"schemaVersion":2,"complete":false,"error":"Plan or report download incomplete"}' > coverage.json
       - uses: actions/download-artifact@v8.0.2

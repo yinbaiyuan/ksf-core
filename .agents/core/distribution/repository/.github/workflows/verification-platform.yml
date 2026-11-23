@@ -14,6 +14,12 @@ on:
       base:
         type: string
         default: ''
+      toolchains:
+        type: boolean
+        default: true
+      full:
+        type: boolean
+        default: false
 permissions:
   contents: read
 env:
@@ -30,6 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/cache@v5
+        if: inputs.toolchains
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -59,6 +66,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Install locked platform dependencies
+        if: inputs.toolchains
         env:
           KSF_CI_GROUPS: ${{ inputs.groups }}
         run: |
@@ -72,14 +80,28 @@ jobs:
           done
           cat sdk.install.log web.install.log projects.install.log fixtures.prepare.log
           exit "$ksf_install_status"
+      - name: Prepare runtime-only native fixtures
+        if: ${{ !inputs.toolchains }}
+        env:
+          KSF_CI_GROUPS: ${{ inputs.groups }}
+        run: node .agents/core/runtime/src/testing/prepare-ci-fixtures.js
       - name: Build frontend before server tests
+        if: inputs.toolchains
         working-directory: .agents/core/runtime/web
         run: npm run build
       - name: Freeze prepared toolchains
+        if: inputs.toolchains
         env:
           COPYFILE_DISABLE: '1'
         run: |
           tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist .agents/runtime-data/ci-seeds
+          node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
+      - name: Freeze prepared runtime fixtures
+        if: ${{ !inputs.toolchains }}
+        env:
+          COPYFILE_DISABLE: '1'
+        run: |
+          tar -cf prepared.tar .agents/runtime-data/ci-seeds
           node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
       - uses: actions/upload-artifact@v7.0.2
         with:
@@ -111,7 +133,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ inputs.full && 1 || 0 }}
       - uses: actions/download-artifact@v8.0.2
         with:
           name: verification-plan
@@ -144,6 +166,7 @@ jobs:
           node .agents/core/runtime/src/testing/prepared-archive.js decompress prepared.tar.zst prepared.tar
           tar -xf prepared.tar
       - name: Restore declared local SDK links
+        if: inputs.toolchains
         run: node .agents/core/runtime/src/testing/ci.js restore-links
       - name: Exact planned group
         id: tests

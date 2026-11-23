@@ -48,12 +48,16 @@ jobs:
           ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           printf 'KSF_RELEASE_NODE=%s\n' "$ksf_node" >> "$GITHUB_ENV"
           dirname "$ksf_node" >> "$GITHUB_PATH"
-      - name: Install SDK test dependencies
-        working-directory: .agents/core/applications/sdk
-        run: npm ci --ignore-scripts
-      - name: Install frontend dependencies
-        working-directory: .agents/core/runtime/web
-        run: npm ci
+      - name: Install locked release dependencies
+        run: |
+          npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
+          npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
+          ksf_install_status=0
+          for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid"; do
+            wait "$ksf_pid" || ksf_install_status=$?
+          done
+          cat sdk.install.log web.install.log
+          exit "$ksf_install_status"
       - name: Build frontend for the final artifact
         working-directory: .agents/core/runtime/web
         run: npm run build
@@ -79,6 +83,7 @@ jobs:
             ${{ runner.temp }}/ksf-release/*.json
           if-no-files-found: error
           retention-days: 14
+          compression-level: 0
   release:
     needs: prepare
     if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && needs.prepare.result == 'success' }}

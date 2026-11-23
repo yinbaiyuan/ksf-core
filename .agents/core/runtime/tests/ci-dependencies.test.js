@@ -6,7 +6,7 @@ import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {loadCatalog} from '../src/testing/catalog.js';
-import {createVerificationPlan, targets,verificationTargets} from '../src/testing/ci-plan.js';
+import {createVerificationPlan, targets,verificationTargets,runtimeOnlyNative,runtimeOnlyTest} from '../src/testing/ci-plan.js';
 import {sourceIdentity} from '../src/testing/ci.js';
 
 function repositoryWorkflows(t) {
@@ -74,7 +74,7 @@ test('native matrix has unique artifacts and a complete disjoint partition of ea
   assert.equal(new Set(plan.groups.map(g=>g.id)).size,plan.groups.length);
   for(const target of verificationTargets(true)){
     const groups=plan.groups.filter(g=>g.target===target.target),files=groups.flatMap(g=>g.files);
-    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)&&!(t.verification.lane==='shared'&&target.platform==='darwin'&&t.platforms.includes('linux'))).map(t=>t.path);
+    const expected=catalog.tests.filter(t=>(target.profile==='all'||t.verification.lane===target.profile)&&t.platforms.includes(target.platform)&&!(t.verification.lane==='shared'&&target.platform==='darwin'&&t.platforms.includes('linux'))&&(target.platform==='linux'||(target.toolchains===false?runtimeOnlyTest(t):!runtimeOnlyTest(t)))).map(t=>t.path);
     assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);
     assert.ok(groups.length<=target.limit);
   }
@@ -173,4 +173,25 @@ test('CI prepares immutable same-attempt fixtures alongside dependencies and tra
  assert.match(install.run,/prepare-ci-fixtures.js.*ksf_fixtures_pid=\$!/);assert.match(install.run,/for ksf_pid in .*"\$ksf_fixtures_pid"/);
  assert.equal(install.env.KSF_CI_GROUPS,'${{ inputs.groups }}');assert.match(freeze.run,/tar -cf prepared.tar.*\.agents\/runtime-data\/ci-seeds/);
  assert.equal(run.env.KSF_TEST_CI_PREPARED_SEEDS,'.agents/runtime-data/ci-seeds');
+});
+
+test('runtime-only transaction groups keep every native file and preserve hosted worker limits',()=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root),plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
+ assert.equal(runtimeOnlyNative.size,28);
+ for(const id of runtimeOnlyNative){const t=catalog.tests.find(t=>t.id===id);assert.ok(t,id);assert.equal(t.verification.lane,'native');assert.equal(t.isolation,'exclusive');assert.deepEqual(t.fixtures,['distribution']);assert.deepEqual(t.requirements,[]);}
+ for(const platform of ['darwin','win32']){
+  const groups=plan.groups.filter(g=>g.platform===platform),files=groups.flatMap(g=>g.files),expected=catalog.tests.filter(t=>t.platforms.includes(platform)&&!(platform==='darwin'&&t.verification.lane==='shared'&&t.platforms.includes('linux'))&&!(platform==='win32'&&t.verification.lane==='shared')).map(t=>t.path);
+  assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);assert.ok(groups.length<=(platform==='darwin'?5:12));
+  for(const g of groups.filter(g=>g.toolchains===false)){assert.equal(g.profile,'native');assert.ok(g.files.every(path=>runtimeOnlyNative.has(catalog.tests.find(t=>t.path===path).id)));}
+ }
+ const wf=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8')),prepare=wf.jobs.prepare.steps;
+ assert.equal(wf.on.workflow_call.inputs.toolchains.default,true);assert.equal(wf.jobs.tests.needs,'prepare');
+ assert.equal(prepare.find(s=>s.name==='Install locked platform dependencies').if,'inputs.toolchains');
+ assert.equal(prepare.find(s=>s.name==='Prepare runtime-only native fixtures').if,'${{ !inputs.toolchains }}');
+ assert.doesNotMatch(prepare.find(s=>s.name==='Freeze prepared runtime fixtures').run,/node_modules|web\/dist/);
+ assert.equal(wf.jobs.tests.steps.find(s=>s.name==='Restore declared local SDK links').if,'inputs.toolchains');
+ assert.equal(wf.jobs.tests.steps.find(s=>s.uses?.startsWith('actions/checkout@')).with['fetch-depth'],'${{ inputs.full && 1 || 0 }}');
+ const parent=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification.yml'),'utf8'));assert.equal(parent.jobs.platform.with.toolchains,'${{ matrix.toolchains }}');assert.equal(parent.jobs.platform.with.full,"${{ needs.plan.outputs.full == 'true' }}");assert.equal(parent.jobs.plan.steps[0].with['fetch-depth'],0);
+ const release=YAML.parse(readFileSync(join(repositoryWorkflows(),'release.yml'),'utf8')),install=release.jobs.prepare.steps.find(s=>s.name==='Install locked release dependencies');
+ assert.match(install.run,/wait "\$ksf_pid" \|\| ksf_install_status=\$\?/);assert.match(install.run,/exit "\$ksf_install_status"/);assert.equal(release.jobs.prepare.steps.find(s=>s.uses?.startsWith('actions/upload-artifact@')).with['compression-level'],0);
 });
