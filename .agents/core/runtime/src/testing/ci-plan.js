@@ -7,8 +7,8 @@ export const targets = [
   {target:'shared', profile:'shared', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:1},
   {target:'mac', profile:'native', platform:'darwin', architecture:'arm64', os:'xcode-27', prepared:'macOS', limit:4},
   {target:'win', profile:'native', platform:'win32', architecture:'x64', os:'windows-2025', prepared:'Windows', limit:12},
-  {target:'linux22', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-22.04', prepared:null, limit:1},
-  {target:'linux24', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-24.04', prepared:null, limit:1},
+  {target:'linux22', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-22.04', prepared:null, limit:2},
+  {target:'linux24', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-24.04', prepared:null, limit:2},
 ];
 // Portable shared obligations use Linux once. Shared fixtures with publisher or desktop-host
 // preconditions stay on Mac, alongside every native Mac contract.
@@ -34,7 +34,10 @@ export function createVerificationPlan(root, {full = false, base, changes} = {},
     const tests = selected.filter(t => assignedToTarget(t,target));
     if (!tests.length) continue;
     const seconds = tests.reduce((sum,t) => sum + (t.seconds?.[target.platform] ?? 1), 0);
-    const count = Math.min(tests.length, target.limit, Math.max(1, Math.ceil(seconds / 450)));
+    // Finish development-only native Linux obligations early, before the
+    // steady Mac/Windows/shared pool needs the hosted concurrency slots.
+    const targetSeconds=target.platform==='linux'&&target.profile==='native'?180:450;
+    const count = Math.min(tests.length, target.limit, Math.max(1, Math.ceil(seconds / targetSeconds)));
     for (const [index, files] of assignShards(tests, count, target.platform).entries()) groups.push({
       id:`${target.target}-${index + 1}`, target:target.target, profile:target.profile,
       platform:target.platform, architecture:target.architecture, os:target.os, prepared:target.prepared,
