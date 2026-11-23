@@ -7,7 +7,8 @@ import {tmpdir} from 'node:os';
 import {createServer} from 'node:net';
 import {startWebServer} from '../src/services/web.js';
 import {ensureService,stopService,serviceStatus,serviceDoctor,redactLog} from '../src/services/service-manager.js';
-import {processIdentity} from '../src/services/service-lock.js';
+import {processIdentity,liveIdentity} from '../src/services/service-lock.js';
+import {platform} from '../src/platform/index.js';
 import {controlRequest} from '../src/communication/client.js';
 import {createApplicationManager} from './helpers/application-catalog.js';
 import {encodePackage,checksum,validateManifest,OFFICIAL_APPLICATIONS} from '../src/applications/protocol.js';
@@ -45,6 +46,12 @@ test('status never probes a non-loopback control address',async t=>{
 test('one root cannot own two hosts even on different ports',async t=>{
   const root=await temporary(t),first=await startWebServer({root,port:0,capture:false});cleanup(root,()=>first.close());
   await assert.rejects(startWebServer({root,port:0,capture:false}),{code:'SERVICE_ALREADY_RUNNING'});
+});
+test('known current-process lock identities need no external probe and reject a reused identity',t=>{
+  const identity=processIdentity(),probe=t.mock.method(platform,'processStart',()=>{throw Error('known current-process identity must not spawn a platform probe');});
+  for(let index=0;index<6;index++)assert.equal(liveIdentity(identity),true);
+  assert.equal(liveIdentity({...identity,processStart:identity.processStart+'-different'}),false);
+  assert.equal(probe.mock.callCount(),0);
 });
 test('concurrent cold starts share one detached host and explicit stop stays stopped',async t=>{
   const root=await temporary(t),port=await availablePort();cleanup(root,()=>stopService(root,{force:true}));

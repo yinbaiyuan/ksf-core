@@ -7,6 +7,10 @@ export const serviceError=(code,message,data)=>Object.assign(new Error(message),
 const identities=new Map();let ownStart;
 export function liveIdentity(record){
   if(!Number.isSafeInteger(record?.pid)||!record.processStart)return false;
+  // This executing process cannot reuse its own PID. Its start identity was
+  // already established by processIdentity; inspecting it again can block
+  // every lock waiter on Windows. Other process owners still use live probes.
+  if(record.pid===process.pid&&ownStart!==undefined)return record.processStart===ownStart;
   try{process.kill(record.pid,0);}catch(error){if(error.code==='ESRCH')return false;}
   const key=record.pid+':'+record.processStart,cached=identities.get(key);if(cached&&cached.until>Date.now())return cached.live;
   let live;try{live=platform.processStart(record.pid)===record.processStart;}catch{try{process.kill(record.pid,0);live=true;}catch(error){live=error.code!=='ESRCH';}}
