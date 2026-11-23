@@ -1,3 +1,4 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { distributionFixture, instanceEntries } from './helpers/distribution-fixture.js';
 import { readArchive } from '../src/distribution/archive.js';
-import { buildRelease } from '../src/distribution/release.js';
+
 import { abilitySource } from '../src/services/sources.js';
 import { systemUpdate, systemRollback } from '../src/distribution/system.js';
 

@@ -1,3 +1,4 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import {gitBinary} from './helpers/platform.js';
 import assert from 'node:assert/strict';
@@ -9,7 +10,7 @@ import { distributionFixture, instanceEntries } from './helpers/distribution-fix
 import { readUserData, writeUserData } from '../src/services/user-data.js';
 import { recordDefinition } from '../src/user-data/records.js';
 import { systemUpdate, systemRollback } from '../src/distribution/system.js';
-import { buildRelease } from '../src/distribution/release.js';
+
 import { readArchive } from '../src/distribution/archive.js';
 
 test('real Core upgrade and rollback preserve object records byte-for-byte', async t => {

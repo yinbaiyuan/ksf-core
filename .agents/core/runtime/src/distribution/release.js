@@ -79,7 +79,7 @@ export function inspectCoreArchive(bytes, { expectedVersion, expectedPlatform, e
   }
   return { entries, manifest };
 }
-async function buildPlatformRelease({ root, output, platform, allowDirty = false, dryRun = false }, {materializeInstance = true, durableInstance = true} = {}) {
+export async function buildPlatformRelease({ root, output, platform, allowDirty = false, dryRun = false }, {materializeInstance = true, durableInstance = true} = {}) {
   const config = configuration(root), build = parseJSON(readRegular(root, '.agents/core/build.json'), 'build.json');
   versionParts(build.version);
   if (!build.runtime?.packages?.[platform]) fail('PLATFORM_UNSUPPORTED', `No bundled runtime for ${platform}.`);

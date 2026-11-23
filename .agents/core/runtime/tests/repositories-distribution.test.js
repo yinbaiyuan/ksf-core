@@ -1,3 +1,4 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import {fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -5,7 +6,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { distributionFixture, instanceEntries } from './helpers/distribution-fixture.js';
-import { buildRelease, inspectCoreArchive } from '../src/distribution/release.js';
+import { inspectCoreArchive } from '../src/distribution/release.js';
 import { readArchive } from '../src/distribution/archive.js';
 import { systemUpdate, systemRollback } from '../src/distribution/system.js';
 import { repository } from '../src/services/repositories.js';

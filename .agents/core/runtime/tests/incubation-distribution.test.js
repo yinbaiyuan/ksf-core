@@ -1,9 +1,10 @@
+import {buildRelease} from './helpers/distribution-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {distributionFixture,fixtureTarget,instanceEntries} from './helpers/distribution-fixture.js';
-import {buildRelease} from '../src/distribution/release.js';
+
 import {publishRelease} from '../src/distribution/publish.js';
 import {readArchive,createArchive} from '../src/distribution/archive.js';
 import {systemUpdate,systemRollback,systemFingerprint} from '../src/distribution/system.js';

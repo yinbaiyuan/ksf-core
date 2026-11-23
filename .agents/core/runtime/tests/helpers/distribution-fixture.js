@@ -1,5 +1,5 @@
 import {platform,launcherInvocation,removePathSync as rmSync} from '../../src/platform/index.js';
-export const fixtureTarget=platform.name==='win32'?'win32-x64':'darwin-arm64';
+export const fixtureTarget=platform.name==='win32'?'win32-x64':platform.name==='linux'?'linux-x64':'darwin-arm64';
 import {gitBinary,nullDevice,writeNodeExecutable,storedZip} from './platform.js';
 import assert from 'node:assert/strict';
 import { after } from 'node:test';
@@ -9,10 +9,16 @@ import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { buildManifest } from '../../src/services/build-manifest.js';
-import { buildRelease, inspectCoreArchive } from '../../src/distribution/release.js';
+import { buildRelease as buildOfficialRelease, buildPlatformRelease, inspectCoreArchive } from '../../src/distribution/release.js';
 import { createArchive } from '../../src/distribution/archive.js';
 import { sha256, stableJSON, writeAtomic, fileMode } from '../../src/distribution/common.js';
 import { developmentPath } from '../../src/distribution/paths.js';
+
+// Internal lifecycle fixtures can exercise real Linux files and processes.
+// The public release command still accepts only the two official products.
+export const buildRelease = (options,settings) => platform.name==='linux'
+  ? buildPlatformRelease({...options,platform:options.platform??fixtureTarget},settings)
+  : buildOfficialRelease(options,settings);
 
 export const repository = fileURLToPath(new URL('../../../../../', import.meta.url));
 const gitTiming = { ms: 0, calls: 0 };
@@ -96,7 +102,7 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
   }
   writeFileSync(join(root, '.gitignore'), '/.agents/runtime-data/\n/.agents/user-data/\n/知识/\n/.agents/core/release.json\n');
   writeAtomic(join(root, '.agents/core/example.txt'), 'first\none\ntwo\nthree\nfour\nfive\nlast\n');
-  const version = process.version.slice(1), archiveRoot = `node-v${version}-darwin-arm64`;
+  const version = process.version.slice(1), archiveRoot = `node-v${version}-${fixtureTarget}`;
   const escapedNode = process.execPath.replace(/'/g, "'\\''");
   const node = Buffer.from(`#!/bin/sh\nif [ "$1" = '--version' ]; then printf 'v${version}\\n'; else exec '${escapedNode}' "$@"; fi\n`);
   let archive,archivePath;
