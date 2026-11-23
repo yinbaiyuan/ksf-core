@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {createServer} from 'node:http';import {once} from 'node:events';import {mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync} from 'node:fs';import {join} from 'node:path';import {tmpdir} from 'node:os';
 import {createApplicationManager} from '../src/applications/manager.js';import {encodePackage,checksum} from '../src/applications/protocol.js';import {buildCatalog} from '../src/store-catalog/build.js';
+import {createCatalogClient} from '../src/store-catalog/client.js';import {readdirSync} from 'node:fs';
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aBncAAAAASUVORK5CYII=','base64'),file=bytes=>({content:bytes.toString('base64'),sha256:checksum(bytes),mode:420});
 async function fixture(t){const folder=mkdtempSync(join(tmpdir(),'ksf-app-catalog-v2-')),root=join(folder,'root'),store=join(folder,'offline'),remote=join(folder,'remote');mkdirSync(root);mkdirSync(store);mkdirSync(join(remote,'packages'),{recursive:true});writeFileSync(join(store,'index.json'),JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));let online=true,corrupt=false;const calls=[];
  const server=createServer((req,res)=>{calls.push(req.url);if(!online){res.writeHead(503);res.end();return;}if(req.url==='/legacy/index.json'){res.end(JSON.stringify({protocol:'ksf-app-registry-v1',apps:[]}));return;}try{const bytes=readFileSync(join(remote,req.url));res.end(corrupt&&req.url.endsWith('.ksfapp')?Buffer.from('corrupted'):bytes);}catch{res.writeHead(404);res.end();}});server.listen(0,'127.0.0.1');await once(server,'listening');const url='http://127.0.0.1:'+server.address().port+'/index.json',objects=[];
@@ -11,4 +12,20 @@ test('historical source Core entries are filtered across pages without dropping 
  const f=await fixture(t),{DEFAULT_APPLICATIONS}=await import('../src/applications/protocol.js');for(const id of DEFAULT_APPLICATIONS)f.objects.push({id,name:'测试应用'+id,description:'历史条目',type:'application',versions:[f.release(id,'9.0.0')]});f.objects.push({id:'com.ksf.terminal',name:'测试应用终端',description:'场景应用',type:'application',versions:[f.release('com.ksf.terminal','0.1.0')]});f.publish();
  const seen=[];let cursor=null;do{const page=await f.manager.catalog({limit:40,cursor});assert.equal(page.errors.length,0);assert.ok(page.applications.every(app=>!DEFAULT_APPLICATIONS.includes(app.appId)));if(page.nextCursor)assert.equal(page.applications.length,40);seen.push(...page.applications.map(app=>app.appId));cursor=page.nextCursor;}while(cursor);
  assert.equal(seen.length,1002);assert.equal(new Set(seen).size,1002);assert.ok(seen.includes('com.ksf.terminal'));for(const id of DEFAULT_APPLICATIONS){await assert.rejects(f.manager.install({appId:id}),{code:'APP_CORE_MANAGED'});await assert.rejects(f.manager.storeVersions({appId:id,sourceId:'ksf-apps'}),{code:'APP_CORE_MANAGED'});}assert.equal(await f.manager.storeDetail({appId:'com.ksf.projects'}),null);
+});
+
+test('native concurrent catalog clients share verified cache without rename failures or temporary files',async t=>{
+ const f=await fixture(t),id='com.example.windows';
+ f.objects.splice(0,f.objects.length,{id,name:'Windows验收便笺',description:'Windows source search',type:'application',versions:[f.release(id,'1.0.0')]});f.publish();
+ const cacheDirectory=join(f.root,'共享 缓存');
+ const pages=await Promise.all(Array.from({length:8},async()=>{
+  const client=createCatalogClient({url:f.url,kind:'applications',cacheDirectory});
+  const result=await client.list({query:'Windows'});
+  assert.deepEqual(result.items.map(item=>item.id),[id]);
+  return client.list({query:'win'});
+ }));
+ assert.ok(pages.every(page=>page.items[0]?.id===id));
+ assert.equal(readdirSync(cacheDirectory).filter(name=>name.endsWith('.tmp')).length,0);
+ const offline=createCatalogClient({url:f.url,kind:'applications',cacheDirectory,fetcher:async()=>{throw new TypeError('offline');}});
+ assert.deepEqual((await offline.list({query:'Windows'})).items.map(item=>item.id),[id]);
 });

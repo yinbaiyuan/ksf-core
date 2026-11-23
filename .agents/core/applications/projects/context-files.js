@@ -916,6 +916,7 @@ export function createContextFileWorkspace({
     merge(text){if(!active?.disk)return;active.base=active.disk;active.disk=null;active.mergeText=null;editFile(active,text);emit();},
     markReviewed:()=>active&&markReviewed(active),
     moveVersion:path=>call('moveVersion',{path}),
+    async refreshAfterMutation(move){while(working&&!disposed)await new Promise(resolve=>setTimeout(resolve,25));if(disposed)return;const fresh=changesReader?await changesReader.afterChange([primaryScope,...scopes.filter(scope=>scope!==primaryScope)]):null;await refresh(true,fresh);if(move&&!disposed)afterMove(move);},
     async mutate(action,data){if(mutating)throw Error('文件操作尚未结束');if(!projectWritable())throw Error('当前项目只读');let value;await changeTree(action,data,result=>{value=result;if(action==='move')afterMove(result);else if(data.kind==='file'){const entry=entries.get(result.path);if(entry)onOpen(entry,{edit:true});}else selected=result.path;});emit();return value;},
     supported:()=>supported,mutating:()=>mutating,
     flush:()=>active&&save(active,{flush:true}),
