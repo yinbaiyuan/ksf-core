@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdirSync, readFileSync, symlinkSync } from 'node:fs';
+import { mkdirSync, readFileSync, symlinkSync, readlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { platform } from '../src/platform/index.js';
 import { writeAtomic } from '../src/distribution/common.js';
@@ -45,4 +45,25 @@ test('system maintenance ignores development dependencies and preserves them thr
   symlinkSync(outside, join(f.workspace, '.agents/core/unmanaged-source-link'), platform.name === 'win32' ? 'junction' : 'dir');
   assert.throws(() => systemFingerprint(f.workspace), { code: 'UNSAFE_PATH' });
   await assert.rejects(systemRead({ root: f.workspace }), { code: 'UNSAFE_PATH' });
+});
+
+
+test('development installs retain independent transaction copies and the original rollback snapshot',async t=>{
+ const f=await distributionFixture(t),paths=['applications/sdk/node_modules','applications/projects/node_modules','runtime/web/node_modules'];
+ for(const path of paths){writeAtomic(join(f.workspace,'.agents/core',path,'marker'),'original development state');if(platform.name!=='win32')symlinkSync('marker',join(f.workspace,'.agents/core',path,'relative-marker'));}
+ const before=systemFingerprint(f.workspace),next=await f.next();
+ await assert.rejects(systemUpdate({root:f.workspace,from:next.coreArchive,fault:(phase,transaction)=>{
+  if(phase!=='prepared')return;
+  for(const path of paths){
+   if(platform.name!=='win32')assert.equal(readlinkSync(join(transaction,'new-core',path,'relative-marker')),'marker');
+   const copy=join(transaction,'new-core',path,'marker');assert.equal(readFileSync(copy,'utf8'),'original development state');writeAtomic(copy,'private failed candidate');assert.equal(readFileSync(join(f.workspace,'.agents/core',path,'marker'),'utf8'),'original development state');
+  }
+  throw new Error('controlled development-copy failure');
+ }}),/controlled development-copy failure/);
+ assert.equal(systemFingerprint(f.workspace),before);
+ for(const path of paths)assert.equal(readFileSync(join(f.workspace,'.agents/core',path,'marker'),'utf8'),'original development state');
+ await systemUpdate({root:f.workspace,from:next.coreArchive});
+ for(const path of paths){if(platform.name!=='win32')assert.equal(readlinkSync(join(f.workspace,'.agents/core',path,'relative-marker')),'marker');assert.equal(readFileSync(join(f.workspace,'.agents/core',path,'marker'),'utf8'),'original development state');writeAtomic(join(f.workspace,'.agents/core',path,'marker'),'later development state');}
+ await systemRollback({root:f.workspace});
+ for(const path of paths)assert.equal(readFileSync(join(f.workspace,'.agents/core',path,'marker'),'utf8'),'original development state');
 });

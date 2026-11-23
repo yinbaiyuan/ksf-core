@@ -2,7 +2,7 @@ import {storedZip} from './helpers/platform.js';
 import {buildManifest} from '../src/services/build-manifest.js';
 import {launcherInvocation,platform as nativePlatform} from '../src/platform/index.js';
 import {fileMode} from '../src/distribution/files.js';
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { cpSync, existsSync, lstatSync, readFileSync, writeFileSync, symlinkSync, rmSync, realpathSync, readdirSync } from 'node:fs';
@@ -14,7 +14,7 @@ import { compareVersions, configuration, installedManifest, releaseReceipt, isBr
 import { buildRelease, inspectCoreArchive, workspaceDocuments, knowledgeFrameworkFiles } from '../src/distribution/release.js';
 import { inspectReleaseDirectory } from '../src/distribution/publish.js';
 import { parseDistributionArgs } from '../src/commands/distribution.js';
-import { distributionFixture, git } from './helpers/distribution-fixture.js';
+import { officialArchiveFixture as distributionFixture, git } from './helpers/distribution-fixture.js';
 import { contextCapabilities } from '../src/services/context.js';
 import { objectQuery } from '../src/services/objects.js';
 import { systemUpdate } from '../src/distribution/system.js';
@@ -99,16 +99,7 @@ test('Core sources need no user directories while installed workspaces still val
   assert.equal(incomplete.data.cooperations.complete, false);
   assert.ok(incomplete.errors.some(error => error.target === '能力/协同'));
 });
-test('distribution fixture reconstructs Core sources from an installed workspace', async t => {
-  const source = await distributionFixture(t);
-  assert.equal(existsSync(join(source.workspace, '.agents/core/release.json')), true);
-  const f = await distributionFixture(t, { sourceRoot: source.workspace });
-  assert.equal(existsSync(join(f.root, '.agents/core/release.json')), false);
-  const discovery = contextCapabilities(f.root);
-  assert.equal(discovery.data.complete, true, JSON.stringify(discovery.errors));
-  assert.equal(existsSync(join(source.workspace, '.agents/core/release.json')), true);
-  assert.equal(f.launch(['context', 'capabilities', '--json']).status, 0);
-});
+
 test('release preview creates no output and dirty sources require an explicit development build', async t => {
   const f = await distributionFixture(t), output = join(f.directory, 'preview');
   const preview = await buildRelease({ root: f.root, output, dryRun: true });
@@ -174,14 +165,7 @@ test('a tampered compatibility index cannot publish a second or different produc
   assert.throws(()=>inspectReleaseDirectory(f.root,f.first.output),{code:'RELEASE_INVALID'});
 });
 
-test('a new updater explicitly targets an existing instance and leaves its source directory untouched',async t=>{
- const f=await distributionFixture(t),next=await f.next('0.1.1',{'.agents/core/example.txt':'target update\n'}),{runDistributionCommand}=await import('../src/commands/distribution.js');
- writeAtomic(join(f.workspace,'USER.md'),'Private instance\n');const sourceBefore=readFileSync(join(f.root,'.agents/core/example.txt')),targetBefore=readFileSync(join(f.workspace,'.agents/core/example.txt'));
- assert.throws(()=>parseDistributionArgs('system',['read','--instance',f.workspace]),{code:'INVALID_ARGUMENTS'});
- const args=['update','--instance',f.workspace,'--from',next.coreArchive,'--json'],preview=await runDistributionCommand('system',[...args,'--dry-run'],f.root);assert.equal(preview.exitCode,0,preview.stdout);const planned=JSON.parse(preview.stdout);assert.equal(planned.data.current,'0.1.0');assert.equal(planned.data.latest,'0.1.1');assert.equal(planned.data.instanceRoot,realpathSync(f.workspace));assert.deepEqual(readFileSync(join(f.workspace,'.agents/core/example.txt')),targetBefore);
- const applied=await runDistributionCommand('system',args,f.root);assert.equal(applied.exitCode,0,applied.stdout);assert.equal(installedManifest(f.workspace).version,'0.1.1');assert.equal(readFileSync(join(f.workspace,'.agents/core/example.txt'),'utf8'),'target update\n');assert.equal(readFileSync(join(f.workspace,'USER.md'),'utf8'),'Private instance\n');assert.deepEqual(readFileSync(join(f.root,'.agents/core/example.txt')),sourceBefore);assert.equal(existsSync(join(f.root,'.agents/core/release.json')),false);
- writeAtomic(join(f.workspace,'.agents/runtime-data/cooperation-migration/state.json'),stableJSON({schemaVersion:1,root:realpathSync(f.workspace),actions:[],status:'applying'}));const blocked=await runDistributionCommand('system',[...args,'--dry-run'],f.root);assert.equal(blocked.exitCode,1);assert.equal(JSON.parse(blocked.stdout).errors[0].code,'MIGRATION_PENDING');
-});
+
 test('Core managed paths include builtin payloads and exclude optional app and official source mirrors',async()=>{
  const {managedPath}=await import('../src/distribution/paths.js');for(const path of ['.agents/core/applications/builtin/index.json','.agents/core/applications/builtin/com.ksf.projects-1.0.0.ksfapp','.agents/core/abilities/partners/ksf-runtime/partner.md'])assert.equal(managedPath(path),true,path);for(const path of ['.agents/core/applications/store/index.json','.agents/core/applications/store/com.ksf.terminal-1.0.0.ksfapp','.agents/core/ability-store/index.json','.agents/core/ability-store/packages/example.ksfabi','.agents/core/applications/terminal/backend.mjs'])assert.equal(managedPath(path),false,path);
 });

@@ -156,3 +156,13 @@ test('native platforms start independently and complete-proof reuse retains a fa
  assert.equal(release.jobs.release['runs-on'],'ubuntu-24.04');
  assert.equal(release.jobs.prepare['runs-on'],'ubuntu-24.04');
 });
+
+
+test('native Linux obligations use bounded early groups without changing their host coverage',()=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root),plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
+ const expected=catalog.tests.filter(t=>t.verification.lane==='native'&&t.platforms.includes('linux')).map(t=>t.path).sort();
+ for(const target of ['linux22','linux24']){
+  const groups=plan.groups.filter(g=>g.target===target);assert.equal(groups.length,2);assert.ok(groups.every(g=>g.profile==='native'&&g.platform==='linux'&&g.architecture==='x64'&&g.estimatedSeconds<=180));
+  assert.deepEqual(groups.flatMap(g=>g.files).sort(),expected);assert.ok(groups.every(g=>g.os===(target==='linux22'?'ubuntu-22.04':'ubuntu-24.04')));
+ }
+});

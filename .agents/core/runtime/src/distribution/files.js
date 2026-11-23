@@ -7,22 +7,21 @@ import { stableJSON } from '../shared/hash.js';
 import { fail } from './errors.js';
 import { validRelative } from './paths.js';
 
-export function checkedPath(root, relative) {
+// The entry belongs only to this synchronous check. Callers must open it
+// immediately; no successful check is reused for another path or request.
+function checkedEntry(root, relative) {
   if (!validRelative(relative)) fail('UNSAFE_PATH', `Invalid relative path: ${JSON.stringify(relative)}.`);
-  let current = resolve(root);
+  let current = resolve(root), entry = null;
   for (const part of relative.split('/')) {
     current = join(current, part);
-    if (existsSync(current)) {
-      const stat = lstatSync(current);
-      if (stat.isSymbolicLink() || (!stat.isDirectory() && !stat.isFile())) fail('UNSAFE_PATH', `Unsupported filesystem entry: ${relative}.`);
-    } else {
-      // existsSync is false for a dangling symlink.
-      try { if (lstatSync(current).isSymbolicLink()) fail('UNSAFE_PATH', `Dangling symlink: ${relative}.`); }
-      catch (error) { if (error.code !== 'ENOENT') throw error; }
-    }
+    try { entry = lstatSync(current); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; entry = null; continue; }
+    if (entry.isSymbolicLink()) fail('UNSAFE_PATH', existsSync(current) ? `Unsupported filesystem entry: ${relative}.` : `Dangling symlink: ${relative}.`);
+    if (!entry.isDirectory() && !entry.isFile()) fail('UNSAFE_PATH', `Unsupported filesystem entry: ${relative}.`);
   }
-  return current;
+  return { path: current, entry };
 }
+export function checkedPath(root, relative) { return checkedEntry(root, relative).path; }
 export function readRegular(root, relative, optional = false) {
   const path = checkedPath(root, relative);
   if (!existsSync(path)) {
@@ -35,11 +34,8 @@ export function readRegular(root, relative, optional = false) {
 // Read bytes and mode from the same open entry. Containment and type checks
 // remain fresh for every call; no directory or validity cache crosses reads.
 export function readRegularRecord(root, relative, { optional = false, declared } = {}) {
-  const path = checkedPath(root, relative);
-  let entry;
-  try { entry = lstatSync(path); }
-  catch (error) {
-    if (error.code !== 'ENOENT') throw error;
+  const {path,entry} = checkedEntry(root, relative);
+  if (!entry) {
     if (optional) return null;
     fail('FILE_MISSING', `Missing file: ${relative}.`);
   }
@@ -61,7 +57,8 @@ function readCheckedRecord(path, relative, entry, declared) {
 export function* walkRegularRecords(root, prefix, { exclude = () => false } = {}) {
   function* visit(relative) {
     if (exclude(relative)) return;
-    const path = checkedPath(root, relative), entry = lstatSync(path);
+    let {path,entry} = checkedEntry(root, relative);
+    if (!entry) entry=lstatSync(path);
     if (entry.isDirectory()) {
       for (const name of readdirSync(path).sort()) yield* visit(`${relative}/${name}`);
     } else if (entry.isFile()) yield [relative, readCheckedRecord(path, relative, entry)];

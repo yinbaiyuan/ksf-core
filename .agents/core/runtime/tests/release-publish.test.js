@@ -1,11 +1,11 @@
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { publishRelease } from '../src/distribution/publish.js';
 import { sha256, stableJSON } from '../src/distribution/common.js';
-import { distributionFixture } from './helpers/distribution-fixture.js';
+import { officialArchiveFixture as distributionFixture } from './helpers/distribution-fixture.js';
 import { systemUpdate } from '../src/distribution/system.js';
 import { workspaceDocuments } from '../src/distribution/release.js';
 
