@@ -201,7 +201,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.23,
         "win32": 0.26
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -235,7 +235,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.3,
         "win32": 1.13
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -321,7 +321,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.25,
+        "darwin": 0.23,
         "win32": 1.14
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -362,7 +362,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.25,
+        "darwin": 0.36,
         "win32": 5.59
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -415,7 +415,7 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 29.72,
+        "darwin": 31.3,
         "win32": 69.52
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -457,7 +457,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.31,
+        "darwin": 0.62,
         "win32": 0.42
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -495,8 +495,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.49,
-        "win32": 1.42
+        "darwin": 10.9,
+        "win32": 14.95
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -541,8 +541,8 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.39,
-        "win32": 0.4
+        "darwin": 0.37,
+        "win32": 0.36
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -580,7 +580,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.22,
         "win32": 0.21
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -617,7 +617,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.24,
         "win32": 0.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -659,8 +659,8 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.91,
-        "win32": 6.92
+        "darwin": 6.15,
+        "win32": 8.7
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -733,7 +733,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.21,
         "win32": 0.23
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -777,7 +777,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.28,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -819,7 +819,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.32,
         "win32": 0.29
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -858,7 +858,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.37,
         "win32": 0.26
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -900,8 +900,8 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.21,
-        "win32": 0.4
+        "darwin": 0.38,
+        "win32": 0.28
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -939,8 +939,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.12,
-        "win32": 0.2
+        "darwin": 0.2,
+        "win32": 0.21
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -976,7 +976,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.39,
         "win32": 0.2
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1015,7 +1015,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.22,
         "win32": 0.22
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1061,7 +1061,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.46,
+        "darwin": 0.49,
         "win32": 1.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1111,8 +1111,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.44,
-        "win32": 0.84
+        "darwin": 0.52,
+        "win32": 0.76
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1159,8 +1159,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.88,
-        "win32": 4.87
+        "darwin": 1.24,
+        "win32": 5.17
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1210,8 +1210,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 1.76
+        "darwin": 0.62,
+        "win32": 1.85
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1256,7 +1256,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.22,
+        "darwin": 0.35,
         "win32": 0.31
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1302,7 +1302,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.89,
+        "darwin": 1.63,
         "win32": 3.42
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1353,7 +1353,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.75,
+        "darwin": 1.44,
         "win32": 2.89
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1404,8 +1404,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.95,
-        "win32": 4.45
+        "darwin": 1.39,
+        "win32": 5.19
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1451,7 +1451,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.04,
+        "darwin": 3.78,
         "win32": 5.04
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1512,8 +1512,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.43,
-        "win32": 8.74
+        "darwin": 4.74,
+        "win32": 10.85
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1570,8 +1570,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.82,
-        "win32": 6.36
+        "darwin": 2.91,
+        "win32": 7.49
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1620,7 +1620,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.49,
+        "darwin": 3.49,
         "win32": 1.06
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1675,7 +1675,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.16,
+        "darwin": 1.96,
         "win32": 1.96
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1727,8 +1727,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.25,
-        "win32": 0.56
+        "darwin": 0.56,
+        "win32": 0.66
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1774,8 +1774,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.46,
-        "win32": 4.45
+        "darwin": 2.71,
+        "win32": 4.91
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1824,8 +1824,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.87,
-        "win32": 1.55
+        "darwin": 2.59,
+        "win32": 6.38
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -1872,7 +1872,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.3,
+        "darwin": 0.55,
         "win32": 0.39
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1933,7 +1933,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.19,
         "win32": 0.22
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -1994,8 +1994,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.54,
-        "win32": 1.22
+        "darwin": 2.41,
+        "win32": 4.63
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2041,7 +2041,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.25,
         "win32": 0.3
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2088,7 +2088,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.24,
         "win32": 0.4
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2143,8 +2143,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.03,
-        "win32": 14.53
+        "darwin": 4.87,
+        "win32": 15.94
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2191,7 +2191,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.78,
+        "darwin": 0.99,
         "win32": 2.33
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2238,8 +2238,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 22.46,
-        "win32": 43.37
+        "darwin": 63.66,
+        "win32": 107.39
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2285,7 +2285,7 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 20.87
+        "win32": 15.36
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2322,7 +2322,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 5.8,
+        "darwin": 6.66,
         "win32": 150
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2360,8 +2360,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 11.29,
-        "win32": 26.66
+        "darwin": 15.28,
+        "win32": 26.9
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2411,8 +2411,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 5.19,
-        "win32": 18.17
+        "darwin": 10.11,
+        "win32": 21.19
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2459,7 +2459,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.56,
+        "darwin": 0.93,
         "win32": 2.14
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2508,7 +2508,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.54,
+        "darwin": 0.88,
         "win32": 2.74
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2555,7 +2555,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 24.39,
+        "darwin": 47.88,
         "win32": 99.39
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2615,7 +2615,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.59,
+        "darwin": 1.1,
         "win32": 2.75
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2671,7 +2671,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.36,
+        "darwin": 1.77,
         "win32": 0.59
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2721,7 +2721,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.46,
         "win32": 0.31
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2766,8 +2766,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.06,
-        "win32": 2.41
+        "darwin": 2.6,
+        "win32": 2.5
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2804,8 +2804,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.42,
-        "win32": 1.34
+        "darwin": 0.55,
+        "win32": 1.29
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -2851,7 +2851,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.29,
+        "darwin": 0.57,
         "win32": 0.81
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -2904,8 +2904,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.5,
-        "win32": 3.44
+        "darwin": 2.71,
+        "win32": 5.2
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -3003,8 +3003,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.93,
-        "win32": 5
+        "darwin": 1.39,
+        "win32": 3.13
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -3042,8 +3042,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.42,
-        "win32": 5.32
+        "darwin": 10.94,
+        "win32": 14.68
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -3084,7 +3084,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.37,
+        "darwin": 0.42,
         "win32": 0.88
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3134,7 +3134,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3.99,
         "win32": 4.83
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3185,7 +3185,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.63,
+        "darwin": 1.91,
         "win32": 3.46
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3229,7 +3229,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9.06,
+        "darwin": 7.5,
         "win32": 15.93
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3273,7 +3273,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 79.07,
+        "darwin": 151.5,
         "win32": 234.34
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3329,7 +3329,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 29.54,
+        "darwin": 48.81,
         "win32": 101.89
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3386,8 +3386,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32.55,
-        "win32": 97.66
+        "darwin": 43.09,
+        "win32": 149.63
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -3445,8 +3445,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.84,
-        "win32": 1.49
+        "darwin": 12.16,
+        "win32": 11.05
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -3502,7 +3502,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.64,
+        "darwin": 0.99,
         "win32": 1.31
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3553,7 +3553,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.33,
+        "darwin": 0.4,
         "win32": 0.76
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3599,7 +3599,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 66.11,
+        "darwin": 130.97,
         "win32": 298.73
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3652,7 +3652,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30.5,
+        "darwin": 105.64,
         "win32": 113.29
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3705,7 +3705,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 35.76,
+        "darwin": 95.3,
         "win32": 136.35
       },
       "timingBasis": "Split seven committed-baseline and legacy-source cases from a native Windows file observed at 556 seconds in CI.",
@@ -3758,7 +3758,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 56.5,
+        "darwin": 143.12,
         "win32": 191.47
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3811,7 +3811,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 40.37,
+        "darwin": 101.45,
         "win32": 146.68
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3864,7 +3864,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 34.91,
+        "darwin": 80.72,
         "win32": 122.6
       },
       "timingBasis": "Six committed-workspace/export cases remain after isolating all seven baseline/legacy cases; preserve all assertions.",
@@ -3924,7 +3924,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
+        "darwin": 0.31,
         "win32": 0.3
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -3969,7 +3969,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.24,
+        "darwin": 0.25,
         "win32": 0.94
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4016,8 +4016,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.66,
-        "win32": 2.44
+        "darwin": 0.86,
+        "win32": 2.37
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4065,8 +4065,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.1,
-        "win32": 17.51
+        "darwin": 2.3,
+        "win32": 18.39
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4116,7 +4116,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.82,
+        "darwin": 1.45,
         "win32": 3.22
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4181,7 +4181,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.29,
+        "darwin": 3.0,
         "win32": 0.83
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4224,7 +4224,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 78.65,
+        "darwin": 151.89,
         "win32": 309.9
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4293,8 +4293,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.75,
-        "win32": 1.37
+        "darwin": 1.14,
+        "win32": 1.65
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4342,8 +4342,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.89,
-        "win32": 6.08
+        "darwin": 2.17,
+        "win32": 5.8
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4396,8 +4396,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.56,
-        "win32": 4.78
+        "darwin": 2.18,
+        "win32": 4.04
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4452,8 +4452,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.27,
-        "win32": 7.34
+        "darwin": 3.72,
+        "win32": 7.42
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4494,8 +4494,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.33,
-        "win32": 25.65
+        "darwin": 18.86,
+        "win32": 39.71
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4536,8 +4536,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21.93,
-        "win32": 46.47
+        "darwin": 20.63,
+        "win32": 46.88
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4586,7 +4586,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.27,
+        "darwin": 0.47,
         "win32": 0.58
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4638,7 +4638,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.34,
+        "darwin": 0.64,
         "win32": 0.85
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4682,7 +4682,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 22.98,
+        "darwin": 55.09,
         "win32": 145.8
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4746,7 +4746,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.51,
+        "darwin": 6.12,
         "win32": 8.16
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4798,7 +4798,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21.5,
+        "darwin": 37.08,
         "win32": 91.89
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4858,7 +4858,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.36,
+        "darwin": 0.6,
         "win32": 0.87
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4903,7 +4903,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 22.55,
+        "darwin": 32.99,
         "win32": 119.6
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -4957,7 +4957,7 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 1.7
+        "win32": 1.31
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -4994,8 +4994,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.73,
-        "win32": 9.33
+        "darwin": 0.89,
+        "win32": 6.58
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5034,8 +5034,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 36.25,
-        "win32": 155.8
+        "darwin": 69.5,
+        "win32": 208.01
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -5083,8 +5083,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 1.59,
-        "win32": 6.1
+        "darwin": 2.18,
+        "win32": 4.6
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5131,7 +5131,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.91,
+        "darwin": 1.0,
         "win32": 1.81
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5182,8 +5182,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.44,
-        "win32": 0.9
+        "darwin": 0.49,
+        "win32": 0.62
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5232,8 +5232,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.01,
-        "win32": 5.51
+        "darwin": 2.71,
+        "win32": 4.2
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5280,7 +5280,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.2,
         "win32": 0.26
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5321,7 +5321,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21.72,
+        "darwin": 42.07,
         "win32": 87.15
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5382,8 +5382,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.66,
-        "win32": 1.51
+        "darwin": 0.88,
+        "win32": 1.07
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5433,7 +5433,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.62,
+        "darwin": 1.13,
         "win32": 1.42
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5487,7 +5487,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.51,
+        "darwin": 2.42,
         "win32": 2.36
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5539,7 +5539,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.1,
+        "darwin": 1.88,
         "win32": 2.86
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5594,8 +5594,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.31,
-        "win32": 1.9
+        "darwin": 1.98,
+        "win32": 1.43
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5647,8 +5647,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
-        "win32": 4.8
+        "darwin": 0.42,
+        "win32": 4.96
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5699,7 +5699,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
+        "darwin": 0.25,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5748,7 +5748,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.89,
+        "darwin": 1.86,
         "win32": 3.18
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5804,8 +5804,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.48,
-        "win32": 4.26
+        "darwin": 2.14,
+        "win32": 4.36
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5855,7 +5855,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.08,
+        "darwin": 6.15,
         "win32": 14.72
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -5907,8 +5907,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.34,
-        "win32": 1.02
+        "darwin": 0.39,
+        "win32": 0.98
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -5950,7 +5950,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 8.29,
+        "darwin": 5.54,
         "win32": 41.7
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6001,7 +6001,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 16.63,
+        "darwin": 23.17,
         "win32": 78.43
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6055,7 +6055,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 10.94,
+        "darwin": 12.03,
         "win32": 36.54
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6109,7 +6109,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.13,
+        "darwin": 17.9,
         "win32": 58.09
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6162,7 +6162,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.18,
+        "darwin": 16.18,
         "win32": 50.85
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6222,7 +6222,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.56,
+        "darwin": 3.04,
         "win32": 5.3
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6266,7 +6266,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23.85,
+        "darwin": 42.03,
         "win32": 114.52
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6327,7 +6327,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 11.62,
+        "darwin": 12.4,
         "win32": 18.32
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6380,7 +6380,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.47,
+        "darwin": 2.25,
         "win32": 3.56
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6436,7 +6436,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.26,
         "win32": 0.23
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6482,7 +6482,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.4,
+        "darwin": 0.93,
         "win32": 1.97
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6534,7 +6534,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.43,
+        "darwin": 0.92,
         "win32": 1.87
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6589,8 +6589,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.78,
-        "win32": 2.72
+        "darwin": 1.57,
+        "win32": 1.88
       },
       "timingBasis": "Mac native source custody, recovery and retention boundaries; Git-dependent cases use the platform tool in isolated repositories.",
       "verification": {
@@ -6637,8 +6637,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
-        "win32": 1.09
+        "darwin": 0.34,
+        "win32": 1.11
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -6680,7 +6680,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 37.08,
+        "darwin": 51.07,
         "win32": 148.49
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6740,7 +6740,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8.59,
+        "darwin": 10.93,
         "win32": 15.4
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6792,7 +6792,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.22,
+        "darwin": 0.35,
         "win32": 0.3
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -6835,8 +6835,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 28.9,
-        "win32": 72.78
+        "darwin": 34.11,
+        "win32": 108.08
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -6882,8 +6882,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 45.83,
-        "win32": 170.12
+        "darwin": 78.12,
+        "win32": 182.9
       },
       "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion.",
       "isolation": "exclusive",
@@ -6929,8 +6929,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 50.28,
-        "win32": 176.86
+        "darwin": 101.39,
+        "win32": 156.41
       },
       "timingBasis": "Split estimates from native CI 41184436954 case metrics; retain every I/O, SIGKILL and live-transaction assertion.",
       "isolation": "exclusive",
@@ -6976,8 +6976,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 35.13,
-        "win32": 156.75
+        "darwin": 66.58,
+        "win32": 224.59
       },
       "timingBasis": "Remaining four cases after native CI 41184436954 demonstrated the mixed recovery file exceeded its Windows group timeout.",
       "isolation": "exclusive",
@@ -7023,8 +7023,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 44.31,
-        "win32": 151.98
+        "darwin": 64.28,
+        "win32": 152.25
       },
       "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases.",
       "isolation": "exclusive",
@@ -7070,8 +7070,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23.1,
-        "win32": 104.03
+        "darwin": 45.85,
+        "win32": 149.79
       },
       "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases.",
       "isolation": "exclusive",
@@ -7117,8 +7117,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 39.13,
-        "win32": 209.22
+        "darwin": 77.05,
+        "win32": 128.88
       },
       "timingBasis": "Split from native CI 41186681465 case diagnostics; preserve all root conflict, candidate and kill recovery cases.",
       "isolation": "exclusive",
@@ -7164,8 +7164,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 33.09,
-        "win32": 167.42
+        "darwin": 47.94,
+        "win32": 136.39
       },
       "timingBasis": "Three CLI/launcher policy cases retained after splitting the mixed Windows group observed in CI 41186681465.",
       "isolation": "exclusive",
@@ -7211,8 +7211,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32.53,
-        "win32": 103.31
+        "darwin": 58.67,
+        "win32": 183.22
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -7254,8 +7254,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1,
+        "darwin": 0.25,
+        "win32": 0.31,
         "linux": 1
       },
       "verification": {
@@ -7294,8 +7294,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1,
+        "darwin": 0.35,
+        "win32": 0.25,
         "linux": 1
       },
       "verification": {
@@ -7333,8 +7333,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1,
+        "darwin": 0.22,
+        "win32": 0.52,
         "linux": 1
       },
       "verification": {
@@ -7382,7 +7382,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.93,
+        "darwin": 1.67,
         "win32": 2.38
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7430,7 +7430,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.27,
+        "darwin": 0.45,
         "win32": 0.63
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7482,7 +7482,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.58,
+        "darwin": 4.03,
         "win32": 2.34
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7539,7 +7539,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.71,
+        "darwin": 19.05,
         "win32": 2.13
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7592,7 +7592,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.72,
+        "darwin": 7.75,
         "win32": 13.63
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7640,8 +7640,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 47.23,
-        "win32": 157.48
+        "darwin": 67.57,
+        "win32": 307.06
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -7696,7 +7696,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
+        "darwin": 0.19,
         "win32": 0.66
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7743,8 +7743,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.99,
-        "win32": 4.53
+        "darwin": 4.41,
+        "win32": 5.82
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -7791,8 +7791,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.71,
-        "win32": 4.29
+        "darwin": 3.65,
+        "win32": 5.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -7833,7 +7833,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23.33,
+        "darwin": 33.34,
         "win32": 138.09
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7893,8 +7893,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.58,
-        "win32": 1.33
+        "darwin": 1.02,
+        "win32": 1.23
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -7941,7 +7941,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
+        "darwin": 0.17,
         "win32": 0.23
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -7988,8 +7988,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
-        "win32": 0.31
+        "darwin": 0.3,
+        "win32": 0.28
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -8035,8 +8035,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
-        "win32": 0.25
+        "darwin": 0.26,
+        "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -8081,8 +8081,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8.87,
-        "win32": 8.04
+        "darwin": 53.83,
+        "win32": 71.49
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -8116,8 +8116,8 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1
+        "darwin": 0.37,
+        "win32": 1.02
       },
       "timingBasis": "Initial estimate; verifies canonical loopback URL, persisted port policy and macOS socket job serialization.",
       "verification": {
@@ -8166,7 +8166,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.55,
+        "darwin": 4.2,
         "win32": 4.73
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8219,7 +8219,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.42,
+        "darwin": 6.47,
         "win32": 1
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8273,7 +8273,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.49,
+        "darwin": 10.81,
         "win32": 1.15
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8319,7 +8319,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 24.32,
+        "darwin": 32.26,
         "win32": 57.71
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8362,7 +8362,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.42,
+        "darwin": 0.45,
         "win32": 0.45
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8398,7 +8398,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.22,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8435,7 +8435,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.13,
+        "darwin": 0.23,
         "win32": 0.23
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8472,7 +8472,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
+        "darwin": 0.34,
         "win32": 0.28
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8508,7 +8508,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.3,
         "win32": 0.18
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8545,7 +8545,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.27,
         "win32": 0.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8583,7 +8583,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.23,
+        "darwin": 0.39,
         "win32": 0.3
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8657,7 +8657,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.47,
+        "darwin": 0.34,
         "win32": 0.56
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8704,7 +8704,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.23,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8740,7 +8740,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
+        "darwin": 0.15,
         "win32": 0.26
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8777,7 +8777,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.19,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8814,7 +8814,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.4,
         "win32": 0.34
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8853,7 +8853,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.28,
         "win32": 0.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8889,7 +8889,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.15,
+        "darwin": 0.2,
         "win32": 0.26
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8963,7 +8963,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.3,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -8999,7 +8999,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.23,
+        "darwin": 0.27,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9036,7 +9036,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.27,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9072,7 +9072,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.37,
+        "darwin": 0.24,
         "win32": 0.28
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9109,7 +9109,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.22,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9145,7 +9145,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.32,
         "win32": 0.31
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9181,7 +9181,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.14,
+        "darwin": 0.23,
         "win32": 0.32
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9218,7 +9218,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.27,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9254,7 +9254,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.24,
         "win32": 0.27
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9291,7 +9291,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
+        "darwin": 0.27,
         "win32": 0.24
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9363,7 +9363,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.16,
+        "darwin": 0.19,
         "win32": 0.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9399,7 +9399,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.17,
+        "darwin": 0.33,
         "win32": 0.25
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9437,7 +9437,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
+        "darwin": 0.23,
         "win32": 0.29
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -9480,8 +9480,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 54.72,
-        "win32": 187.64
+        "darwin": 98.66,
+        "win32": 426.62
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -9527,8 +9527,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 28.52,
-        "win32": 99.69
+        "darwin": 50.87,
+        "win32": 189.13
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -9574,8 +9574,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 43.83,
-        "win32": 166.58
+        "darwin": 78.73,
+        "win32": 308.7
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -9625,8 +9625,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 41.45,
-        "win32": 151.56
+        "darwin": 69.54,
+        "win32": 259.85
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -9671,8 +9671,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 24.37,
-        "win32": 104.13
+        "darwin": 29.16,
+        "win32": 116.02
       },
       "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
       "isolation": "exclusive",
@@ -9710,7 +9710,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "win32": 0.68
+        "win32": 0.71
       },
       "timingBasis": "Scheduling estimate for a native fixture containment fault injection; not a measured CI duration.",
       "verification": {
@@ -9755,7 +9755,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.19,
+        "darwin": 0.51,
         "win32": 0.56
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
@@ -9797,7 +9797,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.09,
+        "darwin": 0.17,
         "win32": 0.19
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
@@ -9832,7 +9832,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.06,
+        "darwin": 0.15,
         "win32": 0.15
       },
       "timingBasis": "Conservative planning estimate for new local tests; macOS targeted run ~50 ms, Windows not yet measured.",
@@ -9871,8 +9871,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 1.57
+        "darwin": 2.17,
+        "win32": 4.09
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
       "verification": {
@@ -9964,8 +9964,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 35,
-        "win32": 125,
+        "darwin": 36.12,
+        "win32": 88.42,
         "linux": 45
       },
       "verification": {
@@ -10024,8 +10024,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 30,
-        "win32": 100,
+        "darwin": 18.32,
+        "win32": 62.85,
         "linux": 40
       },
       "verification": {
@@ -10084,8 +10084,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 19.87,
-        "win32": 65.64,
+        "darwin": 27.85,
+        "win32": 126.63,
         "linux": 20
       },
       "verification": {
@@ -10136,8 +10136,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 26.79,
-        "win32": 130.23,
+        "darwin": 38.14,
+        "win32": 142.63,
         "linux": 1
       },
       "verification": {
@@ -10183,7 +10183,7 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.3,
+        "darwin": 0.29,
         "win32": 0.5
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -10224,8 +10224,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30,
-        "win32": 100
+        "darwin": 25.54,
+        "win32": 66.35
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -10279,8 +10279,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 25,
-        "win32": 100
+        "darwin": 34.65,
+        "win32": 73.84
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -10327,8 +10327,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 6,
-        "win32": 10
+        "darwin": 2.43,
+        "win32": 3.99
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -10381,7 +10381,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.99,
+        "darwin": 6.85,
         "win32": 4.53
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -10431,8 +10431,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 10,
-        "win32": 30
+        "darwin": 22.81,
+        "win32": 110.11
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
@@ -10483,8 +10483,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 3
+        "darwin": 0.48,
+        "win32": 1.49
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -10541,7 +10541,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.21,
         "win32": 2
       },
       "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
@@ -10602,7 +10602,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.44,
         "win32": 2
       },
       "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
@@ -10660,8 +10660,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.4,
-        "win32": 3
+        "darwin": 3.4,
+        "win32": 5.92
       },
       "timingBasis": "Local macOS targeted run, Windows estimate; no Windows execution claimed.",
       "verification": {
@@ -10710,8 +10710,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 120,
-        "win32": 400,
+        "darwin": 90.15,
+        "win32": 113.08,
         "linux": 120
       },
       "timingBasis": "Ownership/rollback first scenario measured 156.2 seconds on Windows in run 44781528373; migration/live-service protection retain conservative allowance.",
@@ -10761,8 +10761,8 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 120,
-        "win32": 430,
+        "darwin": 52.05,
+        "win32": 162.52,
         "linux": 120
       },
       "timingBasis": "Three crash points measured 103.6–107.5 seconds each on Windows in run 44781528373; concurrent-edit recovery adds a conservative allowance.",
@@ -10828,8 +10828,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2
+        "darwin": 1.0,
+        "win32": 1.2
       },
       "timingBasis": "Conservative estimate for bounded protocol/planner filesystem fixtures.",
       "verification": {
@@ -10877,8 +10877,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2
+        "darwin": 2.21,
+        "win32": 4.95
       },
       "timingBasis": "Local darwin-arm64 targeted run below one second; conservative Windows estimate, not native Windows proof.",
       "verification": {
@@ -10958,7 +10958,10 @@
         ".gitignore",
         ".gitattributes",
         "README.md"
-      ]
+      ],
+      "seconds": {
+        "darwin": 2.72
+      }
     },
     {
       "id": "core:task-capture-correctness",
@@ -11014,7 +11017,11 @@
         ".gitignore",
         ".gitattributes",
         "README.md"
-      ]
+      ],
+      "seconds": {
+        "darwin": 1.6,
+        "win32": 3.99
+      }
     },
     {
       "id": "core:task-route-compatibility",
@@ -11070,7 +11077,11 @@
         ".gitignore",
         ".gitattributes",
         "README.md"
-      ]
+      ],
+      "seconds": {
+        "darwin": 2.15,
+        "win32": 4.11
+      }
     },
     {
       "id": "core:project-governance",
@@ -11107,8 +11118,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.4,
-        "win32": 4
+        "darwin": 4.86,
+        "win32": 9.05
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
       "verification": {
@@ -11170,8 +11181,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.4,
-        "win32": 4
+        "darwin": 3.4,
+        "win32": 9.4
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
       "verification": {
@@ -11225,7 +11236,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.34,
+        "darwin": 2.8,
         "win32": 4
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
@@ -11278,8 +11289,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.4,
-        "win32": 4
+        "darwin": 1.88,
+        "win32": 4.16
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
       "verification": {
@@ -11339,8 +11350,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.4,
-        "win32": 4
+        "darwin": 6.32,
+        "win32": 8.7
       },
       "timingBasis": "Conservative planning estimate for new local tests; Windows not yet measured.",
       "verification": {
@@ -11401,8 +11412,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
-        "win32": 15
+        "darwin": 6.23,
+        "win32": 8.06
       },
       "timingBasis": "Conservative estimate for directory reconciliation tests; native timing not yet measured.",
       "verification": {
@@ -11450,7 +11461,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.18,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11486,7 +11497,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.21,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11526,7 +11537,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2.02,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11564,7 +11575,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.15,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11599,7 +11610,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
+        "darwin": 0.15,
         "win32": 0.2
       },
       "timingBasis": "Conservative planning estimate for injected file-action model tests; not a measured cross-platform result.",
@@ -11634,7 +11645,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.15,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11673,7 +11684,7 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.48,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11711,7 +11722,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.24,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11747,7 +11758,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.19,
         "win32": 4
       },
       "timingBasis": "Conservative estimate for newly registered tests; native timing not yet measured.",
@@ -11786,8 +11797,8 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2,
+        "darwin": 0.85,
+        "win32": 0.98,
         "linux": 1
       },
       "timingBasis": "Conservative estimate for configuration snapshot regression; native timings not yet measured.",
@@ -11838,8 +11849,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 39.94,
+        "win32": 58.31,
         "linux": 20
       },
       "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
@@ -11892,8 +11903,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 6.14,
+        "win32": 25.3,
         "linux": 20
       },
       "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
@@ -11945,7 +11956,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
+        "darwin": 21.19,
         "win32": 30
       },
       "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
@@ -11998,8 +12009,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 9.37,
+        "win32": 28.7,
         "linux": 20
       },
       "timingBasis": "Conservative initial estimate; local targeted tests recorded separately.",
@@ -12053,8 +12064,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2
+        "darwin": 2.17,
+        "win32": 4.93
       },
       "timingBasis": "macOS Node 24 targeted execution under one second; Windows estimate, not validated.",
       "verification": {
@@ -12104,8 +12115,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 6.55,
+        "win32": 11.39,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12156,8 +12167,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 0.61,
+        "win32": 1.04,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12227,8 +12238,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 2.25,
+        "win32": 2.9,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12279,8 +12290,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 0.67,
+        "win32": 1.03,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12331,8 +12342,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 1.53,
+        "win32": 1.96,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12380,8 +12391,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 1.13,
+        "win32": 2.24,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12429,8 +12440,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 2.23,
+        "win32": 2.66,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12467,8 +12478,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.31,
-        "win32": 0.42
+        "darwin": 0.49,
+        "win32": 0.53
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
@@ -12514,8 +12525,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 20,
-        "win32": 30,
+        "darwin": 4.38,
+        "win32": 5.88,
         "linux": 20
       },
       "timingBasis": "Conservative declaration; only actual local execution is reported as passed.",
@@ -12574,8 +12585,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 12
+        "darwin": 1.25,
+        "win32": 2.58
       },
       "timingBasis": "Initial conservative estimate for file API tests; native timings will be recorded by the test runner.",
       "verification": {
@@ -12626,7 +12637,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 0.24,
         "win32": 12
       },
       "timingBasis": "Initial conservative estimate for file API tests; native timings will be recorded by the test runner.",
@@ -12678,8 +12689,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 10,
-        "win32": 25
+        "darwin": 4.94,
+        "win32": 14.75
       },
       "timingBasis": "macOS ARM64 local observed approximately 8 seconds; Windows estimate, not yet measured.",
       "verification": {
@@ -12725,7 +12736,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.3,
+        "darwin": 0.17,
         "win32": 0.5
       },
       "timingBasis": "Conservative estimate for pure UI policy and public compatibility gates; replace with native observations when available.",
@@ -12761,7 +12772,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
+        "darwin": 0.23,
         "win32": 0.4
       },
       "timingBasis": "Conservative estimate for deterministic module-map generation and incomplete-closure checks.",
@@ -12802,8 +12813,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.5,
-        "win32": 1
+        "darwin": 0.38,
+        "win32": 0.66
       },
       "timingBasis": "Conservative estimate for isolated on-disk asset closure and bootstrap integrity fixtures.",
       "verification": {
@@ -12839,8 +12850,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4
+        "darwin": 0.74,
+        "win32": 1.12
       },
       "timingBasis": "Conservative estimate for real isolated package install/launch compatibility and preserved legacy access.",
       "verification": {
@@ -12877,8 +12888,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 10
+        "darwin": 4.68,
+        "win32": 6.57
       },
       "timingBasis": "Conservative estimate for durable multi-snapshot staging, CAS, registry-lock races, qualification gates and client/GC fixtures.",
       "verification": {
@@ -12915,8 +12926,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 6
+        "darwin": 1.27,
+        "win32": 2.76
       },
       "timingBasis": "Conservative estimate for first selection, next-document upgrades, persistent rollback and damaged-candidate/old-client fixtures.",
       "verification": {
@@ -12958,8 +12969,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 10
+        "darwin": 2.28,
+        "win32": 5.93
       },
       "timingBasis": "Conservative estimate for actual loopback server, private document leases, CSP, old/new snapshot routing, HTTP CAS and standalone recovery.",
       "verification": {
@@ -13006,8 +13017,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2
+        "darwin": 1.0,
+        "win32": 0.72
       },
       "timingBasis": "Conservative initial estimate; includes actual isolated configuration and durable application-storage services.",
       "verification": {
@@ -13047,8 +13058,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 3
+        "darwin": 0.32,
+        "win32": 0.52
       },
       "timingBasis": "Initial estimate for dual adapter fault/race tests and actual temporary durable AI service integration.",
       "verification": {
@@ -13094,8 +13105,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 3
+        "darwin": 0.47,
+        "win32": 0.58
       },
       "timingBasis": "Initial measured local recovery/close checks with actual managed session storage and actual isolated AI queue; executor explicitly injected.",
       "verification": {
@@ -13139,8 +13150,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 10,
-        "win32": 20
+        "darwin": 5.2,
+        "win32": 8.88
       },
       "timingBasis": "Conservative initial estimate after source inspection; no Windows execution is implied by declaration.",
       "verification": {
@@ -13176,7 +13187,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.23,
         "win32": 1
       },
       "timingBasis": "Conservative initial estimate for pure in-memory icon catalog projection.",
@@ -13210,8 +13221,8 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1
+        "darwin": 0.19,
+        "win32": 0.22
       },
       "timingBasis": "Conservative initial estimate; local PNG/JPEG listing byte and extension checks.",
       "verification": {
@@ -13244,7 +13255,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.22,
         "win32": 1
       },
       "timingBasis": "Initial estimate for pure ownership/close-event stack logic.",
@@ -13281,7 +13292,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.28,
         "win32": 1
       },
       "timingBasis": "Initial estimate for pure ownership/close-event stack logic.",
@@ -13315,7 +13326,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.2,
         "win32": 1
       },
       "timingBasis": "Initial conservative estimate for existing pure corner projection and bounded transform geometry cases.",
@@ -13352,7 +13363,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.26,
         "win32": 1
       },
       "timingBasis": "Conservative estimate for two-phase reload state and race tests.",
@@ -13394,8 +13405,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4
+        "darwin": 0.37,
+        "win32": 0.25
       },
       "timingBasis": "Conservative estimate for immutable managed window checkpoint files and symlink/receipt cases.",
       "verification": {
@@ -13438,8 +13449,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4
+        "darwin": 0.89,
+        "win32": 1.48
       },
       "timingBasis": "Conservative estimate for independent qualification files and real product runtime gates.",
       "verification": {
@@ -13475,7 +13486,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.18,
         "win32": 1
       },
       "timingBasis": "Numeric draft/commit, owner-bound placement and stable menu identity/typeahead cases.",
@@ -13517,7 +13528,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.16,
         "win32": 1
       },
       "timingBasis": "Split minima, stable selection, Unicode truncation and public resource version boundaries.",
@@ -13561,7 +13572,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.2,
         "win32": 1
       },
       "timingBasis": "Locked source drift fails closed; D3 CSSOM preserves attribute semantics. Real diagrams and strict CSP are checked in a production browser.",
@@ -13599,7 +13610,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.24,
         "win32": 1
       },
       "timingBasis": "Owner, IME, repeated Escape and late pointer completion at the host geometry/SDK overlay boundary.",
@@ -13635,7 +13646,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.26,
         "win32": 1
       },
       "timingBasis": "Serial file intents, original unknown operation identity and authoritative receipt matching.",
@@ -13673,7 +13684,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.28,
         "win32": 1
       },
       "timingBasis": "Immutable draft/answer snapshots and independent execution, connection, stop and result axes.",
@@ -13709,7 +13720,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.23,
         "win32": 1
       },
       "timingBasis": "Literal property compatibility with current governance records; preserves unknown fields and independent completion/evidence, with a guard against retired private UI files.",
@@ -13744,7 +13755,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
+        "darwin": 0.26,
         "win32": 0.3
       },
       "timingBasis": "Initial local direct model check; native timings to be observed.",
@@ -13779,7 +13790,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.2,
+        "darwin": 0.35,
         "win32": 0.3
       },
       "timingBasis": "Initial local direct model check; native timings to be observed.",
@@ -13821,8 +13832,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 4
+        "darwin": 1.16,
+        "win32": 1.27
       },
       "timingBasis": "Initial estimate for open SDK retirement regression; actual native receipt recorded separately.",
       "verification": {
@@ -13865,8 +13876,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.5,
-        "win32": 1
+        "darwin": 0.18,
+        "win32": 0.19
       },
       "timingBasis": "Initial estimate for open SDK retirement regression; actual native receipt recorded separately.",
       "verification": {
@@ -13909,8 +13920,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 3
+        "darwin": 1.37,
+        "win32": 0.92
       },
       "timingBasis": "Actual locked Vite SSR rendering and local package build; declared estimates, not Windows acceptance.",
       "verification": {
@@ -13956,7 +13967,7 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.4,
         "win32": 1
       },
       "timingBasis": "Pure palette, generated artifact, contrast and mocked host-subscription logic; estimates are not Windows acceptance.",
@@ -13999,8 +14010,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
-        "win32": 3
+        "darwin": 1.08,
+        "win32": 1.43
       },
       "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
       "verification": {
@@ -14046,8 +14057,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 25,
-        "win32": 65
+        "darwin": 46.09,
+        "win32": 105.2
       },
       "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
       "verification": {
@@ -14097,8 +14108,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 30,
-        "win32": 90
+        "darwin": 34.74,
+        "win32": 88.3
       },
       "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
       "verification": {
@@ -14148,8 +14159,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 30,
-        "win32": 90
+        "darwin": 28.81,
+        "win32": 69.5
       },
       "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
       "verification": {
@@ -14199,8 +14210,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 30,
-        "win32": 90
+        "darwin": 28.78,
+        "win32": 49.8
       },
       "timingBasis": "Split real compiler and isolated filesystem scenarios after native CI timeouts; conservative per-group estimates, not hosted verification.",
       "verification": {
@@ -14249,8 +14260,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 8
+        "darwin": 29.36,
+        "win32": 45.59
       },
       "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
       "verification": {
@@ -14299,8 +14310,8 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
-        "win32": 12
+        "darwin": 55.38,
+        "win32": 79.33
       },
       "timingBasis": "Locked Vite rendering and ordinary application package build; estimates do not represent Windows acceptance.",
       "verification": {
@@ -14352,7 +14363,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.21,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14394,7 +14405,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.22,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14436,7 +14447,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.2,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14478,7 +14489,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.24,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14520,7 +14531,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.16,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14568,8 +14579,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 25
+        "darwin": 1.04,
+        "win32": 0.95
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -14610,7 +14621,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.21,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14652,7 +14663,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.34,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14700,8 +14711,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 25
+        "darwin": 2.57,
+        "win32": 2.92
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -14742,7 +14753,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.21,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14784,7 +14795,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.23,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14826,7 +14837,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.33,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14868,7 +14879,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.16,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14910,7 +14921,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.22,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -14958,8 +14969,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 25
+        "darwin": 1.48,
+        "win32": 1.1
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -15006,8 +15017,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 25
+        "darwin": 0.85,
+        "win32": 0.92
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -15054,8 +15065,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 60,
-        "win32": 90
+        "darwin": 3.78,
+        "win32": 2.88
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -15102,8 +15113,8 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 25
+        "darwin": 0.89,
+        "win32": 0.6
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
       "verification": {
@@ -15144,7 +15155,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.22,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -15186,7 +15197,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.19,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -15228,7 +15239,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.18,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -15270,7 +15281,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.2,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -15312,7 +15323,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 0.14,
         "win32": 2
       },
       "timingBasis": "Conservative registration estimates for existing SDK tests; this does not claim Windows execution.",
@@ -15348,7 +15359,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.03,
+        "darwin": 0.24,
         "win32": 0.03
       },
       "timingBasis": "Initial local estimate; refresh from observed run.",
@@ -15385,7 +15396,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.04,
+        "darwin": 0.28,
         "win32": 0.04
       },
       "timingBasis": "Initial local estimate; refresh from observed run.",
@@ -15420,7 +15431,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
+        "darwin": 0.13,
         "win32": 0.2
       },
       "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
@@ -15454,7 +15465,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
+        "darwin": 0.19,
         "win32": 0.2
       },
       "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
@@ -15488,7 +15499,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
+        "darwin": 0.14,
         "win32": 0.2
       },
       "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
@@ -15522,7 +15533,7 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.1,
+        "darwin": 0.15,
         "win32": 0.2
       },
       "timingBasis": "Conservative planning estimate for existing pure model tests; not a measured cross-platform result.",
@@ -15541,6 +15552,6 @@
     "historicalCI": "41409410844",
     "testedHead": "c14beb32105f324a0c4ef13115d9b6e2cc36445d",
     "equivalentMergedTree": "a4c0d4f19149a1a12dfce661edecc648fb78339e",
-    "note": "Historical file durations for scheduling only. Extracted files use conservative estimates; run receipts record actual fixture/preparation/test time."
+    "note": "Scheduling estimates updated from successful Verify Core run 45221092287: xcode-27 ARM64 and Windows 2025 x64; Linux estimates unchanged. Actual receipts, including fixture preparation, remain authoritative."
   }
 }

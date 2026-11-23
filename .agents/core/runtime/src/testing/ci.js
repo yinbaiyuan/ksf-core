@@ -99,6 +99,9 @@ export function aggregateReports(root,reports,{full=true,proofPath,summaryPath})
  writeFileSync(proofPath,JSON.stringify(proof,null,2)+'\n');return proof;
 }
 export function trustedRun(run,repo,sha){return run?.conclusion==='success'&&run.head_sha===sha&&run.head_branch==='core-main'&&run.head_repository?.full_name===repo&&run.path==='.github/workflows/check.yml'&&['push','workflow_dispatch'].includes(run.event);}
+// Pin the REST representation used for merge_commit_sha. Later API versions
+// omit it; discovery and independent provenance verification must use the same
+// explicit representation rather than silently falling back to duplicate CI.
 // A PR receipt is eligible only after the API confirms that this exact,
 // same-repository head was merged into the final commit being checked. Input
 // identity below still covers every source, workflow, test and runtime byte.
@@ -118,11 +121,12 @@ export function validateProof(root,proof,run,pull,testedCommit){
 }
 export async function findProof(root,{requester}={}){
  const repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA,token=process.env.GITHUB_TOKEN;
- const request=requester??(async path=>{const response=await fetch('https://api.github.com'+path,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Actions API '+response.status);return response;});
+ const request=requester??(async path=>{const response=await fetch('https://api.github.com'+path,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Actions API '+response.status);return response;});
  const select=async candidates=>{
   for(const run of candidates){
    const artifacts=await(await request(`/repos/${repo}/actions/runs/${run.id}/artifacts`)).json(),matches=artifacts.artifacts?.filter(a=>a.name.startsWith('suite-proof-')&&!a.expired)??[];
    if(matches.length!==1)continue;
+   process.stdout.write(`Found complete proof artifact ${matches[0].id} from run ${run.id}.\n`);
    appendFileSync(process.env.GITHUB_OUTPUT,`candidate=${matches[0].id}\nrun=${run.id}\n`);return true;
   }
   return false;
@@ -133,6 +137,7 @@ export async function findProof(root,{requester}={}){
   const pulls=await(await request(`/repos/${repo}/commits/${sha}/pulls`)).json();
   for(const summary of pulls){
    const pull=await(await request(`/repos/${repo}/pulls/${summary.number}`)).json();
+   if(pull.merged&&typeof pull.merge_commit_sha!=='string')throw Error('Pinned pull-request representation is missing merge_commit_sha');
    if(!pull.merged||pull.merge_commit_sha!==sha||pull.head?.repo?.full_name!==repo)continue;
    const prior=await(await request(`/repos/${repo}/actions/runs?head_sha=${pull.head.sha}&status=success&per_page=30`)).json();
    if(await select((prior.workflow_runs??[]).filter(run=>trustedMergedPullRun(run,pull,repo,sha))))return;
@@ -142,7 +147,7 @@ export async function findProof(root,{requester}={}){
 }
 export async function verifyProofCandidate(root,proof,runId,{requester}={}){
  const repo=process.env.GITHUB_REPOSITORY,sha=process.env.GITHUB_SHA;
- const get=requester??(async path=>{const response=await fetch(`https://api.github.com/repos/${repo}/${path}`,{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Proof provenance unavailable');return response.json();});
+ const get=requester??(async path=>{const response=await fetch(`https://api.github.com/repos/${repo}/${path}`,{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Proof provenance unavailable');return response.json();});
  if(!/^[a-f0-9]{40}$/.test(proof?.commit??'')||!/^\d+$/.test(String(runId)))fail('TEST_PROOF_INVALID','Invalid tested commit or run.');
  const run=await get(`actions/runs/${runId}`);let pull;
  if(run.event==='pull_request'){

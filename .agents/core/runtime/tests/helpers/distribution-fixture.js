@@ -119,7 +119,7 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
   git(root, ['config', 'user.name', 'KSF Fixture']); git(root, ['config', 'user.email', 'fixture@example.invalid']);
   git(root, ['config', 'commit.gpgsign', 'false']);
   git(root, ['add', '.agents', 'AGENTS.md', '.gitignore']); git(root,['update-index','--chmod=+x','.agents/ksf']); git(root, ['commit', '-m', 'Fictional clean Core source']);
-  const first = await buildRelease({ root, platform:fixtureTarget, output: join(directory, 'release-0.1.0') });
+  const first = await buildRelease({ root, platform:fixtureTarget, output: join(directory, 'release-0.1.0') },{durableInstance:false});
   const workspace = join(directory, 'ksf'); cpSync(first.template, workspace, { recursive: true });
   if (!compact) embedReceiptBaseline(workspace, first);
   return { directory, root, workspace, first, build, originals, legacyEntry };

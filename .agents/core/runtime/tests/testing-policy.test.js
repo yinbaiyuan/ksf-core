@@ -263,6 +263,32 @@ test('proof lookup reconciles a merged PR when GitHub clears the run pull-reques
  responses['commits/final/pulls']=[];
  await assert.rejects(verifyProofCandidate(f.root,proof,7,{requester:get}),{code:'TEST_PROOF_INVALID'});
 });
+test('real proof transports pin the PR representation used by merge provenance',async t=>{
+ const f=fixture(t),plan=makePlan(f),proof=validateLayeredCoverage(f.root,reportsFor(plan),plan,sourceIdentity(f.root));
+ const prior={...process.env},priorFetch=globalThis.fetch,output=join(f.root,'transport-outputs');
+ Object.assign(process.env,{GITHUB_REPOSITORY:'official/core',GITHUB_SHA:'final',GITHUB_OUTPUT:output,GITHUB_TOKEN:'fictional-token'});
+ t.after(()=>{globalThis.fetch=priorFetch;for(const key of ['GITHUB_REPOSITORY','GITHUB_SHA','GITHUB_OUTPUT','GITHUB_TOKEN'])if(prior[key]===undefined)delete process.env[key];else process.env[key]=prior[key];});
+ Object.assign(proof,{repository:'official/core',commit:'a'.repeat(40),runId:'7',runAttempt:'2'});
+ const run={id:7,run_attempt:2,conclusion:'success',head_sha:'head',head_repository:{full_name:'official/core'},path:'.github/workflows/check.yml',event:'pull_request'};
+ const pull={number:9,merged:true,merge_commit_sha:'final',head:{sha:'head',repo:{full_name:'official/core'}},base:{ref:'core-main',repo:{full_name:'official/core'}}};
+ const responses={
+  'actions/runs?head_sha=final&status=success&per_page=30':{workflow_runs:[]},'commits/final/pulls':[{number:9}], 'pulls/9':pull,
+  'actions/runs?head_sha=head&status=success&per_page=30':{workflow_runs:[run]},'actions/runs/7/artifacts':{artifacts:[{id:17,name:'suite-proof-'+proof.commit,expired:false}]},
+  'actions/runs/7':run,['commits/'+proof.commit]:{sha:proof.commit,parents:[{sha:'base'},{sha:'head'}]},
+ };
+ let calls=0;
+ globalThis.fetch=async(url,options)=>{
+  assert.equal(options.headers['X-GitHub-Api-Version'],'2022-11-28');
+  assert.equal(options.headers.Authorization,'Bearer fictional-token');
+  const path=url.replace('https://api.github.com/repos/official/core/','');assert.ok(Object.hasOwn(responses,path),path);calls++;
+  return new Response(JSON.stringify(responses[path]));
+ };
+ await findProof(f.root);assert.equal(readFileSync(output,'utf8'),'candidate=17\nrun=7\n');
+ assert.equal(await verifyProofCandidate(f.root,proof,7),true);assert.equal(calls,9);
+ // A representation that drops the merge SHA can never become valid proof.
+ delete pull.merge_commit_sha;
+ await assert.rejects(verifyProofCandidate(f.root,proof,7),{code:'TEST_PROOF_INVALID'});
+});
 test('seed copies keep files and Git histories independent and mutation changes their digest',t=>{
   const root=mkdtempSync(join(tmpdir(),'ksf-seed-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
   const seed=join(root,'seed');mkdirSync(join(seed,'.git/objects'),{recursive:true});writeFileSync(join(seed,'.git/objects/original'),'git object');writeFileSync(join(seed,'business.txt'),'original');
