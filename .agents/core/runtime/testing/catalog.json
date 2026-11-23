@@ -509,10 +509,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 15.53,
-        "win32": 19.78
+        "darwin": 21,
+        "win32": 53
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -555,10 +555,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.36,
-        "win32": 0.45
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -677,10 +677,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9.03,
-        "win32": 9.72
+        "darwin": 8,
+        "win32": 10
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -928,10 +928,10 @@
       ],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 0.47
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -967,10 +967,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.18,
-        "win32": 0.25
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1145,10 +1145,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.65,
-        "win32": 0.82
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1193,10 +1193,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.75,
-        "win32": 6.42
+        "darwin": 2,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1244,10 +1244,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.65,
-        "win32": 2.16
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1444,10 +1444,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.16,
-        "win32": 6.42
+        "darwin": 3,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1554,10 +1554,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.04,
-        "win32": 12.26
+        "darwin": 5,
+        "win32": 8
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1612,10 +1612,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.7,
-        "win32": 8.95
+        "darwin": 4,
+        "win32": 19
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1773,10 +1773,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.48,
-        "win32": 0.84
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1820,10 +1820,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.03,
-        "win32": 6.31
+        "darwin": 4,
+        "win32": 4
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1870,10 +1870,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.7,
-        "win32": 7.83
+        "darwin": 4,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2044,10 +2044,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.42,
-        "win32": 7.35
+        "darwin": 4,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2197,10 +2197,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 8.62,
-        "win32": 19.16
+        "darwin": 7,
+        "win32": 18
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2294,11 +2294,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 66.38,
-        "win32": 119.46,
+        "darwin": 71,
+        "win32": 102,
         "linux": 55.32
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2342,9 +2342,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 16.11
+        "win32": 20
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2379,11 +2379,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9.45,
+        "darwin": 9,
         "win32": 150,
         "linux": 2.34
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2418,11 +2418,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30.89,
-        "win32": 25.21,
+        "darwin": 18,
+        "win32": 41,
         "linux": 25.99
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2470,10 +2470,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.65,
-        "win32": 25.15
+        "darwin": 13,
+        "win32": 24
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2835,11 +2835,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.0,
-        "win32": 2.24,
+        "darwin": 2,
+        "win32": 3,
         "linux": 1.64
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2874,10 +2874,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 0.74,
-        "win32": 1.4
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2976,10 +2976,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.04,
-        "win32": 5.53
+        "darwin": 4,
+        "win32": 6
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3077,10 +3077,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.12,
-        "win32": 5.46
+        "darwin": 2,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -3116,10 +3116,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 14.13,
-        "win32": 26.42
+        "darwin": 12,
+        "win32": 25
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3472,11 +3472,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 57.76,
-        "win32": 167.26,
+        "darwin": 54,
+        "win32": 184,
         "linux": 31.17
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -3532,11 +3532,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 10.77,
-        "win32": 14.42,
+        "darwin": 11,
+        "win32": 12,
         "linux": 7.34
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4123,10 +4123,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 1.04,
-        "win32": 3.11
+        "darwin": 2,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4172,10 +4172,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.01,
-        "win32": 21.48
+        "darwin": 3,
+        "win32": 23
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4406,11 +4406,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.23,
-        "win32": 2.02,
+        "darwin": 2,
+        "win32": 2,
         "linux": 0.9
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4456,10 +4456,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.32,
-        "win32": 7.58
+        "darwin": 4,
+        "win32": 9
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4510,10 +4510,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.93,
-        "win32": 5.05
+        "darwin": 3,
+        "win32": 4
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4566,10 +4566,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.98,
-        "win32": 8.54
+        "darwin": 6,
+        "win32": 9
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4608,10 +4608,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18.9,
-        "win32": 39.8
+        "darwin": 27,
+        "win32": 45
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4650,10 +4650,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18.17,
-        "win32": 63.12
+        "darwin": 26,
+        "win32": 58
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4866,10 +4866,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7.1,
+        "darwin": 8,
         "win32": 8.16
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
@@ -5083,9 +5083,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0,
-        "win32": 2.03
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5120,11 +5120,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 2.07,
-        "win32": 10.5,
+        "darwin": 1,
+        "win32": 8,
         "linux": 0.36
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5161,10 +5161,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 61.89,
-        "win32": 187.69
+        "darwin": 58,
+        "win32": 138
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -5210,10 +5210,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 3.2,
-        "win32": 5.11
+        "darwin": 3,
+        "win32": 6
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5311,10 +5311,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.0,
-        "win32": 0.79
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5361,11 +5361,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.38,
-        "win32": 6.29,
+        "darwin": 6,
+        "win32": 6,
         "linux": 1.93
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5516,10 +5516,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.27,
-        "win32": 1.54
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5734,10 +5734,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.28,
-        "win32": 2.35
+        "darwin": 3,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5787,11 +5787,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.47,
-        "win32": 5.68,
+        "darwin": 1,
+        "win32": 5,
         "linux": 0.22
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5949,10 +5949,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.66,
-        "win32": 4.87
+        "darwin": 3,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6054,10 +6054,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.68,
-        "win32": 1.07
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6699,10 +6699,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.82,
+        "darwin": 1,
         "win32": 1.87
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
@@ -6754,10 +6754,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.31,
-        "win32": 3.14
+        "darwin": 2,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6802,10 +6802,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.33,
-        "win32": 1.29
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -7006,10 +7006,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 45,
-        "win32": 213.7
+        "darwin": 57,
+        "win32": 139
       },
-      "timingBasis": "Two-case local darwin validation 35.668s with margin; Windows conservatively scales the prior one-case PR37 observation for the added transaction isolation and rollback scenario. Not a measured Windows duration.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7053,10 +7053,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 71.86,
-        "win32": 195.06
+        "darwin": 46,
+        "win32": 189
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7100,10 +7100,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 87.48,
-        "win32": 209.45
+        "darwin": 86,
+        "win32": 125
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7147,10 +7147,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 92.46,
-        "win32": 187.6
+        "darwin": 83,
+        "win32": 162
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7194,10 +7194,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 77.57,
-        "win32": 165.94
+        "darwin": 40,
+        "win32": 126
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7241,10 +7241,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 40.03,
-        "win32": 57.87
+        "darwin": 32,
+        "win32": 88
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7288,10 +7288,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 75.0,
-        "win32": 171.46
+        "darwin": 46,
+        "win32": 95
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7335,10 +7335,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 62.0,
-        "win32": 143.63
+        "darwin": 59,
+        "win32": 97
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7382,10 +7382,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 53.55,
-        "win32": 155.16
+        "darwin": 48,
+        "win32": 158
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7425,8 +7425,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 0.38,
-        "win32": 0.36,
+        "darwin": 1,
+        "win32": 1,
         "linux": 0.2
       },
       "verification": {
@@ -7440,7 +7440,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:system-update-frontend-metadata",
@@ -7466,8 +7466,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 0.37,
-        "win32": 0.44,
+        "darwin": 1,
+        "win32": 1,
         "linux": 0.2
       },
       "verification": {
@@ -7481,7 +7481,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:release-files",
@@ -7506,8 +7506,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 0.49,
-        "win32": 0.88,
+        "darwin": 1,
+        "win32": 1,
         "linux": 0.3
       },
       "verification": {
@@ -7521,7 +7521,7 @@
         ".agents/core/runtime/src/platform",
         ".agents/core/runtime/src/shared"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:task-checkpoints",
@@ -7824,10 +7824,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 122.89,
-        "win32": 392.15
+        "darwin": 89,
+        "win32": 332
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7880,10 +7880,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.22,
+        "darwin": 1,
         "win32": 0.66
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "shared",
         "kind": "logic",
@@ -7927,11 +7927,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.43,
-        "win32": 6.84,
+        "darwin": 5,
+        "win32": 7,
         "linux": 2.72
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -7976,11 +7976,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.52,
-        "win32": 3.98,
+        "darwin": 5,
+        "win32": 6,
         "linux": 4.46
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8081,10 +8081,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.21,
-        "win32": 1.51
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8178,11 +8178,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.24,
-        "win32": 0.37,
+        "darwin": 1,
+        "win32": 1,
         "linux": 0.16
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8226,10 +8226,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.22,
-        "win32": 0.29
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8272,10 +8272,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 68.63,
-        "win32": 76.06
+        "darwin": 71,
+        "win32": 85
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8307,10 +8307,10 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 0.47,
-        "win32": 1.23
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -9739,10 +9739,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 44.81,
-        "win32": 122.68
+        "darwin": 51,
+        "win32": 126
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9786,10 +9786,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 35.46,
-        "win32": 142.42
+        "darwin": 51,
+        "win32": 140
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9833,10 +9833,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 19.23,
-        "win32": 73.65
+        "darwin": 17,
+        "win32": 76
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9880,10 +9880,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 64.89,
-        "win32": 284.46
+        "darwin": 86,
+        "win32": 223
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9927,10 +9927,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 92.26,
-        "win32": 295.39
+        "darwin": 68,
+        "win32": 250
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9978,10 +9978,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 63.36,
-        "win32": 197.64
+        "darwin": 52,
+        "win32": 158
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10024,10 +10024,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 36.01,
-        "win32": 86.81
+        "darwin": 26,
+        "win32": 109
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10063,9 +10063,9 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "win32": 1.03
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10230,10 +10230,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.73,
-        "win32": 7.38
+        "darwin": 3,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10327,8 +10327,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 34.92,
-        "win32": 131.67,
+        "darwin": 29,
+        "win32": 105,
         "linux": 23.62
       },
       "verification": {
@@ -10355,7 +10355,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:runtime-bundle-inspection",
@@ -10387,8 +10387,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 25.89,
-        "win32": 61.72,
+        "darwin": 26,
+        "win32": 94,
         "linux": 28.57
       },
       "verification": {
@@ -10415,7 +10415,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10447,8 +10447,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 29.79,
-        "win32": 101.82,
+        "darwin": 30,
+        "win32": 74,
         "linux": 24.53
       },
       "verification": {
@@ -10468,7 +10468,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:runtime-bundle-native",
@@ -10500,8 +10500,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 44.14,
-        "win32": 143.26,
+        "darwin": 45,
+        "win32": 200,
         "linux": 0.18
       },
       "verification": {
@@ -10520,7 +10520,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     },
     {
       "id": "core:distribution-policy",
@@ -10591,10 +10591,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 25.03,
-        "win32": 93.87
+        "darwin": 35,
+        "win32": 71
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10646,10 +10646,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 33.8,
-        "win32": 159.77
+        "darwin": 37,
+        "win32": 69
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10694,10 +10694,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 2.93,
-        "win32": 4.34
+        "darwin": 3,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -10799,10 +10799,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 25.78,
-        "win32": 76.85
+        "darwin": 26,
+        "win32": 69
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10851,10 +10851,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.76,
-        "win32": 1.65
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11032,10 +11032,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.94,
-        "win32": 6.71
+        "darwin": 3,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11082,11 +11082,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 73.75,
-        "win32": 212.33,
+        "darwin": 68,
+        "win32": 165,
         "linux": 120
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11133,11 +11133,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68.2,
-        "win32": 138.47,
+        "darwin": 67,
+        "win32": 137,
         "linux": 120
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11200,10 +11200,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.96,
-        "win32": 1.55
+        "darwin": 2,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11249,10 +11249,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.5,
-        "win32": 6.11
+        "darwin": 3,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11369,7 +11369,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11393,8 +11393,8 @@
         "README.md"
       ],
       "seconds": {
-        "darwin": 1.65,
-        "win32": 5.5
+        "darwin": 2,
+        "win32": 4
       }
     },
     {
@@ -11429,7 +11429,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11453,8 +11453,8 @@
         "README.md"
       ],
       "seconds": {
-        "darwin": 2.94,
-        "win32": 6.04
+        "darwin": 3,
+        "win32": 7
       }
     },
     {
@@ -11492,10 +11492,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6.66,
-        "win32": 11.56
+        "darwin": 6,
+        "win32": 13
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11555,10 +11555,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.97,
-        "win32": 11.28
+        "darwin": 6,
+        "win32": 11
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11665,10 +11665,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.26,
-        "win32": 3.59
+        "darwin": 3,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11726,10 +11726,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 10.19,
-        "win32": 6.7
+        "darwin": 9,
+        "win32": 12
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11788,10 +11788,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7.93,
-        "win32": 8.57
+        "darwin": 7,
+        "win32": 10
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12191,11 +12191,11 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 0.77,
-        "win32": 1.0,
+        "darwin": 1,
+        "win32": 1,
         "linux": 0.43
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -12243,11 +12243,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 29.83,
-        "win32": 70.12,
+        "darwin": 28,
+        "win32": 49,
         "linux": 21.27
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12297,11 +12297,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.72,
-        "win32": 11.53,
+        "darwin": 6,
+        "win32": 12,
         "linux": 5.25
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12405,11 +12405,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15.41,
-        "win32": 37.23,
+        "darwin": 11,
+        "win32": 39,
         "linux": 4.85
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12460,10 +12460,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.96,
-        "win32": 6.23
+        "darwin": 2,
+        "win32": 7
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12511,11 +12511,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6.46,
-        "win32": 11.57,
+        "darwin": 5,
+        "win32": 11,
         "linux": 5.19
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12563,11 +12563,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.72,
-        "win32": 1.29,
+        "darwin": 1,
+        "win32": 2,
         "linux": 0.43
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12634,11 +12634,11 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.73,
-        "win32": 3.35,
+        "darwin": 2,
+        "win32": 4,
         "linux": 1.54
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12686,11 +12686,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.81,
-        "win32": 0.96,
+        "darwin": 1,
+        "win32": 2,
         "linux": 1.09
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12738,11 +12738,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.65,
-        "win32": 2.62,
+        "darwin": 2,
+        "win32": 3,
         "linux": 1.64
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12787,11 +12787,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.99,
-        "win32": 4.14,
+        "darwin": 2,
+        "win32": 3,
         "linux": 1.1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12836,11 +12836,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.87,
-        "win32": 3.23,
+        "darwin": 2,
+        "win32": 4,
         "linux": 2.28
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12874,10 +12874,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.62,
-        "win32": 0.69
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12921,11 +12921,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4.76,
-        "win32": 6.55,
+        "darwin": 4,
+        "win32": 6,
         "linux": 3.5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12981,10 +12981,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.37,
-        "win32": 2.99
+        "darwin": 2,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13087,10 +13087,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7.06,
-        "win32": 14.35
+        "darwin": 10,
+        "win32": 19
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13215,10 +13215,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.61,
-        "win32": 0.68
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13252,10 +13252,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.98,
-        "win32": 1.02
+        "darwin": 1,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13290,10 +13290,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.98,
-        "win32": 11.05
+        "darwin": 6,
+        "win32": 11
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13328,10 +13328,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.83,
-        "win32": 3.1
+        "darwin": 2,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13371,10 +13371,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.62,
-        "win32": 6.65
+        "darwin": 4,
+        "win32": 5
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13419,10 +13419,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.04,
-        "win32": 0.73
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13460,10 +13460,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.47,
-        "win32": 0.56
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13507,10 +13507,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.6,
-        "win32": 0.75
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13552,10 +13552,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.93,
-        "win32": 8.17
+        "darwin": 5,
+        "win32": 6
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13625,10 +13625,10 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 0.22,
-        "win32": 0.25
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13817,10 +13817,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.45,
-        "win32": 0.44
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13861,10 +13861,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.77,
-        "win32": 2.42
+        "darwin": 2,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14262,10 +14262,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.86,
-        "win32": 1.49
+        "darwin": 2,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14306,10 +14306,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.21,
-        "win32": 0.24
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14350,10 +14350,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.5,
-        "win32": 1.6
+        "darwin": 2,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14442,10 +14442,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2.08,
-        "win32": 1.41
+        "darwin": 2,
+        "win32": 2
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14489,10 +14489,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 70.94,
-        "win32": 107.51
+        "darwin": 60,
+        "win32": 110
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14540,10 +14540,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 54.4,
-        "win32": 44.13
+        "darwin": 47,
+        "win32": 73
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14591,10 +14591,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 34.26,
-        "win32": 84.81
+        "darwin": 34,
+        "win32": 63
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14642,10 +14642,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 36.17,
-        "win32": 66.39
+        "darwin": 30,
+        "win32": 60
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14692,10 +14692,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 22.04,
-        "win32": 39.84
+        "darwin": 22,
+        "win32": 25
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14742,10 +14742,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 56.8,
-        "win32": 83.72
+        "darwin": 59,
+        "win32": 76
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15021,10 +15021,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.04,
-        "win32": 1.03
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15157,10 +15157,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3.98,
-        "win32": 2.77
+        "darwin": 3,
+        "win32": 3
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15425,10 +15425,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.35,
-        "win32": 1.42
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15473,10 +15473,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1.34,
-        "win32": 0.91
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15521,10 +15521,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5.51,
-        "win32": 3.84
+        "darwin": 5,
+        "win32": 4
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -15569,10 +15569,10 @@
       ],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 0.99,
-        "win32": 0.93
+        "darwin": 1,
+        "win32": 1
       },
-      "timingBasis": "Observed current-platform file durations from successful PR37 run 45247360703 (head db7670e98e8620ebe150cd117a11945f58018f10), with 15 percent scheduling margin. Estimates do not certify the next source.",
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -16106,7 +16106,7 @@
       "timeoutMs": 30000,
       "seconds": {
         "darwin": 1,
-        "win32": 2,
+        "win32": 1,
         "linux": 1
       },
       "verification": {
@@ -16118,7 +16118,7 @@
         ".agents/core/runtime/src/testing/prepared-archive.js",
         ".agents/core/distribution/repository/.github/workflows/verification-platform.yml"
       ],
-      "timingBasis": "Conservative bounded streaming roundtrip and failure-fixture estimate."
+      "timingBasis": "PR38 successful full CI 45261501873 per-file native duration plus 15 percent scheduling margin; measured independently of fixture preparation."
     }
   ],
   "timingBaseline": {

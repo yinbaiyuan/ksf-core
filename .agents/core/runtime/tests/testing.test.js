@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync, spawn } from 'node:child_process';
 import { catalogPath, loadCatalog } from '../src/testing/catalog.js';
-import { parseTestOptions, createTestPlan, assignShards } from '../src/testing/planner.js';
+import { parseTestOptions, createTestPlan, assignShards,scheduledSeconds } from '../src/testing/planner.js';
 import { executeTestPlan, testEnvironment, scheduleTests } from '../src/testing/runner.js';
 import { runTestCommand } from '../src/commands/test.js';
 import { gitBinary, nullDevice } from './helpers/platform.js';
@@ -142,4 +142,14 @@ test('cancellation reports unexecuted scope and kills this run’s children', as
   // Reaping an already killed grandchild may be asynchronous on POSIX.
   for(let i=0;i<40;i++){try{process.kill(grandchild,0);await new Promise(r=>setTimeout(r,25));}catch{break;}}
   assert.throws(()=>process.kill(grandchild,0));
+});
+
+test('shard estimates honor exclusive barriers and overlapping ordinary files',()=>{
+ const item=(id,seconds,isolation='shared')=>({id,path:id,isolation,seconds:{darwin:seconds}});
+ const files=[item('a',100,'exclusive'),item('b',90,'exclusive'),item('c',80),item('d',70),item('e',60,'exclusive'),item('f',50),item('g',40),item('h',30)];
+ const old=[[],[]],cost=[0,0];for(const file of files){const i=cost[0]<=cost[1]?0:1;old[i].push(file);cost[i]+=file.seconds.darwin;}
+ const bins=assignShards(files,2,'darwin');
+ assert.ok(Math.max(...bins.map(b=>scheduledSeconds(b,'darwin')))<Math.max(...old.map(b=>scheduledSeconds(b,'darwin'))));
+ assert.equal(new Set(bins.flat().map(t=>t.path)).size,files.length);assert.deepEqual(bins,assignShards([...files].reverse(),2,'darwin'));
+ assert.equal(scheduledSeconds([item('one',10),item('two',8),item('exclusive',7,'exclusive'),item('later',2)],'darwin'),19);
 });

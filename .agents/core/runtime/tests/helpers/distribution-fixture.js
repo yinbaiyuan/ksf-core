@@ -61,8 +61,8 @@ export function embedReceiptBaseline(workspace, first) {
     writeAtomic(join(workspace, '.agents/core/release.json'), stableJSON(manifest));
 }
 
-export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false, target = fixtureTarget } = {}) {
-  const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
+export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false, target = fixtureTarget, temporaryRoot = tmpdir() } = {}) {
+  const directory = mkdtempSync(join(temporaryRoot, 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
   // Reconstruct Core sources without inheriting the source workspace's installed identity.

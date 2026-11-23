@@ -14,11 +14,11 @@ import {runTestCommand} from '../commands/test.js';
 
 // Persist the outcome before returning its nonzero exit status. Shell `-e`
 // must never discard the failed shard's structured coverage and diagnostics.
-export async function runVerification(root,args,reportPath){
+export async function runVerification(root,args,reportPath,execution={}){
  let before,report,exitCode=1;
  try{
   before=sourceIdentity(root);
-  const command=await runTestCommand([...args,'--json'],root),envelope=JSON.parse(command.stdout),after=sourceIdentity(root);
+  const command=await runTestCommand([...args,'--json'],root,execution),envelope=JSON.parse(command.stdout),after=sourceIdentity(root);
   const changed=before.sourceDigest!==after.sourceDigest;
   report={schemaVersion:1,platform:process.platform,architecture:process.arch,nodeVersion:process.version,results:[],changedInputs:[],summary:{executed:0,reused:0,failed:0},...envelope.data,...before,commandExitCode:command.exitCode,errors:envelope.errors??[]};
   report.complete=command.exitCode===0&&envelope.ok===true&&report.complete===true&&!changed;
@@ -183,7 +183,12 @@ async function main(){
   try{
    const plan=validateVerificationPlan(root,JSON.parse(readFileSync(planPath,'utf8')),sourceIdentity(root)),group=plan.groups.find(g=>g.id===id);
    if(!group||group.platform!==process.platform||group.architecture!==process.arch)fail('TEST_CI_PLAN_INVALID','CI group requires its real native target.');
-   const exit=await runVerification(root,['--suite','full','--profile',group.profile,'--files',...group.files],reportPath);
+   let execution={};
+   if(process.env.KSF_TEST_CI_PREPARED_SEEDS){
+    if(process.env.GITHUB_ACTIONS!=='true')fail('TEST_CI_PREPARATION_INVALID','Prepared distribution fixtures require Actions provenance.');
+    execution={preparedFixtures:{directory:process.env.KSF_TEST_CI_PREPARED_SEEDS,identity:plan,runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}};
+   }
+   const exit=await runVerification(root,['--suite','full','--profile',group.profile,'--files',...group.files],reportPath,execution);
    const report=JSON.parse(readFileSync(reportPath,'utf8'));writeFileSync(reportPath,JSON.stringify({...report,groupId:id,planDigest:plan.digest},null,2)+'\n');process.exitCode=exit;
   }catch(error){writeFileSync(reportPath,JSON.stringify({schemaVersion:2,groupId:id,complete:false,status:'failed',platform:process.platform,results:[],errors:[{code:error.code??'TEST_EXECUTION_FAILED',message:error.message}]},null,2)+'\n');process.exitCode=1;}
  }else if(command==='aggregate-plan'){

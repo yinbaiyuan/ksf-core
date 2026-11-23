@@ -51,11 +51,27 @@ export function changedPaths(root, base) {
   paths.push(...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean));
   return { base: comparison, head, paths: [...new Set(paths.filter(Boolean).map(slash).filter(path=>!rebuiltArtifact(path)))].sort() };
 }
+// Match the runner's two-file full-suite schedule, including exclusive barriers.
+// Summed durations overfill a group with exclusive files while another group
+// can overlap its ordinary files. This estimate changes placement, never scope.
+export function scheduledSeconds(tests, platform = process.platform, parallel = 2) {
+  let clock = 0, active = [];
+  for (const item of [...tests].sort((a,b)=>(b.seconds?.[platform]??1)-(a.seconds?.[platform]??1)||a.path.localeCompare(b.path))) {
+    const seconds = item.seconds?.[platform] ?? 1;
+    if (item.isolation === 'exclusive') { clock = Math.max(clock,...active) + seconds; active = []; }
+    else {
+      if (active.length >= parallel) { clock = Math.min(...active); active.splice(active.indexOf(clock),1); }
+      active.push(clock + seconds);
+    }
+  }
+  return Math.max(clock,...active);
+}
 export function assignShards(tests, count, platform = process.platform) {
-  const bins = Array.from({ length: count }, () => ({ seconds: 0, files: [] }));
+  const bins = Array.from({ length: count }, () => ({ files: [] }));
   for (const item of [...tests].sort((a, b) => (b.seconds?.[platform] ?? 1) - (a.seconds?.[platform] ?? 1) || a.id.localeCompare(b.id))) {
-    const index = bins.reduce((best, bin, n) => bin.seconds < bins[best].seconds ? n : best, 0);
-    bins[index].files.push(item); bins[index].seconds += item.seconds?.[platform] ?? 1;
+    const costs = bins.map(bin => scheduledSeconds([...bin.files,item],platform));
+    const index = bins.reduce((best,bin,n)=>costs[n]<costs[best]||costs[n]===costs[best]&&bin.files.length<bins[best].files.length?n:best,0);
+    bins[index].files.push(item);
   }
   return bins.map(bin => bin.files.sort((a, b) => a.path.localeCompare(b.path)));
 }

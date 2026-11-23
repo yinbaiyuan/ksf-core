@@ -20,7 +20,7 @@ Paths are relative to this KSF root, not the caller's current directory.
 No dependency installation, managed builds, live AI, deployment or daily-service restart.
 Exit: 0 passed/not-applicable; 1 failed/incomplete; 2 invalid arguments.
 `;
-export async function runTestCommand(args, root) {
+export async function runTestCommand(args, root, execution = {}) {
   const json = args.includes('--json');
   const emit = (ok, data, errors = []) => JSON.stringify({ ok, command: 'test', operation: null, data, errors }) + '\n';
   try {
@@ -29,7 +29,7 @@ export async function runTestCommand(args, root) {
     const plan = createTestPlan(root, options);
     const publicPlan = { suite: plan.suite, profile: plan.profile, scope: plan.scope, component: plan.component, platform: plan.platform, status: plan.status, execution:plan.execution, changes: plan.changes, reasons: plan.reasons, gaps: plan.gaps, requiredFullComponents: plan.requiredFullComponents, selectedFiles: plan.selectedFiles, assignedFiles: plan.tests.map(t => t.path), excludedPlatform: plan.excludedPlatform, missingDependencies: plan.missingDependencies, catalogDigest: plan.catalog.digest };
     if (options.plan) return { exitCode: 0, stdout: json ? emit(true, { phase: 'plan', ...publicPlan }) : JSON.stringify(publicPlan, null, 2) + '\n' };
-    const { ok, result } = await executeTestPlan(root, plan);
+    const { ok, result } = await executeTestPlan(root, plan, execution);
     const errors = ok ? [] : [{ code: result.changedInputs.length ? 'TEST_INPUT_CHANGED' : 'TEST_FAILED', message: 'Selected test coverage is incomplete. Inspect the per-file report.' }];
     return { exitCode: ok ? 0 : 1, stdout: json ? emit(ok, { phase: 'run', ...result }, errors) : `Test ${result.status}: ${result.summary.executed} executed, ${result.summary.reused} reused, ${result.summary.failed} failed; ${result.durationMs} ms\nReport: ${result.reportPath}\n` };
   } catch (error) {
