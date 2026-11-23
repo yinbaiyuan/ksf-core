@@ -150,5 +150,5 @@ test('native platforms start independently and complete-proof reuse retains a fa
  assert.ok(proof.jobs.proof.steps.some(step=>/ci.js verify-proof/.test(step.run??'')));
  const release=YAML.parse(readFileSync(join(directory,'release.yml'),'utf8'));
  assert.equal(release.jobs.release['runs-on'],'ubuntu-24.04');
- assert.equal(release.jobs.prepare['runs-on'],'macos-15');
+ assert.equal(release.jobs.prepare['runs-on'],'xcode-27');
 });

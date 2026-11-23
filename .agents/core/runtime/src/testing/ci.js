@@ -172,7 +172,7 @@ async function main(){
   writeFileSync('verification-plan.json',JSON.stringify(plan,null,2)+'\n');
   const matrix=plan.groups.filter(g=>g.prepared),linux=plan.groups.filter(g=>!g.prepared);
   const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared,groups:JSON.stringify({include:matrix.filter(item=>item.prepared===g.prepared)})}])).values()];
-  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'macos-15'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'macos-15',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
+  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'xcode-27'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'xcode-27',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
  }else if(command==='run-group'){
   const [planPath,id,reportPath]=args;
   try{

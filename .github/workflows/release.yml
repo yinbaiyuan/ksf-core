@@ -22,7 +22,7 @@ jobs:
   prepare:
     needs: [find-proof, verification]
     if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && (needs.find-proof.outputs.valid == 'true' || needs.verification.result == 'success') }}
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 90
     outputs:
       version: ${{ steps.bundle.outputs.version }}
