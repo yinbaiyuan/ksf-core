@@ -4775,8 +4775,7 @@
       "suite": "full",
       "platforms": [
         "darwin",
-        "win32",
-        "linux"
+        "win32"
       ],
       "cacheable": false,
       "inputs": [
@@ -4793,15 +4792,14 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 55.09,
-        "win32": 145.8,
-        "linux": 55.09
+        "win32": 145.8
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "isolation": "exclusive",
       "verification": {
         "lane": "shared",
         "kind": "integration",
-        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage.",
+        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage. Desktop-capable host defaults are part of this shared fixture; retain the original Mac host and the separately declared native platform guards.",
         "nativeContracts": [
           "core:distribution-native",
           "core:contribute-native",
@@ -4834,8 +4832,7 @@
       "suite": "quick",
       "platforms": [
         "darwin",
-        "win32",
-        "linux"
+        "win32"
       ],
       "cacheable": false,
       "inputs": [
@@ -4859,14 +4856,13 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 6.12,
-        "win32": 8.16,
-        "linux": 6.12
+        "win32": 8.16
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
-        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage.",
+        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage. Desktop-capable host defaults are part of this shared fixture; retain the original Mac host and the separately declared native platform guards.",
         "nativeContracts": [
           "core:metadata",
           "core:application-data"
@@ -6658,8 +6654,7 @@
       "suite": "quick",
       "platforms": [
         "darwin",
-        "win32",
-        "linux"
+        "win32"
       ],
       "cacheable": false,
       "inputs": [
@@ -6683,14 +6678,13 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0.92,
-        "win32": 1.87,
-        "linux": 0.92
+        "win32": 1.87
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
         "lane": "shared",
         "kind": "integration",
-        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage.",
+        "reason": "Business/protocol and policy combinations execute once; native persistence, transport, launcher and transaction boundaries have independent coverage. Desktop-capable host defaults are part of this shared fixture; retain the original Mac host and the separately declared native platform guards.",
         "nativeContracts": [
           "core:metadata",
           "core:application-data"
@@ -7838,8 +7832,7 @@
       "suite": "quick",
       "platforms": [
         "darwin",
-        "win32",
-        "linux"
+        "win32"
       ],
       "cacheable": false,
       "inputs": [
@@ -7863,14 +7856,13 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 0.19,
-        "win32": 0.66,
-        "linux": 0.19
+        "win32": 0.66
       },
       "timingBasis": "Native CI 41184436954 observed file durations; same-platform two-file concurrency, dependency preparation excluded.",
       "verification": {
         "lane": "shared",
         "kind": "logic",
-        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host."
+        "reason": "Deterministic model, parser, contract validation or injected service logic; execute once on the baseline host. Desktop-capable host defaults are part of this shared fixture; retain the original Mac host and the separately declared native platform guards."
       },
       "selectionInputs": [
         ".agents/core/runtime/src/services/workbench-terminal.js"
@@ -9719,10 +9711,104 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 98.66,
-        "win32": 426.62
+        "darwin": 39.46,
+        "win32": 170.65
       },
-      "timingBasis": "Conservative scheduling estimate after retaining all 25 scenarios in bounded groups; PR19 run 41301026331 diagnostics plus a fresh per-file seed. Exclusive admission; not a measured standalone duration.",
+      "timingBasis": "Conservative proportional scheduling estimate from the original five-scenario file (darwin 98.66s, win32 426.62s); all original cases and native platforms retained in independent 2/2/1 groups. Not a measured standalone duration.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-reclone-recovery",
+      "path": ".agents/core/runtime/tests/instance-reclone-recovery.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 39.46,
+        "win32": 170.65
+      },
+      "timingBasis": "Conservative proportional scheduling estimate from the original five-scenario file (darwin 98.66s, win32 426.62s); all original cases and native platforms retained in independent 2/2/1 groups. Not a measured standalone duration.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-reclone-branches",
+      "path": ".agents/core/runtime/tests/instance-reclone-branches.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 19.73,
+        "win32": 85.32
+      },
+      "timingBasis": "Conservative proportional scheduling estimate from the original five-scenario file (darwin 98.66s, win32 426.62s); all original cases and native platforms retained in independent 2/2/1 groups. Not a measured standalone duration.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",

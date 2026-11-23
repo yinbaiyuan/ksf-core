@@ -1,5 +1,5 @@
 import { platform, replaceFileSync as renameSync } from '../platform/index.js';
-import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, openSync, closeSync, fstatSync, constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { withTemporaryFile } from '../shared/files.js';
@@ -31,6 +31,43 @@ export function readRegular(root, relative, optional = false) {
   }
   if (!lstatSync(path).isFile()) fail('UNSAFE_PATH', `Expected a regular file: ${relative}.`);
   return readFileSync(path);
+}
+// Read bytes and mode from the same open entry. Containment and type checks
+// remain fresh for every call; no directory or validity cache crosses reads.
+export function readRegularRecord(root, relative, { optional = false, declared } = {}) {
+  const path = checkedPath(root, relative);
+  let entry;
+  try { entry = lstatSync(path); }
+  catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    if (optional) return null;
+    fail('FILE_MISSING', `Missing file: ${relative}.`);
+  }
+  return readCheckedRecord(path, relative, entry, declared);
+}
+function readCheckedRecord(path, relative, entry, declared) {
+  if (!entry.isFile()) fail('UNSAFE_PATH', `Expected a regular file: ${relative}.`);
+  let descriptor;
+  try { descriptor = openSync(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0)); }
+  catch (error) { if (error.code === 'ELOOP') fail('UNSAFE_PATH', `Unsupported filesystem entry: ${relative}.`); throw error; }
+  try {
+    const actual = fstatSync(descriptor);
+    if (!actual.isFile()) fail('UNSAFE_PATH', `Expected a regular file: ${relative}.`);
+    return { bytes: readFileSync(descriptor), mode: platform.fileMode(path, actual.mode, declared) };
+  } finally { closeSync(descriptor); }
+}
+// Every leaf is checked immediately before opening. No cached containment
+// check authorizes a subsequent file read.
+export function* walkRegularRecords(root, prefix, { exclude = () => false } = {}) {
+  function* visit(relative) {
+    if (exclude(relative)) return;
+    const path = checkedPath(root, relative), entry = lstatSync(path);
+    if (entry.isDirectory()) {
+      for (const name of readdirSync(path).sort()) yield* visit(`${relative}/${name}`);
+    } else if (entry.isFile()) yield [relative, readCheckedRecord(path, relative, entry)];
+    else fail('UNSAFE_PATH', `Unsupported file: ${relative}.`);
+  }
+  yield* visit(prefix);
 }
 export function writeAtomic(path, bytes, mode = 0o644) {
   mkdirSync(dirname(path), { recursive: true });

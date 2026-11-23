@@ -1,5 +1,6 @@
 import {platform,launcherInvocation,removePathSync as rmSync} from '../../src/platform/index.js';
 export const fixtureTarget=platform.name==='win32'?'win32-x64':platform.name==='linux'?'linux-x64':'darwin-arm64';
+export const officialFixtureTarget=platform.name==='win32'?'win32-x64':'darwin-arm64';
 import {gitBinary,nullDevice,writeNodeExecutable,storedZip} from './platform.js';
 import assert from 'node:assert/strict';
 import { after } from 'node:test';
@@ -51,7 +52,7 @@ export function commitWorkspace(f, { paths = ['.agents/core', 'AGENTS.md', '.age
   return git(f.workspace, ['rev-parse', 'HEAD']);
 }
 export function embedReceiptBaseline(workspace, first) {
-    const { manifest, entries } = inspectCoreArchive(readFileSync(join(first.output, first.index.platforms[fixtureTarget].core.name)));
+    const { manifest, entries } = inspectCoreArchive(readFileSync(join(first.output, first.index.platforms[first.platform].core.name)));
     delete manifest.instance_initialization;
     for (const [path, record] of Object.entries(manifest.files)) {
       const bytes = entries.get(path).bytes;
@@ -60,7 +61,7 @@ export function embedReceiptBaseline(workspace, first) {
     writeAtomic(join(workspace, '.agents/core/release.json'), stableJSON(manifest));
 }
 
-export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false } = {}) {
+export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false, target = fixtureTarget } = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'ksf distribution 测试 ')), root = join(directory, 'core');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   mkdirSync(root);
@@ -102,7 +103,7 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
   }
   writeFileSync(join(root, '.gitignore'), '/.agents/runtime-data/\n/.agents/user-data/\n/知识/\n/.agents/core/release.json\n');
   writeAtomic(join(root, '.agents/core/example.txt'), 'first\none\ntwo\nthree\nfour\nfive\nlast\n');
-  const version = process.version.slice(1), archiveRoot = `node-v${version}-${fixtureTarget}`;
+  const version = process.version.slice(1), archiveRoot = `node-v${version}-${target}`;
   const escapedNode = process.execPath.replace(/'/g, "'\\''");
   const node = Buffer.from(`#!/bin/sh\nif [ "$1" = '--version' ]; then printf 'v${version}\\n'; else exec '${escapedNode}' "$@"; fi\n`);
   let archive,archivePath;
@@ -117,7 +118,7 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
   }
   writeAtomic(join(root, archivePath), archive);
   const build = { schema_version: 1, name: 'ksf-core', version: '0.1.0', runtime: { version, release_channel: 'lts', packages: {
-    [fixtureTarget]: { archive_path: archivePath, archive_sha256: sha256(archive) },
+    [target]: { archive_path: archivePath, archive_sha256: sha256(archive) },
   } } };
   writeAtomic(join(root, '.agents/core/build.json'), stableJSON(build));
   await buildManifest(root);
@@ -125,10 +126,10 @@ export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = r
   git(root, ['config', 'user.name', 'KSF Fixture']); git(root, ['config', 'user.email', 'fixture@example.invalid']);
   git(root, ['config', 'commit.gpgsign', 'false']);
   git(root, ['add', '.agents', 'AGENTS.md', '.gitignore']); git(root,['update-index','--chmod=+x','.agents/ksf']); git(root, ['commit', '-m', 'Fictional clean Core source']);
-  const first = await buildRelease({ root, platform:fixtureTarget, output: join(directory, 'release-0.1.0') },{durableInstance:false});
+  const first = await buildRelease({ root, platform:target, output: join(directory, 'release-0.1.0') },{durableInstance:false});
   const workspace = join(directory, 'ksf'); cpSync(first.template, workspace, { recursive: true });
   if (!compact) embedReceiptBaseline(workspace, first);
-  return { directory, root, workspace, first, build, originals, legacyEntry };
+  return { directory, root, workspace, first, build, originals, legacyEntry, target };
 }
 
 const seeds = new Map(), seedCleanup = [];
@@ -150,8 +151,8 @@ export async function distributionFixture(t, options = {}) {
   let base;
   if (options.legacyEntry || options.sourceRoot && options.sourceRoot !== repository) base = await createFixtureBase(t, options);
   else {
-    const key = !!options.compact;
-    if (!seeds.has(key)) seeds.set(key, runSeed(key) ?? createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
+    const compact=!!options.compact,target=options.target??fixtureTarget,key=target+':'+compact;
+    if (!seeds.has(key)) seeds.set(key, (target===fixtureTarget?runSeed(compact):null) ?? createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
     const seed = await seeds.get(key), directory = mkdtempSync(join(tmpdir(), 'ksf isolated fixture '));
     t.after(() => {const start=performance.now();rmSync(directory, { recursive: true, force: true });cleanupMs=performance.now()-start;});
     const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');
@@ -160,9 +161,9 @@ export async function distributionFixture(t, options = {}) {
     cpSync(seed.root, root, { recursive: true });
     cpSync(seed.workspace, workspace, { recursive: true });
     cpSync(seed.first.output, output, { recursive: true });
-    base = { directory, root, workspace, first: { ...structuredClone(seed.first), output, instance: join(output, 'ksf'), template: join(output, 'ksf') }, build: structuredClone(seed.build), originals: new Map(), legacyEntry: false };
+    base = { directory, root, workspace, first: { ...structuredClone(seed.first), output, instance: join(output, 'ksf'), template: join(output, 'ksf') }, build: structuredClone(seed.build), originals: new Map(), legacyEntry: false, target:seed.target??seed.first.platform };
   }
-  const { directory, root, workspace, first, build, originals } = base;
+  const { directory, root, workspace, first, build, originals, target=fixtureTarget } = base;
   const fixtureMs = performance.now()-began;
   t.after(() => t.diagnostic(JSON.stringify({phase:'distribution-fixture',fixtureMs:Math.round(fixtureMs),gitMs:Math.round(gitTiming.ms-priorGit.ms),gitCalls:gitTiming.calls-priorGit.calls,packageMs:Math.round(packageMs),assertionAndOtherMs:Math.round(Math.max(0,performance.now()-began-fixtureMs-packageMs-cleanupMs)),cleanupMs:Math.round(cleanupMs)})));
   let legacyEntry = base.legacyEntry;
@@ -183,12 +184,12 @@ export async function distributionFixture(t, options = {}) {
     // Transaction scenarios consume the real, validated update archive. The
     // initial seed covers instance materialization; no second unused copy of
     // its thousands of durable files is needed for each fault injection.
-    const result = await buildRelease({ root, platform:fixtureTarget, output: join(directory, `release-${version}`) },{materializeInstance:false});
+    const result = await buildRelease({ root, platform:target, output: join(directory, `release-${version}`) },{materializeInstance:false});
     packageMs+=performance.now()-packStarted;
     const index = JSON.parse(readFileSync(join(result.output, 'ksf-core-index.json'), 'utf8'));
-    for (const item of Object.values(index.platforms[fixtureTarget])) item.url = pathToFileURL(join(result.output, item.name)).href;
+    for (const item of Object.values(index.platforms[target])) item.url = pathToFileURL(join(result.output, item.name)).href;
     const source = join(directory, `feed-${version}.json`); writeAtomic(source, stableJSON(index));
-    return { ...result, source, coreArchive: join(result.output, index.platforms[fixtureTarget].core.name), feed: index };
+    return { ...result, source, coreArchive: join(result.output, index.platforms[target].core.name), feed: index };
   };
   const launch = (args, options = {}) => { const invocation=launcherInvocation(workspace,args); return spawnSync(invocation.executable, invocation.args, {
     cwd: tmpdir(), encoding: 'utf8', timeout: options.timeoutMs ?? 20000,
@@ -208,3 +209,7 @@ export function instanceEntries(root) {
   }
   visit(''); return entries;
 }
+
+// Publisher and archive-layout contracts use official target descriptors even
+// on a Linux inspection host; execution fixtures above use the real host target.
+export const officialArchiveFixture=(t,options={})=>distributionFixture(t,{...options,target:officialFixtureTarget});

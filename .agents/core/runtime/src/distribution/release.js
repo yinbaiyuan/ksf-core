@@ -6,7 +6,7 @@ import { buildManifest } from '../services/build-manifest.js';
 import { configuration } from './configuration.js';
 import { fail } from './errors.js';
 import { sha256, stableJSON } from '../shared/hash.js';
-import { checkedPath, readRegular, walkFiles, fileMode, writeAtomic, parseJSON } from './files.js';
+import { readRegular, walkFiles, readRegularRecord, writeAtomic, parseJSON } from './files.js';
 import { validateManifest, releaseReceipt } from './manifests.js';
 import { versionParts } from './versions.js';
 import { createArchive, readArchive } from './archive.js';
@@ -103,7 +103,8 @@ export async function buildPlatformRelease({ root, output, platform, allowDirty 
     const sourceHashes = new Map(), sourceModes = new Map(), stagedEntries = [];
     for (const path of [...paths, 'AGENTS.md']) {
       const original = committed?.entries.get(path);
-      const bytes = readRegular(root, path), mode = fileMode(checkedPath(root, path), original?.mode === '100755' ? 0o755 : original?.mode === '100644' ? 0o644 : undefined);
+      const record = readRegularRecord(root,path,{declared:original?.mode === '100755' ? 0o755 : original?.mode === '100644' ? 0o644 : undefined});
+      const {bytes,mode}=record;
       sourceModes.set(path, mode);
       if (committed && path !== '.agents/core/manifest.yaml' && (!original || original.type !== 'blob' ||
           original.mode !== (mode === 0o755 ? '100755' : '100644') || gitBlobID(bytes) !== original.object)) source.dirty = true;
@@ -123,7 +124,7 @@ export async function buildPlatformRelease({ root, output, platform, allowDirty 
     await buildManifest(staging, { sourceRoot: root, builtAt: source.builtAt,...(scoped?{target:platform}:{}) });
     const inventory = {}, coreEntries = [];
     for (const path of [...bundledPaths.filter(p => p !== '.agents/core/manifest.yaml'), '.agents/core/manifest.yaml', 'AGENTS.md'].sort()) {
-      const bytes = readRegular(staging, path), mode = fileMode(checkedPath(staging, path), sourceModes.get(path));
+      const {bytes,mode}=readRegularRecord(staging,path,{declared:sourceModes.get(path)});
       inventory[path] = { sha256: sha256(bytes), mode, source_path: path };
       coreEntries.push({ path, bytes, mode });
     }

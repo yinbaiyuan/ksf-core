@@ -7,7 +7,7 @@ import {installedManifest} from '../src/distribution/manifests.js';
 import {resolveBaseline} from '../src/distribution/baseline.js';
 import {planUpdate} from '../src/distribution/system.js';
 import {runtimeLayoutPath,runtimeLayoutBytes,runtimePackagesPath} from '../src/platform/runtime-bundle.js';
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import {ForkAPI} from './helpers/contribution-api.js';
 import {multi,freeze,inspect} from './helpers/runtime-bundle-fixture.js';
 

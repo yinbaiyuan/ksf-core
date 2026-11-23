@@ -10,8 +10,8 @@ export const targets = [
   {target:'linux22', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-22.04', prepared:null, limit:1},
   {target:'linux24', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-24.04', prepared:null, limit:1},
 ];
-// Portable shared obligations use Linux once. Formal publisher fixtures that
-// require an official target stay on Mac, alongside every native Mac contract.
+// Portable shared obligations use Linux once. Shared fixtures with publisher or desktop-host
+// preconditions stay on Mac, alongside every native Mac contract.
 // Three shared, five Mac and twelve Windows workers fit the hosted budget.
 export const verificationTargets = full => full
   ? [targets[0],{...targets[2],profile:'all',limit:5},...targets.slice(3)]

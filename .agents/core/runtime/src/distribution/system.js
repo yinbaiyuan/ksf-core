@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { checkedPath, fileMode, parseJSON, readJSON, readRegular, textBytes, walkFiles, writeAtomic, writeJSON } from './files.js';
+import { checkedPath, fileMode, readRegularRecord, walkRegularRecords, parseJSON, readJSON, readRegular, textBytes, walkFiles, writeAtomic, writeJSON } from './files.js';
 import { compareVersions, versionParts } from './versions.js';
 import { configuration } from './configuration.js';
 import { digestObject, isSHA, sha256, stableJSON } from '../shared/hash.js';
@@ -32,12 +32,14 @@ const generated = new Set(['.agents/core/manifest.yaml']);
 const modeOf = (root, path) => existsSync(checkedPath(root, path)) ? fileMode(checkedPath(root, path)) : null;
 const equals = matchesBaseline;
 function localFile(root, path, declared) {
-  const bytes = readRegular(root, path, true);
-  return bytes === null ? null : { bytes, mode: fileMode(checkedPath(root, path), declared) };
+  return readRegularRecord(root, path, { optional: true, declared });
 }
 export function systemFingerprint(root) {
-  const paths = walkFiles(root, '.agents/core', { exclude: developmentPath }).concat(rootFiles).sort();
-  return digestObject(paths.map(path => [path, sha256(readRegular(root, path)), fileMode(checkedPath(root, path))]));
+  const records=[];
+  for (const [path,file] of walkRegularRecords(root,'.agents/core',{exclude:developmentPath})) records.push([path,sha256(file.bytes),file.mode]);
+  for (const path of rootFiles) { const file=readRegularRecord(root,path);records.push([path,sha256(file.bytes),file.mode]); }
+  records.sort(([a],[b])=>a<b?-1:a>b?1:0);
+  return digestObject(records);
 }
 export async function systemRead({ root, api, fetcher }) {
   const receipt = installedManifest(root, true), config = configuration(root, { user: true });
