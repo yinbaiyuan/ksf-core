@@ -174,7 +174,10 @@ export async function distributionFixture(t, options = {}) {
     }
     git(root, ['add', '.agents', 'AGENTS.md']); git(root, ['commit', '-m', `Fictional Core ${version}`]);
     const packStarted=performance.now();
-    const result = await buildRelease({ root, platform:fixtureTarget, output: join(directory, `release-${version}`) });
+    // Transaction scenarios consume the real, validated update archive. The
+    // initial seed covers instance materialization; no second unused copy of
+    // its thousands of durable files is needed for each fault injection.
+    const result = await buildRelease({ root, platform:fixtureTarget, output: join(directory, `release-${version}`) },{materializeInstance:false});
     packageMs+=performance.now()-packStarted;
     const index = JSON.parse(readFileSync(join(result.output, 'ksf-core-index.json'), 'utf8'));
     for (const item of Object.values(index.platforms[fixtureTarget])) item.url = pathToFileURL(join(result.output, item.name)).href;

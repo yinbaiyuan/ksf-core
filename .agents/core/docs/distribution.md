@@ -80,7 +80,7 @@ Core 源码不保存真实 USER、BOT、个人目录或占位文件。通用实�
 
 新计划 schema 5 将 `core`（原版出处）与 `target`（PR 目标）分开。submit 先验证原版 Core 与冻结前像，再以原 Core SHA 为唯一父节点构造纯系统提交和 `contrib-<ID>` 分支，向 `core-main` 创建草稿 PR。个人 main、作者配置、提交说明、文件和历史不发送给 Core。不整体 merge、rebase 或 push 个人分支到官方仓库。
 
-官方根文件的规范源位于 `.agents/core/distribution/repository/`，涵盖 README、忽略规则、属性及三份官方工作流。prepare 对所选规范源显式生成官方根路径投影，两份差异都出现在审阅计划；它从原始 Core 树读取根文件前像，不读取个人根 README 或 CI。映射是固定白名单，不能借此公开任意个人路径。系统升级只更新规范源，不覆盖个人根文件。
+官方根文件的规范源位于 `.agents/core/distribution/repository/`，涵盖 README、忽略规则、属性及官方工作流（含证明核验和单平台验证的复用工作流）。prepare 对所选规范源显式生成官方根路径投影，两份差异都出现在审阅计划；它从原始 Core 树读取根文件前像，不读取个人根 README 或 CI。映射是固定白名单，不能借此公开任意个人路径。系统升级只更新规范源，不覆盖个人根文件。
 
 旧 schema 1/2/3/4 贡献计划仍可读取并只读核对已有 PR；未发布计划需重新 prepare，不能携带旧 `main` 目标发起新贡献。相同内容与未知发布尝试继续按原 ID 对账。参数、重试和公开审阅见 [contribute CLI](cli/contribute.md)。
 

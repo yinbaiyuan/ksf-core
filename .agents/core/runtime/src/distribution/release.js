@@ -116,7 +116,9 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
       if (expected.join('\n') !== actual.join('\n')) source.dirty = true;
       if (source.dirty && !allowDirty) fail('RELEASE_SOURCE_DIRTY', 'System files must exactly match the recorded Core commit; ignored or uncommitted files cannot enter an official release.');
     }
-    await writeReleaseFiles(staging,stagedEntries);
+    // Private, disposable staging is never an installation or recovery source.
+    // Published archives and inspection instances still use durable writes.
+    await writeReleaseFiles(staging,stagedEntries,{durable:false});
     stagedEntries.length=0;
     await buildManifest(staging, { sourceRoot: root, builtAt: source.builtAt,...(scoped?{target:platform}:{}) });
     const inventory = {}, coreEntries = [];
@@ -147,7 +149,7 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
     if (current.revision !== source.revision || [...sourceHashes].some(([p, hash]) => sha256(readRegular(root, p)) !== hash) ||
         paths.join('\n') !== [...walkFiles(root, '.agents/core', { exclude: excluded }), ...launcherFiles].sort().join('\n')) fail('RELEASE_INPUT_CHANGED', 'Core changed while building the release.');
     const result = { version: build.version, platform, development: source.dirty, coreRevision: source.revision,
-      products, output: destination, instance: targetRoot, template: targetRoot, index, sourceDigest: sha256(stableJSON([...sourceHashes])), managedFiles: Object.keys(inventory).length, dryRun };
+      products, output: destination, instance: materializeInstance?targetRoot:null, template: materializeInstance?targetRoot:null, index, sourceDigest: sha256(stableJSON([...sourceHashes])), managedFiles: Object.keys(inventory).length, dryRun };
     if (!dryRun) {
       mkdirSync(destination, { recursive: true });
       if(materializeInstance)await writeReleaseFiles(targetRoot,fullEntries);
@@ -161,13 +163,13 @@ async function buildPlatformRelease({ root, output, platform, allowDirty = false
 
 // The official feed must contain every declared platform. A Mac publisher can
 // build a Windows archive without executing the Windows runtime.
-export async function buildRelease(options) {
+export async function buildRelease(options, {materializeInstance = true} = {}) {
   const { root, output, platform, dryRun = false } = options;
   const build = parseJSON(readRegular(root, '.agents/core/build.json'), 'build.json');
   if(platform&&!releaseTargets.includes(platform))fail('PLATFORM_UNSUPPORTED', `Official release is not supported for ${platform}.`);
   const targets = platform ? [platform] : Object.keys(build.runtime?.packages ?? {}).filter(target=>releaseTargets.includes(target)).sort();
   if (!targets.length) fail('PLATFORM_UNSUPPORTED', 'No bundled release platforms are declared.');
-  if (targets.length === 1) return buildPlatformRelease({ ...options, platform: targets[0] });
+  if (targets.length === 1) return buildPlatformRelease({ ...options, platform: targets[0] },{materializeInstance});
   const destination = resolve(root, output ?? `.agents/runtime-data/releases/${build.version}`);
   if (existsSync(destination)) fail('OUTPUT_EXISTS', 'Release output already exists; choose a new output directory.');
   const staging = mkdtempSync(join(tmpdir(), 'ksf-platform-releases-'));
@@ -176,7 +178,7 @@ export async function buildRelease(options) {
     const instancePlatform = targets.includes(nativePlatform) ? nativePlatform : targets[0];
     // Every target still builds and verifies its archive. Only the retained
     // local inspection instance needs its full directory materialized.
-    for (const target of targets) results.push(await buildPlatformRelease({ ...options, platform: target, output: join(staging, target) }, {materializeInstance:target===instancePlatform}));
+    for (const target of targets) results.push(await buildPlatformRelease({ ...options, platform: target, output: join(staging, target) }, {materializeInstance:materializeInstance&&target===instancePlatform}));
     const first = results[0];
     if (results.some(result => result.version !== first.version || result.coreRevision !== first.coreRevision || result.sourceDigest !== first.sourceDigest || result.development !== first.development)) fail('RELEASE_INPUT_CHANGED', 'All platform packages must come from the same frozen system source.');
     const index = { ...first.index, platforms: Object.assign({}, ...results.map(result => result.index.platforms)) };
@@ -188,10 +190,10 @@ export async function buildRelease(options) {
         const item = result.index.platforms[result.platform].core;
         renameSync(join(result.output, item.name), join(destination, item.name));
       }
-      renameSync(native.instance, instance);
+      if(materializeInstance)renameSync(native.instance, instance);
       writeAtomic(join(destination, releaseIndexName), stableJSON(index));
       writeAtomic(join(destination, legacyReleaseIndexName), stableJSON(compatibilityIndex(index)));
     }
-    return { ...first, platform: null, platforms: targets, output: destination, instance, template: instance, index, dryRun };
+    return { ...first, platform: null, platforms: targets, output: destination, instance:materializeInstance?instance:null, template:materializeInstance?instance:null, index, dryRun };
   } finally { rmSync(staging, { recursive: true, force: true }); }
 }

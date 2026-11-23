@@ -3,9 +3,9 @@ import {changedPaths, assignShards} from './planner.js';
 import {selectChangedTests} from './selection.js';
 
 export const targets = [
-  {target:'shared', profile:'shared', platform:'darwin', architecture:'arm64', os:'macos-15', prepared:'macOS', limit:1},
-  {target:'mac', profile:'native', platform:'darwin', architecture:'arm64', os:'macos-15', prepared:'macOS', limit:1},
-  {target:'win', profile:'native', platform:'win32', architecture:'x64', os:'windows-2025', prepared:'Windows', limit:4},
+  {target:'shared', profile:'shared', platform:'darwin', architecture:'arm64', os:'macos-15', prepared:'macOS', limit:4},
+  {target:'mac', profile:'native', platform:'darwin', architecture:'arm64', os:'macos-15', prepared:'macOS', limit:4},
+  {target:'win', profile:'native', platform:'win32', architecture:'x64', os:'windows-2025', prepared:'Windows', limit:8},
   {target:'linux22', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-22.04', prepared:null, limit:1},
   {target:'linux24', profile:'native', platform:'linux', architecture:'x64', os:'ubuntu-24.04', prepared:null, limit:1},
 ];

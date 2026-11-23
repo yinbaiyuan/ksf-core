@@ -8,7 +8,7 @@ import {loadCatalog,catalogPath} from '../src/testing/catalog.js';
 import {createTestPlan,parseTestOptions} from '../src/testing/planner.js';
 import {createVerificationPlan,validateVerificationPlan,planDigest} from '../src/testing/ci-plan.js';
 import {validateLayeredCoverage,aggregateLayeredReports} from '../src/testing/ci-coverage.js';
-import {sourceIdentity,validateProof} from '../src/testing/ci.js';
+import {sourceIdentity,validateProof,findProof,verifyProofCandidate} from '../src/testing/ci.js';
 import {fixtureDigest} from '../src/testing/fixtures.js';
 import {testEnvironment,executeTestPlan} from '../src/testing/runner.js';
 import {dependencyInputs} from '../src/testing/selection.js';
@@ -123,6 +123,17 @@ test('pure changes run once; native changes retain each target; unknown inputs f
   assert.equal(createTestPlan(f.root,parseTestOptions(['--suite','full','--profile','shared'])).tests.length,1);
   assert.throws(()=>parseTestOptions(['--profile','windows']),{code:'INVALID_ARGUMENTS'});
 });
+
+test('full risk obligations do not depend on expanding unrelated dynamic dependency directories',t=>{
+ const f=fixture(t);
+ writeFileSync(join(f.root,f.catalog.tests[0].path),"import '@ksf/sdk/dynamic';\n");
+ // No SDK toolchain is present in this fixture. The reviewed global risk
+ // already selects all tests; planning must not read an unrelated SDK package.
+ const path=f.runtime+'/testing/policy.json';writeFileSync(join(f.root,path),'{}');
+ const plan=createTestPlan(f.root,parseTestOptions(['--suite','full','--changed']),{changes:{paths:[path]}});
+ assert.deepEqual(plan.tests.map(t=>t.id),['logic','native']);
+ assert.deepEqual(plan.requiredFullComponents,['core']);
+});
 test('generated build outputs neither widen source selection nor invalidate its frozen plan',t=>{
   const f=fixture(t),manifest='.agents/core/manifest.yaml',dist=f.runtime+'/web/dist';
   writeFileSync(join(f.root,f.catalog.tests[0].path),"import '../src/logic.js'; // source change\n");
@@ -214,6 +225,43 @@ test('release accepts only schema-2 complete trusted evidence for the exact run 
   assert.equal(validateProof(f.root,proof,run),true);
   for(const override of [{schemaVersion:1},{full:false},{runAttempt:'1'},{commit:'previous'},{groups:[]},{planDigest:'old'},{sourceDigest:'stale'}])assert.throws(()=>validateProof(f.root,{...proof,...override},run),{code:'TEST_PROOF_INVALID'});
   assert.throws(()=>validateProof(f.root,proof,{...run,event:'pull_request'}),{code:'TEST_PROOF_INVALID'});
+});
+test('merged same-repository PR proof requires exact reviewed inputs and API-confirmed tested merge ancestry',t=>{
+ const f=fixture(t),plan=makePlan(f),proof=validateLayeredCoverage(f.root,reportsFor(plan),plan,sourceIdentity(f.root));
+ const prior={...process.env};t.after(()=>{for(const key of ['GITHUB_REPOSITORY','GITHUB_SHA'])if(prior[key]===undefined)delete process.env[key];else process.env[key]=prior[key];});
+ process.env.GITHUB_REPOSITORY='official/core';process.env.GITHUB_SHA='final-sha';
+ Object.assign(proof,{repository:'official/core',commit:'a'.repeat(40),runId:'7',runAttempt:'2'});
+ const run={id:7,run_attempt:2,conclusion:'success',head_sha:'head',head_branch:'feature',head_repository:{full_name:'official/core'},path:'.github/workflows/check.yml',event:'pull_request',pull_requests:[]};
+ const pull={number:9,merged:true,merge_commit_sha:'final-sha',head:{sha:'head',repo:{full_name:'official/core'}},base:{ref:'core-main',repo:{full_name:'official/core'}}};
+ const commit={sha:proof.commit,parents:[{sha:'base'},{sha:'head'}]};
+ assert.equal(validateProof(f.root,proof,run,pull,commit),true);
+ for(const bad of [{...pull,merged:false},{...pull,merge_commit_sha:'another-merge'},{...pull,base:{...pull.base,repo:{full_name:'fork/core'}}},{...pull,head:{sha:'other-head',repo:{full_name:'official/core'}}},{...pull,head:{...pull.head,repo:{full_name:'fork/core'}}},{...pull,base:{...pull.base,ref:'another-branch'}}])assert.throws(()=>validateProof(f.root,proof,run,bad,commit),{code:'TEST_PROOF_INVALID'});
+ for(const bad of [undefined,{...commit,sha:'different'},{...commit,parents:[{sha:'base'},{sha:'other'}]}])assert.throws(()=>validateProof(f.root,proof,run,pull,bad),{code:'TEST_PROOF_INVALID'});
+ for(const bad of [{...run,run_attempt:3},{...run,conclusion:'cancelled'},{...run,path:'.github/workflows/forged.yml'},{...run,head_repository:{full_name:'fork/core'}}])assert.throws(()=>validateProof(f.root,proof,bad,pull,commit),{code:'TEST_PROOF_INVALID'});
+ writeFileSync(join(f.root,f.runtime,'src/logic.js'),'changed after PR');
+ assert.throws(()=>validateProof(f.root,proof,run,pull,commit),{code:'TEST_PROOF_INVALID'});
+});
+test('proof lookup reconciles a merged PR when GitHub clears the run pull-request array',async t=>{
+ const f=fixture(t),plan=makePlan(f),proof=validateLayeredCoverage(f.root,reportsFor(plan),plan,sourceIdentity(f.root));
+ const prior={...process.env},output=join(f.root,'outputs');
+ for(const [key,value] of Object.entries({GITHUB_REPOSITORY:'official/core',GITHUB_SHA:'final',GITHUB_OUTPUT:output}))process.env[key]=value;
+ t.after(()=>{for(const key of ['GITHUB_REPOSITORY','GITHUB_SHA','GITHUB_OUTPUT'])if(prior[key]===undefined)delete process.env[key];else process.env[key]=prior[key];});
+ Object.assign(proof,{repository:'official/core',commit:'a'.repeat(40),runId:'7',runAttempt:'2'});
+ const run={id:7,run_attempt:2,conclusion:'success',head_sha:'head',head_repository:{full_name:'official/core'},path:'.github/workflows/check.yml',event:'pull_request',pull_requests:[]};
+ const pull={number:9,merged:true,merge_commit_sha:'final',head:{sha:'head',repo:{full_name:'official/core'}},base:{ref:'core-main',repo:{full_name:'official/core'}}};
+ const responses={
+  'actions/runs?head_sha=final&status=success&per_page=30':{workflow_runs:[]},
+  'commits/final/pulls':[{number:9}], 'pulls/9':pull,
+  'actions/runs?head_sha=head&status=success&per_page=30':{workflow_runs:[run]},
+  'actions/runs/7/artifacts':{artifacts:[{id:17,name:'suite-proof-'+proof.commit,expired:false}]},
+  'actions/runs/7':run, ['commits/'+proof.commit]:{sha:proof.commit,parents:[{sha:'base'},{sha:'head'}]},
+ };
+ const get=async path=>{assert.ok(Object.hasOwn(responses,path),path);return responses[path];};
+ await findProof(f.root,{requester:async path=>new Response(JSON.stringify(await get(path.replace('/repos/official/core/',''))))});
+ assert.equal(readFileSync(output,'utf8'),'candidate=17\nrun=7\n');
+ assert.equal(await verifyProofCandidate(f.root,proof,7,{requester:get}),true);
+ responses['commits/final/pulls']=[];
+ await assert.rejects(verifyProofCandidate(f.root,proof,7,{requester:get}),{code:'TEST_PROOF_INVALID'});
 });
 test('seed copies keep files and Git histories independent and mutation changes their digest',t=>{
   const root=mkdtempSync(join(tmpdir(),'ksf-seed-'));t.after(()=>rmSync(root,{recursive:true,force:true}));

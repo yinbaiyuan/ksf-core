@@ -24,3 +24,11 @@ test('release write failure drains pending writers before cleanup and preserves 
  // On Windows this also requires all writer handles to have been closed.
  rmSync(path,{recursive:true,force:true});
 });
+
+test('disposable release staging preserves bytes and modes before durable publication',async t=>{
+ const path=root(t),entries=[{path:'目录/source.js',bytes:Buffer.from('staged source\n'),mode:0o755}];
+ await writeReleaseFiles(path,entries,{durable:false});
+ assert.deepEqual(readFileSync(join(path,entries[0].path)),entries[0].bytes);
+ assert.equal(fileMode(join(path,entries[0].path),0o755),0o755);
+ assert.equal(files(path).length,1);
+});

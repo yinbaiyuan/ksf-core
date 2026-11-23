@@ -13,7 +13,7 @@
 
 各操作支持 json、单独 help。quiet 仅限 sync，与 json 互斥。source 与 from 互斥，不持久改变来源；文件按 KSF 根定位。接受 HTTPS、本地文件和 loopback HTTP；拒绝公开明文 HTTP、带凭据地址和降级重定向。
 
-read/check 不写业务目标。schema 4/5 实例的 read 会联网读取固定 Core 提交的文件树以比较差异，不查询新版；升级双方修改同一文本时按需读取并校验原文。联网是维护前提，读取失败保留当前系统。未发布的 development 小型凭据只返回身份，changes:null、baselineVerified:false、baselineStatus:development-package，不尝试把个人或未发布提交冒充远程原版；开发包仍不能贡献或正式升级。update 预览也下载、合并、验证候选，但不切换系统或建立正式备份。update 通常要求新版本；源码模板 schema 5 可将同版本且验证为原 Core 提交后继的正式发行安装为 schema 4，同版本 Release 落后于已验证模板来源时 check 返回 sourceAhead:true、available:false，保留当前源码；显式安装旧包仍拒绝。旧正式凭据仍拒绝同版本换源。旧版本使用 rollback。开发仓库 read 返回 development，其余安装操作要求有效 release.json。
+read/check 不写业务目标。schema 4/5 实例的 read 会联网读取固定 Core 提交的文件树以比较差异，不查询新版；升级双方修改同一文本时按需读取并校验原文。联网是维护前提，读取失败保留当前系统。未发布的 development 小型凭据只返回身份，changes:null、baselineVerified:false、baselineStatus:development-package，不尝试把个人或未发布提交冒充远程原版；开发包仍不能贡献或正式升级。update 预览也下载、合并、验证候选，但不切换系统或建立正式备份。索引请求仍使用配置的连接时限，Core包正文最多读取180秒。预览和实际安装共用runtime-data/system中一个可替换的Core包文件；每次仍重新读取并验证索引，按索引大小与SHA-256核对缓存实际字节，再完整核验候选、冲突、应用和数据。缓存不存有效性结论，不替代保存保护，也不保留多版本包历史。update 通常要求新版本；源码模板 schema 5 可将同版本且验证为原 Core 提交后继的正式发行安装为 schema 4，同版本 Release 落后于已验证模板来源时 check 返回 sourceAhead:true、available:false，保留当前源码；显式安装旧包仍拒绝。旧正式凭据仍拒绝同版本换源。旧版本使用 rollback。开发仓库 read 返回 development，其余安装操作要求有效 release.json。
 
 ## 在用户实例里手动升级
 

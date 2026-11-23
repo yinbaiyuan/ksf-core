@@ -20,7 +20,7 @@ import { checkSourceCompatibility } from '../sources/compatibility.js';
 import { isRepository, isRevision } from './git-values.js';
 import { developmentPath,retiredCorePath } from './paths.js';
 import { matchesBaseline, resolveBaseline } from './baseline.js';
-import { download, releaseIndex } from './network.js';
+import { download, releaseIndex, downloadVerifiedArchive } from './network.js';
 import { inspectCoreArchive } from './release.js';
 import { rootFiles, launcherProtocol } from './products.js';
 import {platform,launcherInvocation,replaceFileSync as renameSync,removePathSync as rmSync} from '../platform/index.js';
@@ -331,12 +331,11 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
   let current = receipt;
   let archive, check;
   if (from) {
-    archive = (await download(sourceAtRoot(root, from), { timeout: config.request_timeout_seconds * 1000, fetcher })).bytes;
+    archive = (await download(sourceAtRoot(root, from), { timeout: config.request_timeout_seconds * 1000, bodyTimeout: 180000, fetcher })).bytes;
   } else {
     check = await systemCheck({ root, source, fetcher, api });
     if (!check.available) return { current: current.version, latest: check.latest, changed: false, dryRun };
-    archive = (await download(check.artifacts.core.url, { base: check.indexURL, timeout: config.request_timeout_seconds * 1000, fetcher })).bytes;
-    if (archive.length !== check.artifacts.core.size || sha256(archive) !== check.artifacts.core.sha256) fail('CHECKSUM_MISMATCH', 'Downloaded Core archive does not match the Release index.');
+    archive = await downloadVerifiedArchive(root,check.artifacts.core,{ base: check.indexURL, timeout: config.request_timeout_seconds * 1000, bodyTimeout: 180000, fetcher });
   }
   const { manifest: incoming, entries } = inspectCoreArchive(archive, { expectedPlatform: check?.platform ?? `${process.platform}-${process.arch}`, expectedRepository: current.core.repository, expectedVersion: check?.latest });
   if (incoming.development) fail('RELEASE_INVALID', 'Cannot install a development package as an official update.');

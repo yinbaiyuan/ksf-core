@@ -47,11 +47,12 @@ export function dependencyInputs(root, paths) {
 // broader; narrowing scheduling must never weaken source mutation detection.
 export function selectChangedTests(root, catalog, paths) {
   const ids = new Set(), full = new Set(), reasons = [];
-  const graph = dependencyInputs(root,catalog.tests.map(t=>t.path));
+  const dependencyChanges=[];
   for (const path of paths) {
     if (rebuiltArtifact(path)) continue;
     const ownTest = catalog.tests.find(t => t.path === path);
     if (ownTest) { ids.add(ownTest.id); reasons.push({path, reason: 'Changed registered test.'}); continue; }
+    dependencyChanges.push(path);
     let known = false;
     for (const rule of catalog.risks) if (rule.paths.some(p => matchesInput(path, p))) {
       for (const component of rule.components) full.add(component);
@@ -59,7 +60,6 @@ export function selectChangedTests(root, catalog, paths) {
     }
     for (const item of catalog.tests) {
       if (item.selectionInputs.some(p => matchesInput(path,p))) {ids.add(item.id); known=true;}
-      if (graph.get(item.path).some(p => matchesInput(path,p))) ids.add(item.id);
     }
     if (!known) {
       const components = Object.entries(catalog.components).filter(([, c]) => matchesInput(path, c.directory)).map(([id]) => id);
@@ -71,6 +71,14 @@ export function selectChangedTests(root, catalog, paths) {
     }
   }
   for (const t of catalog.tests) if (full.has(t.owner) || t.covers.some(c => full.has(c))) ids.add(t.id);
+  // Risk rules and unmapped ownership already establish the full obligation.
+  // Only unresolved candidates need dependency expansion; traversing every
+  // test's broad dynamic directory cannot add coverage to an all-tests plan.
+  const remaining=catalog.tests.filter(t=>!ids.has(t.id));
+  if(remaining.length&&dependencyChanges.length){
+    const graph=dependencyInputs(root,remaining.map(t=>t.path));
+    for(const t of remaining)if(dependencyChanges.some(path=>graph.get(t.path).some(p=>matchesInput(path,p))))ids.add(t.id);
+  }
   // Shared integrations keep their declared native boundary checks.
   for (const t of catalog.tests) if (ids.has(t.id)) for (const id of t.verification.nativeContracts ?? []) ids.add(id);
   return {ids: [...ids].sort(), requiredFullComponents: [...full].sort(), reasons};
