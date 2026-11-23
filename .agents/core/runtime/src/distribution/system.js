@@ -2,7 +2,7 @@ import {GitHubAPI} from './github.js';
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync,
   chmodSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
@@ -188,6 +188,20 @@ function backupRecords(root) {
     return record && !existsSync(join(path, id, 'retention.json')) ? [{ ...record, id }] : [];
   });
 }
+// Frontend development installs are not part of the validated release payload.
+// Preserve independent copies at commit, without duplicating them for previews.
+const developmentInstalls = ['applications/sdk/node_modules','applications/projects/node_modules','runtime/web/node_modules'];
+function copyValidationCore(source,target) {
+  cpSync(source,target,{recursive:true,filter:path=>!developmentInstalls.includes(relative(source,path).replaceAll('\\','/'))});
+}
+function copyDevelopmentInstalls(source,target) {
+  for (const path of developmentInstalls) {
+    const original=join(source,path);
+    try {lstatSync(original);} catch(error) {if(error.code==='ENOENT')continue;throw error;}
+    mkdirSync(dirname(join(target,path)),{recursive:true});
+    cpSync(original,join(target,path),{recursive:true,errorOnExist:true,force:false,verbatimSymlinks:true});
+  }
+}
 function verifyCandidate(candidate, changedPaths = []) {
   const invocation = launcherInvocation(candidate, ['runtime','verify','--json']);
   const verify = spawnSync(invocation.executable, invocation.args, {
@@ -254,7 +268,7 @@ function assertServiceStopped(root){
   const lock=readJSON(root,'.agents/runtime-data/service/host.lock',true);
   if(liveIdentity(owner)||liveIdentity(lock))fail('SERVICE_RUNNING','Stop and drain the current service before switching Core or applications.');
 }
-function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault,applicationPlan } = {}) {
+function commitCandidate(root, candidate, { before, from, to, operation = 'update', fault,applicationPlan,dependencySource=join(root,'.agents/core') } = {}) {
   assertServiceStopped(root);
   if(applicationPlan?.changed)for(const path of ['.agents/ksf','.agents/ksf.ps1'])if(!readRegular(candidate,path).includes(Buffer.from('KSF_APPLICATIONS_RECOVERY')))fail('CANDIDATE_INVALID','Target launchers cannot recover the application index.');
   if(applicationPlan){assertApplicationBaseline(root,applicationPlan);stageApplicationPackages(root,applicationPlan);}
@@ -276,6 +290,7 @@ function commitCandidate(root, candidate, { before, from, to, operation = 'updat
   try {
     // Staging is copied onto the same filesystem before changing live files.
     cpSync(join(candidate, '.agents/core'), join(transaction, 'new-core'), { recursive: true, errorOnExist: true, force: false });
+    copyDevelopmentInstalls(dependencySource,join(transaction,'new-core'));
     mkdirSync(join(transaction, 'old-root'));
     mkdirSync(join(transaction, 'new-root'));
     const changedRoots = rootFiles.filter(path => !readRegular(root, path).equals(readRegular(candidate, path)) || modeOf(root, path) !== modeOf(candidate, path));
@@ -351,7 +366,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
   if (plan.conflicts.length) fail('UPDATE_CONFLICT', 'Core changes conflict with local edits; the current system was preserved.', result);
   const staging = mkdtempSync(join(tmpdir(), 'ksf-update-'));
   try {
-    cpSync(checkedPath(root, '.agents/core'), join(staging, '.agents/core'), { recursive: true });
+    copyValidationCore(checkedPath(root, '.agents/core'), join(staging, '.agents/core'));
     for (const [path, file] of plan.files) {
       const target = checkedPath(staging, path);
       if (file === null) rmSync(target, { force: true });
@@ -382,7 +397,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
   const old = validateManifest(parseJSON(readFileSync(join(backup, 'old-core/release.json')), 'backup manifest'));
   const staging = mkdtempSync(join(tmpdir(), 'ksf-rollback-'));
   try {
-    cpSync(join(backup, 'old-core'), join(staging, '.agents/core'), { recursive: true });
+    copyValidationCore(join(backup, 'old-core'), join(staging, '.agents/core'));
     for (const path of rootFiles) {
       const old = join(backup, 'old-root', path);
       const source = existsSync(old) ? old : checkedPath(root, path);
@@ -398,7 +413,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
     const applicationPlan=await planCoreApplications(root,join(staging,'.agents/core'),{rollbackRecord:applicationsRecord??{changes:{}},environment});
     await assertCoreDataCompatibility(root,join(staging,'.agents/core'),{applicationState:applicationPlan.state,environment});
     if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
-    return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault,applicationPlan }), dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
+    return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault,applicationPlan,dependencySource:join(backup,'old-core') }), dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
   } finally { rmSync(staging, { recursive: true, force: true }); }
 }
 export async function systemSync({ root, now = Date.now(), fetcher }) {

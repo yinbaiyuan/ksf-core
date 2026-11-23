@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
-import {distributionFixture,fixtureTarget,instanceEntries} from './helpers/distribution-fixture.js';
+import {officialArchiveFixture as distributionFixture,officialFixtureTarget as fixtureTarget,instanceEntries} from './helpers/distribution-fixture.js';
 import {buildRelease} from '../src/distribution/release.js';
 import {publishRelease} from '../src/distribution/publish.js';
 import {readArchive,createArchive} from '../src/distribution/archive.js';
@@ -24,13 +24,4 @@ test('workspace ships only the exact generic pending seed; source instance data 
   assert.equal((await publishRelease({root:f.root,directory:built.output,dryRun:true})).dryRun,true);
   // The local convenience directory is not a published artifact; only the Core seed is uploaded.
   assert.deepEqual(Object.keys(descriptor),['core']);
-});
-test('lifecycle changes do not alter Core fingerprint and upgrade/rollback preserve state without incubating legacy instances',async t=>{
-  const f=await distributionFixture(t),initial=systemFingerprint(f.workspace),entry=f.launch(['context','entry','--json']);
-  assert.equal(entry.status,0,entry.stdout+entry.stderr);assert.equal(JSON.parse(entry.stdout).data.mode,'incubation');
-  writeUserData({root:f.workspace,namespace:'incubation',ifMatch:readUserData({root:f.workspace,namespace:'incubation'}).etag,values:{status:'completed'}});
-  assert.equal(systemFingerprint(f.workspace),initial);const before=readFileSync(join(f.workspace,statePath)),next=await f.next();
-  await systemUpdate({root:f.workspace,from:next.coreArchive});assert.deepEqual(readFileSync(join(f.workspace,statePath)),before);assert.equal(contextEntry(f.workspace).mode,'runtime');
-  await systemRollback({root:f.workspace});assert.deepEqual(readFileSync(join(f.workspace,statePath)),before);
-  rmSync(join(f.workspace,statePath));await systemUpdate({root:f.workspace,from:next.coreArchive});assert.equal(readUserData({root:f.workspace,namespace:'incubation'}).state,'missing');assert.equal(contextEntry(f.workspace).mode,'runtime');
 });

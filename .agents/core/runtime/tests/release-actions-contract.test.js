@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {repository} from './helpers/distribution-fixture.js';
 import {reportPublication,inspectHandoff} from '../src/distribution/release-actions.js';
-import {distributionFixture} from './helpers/distribution-fixture.js';
+import {officialArchiveFixture as distributionFixture} from './helpers/distribution-fixture.js';
 const directory = join(repository, '.agents/core/distribution/repository/.github/workflows');
 test('official workflows use core-main, native platform evidence and one Core publisher', () => {
   const text = name => readFileSync(join(directory, name), 'utf8');

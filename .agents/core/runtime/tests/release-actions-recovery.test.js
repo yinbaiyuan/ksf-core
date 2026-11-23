@@ -1,4 +1,4 @@
-import {fixtureTarget} from './helpers/distribution-fixture.js';
+import {officialFixtureTarget as fixtureTarget} from './helpers/distribution-fixture.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
@@ -8,7 +8,7 @@ import { inspectHandoff, recoverPublishedBundle, corePreflight, reportPublicatio
 import { inspectReleaseDirectory } from '../src/distribution/publish.js';
 import { createArchive, readArchive } from '../src/distribution/archive.js';
 import { sha256, stableJSON } from '../src/distribution/common.js';
-import { distributionFixture, repository } from './helpers/distribution-fixture.js';
+import { officialArchiveFixture as distributionFixture, repository } from './helpers/distribution-fixture.js';
 import { PublicationAPI } from './helpers/publication-api.js';
 import YAML from '../src/vendor/yaml/dist/index.js';
 function published(f) {

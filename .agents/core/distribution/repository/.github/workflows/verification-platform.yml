@@ -73,12 +73,17 @@ jobs:
         working-directory: .agents/core/runtime/web
         run: npm run build
       - name: Freeze prepared toolchains
-        run: tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist
+        env:
+          COPYFILE_DISABLE: '1'
+        run: |
+          tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist
+          node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
       - uses: actions/upload-artifact@v7.0.2
         with:
           overwrite: true
           name: prepared-${{ inputs.prepared }}
-          path: prepared.tar
+          path: prepared.tar.zst
+          compression-level: 0
           retention-days: 1
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
@@ -110,8 +115,6 @@ jobs:
       - uses: actions/download-artifact@v8.0.2
         with:
           name: prepared-${{ matrix.prepared }}
-      - name: Restore platform toolchains
-        run: tar -xf prepared.tar
       - name: Prepare group runtime on macOS
         if: runner.os == 'macOS'
         run: |
@@ -133,6 +136,10 @@ jobs:
           $details = & ./.agents/ksf.ps1 hello --json | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Restore platform toolchains
+        run: |
+          node .agents/core/runtime/src/testing/prepared-archive.js decompress prepared.tar.zst prepared.tar
+          tar -xf prepared.tar
       - name: Restore declared local SDK links
         run: node .agents/core/runtime/src/testing/ci.js restore-links
       - name: Exact planned group
