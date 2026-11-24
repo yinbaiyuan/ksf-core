@@ -1,0 +1,70 @@
+name: Native volume diagnostic only
+on:
+  push:
+    branches: [codex/ci-volume-diagnostic-20261124]
+permissions:
+  contents: read
+concurrency:
+  group: native-volume-diagnostic
+  cancel-in-progress: false
+jobs:
+  diagnostic:
+    if: github.repository == 'yinbaiyuan/ksf-core'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, xcode-27]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      KSF_SKIP_AUTO_UPDATE: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Prepare verified bundled runtime
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & ./.agents/ksf.ps1 build --json | Out-Null
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./.agents/ksf.ps1 runtime verify --json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $details = & ./.agents/ksf.ps1 hello --json | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Prepare verified bundled runtime on Mac
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          .agents/ksf build --json > /dev/null
+          .agents/ksf runtime verify --json
+          ksf_node=$(.agents/ksf hello --json | /usr/bin/plutil -extract runtime.nodePath raw -o - -)
+          dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Record native filesystem layout
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: Get-Volume | Select-Object DriveLetter,FileSystem,HealthStatus,Size,SizeRemaining | ConvertTo-Json
+      - name: Record Mac filesystem layout
+        if: runner.os == 'macOS'
+        shell: bash
+        run: df -h "$HOME" "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
+      - name: Compare unchanged native tests on both volumes
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          node .agents/core/runtime/tools/volume-diagnostic.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compare unchanged native tests on Mac
+        if: runner.os == 'macOS'
+        shell: bash
+        run: node .agents/core/runtime/tools/volume-diagnostic.mjs
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: native-volume-diagnostic-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .agents/runtime-data/volume-diagnostic/
+          include-hidden-files: true
+          if-no-files-found: error
