@@ -42,5 +42,5 @@ export async function copyFixtureEntries(entries) {
   });
   await Promise.allSettled(workers);
   if (failure) throw failure;
-  for (const directory of directories.reverse()) chmodSync(directory.target, directory.mode);
+  for (const directory of directories.reverse()) if ((lstatSync(directory.target).mode & 0o777) !== directory.mode) chmodSync(directory.target, directory.mode);
 }

@@ -1,3 +1,4 @@
+import {rm as removeFixture} from 'node:fs/promises';
 import {platform,launcherInvocation,removePathSync as rmSync} from '../../src/platform/index.js';
 export const fixtureTarget=platform.name==='win32'?'win32-x64':platform.name==='linux'?'linux-x64':'darwin-arm64';
 export const officialFixtureTarget=platform.name==='win32'?'win32-x64':'darwin-arm64';
@@ -40,9 +41,6 @@ export function git(root, args) {
 export function commitWorkspace(f, { paths = ['.agents/core', 'AGENTS.md', '.agents/ksf', '.agents/ksf.ps1'], message = 'Fictional local system checkpoint', modes={} } = {}) {
   if (!existsSync(join(f.workspace, '.git'))) {
     git(f.workspace, ['init', '--template=', '--initial-branch=main']);
-    git(f.workspace, ['config', 'user.name', 'KSF Fixture']);
-    git(f.workspace, ['config', 'user.email', 'fixture@example.invalid']);
-    git(f.workspace, ['config', 'commit.gpgsign', 'false']);
   }
   git(f.workspace,['config','user.name','KSF Fixture']);git(f.workspace,['config','user.email','fixture@example.invalid']);git(f.workspace,['config','commit.gpgsign','false']);
   // This helper writes only the isolated test workspace, never a real instance.
@@ -64,7 +62,7 @@ export function embedReceiptBaseline(workspace, first) {
 
 export async function createFixtureBase(t, { legacyEntry = false, sourceRoot = repository, compact = false, target = fixtureTarget, temporaryRoot = tmpdir() } = {}) {
   const directory = mkdtempSync(join(temporaryRoot, 'ksf distribution 测试 ')), root = join(directory, 'core');
-  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  t.after(() => removeFixture(directory, { recursive: true, force: true, maxRetries: 8, retryDelay: 50 }));
   mkdirSync(root);
   // Reconstruct Core sources without inheriting the source workspace's installed identity.
   const installedMarker = join(sourceRoot, '.agents/core/release.json');
@@ -146,7 +144,7 @@ function runSeed(compact) {
   assert.ok(seed && existsSync(seed.root) && existsSync(seed.workspace) && existsSync(seed.first.output), 'Run seed is incomplete; do not silently rebuild or reuse another run.');
   return seed;
 }
-after(() => { for (const cleanup of seedCleanup.splice(0)) cleanup(); });
+after(async () => { for (const cleanup of seedCleanup.splice(0)) await cleanup(); });
 export async function distributionFixture(t, options = {}) {
   const began = performance.now(), priorGit = {...gitTiming}; let packageMs = 0, cleanupMs = 0;
   let base;
@@ -155,7 +153,7 @@ export async function distributionFixture(t, options = {}) {
     const compact=!!options.compact,target=options.target??fixtureTarget,key=target+':'+compact;
     if (!seeds.has(key)) seeds.set(key, (target===fixtureTarget?runSeed(compact):null) ?? createFixtureBase({ after: callback => seedCleanup.push(callback) }, options));
     const seed = await seeds.get(key), directory = mkdtempSync(join(tmpdir(), 'ksf isolated fixture '));
-    t.after(() => {const start=performance.now();rmSync(directory, { recursive: true, force: true });cleanupMs=performance.now()-start;});
+    t.after(async () => {const start=performance.now();await removeFixture(directory, { recursive: true, force: true, maxRetries: 8, retryDelay: 50 });cleanupMs=performance.now()-start;});
     const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');
     // Seeds are never mutated. Copies are independent, including Git objects;
     // mutable fixtures must not share writable hardlinks with another scenario.

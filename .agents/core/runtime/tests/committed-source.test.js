@@ -27,3 +27,14 @@ test('committed batch rejects unsupported modes and unreadable pinned objects',t
  entry.mode='120000';assert.throws(()=>[...source.readBatches(['.agents/core/a'])],{code:'CONTRIBUTION_FILE_TYPE'});
  entry.mode='100644';entry.object='f'.repeat(entry.object.length);assert.throws(()=>[...source.readBatches(['.agents/core/a'])],{code:'CONTRIBUTION_SOURCE_MISSING'});
 });
+
+
+test('combined root and HEAD reads retain unborn, nested-root and fresh-head boundaries',t=>{
+ const f=fixture(t);assert.throws(()=>committedSource(f.root),{code:'CONTRIBUTION_HEAD_REQUIRED'});
+ writeFileSync(join(f.root,'.agents/core/a'),'original');const first=f.commit();
+ assert.equal(committedSource(f.root).headCommit,first);
+ assert.throws(()=>committedSource(join(f.root,'.agents/core')),{code:'CONTRIBUTION_GIT_ROOT_MISMATCH'});
+ writeFileSync(join(f.root,'.agents/core/a'),'next');const second=f.commit();const pinned=committedSource(f.root,{commit:first});
+ assert.equal(pinned.headCommit,second);assert.equal(pinned.sourceCommit,first);assert.equal(pinned.read('.agents/core/a').bytes.toString(),'original');
+ assert.throws(()=>committedSource(f.root,{commit:'not-a-commit'}),{code:'CONTRIBUTION_INVALID'});
+});

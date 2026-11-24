@@ -34,15 +34,15 @@ export const knowledgeFrameworkFiles = [
 export const workspaceDocuments = ['知识/knowledge.md', '档案/archive.md', 'USER.md', 'BOT.md', '.agents/user-data/incubation.json', ...knowledgeFrameworkFiles];
 function revisionInfo(root, allowDirty) {
   const git = args => spawnSync(gitExecutable, ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
-  const rev = git(['rev-parse', '--verify', 'HEAD']);
-  if (rev.status !== 0 || !/^[a-f0-9]{40}\s*$/.test(rev.stdout)) fail('RELEASE_SOURCE_INVALID', 'Build a release from the Core source repository with an existing commit.');
+  const info = git(['show', '-s', '--format=%H%x00%cI', 'HEAD']);
+  const [revision, timestamp, ...extra] = (info.stdout ?? '').replace(/\r?\n$/, '').split('\0');
+  if (info.status !== 0 || !/^[a-f0-9]{40}$/.test(revision ?? '')) fail('RELEASE_SOURCE_INVALID', 'Build a release from the Core source repository with an existing commit.');
+  if (extra.length || !Number.isFinite(Date.parse(timestamp))) fail('RELEASE_SOURCE_INVALID', 'Cannot read the Core commit timestamp.');
   const state = git(['status', '--porcelain', '--untracked-files=all', '--', '.agents', 'AGENTS.md', '.gitignore', '.github', 'README.md', ':(exclude).agents/core/manifest.yaml']);
   if (state.status !== 0) fail('RELEASE_SOURCE_INVALID', 'Cannot inspect the Core source state.');
   const dirty = state.stdout.length > 0;
   if (dirty && !allowDirty) fail('RELEASE_SOURCE_DIRTY', 'Commit Core changes before building an official release; --allow-dirty creates a local development package.');
-  const time = git(['show', '-s', '--format=%cI', 'HEAD']);
-  if (time.status !== 0 || !Number.isFinite(Date.parse(time.stdout.trim()))) fail('RELEASE_SOURCE_INVALID', 'Cannot read the Core commit timestamp.');
-  return { revision: rev.stdout.trim(), dirty, builtAt: new Date(time.stdout.trim()).toISOString() };
+  return { revision, dirty, builtAt: new Date(timestamp).toISOString() };
 }
 function excluded(path) {
   return developmentPath(path) || path === '.agents/core/release.json' || /(?:^|\/)\.DS_Store$/.test(path) ||

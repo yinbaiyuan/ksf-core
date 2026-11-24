@@ -1,13 +1,15 @@
+import {hashFiles} from '../src/testing/fingerprint-worker.js';
+import {createHash} from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,realpathSync,existsSync,symlinkSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,realpathSync,existsSync,symlinkSync,chmodSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {sourceIdentity,validateCoverage,validateProof,trustedRun,restorePreparedLinks,runVerification,aggregateReports,validateGroupPreparation} from '../src/testing/ci.js';
 import {gitBinary,nullDevice} from './helpers/platform.js';
-import {loadCatalog,catalogPath,inputFingerprints} from '../src/testing/catalog.js';
+import {loadCatalog,catalogPath,inputFingerprints,inputFingerprintsAsync} from '../src/testing/catalog.js';
 function proofFixture(t){
  const root=mkdtempSync(join(tmpdir(),'ksf-proof-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
  mkdirSync(join(root,'.agents/core/runtime/tests'),{recursive:true});mkdirSync(join(root,'.agents/core/runtime/testing'));
@@ -142,4 +144,31 @@ test('CI retains only synthetic fixture timing counters without hiding file fail
  const result=JSON.parse(readFileSync(report));assert.equal(result.complete,false);assert.equal(result.results[0].status,'failed');
  assert.deepEqual(result.results[0].fixtureTiming,{scenarios:1,fixtureMs:12,gitMs:3,gitCalls:2,packageMs:4,assertionAndOtherMs:8,cleanupMs:1});
  assert.equal(JSON.stringify(result.results[0].fixtureTiming).includes('private'),false);
+});
+
+
+test('snapshot hashing retains sync fingerprints and detects fresh input and installed dependency changes',async t=>{
+ const root=proofFixture(t),modules=join(root,'.agents/core/runtime/node_modules'),lib=join(modules,'中文');mkdirSync(lib,{recursive:true});
+ writeFileSync(join(root,'.agents/core/runtime/package.json'),'{"type":"module"}');writeFileSync(join(lib,'value'),'dependency');
+ const catalog=loadCatalog(root),snapshot=()=>inputFingerprintsAsync(root,catalog,catalog.tests);
+ const before=inputFingerprints(root,catalog,catalog.tests);assert.deepEqual(await snapshot(),before);
+ writeFileSync(join(lib,'value'),'changed');assert.notDeepEqual(await snapshot(),before);writeFileSync(join(lib,'value'),'dependency');assert.deepEqual(await snapshot(),before);
+ writeFileSync(join(lib,'added'),'new');assert.notDeepEqual(await snapshot(),before);rmSync(join(lib,'added'));
+ writeFileSync(join(root,catalog.tests[0].path),'changed source');assert.notDeepEqual(await snapshot(),before);
+ if(process.platform!=='win32'){const prior=await snapshot();chmodSync(join(root,catalog.tests[0].path),0o755);assert.notDeepEqual(await snapshot(),prior);}
+});
+
+test('hash workers retain binary and Unicode bytes, drain failures and ignore parent preloads',async t=>{
+ const root=proofFixture(t),paths=[join(root,'binary'),join(root,'中文 文件')];
+ writeFileSync(paths[0],Buffer.alloc(1024*1024,129));writeFileSync(paths[1],'Unicode bytes\n');
+ const expected=new Map(paths.map(path=>[path,createHash('sha256').update(readFileSync(path)).digest('hex')]));assert.deepEqual(await hashFiles(paths,{workers:2}),expected);
+ const ports=process.getActiveResourcesInfo().filter(type=>type==='MessagePort').length;
+ await assert.rejects(hashFiles([join(root,'missing'),...paths],{workers:2}),{code:'ENOENT'});
+ assert.ok(process.getActiveResourcesInfo().filter(type=>type==='MessagePort').length<=ports);assert.deepEqual(await hashFiles(paths,{workers:1}),expected);
+ const marker=join(root,'preload-runs'),preload=join(root,'preload.cjs');
+ writeFileSync(preload,"require('node:fs').appendFileSync(process.env.KSF_HASH_PRELOAD_MARKER,'loaded\\n');");
+ const url=new URL('../src/testing/fingerprint-worker.js',import.meta.url).href;
+ const program=`import{hashFiles}from ${JSON.stringify(url)};await hashFiles(${JSON.stringify(paths)},{workers:2});`;
+ const child=spawnSync(process.execPath,['--input-type=module','-e',program],{encoding:'utf8',timeout:15000,env:{...process.env,NODE_OPTIONS:'--require '+JSON.stringify(preload),KSF_HASH_PRELOAD_MARKER:marker}});
+ assert.equal(child.status,0,child.stderr);assert.equal(readFileSync(marker,'utf8'),'loaded\n');
 });

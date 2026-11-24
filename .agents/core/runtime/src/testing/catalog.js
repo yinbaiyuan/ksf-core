@@ -1,3 +1,5 @@
+import {availableParallelism} from 'node:os';
+import {hashFiles} from './fingerprint-worker.js';
 import { readFileSync, readdirSync, lstatSync, existsSync, realpathSync, statSync } from 'node:fs';
 import { join, resolve, relative, matchesGlob } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -63,43 +65,61 @@ export function loadCatalog(root) {
   for (const [id, component] of Object.entries(catalog.components)) if (!catalog.tests.some(t => t.owner === id || t.covers.includes(id)) && !component.noTestsReason) fail('TEST_CATALOG_INVALID', `Component ${id} must declare tests, delegated coverage, or an explicit no-test reason.`);
   return { ...catalog, digest: sha256(JSON.stringify(catalog)) };
 }
-export function inputFingerprints(root, catalog, tests) {
-  const paths = new Map(), roots = new Map();
-  const digestInput = input => {
-    if (!roots.has(input)) {
-      const files = walk(root, input);
-      roots.set(input, sha256(JSON.stringify(files.map(path => {
-        if (!paths.has(path)) paths.set(path, [lstatSync(join(root, path)).mode & 0o777, sha256(readFileSync(join(root, path)))]);
-        return [path, paths.get(path)];
-      }))));
+function fingerprintPlan(root, catalog, tests) {
+  const files=new Set(), paths=new Map(), roots=new Map(), dependencyTrees=new Map();
+  let hashes;
+  const fileHash=path=>{files.add(path);return()=>hashes.get(path);};
+  const constant=value=>()=>value;
+  const memo=compute=>{let ready=false,value;return()=>{if(!ready){value=compute();ready=true;}return value;};};
+  const digestInput=input=>{
+    if(!roots.has(input)){
+      const entries=walk(root,input).map(path=>{
+        if(!paths.has(path))paths.set(path,[lstatSync(join(root,path)).mode & 0o777,fileHash(join(root,path))]);
+        const [mode,hash]=paths.get(path);return()=>[path,[mode,hash()]];
+      });
+      roots.set(input,memo(()=>sha256(JSON.stringify(entries.map(entry=>entry())))));
     }
     return roots.get(input);
   };
-  const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) => /^(?:CI|TZ|LANG|LC_|NODE_|KSF_|GIT_|PATH$|Path$|SystemRoot$)/i.test(key) && !/TOKEN|KEY|SECRET|PASSWORD|CREDENTIAL/i.test(key)).sort(([a], [b]) => a.localeCompare(b)));
-  const runtime = [process.version, process.platform, process.arch, sha256(readFileSync(process.execPath)), environment, sha256(readFileSync(join(root, catalogPath)))];
-  // Locks alone do not prove the installed toolchain. Include its actual bytes,
-  // including native packages and local SDK links. Memoize shared directories.
-  const dependencyTrees = new Map();
-  function dependencies(directory, ancestors = new Set()) {
-    if (!existsSync(directory)) return 'missing';
-    const actual = realpathSync.native(directory);
-    if (ancestors.has(actual)) return 'cycle';
-    if (!dependencyTrees.has(actual)) {
-      const next = new Set([...ancestors, actual]), records = [];
-      for (const entry of readdirSync(actual,{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)) {
-        const name=entry.name;
-        if (['.cache', '.vite', '.bin'].includes(name)) continue;
-        // The current directory enumeration already gives regular-file types.
-        // Follow links and unknown entries as before; retain the exact digest format.
-        const path = join(actual, name), directory=entry.isDirectory()||!entry.isFile()&&statSync(path).isDirectory();
-        records.push([name, directory ? dependencies(path, next) : sha256(readFileSync(path))]);
+  const environment=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(?:CI|TZ|LANG|LC_|NODE_|KSF_|GIT_|PATH$|Path$|SystemRoot$)/i.test(key)&&!/TOKEN|KEY|SECRET|PASSWORD|CREDENTIAL/i.test(key)).sort(([a],[b])=>a.localeCompare(b)));
+  const executable=fileHash(process.execPath),declaration=fileHash(join(root,catalogPath));
+  const runtime=()=>[process.version,process.platform,process.arch,executable(),environment,declaration()];
+  function dependencies(directory,ancestors=new Set()){
+    if(!existsSync(directory))return constant('missing');
+    const actual=realpathSync.native(directory);
+    if(ancestors.has(actual))return constant('cycle');
+    if(!dependencyTrees.has(actual)){
+      const next=new Set([...ancestors,actual]),records=[];
+      for(const entry of readdirSync(actual,{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)){
+        const name=entry.name;if(['.cache','.vite','.bin'].includes(name))continue;
+        const path=join(actual,name),directory=entry.isDirectory()||!entry.isFile()&&statSync(path).isDirectory();
+        records.push([name,directory?dependencies(path,next):fileHash(path)]);
       }
-      dependencyTrees.set(actual, sha256(JSON.stringify(records)));
+      dependencyTrees.set(actual,memo(()=>sha256(JSON.stringify(records.map(([name,hash])=>[name,hash()])))));
     }
     return dependencyTrees.get(actual);
   }
-  const toolchains = [...new Set(Object.values(catalog.components).map(c => c.directory).filter(path => existsSync(join(root, path, 'package.json'))))].sort().map(path => [path, ['package.json','package-lock.json'].map(name=>existsSync(join(root,path,name))?sha256(readFileSync(join(root,path,name))):'missing'), dependencies(join(root, path, 'node_modules'))]);
-  return Object.fromEntries(tests.map(item => [item.id, sha256(JSON.stringify([catalog.digest, runtime, toolchains, [...new Set([item.path, ...item.inputs])].sort().map(input => [input, digestInput(input)])]))]));
+  const toolchains=[...new Set(Object.values(catalog.components).map(c=>c.directory).filter(path=>existsSync(join(root,path,'package.json'))))].sort().map(path=>{
+    const packages=['package.json','package-lock.json'].map(name=>existsSync(join(root,path,name))?fileHash(join(root,path,name)):constant('missing'));
+    const tree=dependencies(join(root,path,'node_modules'));return()=>[path,packages.map(hash=>hash()),tree()];
+  });
+  const selected=tests.map(item=>({id:item.id,inputs:[...new Set([item.path,...item.inputs])].sort().map(input=>[input,digestInput(input)])}));
+  return {files,finish(values){hashes=values;const sharedRuntime=runtime(),sharedToolchains=toolchains.map(tree=>tree());return Object.fromEntries(selected.map(item=>[item.id,sha256(JSON.stringify([catalog.digest,sharedRuntime,sharedToolchains,item.inputs.map(([input,hash])=>[input,hash()])]))]));}};
+}
+export function inputFingerprints(root,catalog,tests){
+  const plan=fingerprintPlan(root,catalog,tests),hashes=new Map();
+  for(const path of plan.files)hashes.set(path,sha256(readFileSync(path)));
+  return plan.finish(hashes);
+}
+// Only this invocation owns the enumerated graph and hashes. Both runner
+// snapshots build new graphs; no validity or installed-toolchain cache survives.
+export async function inputFingerprintsAsync(root,catalog,tests){
+  const plan=fingerprintPlan(root,catalog,tests),files=[...plan.files];
+  const count=Math.min(4,availableParallelism());
+  const hashes=files.length>=10000&&count>1
+    ? await hashFiles(files,{workers:count})
+    : new Map(files.map(path=>[path,sha256(readFileSync(path))]));
+  return plan.finish(hashes);
 }
 export function missingRequirements(root, catalog, tests) {
   const missing = [];
