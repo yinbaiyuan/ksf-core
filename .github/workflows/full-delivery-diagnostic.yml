@@ -1,0 +1,12 @@
+name: Full delivery diagnostic only
+on:
+  push:
+    branches: [codex/ci-full-delivery-diagnostic-20261124]
+permissions:
+  contents: read
+jobs:
+  verification:
+    if: github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification.yml
+    with:
+      full: true

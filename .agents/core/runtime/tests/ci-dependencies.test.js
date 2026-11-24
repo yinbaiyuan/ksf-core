@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import {existsSync, readdirSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {selectPreparationGroups} from '../src/testing/preparation-groups.js';
 import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
@@ -19,7 +21,8 @@ test('CI prepares locked toolchains once per platform and restores them before f
   const directory = repositoryWorkflows(t); if (!directory) return;
   const verification = YAML.parse(readFileSync(join(directory, 'verification.yml'), 'utf8'));
   const native = YAML.parse(readFileSync(join(directory, 'verification-platform.yml'), 'utf8'));
-  const setup = native.jobs.prepare.steps, full = native.jobs.tests.steps;
+  const preparation=YAML.parse(readFileSync(join(directory,'verification-prepare.yml'),'utf8'));
+  const setup = preparation.jobs.prepare.steps, full = native.jobs.tests.steps;
   const installer=setup.find(s=>s.name==='Install locked platform dependencies').run;
   for (const part of ['applications/sdk', 'applications/projects', 'runtime/web']) {
     assert.ok(installer.includes('npm --prefix .agents/core/'+part+' ci'));
@@ -40,7 +43,7 @@ test('CI prepares locked toolchains once per platform and restores them before f
   for (const step of [...setup,...full]) assert.ok(!step.env?.NODE_OPTIONS);
   const check = YAML.parse(readFileSync(join(directory, 'check.yml'), 'utf8'));
   assert.equal(check.jobs.required.if, "always() && github.repository == 'yinbaiyuan/ksf-core'");assert.deepEqual(check.jobs.required.needs, ['reuse','verification']);
-  assert.deepEqual(verification.jobs.coverage.needs, ['plan','platform','linux-core']);
+  assert.deepEqual(verification.jobs.coverage.needs, ['plan','platform','linux-core','full-shared-linux','full-mac-runtime','full-mac','full-win-runtime','full-win']);
   assert.ok(!check.on.pull_request.paths && !check.on.push.paths);
   for(const id of ['plan','coverage'])assert.equal(verification.jobs[id]['runs-on'],'ubuntu-24.04','Pure orchestration must not queue for a native Mac runner.');
   assert.equal(check.jobs.required['runs-on'],'ubuntu-24.04');
@@ -151,7 +154,7 @@ test('native platforms start independently and complete-proof reuse retains a fa
  assert.equal(verification.jobs.platform.needs,'plan');
  assert.equal(verification.jobs.platform.uses,'./.github/workflows/verification-platform.yml');
  assert.equal(native.jobs.tests.needs,'prepare');
- assert.equal(native.jobs.prepare['runs-on'],'${{ inputs.os }}');
+ const preparation=YAML.parse(readFileSync(join(directory,'verification-prepare.yml'),'utf8'));assert.equal(preparation.jobs.prepare['runs-on'],'${{ inputs.os }}');assert.equal(native.jobs.prepare.uses,'./.github/workflows/verification-prepare.yml');
  const check=YAML.parse(readFileSync(join(directory,'check.yml'),'utf8'));
  assert.match(check.jobs.verification.with.full,/github.event_name != 'workflow_dispatch'/);
  assert.match(check.jobs.verification.if,/needs.reuse.outputs.valid != 'true'/);
@@ -175,10 +178,11 @@ test('native Linux obligations use bounded early groups without changing their h
 });
 
 test('CI prepares immutable same-attempt fixtures alongside dependencies and transports them with toolchains',()=>{
- const native=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8'));
- const install=native.jobs.prepare.steps.find(s=>s.name==='Install locked platform dependencies'),freeze=native.jobs.prepare.steps.find(s=>s.name==='Freeze prepared toolchains'),run=native.jobs.tests.steps.find(s=>s.id==='tests');
+ const native=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-prepare.yml'),'utf8'));
+ const tests=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8'));
+ const install=native.jobs.prepare.steps.find(s=>s.name==='Install locked platform dependencies'),freeze=native.jobs.prepare.steps.find(s=>s.name==='Freeze prepared toolchains'),run=tests.jobs.tests.steps.find(s=>s.id==='tests');
  assert.match(install.run,/prepare-ci-fixtures.js.*ksf_fixtures_pid=\$!/);assert.match(install.run,/for ksf_pid in .*"\$ksf_fixtures_pid"/);
- assert.equal(install.env.KSF_CI_GROUPS,'${{ inputs.groups }}');assert.match(freeze.run,/tar -cf -.*\.agents\/runtime-data\/ci-seeds/);
+ const select=native.jobs.prepare.steps.find(s=>s.name==='Select exact preparation groups');assert.equal(select.env.KSF_PREPARATION_GROUPS,'${{ inputs.groups }}');assert.match(select.run,/ci.js prepare-groups/);assert.ok(!install.env?.KSF_CI_GROUPS);assert.match(freeze.run,/tar -cf -.*\.agents\/runtime-data\/ci-seeds/);
  assert.equal(run.env.KSF_TEST_CI_PREPARED_SEEDS,'.agents/runtime-data/ci-seeds');
 });
 
@@ -191,7 +195,7 @@ test('runtime-only transaction groups keep every native file and preserve hosted
   assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);assert.ok(groups.length<=(platform==='darwin'?5:12));
   for(const g of groups.filter(g=>g.toolchains===false)){assert.equal(g.profile,'native');assert.ok(g.files.every(path=>runtimeOnlyTest(catalog.tests.find(t=>t.path===path))));}
  }
- const wf=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8')),prepare=wf.jobs.prepare.steps;
+ const wf=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8')),preparation=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-prepare.yml'),'utf8')),prepare=preparation.jobs.prepare.steps;
  assert.equal(wf.on.workflow_call.inputs.toolchains.default,true);assert.equal(wf.jobs.tests.needs,'prepare');
  assert.equal(prepare.find(s=>s.name==='Install locked platform dependencies').if,'inputs.toolchains');
  assert.equal(prepare.find(s=>s.name==='Prepare runtime-only native fixtures').if,'${{ !inputs.toolchains }}');
@@ -215,4 +219,67 @@ test('qualified Core files share runtime workers without moving frontend or unqu
  assert.equal(runtimeOnlyTest({id:'core:new-native-file',owner:'core',requirements:[]}),false);
  for(const [target,count] of [['mac-runtime',4],['mac',1],['win-runtime',10],['win',2]])assert.equal(plan.groups.filter(g=>g.target===target).length,count);
  assert.equal(plan.groups.length,24);assert.equal(plan.groups.reduce((sum,g)=>sum+g.files.length,0),549);
+});
+
+
+test('full platform preparation overlaps planning without cross-platform readiness barriers',()=>{
+ const directory=repositoryWorkflows(),workflow=YAML.parse(readFileSync(join(directory,'verification.yml'),'utf8')),native=YAML.parse(readFileSync(join(directory,'verification-platform.yml'),'utf8'));
+ const expected=[['shared-linux','Linux','ubuntu-24.04',true],['mac-runtime','macOS-runtime','xcode-27',false],['mac','macOS','xcode-27',true],['win-runtime','Windows-runtime','windows-2025',false],['win','Windows','windows-2025',true]];
+ for(const [id,prepared,os,toolchains] of expected){
+  const producer=workflow.jobs['prepare-'+id],consumer=workflow.jobs['full-'+id];
+  assert.equal(producer.needs,undefined);assert.match(producer.if,/inputs.full/);assert.equal(producer.uses,'./.github/workflows/verification-prepare.yml');assert.deepEqual(producer.with,{os,prepared,toolchains,full:true});
+  assert.deepEqual(consumer.needs,['plan','prepare-'+id]);assert.match(consumer.if,/needs.plan.outputs.has_native/);assert.equal(consumer.with.prepared_external,true);assert.equal(consumer.with.prepared,prepared);assert.equal(consumer.with.toolchains,toolchains);
+  assert.ok(consumer.with.groups.includes("['"+prepared+"']"));assert.ok(workflow.jobs.coverage.needs.includes('full-'+id));
+ }
+ assert.match(workflow.jobs.platform.if,/!inputs.full/);assert.equal(native.on.workflow_call.inputs.prepared_external.default,false);
+ assert.match(native.jobs.prepare.if,/!inputs.prepared_external/);assert.match(native.jobs.tests.if,/!cancelled\(\)/);assert.match(native.jobs.tests.if,/needs.prepare.result == 'success'/);
+ const gate=workflow.jobs.coverage.steps.find(s=>s.name==='Require every applicable job');assert.equal(gate.if,'always()');assert.match(gate.run,/KSF_FULL/);
+ for(const key of ['KSF_SHARED_LINUX_RESULT','KSF_MAC_RUNTIME_RESULT','KSF_MAC_RESULT','KSF_WIN_RUNTIME_RESULT','KSF_WIN_RESULT'])assert.ok(gate.run.includes('"$'+key+'"'));
+ assert.equal(workflow.permissions.contents,'read');assert.equal(Object.keys(workflow.permissions).length,1);
+ assert.deepEqual(targets.filter(t=>t.prepared).map(t=>[t.target,t.prepared,t.os,t.toolchains]),expected);
+});
+
+
+test('source-derived full preparation equals canonical groups and rejects wrong host or altered input',()=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),identity=sourceIdentity(root),plan=createVerificationPlan(root,{full:true},identity);
+ for(const target of targets.filter(t=>t.prepared)){
+  const host={platform:target.platform,architecture:target.architecture},input={prepared:target.prepared,os:target.os,toolchains:target.toolchains,full:true},expected={include:plan.groups.filter(g=>g.prepared===target.prepared)};
+  assert.deepEqual(selectPreparationGroups(root,input,identity,host),expected);
+  assert.deepEqual(selectPreparationGroups(root,{...input,groups:JSON.stringify(expected,null,2)},identity,host),expected);
+  for(const changed of [{groups:'null'},{groups:'{'},{groups:'{"include":[]}'},{os:'other-host'},{toolchains:!target.toolchains},{full:false},{full:'true'}])assert.throws(()=>selectPreparationGroups(root,{...input,...changed},identity,host),{code:'TEST_CI_PREPARATION_INVALID'});
+  assert.throws(()=>selectPreparationGroups(root,input,identity,{...host,architecture:'wrong'}),{code:'TEST_CI_PREPARATION_INVALID'});
+  const altered=structuredClone(expected);altered.include[0].files.pop();assert.throws(()=>selectPreparationGroups(root,{...input,groups:JSON.stringify(altered)},identity,host),{code:'TEST_CI_PREPARATION_INVALID'});
+ }
+});
+
+test('affected preparation retains explicit groups and refuses duplicate or cross-target files',()=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),identity=sourceIdentity(root),plan=createVerificationPlan(root,{full:true},identity),target=targets.find(t=>t.target==='mac-runtime'),host={platform:target.platform,architecture:target.architecture};
+ const expected={include:plan.groups.filter(g=>g.prepared===target.prepared).slice(0,1)},input={prepared:target.prepared,os:target.os,toolchains:target.toolchains,full:false,groups:JSON.stringify(expected)};
+ assert.deepEqual(selectPreparationGroups(root,input,identity,host),expected);
+ for(const mutate of [v=>v.include.push(structuredClone(v.include[0])),v=>v.include[0].files.push(v.include[0].files[0]),v=>v.include[0].files.push(plan.groups.find(g=>g.target==='mac').files[0]),v=>v.include[0].architecture='x64',v=>v.include[0].profile='all',v=>v.include[0].id='wrong-1',v=>v.include[0].id='mac-runtime-5']){
+  const changed=structuredClone(expected);mutate(changed);assert.throws(()=>selectPreparationGroups(root,{...input,groups:JSON.stringify(changed)},identity,host),{code:'TEST_CI_PREPARATION_INVALID'});
+ }
+});
+
+test('the actual coverage gate rejects failed, cancelled, skipped and missing prerequisites',()=>{
+ const workflow=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification.yml'),'utf8'));
+ const script=workflow.jobs.coverage.steps.find(s=>s.name==='Require every applicable job').run;
+ const fullKeys=['KSF_SHARED_LINUX_RESULT','KSF_MAC_RUNTIME_RESULT','KSF_MAC_RESULT','KSF_WIN_RUNTIME_RESULT','KSF_WIN_RESULT'];
+ const baseline={...process.env,KSF_FULL:'true',PLAN:'success',HAS_NATIVE:'true',HAS_LINUX:'true',LINUX:'success',PLATFORM:'skipped',...Object.fromEntries(fullKeys.map(k=>[k,'success']))};
+ const run=env=>spawnSync('bash',['-e','-c',script],{env,encoding:'utf8',timeout:10000});
+ assert.equal(run(baseline).status,0);
+ for(const key of ['PLAN','LINUX',...fullKeys])for(const status of ['failure','cancelled','skipped',''])assert.notEqual(run({...baseline,[key]:status}).status,0,`${key}: ${status}`);
+ const affected={...baseline,KSF_FULL:'false',PLATFORM:'success',...Object.fromEntries(fullKeys.map(k=>[k,'skipped']))};
+ assert.equal(run(affected).status,0);
+ for(const status of ['failure','cancelled','skipped',''])assert.notEqual(run({...affected,PLATFORM:status}).status,0);
+ assert.equal(run({...affected,HAS_NATIVE:'false',PLATFORM:'skipped'}).status,0);
+});
+
+test('preparation CLI publishes only normalized groups after validating real-host inputs',t=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),folder=mkdtempSync(join(tmpdir(),'ksf-preparation-env-'));t.after(()=>rmSync(folder,{recursive:true,force:true}));
+ const target=targets.find(t=>t.prepared&&t.platform===process.platform&&t.architecture===process.arch);if(!target)return t.skip('No official preparation target for this host.');
+ const output=join(folder,'environment'),env={...process.env,NODE_OPTIONS:'',KSF_PREPARED:target.prepared,KSF_PREPARATION_OS:target.os,KSF_PREPARATION_TOOLCHAINS:String(target.toolchains),KSF_PREPARATION_FULL:'true',KSF_PREPARATION_GROUPS:'',GITHUB_ENV:output};writeFileSync(output,'');
+ const result=spawnSync(process.execPath,['.agents/core/runtime/src/testing/ci.js','prepare-groups'],{cwd:root,env,encoding:'utf8',timeout:30000});assert.equal(result.status,0,result.stderr);
+ const line=readFileSync(output,'utf8');assert.equal(line.split('\n').length,2);assert.ok(line.startsWith('KSF_CI_GROUPS='));const groups=JSON.parse(line.slice('KSF_CI_GROUPS='.length));assert.ok(groups.include.every(g=>g.prepared===target.prepared&&g.platform===process.platform));
+ writeFileSync(output,'');const failed=spawnSync(process.execPath,['.agents/core/runtime/src/testing/ci.js','prepare-groups'],{cwd:root,env:{...env,KSF_PREPARATION_OS:'wrong'},encoding:'utf8',timeout:30000});assert.notEqual(failed.status,0);assert.equal(readFileSync(output,'utf8'),'');
 });
