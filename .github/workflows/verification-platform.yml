@@ -35,11 +35,6 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/cache@v5
-        if: inputs.toolchains
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Prepare and verify pinned runtime on macOS
         if: runner.os == 'macOS'
         run: |
@@ -65,6 +60,19 @@ jobs:
           $details = & ./.agents/ksf.ps1 hello --json | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Locate pinned npm cache
+        if: inputs.toolchains
+        id: npm-cache
+        run: |
+          ksf_cache=$(npm config get cache)
+          ksf_cache=${ksf_cache%$'\r'}
+          test -n "$ksf_cache"
+          printf 'path=%s\n' "$ksf_cache" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        if: inputs.toolchains
+        with:
+          path: ${{ steps.npm-cache.outputs.path }}
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install locked platform dependencies
         if: inputs.toolchains
         env:

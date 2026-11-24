@@ -20,7 +20,14 @@ test('official workflows use core-main, native platform evidence and one Core pu
     assert.ok(text(name).includes("github.repository == 'yinbaiyuan/ksf-core'"));
     assert.ok(!/ksf-workspace|KSF_TEMPLATE_APP|create-github-app-token|release template|release mirror|release-only/.test(text(name)));
   }
-  assert.deepEqual(Object.keys(release.jobs), ['find-proof','verification','prepare','release']);
+  assert.deepEqual(Object.keys(release.jobs), ['find-proof','verification','prepare','warm-windows-downloads','release']);
+  const warm=release.jobs['warm-windows-downloads'];
+  assert.equal(warm.needs,'find-proof');assert.match(warm.if,/refs\/heads\/core-main/);assert.match(warm.if,/needs.find-proof.outputs.valid == 'true'/);
+  assert.equal(warm['runs-on'],'windows-2025');assert.deepEqual(warm.permissions,{contents:'read'});
+  assert.ok(warm.steps.some(step=>step.id==='npm-cache'&&/npm config get cache/.test(step.run??'')));
+  assert.ok(warm.steps.some(step=>step.id==='npm-downloads'&&step.with.path==='${{ steps.npm-cache.outputs.path }}'));
+  assert.ok(warm.steps.some(step=>/wait "\$ksf_pid" \|\| ksf_install_status=\$\?/.test(step.run??'')));
+  assert.ok(!JSON.stringify(warm).includes('release publish'));
   assert.ok(text('release.yml').includes('origin/core-main'));
   assert.ok(text('release.yml').includes('release publish'));
   assert.ok(text('verification-platform.yml').includes('restore-links'));

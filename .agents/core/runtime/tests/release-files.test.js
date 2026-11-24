@@ -14,11 +14,12 @@ function files(path){return readdirSync(path,{withFileTypes:true}).flatMap(entry
 test('bounded fixture copies preserve hidden, Unicode and empty entries with independent bytes and modes',async t=>{
  const source=root(t),a=root(t),b=root(t);
  const entries=[{path:'目录/脚本',bytes:Buffer.from('original executable\n'),mode:0o755},{path:'.git/objects/synthetic',bytes:Buffer.from([0,1,255]),mode:0o644}];
- mkdirSync(join(source,'empty'));
+ mkdirSync(join(source,'empty'));chmodSync(join(source,'empty'),0o711);
  for(const entry of entries){const path=join(source,entry.path);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,entry.bytes,{mode:entry.mode});chmodSync(path,entry.mode);}
  await copyFixtureEntries([{source,target:join(a,'tree'),recursive:true},{source,target:join(b,'tree'),recursive:true}]);
  for(const target of [a,b]){
   assert.deepEqual(readdirSync(join(target,'tree/empty')),[]);
+  assert.equal(fileMode(join(target,'tree/empty'),0o711),fileMode(join(source,'empty'),0o711));
   for(const entry of entries){const path=join(target,'tree',entry.path);assert.deepEqual(readFileSync(path),entry.bytes);assert.equal(fileMode(path,entry.mode),fileMode(join(source,entry.path),entry.mode));}
  }
  writeFileSync(join(a,'tree',entries[0].path),'changed only in first copy');
