@@ -4,7 +4,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { platform, removePathSync } from '../platform/index.js';
-import { inputFingerprints, fail } from './catalog.js';
+import { inputFingerprintsAsync, fail } from './catalog.js';
 import { fixtureDigest,readPreparedFixtures } from './fixtures.js';
 import { retainRuntimeArtifacts } from '../distribution/retention.js';
 
@@ -49,13 +49,13 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   for (const error of retention.errors) progress(`Test artifact retention: ${error.code}: ${error.message}`);
   const runId = randomUUID(), base = join(root, '.agents/runtime-data/tests'), directory = join(base, runId), cache = join(base, 'cache');
   mkdirSync(directory, { recursive: true }); mkdirSync(cache, { recursive: true });
-  const fingerprintStarted=performance.now();
-  const before = inputFingerprints(root, plan.catalog, plan.tests), beforeFingerprintMs=Math.round(performance.now()-fingerprintStarted), results = new Array(plan.tests.length), active = new Set();
+  const results = new Array(plan.tests.length), active = new Set();
+  let before,beforeFingerprintMs;
   // Keep native Windows staging paths within legacy PowerShell/.NET limits.
   // A profile-root scratch directory is shorter than %LOCALAPPDATA%/Temp plus
   // another run/file hierarchy, and is exclusively owned and removed here.
   const temporaryDirectory = mkdtempSync(join(process.platform==='win32'?homedir():tmpdir(), '.ksft-'));
-  const startedAt = new Date().toISOString(), start = performance.now(); let cancelled = false;
+  let cancelled = false;
   const stop = child => {
     if (child.exitCode !== null || child.signalCode !== null) return;
     // Detached descendants have their own POSIX process groups. Snapshot the
@@ -71,6 +71,13 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   };
   const onSignal = () => { cancelled = true; for (const child of active) stop(child); };
   process.on('SIGINT', onSignal); process.on('SIGTERM', onSignal);
+  try {
+    const began=performance.now();before=await inputFingerprintsAsync(root,plan.catalog,plan.tests);beforeFingerprintMs=Math.round(performance.now()-began);
+  } catch(error) {
+    process.off('SIGINT',onSignal);process.off('SIGTERM',onSignal);removePathSync(temporaryDirectory,{recursive:true,force:true});throw error;
+  }
+  const startedAt=new Date().toISOString(),start=performance.now();
+
   let fixturePreparation = null, fixtureError, seedPath, seedDirectory;
   async function prepareFixtures() {
     const consumers = plan.tests.filter(t => t.fixtures?.includes('distribution'));
@@ -159,10 +166,14 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
     const schedule = plan.tests.map((item,index)=>({...item,index})).sort((a,b)=>(b.seconds?.[process.platform]??1)-(a.seconds?.[process.platform]??1)||a.path.localeCompare(b.path));
     const parallel = plan.execution.maxParallelFiles;
     await scheduleTests(schedule, parallel, async item => { results[item.index] = await runOne(item, item.index); }, () => cancelled);
-  } catch (error) { fixtureError = {code:error.code ?? 'TEST_EXECUTION_FAILED',message:error.message}; progress(error.message); } finally { process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); for (const child of active) stop(child); }
+  } catch (error) { fixtureError = {code:error.code ?? 'TEST_EXECUTION_FAILED',message:error.message}; progress(error.message); } finally { for (const child of active) stop(child); }
   for (let i = 0; i < results.length; i++) if (!results[i]) results[i] = { id: plan.tests[i].id, path: plan.tests[i].path, owner: plan.tests[i].owner, status: 'not-executed', durationMs: 0 };
   const afterFingerprintStarted=performance.now();
-  const after = inputFingerprints(root, plan.catalog, plan.tests), afterFingerprintMs=Math.round(performance.now()-afterFingerprintStarted), changed = plan.tests.filter(item => before[item.id] !== after[item.id]).map(item => item.path);
+  let after,afterFingerprintMs;
+  try {after=await inputFingerprintsAsync(root,plan.catalog,plan.tests);afterFingerprintMs=Math.round(performance.now()-afterFingerprintStarted);}
+  catch(error){removePathSync(temporaryDirectory,{recursive:true,force:true});throw error;}
+  finally{process.off('SIGINT',onSignal);process.off('SIGTERM',onSignal);}
+  const changed=plan.tests.filter(item=>before[item.id]!==after[item.id]).map(item=>item.path);
   try {if (fixturePreparation && fixtureDigest(seedDirectory) !== fixturePreparation.digest) fixtureError = {code:'TEST_FIXTURE_CHANGED',message:'A test changed the run-owned immutable fixture seed.'};}
   catch(error) {fixtureError = {code:'TEST_FIXTURE_CHANGED',message:error.message};}
   let cleanupError;

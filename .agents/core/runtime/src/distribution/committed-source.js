@@ -29,17 +29,26 @@ export function committedSource(root, { commit, binary = gitBinary } = {}) {
     if (result.error) fail('CONTRIBUTION_GIT_FAILED', 'Could not read the local Git objects.');
     return result;
   };
-  const top = run(['rev-parse', '--show-toplevel']);
-  if (top.status !== 0) fail('CONTRIBUTION_GIT_REQUIRED', 'Use a Git repository at the KSF root and commit the intended system changes first.');
-  // Native resolution expands Windows 8.3 aliases, as Git and PowerShell do.
-  const gitRoot = realpathSync.native(top.stdout.toString('utf8').replace(/\r?\n$/, ''));
-  const selectedRoot = realpathSync.native(root);
-  if (gitRoot !== selectedRoot) {
-    fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.', { gitRoot, selectedRoot });
+  const snapshot = run(['rev-parse', '--show-toplevel', '--verify', 'HEAD^{commit}']);
+  const parsed = snapshot.status === 0 && /^([\s\S]*?)\r?\n([a-f0-9]{40}|[a-f0-9]{64})\r?\n$/.exec(snapshot.stdout.toString('utf8'));
+  let headCommit;
+  if (parsed) {
+    const gitRoot = realpathSync.native(parsed[1]), selectedRoot = realpathSync.native(root);
+    if (gitRoot !== selectedRoot) fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.', {gitRoot,selectedRoot});
+    headCommit = parsed[2];
+  } else {
+    const top = run(['rev-parse', '--show-toplevel']);
+    if (top.status !== 0) fail('CONTRIBUTION_GIT_REQUIRED', 'Use a Git repository at the KSF root and commit the intended system changes first.');
+    // Native resolution expands Windows 8.3 aliases, as Git and PowerShell do.
+    const gitRoot = realpathSync.native(top.stdout.toString('utf8').replace(/\r?\n$/, ''));
+    const selectedRoot = realpathSync.native(root);
+    if (gitRoot !== selectedRoot) {
+      fail('CONTRIBUTION_GIT_ROOT_MISMATCH', 'The KSF root must be the Git working-tree root.', { gitRoot, selectedRoot });
+    }
+    const head = run(['rev-parse', '--verify', 'HEAD^{commit}']);
+    headCommit = head.stdout.toString('utf8').trim();
+    if (head.status !== 0 || !isLocalCommit(headCommit)) fail('CONTRIBUTION_HEAD_REQUIRED', 'The KSF repository has no readable HEAD commit.');
   }
-  const head = run(['rev-parse', '--verify', 'HEAD^{commit}']);
-  const headCommit = head.stdout.toString('utf8').trim();
-  if (head.status !== 0 || !isLocalCommit(headCommit)) fail('CONTRIBUTION_HEAD_REQUIRED', 'The KSF repository has no readable HEAD commit.');
   if (commit !== undefined && !isLocalCommit(commit)) fail('CONTRIBUTION_INVALID', 'Invalid local contribution commit.');
   const sourceCommit = commit ?? headCommit;
   const listing = run(['ls-tree', '-r', '-z', sourceCommit, '--', 'AGENTS.md', '.agents/core', '.agents/bin/ksf', '.agents/ksf', '.agents/ksf.ps1']);

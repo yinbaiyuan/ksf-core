@@ -117,6 +117,15 @@ function gitInfo(root) {
   const run = args => spawnSync(gitExecutable, ['-C', root, ...args], { encoding: 'utf8' });
   const top = run(['rev-parse', '--show-toplevel']);
   if (top.status !== 0 || realpathSync.native(top.stdout.trim()) !== realpathSync.native(root)) return { source_revision: null, source_dirty: null };
+  // Branch identity and worktree state come from one current Git query.
+  // Older or failing Git representations retain the original independent reads.
+  const snapshot = run(['status', '--porcelain=v2', '--branch', '--untracked-files=all', '--', '.', ':(exclude).agents/core/manifest.yaml']);
+  if (snapshot.status === 0) {
+    const lines = snapshot.stdout.split(/\r?\n/), oid = lines.find(line => line.startsWith('# branch.oid '));
+    if (oid === '# branch.oid (initial)' || /^# branch\.oid (?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(oid ?? ''))
+      return { source_revision: oid === '# branch.oid (initial)' ? null : oid.slice('# branch.oid '.length),
+        source_dirty: lines.some(line => line && !line.startsWith('# ')) };
+  }
   const revision = run(['rev-parse', '--verify', 'HEAD']);
   const status = run(['status', '--porcelain', '--untracked-files=all', '--', '.', ':(exclude).agents/core/manifest.yaml']);
   return { source_revision: revision.status === 0 ? revision.stdout.trim() : null,
