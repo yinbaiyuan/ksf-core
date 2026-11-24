@@ -10,15 +10,15 @@ export async function transformPreparedArchive(input,output,operation) {
   if (!['compress','decompress'].includes(operation)) throw new Error('Expected compress or decompress.');
   const codec=operation==='compress'?createZstdCompress({params:{[constants.ZSTD_c_compressionLevel]:1,[constants.ZSTD_c_checksumFlag]:1}}):createZstdDecompress();
   let file;
-  try { file=await open(output,'wx',0o600); }
+  try { if(output!=='-')file=await open(output,'wx',0o600); }
   catch(error) {codec.destroy();throw error;}
-  try {await pipeline(createReadStream(input),codec,file.createWriteStream());}
-  catch(error) {await file.close().catch(()=>{});await rm(output,{force:true});throw error;}
-  finally {await file.close().catch(()=>{});}
+  try {await pipeline(input==='-'?process.stdin:createReadStream(input),codec,file?file.createWriteStream():process.stdout);}
+  catch(error) {if(file){await file.close().catch(()=>{});await rm(output,{force:true});}throw error;}
+  finally {if(file)await file.close().catch(()=>{});}
 }
 if (process.argv[1] && fileURLToPath(import.meta.url)===resolve(process.argv[1])) {
   try {
-    if (process.argv.length!==5) throw new Error('Usage: prepared-archive.js compress|decompress input output');
+    if (process.argv.length!==5) throw new Error('Usage: prepared-archive.js compress|decompress input|- output|-');
     await transformPreparedArchive(process.argv[3],process.argv[4],process.argv[2]);
   } catch(error) {console.error(error.message);process.exitCode=1;}
 }

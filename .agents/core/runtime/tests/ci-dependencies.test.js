@@ -26,9 +26,13 @@ test('CI prepares locked toolchains once per platform and restores them before f
   }
   assert.match(installer,/wait "\$ksf_pid" \|\| ksf_install_status=\$\?/);
   assert.match(installer,/exit "\$ksf_install_status"/);
-  assert.ok(setup.findIndex(s => /npm run build/.test(s.run ?? '')) < setup.findIndex(s => /tar -cf prepared.tar/.test(s.run ?? '')));
+  assert.ok(setup.findIndex(s => /npm run build/.test(s.run ?? '')) < setup.findIndex(s => /tar -cf -/.test(s.run ?? '')));
   assert.ok(!setup.some(s => /ci.js run/.test(s.run ?? '')));
-  assert.ok(full.findIndex(s => /tar -xf prepared.tar/.test(s.run ?? '')) < full.findIndex(s => /ci.js run-group/.test(s.run ?? '')));
+  assert.ok(full.findIndex(s => /tar -xf -/.test(s.run ?? '')) < full.findIndex(s => /ci.js run-group/.test(s.run ?? '')));
+  for(const step of [...setup.filter(s=>/^Freeze prepared /.test(s.name??'')),full.find(s=>s.name==='Restore platform toolchains')]){
+    assert.match(step.run,/set -o pipefail/,'A failed archive producer or consumer must fail the job.');
+    assert.match(step.run,/\|/);assert.doesNotMatch(step.run,/prepared\.tar(?:\s|$)/,'Do not materialize an uncompressed intermediate archive.');
+  }
   assert.ok(!full.some(s => /npm (?:test|ci)|release build|npm run build/.test(s.run ?? '')));
   for (const step of [...setup,...full]) assert.ok(!step.env?.NODE_OPTIONS);
   const check = YAML.parse(readFileSync(join(directory, 'check.yml'), 'utf8'));
@@ -171,7 +175,7 @@ test('CI prepares immutable same-attempt fixtures alongside dependencies and tra
  const native=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8'));
  const install=native.jobs.prepare.steps.find(s=>s.name==='Install locked platform dependencies'),freeze=native.jobs.prepare.steps.find(s=>s.name==='Freeze prepared toolchains'),run=native.jobs.tests.steps.find(s=>s.id==='tests');
  assert.match(install.run,/prepare-ci-fixtures.js.*ksf_fixtures_pid=\$!/);assert.match(install.run,/for ksf_pid in .*"\$ksf_fixtures_pid"/);
- assert.equal(install.env.KSF_CI_GROUPS,'${{ inputs.groups }}');assert.match(freeze.run,/tar -cf prepared.tar.*\.agents\/runtime-data\/ci-seeds/);
+ assert.equal(install.env.KSF_CI_GROUPS,'${{ inputs.groups }}');assert.match(freeze.run,/tar -cf -.*\.agents\/runtime-data\/ci-seeds/);
  assert.equal(run.env.KSF_TEST_CI_PREPARED_SEEDS,'.agents/runtime-data/ci-seeds');
 });
 
