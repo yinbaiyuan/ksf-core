@@ -15,6 +15,8 @@ import {readStore} from '../src/ability-store/storage.js';
 import {runAbilityStoreCommand} from '../src/commands/ability-store.js';
 import {checkSourceCompatibility} from '../src/sources/compatibility.js';
 import {gitBinary} from './helpers/platform.js';
+import fs from 'node:fs';
+import {syncBuiltinESMExports} from 'node:module';
 function fixture(t){
  const folder=realpathSync(mkdtempSync(join(tmpdir(),'ksf-store-'))),root=join(folder,'ksf');t.after(()=>rmSync(folder,{recursive:true,force:true,maxRetries:8,retryDelay:50}));
  for(const type of Object.values(types))for(const source of ['system','user'])mkdirSync(join(root,type[source]),{recursive:true});
@@ -152,4 +154,37 @@ test('legacy explicit members become dependencies only while an owning partner r
 test('a broken unselected product does not block an installed independent product update',async t=>{
  const f=fixture(t),s=f.source(),a='partner.author.one',bad='partner.author.bad';f.add(s,a);f.add(s,bad);writeFileSync(join(s,'ksf-source.yaml'),YAML.stringify({kind:'ksf-ability-source',schema_version:2,id:'team',name:'team',distribution:{entries:[a,bad]}}));await f.mutate('source-add',{kind:'local',location:s});await f.apply('install',{sourceId:'team',id:a});
  f.add(s,bad,['competency.ksf.unavailable@9.0.0'],'0.2.0');f.add(s,a,[],'0.2.0');await f.apply('update',{sourceId:'team',id:a});assert.equal(f.query(a).data.object.version,'0.2.0');
+});
+
+
+async function wholeSourceFixture(t){
+ const f=fixture(t),source=f.source(),ids=['competency.fixture.first','competency.fixture.second'];
+ for(const id of ids)f.add(source,id);
+ await f.mutate('source-add',{kind:'local',location:source});await f.apply('install',{sourceId:'team',ids});
+ for(const id of ids)f.add(source,id,[],'0.2.0');
+ return {...f,source,ids};
+}
+test('whole-source previews refresh between requests and retain installed generations on stale plans',async t=>{
+ const f=await wholeSourceFixture(t),preview=await previewAbilityStore(f.root,{action:'update',sourceId:'team'}),before=readStore(f.root);
+ f.add(f.source,f.ids[0],[],'0.3.0');
+ await assert.rejects(f.mutate('update',{sourceId:'team',planDigest:preview.planDigest}),{code:'ABILITY_STORE_PREVIEW_CHANGED'});assert.deepEqual(readStore(f.root),before);
+ const next=await previewAbilityStore(f.root,{action:'update',sourceId:'team'});assert.notEqual(next.planDigest,preview.planDigest);
+ await f.mutate('update',{sourceId:'team',planDigest:next.planDigest});const installed=readStore(f.root).state.installed.team.objects;
+ assert.equal(installed.find(o=>o.id===f.ids[0]).version,'0.3.0');assert.equal(installed.find(o=>o.id===f.ids[1]).version,'0.2.0');
+});
+test('whole-source publication rechecks source bytes after the shared planning snapshot',async t=>{
+ const f=await wholeSourceFixture(t),preview=await previewAbilityStore(f.root,{action:'update',sourceId:'team'}),before=readStore(f.root);
+ await assert.rejects(mutateAbilityStore(f.root,'update',{sourceId:'team',planDigest:preview.planDigest,ifMatch:preview.version,operationId:randomUUID()},{beforePublish(){f.add(f.source,f.ids[1],[],'0.2.0','# changed after planning\n');}}),{code:'ABILITY_STORE_SOURCE_CHANGED'});
+ assert.deepEqual(readStore(f.root),before);assert.ok(before.state.installed.team.objects.every(o=>o.version==='0.1.0'));
+});
+test('a definition changed during whole-source planning is rejected before returning a mixed-version preview',async t=>{
+ const f=await wholeSourceFixture(t),target=fs.realpathSync.native(join(f.source,types.competency.user,f.ids[0],types.competency.entry)),before=readStore(f.root);
+ const open=fs.openSync,read=fs.readFileSync,close=fs.closeSync,descriptors=new Set();let armed=true,changed=false;
+ fs.openSync=function(...args){const fd=open(...args);if(String(args[0])===target)descriptors.add(fd);return fd;};
+ fs.closeSync=function(fd){descriptors.delete(fd);return close(fd);};
+ fs.readFileSync=function(...args){const bytes=read(...args);if(armed&&(String(args[0])===target||descriptors.has(args[0]))){armed=false;queueMicrotask(()=>{f.add(f.source,f.ids[0],[],'0.3.0','# changed during planning\n');changed=true;});}return bytes;};syncBuiltinESMExports();
+ try{
+  let failure;try{await previewAbilityStore(f.root,{action:'update',sourceId:'team'});}catch(error){failure=error;}
+  assert.equal(changed,true,'Mutation must target the exact canonical source path.');assert.equal(failure?.code,'ABILITY_STORE_SOURCE_CHANGED');assert.deepEqual(readStore(f.root),before);
+ }finally{fs.openSync=open;fs.readFileSync=read;fs.closeSync=close;syncBuiltinESMExports();}
 });

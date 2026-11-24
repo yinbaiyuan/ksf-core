@@ -31,7 +31,7 @@ const portable=value=>value.split(sep).join('/');
 const packageOf=(state,id)=>Object.hasOwn(state.installed,id)?state.installed[id]:undefined;
 const err=e=>({code:e.code??'ABILITY_STORE_FAILED',message:e.message});
 const requireSource=(s,id)=>{const source=s.sources.find(x=>x.id===id);if(!source)fail('ABILITY_STORE_SOURCE_MISSING','能力源不存在，请重新添加。');return source;};
-const checkedSource=(root,source,{selectedOnly=false}={})=>{const checked=['http','package'].includes(source.kind)?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id);if(checked.errors.length&&!selectedOnly)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
+const checkedSource=(root,source,{selectedOnly=false}={})=>{const checked=['http','package'].includes(source.kind)?(()=>{const c=catalog(root,{linked:false,extraSources:[{id:source.id,root:source.path}]});return {catalog:c,errors:[...problems(c,{source:source.id}),...c.rows.filter(r=>r.source===source.id&&!r.errors.length).flatMap(r=>referenceResults(c,r).filter(r=>r.error).map(r=>r.error))]};})():inspectSource(root,source.path,source.id,{includeBranch:false});if(checked.errors.length&&!selectedOnly)fail('ABILITY_STORE_SOURCE_INVALID','能力源校验失败。',{errors:checked.errors});return checked;};
 function git(path,args,{timeout=120000}={}){
  return new Promise((accept,reject)=>{
   const env={...process.env,GIT_TERMINAL_PROMPT:'0',GIT_OPTIONAL_LOCKS:'0',GIT_NO_REPLACE_OBJECTS:'1',GIT_SSH_COMMAND:'ssh -oBatchMode=yes'};
@@ -96,7 +96,7 @@ function collectFiles(objects){
  for(const o of objects){const row=o._row,tree=readTree(row.directory);for(const dir of tree.directories)directories.add(portable(relative(row.sourceRoot,join(row.directory,dir.path))));for(const file of tree.files)if(file.path!=='.ksf-store-origin.json')add(join(row.directory,file.path),row.sourceRoot);references(o._catalog,row);}
  return {files,directories:[...directories].sort(),origins};
 }
-function plan(root,state,input){
+function plan(root,state,input,sourceInspection){
  const {action,sourceId,id}=input;
  if(action==='rollback')return rollbackAbilityPlan(root,state,input);
  if(action==='copy'){
@@ -118,7 +118,7 @@ function plan(root,state,input){
  let source=state.sources.find(s=>s.id===sourceId);if(action==='migrate'){const linked=configuredSources(root).find(s=>s.id===sourceId);if(!linked)fail('ABILITY_STORE_SOURCE_MISSING','原能力源不存在。');const checked=inspectSource(root,linked.root,sourceId);source={id:sourceId,name:checked.data.name,path:linked.root,kind:'local',enabled:true};}
  if(action!=='migrate'&&configuredSources(root).some(s=>s.id===sourceId)&&!state.adopted.includes(sourceId))fail('ABILITY_STORE_MIGRATION_REQUIRED','请先迁移原关联，以保留其中全部现有能力。');
  source??=requireSource(state,sourceId);if(!source.enabled)fail('ABILITY_STORE_SOURCE_DISABLED','请先启用此能力源。');
- const checked=checkedSource(root,source,{selectedOnly:action!=='migrate'}),c=checked.catalog,p=packageOf(state,sourceId),all=installedDescriptors(root,sourceId,p),replaced=new Set(),selected=new Map();
+ const checked=sourceInspection??checkedSource(root,source,{selectedOnly:action!=='migrate'}),c=checked.catalog,p=packageOf(state,sourceId),all=installedDescriptors(root,sourceId,p),replaced=new Set(),selected=new Map();
  const requested=action==='migrate'?c.rows.filter(r=>r.source===sourceId&&!r.errors.length).map(r=>r.id):(input.ids??(id?[id]:action==='update'?p?.objects.map(o=>o.id):[]));
  if(!Array.isArray(requested)||!requested.length||requested.some(id=>!validId(id)))fail('INVALID_ARGUMENTS','请选择要安装或更新的能力。');
  if(action!=='migrate')for(const id of requested)requireDistributionEntry(resolveObject(c,{id},sourceId));
@@ -141,7 +141,7 @@ function plan(root,state,input){
  const blocked=[];for(const row of runtime.rows.filter(r=>r.source!==sourceId&&!r.errors.length&&r.metadata.status!=='archived'))for(const ref of row.metadata.references??[]){let before;try{before=resolveDependency(runtime,row,ref);}catch{continue;}if(before.kind==='file'||before.target.source!==sourceId)continue;try{resolveDependency(after,row,ref);}catch{blocked.push(row.metadata.name);break;}}
  assertCurrentBindings(root,runtime,after);
  if(blocked.length)fail('ABILITY_STORE_EXTERNAL_DEPENDENCY','个人或其他能力仍依赖旧版本，本次未更新：'+blocked.join('、'),{dependents:blocked});
- let resources;try{resources=collectFiles(objects);}catch(e){if(e.code==='ABILITY_STORE_RESOURCE_CONFLICT'&&selected.size<objects.length&&source.kind!=='http')return plan(root,state,{...input,ids:roots});throw e;}return {action,sourceId,source,origin:source,roots,objects,...resources,group:[...replaced],planDigest:hash([action,sourceId,roots,objects.map(o=>[o.id,o.version,o.digest,o.distribution]),[...resources.files].map(([p,f])=>[p,f.digest])])};
+ let resources;try{resources=collectFiles(objects);}catch(e){if(e.code==='ABILITY_STORE_RESOURCE_CONFLICT'&&selected.size<objects.length&&source.kind!=='http')return plan(root,state,{...input,ids:roots},sourceInspection);throw e;}return {action,sourceId,source,origin:source,roots,objects,...resources,group:[...replaced],planDigest:hash([action,sourceId,roots,objects.map(o=>[o.id,o.version,o.digest,o.distribution]),[...resources.files].map(([p,f])=>[p,f.digest])])};
 }
 const publicPlan=p=>({...(p.batch?{scope:p.scope,batch:p.batch}:{}),...(p.reused?{reused:p.reused}:{}),...(p.plans?{sources:p.plans.map(v=>({sourceId:v.sourceId,roots:v.roots,objects:v.objects.map(o=>o.id)}))}:{}),action:p.action,sourceId:p.sourceId,planDigest:p.planDigest,objects:p.objects.map(({_row,_catalog,...o})=>o),roots:p.roots,group:p.group??[],removed:p.removed??[],personalPath:p.personalPath});
 async function batchUpdatePlan(root,state,input){
@@ -150,7 +150,8 @@ async function batchUpdatePlan(root,state,input){
  for(const object of all.values()){for(const d of object.dependencies)if(d.source===input.sourceId)connect(object.id,d.id);for(const [path] of collectFiles([object]).files){const prior=owners.get(path);if(prior)connect(prior,object.id);else owners.set(path,object.id);}}
  let components=[];const seen=new Set();for(const id of all.keys()){if(seen.has(id))continue;const group=[],queue=[id];while(queue.length){const current=queue.pop();if(seen.has(current))continue;seen.add(current);group.push(current);queue.push(...links.get(current));}components.push(group.sort());}
  const source=state.sources.find(s=>s.id===input.sourceId);
- const current=source&&['local','git'].includes(source.kind)?checkedSource(root,source,{selectedOnly:true}).catalog.rows.filter(r=>r.source===input.sourceId&&!r.errors.length).map(r=>({id:r.id,distribution:distributionOf(r)})):[];
+ const sourceInspection=source&&['local','git'].includes(source.kind)?checkedSource(root,source,{selectedOnly:true}):undefined;
+ const current=sourceInspection?sourceInspection.catalog.rows.filter(r=>r.source===input.sourceId&&!r.errors.length).map(r=>({id:r.id,distribution:distributionOf(r)})):[];
  const units=new Map([...all.values(),...current].map(o=>[o.id,o]));
  const prepared=[],batch=[];try{
   // A new release can introduce a connection that was absent in the installed
@@ -158,7 +159,7 @@ async function batchUpdatePlan(root,state,input){
   // group, then preview that combined request again so exact-version conflicts
   // block only the truly connected component.
   for(;;){
-   const candidates=[];for(const ids of components){try{const requested=source&&['local','git'].includes(source.kind)?ids.filter(id=>installed.roots.includes(id)):ids;candidates.push({ids,value:await preparedPlan(root,state,{...input,ids:distributionRequests(requested,[...units.values()])})});}catch(error){candidates.push({ids,error});}}
+   const candidates=[];for(const ids of components){try{const requested=source&&['local','git'].includes(source.kind)?ids.filter(id=>installed.roots.includes(id)):ids;candidates.push({ids,value:await preparedPlan(root,state,{...input,ids:distributionRequests(requested,[...units.values()])},sourceInspection)});}catch(error){candidates.push({ids,error});}}
    const parent=components.map((_,i)=>i),find=i=>parent[i]===i?i:parent[i]=find(parent[i]),connect=(a,b)=>{parent[find(a)]=find(b);},byId=new Map(components.flatMap((ids,i)=>ids.map(id=>[id,i]))),resources=new Map();
    for(let i=0;i<candidates.length;i++){const value=candidates[i].value;if(!value)continue;for(const id of value.group??[])if(byId.has(id))connect(i,byId.get(id));
     for(const part of value.plans??[value])for(const object of part.objects.filter(o=>value.group?.includes(o.id))){for(const [path] of collectFiles([object]).files){const key=part.sourceId+':'+path;if(resources.has(key))connect(i,resources.get(key));else resources.set(key,i);}}
@@ -169,10 +170,15 @@ async function batchUpdatePlan(root,state,input){
   }
   const targets=new Map();for(const value of prepared)for(const part of value.plans??[value]){let target=targets.get(part.sourceId);if(!target){target={sourceId:part.sourceId,origin:part.origin??part.source,roots:state.installed[part.sourceId]?.roots??part.roots,objects:installedDescriptors(root,part.sourceId,state.installed[part.sourceId]),selected:new Set()};targets.set(part.sourceId,target);}for(const object of part.objects){if(!target.objects.has(object.id)||value.group.includes(object.id)){const old=target.objects.get(object.id);if(target.selected.has(object.id)&&old.version!==object.version)fail('ABILITY_STORE_DEPENDENCY_CONFLICT','候选更新组要求不同精确版本。');target.objects.set(object.id,object);target.selected.add(object.id);}else if(object.contentDigest&&!target.objects.get(object.id).contentDigest)target.objects.get(object.id).contentDigest=object.contentDigest;}}
   const plans=[...targets.values()].map(target=>{const roots=normalizeDistributionRoots(target.roots,[...target.objects.values()]),keep=new Set();const visit=id=>{if(keep.has(id))return;keep.add(id);for(const d of target.objects.get(id)?.dependencies??[])if(d.source===target.sourceId)visit(d.id);};roots.forEach(visit);const objects=[...target.objects.values()].filter(o=>keep.has(o.id)),resources=collectFiles(objects);return{action:'update',sourceId:target.sourceId,origin:target.origin,roots,objects,...resources};});
+  if(sourceInspection){
+   const currentInspection=checkedSource(root,source,{selectedOnly:true});
+   const fingerprint=checked=>hash([checked.declaration,checked.data,checked.errors,checked.catalog.rows.filter(row=>row.source===input.sourceId).map(row=>[row.path,row.sourceRoot,row.id,row.digest,row.errors])]);
+   if(fingerprint(currentInspection)!==fingerprint(sourceInspection))fail('ABILITY_STORE_SOURCE_CHANGED','源定义在批量计划期间变化，请重新预览。');
+  }
   return{action:'update',sourceId:input.sourceId,scope:'source-installed',batch,plans,roots:[...new Set(plans.flatMap(p=>p.roots))],group:[...new Set(prepared.flatMap(p=>p.group))],objects:plans.flatMap(p=>p.objects),planDigest:hash(['batch-update',input.sourceId,batch,plans.map(p=>p.objects.map(o=>[o.id,o.version,o.contentDigest??o.digest]))]),dispose:()=>prepared.forEach(p=>p.dispose?.())};
  }catch(error){prepared.forEach(p=>p.dispose?.());throw error;}
 }
-async function preparedPlan(root,state,input){if(input.action==='update'&&!input.id&&!input.ids)return batchUpdatePlan(root,state,input);const prepared=await prepareHTTP(root,state,input);if(prepared._composite)return linkedHTTPPlan(root,state,input,prepared);const source=prepared.sources.find(s=>s.id===input.sourceId),temporary=prepared!==state&&source?.kind==='http'?source.path:null;try{const result=plan(root,prepared,input);if(temporary){for(const object of result.objects){delete object.directory;delete object.path;delete object.source_root;}result.dispose=()=>rmSync(temporary,{recursive:true,force:true});}return result;}catch(e){if(temporary)rmSync(temporary,{recursive:true,force:true});throw e;}}
+async function preparedPlan(root,state,input,sourceInspection){if(input.action==='update'&&!input.id&&!input.ids)return batchUpdatePlan(root,state,input);const prepared=await prepareHTTP(root,state,input);if(prepared._composite)return linkedHTTPPlan(root,state,input,prepared);const source=prepared.sources.find(s=>s.id===input.sourceId),temporary=prepared!==state&&source?.kind==='http'?source.path:null;try{const result=plan(root,prepared,input,sourceInspection);if(temporary){for(const object of result.objects){delete object.directory;delete object.path;delete object.source_root;}result.dispose=()=>rmSync(temporary,{recursive:true,force:true});}return result;}catch(e){if(temporary)rmSync(temporary,{recursive:true,force:true});throw e;}}
 function importPlan(root,state,input){
  if(typeof input.package!=='string'||input.package.length>Math.ceil(MAX_ABILITY_PACKAGE/3)*4)fail('ABILITY_PACKAGE_INVALID','请选择有效能力包（最大20MiB）。');
  const bytes=Buffer.from(input.package,'base64'),packet=validateAbilityPackage(decodeAbilityPackage(bytes));return compositeImportPlan(root,state,packet,input);
