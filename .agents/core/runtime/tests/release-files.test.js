@@ -6,9 +6,31 @@ import {tmpdir} from 'node:os';
 import {writeReleaseFiles} from '../src/distribution/release-files.js';
 import {systemFingerprint} from '../src/distribution/system.js';
 import {digestObject,sha256} from '../src/shared/hash.js';
-import {fileMode,readRegularRecord} from '../src/distribution/files.js';
+import {fileMode,readRegularRecord,readRegular,walkFiles} from '../src/distribution/files.js';
+import {copyFixtureEntries} from './helpers/fixture-copy.js';
 function root(t){const path=mkdtempSync(join(tmpdir(),'ksf-release-files-'));t.after(()=>rmSync(path,{recursive:true,force:true}));return path;}
 function files(path){return readdirSync(path,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?files(join(path,entry.name)):join(path,entry.name));}
+
+test('bounded fixture copies preserve hidden, Unicode and empty entries with independent bytes and modes',async t=>{
+ const source=root(t),a=root(t),b=root(t);
+ const entries=[{path:'目录/脚本',bytes:Buffer.from('original executable\n'),mode:0o755},{path:'.git/objects/synthetic',bytes:Buffer.from([0,1,255]),mode:0o644}];
+ mkdirSync(join(source,'empty'));
+ for(const entry of entries){const path=join(source,entry.path);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,entry.bytes,{mode:entry.mode});chmodSync(path,entry.mode);}
+ await copyFixtureEntries([{source,target:join(a,'tree'),recursive:true},{source,target:join(b,'tree'),recursive:true}]);
+ for(const target of [a,b]){
+  assert.deepEqual(readdirSync(join(target,'tree/empty')),[]);
+  for(const entry of entries){const path=join(target,'tree',entry.path);assert.deepEqual(readFileSync(path),entry.bytes);assert.equal(fileMode(path,entry.mode),fileMode(join(source,entry.path),entry.mode));}
+ }
+ writeFileSync(join(a,'tree',entries[0].path),'changed only in first copy');
+ for(const target of [source,join(b,'tree')])assert.deepEqual(readFileSync(join(target,entries[0].path)),entries[0].bytes);
+});
+
+test('failed fixture copies drain in-flight operations before cleanup and preserve obstructions',async t=>{
+ const source=root(t),target=root(t);writeFileSync(join(source,'large'),Buffer.alloc(1024*1024,3));writeFileSync(join(target,'blocked'),'original');
+ await assert.rejects(copyFixtureEntries([{source:join(source,'large'),target:join(target,'started/first')},{source:join(source,'large'),target:join(target,'blocked/child')},...Array.from({length:20},(_,i)=>({source:join(source,'large'),target:join(target,'started',String(i))}))]));
+ assert.equal(readFileSync(join(target,'blocked'),'utf8'),'original');
+ rmSync(target,{recursive:true,force:true});
+});
 
 test('release file publication preserves every byte, declared mode and nested Unicode path without temporary files',async t=>{
  const path=root(t),entries=Array.from({length:40},(_,i)=>({path:'目录/'+i+'/entry.js',bytes:Buffer.from('export default '+i+';\n'),mode:i%2?0o644:0o755}));
@@ -43,6 +65,18 @@ test('paired source reads preserve bytes and mode, refresh each read and reject 
  mkdirSync(join(path,'directory'));assert.throws(()=>readRegularRecord(path,'directory'),{code:'UNSAFE_PATH'});
  const outside=root(t);writeFileSync(join(outside,'private'),'outside');symlinkSync(outside,join(path,'escape'),process.platform==='win32'?'junction':'dir');
  assert.throws(()=>readRegularRecord(path,'escape/private'),{code:'UNSAFE_PATH'});
+});
+
+test('byte reads and traversal preserve missing/type errors and refresh entries on every call',t=>{
+ const path=root(t);mkdirSync(join(path,'目录'));writeFileSync(join(path,'目录/文件'),'original');
+ assert.equal(readRegular(path,'目录/文件').toString(),'original');
+ assert.equal(readRegular(path,'目录/missing',true),null);assert.throws(()=>readRegular(path,'目录/missing'),{code:'FILE_MISSING'});
+ assert.throws(()=>readRegular(path,'目录',true),{code:'UNSAFE_PATH'});
+ assert.deepEqual(walkFiles(path,'目录'),['目录/文件']);
+ writeFileSync(join(path,'目录/文件'),'changed');writeFileSync(join(path,'目录/新增'),'new');
+ assert.equal(readRegular(path,'目录/文件').toString(),'changed');assert.deepEqual(walkFiles(path,'目录'),['目录/文件','目录/新增']);
+ const outside=root(t);writeFileSync(join(outside,'private'),'outside');symlinkSync(outside,join(path,'escape'),process.platform==='win32'?'junction':'dir');
+ assert.throws(()=>readRegular(path,'escape/private'),{code:'UNSAFE_PATH'});assert.throws(()=>walkFiles(path,'escape'),{code:'UNSAFE_PATH'});
 });
 
 test('streamed system fingerprints preserve the existing path, byte and mode digest contract',t=>{

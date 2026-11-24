@@ -17,9 +17,11 @@ import { launcherFiles } from './products.js';
 import { stableJSON, sha256 } from '../shared/hash.js';
 import { fail } from './errors.js';
 
-function git(root, args, required = true) {
+function git(root, args, required = true, emptyOnNoMatch = false) {
   const result = spawnSync(gitExecutable, ['--no-replace-objects', '-C', root, ...args], { encoding: 'utf8', timeout: 30000,
     env: gitEnvironment() });
+  if (emptyOnNoMatch && result.error) return null;
+  if (emptyOnNoMatch && result.status === 1) return '';
   if (required && result.status !== 0) fail('INSTANCE_GIT_INVALID', 'Cannot inspect the instance Git repository.');
   return result.status === 0 ? result.stdout.replace(/\r?\n$/, '') : null;
 }
@@ -84,6 +86,19 @@ function configValues(root, key, local = true) {
   const raw = git(root, ['config', ...(local ? ['--local'] : []), '--null', '--get-all', key], false);
   return raw === null ? [] : raw.split('\0').slice(0, -1);
 }
+function localInstanceConfig(root) {
+  const values = new Map(instanceGitConfig.map(([key]) => [key.toLowerCase(), []]));
+  const raw = git(root, ['config', '--local', '--null', '--get-regexp', '^(push\\.default|branch\\.main\\.(remote|merge|pushremote))$'], false, true);
+  // Preserve individual reads when the combined output exceeds the process
+  // buffer or Git cannot complete the batch; never reinterpret it as absence.
+  if (raw === null) return key => configValues(root, key);
+  for (const record of raw?.split('\0').slice(0, -1) ?? []) {
+    const separator = record.indexOf('\n');
+    const key = (separator < 0 ? record : record.slice(0, separator)).toLowerCase();
+    values.get(key)?.push(separator < 0 ? '' : record.slice(separator + 1));
+  }
+  return key => values.get(key.toLowerCase());
+}
 const sameValues = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 function planInstanceGit(root, branch, target, { targetHead, resume = false } = {}) {
   if (branch === null) return null;
@@ -97,7 +112,8 @@ function planInstanceGit(root, branch, target, { targetHead, resume = false } = 
   }
   const pushURLs = git(root, ['remote', 'get-url', '--push', '--all', 'origin'], false)?.split('\n') ?? [];
   if (pushURLs.some(url => isCoreRemote(url, configuration(root)))) fail('INSTANCE_PUSH_CONFIG_CONFLICT', 'The origin push destination includes the official Core; preserve the remote settings and select a personal repository.');
-  const config = instanceGitConfig.map(([key, value]) => ({ key, before: configValues(root, key), after: [value] }));
+  const localConfig = localInstanceConfig(root);
+  const config = instanceGitConfig.map(([key, value]) => ({ key, before: localConfig(key), after: [value] }));
   if (config.some(item => item.before.length > 1)) fail('INSTANCE_PUSH_CONFIG_CONFLICT', 'Preserve the multi-valued branch or push settings for review before initializing.');
   const head = git(root, ['rev-parse', 'HEAD']);
   return { branchBefore: branch, branchAfter: target, head, targetHead: targetHead ?? head, resume, created: branch !== target && !existing,
@@ -144,19 +160,21 @@ function checkInstanceGitRecovery(root, state) {
   const branch = git(root, ['branch', '--show-current'], false);
   const before = git(root, ['rev-parse', '--verify', `refs/heads/${state.branchBefore}`], false);
   const after = git(root, ['rev-parse', '--verify', `refs/heads/${state.branchAfter}`], false);
+  const localConfig = localInstanceConfig(root);
   if (!ownsGitRoot(root) || ![state.branchBefore, state.branchAfter].includes(branch) || before !== state.head ||
       (after !== null && after !== (state.targetHead ?? state.head)) || (branch === state.branchAfter && after === null) ||
       (!state.created && after === null) ||
       (state.resume && git(root, ['status', '--porcelain', '--untracked-files=no']) !== '') ||
       (state.created && after !== null && git(root, ['reflog', 'show', '-1', '--format=%gs', `refs/heads/${state.branchAfter}`], false) !== state.refLogMessage) ||
-      state.config.some(item => { const actual = configValues(root, item.key); return !sameValues(actual, item.before) && !sameValues(actual, item.after); })) {
+      state.config.some(item => { const actual = localConfig(item.key); return !sameValues(actual, item.before) && !sameValues(actual, item.after); })) {
     fail('INSTANCE_RECOVERY_CONFLICT', 'The instance branch or Git settings changed during initialization; preserve the transaction and local commits.');
   }
 }
 function applyInstanceGit(root, state) {
   if (!state) return;
+  const localConfig = localInstanceConfig(root);
   if (git(root, ['branch', '--show-current']) !== state.branchBefore || git(root, ['rev-parse', 'HEAD']) !== state.head ||
-      state.config.some(item => !sameValues(configValues(root, item.key), item.before))) fail('INSTANCE_INPUT_CHANGED', 'Git changed during initialization.');
+      state.config.some(item => !sameValues(localConfig(item.key), item.before))) fail('INSTANCE_INPUT_CHANGED', 'Git changed during initialization.');
   const target = git(root, ['rev-parse', '--verify', `refs/heads/${state.branchAfter}`], false);
   if (state.created ? target !== null : target !== (state.targetHead ?? state.head)) fail('INSTANCE_INPUT_CHANGED', 'The personal main reference changed during initialization.');
   if (state.created) {
