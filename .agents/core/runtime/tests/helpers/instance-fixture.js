@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdirSync} from 'node:fs';
 import {join} from 'node:path';
-import {distributionFixture,git} from './distribution-fixture.js';
+import {transactionFixture as distributionFixture,git} from './distribution-fixture.js';
 import {copyFixtureEntries} from './fixture-copy.js';
 import {ForkAPI} from './contribution-api.js';
 import {initializeInstance} from '../../src/distribution/instance.js';

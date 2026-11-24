@@ -4,7 +4,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {installedManifest,writeAtomic} from '../src/distribution/common.js';
 import {systemUpdate,systemFingerprint} from '../src/distribution/system.js';
-import {distributionFixture} from './helpers/distribution-fixture.js';
+import {transactionFixture as distributionFixture} from './helpers/distribution-fixture.js';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 
 test('three-way update preserves non-overlapping local edits and untracked Core additions', async t => {

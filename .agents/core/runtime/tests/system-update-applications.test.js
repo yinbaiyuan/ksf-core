@@ -4,7 +4,7 @@ import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
-import {distributionFixture} from './helpers/distribution-fixture.js';
+import {transactionFixture as distributionFixture} from './helpers/distribution-fixture.js';
 import {systemUpdate,systemRollback} from '../src/distribution/system.js';
 import {encodePackage,checksum} from '../src/applications/protocol.js';
 import {stageApplicationPackages,applicationStatePath} from '../src/applications/core-upgrade.js';

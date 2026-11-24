@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync, chmodSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, writeFileSync, chmodSync } from 'node:fs';
+import {rm} from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -159,7 +160,7 @@ export async function buildPlatformRelease({ root, output, platform, allowDirty 
       writeAtomic(join(destination, legacyReleaseIndexName), stableJSON(compatibilityIndex(index)));
     }
     return result;
-  } finally { rmSync(staging, { recursive: true, force: true }); }
+  } finally { await rm(staging, { recursive: true, force: true }); }
 }
 
 // The official feed must contain every declared platform. A Mac publisher can
@@ -196,5 +197,5 @@ export async function buildRelease(options, {materializeInstance = true, durable
       writeAtomic(join(destination, legacyReleaseIndexName), stableJSON(compatibilityIndex(index)));
     }
     return { ...first, platform: null, platforms: targets, output: destination, instance:materializeInstance?instance:null, template:materializeInstance?instance:null, index, dryRun };
-  } finally { rmSync(staging, { recursive: true, force: true }); }
+  } finally { await rm(staging, { recursive: true, force: true }); }
 }

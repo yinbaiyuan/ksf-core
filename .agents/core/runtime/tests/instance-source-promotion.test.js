@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {cpSync,existsSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
-import {distributionFixture,git,commitWorkspace,contributionDescription} from './helpers/distribution-fixture.js';
+import {transactionFixture as distributionFixture,git,commitWorkspace,contributionDescription} from './helpers/distribution-fixture.js';
 import {ForkAPI} from './helpers/contribution-api.js';
 import {initializeInstance} from '../src/distribution/instance.js';
 import {buildRelease} from '../src/distribution/release.js';

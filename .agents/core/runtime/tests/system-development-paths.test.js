@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { platform } from '../src/platform/index.js';
 import { writeAtomic } from '../src/distribution/common.js';
 import { systemFingerprint, systemRead, systemUpdate, systemRollback } from '../src/distribution/system.js';
-import { distributionFixture } from './helpers/distribution-fixture.js';
+import { transactionFixture as distributionFixture } from './helpers/distribution-fixture.js';
 
 test('system maintenance ignores development dependencies and preserves them through upgrade and rollback', async t => {
   const f = await distributionFixture(t), before = systemFingerprint(f.workspace);

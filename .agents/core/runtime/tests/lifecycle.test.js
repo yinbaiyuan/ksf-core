@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { commitWorkspace, distributionFixture, contributionDescription } from './helpers/distribution-fixture.js';
+import { commitWorkspace, transactionFixture as distributionFixture, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 import { systemCheck, systemUpdate, systemRollback, systemRead } from '../src/distribution/system.js';
 import { prepareContribution, submitContribution } from '../src/distribution/contribute.js';

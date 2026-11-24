@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {join} from 'node:path';
-import {distributionFixture} from './distribution-fixture.js';
+import {transactionFixture as distributionFixture} from './distribution-fixture.js';
 import {encodePackage,checksum} from '../../src/applications/protocol.js';
 import {stageApplicationPackages,applicationStatePath} from '../../src/applications/core-upgrade.js';
 const origin={id:'ksf-apps',name:'KSF 公用应用源',url:'https://yinbaiyuan.github.io/ksf-apps/index.json'};
