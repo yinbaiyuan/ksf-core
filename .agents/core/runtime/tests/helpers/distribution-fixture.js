@@ -155,14 +155,26 @@ export async function distributionFixture(t, options = {}) {
     const seed = await seeds.get(key), directory = mkdtempSync(join(tmpdir(), 'ksf isolated fixture '));
     t.after(async () => {const start=performance.now();await removeFixture(directory, { recursive: true, force: true, maxRetries: 8, retryDelay: 50 });cleanupMs=performance.now()-start;});
     const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');
+    const copyInspection = options.copyInspection !== false;
+    // The seed always builds and validates the real initial inspection
+    // instance. Transaction-only consumers need its archives and metadata,
+    // plus independent source/Git and workspace trees, but never this third
+    // installation copy. Default consumers retain the complete old layout.
+    if (!copyInspection) assert.equal(relative(seed.first.output, seed.first.template), 'ksf');
+    const releaseEntries = copyInspection ? [{source: seed.first.output, target: output, recursive: true}]
+      : readdirSync(seed.first.output).filter(name => name !== 'ksf')
+        .map(name => ({source: join(seed.first.output, name), target: join(output, name), recursive: true}));
     // Seeds are never mutated. Copies are independent, including Git objects;
     // mutable fixtures must not share writable hardlinks with another scenario.
     await copyFixtureEntries([
       {source: seed.root, target: root, recursive: true},
       {source: seed.workspace, target: workspace, recursive: true},
-      {source: seed.first.output, target: output, recursive: true},
+      ...releaseEntries,
     ]);
     base = { directory, root, workspace, first: { ...structuredClone(seed.first), output, instance: join(output, 'ksf'), template: join(output, 'ksf') }, build: structuredClone(seed.build), originals: new Map(), legacyEntry: false, target:seed.target??seed.first.platform };
+    if (!copyInspection) for (const key of ['instance','template']) Object.defineProperty(base.first,key,{enumerable:true,get(){
+      throw Object.assign(new Error('This transaction fixture omits the initial inspection copy; request copyInspection:true before reading '+key+'.'),{code:'TEST_FIXTURE_INSPECTION_NOT_REQUESTED'});
+    }});
   }
   const { directory, root, workspace, first, build, originals, target=fixtureTarget } = base;
   const fixtureMs = performance.now()-began;
@@ -214,3 +226,5 @@ export function instanceEntries(root) {
 // Publisher and archive-layout contracts use official target descriptors even
 // on a Linux inspection host; execution fixtures above use the real host target.
 export const officialArchiveFixture=(t,options={})=>distributionFixture(t,{...options,target:officialFixtureTarget});
+export const transactionFixture=(t,options={})=>distributionFixture(t,{copyInspection:false,...options});
+export const officialTransactionFixture=(t,options={})=>officialArchiveFixture(t,{copyInspection:false,...options});

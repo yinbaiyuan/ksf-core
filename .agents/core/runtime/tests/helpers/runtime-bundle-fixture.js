@@ -6,7 +6,7 @@ import {buildManifest} from '../../src/services/build-manifest.js';
 import {runtimePackage} from '../../src/platform/catalog.js';
 import {runtimePackagesPath} from '../../src/platform/runtime-bundle.js';
 import {sha256,stableJSON} from '../../src/shared/hash.js';
-import {officialArchiveFixture as distributionFixture,officialFixtureTarget as fixtureTarget,git} from './distribution-fixture.js';
+import {officialTransactionFixture as distributionFixture,officialFixtureTarget as fixtureTarget,git} from './distribution-fixture.js';
 import {storedZip} from './platform.js';
 
 function addTarget(f,target){

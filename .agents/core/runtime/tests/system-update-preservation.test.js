@@ -4,7 +4,7 @@ import {existsSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {installedManifest,writeAtomic} from '../src/distribution/common.js';
 import {systemCheck,systemUpdate,systemRollback} from '../src/distribution/system.js';
-import {distributionFixture} from './helpers/distribution-fixture.js';
+import {transactionFixture as distributionFixture} from './helpers/distribution-fixture.js';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 
 test('Release check and upgrade work without Git, preserve private files and use explicit version identity', async t => {

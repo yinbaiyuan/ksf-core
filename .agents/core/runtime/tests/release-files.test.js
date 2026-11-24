@@ -8,6 +8,7 @@ import {systemFingerprint} from '../src/distribution/system.js';
 import {digestObject,sha256} from '../src/shared/hash.js';
 import {fileMode,readRegularRecord,readRegular,walkFiles} from '../src/distribution/files.js';
 import {copyFixtureEntries} from './helpers/fixture-copy.js';
+import {copyIndependentEntries} from '../src/shared/copy-files.js';
 function root(t){const path=mkdtempSync(join(tmpdir(),'ksf-release-files-'));t.after(()=>rmSync(path,{recursive:true,force:true}));return path;}
 function files(path){return readdirSync(path,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?files(join(path,entry.name)):join(path,entry.name));}
 
@@ -31,6 +32,22 @@ test('failed fixture copies drain in-flight operations before cleanup and preser
  await assert.rejects(copyFixtureEntries([{source:join(source,'large'),target:join(target,'started/first')},{source:join(source,'large'),target:join(target,'blocked/child')},...Array.from({length:20},(_,i)=>({source:join(source,'large'),target:join(target,'started',String(i))}))]));
  assert.equal(readFileSync(join(target,'blocked'),'utf8'),'original');
  rmSync(target,{recursive:true,force:true});
+});
+
+test('private validation copies exclude only declared development installations and retain independent files and modes',async t=>{
+ const source=root(t),target=root(t),files=[['source/中文.js','ordinary source',0o755],['empty-value','',0o644],['applications/sdk/node_modules/private','excluded development content',0o644],['other/node_modules/keep','ordinary extra content',0o644]];
+ for(const [path,bytes,mode] of files){mkdirSync(dirname(join(source,path)),{recursive:true});writeFileSync(join(source,path),bytes,{mode});chmodSync(join(source,path),mode);}
+ mkdirSync(join(source,'empty-directory'));chmodSync(join(source,'empty-directory'),0o711);
+ await copyIndependentEntries([{source,target,recursive:true}],{filter:path=>path!==join(source,'applications/sdk/node_modules')});
+ assert.throws(()=>readFileSync(join(target,files[2][0])),{code:'ENOENT'});
+ for(const [path,bytes,mode] of files.filter((_,i)=>i!==2)){
+  assert.equal(readFileSync(join(target,path),'utf8'),bytes);
+  assert.equal(fileMode(join(target,path),mode),fileMode(join(source,path),mode));
+ }
+ assert.deepEqual(readdirSync(join(target,'empty-directory')),[]);
+ assert.equal(fileMode(join(target,'empty-directory'),0o711),fileMode(join(source,'empty-directory'),0o711));
+ writeFileSync(join(target,files[0][0]),'changed copy');
+ assert.equal(readFileSync(join(source,files[0][0]),'utf8'),files[0][1]);
 });
 
 test('release file publication preserves every byte, declared mode and nested Unicode path without temporary files',async t=>{

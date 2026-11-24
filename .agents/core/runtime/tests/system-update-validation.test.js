@@ -8,7 +8,7 @@ import {syncBuiltinESMExports} from 'node:module';
 import {join,basename} from 'node:path';
 import {stableJSON} from '../src/distribution/common.js';
 import {systemCheck,systemUpdate,systemFingerprint} from '../src/distribution/system.js';
-import {distributionFixture} from './helpers/distribution-fixture.js';
+import {transactionFixture as distributionFixture} from './helpers/distribution-fixture.js';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 
 beforeEach(t => {

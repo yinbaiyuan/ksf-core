@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { installedManifest, stableJSON, writeAtomic } from '../src/distribution/common.js';
 import { systemCheck, systemUpdate, systemRollback, systemRead, systemSync, systemFingerprint } from '../src/distribution/system.js';
-import { distributionFixture } from './helpers/distribution-fixture.js';
+import { transactionFixture as distributionFixture } from './helpers/distribution-fixture.js';
 const sample = 'first\none\ntwo\nthree\nfour\nfive\nlast\n';
 
 for (const defect of ['missing-entry', 'missing-reference', 'inactive-entry']) test(`invalid candidate definitions (${defect}) leave the installed system intact`, async t => {

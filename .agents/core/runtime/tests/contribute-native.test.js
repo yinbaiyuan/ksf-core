@@ -6,7 +6,7 @@ import { prepareContribution, readContribution, submitContribution } from '../sr
 import { committedSource } from '../src/distribution/committed-source.js';
 import { digestObject, installedManifest, sha256, stableJSON, validateManifest, writeAtomic } from '../src/distribution/common.js';
 import { GitHubAPI } from '../src/distribution/github.js';
-import { commitWorkspace, distributionFixture, git, contributionDescription } from './helpers/distribution-fixture.js';
+import { commitWorkspace, transactionFixture as distributionFixture, git, contributionDescription } from './helpers/distribution-fixture.js';
 import { ForkAPI } from './helpers/contribution-api.js';
 const example = '.agents/core/example.txt';
 async function fixture(t) {

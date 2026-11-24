@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync,
   chmodSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
+import {copyIndependentEntries} from '../shared/copy-files.js';
 import { join, dirname, resolve, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -192,8 +193,8 @@ function backupRecords(root) {
 // Frontend development installs are not part of the validated release payload.
 // Preserve independent copies at commit, without duplicating them for previews.
 const developmentInstalls = ['applications/sdk/node_modules','applications/projects/node_modules','runtime/web/node_modules'];
-function copyValidationCore(source,target) {
-  cpSync(source,target,{recursive:true,filter:path=>!developmentInstalls.includes(relative(source,path).replaceAll('\\','/'))});
+async function copyValidationCore(source,target) {
+  await copyIndependentEntries([{source,target,recursive:true}],{filter:path=>!developmentInstalls.includes(relative(source,path).replaceAll('\\','/'))});
 }
 function copyDevelopmentInstalls(source,target) {
   for (const path of developmentInstalls) {
@@ -367,7 +368,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
   if (plan.conflicts.length) fail('UPDATE_CONFLICT', 'Core changes conflict with local edits; the current system was preserved.', result);
   const staging = mkdtempSync(join(tmpdir(), 'ksf-update-'));
   try {
-    copyValidationCore(checkedPath(root, '.agents/core'), join(staging, '.agents/core'));
+    await copyValidationCore(checkedPath(root, '.agents/core'), join(staging, '.agents/core'));
     for (const [path, file] of plan.files) {
       const target = checkedPath(staging, path);
       if (file === null) rmSync(target, { force: true });
@@ -398,7 +399,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
   const old = validateManifest(parseJSON(readFileSync(join(backup, 'old-core/release.json')), 'backup manifest'));
   const staging = mkdtempSync(join(tmpdir(), 'ksf-rollback-'));
   try {
-    copyValidationCore(join(backup, 'old-core'), join(staging, '.agents/core'));
+    await copyValidationCore(join(backup, 'old-core'), join(staging, '.agents/core'));
     for (const path of rootFiles) {
       const old = join(backup, 'old-root', path);
       const source = existsSync(old) ? old : checkedPath(root, path);
