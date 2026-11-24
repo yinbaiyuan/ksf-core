@@ -9,6 +9,8 @@ import { gitBinary, nullDevice } from './helpers/platform.js';
 import { planRuntimeCleanup, cleanupRuntimeArtifacts } from '../src/distribution/retention.js';
 import { runDistributionCommand, parseDistributionArgs } from '../src/commands/distribution.js';
 import { applyMatchedSwitch } from '../src/distribution/matched-switch.js';
+import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'KSF 清理 '));
@@ -185,4 +187,37 @@ test('cleanup arguments reject accidental application and have explicit help', a
   assert.throws(() => parseDistributionArgs('system', ['cleanup', '--apply=yes']), { code: 'INVALID_ARGUMENTS' });
   const f = fixture(t), help = await runDistributionCommand('system', ['cleanup', '--help'], f.root);
   assert.equal(help.exitCode, 0); assert.match(help.stdout, /cleanup/); assert.match(help.stdout, /--apply/);
+});
+test('one preview reuses primary bytes, but a new preview reads changed source again', t => {
+  const f = fixture(t), old = f.switchRun('2026-01-01');
+  f.switchRun('2026-01-02'); f.switchRun('2026-01-03');
+  const source = join(f.root, '.agents/core/original.txt'), open = fs.openSync;
+  let reads = 0;
+  const mock = t.mock.method(fs, 'openSync', (...args) => { if (args[0] === source) reads++; return open(...args); });
+  syncBuiltinESMExports(); t.after(() => { mock.mock.restore(); syncBuiltinESMExports(); });
+  assert.equal(planRuntimeCleanup(f.root).candidates.length, 2);
+  assert.equal(reads, 1);
+  f.put('.agents/core/original.txt', 'replacement without historical custody');
+  const changed = planRuntimeCleanup(f.root);
+  assert.equal(reads, 2); assert.equal(changed.candidates.length, 0);
+  assert.equal(changed.warnings.filter(w => w.reason === 'source-not-preserved').length, 2);
+  assert(existsSync(join(f.root, old, 'previous-core/original.txt')));
+});
+test('every actual deletion rechecks primary custody after preview and earlier deletions', t => {
+  const f = fixture(t), older = f.switchRun('2026-01-01'), newer = f.switchRun('2026-01-02');
+  f.switchRun('2026-01-03');
+  const guard = join(f.root, older, 'switch.json'), read = fs.readFileSync;
+  let guardReads = 0;
+  const mock = t.mock.method(fs, 'readFileSync', (...args) => {
+    // Receipt read, preview guard snapshot, then the fresh apply guard. The
+    // newer backup is removed first; the live primary changes before older.
+    if (args[0] === guard && ++guardReads === 3) f.put('.agents/core/original.txt', 'changed after preview');
+    return read(...args);
+  });
+  syncBuiltinESMExports(); t.after(() => { mock.mock.restore(); syncBuiltinESMExports(); });
+  const result = cleanupRuntimeArtifacts({ root: f.root, apply: true });
+  assert.deepEqual(result.removed, [`${newer}/previous-core`]);
+  assert.deepEqual(result.errors.map(e => e.code), ['CLEANUP_SOURCE_UNPROTECTED']);
+  assert(existsSync(join(f.root, older, 'previous-core/original.txt')));
+  assert(!existsSync(join(f.root, older, 'retention.json')));
 });

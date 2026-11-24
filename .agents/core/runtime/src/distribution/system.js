@@ -2,6 +2,7 @@ import {GitHubAPI} from './github.js';
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync,
   chmodSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { join, dirname, resolve, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -386,7 +387,7 @@ export async function systemUpdate({ root, source, from, dryRun = false, fetcher
     if (systemFingerprint(root) !== before) fail('SYSTEM_CHANGED', 'System files changed during update validation.');
     if (dryRun) return { ...result, wouldChange: true };
     return { ...result, ...commitCandidate(root, staging, { before, from: current.version, to: incoming.version, fault,applicationPlan }) };
-  } finally { rmSync(staging, { recursive: true, force: true }); }
+  } finally { await rm(staging, { recursive: true, force: true, maxRetries: 8, retryDelay: 50 }); }
 }
 export async function systemRollback({ root, dryRun = false, fault }) {
   const current = installedManifest(root), records = backupRecords(root), latest = records[0];
@@ -414,7 +415,7 @@ export async function systemRollback({ root, dryRun = false, fault }) {
     await assertCoreDataCompatibility(root,join(staging,'.agents/core'),{applicationState:applicationPlan.state,environment});
     if (dryRun) return { current: current.version, target: old.version, changed: false, wouldChange: true, dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
     return { ...commitCandidate(root, staging, { before, from: current.version, to: old.version, operation: 'rollback', fault,applicationPlan,dependencySource:join(backup,'old-core') }), dryRun,applications:applicationPlan.entries,recoveryLauncherRetained };
-  } finally { rmSync(staging, { recursive: true, force: true }); }
+  } finally { await rm(staging, { recursive: true, force: true, maxRetries: 8, retryDelay: 50 }); }
 }
 export async function systemSync({ root, now = Date.now(), fetcher }) {
   const manifest = installedManifest(root, true);
