@@ -35,7 +35,7 @@ jobs:
           dirname "$ksf_node" >> "$GITHUB_PATH"
       - name: Install locked coverage-audit parser
         working-directory: .agents/core/applications/sdk
-        run: npm ci --ignore-scripts
+        run: npm ci --prefer-offline --ignore-scripts
       - id: plan
         env:
           KSF_MANUAL_FULL: ${{ inputs.full }}
@@ -88,7 +88,7 @@ jobs:
           dirname "$ksf_node" >> "$GITHUB_PATH"
       - name: Install locked SDK build dependencies for Core app lifecycle
         working-directory: .agents/core/applications/sdk
-        run: npm ci --ignore-scripts
+        run: npm ci --prefer-offline --ignore-scripts
       - name: Exact planned Linux core group
         id: tests
         run: node .agents/core/runtime/src/testing/ci.js run-group verification-plan.json "${{ matrix.id }}" "${{ matrix.id }}.report.json"

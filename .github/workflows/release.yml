@@ -60,8 +60,8 @@ jobs:
           key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install locked release dependencies
         run: |
-          npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
-          npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
+          npm --prefix .agents/core/applications/sdk ci --prefer-offline --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
+          npm --prefix .agents/core/runtime/web ci --prefer-offline > web.install.log 2>&1 & ksf_web_pid=$!
           ksf_install_status=0
           for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid"; do
             wait "$ksf_pid" || ksf_install_status=$?
@@ -133,9 +133,9 @@ jobs:
       - name: Populate missing default-branch Windows downloads
         if: steps.npm-downloads.outputs.cache-hit != 'true'
         run: |
-          npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
-          npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
-          npm --prefix .agents/core/applications/projects ci --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
+          npm --prefix .agents/core/applications/sdk ci --prefer-offline --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
+          npm --prefix .agents/core/runtime/web ci --prefer-offline > web.install.log 2>&1 & ksf_web_pid=$!
+          npm --prefix .agents/core/applications/projects ci --prefer-offline --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
           ksf_install_status=0
           for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid" "$ksf_projects_pid"; do
             wait "$ksf_pid" || ksf_install_status=$?
