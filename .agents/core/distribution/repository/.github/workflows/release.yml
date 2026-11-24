@@ -47,6 +47,17 @@ jobs:
           ksf_node=$(.agents/ksf hello --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["runtime"]["nodePath"])')
           printf 'KSF_RELEASE_NODE=%s\n' "$ksf_node" >> "$GITHUB_ENV"
           dirname "$ksf_node" >> "$GITHUB_PATH"
+      - name: Locate pinned npm cache
+        id: npm-cache
+        run: |
+          ksf_cache=$(npm config get cache)
+          ksf_cache=${ksf_cache%$'\r'}
+          test -n "$ksf_cache"
+          printf 'path=%s\n' "$ksf_cache" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        with:
+          path: ${{ steps.npm-cache.outputs.path }}
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install locked release dependencies
         run: |
           npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
@@ -83,6 +94,54 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+  warm-windows-downloads:
+    needs: find-proof
+    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && github.ref == 'refs/heads/core-main' && needs.find-proof.outputs.valid == 'true' }}
+    runs-on: windows-2025
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare verified Windows runtime for download cache
+        shell: powershell
+        run: |
+          & ./.agents/ksf.ps1 build --json | Out-Null
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./.agents/ksf.ps1 runtime verify --json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $details = & ./.agents/ksf.ps1 hello --json | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Locate pinned npm cache
+        id: npm-cache
+        run: |
+          ksf_cache=$(npm config get cache)
+          ksf_cache=${ksf_cache%$'\r'}
+          test -n "$ksf_cache"
+          printf 'path=%s\n' "$ksf_cache" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        id: npm-downloads
+        with:
+          path: ${{ steps.npm-cache.outputs.path }}
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Populate missing default-branch Windows downloads
+        if: steps.npm-downloads.outputs.cache-hit != 'true'
+        run: |
+          npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
+          npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
+          npm --prefix .agents/core/applications/projects ci --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
+          ksf_install_status=0
+          for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid" "$ksf_projects_pid"; do
+            wait "$ksf_pid" || ksf_install_status=$?
+          done
+          cat sdk.install.log web.install.log projects.install.log
+          exit "$ksf_install_status"
   release:
     needs: [find-proof, verification, prepare]
     if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && needs.prepare.result == 'success' && (needs.find-proof.outputs.valid == 'true' || needs.verification.result == 'success') }}
