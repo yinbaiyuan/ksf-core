@@ -23,13 +23,7 @@ function checkedEntry(root, relative) {
 }
 export function checkedPath(root, relative) { return checkedEntry(root, relative).path; }
 export function readRegular(root, relative, optional = false) {
-  const path = checkedPath(root, relative);
-  if (!existsSync(path)) {
-    if (optional) return null;
-    fail('FILE_MISSING', `Missing file: ${relative}.`);
-  }
-  if (!lstatSync(path).isFile()) fail('UNSAFE_PATH', `Expected a regular file: ${relative}.`);
-  return readFileSync(path);
+  return readRegularRecord(root, relative, { optional })?.bytes ?? null;
 }
 // Read bytes and mode from the same open entry. Containment and type checks
 // remain fresh for every call; no directory or validity cache crosses reads.
@@ -84,7 +78,7 @@ export function walkFiles(root, prefix, { exclude = () => false } = {}) {
   const found = [];
   function visit(relative) {
     if (exclude(relative)) return;
-    const path = checkedPath(root, relative), stat = lstatSync(path);
+    const {path,entry} = checkedEntry(root, relative), stat = entry ?? lstatSync(path);
     if (stat.isDirectory()) for (const child of readdirSync(path).sort()) visit(`${relative}/${child}`);
     else if (stat.isFile()) found.push(relative);
     else fail('UNSAFE_PATH', `Unsupported file: ${relative}.`);

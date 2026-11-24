@@ -136,6 +136,14 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
         try { writeFileSync(log, events.map(e => typeof e === 'string' ? e : JSON.stringify(e)).join('\n') + '\n' + Buffer.concat(stderr).toString('utf8')); }
         catch(error) { status='failed';logError={code:error.code,message:error.message}; }
         const result = { id: item.id, path: item.path, owner: item.owner, isolation: item.isolation ?? 'shared', timeoutMs: item.timeoutMs, status, exitCode: code, signal, durationMs: Math.round(performance.now() - began), counts, log };
+        // Keep the existing synthetic fixture diagnostics available after a
+        // hosted runner exits. Only finite timing counters enter the receipt;
+        // arbitrary diagnostics, paths and test output stay in the local log.
+        const timingKeys=['fixtureMs','gitMs','gitCalls','packageMs','assertionAndOtherMs','cleanupMs'];
+        const timings=events.filter(event=>event.type==='test:diagnostic').flatMap(event=>{
+          try{const value=JSON.parse(event.data?.message);return value?.phase==='distribution-fixture'&&timingKeys.every(key=>Number.isFinite(value[key])&&value[key]>=0)?[Object.fromEntries(timingKeys.map(key=>[key,value[key]]))]:[];}catch{return [];}
+        });
+        if(timings.length)result.fixtureTiming={scenarios:timings.length,...Object.fromEntries(timingKeys.map(key=>[key,timings.reduce((sum,value)=>sum+value[key],0)]))};
         if(logError)result.logError=logError;
         progress(`[${status.toUpperCase()}] ${item.path} (${result.durationMs} ms)`);
         if (status !== 'passed') {

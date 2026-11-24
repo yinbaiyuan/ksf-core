@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {writeReleaseFiles} from '../src/distribution/release-files.js';
 import {systemFingerprint} from '../src/distribution/system.js';
 import {digestObject,sha256} from '../src/shared/hash.js';
-import {fileMode,readRegularRecord} from '../src/distribution/files.js';
+import {fileMode,readRegularRecord,readRegular,walkFiles} from '../src/distribution/files.js';
 function root(t){const path=mkdtempSync(join(tmpdir(),'ksf-release-files-'));t.after(()=>rmSync(path,{recursive:true,force:true}));return path;}
 function files(path){return readdirSync(path,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?files(join(path,entry.name)):join(path,entry.name));}
 
@@ -43,6 +43,18 @@ test('paired source reads preserve bytes and mode, refresh each read and reject 
  mkdirSync(join(path,'directory'));assert.throws(()=>readRegularRecord(path,'directory'),{code:'UNSAFE_PATH'});
  const outside=root(t);writeFileSync(join(outside,'private'),'outside');symlinkSync(outside,join(path,'escape'),process.platform==='win32'?'junction':'dir');
  assert.throws(()=>readRegularRecord(path,'escape/private'),{code:'UNSAFE_PATH'});
+});
+
+test('byte reads and traversal preserve missing/type errors and refresh entries on every call',t=>{
+ const path=root(t);mkdirSync(join(path,'目录'));writeFileSync(join(path,'目录/文件'),'original');
+ assert.equal(readRegular(path,'目录/文件').toString(),'original');
+ assert.equal(readRegular(path,'目录/missing',true),null);assert.throws(()=>readRegular(path,'目录/missing'),{code:'FILE_MISSING'});
+ assert.throws(()=>readRegular(path,'目录',true),{code:'UNSAFE_PATH'});
+ assert.deepEqual(walkFiles(path,'目录'),['目录/文件']);
+ writeFileSync(join(path,'目录/文件'),'changed');writeFileSync(join(path,'目录/新增'),'new');
+ assert.equal(readRegular(path,'目录/文件').toString(),'changed');assert.deepEqual(walkFiles(path,'目录'),['目录/文件','目录/新增']);
+ const outside=root(t);writeFileSync(join(outside,'private'),'outside');symlinkSync(outside,join(path,'escape'),process.platform==='win32'?'junction':'dir');
+ assert.throws(()=>readRegular(path,'escape/private'),{code:'UNSAFE_PATH'});assert.throws(()=>walkFiles(path,'escape'),{code:'UNSAFE_PATH'});
 });
 
 test('streamed system fingerprints preserve the existing path, byte and mode digest contract',t=>{

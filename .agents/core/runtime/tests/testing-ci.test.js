@@ -133,3 +133,13 @@ test('runtime-only group validation refuses inherited developer toolchains befor
   const directory=join(root,'.agents/core',path);mkdirSync(directory,{recursive:true});assert.throws(()=>validateGroupPreparation(root,group),{code:'TEST_CI_PREPARATION_INVALID'});assert.doesNotThrow(()=>validateGroupPreparation(root,{toolchains:true,prepared:'full'}));rmSync(directory,{recursive:true});
  }
 });
+
+test('CI retains only synthetic fixture timing counters without hiding file failures',async t=>{
+ const root=proofFixture(t),report=join(root,'timing.report.json'),path=join(root,catalogPath),catalog=JSON.parse(readFileSync(path));catalog.tests[0].platforms.push('linux');writeFileSync(path,JSON.stringify(catalog));
+ const timing={phase:'distribution-fixture',fixtureMs:12,gitMs:3,gitCalls:2,packageMs:4,assertionAndOtherMs:8,cleanupMs:1};
+ writeFileSync(join(root,'.agents/core/runtime/tests/a.test.js'),`import test from 'node:test';test('synthetic failed scenario',t=>{t.diagnostic(${JSON.stringify(JSON.stringify(timing))});t.diagnostic('unstructured diagnostic');t.diagnostic('{"phase":"other","private":"not in timing receipt"}');throw Error('EXPECTED_TIMING_FAILURE');});\n`);
+ assert.equal(await runVerification(root,['--suite','full'],report),1);
+ const result=JSON.parse(readFileSync(report));assert.equal(result.complete,false);assert.equal(result.results[0].status,'failed');
+ assert.deepEqual(result.results[0].fixtureTiming,{scenarios:1,fixtureMs:12,gitMs:3,gitCalls:2,packageMs:4,assertionAndOtherMs:8,cleanupMs:1});
+ assert.equal(JSON.stringify(result.results[0].fixtureTiming).includes('private'),false);
+});

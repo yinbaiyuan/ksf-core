@@ -20,8 +20,7 @@ jobs:
     with:
       full: true
   prepare:
-    needs: [find-proof, verification]
-    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && (needs.find-proof.outputs.valid == 'true' || needs.verification.result == 'success') }}
+    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     outputs:
@@ -85,8 +84,8 @@ jobs:
           retention-days: 14
           compression-level: 0
   release:
-    needs: prepare
-    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && needs.prepare.result == 'success' }}
+    needs: [find-proof, verification, prepare]
+    if: ${{ !cancelled() && github.repository == 'yinbaiyuan/ksf-core' && needs.prepare.result == 'success' && (needs.find-proof.outputs.valid == 'true' || needs.verification.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
