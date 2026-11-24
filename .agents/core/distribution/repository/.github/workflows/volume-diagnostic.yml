@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 45
     env:
       KSF_SKIP_AUTO_UPDATE: '1'
+      KSF_TEST_CI_CHECKOUT_SCRATCH: '1'
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -55,16 +56,18 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          node .agents/core/runtime/tools/volume-diagnostic.mjs
+          node .agents/core/runtime/tools/volume-runner-regression.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Compare unchanged native tests on Mac
         if: runner.os == 'macOS'
         shell: bash
-        run: node .agents/core/runtime/tools/volume-diagnostic.mjs
+        run: node .agents/core/runtime/tools/volume-runner-regression.mjs
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: native-volume-diagnostic-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .agents/runtime-data/volume-diagnostic/
+          path: |
+            .agents/runtime-data/volume-diagnostic/
+            .agents/runtime-data/tests/
           include-hidden-files: true
           if-no-files-found: error
