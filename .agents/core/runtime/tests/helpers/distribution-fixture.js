@@ -14,6 +14,7 @@ import { buildRelease as buildOfficialRelease, buildPlatformRelease, inspectCore
 import { createArchive } from '../../src/distribution/archive.js';
 import { sha256, stableJSON, writeAtomic, fileMode } from '../../src/distribution/common.js';
 import { developmentPath } from '../../src/distribution/paths.js';
+import { copyFixtureEntries } from './fixture-copy.js';
 
 // Internal lifecycle fixtures can exercise real Linux files and processes.
 // The public release command still accepts only the two official products.
@@ -158,9 +159,11 @@ export async function distributionFixture(t, options = {}) {
     const root = join(directory, 'core'), workspace = join(directory, 'ksf'), output = join(directory, 'release-0.1.0');
     // Seeds are never mutated. Copies are independent, including Git objects;
     // mutable fixtures must not share writable hardlinks with another scenario.
-    cpSync(seed.root, root, { recursive: true });
-    cpSync(seed.workspace, workspace, { recursive: true });
-    cpSync(seed.first.output, output, { recursive: true });
+    await copyFixtureEntries([
+      {source: seed.root, target: root, recursive: true},
+      {source: seed.workspace, target: workspace, recursive: true},
+      {source: seed.first.output, target: output, recursive: true},
+    ]);
     base = { directory, root, workspace, first: { ...structuredClone(seed.first), output, instance: join(output, 'ksf'), template: join(output, 'ksf') }, build: structuredClone(seed.build), originals: new Map(), legacyEntry: false, target:seed.target??seed.first.platform };
   }
   const { directory, root, workspace, first, build, originals, target=fixtureTarget } = base;

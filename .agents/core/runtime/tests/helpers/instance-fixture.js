@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {cpSync,mkdirSync} from 'node:fs';
-import {join,dirname} from 'node:path';
+import {mkdirSync} from 'node:fs';
+import {join} from 'node:path';
 import {distributionFixture,git} from './distribution-fixture.js';
+import {copyFixtureEntries} from './fixture-copy.js';
 import {ForkAPI} from './contribution-api.js';
 import {initializeInstance} from '../../src/distribution/instance.js';
 import {writeAtomic} from '../../src/distribution/files.js';
@@ -11,10 +12,8 @@ export async function template(t,{beforeCopy}={}) {
   mkdirSync(instance);
   // A GitHub template contains the recorded source tree, not ignored or
   // untracked files from the developer's working directory.
-  for(const path of git(f.root,['ls-files','-z']).split('\0').filter(Boolean)){
-    const destination=join(instance,path);mkdirSync(dirname(destination),{recursive:true});
-    cpSync(join(f.root,path),destination);
-  }
+  await copyFixtureEntries(git(f.root,['ls-files','-z']).split('\0').filter(Boolean)
+    .map(path=>({source:join(f.root,path),target:join(instance,path)})));
   git(instance, ['init','--template=','--initial-branch=core-main']);
   git(instance, ['config','user.name','Fixture']); git(instance, ['config','user.email','fixture@example.invalid']);
   git(instance, ['config','core.autocrlf','false']);
