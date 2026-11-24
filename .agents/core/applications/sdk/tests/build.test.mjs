@@ -44,3 +44,34 @@ test('local installation builds are content-addressed and never change the relea
  assert.notEqual(first.package.sha256,second.package.sha256);assert.equal(second.manifest.version,'1.0.0');assert.ok(second.packagePath.includes('.ksf-local'));assert.ok(decodePackage(await readFile(first.packagePath)));assert.ok(decodePackage(await readFile(second.packagePath)));
  assert.deepEqual(await readFile(join(store,'index.json')),catalog);assert.deepEqual(await readFile(join(store,formal.package.url)),bytes);assert.deepEqual(await readFile(join(target,'manifest.json')),sourceManifest);assert.equal(JSON.parse(await readFile(join(target,'.ksf-local/latest.json'),'utf8')).package.sha256,second.package.sha256);
 });
+
+test('Windows publication acquisition retries transient denial without entering the action early',{skip:process.platform!=='win32'},async t=>{
+ const fs=await import('node:fs/promises'),{syncBuiltinESMExports}=await import('node:module');
+ const {withStoreLock}=await import('../server/publication.mjs');
+ const root=await temp(t),store=join(root,'store'),original=fs.default.open;let attempts=0,actions=0;
+ const mock=t.mock.method(fs.default,'open',async(...args)=>{
+  if(args[0].endsWith('.publication.lock')&&++attempts<3)throw Object.assign(Error('Synthetic transient sharing denial'),{code:'EPERM'});
+  return original(...args);
+ });
+ syncBuiltinESMExports();t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+ await withStoreLock(store,async()=>{actions++;assert.equal(attempts,3);assert.equal(JSON.parse(await readFile(join(store,'.publication.lock'),'utf8')).pid,process.pid);});
+ assert.equal(actions,1);assert.equal(attempts,3);await assert.rejects(readFile(join(store,'.publication.lock')),{code:'ENOENT'});
+});
+test('permanent Windows lock denial retains its original error and never publishes',{skip:process.platform!=='win32'},async t=>{
+ const fs=await import('node:fs/promises'),{syncBuiltinESMExports}=await import('node:module');
+ const {withStoreLock}=await import('../server/publication.mjs');const root=await temp(t),store=join(root,'store');let attempts=0,actions=0;
+ const original=fs.default.open,error=Object.assign(Error('Synthetic permanent denial'),{code:'EPERM'});
+ const mock=t.mock.method(fs.default,'open',async(...args)=>{if(args[0].endsWith('.publication.lock')){attempts++;throw error;}return original(...args);});
+ syncBuiltinESMExports();t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+ await assert.rejects(withStoreLock(store,()=>{actions++;}),value=>value===error);
+ assert.equal(attempts,100);assert.equal(actions,0);await assert.rejects(readFile(join(store,'.publication.lock')),{code:'ENOENT'});
+});
+test('publication acquisition preserves other permission errors without retry or action',async t=>{
+ const fs=await import('node:fs/promises'),{syncBuiltinESMExports}=await import('node:module');
+ const {withStoreLock}=await import('../server/publication.mjs');const root=await temp(t),store=join(root,'store');let attempts=0,actions=0;
+ const original=fs.default.open,error=Object.assign(Error('Synthetic access denied'),{code:'EACCES'});
+ const mock=t.mock.method(fs.default,'open',async(...args)=>{if(args[0].endsWith('.publication.lock')){attempts++;throw error;}return original(...args);});
+ syncBuiltinESMExports();t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+ await assert.rejects(withStoreLock(store,()=>{actions++;}),value=>value===error);
+ assert.equal(attempts,1);assert.equal(actions,0);await assert.rejects(readFile(join(store,'.publication.lock')),{code:'ENOENT'});
+});
