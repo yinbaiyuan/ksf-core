@@ -1493,7 +1493,19 @@
       "nativePlatforms": [
         "darwin",
         "win32"
-      ]
+      ],
+      "amendment": {
+        "hash": "77c23b2e9e24c5e4336e7866d218dadd75eeb5d4d2f2d9572a9b6988aa2beb57",
+        "originalAssertions": [
+          "b49c2d93e109312b5250d66f5efd1c06413a5e37fb351d2819515f279d95be99",
+          "bbca0c668d9b04903f68555ef928ed33a10d03af6dec21b01c3a754b310d7d96",
+          "8370abd55a5830023a91c406fafaf9f872fca6a3a50423420be75d8da45464d8",
+          "7a96c984af80c9aaa9464b5161fcd213d2ad3262b461ae4ae8a4b1d61627accc",
+          "b03a27aec3bf8c203d980483ef6c4d6eea945540d5a059ade4ecfb5e12858544",
+          "44d7a875bc8bcab458fb485c8bfba81144cfa7c52bf1323a7801d0c1f1c3d15d"
+        ],
+        "reason": "Use a controlled test clock after the real migration write reaches its barrier. Keep the original 100 ms preparation deadline, 150 ms clock advance, all assertions, native worker lifecycle, platforms and file timeout. Delayed startup reproduced the old wait before barrier; no production deadline is increased."
+      }
     },
     {
       "path": ".agents/core/runtime/tests/application-data.test.js",

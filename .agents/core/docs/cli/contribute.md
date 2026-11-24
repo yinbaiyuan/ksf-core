@@ -54,4 +54,4 @@ prepare 返回 warnings，按本机贡献记录识别同一 sourceCommit 或相�
 
 submit 对不同 ID 的相同内容再次检查：核实已有 PR 后返回 duplicate:true、原 ID 和 requestedId，open、closed、merged 均不重复创建。已有尝试未形成可核实的 PR 时返回 CONTRIBUTION_PREVIOUS_ATTEMPT，要求重试原 ID；远程状态不明或已变化时保留现场。attempted.json 在第一个远程写入前记录意图，覆盖创建 ref 或 PR 的响应丢失。旧计划没有 sourceCommit 时仅按完全相同的系统内容提示，不能补造节点关联。基于本机保留的记录判断，不声称能识别其他设备或手工创建且没有本机记录的 PR。
 
-规范源 `.agents/core/distribution/repository/` 的固定导出映射可生成官方根 README、.gitignore、.gitattributes 和三份工作流的差异。每项投影显式出现在公开计划中，原版来自精确 Core 树，内容来自已提交的规范源；不读取个人根文件。映射以外的任意根路径仍被拒绝。
+规范源 `.agents/core/distribution/repository/` 的固定导出映射可生成官方根 README、.gitignore、.gitattributes 和固定白名单内官方工作流的差异。每项投影显式出现在公开计划中，原版来自精确 Core 树，内容来自已提交的规范源；不读取个人根文件。映射以外的任意根路径仍被拒绝。

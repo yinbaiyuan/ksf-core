@@ -24,6 +24,7 @@ jobs:
       matrix: ${{ steps.plan.outputs.matrix }}
       preparations: ${{ steps.plan.outputs.preparations }}
       linux: ${{ steps.plan.outputs.linux }}
+      prepared_groups: ${{ steps.plan.outputs.prepared_groups }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -48,9 +49,109 @@ jobs:
             verification-plan.json
             coverage-audit.json
           if-no-files-found: error
+  prepare-shared-linux:
+    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification-prepare.yml
+    with:
+      os: ubuntu-24.04
+      prepared: Linux
+      toolchains: true
+      full: true
+  full-shared-linux:
+    if: inputs.full && needs.plan.outputs.has_native == 'true'
+    needs: [plan, prepare-shared-linux]
+    uses: ./.github/workflows/verification-platform.yml
+    with:
+      os: ubuntu-24.04
+      prepared: Linux
+      groups: ${{ fromJSON(needs.plan.outputs.prepared_groups)['Linux'] }}
+      base: ${{ inputs.base }}
+      toolchains: true
+      full: true
+      prepared_external: true
+  prepare-mac-runtime:
+    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification-prepare.yml
+    with:
+      os: xcode-27
+      prepared: macOS-runtime
+      toolchains: false
+      full: true
+  full-mac-runtime:
+    if: inputs.full && needs.plan.outputs.has_native == 'true'
+    needs: [plan, prepare-mac-runtime]
+    uses: ./.github/workflows/verification-platform.yml
+    with:
+      os: xcode-27
+      prepared: macOS-runtime
+      groups: ${{ fromJSON(needs.plan.outputs.prepared_groups)['macOS-runtime'] }}
+      base: ${{ inputs.base }}
+      toolchains: false
+      full: true
+      prepared_external: true
+  prepare-mac:
+    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification-prepare.yml
+    with:
+      os: xcode-27
+      prepared: macOS
+      toolchains: true
+      full: true
+  full-mac:
+    if: inputs.full && needs.plan.outputs.has_native == 'true'
+    needs: [plan, prepare-mac]
+    uses: ./.github/workflows/verification-platform.yml
+    with:
+      os: xcode-27
+      prepared: macOS
+      groups: ${{ fromJSON(needs.plan.outputs.prepared_groups)['macOS'] }}
+      base: ${{ inputs.base }}
+      toolchains: true
+      full: true
+      prepared_external: true
+  prepare-win-runtime:
+    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification-prepare.yml
+    with:
+      os: windows-2025
+      prepared: Windows-runtime
+      toolchains: false
+      full: true
+  full-win-runtime:
+    if: inputs.full && needs.plan.outputs.has_native == 'true'
+    needs: [plan, prepare-win-runtime]
+    uses: ./.github/workflows/verification-platform.yml
+    with:
+      os: windows-2025
+      prepared: Windows-runtime
+      groups: ${{ fromJSON(needs.plan.outputs.prepared_groups)['Windows-runtime'] }}
+      base: ${{ inputs.base }}
+      toolchains: false
+      full: true
+      prepared_external: true
+  prepare-win:
+    if: inputs.full && github.repository == 'yinbaiyuan/ksf-core'
+    uses: ./.github/workflows/verification-prepare.yml
+    with:
+      os: windows-2025
+      prepared: Windows
+      toolchains: true
+      full: true
+  full-win:
+    if: inputs.full && needs.plan.outputs.has_native == 'true'
+    needs: [plan, prepare-win]
+    uses: ./.github/workflows/verification-platform.yml
+    with:
+      os: windows-2025
+      prepared: Windows
+      groups: ${{ fromJSON(needs.plan.outputs.prepared_groups)['Windows'] }}
+      base: ${{ inputs.base }}
+      toolchains: true
+      full: true
+      prepared_external: true
   platform:
     name: ${{ matrix.prepared }}
-    if: needs.plan.outputs.has_native == 'true'
+    if: ${{ !inputs.full && needs.plan.outputs.has_native == 'true' }}
     needs: plan
     strategy:
       fail-fast: false
@@ -110,7 +211,7 @@ jobs:
             .agents/runtime-data/tests/
   coverage:
     if: always() && github.repository == 'yinbaiyuan/ksf-core'
-    needs: [plan, platform, linux-core]
+    needs: [plan, platform, linux-core, full-shared-linux, full-mac-runtime, full-mac, full-win-runtime, full-win]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
@@ -134,14 +235,26 @@ jobs:
       - name: Require every applicable job
         if: always()
         env:
+          KSF_FULL: ${{ needs.plan.outputs.full }}
           PLAN: ${{ needs.plan.result }}
+          KSF_SHARED_LINUX_RESULT: ${{ needs.full-shared-linux.result }}
+          KSF_MAC_RUNTIME_RESULT: ${{ needs.full-mac-runtime.result }}
+          KSF_MAC_RESULT: ${{ needs.full-mac.result }}
+          KSF_WIN_RUNTIME_RESULT: ${{ needs.full-win-runtime.result }}
+          KSF_WIN_RESULT: ${{ needs.full-win.result }}
           PLATFORM: ${{ needs.platform.result }}
           LINUX: ${{ needs.linux-core.result }}
           HAS_NATIVE: ${{ needs.plan.outputs.has_native }}
           HAS_LINUX: ${{ needs.plan.outputs.has_linux }}
         run: |
           test "$PLAN" = success
-          if [ "$HAS_NATIVE" = true ]; then test "$PLATFORM" = success; fi
+          if [ "$HAS_NATIVE" = true ]; then
+            if [ "$KSF_FULL" = true ]; then
+              for ksf_result in "$KSF_SHARED_LINUX_RESULT" "$KSF_MAC_RUNTIME_RESULT" "$KSF_MAC_RESULT" "$KSF_WIN_RUNTIME_RESULT" "$KSF_WIN_RESULT"; do test "$ksf_result" = success || exit 1; done
+            else
+              test "$PLATFORM" = success
+            fi
+          fi
           if [ "$HAS_LINUX" = true ]; then test "$LINUX" = success; fi
       - uses: actions/upload-artifact@v7.0.2
         if: always()

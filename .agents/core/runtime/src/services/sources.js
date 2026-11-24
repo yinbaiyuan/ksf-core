@@ -16,10 +16,10 @@ import {annotateDistribution} from '../sources/distribution.js';
 export function sourceCatalog(root, declaration) {
   return annotateDistribution(catalog(root, { linked: false, extraSources: [{ id: declaration.id, root: declaration.root }] }), declaration.id, declaration.distribution?.entries);
 }
-export function inspectSource(root, path, expectedId) {
+export function inspectSource(root, path, expectedId, {includeBranch = true} = {}) {
   const target = ordinaryDirectory(path);
   if (within(root, target) && dirname(target) !== join(root, 'repositories')) sourceFailure('SOURCE_PATH_INVALID', 'Inside a KSF instance, sources must be direct children of the ignored repositories container.', { target });
-  const checked = repository({ root, operation: 'check', target });
+  const checked = repository({ root, operation: 'check', target }, {includeBranch});
   const gitError=checked.errors.find(e=>['REPOSITORY_GIT_REQUIRED','REPOSITORY_GIT_FAILED','REPOSITORY_GIT_UNAVAILABLE'].includes(e.code));
   if(gitError)sourceFailure(gitError.code,gitError.message,{target,errors:checked.errors});
   if (checked.errors.length) sourceFailure('SOURCE_REPOSITORY_INVALID', 'Source must be an independent Git working-tree root.', { target, errors: checked.errors });

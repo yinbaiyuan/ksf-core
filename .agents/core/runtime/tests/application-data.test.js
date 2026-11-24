@@ -110,12 +110,15 @@ test('SDK refuses revision overflow without modifying the stored document',async
  const f=await fixture(t),path=await f.seed({schemaVersion:1,revision:Number.MAX_SAFE_INTEGER,data:{}}),before=await readFile(path,'utf8'),store=createJSONStore(f.context,{schemaVersion:2,migrations:{1:d=>d}});await assert.rejects(store.migrate(),{code:'APP_DATA_INVALID'});assert.equal(await readFile(path,'utf8'),before);
 });
 test('a timed out preparation cannot switch packages while a host migration is still writing',async t=>{
+ // Establish the held host write before advancing the same preparation deadline.
+ // Worker startup speed must not decide whether this concurrency case runs.
+ t.mock.timers.enable({apis:['setTimeout']});
  let release,entered;const barrier=new Promise(r=>release=r),waiting=new Promise(r=>entered=r);
  const f=await appFixture(t,{prepareTimeoutMs:100,storageOptions:{async fault(stage){if(stage==='backup-written'){entered();await barrier;}}}}),one=await f.add(manifest('1.0.0',2),backend);await f.seed({schemaVersion:1,items:['kept']});await f.install(one);
  const launch=f.manager.launch('com.example.migration',one.package.sha256,{kind:'service'});const observed=launch.then(()=>({ok:true}),error=>({error}));await waiting;
  try{
   const healthy={...manifest('1.0.0',1),id:'com.example.other',dataStores:[]},good=await f.add(healthy,'export function activate(){return{call(){return \"works\"}}}');await f.install(good);const lease=await f.manager.launch(healthy.id,good.package.sha256,{kind:'service'});assert.equal(await f.manager.call(lease.id,'read'),'works');
-  const two=await f.add(manifest('1.0.1',2),backend);await f.install(two);await new Promise(r=>setTimeout(r,150));
+  const two=await f.add(manifest('1.0.1',2),backend);await f.install(two);t.mock.timers.tick(150);
   const state=await f.manager.snapshot(),app=state.installed.find(a=>a.id==='com.example.migration');assert.equal(app.active.manifest.version,'1.0.0');assert.equal(app.pending.manifest.version,'1.0.1');
   await assert.rejects(f.manager.changeApp('com.example.migration','rollback'),{code:'APP_BUSY'});
  }finally{release();}

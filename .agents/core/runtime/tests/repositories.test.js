@@ -30,6 +30,24 @@ function files(root) {
     : [[entry.name, readFileSync(join(root, entry.name)).toString('base64')]]);
 }
 
+test('internal identity checks can omit branch display while public checks retain it',t=>{
+ const f=fixture(t),target=join(f.directory,'independent');git(f.directory,['init','--template=','--initial-branch=main',target]);
+ const normal=f.call('check',target);assert.deepEqual(normal.errors,[]);assert.equal(normal.data.repositories[0].branch,'main');
+ let branchCalls=0;const light=f.call('check',target,{}, {includeBranch:false,run(...args){if(args[1].includes('symbolic-ref'))branchCalls++;return spawnSync(...args);}});
+ assert.deepEqual(light.errors,[]);assert.equal(light.data.repositories[0].valid,true);assert.equal(light.data.repositories[0].branch,null);assert.equal(branchCalls,0);
+});
+
+test('omitting branch display still rejects inherited parent Git roots',t=>{
+ const f=fixture(t),target=join(f.directory,'independent');git(f.directory,['init','--template=','--initial-branch=main',target]);const nested=join(target,'nested');mkdirSync(nested);
+ const result=f.call('check',nested,{}, {includeBranch:false});assert.equal(result.data.valid,false);assert.ok(result.errors.some(e=>e.code==='REPOSITORY_ROOT_MISMATCH'));
+});
+
+test('omitting branch display still rejects a worktree sharing outer Git history',t=>{
+ const f=fixture(t);git(f.root,['-c','user.name=KSF Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','--allow-empty','-m','Fictional history']);
+ const target=join(f.directory,'linked');git(f.root,['worktree','add','-b','linked',target]);
+ const result=f.call('check',target,{}, {includeBranch:false});assert.equal(result.data.valid,false);assert.ok(result.errors.some(e=>e.code==='REPOSITORY_SHARED_GIT'));
+});
+
 test('managed creation isolates Git history, keeps the exact name, and is repeatable without commits', t => {
   const f = fixture(t), created = f.call('create', '客户 方案');
   assert.equal(created.data.created, true); assert.equal(created.data.changed, true);

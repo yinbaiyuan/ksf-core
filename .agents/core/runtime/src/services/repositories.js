@@ -69,7 +69,7 @@ function commonDirectory(path, run, optional = false) {
   if (!value) fail('REPOSITORY_GIT_FAILED', 'Cannot inspect the repository Git storage.', path);
   return realpathSync.native(resolve(path, value));
 }
-function identity(root, path, run) {
+function identity(root, path, run, includeBranch = true) {
   directory(path);
   const real = realpathSync(path), scope = scopeOf(root), managed = inside(scope, real) && real !== scope;
   if (managed) {
@@ -81,8 +81,8 @@ function identity(root, path, run) {
   if (top.status !== 0 || realpathSync.native(top.stdout.replace(/\r?\n$/, '')) !== realpathSync.native(real)) fail('REPOSITORY_ROOT_MISMATCH', 'The selected directory must itself be a Git working-tree root, not inherit its parent repository.', path);
   const outerCommon = commonDirectory(root, run, true);
   if (outerCommon && commonDirectory(real, run) === outerCommon) fail('REPOSITORY_SHARED_GIT', 'The engineering repository must not share Git history with the outer KSF repository; use an independent repository.', path);
-  const branch = git(real, ['symbolic-ref', '--quiet', '--short', 'HEAD'], run);
-  return { name: basename(real), path: display(root, real), gitRoot: display(root, real), managed, branch: branch.status === 0 ? branch.stdout.trim() : null, valid: true };
+  const branch = includeBranch ? git(real, ['symbolic-ref', '--quiet', '--short', 'HEAD'], run) : null;
+  return { name: basename(real), path: display(root, real), gitRoot: display(root, real), managed, branch: branch?.status === 0 ? branch.stdout.trim() : null, valid: true };
 }
 function pathsFrom(metadata, folder, projectName) {
   const values = Object.hasOwn(metadata, 'repositories') ? metadata.repositories : [];
@@ -188,7 +188,7 @@ export function repository({ root, operation, target, projectName, scope = 'curr
     try { parentIsolation(root, hooks.run); } catch (error) { errors.push(repositoryErrorItem(error)); }
   }
   for (const path of candidates) {
-    try { repositories.push(identity(root, path, hooks.run)); }
+    try { repositories.push(identity(root, path, hooks.run, hooks.includeBranch !== false)); }
     catch (error) { repositories.push({ name: basename(path), path: display(root, path), valid: false }); errors.push(repositoryErrorItem(error, path)); }
   }
   return { data: { complete: errors.length === 0, repositories, ...(operation === 'check' ? { valid: errors.length === 0 } : {}) }, errors };

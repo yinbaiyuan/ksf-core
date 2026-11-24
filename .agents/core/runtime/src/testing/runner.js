@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, win32 } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { platform, removePathSync } from '../platform/index.js';
@@ -24,6 +24,17 @@ export function testEnvironment(input = process.env) {
 }
 function readJSON(path) { try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return null; } }
 function writeJSON(path, value) { const temporary = `${path}.${randomUUID()}.tmp`; writeFileSync(temporary, JSON.stringify(value, null, 2) + '\n'); renameSync(temporary, path); }
+// Native Windows hosted preparation lives on the checkout volume. Keep its
+// independent scenario copies there, using a prefix no longer than the old
+// profile-root prefix. Local runs and nested fixture repositories stay put.
+export function testTemporaryParent(root,{env=process.env,platform=process.platform,home=homedir(),temporary=tmpdir()}={}) {
+  if(platform!=='win32')return temporary;
+  if(env.GITHUB_ACTIONS==='true'&&env.RUNNER_ENVIRONMENT==='github-hosted'&&env.KSF_TEST_CI_CHECKOUT_SCRATCH==='1'&&typeof env.GITHUB_WORKSPACE==='string'&&win32.isAbsolute(root)&&win32.isAbsolute(env.GITHUB_WORKSPACE)){
+    const checkout=win32.resolve(root),parent=win32.dirname(checkout);
+    if(/^[A-Za-z]:\\/.test(checkout)&&checkout.toLowerCase()===win32.resolve(env.GITHUB_WORKSPACE).toLowerCase()&&parent.length<=home.length)return parent;
+  }
+  return home;
+}
 // An exclusive file is a barrier: drain earlier work, run it alone, then admit
 // later files. Do not backfill past the barrier and starve heavy lifecycle work.
 export async function scheduleTests(items, parallel, run, cancelled) {
@@ -51,10 +62,9 @@ export async function executeTestPlan(root, plan, { progress = line => process.s
   mkdirSync(directory, { recursive: true }); mkdirSync(cache, { recursive: true });
   const results = new Array(plan.tests.length), active = new Set();
   let before,beforeFingerprintMs;
-  // Keep native Windows staging paths within legacy PowerShell/.NET limits.
-  // A profile-root scratch directory is shorter than %LOCALAPPDATA%/Temp plus
-  // another run/file hierarchy, and is exclusively owned and removed here.
-  const temporaryDirectory = mkdtempSync(join(process.platform==='win32'?homedir():tmpdir(), '.ksft-'));
+  // A unique, short scratch directory remains exclusively owned and removed
+  // here. CI selection also avoids repeated copies from D: preparation to C:.
+  const temporaryDirectory = mkdtempSync(join(testTemporaryParent(root), '.ksft-'));
   let cancelled = false;
   const stop = child => {
     if (child.exitCode !== null || child.signalCode !== null) return;

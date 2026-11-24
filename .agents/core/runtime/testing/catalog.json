@@ -1148,7 +1148,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1193,10 +1193,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 6,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1247,7 +1247,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1444,10 +1444,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 2,
         "win32": 5
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1554,10 +1554,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
+        "darwin": 20,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1612,10 +1612,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 5,
         "win32": 7
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1776,7 +1776,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1823,7 +1823,7 @@
         "darwin": 3,
         "win32": 7
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1870,10 +1870,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 14,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2044,10 +2044,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 11,
         "win32": 8
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2197,10 +2197,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 7,
+        "darwin": 8,
         "win32": 15
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2294,11 +2294,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 69,
+        "darwin": 81,
         "win32": 98,
         "linux": 55.32
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2379,11 +2379,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 7,
+        "darwin": 14,
         "win32": 150,
         "linux": 2.34
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2418,11 +2418,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21,
+        "darwin": 19,
         "win32": 39,
         "linux": 25.99
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2473,7 +2473,7 @@
         "darwin": 13,
         "win32": 26
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2835,11 +2835,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 8,
         "win32": 4,
         "linux": 1.64
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2877,7 +2877,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2979,7 +2979,7 @@
         "darwin": 4,
         "win32": 7
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3077,10 +3077,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -3116,10 +3116,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 12,
+        "darwin": 16,
         "win32": 19
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3472,11 +3472,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32,
+        "darwin": 45,
         "win32": 128,
         "linux": 31.17
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -3532,11 +3532,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 13,
+        "darwin": 16,
         "win32": 15,
         "linux": 7.34
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4126,7 +4126,7 @@
         "darwin": 2,
         "win32": 4
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4172,10 +4172,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 9,
         "win32": 23
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4406,11 +4406,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 6,
         "win32": 2,
         "linux": 0.9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4510,10 +4510,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4566,10 +4566,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 6,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4608,10 +4608,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 17,
+        "darwin": 24,
         "win32": 43
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4650,10 +4650,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23,
+        "darwin": 29,
         "win32": 34
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5120,11 +5120,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 8,
         "linux": 0.36
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5161,10 +5161,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 55,
+        "darwin": 69,
         "win32": 181
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -5213,7 +5213,7 @@
         "darwin": 3,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5314,7 +5314,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5361,11 +5361,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 6,
         "win32": 8,
         "linux": 1.93
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5519,7 +5519,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5734,10 +5734,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 4,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5791,7 +5791,7 @@
         "win32": 5,
         "linux": 0.22
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5949,10 +5949,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 7
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6057,7 +6057,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6754,10 +6754,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 7,
         "win32": 3
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6802,10 +6802,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -7006,10 +7006,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 47,
+        "darwin": 56,
         "win32": 135
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7053,10 +7053,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 51,
+        "darwin": 62,
         "win32": 151
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7100,10 +7100,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 52,
+        "darwin": 47,
         "win32": 185
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7147,10 +7147,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 71,
+        "darwin": 69,
         "win32": 153
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7194,10 +7194,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 33,
+        "darwin": 59,
         "win32": 103
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7241,10 +7241,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 31,
+        "darwin": 42,
         "win32": 83
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7288,10 +7288,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 81,
+        "darwin": 41,
         "win32": 156
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7335,10 +7335,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 51,
+        "darwin": 45,
         "win32": 98
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7382,10 +7382,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 33,
+        "darwin": 39,
         "win32": 115
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7440,7 +7440,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:system-update-frontend-metadata",
@@ -7481,7 +7481,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:release-files",
@@ -7506,7 +7506,7 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 1,
         "linux": 0.3
       },
@@ -7521,7 +7521,7 @@
         ".agents/core/runtime/src/platform",
         ".agents/core/runtime/src/shared"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:task-checkpoints",
@@ -7824,10 +7824,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21,
+        "darwin": 20,
         "win32": 79
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7872,10 +7872,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 21,
+        "darwin": 88,
         "win32": 116
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7920,10 +7920,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 29,
+        "darwin": 31,
         "win32": 83
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -8023,11 +8023,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 9,
+        "darwin": 7,
         "win32": 11,
         "linux": 2.72
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8076,7 +8076,7 @@
         "win32": 6,
         "linux": 4.46
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8177,10 +8177,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8278,7 +8278,7 @@
         "win32": 1,
         "linux": 0.16
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8325,7 +8325,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8368,10 +8368,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 76,
+        "darwin": 75,
         "win32": 83
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8406,7 +8406,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -9835,10 +9835,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 34,
+        "darwin": 49,
         "win32": 100
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9882,10 +9882,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32,
+        "darwin": 29,
         "win32": 116
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9929,10 +9929,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 17,
+        "darwin": 16,
         "win32": 55
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9976,10 +9976,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 13,
+        "darwin": 17,
         "win32": 65
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10023,10 +10023,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 25,
+        "darwin": 21,
         "win32": 96
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10070,10 +10070,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23,
+        "darwin": 55,
         "win32": 108
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10117,10 +10117,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 87,
+        "darwin": 85,
         "win32": 198
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10168,10 +10168,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 69,
+        "darwin": 87,
         "win32": 113
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10214,10 +10214,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23,
+        "darwin": 29,
         "win32": 62
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10420,10 +10420,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 7,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10517,7 +10517,7 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 37,
+        "darwin": 22,
         "win32": 100,
         "linux": 23.62
       },
@@ -10545,7 +10545,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:runtime-bundle-inspection",
@@ -10577,7 +10577,7 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 25,
+        "darwin": 24,
         "win32": 52,
         "linux": 28.57
       },
@@ -10605,7 +10605,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10637,7 +10637,7 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 31,
+        "darwin": 32,
         "win32": 81,
         "linux": 24.53
       },
@@ -10658,7 +10658,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:runtime-bundle-native",
@@ -10690,7 +10690,7 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 30,
+        "darwin": 31,
         "win32": 115,
         "linux": 0.18
       },
@@ -10710,7 +10710,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     },
     {
       "id": "core:distribution-policy",
@@ -10781,10 +10781,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 28,
+        "darwin": 30,
         "win32": 82
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10839,7 +10839,7 @@
         "darwin": 35,
         "win32": 91
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10884,10 +10884,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 7,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -10989,10 +10989,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 34,
+        "darwin": 33,
         "win32": 89
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11044,7 +11044,7 @@
         "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11222,10 +11222,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
+        "darwin": 5,
         "win32": 6
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11272,11 +11272,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
+        "darwin": 72,
         "win32": 158,
         "linux": 120
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11323,11 +11323,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 58,
+        "darwin": 48,
         "win32": 170,
         "linux": 120
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11393,7 +11393,7 @@
         "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11442,7 +11442,7 @@
         "darwin": 3,
         "win32": 8
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11559,7 +11559,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11619,7 +11619,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11643,7 +11643,7 @@
         "README.md"
       ],
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 8
       }
     },
@@ -11682,10 +11682,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 32,
         "win32": 12
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11745,10 +11745,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 6,
         "win32": 10
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11858,7 +11858,7 @@
         "darwin": 3,
         "win32": 4
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11916,10 +11916,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7,
+        "darwin": 8,
         "win32": 10
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11978,10 +11978,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 9,
+        "darwin": 8,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12381,11 +12381,11 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 1,
         "linux": 0.43
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -12433,11 +12433,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 31,
+        "darwin": 33,
         "win32": 53,
         "linux": 21.27
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12487,11 +12487,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7,
+        "darwin": 6,
         "win32": 8,
         "linux": 5.25
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12599,7 +12599,7 @@
         "win32": 25,
         "linux": 4.85
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12701,11 +12701,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 7,
         "win32": 11,
         "linux": 5.19
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12757,7 +12757,7 @@
         "win32": 2,
         "linux": 0.43
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12876,11 +12876,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 1,
         "win32": 1,
         "linux": 1.09
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12932,7 +12932,7 @@
         "win32": 3,
         "linux": 1.64
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12981,7 +12981,7 @@
         "win32": 3,
         "linux": 1.1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13026,11 +13026,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 7,
         "win32": 3,
         "linux": 2.28
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13115,7 +13115,7 @@
         "win32": 5,
         "linux": 3.5
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13171,10 +13171,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 4
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13277,10 +13277,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 9,
         "win32": 11
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13445,7 +13445,7 @@
         "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13480,10 +13480,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
+        "darwin": 28,
         "win32": 9
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13742,10 +13742,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 25,
         "win32": 10
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14007,10 +14007,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14051,10 +14051,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 5,
         "win32": 3
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14499,7 +14499,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -16295,7 +16295,7 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 3,
         "win32": 3,
         "linux": 1
       },
@@ -16308,7 +16308,7 @@
         ".agents/core/runtime/src/testing/prepared-archive.js",
         ".agents/core/distribution/repository/.github/workflows/verification-platform.yml"
       ],
-      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes. Mac runtime placement refreshed from the larger passed-file duration in PR58 run 45360554879 and diagnostic run 45386910586, plus 15 percent margin. The diagnostic failed overall; its timed-out application-data result is excluded and retains the prior valid sample. Placement only; not full proof or a timeout change."
     }
   ],
   "timingBaseline": {

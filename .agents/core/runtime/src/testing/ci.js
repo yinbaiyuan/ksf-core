@@ -8,6 +8,7 @@ import {loadCatalog,sha256,fail,rebuiltArtifact} from './catalog.js';
 import {createTestPlan,parseTestOptions} from './planner.js';
 import {gitExecutable} from '../platform/index.js';
 import {createVerificationPlan,validateVerificationPlan} from './ci-plan.js';
+import {selectPreparationGroups} from './preparation-groups.js';
 import {aggregateLayeredReports} from './ci-coverage.js';
 import {auditCoverage} from './coverage-audit.js';
 import {runTestCommand} from '../commands/test.js';
@@ -184,7 +185,14 @@ async function main(){
   writeFileSync('verification-plan.json',JSON.stringify(plan,null,2)+'\n');
   const matrix=plan.groups.filter(g=>g.prepared),linux=plan.groups.filter(g=>!g.prepared);
   const preparations=[...new Map(matrix.map(g=>[g.prepared,{os:g.os,prepared:g.prepared,toolchains:g.toolchains,groups:JSON.stringify({include:matrix.filter(item=>item.prepared===g.prepared)})}])).values()];
-  appendFileSync(process.env.GITHUB_OUTPUT,`full=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'xcode-27'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'xcode-27',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
+  const preparedGroups=Object.fromEntries(preparations.map(p=>[p.prepared,p.groups]));
+  appendFileSync(process.env.GITHUB_OUTPUT,`prepared_groups=${JSON.stringify(preparedGroups)}\nfull=${plan.full}\nactive=${plan.groups.length>0}\nmatrix=${JSON.stringify({include:matrix.length?matrix:[{id:'none',os:'xcode-27'}]})}\npreparations=${JSON.stringify({include:preparations.length?preparations:[{os:'xcode-27',prepared:'none'}]})}\nlinux=${JSON.stringify({include:linux.length?linux:[{id:'none',os:'ubuntu-24.04'}]})}\nhas_native=${matrix.length>0}\nhas_linux=${linux.length>0}\n`);
+ }else if(command==='prepare-groups'){
+  if(args.length)fail('TEST_CI_PREPARATION_INVALID','Preparation selection accepts only its explicit job environment.');
+  const boolean=name=>{const value=process.env[name];if(!['true','false'].includes(value))fail('TEST_CI_PREPARATION_INVALID','Missing explicit preparation mode.');return value==='true';};
+  const groups=selectPreparationGroups(root,{prepared:process.env.KSF_PREPARED,os:process.env.KSF_PREPARATION_OS,toolchains:boolean('KSF_PREPARATION_TOOLCHAINS'),full:boolean('KSF_PREPARATION_FULL'),groups:process.env.KSF_PREPARATION_GROUPS??''},sourceIdentity(root));
+  if(!process.env.GITHUB_ENV)fail('TEST_CI_PREPARATION_INVALID','Preparation requires its job environment output.');
+  appendFileSync(process.env.GITHUB_ENV,'KSF_CI_GROUPS='+JSON.stringify(groups)+'\n');
  }else if(command==='run-group'){
   const [planPath,id,reportPath]=args;
   try{

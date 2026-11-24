@@ -6,9 +6,26 @@ import { tmpdir } from 'node:os';
 import { spawnSync, spawn } from 'node:child_process';
 import { catalogPath, loadCatalog } from '../src/testing/catalog.js';
 import { parseTestOptions, createTestPlan, assignShards,scheduledSeconds } from '../src/testing/planner.js';
-import { executeTestPlan, testEnvironment, scheduleTests } from '../src/testing/runner.js';
+import { executeTestPlan, testEnvironment, scheduleTests, testTemporaryParent } from '../src/testing/runner.js';
 import { runTestCommand } from '../src/commands/test.js';
 import { gitBinary, nullDevice } from './helpers/platform.js';
+
+test('native Windows CI uses a short same-checkout temporary parent',()=>{
+ const root='D:\\a\\ksf-core\\ksf-core',settings={platform:'win32',home:'C:\\Users\\runneradmin',temporary:'C:\\Users\\runneradmin\\AppData\\Local\\Temp',env:{GITHUB_ACTIONS:'true',RUNNER_ENVIRONMENT:'github-hosted',KSF_TEST_CI_CHECKOUT_SCRATCH:'1',GITHUB_WORKSPACE:root}};
+ assert.equal(testTemporaryParent(root,settings),'D:\\a\\ksf-core');
+ assert.equal(testTemporaryParent(root.toLowerCase(),settings),'d:\\a\\ksf-core');
+ assert.equal(testTemporaryParent(root,{...settings,env:{...settings.env,GITHUB_WORKSPACE:root+'\\'}}),'D:\\a\\ksf-core');
+ assert.ok(testTemporaryParent(root,settings).length<=settings.home.length);
+});
+
+test('local, nested, ambiguous and longer Windows paths retain profile-root staging',()=>{
+ const root='D:\\a\\ksf-core\\ksf-core',settings={platform:'win32',home:'C:\\Users\\runneradmin',temporary:'unused',env:{GITHUB_ACTIONS:'true',RUNNER_ENVIRONMENT:'github-hosted',KSF_TEST_CI_CHECKOUT_SCRATCH:'1',GITHUB_WORKSPACE:root}};
+ for(const [path,env]of [[root,{}],[root,{...settings.env,GITHUB_ACTIONS:'false'}],[root,{...settings.env,RUNNER_ENVIRONMENT:'self-hosted'}],[root,{...settings.env,KSF_TEST_CI_CHECKOUT_SCRATCH:''}],[root+'\\fixture',settings.env],[root,{...settings.env,GITHUB_WORKSPACE:'D:\\other'}],[root,{...settings.env,GITHUB_WORKSPACE:'relative'}],['relative',settings.env],['D:\\very-long-parent-component\\checkout',{...settings.env,GITHUB_WORKSPACE:'D:\\very-long-parent-component\\checkout'}],['\\\\server\\share\\checkout',{...settings.env,GITHUB_WORKSPACE:'\\\\server\\share\\checkout'}]])assert.equal(testTemporaryParent(path,{...settings,env}),settings.home);
+});
+
+test('Mac and Linux keep their native temporary roots even with Actions metadata',()=>{
+ for(const platform of ['darwin','linux'])assert.equal(testTemporaryParent('/work/ksf',{platform,home:'/home/runner',temporary:'/tmp/native',env:{GITHUB_ACTIONS:'true',GITHUB_WORKSPACE:'/work/ksf'}}),'/tmp/native');
+});
 
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'KSF test 中文 ')), runtime = '.agents/core/runtime';
