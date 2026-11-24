@@ -6,7 +6,7 @@ import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import YAML from '../src/vendor/yaml/dist/index.js';
 import {loadCatalog} from '../src/testing/catalog.js';
-import {createVerificationPlan, targets,verificationTargets,runtimeOnlyNative,runtimeOnlyTest} from '../src/testing/ci-plan.js';
+import {createVerificationPlan, targets,verificationTargets,runtimeOnlyNative,runtimeOnlyCore,runtimeOnlyTest} from '../src/testing/ci-plan.js';
 import {sourceIdentity} from '../src/testing/ci.js';
 
 function repositoryWorkflows(t) {
@@ -189,7 +189,7 @@ test('runtime-only transaction groups keep every native file and preserve hosted
  for(const platform of ['darwin','win32']){
   const groups=plan.groups.filter(g=>g.platform===platform),files=groups.flatMap(g=>g.files),expected=catalog.tests.filter(t=>t.platforms.includes(platform)&&!(platform==='darwin'&&t.verification.lane==='shared'&&t.platforms.includes('linux'))&&!(platform==='win32'&&t.verification.lane==='shared')).map(t=>t.path);
   assert.deepEqual([...files].sort(),expected.sort());assert.equal(new Set(files).size,files.length);assert.ok(groups.length<=(platform==='darwin'?5:12));
-  for(const g of groups.filter(g=>g.toolchains===false)){assert.equal(g.profile,'native');assert.ok(g.files.every(path=>runtimeOnlyNative.has(catalog.tests.find(t=>t.path===path).id)));}
+  for(const g of groups.filter(g=>g.toolchains===false)){assert.equal(g.profile,'native');assert.ok(g.files.every(path=>runtimeOnlyTest(catalog.tests.find(t=>t.path===path))));}
  }
  const wf=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification-platform.yml'),'utf8')),prepare=wf.jobs.prepare.steps;
  assert.equal(wf.on.workflow_call.inputs.toolchains.default,true);assert.equal(wf.jobs.tests.needs,'prepare');
@@ -201,4 +201,18 @@ test('runtime-only transaction groups keep every native file and preserve hosted
  const parent=YAML.parse(readFileSync(join(repositoryWorkflows(),'verification.yml'),'utf8'));assert.equal(parent.jobs.platform.with.toolchains,'${{ matrix.toolchains }}');assert.equal(parent.jobs.platform.with.full,"${{ needs.plan.outputs.full == 'true' }}");assert.equal(parent.jobs.plan.steps[0].with['fetch-depth'],0);
  const release=YAML.parse(readFileSync(join(repositoryWorkflows(),'release.yml'),'utf8')),install=release.jobs.prepare.steps.find(s=>s.name==='Install locked release dependencies');
  assert.match(install.run,/wait "\$ksf_pid" \|\| ksf_install_status=\$\?/);assert.match(install.run,/exit "\$ksf_install_status"/);assert.equal(release.jobs.prepare.steps.find(s=>s.uses?.startsWith('actions/upload-artifact@')).with['compression-level'],0);
+});
+
+
+test('qualified Core files share runtime workers without moving frontend or unqualified files',()=>{
+ const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root),plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
+ assert.equal(runtimeOnlyCore.size,82);
+ for(const id of runtimeOnlyCore){
+  const item=catalog.tests.find(t=>t.id===id);assert.ok(item,id);assert.equal(item.owner,'core');assert.equal(item.verification.lane,'native');assert.deepEqual(item.requirements,[]);
+  assert.deepEqual(item.fixtures??[],id==='core:path-identity'?['distribution']:[]);
+ }
+ for(const id of ['core:application-open-ui','core:eval'])assert.equal(runtimeOnlyTest(catalog.tests.find(t=>t.id===id)),false);
+ assert.equal(runtimeOnlyTest({id:'core:new-native-file',owner:'core',requirements:[]}),false);
+ for(const [target,count] of [['mac-runtime',4],['mac',1],['win-runtime',10],['win',2]])assert.equal(plan.groups.filter(g=>g.target===target).length,count);
+ assert.equal(plan.groups.length,24);assert.equal(plan.groups.reduce((sum,g)=>sum+g.files.length,0),549);
 });
