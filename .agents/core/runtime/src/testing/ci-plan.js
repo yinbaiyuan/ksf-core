@@ -72,7 +72,9 @@ export function createVerificationPlan(root, {full = false, base, changes} = {},
     // Finish development-only native Linux obligations early, before the
     // steady Mac/Windows/shared pool needs the hosted concurrency slots.
     const targetSeconds=target.platform==='linux'&&target.profile==='native'?180:450;
-    const count = Math.min(tests.length, target.limit, Math.max(1, Math.ceil(seconds / targetSeconds)));
+    // Retain the reviewed nine-worker full transaction pool after faster
+    // fixtures lower its summed estimates; affected-only plans stay adaptive.
+    const count = full && target.target==='win-runtime' ? Math.min(tests.length,target.limit) : Math.min(tests.length, target.limit, Math.max(1, Math.ceil(seconds / targetSeconds)));
     const profile=target.profile==='all'&&tests.every(t=>t.verification.lane==='native')?'native':target.profile;
     for (const [index, files] of assignShards(tests, count, target.platform).entries()) groups.push({
       id:`${target.target}-${index + 1}`, target:target.target, profile,

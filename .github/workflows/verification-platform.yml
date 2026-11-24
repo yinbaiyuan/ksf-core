@@ -79,9 +79,9 @@ jobs:
           KSF_CI_GROUPS: ${{ inputs.groups }}
         run: |
           node .agents/core/runtime/src/testing/prepare-ci-fixtures.js > fixtures.prepare.log 2>&1 & ksf_fixtures_pid=$!
-          npm --prefix .agents/core/applications/sdk ci --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
-          npm --prefix .agents/core/runtime/web ci > web.install.log 2>&1 & ksf_web_pid=$!
-          npm --prefix .agents/core/applications/projects ci --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
+          npm --prefix .agents/core/applications/sdk ci --prefer-offline --ignore-scripts > sdk.install.log 2>&1 & ksf_sdk_pid=$!
+          npm --prefix .agents/core/runtime/web ci --prefer-offline > web.install.log 2>&1 & ksf_web_pid=$!
+          npm --prefix .agents/core/applications/projects ci --prefer-offline --ignore-scripts > projects.install.log 2>&1 & ksf_projects_pid=$!
           ksf_install_status=0
           for ksf_pid in "$ksf_sdk_pid" "$ksf_web_pid" "$ksf_projects_pid" "$ksf_fixtures_pid"; do
             wait "$ksf_pid" || ksf_install_status=$?
