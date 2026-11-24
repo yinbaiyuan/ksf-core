@@ -51,7 +51,7 @@ function assertIdle(root) {
 }
 // Age and a completed receipt prove that a rollback is obsolete, not that its
 // local edits are backed up. Unknown source stays until explicitly preserved.
-function sourceProtection(root, { preview = false } = {}) {
+function sourceProtection(root, { preview = false, stopAfterFirst = false } = {}) {
   let committed;
   // Repeated historical payloads often refer to the same live source. This
   // bounded snapshot belongs only to this protection pass. Applying a plan
@@ -93,13 +93,18 @@ function sourceProtection(root, { preview = false } = {}) {
   };
   return path => {
     const prefix = /\/(?:old-root|new-root)$/.test(path) ? '' : '.agents/core/';
-    const unprotected = [];
-    function visit(at) {
+    const unprotected = [], deferred = [];
+    function visit(at, readingDeferred = false) {
+      if (stopAfterFirst && unprotected.length) return;
       const rel = relative(safe(root, path), at).split(sep).join('/'), current = `${prefix}${rel}`, s = lstatSync(at);
       if (rel.split('/').includes('.git')) { unprotected.push(rel); return; }
       if (at.endsWith(`${sep}.DS_Store`) || developmentPath(current)) return;
       if (s.isDirectory()) { for (const name of readdirSync(at)) visit(join(at, name)); return; }
       if (s.isFile()) {
+        // A single unpreserved original retains the entire artifact. During
+        // automatic maintenance, inspect ordinary originals before large
+        // packages; authorize removal only after every deferred file passes.
+        if (stopAfterFirst && !readingDeferred && s.size > 256 * 1024) { deferred.push(at); return; }
         const bytes = readFileSync(at);
         if (primaryMatches(current, bytes)) return;
         const oid = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -108,18 +113,19 @@ function sourceProtection(root, { preview = false } = {}) {
       unprotected.push(rel);
     }
     visit(safe(root, path));
+    for (const at of deferred) { if (unprotected.length) break; visit(at, true); }
     return unprotected;
   };
 }
-export function planRuntimeCleanup(root, { scope = 'all', keepRunId } = {}) {
+export function planRuntimeCleanup(root, { scope = 'all', keepRunId, briefSourceWarnings = false } = {}) {
   root = resolve(root); assertIdle(root);
   const candidates = [], retained = [], warnings = [];
-  const protect = sourceProtection(root, { preview: true });
+  const protect = sourceProtection(root, { preview: true, stopAfterFirst: briefSourceWarnings });
   const add = (path, reason, guard) => {
     if (!existsSync(safe(root, path))) return;
     if (reason.includes('rollback') || reason === 'superseded-prepared-switch') {
       const unique = protect(path);
-      if (unique.length) { warnings.push({ path, reason: 'source-not-preserved', count: unique.length, files: unique.slice(0, 20) }); retained.push({ path, reason: 'source-not-preserved' }); return; }
+      if (unique.length) { warnings.push({ path, reason: 'source-not-preserved', ...(briefSourceWarnings ? { exhaustive: false } : { count: unique.length }), files: unique.slice(0, 20) }); retained.push({ path, reason: 'source-not-preserved' }); return; }
     }
     candidates.push({ path, reason, guard, ...tree(root, path) });
   };
@@ -169,15 +175,15 @@ export function planRuntimeCleanup(root, { scope = 'all', keepRunId } = {}) {
   }
   return { schemaVersion: 1, root, scope, policy: { matchedRollbacks: 1, officialRollbacks: 1, testRuns: 10, additionalFailedRuns: 5, cacheEntries: 256, cacheBytes: 64 * 1024 * 1024 }, candidates, retained, warnings, reclaimableBytes: candidates.reduce((n, c) => n + c.bytes, 0) };
 }
-export function cleanupRuntimeArtifacts({ root, apply = false, scope = 'all', keepRunId }) {
-  const plan = planRuntimeCleanup(root, { scope, keepRunId }), removed = [], errors = [];
+export function cleanupRuntimeArtifacts({ root, apply = false, scope = 'all', keepRunId, briefSourceWarnings = false }) {
+  const plan = planRuntimeCleanup(root, { scope, keepRunId, briefSourceWarnings }), removed = [], errors = [];
   if (apply) for (const candidate of plan.candidates) {
     try {
       assertIdle(root);
       if (candidate.guard && digest(readFileSync(safe(root, candidate.guard.path))) !== candidate.guard.digest) fail('CLEANUP_CHANGED', 'Artifact receipt changed during cleanup.');
       if (tree(root, candidate.path).fingerprint !== candidate.fingerprint) fail('CLEANUP_CHANGED', 'Artifact changed during cleanup.');
       if (candidate.reason.includes('rollback') || candidate.reason === 'superseded-prepared-switch') {
-        if (sourceProtection(root)(candidate.path).length) fail('CLEANUP_SOURCE_UNPROTECTED', 'Source preservation changed; retain this artifact for review.');
+        if (sourceProtection(root, { stopAfterFirst: true })(candidate.path).length) fail('CLEANUP_SOURCE_UNPROTECTED', 'Source preservation changed; retain this artifact for review.');
       }
       // Mark the loss of rollback material before removal. An interrupted prune
       // remains explicit; it can never be mistaken for a complete backup.
@@ -191,6 +197,6 @@ export function cleanupRuntimeArtifacts({ root, apply = false, scope = 'all', ke
   return { ...plan, apply, removed, errors, changed: removed.length > 0, reclaimedBytes: plan.candidates.filter(c => removed.includes(c.path)).reduce((n, c) => n + c.bytes, 0) };
 }
 export function retainRuntimeArtifacts(root, scope = 'all', options = {}) {
-  try { return cleanupRuntimeArtifacts({ root, apply: true, scope, ...options }); }
+  try { return cleanupRuntimeArtifacts({ root, apply: true, scope, briefSourceWarnings: true, ...options }); }
   catch (error) { return { changed: false, errors: [{ code: error.code ?? 'CLEANUP_FAILED', message: error.message }] }; }
 }
