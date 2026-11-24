@@ -102,15 +102,15 @@ jobs:
         env:
           COPYFILE_DISABLE: '1'
         run: |
-          tar -cf prepared.tar .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist .agents/runtime-data/ci-seeds
-          node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
+          set -o pipefail
+          tar -cf - .agents/core/applications/sdk/node_modules .agents/core/applications/projects/node_modules .agents/core/runtime/web/node_modules .agents/core/runtime/web/dist .agents/runtime-data/ci-seeds | node .agents/core/runtime/src/testing/prepared-archive.js compress - prepared.tar.zst
       - name: Freeze prepared runtime fixtures
         if: ${{ !inputs.toolchains }}
         env:
           COPYFILE_DISABLE: '1'
         run: |
-          tar -cf prepared.tar .agents/runtime-data/ci-seeds
-          node .agents/core/runtime/src/testing/prepared-archive.js compress prepared.tar prepared.tar.zst
+          set -o pipefail
+          tar -cf - .agents/runtime-data/ci-seeds | node .agents/core/runtime/src/testing/prepared-archive.js compress - prepared.tar.zst
       - uses: actions/upload-artifact@v7.0.2
         with:
           overwrite: true
@@ -171,8 +171,8 @@ jobs:
           Split-Path $details.runtime.nodePath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Restore platform toolchains
         run: |
-          node .agents/core/runtime/src/testing/prepared-archive.js decompress prepared.tar.zst prepared.tar
-          tar -xf prepared.tar
+          set -o pipefail
+          node .agents/core/runtime/src/testing/prepared-archive.js decompress prepared.tar.zst - | tar -xf -
       - name: Restore declared local SDK links
         if: inputs.toolchains
         run: node .agents/core/runtime/src/testing/ci.js restore-links
