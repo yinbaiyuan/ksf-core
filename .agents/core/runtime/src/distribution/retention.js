@@ -51,8 +51,29 @@ function assertIdle(root) {
 }
 // Age and a completed receipt prove that a rollback is obsolete, not that its
 // local edits are backed up. Unknown source stays until explicitly preserved.
-function sourceProtection(root) {
+function sourceProtection(root, { preview = false } = {}) {
   let committed;
+  // Repeated historical payloads often refer to the same live source. This
+  // bounded snapshot belongs only to this protection pass. Applying a plan
+  // creates a new pass for each deletion, never trusting preview custody.
+  const primary = new Map(), primaryLimit = 32 * 1024 * 1024;
+  let primaryBytes = 0;
+  const primaryMatches = (path, bytes) => {
+    if (!preview) {
+      try { return readRegular(root, path, true)?.equals(bytes) ?? false; } catch { return false; }
+    }
+    if (!primary.has(path)) {
+      let source = null;
+      try { source = readRegular(root, path, true); } catch { /* Unreadable primary is not proof. */ }
+      // Keep small original bytes within a fixed budget; large runtime
+      // archives still use a fresh read. No hash replaces byte comparison.
+      if (primary.size < 10000 && (source?.length ?? 0) <= 256 * 1024 && primaryBytes + (source?.length ?? 0) <= primaryLimit) {
+        primary.set(path, source); primaryBytes += source?.length ?? 0;
+      }
+      else return source?.equals(bytes) ?? false;
+    }
+    return primary.get(path)?.equals(bytes) ?? false;
+  };
   const gitObjects = () => {
     if (committed) return committed;
     committed = new Set();
@@ -80,7 +101,7 @@ function sourceProtection(root) {
       if (s.isDirectory()) { for (const name of readdirSync(at)) visit(join(at, name)); return; }
       if (s.isFile()) {
         const bytes = readFileSync(at);
-        try { if (readRegular(root, current, true)?.equals(bytes)) return; } catch { /* Unreadable primary is not proof. */ }
+        if (primaryMatches(current, bytes)) return;
         const oid = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
         if (gitObjects().has(`${oid} ${current}`)) return;
       }
@@ -93,7 +114,7 @@ function sourceProtection(root) {
 export function planRuntimeCleanup(root, { scope = 'all', keepRunId } = {}) {
   root = resolve(root); assertIdle(root);
   const candidates = [], retained = [], warnings = [];
-  const protect = sourceProtection(root);
+  const protect = sourceProtection(root, { preview: true });
   const add = (path, reason, guard) => {
     if (!existsSync(safe(root, path))) return;
     if (reason.includes('rollback') || reason === 'superseded-prepared-switch') {
