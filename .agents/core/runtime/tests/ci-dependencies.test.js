@@ -177,7 +177,7 @@ test('CI prepares immutable same-attempt fixtures alongside dependencies and tra
 
 test('runtime-only transaction groups keep every native file and preserve hosted worker limits',()=>{
  const root=fileURLToPath(new URL('../../../../',import.meta.url)),catalog=loadCatalog(root),plan=createVerificationPlan(root,{full:true},sourceIdentity(root));
- assert.equal(runtimeOnlyNative.size,28);
+ assert.equal(runtimeOnlyNative.size,32);
  for(const id of runtimeOnlyNative){const t=catalog.tests.find(t=>t.id===id);assert.ok(t,id);assert.equal(t.verification.lane,'native');assert.equal(t.isolation,'exclusive');assert.deepEqual(t.fixtures,['distribution']);assert.deepEqual(t.requirements,[]);}
  for(const platform of ['darwin','win32']){
   const groups=plan.groups.filter(g=>g.platform===platform),files=groups.flatMap(g=>g.files),expected=catalog.tests.filter(t=>t.platforms.includes(platform)&&!(platform==='darwin'&&t.verification.lane==='shared'&&t.platforms.includes('linux'))&&!(platform==='win32'&&t.verification.lane==='shared')).map(t=>t.path);

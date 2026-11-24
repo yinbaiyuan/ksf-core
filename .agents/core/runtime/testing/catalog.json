@@ -7824,10 +7824,106 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 83.97,
-        "win32": 304
+        "darwin": 28.99,
+        "win32": 102.33
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/distribution/manifests.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-initialization-guards",
+      "path": ".agents/core/runtime/tests/instance-initialization-guards.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 28.99,
+        "win32": 102.33
+      },
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/distribution/manifests.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-initialization-branches",
+      "path": ".agents/core/runtime/tests/instance-initialization-branches.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 28.99,
+        "win32": 102.33
+      },
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9880,10 +9976,104 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 66.89,
-        "win32": 271
+        "darwin": 14.38,
+        "win32": 55.2
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-initialization-recovery-branches",
+      "path": ".agents/core/runtime/tests/instance-initialization-recovery-branches.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 27.76,
+        "win32": 109.4
+      },
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
+      "isolation": "exclusive",
+      "verification": {
+        "lane": "native",
+        "kind": "integration",
+        "reason": "Real host process, filesystem, CLI, package or transaction integration; keep native execution on each declared target."
+      },
+      "selectionInputs": [
+        ".agents/core/distribution",
+        ".agents/core/runtime/src/distribution",
+        ".agents/core/runtime/src/distribution/files.js",
+        ".agents/core/runtime/src/distribution/instance.js",
+        ".agents/core/runtime/src/services/entry-context.js"
+      ],
+      "fixtures": [
+        "distribution"
+      ]
+    },
+    {
+      "id": "core:instance-initialization-recovery-crashes",
+      "path": ".agents/core/runtime/tests/instance-initialization-recovery-crashes.test.js",
+      "owner": "core",
+      "covers": [
+        "core"
+      ],
+      "suite": "full",
+      "platforms": [
+        "darwin",
+        "win32"
+      ],
+      "cacheable": false,
+      "inputs": [
+        ".agents/core",
+        ".github",
+        "AGENTS.md",
+        ".agents/ksf",
+        ".agents/ksf.ps1",
+        ".gitignore",
+        ".gitattributes",
+        "README.md"
+      ],
+      "requirements": [],
+      "timeoutMs": 600000,
+      "seconds": {
+        "darwin": 27.76,
+        "win32": 109.4
+      },
+      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
