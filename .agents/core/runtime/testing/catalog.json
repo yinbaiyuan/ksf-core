@@ -1146,9 +1146,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 4
+        "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1193,10 +1193,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 8
+        "darwin": 2,
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1245,9 +1245,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 4
+        "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1445,9 +1445,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 7
+        "win32": 5
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1554,10 +1554,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 7,
-        "win32": 13
+        "darwin": 6,
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1612,10 +1612,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 10
+        "darwin": 4,
+        "win32": 7
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1774,9 +1774,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 2
+        "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -1820,10 +1820,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 3,
         "win32": 7
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -1870,10 +1870,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 11
+        "darwin": 4,
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2044,10 +2044,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 12
+        "darwin": 3,
+        "win32": 8
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2197,10 +2197,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 9,
-        "win32": 21
+        "darwin": 7,
+        "win32": 15
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2294,11 +2294,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
-        "win32": 117,
+        "darwin": 69,
+        "win32": 98,
         "linux": 55.32
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2379,11 +2379,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 8,
+        "darwin": 7,
         "win32": 150,
         "linux": 2.34
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -2418,11 +2418,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 26,
-        "win32": 40,
+        "darwin": 21,
+        "win32": 39,
         "linux": 25.99
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2470,10 +2470,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 10,
-        "win32": 27
+        "darwin": 13,
+        "win32": 26
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2836,10 +2836,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 3,
+        "win32": 4,
         "linux": 1.64
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2877,7 +2877,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -2976,10 +2976,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 9
+        "darwin": 4,
+        "win32": 7
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3078,9 +3078,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 9
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -3116,10 +3116,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 11,
-        "win32": 26
+        "darwin": 12,
+        "win32": 19
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -3472,11 +3472,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 24,
-        "win32": 145,
+        "darwin": 32,
+        "win32": 128,
         "linux": 31.17
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -3532,11 +3532,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 15,
-        "win32": 13,
+        "darwin": 13,
+        "win32": 15,
         "linux": 7.34
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4126,7 +4126,7 @@
         "darwin": 2,
         "win32": 4
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4173,9 +4173,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 19
+        "win32": 23
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4407,10 +4407,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 3,
+        "win32": 2,
         "linux": 0.9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4510,10 +4510,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 5
+        "darwin": 2,
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -4566,10 +4566,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
-        "win32": 12
+        "darwin": 5,
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4608,10 +4608,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 23,
-        "win32": 42
+        "darwin": 17,
+        "win32": 43
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -4650,10 +4650,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30,
-        "win32": 56
+        "darwin": 23,
+        "win32": 34
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5120,11 +5120,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 2,
-        "win32": 12,
+        "darwin": 1,
+        "win32": 8,
         "linux": 0.36
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5161,10 +5161,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
-        "win32": 165
+        "darwin": 55,
+        "win32": 181
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -5210,10 +5210,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 4,
-        "win32": 7
+        "darwin": 3,
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5312,9 +5312,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 2
+        "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5361,11 +5361,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 6,
+        "darwin": 5,
         "win32": 8,
         "linux": 1.93
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5516,10 +5516,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -5735,9 +5735,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 3
+        "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5788,10 +5788,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 6,
+        "win32": 5,
         "linux": 0.22
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -5949,10 +5949,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 6
+        "darwin": 2,
+        "win32": 7
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6055,9 +6055,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 1,
-        "win32": 2
+        "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6755,9 +6755,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 4
+        "win32": 3
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -6805,7 +6805,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -7006,10 +7006,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 39,
-        "win32": 139
+        "darwin": 47,
+        "win32": 135
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7053,10 +7053,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30,
-        "win32": 95
+        "darwin": 51,
+        "win32": 151
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7100,10 +7100,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 58,
-        "win32": 180
+        "darwin": 52,
+        "win32": 185
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7147,10 +7147,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 38,
+        "darwin": 71,
         "win32": 153
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7194,10 +7194,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 40,
-        "win32": 136
+        "darwin": 33,
+        "win32": 103
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7241,10 +7241,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 24,
-        "win32": 55
+        "darwin": 31,
+        "win32": 83
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7288,10 +7288,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 42,
-        "win32": 143
+        "darwin": 81,
+        "win32": 156
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7335,10 +7335,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 30,
-        "win32": 99
+        "darwin": 51,
+        "win32": 98
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7382,10 +7382,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 32,
-        "win32": 117
+        "darwin": 33,
+        "win32": 115
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7440,7 +7440,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:system-update-frontend-metadata",
@@ -7481,7 +7481,7 @@
         ".agents/core/runtime/src/shared",
         ".agents/core/runtime/src/platform"
       ],
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:release-files",
@@ -7507,7 +7507,7 @@
       "timeoutMs": 30000,
       "seconds": {
         "darwin": 1,
-        "win32": 2,
+        "win32": 1,
         "linux": 0.3
       },
       "verification": {
@@ -7521,7 +7521,7 @@
         ".agents/core/runtime/src/platform",
         ".agents/core/runtime/src/shared"
       ],
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:task-checkpoints",
@@ -7824,10 +7824,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18,
-        "win32": 68
+        "darwin": 21,
+        "win32": 79
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7872,10 +7872,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 19,
-        "win32": 132
+        "darwin": 21,
+        "win32": 116
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -7920,10 +7920,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 22,
-        "win32": 99
+        "darwin": 29,
+        "win32": 83
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -8023,11 +8023,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 9,
         "win32": 11,
         "linux": 2.72
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8072,11 +8072,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
+        "darwin": 6,
         "win32": 6,
         "linux": 4.46
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8180,7 +8180,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8278,7 +8278,7 @@
         "win32": 1,
         "linux": 0.16
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8325,7 +8325,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -8368,10 +8368,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 61,
-        "win32": 82
+        "darwin": 76,
+        "win32": 83
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -8406,7 +8406,7 @@
         "darwin": 1,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -9835,10 +9835,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 29,
-        "win32": 114
+        "darwin": 34,
+        "win32": 100
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9882,10 +9882,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 28,
-        "win32": 89
+        "darwin": 32,
+        "win32": 116
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9929,10 +9929,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 11,
-        "win32": 62
+        "darwin": 17,
+        "win32": 55
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -9976,10 +9976,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 10,
-        "win32": 56
+        "darwin": 13,
+        "win32": 65
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10023,10 +10023,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18,
-        "win32": 137
+        "darwin": 25,
+        "win32": 96
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10070,10 +10070,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18,
-        "win32": 87
+        "darwin": 23,
+        "win32": 108
       },
-      "timingBasis": "Conservative apportionment of the existing native file estimate by independent fixture count, plus one second per file. Ten original top-level scenarios are moved intact across six exclusive native files. New standalone timings require fresh receipts; placement only, no result reuse. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10117,10 +10117,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 53,
-        "win32": 238
+        "darwin": 87,
+        "win32": 198
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10168,10 +10168,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 73,
-        "win32": 135
+        "darwin": 69,
+        "win32": 113
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10214,10 +10214,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 18,
-        "win32": 64
+        "darwin": 23,
+        "win32": 62
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10420,10 +10420,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 8
+        "darwin": 3,
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -10517,8 +10517,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 27,
-        "win32": 119,
+        "darwin": 37,
+        "win32": 100,
         "linux": 23.62
       },
       "verification": {
@@ -10545,7 +10545,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:runtime-bundle-inspection",
@@ -10577,8 +10577,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 15,
-        "win32": 63,
+        "darwin": 25,
+        "win32": 52,
         "linux": 28.57
       },
       "verification": {
@@ -10605,7 +10605,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:runtime-bundle-upgrade",
@@ -10637,8 +10637,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 18,
-        "win32": 88,
+        "darwin": 31,
+        "win32": 81,
         "linux": 24.53
       },
       "verification": {
@@ -10658,7 +10658,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:runtime-bundle-native",
@@ -10690,8 +10690,8 @@
       "requirements": [],
       "cacheable": false,
       "seconds": {
-        "darwin": 34,
-        "win32": 128,
+        "darwin": 30,
+        "win32": 115,
         "linux": 0.18
       },
       "verification": {
@@ -10710,7 +10710,7 @@
       "fixtures": [
         "distribution"
       ],
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     },
     {
       "id": "core:distribution-policy",
@@ -10781,10 +10781,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 17,
-        "win32": 89
+        "darwin": 28,
+        "win32": 82
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10836,10 +10836,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 20,
-        "win32": 80
+        "darwin": 35,
+        "win32": 91
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -10885,9 +10885,9 @@
       "timeoutMs": 600000,
       "seconds": {
         "darwin": 4,
-        "win32": 5
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -10989,10 +10989,10 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 20,
-        "win32": 82
+        "darwin": 34,
+        "win32": 89
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11041,10 +11041,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11222,10 +11222,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 8
+        "darwin": 3,
+        "win32": 6
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11272,11 +11272,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 71,
-        "win32": 146,
+        "darwin": 68,
+        "win32": 158,
         "linux": 120
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11323,11 +11323,11 @@
       "requirements": [],
       "timeoutMs": 600000,
       "seconds": {
-        "darwin": 68,
-        "win32": 185,
+        "darwin": 58,
+        "win32": 170,
         "linux": 120
       },
-      "timingBasis": "Observed runtime-only native durations from successful PR40 run 45279452764 (head d21eb34b9c7a97d2a45728dbb8fde04b9286b4e9), with 15 percent scheduling margin. Only placement estimates change; no verification result is reused. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged. win32 runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged. darwin runtime-only scheduling refreshed from successful PR54 run 45341902096, head 68c2919667d4a6f1a6d99377a31e7915ac28e55f, with 15 percent margin; file contracts, timeout, isolation and hosted workers unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "isolation": "exclusive",
       "verification": {
         "lane": "native",
@@ -11393,7 +11393,7 @@
         "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11439,10 +11439,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 7
+        "darwin": 3,
+        "win32": 8
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11559,7 +11559,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11584,7 +11584,7 @@
       ],
       "seconds": {
         "darwin": 2,
-        "win32": 5
+        "win32": 4
       }
     },
     {
@@ -11619,7 +11619,7 @@
       ],
       "requirements": [],
       "timeoutMs": 120000,
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11643,8 +11643,8 @@
         "README.md"
       ],
       "seconds": {
-        "darwin": 3,
-        "win32": 7
+        "darwin": 2,
+        "win32": 8
       }
     },
     {
@@ -11682,10 +11682,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
-        "win32": 13
+        "darwin": 8,
+        "win32": 12
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11745,10 +11745,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 9,
-        "win32": 12
+        "darwin": 5,
+        "win32": 10
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11856,9 +11856,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 3,
-        "win32": 6
+        "win32": 4
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11916,10 +11916,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 9,
-        "win32": 12
+        "darwin": 7,
+        "win32": 10
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -11979,9 +11979,9 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 9,
-        "win32": 15
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12381,11 +12381,11 @@
       "requirements": [],
       "timeoutMs": 60000,
       "seconds": {
-        "darwin": 2,
+        "darwin": 1,
         "win32": 1,
         "linux": 0.43
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "contract",
@@ -12433,11 +12433,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 38,
-        "win32": 77,
+        "darwin": 31,
+        "win32": 53,
         "linux": 21.27
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12487,11 +12487,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 3,
-        "win32": 13,
+        "darwin": 7,
+        "win32": 8,
         "linux": 5.25
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12595,11 +12595,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 14,
-        "win32": 45,
+        "darwin": 15,
+        "win32": 25,
         "linux": 4.85
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12701,11 +12701,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 9,
-        "win32": 12,
+        "darwin": 8,
+        "win32": 11,
         "linux": 5.19
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12757,7 +12757,7 @@
         "win32": 2,
         "linux": 0.43
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12876,11 +12876,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
-        "win32": 2,
+        "darwin": 2,
+        "win32": 1,
         "linux": 1.09
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12932,7 +12932,7 @@
         "win32": 3,
         "linux": 1.64
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -12978,10 +12978,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 4,
+        "win32": 3,
         "linux": 1.1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13027,10 +13027,10 @@
       "timeoutMs": 120000,
       "seconds": {
         "darwin": 2,
-        "win32": 4,
+        "win32": 3,
         "linux": 2.28
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13111,11 +13111,11 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 5,
-        "win32": 7,
+        "darwin": 4,
+        "win32": 5,
         "linux": 3.5
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13174,7 +13174,7 @@
         "darwin": 2,
         "win32": 4
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13277,10 +13277,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 10,
-        "win32": 16
+        "darwin": 8,
+        "win32": 11
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13442,10 +13442,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 1,
+        "darwin": 2,
         "win32": 2
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13480,10 +13480,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 8,
-        "win32": 13
+        "darwin": 6,
+        "win32": 9
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -13742,10 +13742,10 @@
       "requirements": [],
       "timeoutMs": 120000,
       "seconds": {
-        "darwin": 4,
+        "darwin": 8,
         "win32": 10
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14010,7 +14010,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14054,7 +14054,7 @@
         "darwin": 2,
         "win32": 3
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -14499,7 +14499,7 @@
         "darwin": 1,
         "win32": 1
       },
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged.",
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes.",
       "verification": {
         "lane": "native",
         "kind": "integration",
@@ -16295,8 +16295,8 @@
       "requirements": [],
       "timeoutMs": 30000,
       "seconds": {
-        "darwin": 1,
-        "win32": 1,
+        "darwin": 2,
+        "win32": 3,
         "linux": 1
       },
       "verification": {
@@ -16308,7 +16308,7 @@
         ".agents/core/runtime/src/testing/prepared-archive.js",
         ".agents/core/distribution/repository/.github/workflows/verification-platform.yml"
       ],
-      "timingBasis": "PR39 successful full CI 45269986283 per-file native duration plus 15 percent scheduling margin; preparation and fingerprint timings are reported separately. Windows scheduling refreshed from successful PR47 run 45308646551, head 4c84f3d9be2f614b2df3b52db7b1427b057addd6, with 15 percent margin; other platform estimates unchanged. Placement only, not a pass or timeout change. Windows scheduling refreshed from successful PR52 run 45330499786, head a1c10ab5ec924e4d027ced57aa97a590e99c57e3, with 15 percent margin; Mac/Linux estimates and all execution obligations unchanged."
+      "timingBasis": "PR57 successful full native run 45350947957, head 45ef1e7fc2beae5a7d20a2ce18aeff8b7fa69a3f; Mac/Windows per-file duration plus 15 percent placement margin. Runtime pool eligibility is explicitly qualified; no platform, scenario, assertion, isolation or timeout changes."
     }
   ],
   "timingBaseline": {
