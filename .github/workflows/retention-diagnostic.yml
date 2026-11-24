@@ -1,0 +1,56 @@
+name: Retention safety diagnostic
+on:
+  push:
+    branches: [codex/retention-safety-20261124]
+permissions:
+  contents: read
+concurrency:
+  group: retention-safety-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  retention:
+    if: github.repository == 'yinbaiyuan/ksf-core'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [xcode-27, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      KSF_SKIP_AUTO_UPDATE: '1'
+      KSF_TEST_CI_CHECKOUT_SCRATCH: ${{ matrix.os == 'windows-2025' && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify Mac pinned runtime and retention behavior
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          .agents/ksf build --json > /dev/null
+          .agents/ksf runtime verify --json
+          .agents/ksf test --suite full --files .agents/core/runtime/tests/runtime-retention.test.js --json > retention.report.json
+      - name: Verify Windows pinned runtime and retention behavior
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & ./.agents/ksf.ps1 build --json | Out-Null
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./.agents/ksf.ps1 runtime verify --json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $report = & ./.agents/ksf.ps1 test --suite full --files .agents/core/runtime/tests/runtime-retention.test.js --json
+          $testExit = $LASTEXITCODE
+          [System.IO.File]::WriteAllText((Join-Path $env:GITHUB_WORKSPACE 'retention.report.json'), ($report -join "`n"), (New-Object System.Text.UTF8Encoding $false))
+          if ($testExit -ne 0) { exit $testExit }
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: retention-${{ runner.os }}
+          include-hidden-files: true
+          path: |
+            retention.report.json
+            .agents/runtime-data/tests/
+          if-no-files-found: error
+          retention-days: 2

@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { gitBinary, nullDevice } from './helpers/platform.js';
-import { planRuntimeCleanup, cleanupRuntimeArtifacts } from '../src/distribution/retention.js';
+import { planRuntimeCleanup, cleanupRuntimeArtifacts, retainRuntimeArtifacts } from '../src/distribution/retention.js';
 import { runDistributionCommand, parseDistributionArgs } from '../src/commands/distribution.js';
 import { applyMatchedSwitch } from '../src/distribution/matched-switch.js';
 import fs from 'node:fs';
@@ -220,4 +220,53 @@ test('every actual deletion rechecks primary custody after preview and earlier d
   assert.deepEqual(result.errors.map(e => e.code), ['CLEANUP_SOURCE_UNPROTECTED']);
   assert(existsSync(join(f.root, older, 'previous-core/original.txt')));
   assert(!existsSync(join(f.root, older, 'retention.json')));
+});
+
+
+test('automatic retention reports one explicit sample and defers large packages when a small original is unique', t => {
+  const f=fixture(t), old=f.switchRun('2026-01-01'); f.switchRun('2026-01-02');
+  const bytes='p'.repeat(300*1024), path=`${old}/previous-core/0-package.bin`;
+  f.put('.agents/core/0-package.bin',bytes); f.put(path,bytes);
+  f.put(`${old}/previous-core/z-unique.js`,'first unpreserved source'); f.put(`${old}/previous-core/zz-unique.js`,'second unpreserved source');
+  const read=fs.readFileSync;let largeReads=0;
+  const mock=t.mock.method(fs,'readFileSync',(...args)=>{if([join(f.root,path),join(f.root,'.agents/core/0-package.bin')].includes(args[0]))largeReads++;return read(...args);});
+  syncBuiltinESMExports(); t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+  const brief=retainRuntimeArtifacts(f.root,'switches');assert.equal(brief.removed.length,0);assert.equal(largeReads,0);
+  const warning=brief.warnings.find(w=>w.reason==='source-not-preserved');assert.equal(warning.exhaustive,false);assert.equal('count'in warning,false);assert.deepEqual(warning.files,['z-unique.js']);assert(!existsSync(join(f.root,old,'retention.json')));
+  const full=planRuntimeCleanup(f.root,{scope:'switches'});assert.equal(full.warnings[0].count,2);assert.deepEqual(full.warnings[0].files,['z-unique.js','zz-unique.js']);assert(largeReads>0);
+});
+
+test('automatic retention checks every deferred package before deleting an otherwise redundant backup', t => {
+  const f=fixture(t), old=f.switchRun('2026-01-01'), latest=f.switchRun('2026-01-02');
+  for(const name of ['a.bin','b.bin']){const bytes=name.repeat(100*1024);f.put('.agents/core/'+name,bytes);f.put(`${old}/previous-core/${name}`,bytes);}
+  const read=fs.readFileSync,reads=new Map();const mock=t.mock.method(fs,'readFileSync',(...args)=>{if(typeof args[0]==='string'&&args[0].startsWith(join(f.root,old,'previous-core')))reads.set(args[0],1+(reads.get(args[0])??0));return read(...args);});
+  syncBuiltinESMExports();t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+  const result=retainRuntimeArtifacts(f.root,'switches');assert.deepEqual(result.removed,[`${old}/previous-core`]);assert.equal(result.errors.length,0);
+  for(const name of ['a.bin','b.bin'])assert((reads.get(join(f.root,old,'previous-core',name))??0)>=2);
+  assert(existsSync(join(f.root,latest,'previous-core/original.txt')));assert.equal(JSON.parse(readFileSync(join(f.root,old,'retention.json'))).rollbackRetired,true);
+});
+
+test('a unique deferred package retains the entire backup even when its name and size match the primary', t => {
+  const f=fixture(t),old=f.switchRun('2026-01-01');f.switchRun('2026-01-02');
+  f.put('.agents/core/a-package.ksfapp','a'.repeat(300*1024));f.put(`${old}/previous-core/a-package.ksfapp`,'b'.repeat(300*1024));
+  const result=retainRuntimeArtifacts(f.root,'switches');assert.equal(result.removed.length,0);assert.equal(result.warnings[0].exhaustive,false);assert.deepEqual(result.warnings[0].files,['a-package.ksfapp']);assert(existsSync(join(f.root,old,'previous-core/a-package.ksfapp')));
+});
+
+test('deferred primary custody is freshly checked after the preview and before actual deletion', t => {
+  const f=fixture(t),old=f.switchRun('2026-01-01');f.switchRun('2026-01-02');
+  const bytes='a'.repeat(300*1024);f.put('.agents/core/a-package.bin',bytes);f.put(`${old}/previous-core/a-package.bin`,bytes);
+  const guard=join(f.root,old,'switch.json'),read=fs.readFileSync;let guardReads=0;
+  const mock=t.mock.method(fs,'readFileSync',(...args)=>{if(args[0]===guard&&++guardReads===3)f.put('.agents/core/a-package.bin','b'.repeat(bytes.length));return read(...args);});
+  syncBuiltinESMExports();t.after(()=>{mock.mock.restore();syncBuiltinESMExports();});
+  const result=retainRuntimeArtifacts(f.root,'switches');assert.equal(result.removed.length,0);assert.deepEqual(result.errors.map(e=>e.code),['CLEANUP_SOURCE_UNPROTECTED']);assert(existsSync(join(f.root,old,'previous-core/a-package.bin')));assert(!existsSync(join(f.root,old,'retention.json')));
+});
+
+test('a deferred file replaced by an external link is retained without reading the external source', t => {
+  const f=fixture(t),old=f.switchRun('2026-01-01');f.switchRun('2026-01-02');
+  const bytes='a'.repeat(300*1024),file=join(f.root,old,'previous-core/a-package.bin');f.put('.agents/core/a-package.bin',bytes);f.put(`${old}/previous-core/a-package.bin`,bytes);f.put('outside/unique.txt','private external original');
+  const stat=fs.lstatSync,read=fs.readFileSync;let statReads=0,externalReads=0;
+  const statMock=t.mock.method(fs,'lstatSync',(...args)=>{if(args[0]===file&&++statReads===2){rmSync(file);symlinkSync(join(f.root,'outside'),file,process.platform==='win32'?'junction':'dir');}return stat(...args);});
+  const readMock=t.mock.method(fs,'readFileSync',(...args)=>{if(typeof args[0]==='string'&&args[0].startsWith(join(f.root,'outside')))externalReads++;return read(...args);});
+  syncBuiltinESMExports();t.after(()=>{statMock.mock.restore();readMock.mock.restore();syncBuiltinESMExports();});
+  const result=retainRuntimeArtifacts(f.root,'switches');assert.equal(result.removed.length,0);assert.equal(externalReads,0);assert.deepEqual(result.warnings[0].files,['a-package.bin']);assert.equal(readFileSync(join(f.root,'outside/unique.txt'),'utf8'),'private external original');
 });
