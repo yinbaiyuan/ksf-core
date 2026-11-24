@@ -4,7 +4,6 @@ import {existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,realpathSync,r
 import {spawnSync} from 'node:child_process';
 import {dirname,join,parse} from 'node:path';
 import {homedir,tmpdir} from 'node:os';
-import {fileURLToPath} from 'node:url';
 import {sourceIdentity} from '../src/testing/ci.js';
 import {createVerificationPlan} from '../src/testing/ci-plan.js';
 import {prepareCIFixtures} from '../src/testing/prepare-ci-fixtures.js';
@@ -34,7 +33,7 @@ try{
   try{
    assert.equal(sourceIdentity(root).sourceDigest,identity.sourceDigest);
    const env={...testEnvironment(),TMPDIR:scratch,TMP:scratch,TEMP:scratch,KSF_TEST_DISTRIBUTION_SEEDS:prepared.seedPath,KSF_VOLUME_METRICS:metrics};
-   const started=performance.now(),execution=spawnSync(process.execPath,['--import',fileURLToPath(new URL('./volume-diagnostic-preload.mjs',import.meta.url)),'--test','--test-reporter=tap',join(root,'.agents/core/runtime/tests',spec.file)],{cwd:root,env,encoding:'utf8',timeout:600000,maxBuffer:8*1024*1024,windowsHide:true});
+   const started=performance.now(),execution=spawnSync(process.execPath,['--import',new URL('./volume-diagnostic-preload.mjs',import.meta.url).href,'--test','--test-reporter=tap',join(root,'.agents/core/runtime/tests',spec.file)],{cwd:root,env,encoding:'utf8',timeout:600000,maxBuffer:8*1024*1024,windowsHide:true});
    const seconds=(performance.now()-started)/1000,text=(execution.stdout??'')+(execution.stderr??'');writeFileSync(log,text);
    const number=name=>Number([...text.matchAll(new RegExp('^# '+name+' (\\d+)$','gm'))].at(-1)?.[1]??NaN);
    const counts=Object.fromEntries(['tests','pass','fail','cancelled','skipped','todo'].map(name=>[name,number(name)]));
